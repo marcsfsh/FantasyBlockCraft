@@ -43,3 +43,16 @@ Gamepad API support for Xbox-layout pads, aimed at the ROG Ally X in gamepad mod
 
 ### D-014 Save key policy (earlier)
 Bump `SAVE_KEY` whenever generation changes would misplace saved edits. Note: the last biome tuning did not bump it (see KNOWN_ISSUES).
+
+### D-015 Vendored three.js r128 for the game folder; single file keeps the CDN (2026-10-07)
+`vendor/three.min.js` is three.js r128 from npm `three@0.128.0`, byte-identical to the CDN copy. `npm run build:web` points the game folder at it so `dist/web` (and the Pages site) runs offline and does not depend on a third-party host. The single-file build keeps the CDN script tag, so it stays byte-identical and small (about 340 KB instead of about 930 KB). Inlining three.js into the single file is a possible later change; it would need its own decision because it changes the file players download. Constrains: upgrading three.js means updating `vendor/`, `tools/lib.mjs` and the template together.
+
+### D-016 No runtime dependencies, no dev dependencies (2026-10-07)
+The game ships only its own code plus vendored three.js. Tooling (build, tests, checks, benchmark) uses Node built-ins only, so a fresh cloud session or CI runner can run `npm test` with no install step and no network. Constrains: adding a dev dependency needs a logged decision and a SessionStart hook in `.claude/settings.json` that installs it.
+
+### D-017 Proposed: gradual formatting and linting, not a mass reformat (2026-10-07, proposal, not applied)
+The source is deliberately dense; reformatting it all would bury every future diff and `git blame`. If a formatter or linter is wanted later:
+1. Start with a linter in **report-only** mode for real bugs only (undefined names across the shared scope, unreachable code, duplicate keys), with no style rules. Run it in CI as a non-blocking job. This needs a dev dependency (see D-016) or a small Node-only checker.
+2. Make that bug-only lint blocking once it is clean.
+3. Format only files that a change already rewrites substantially, ideally as part of the ES module conversion (`docs/ES_MODULES_PLAN.md`), one system per PR, in a commit separate from logic changes, and list the commit in a `.git-blame-ignore-revs` file.
+4. Never format generation code in the same PR as a generation change, so the world-hash snapshot test isolates behaviour from layout.

@@ -5,6 +5,6 @@
 - **Streaming hitch.** Generating one chunk takes about 20 ms, so the frame rate dips while new terrain streams in.
 - **Save key not bumped** after the latest biome tuning, so a world started before it mixes old edits with new terrain.
 - **Sunken water leaks at chunk borders.** The tidy pass cannot see open air in the neighbouring chunk.
-- **three.js from a CDN.** The game folder build needs the library vendored to run offline.
+- **Single file needs the network.** The single-file build still loads three.js r128 from the CDN (see D-015), and both builds load the VT323 font from Google Fonts (the game falls back to a system font offline). The game folder uses the vendored three.js and otherwise runs offline.
 - **Legacy code still bundled:** towns, roads, power tools, power network, trading and coins (traders and mints exist only in creative).
 - **Headless tests stub the browser.** `performance.now()` returns 0 in tests, so time budgets do not apply there; nothing is rendered.

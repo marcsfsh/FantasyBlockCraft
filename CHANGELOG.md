@@ -8,6 +8,9 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 ### Tooling
 - Imported the modular source into this repository.
 - Added `CLAUDE.md` and this changelog.
+- Added `.gitattributes` (LF line endings everywhere).
+- Vendored three.js r128 in `vendor/`; the game folder build now runs offline. The single-file build is unchanged.
+- Added `npm run check` and `npm run check:syntax`.
 
 ## 0.1.0 (2026-10-05)
 

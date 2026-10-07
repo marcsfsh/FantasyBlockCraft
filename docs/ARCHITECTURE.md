@@ -8,7 +8,7 @@ Consequences:
 
 - Any file can use anything declared in any other file, but **top-level code runs in manifest order**. Moving a file earlier can break code that runs at load time (function declarations are hoisted across the whole bundle; `const` and `let` are not).
 - There are no imports or exports yet. Moving to ES modules is a planned refactor, best done one system at a time with tests passing after each step.
-- three.js r128 is loaded from a CDN by a script tag in the template. For an offline game folder, put the library in `vendor/` and point the template at it; the web build copies `vendor/` and `assets/` automatically.
+- three.js **r128** (npm `three@0.128.0`) is the only library. The template loads it from the cdnjs CDN; the single-file build keeps that tag. The game-folder build swaps the tag for `vendor/three.min.js`, a committed, byte-identical copy, so `dist/web` runs offline (see `vendor/README.md`). The web build copies `vendor/` and `assets/` automatically.
 
 ## Modules, in bundle order
 

@@ -25,7 +25,9 @@ Old lands on the surface; a deep, layered underground that ends in a ruined dwar
 | `npm test -- --seed=777 ruin-graph` | Override the seed (cases with a `// @seed` line keep theirs) |
 | `npm run test:quick` | Smoke and lighting only |
 | `npm run build` | Both targets: `dist/single/fantasy-blockcraft.html` and `dist/web/` |
-| `npm run build:single` / `build:web` | One target |
+| `npm run build:single` / `build:web` | One target. The game folder uses `vendor/three.min.js`; the single file loads three.js r128 from the CDN |
+| `npm run check` | Both builds, syntax check, smoke test: the quick gate before committing |
+| `npm run check:syntax` | Bundle syntax only; reports the source file and line |
 
 `tools/serve.mjs` (`npm run dev`) is a local dev server for people running the game on their own machine. It is useless in the cloud session; do not start it.
 
@@ -72,5 +74,5 @@ Details of the test harness: `docs/TESTING.md`.
 - Write blocks during generation without `PW`, or read outside the chunk without `GW`.
 - Loosen the lighting equality test, or raise a test threshold without a logged decision.
 - Edit or commit `dist/`, or mass-reformat source files.
-- Add runtime dependencies, or anything modern or named after Tolkien's works to the game.
+- Add runtime or dev dependencies without a logged decision (see D-016), or anything modern or named after Tolkien's works to the game.
 - Say "should work" in place of test output.
