@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Fantasy BlockCraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+{{STYLE_BLOCK}}
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="tint"></div><div id="hurt"></div>
+  <div id="info"></div>
+  <div id="toast"></div>
+  <canvas id="mm" width="150" height="150" aria-label="Map, tap to zoom"></canvas>
+  <div id="cross"></div>
+  <div id="name"></div>
+  <div id="stats"><div id="hearts"></div><div id="airfood"><div id="air"></div><div id="food"></div></div></div>
+  <div id="bar"></div>
+  <div id="touch">
+    <div id="joyb"></div><div id="joyk"></div>
+    <button class="tb" id="tJump" aria-label="Jump or fly up"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+    <button class="tb" id="tDown" aria-label="Fly down"><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button>
+    <button class="tb" id="tBreak" aria-label="Break block"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 4l3 6-3 4 4 6M14 10l4-1"/></svg></button>
+    <button class="tb" id="tPlace" aria-label="Place block"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M12 8v8M8 12h8"/></svg></button>
+    <div id="ttop">
+    <button class="tb sq" id="tPause" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+    <button class="tb sq" id="tUndo">Undo</button>
+    <button class="tb sq" id="tSwap" aria-label="Replace mode">Swap</button>
+    <button class="tb sq" id="tBrush" aria-label="Brush size">1x</button>
+    <button class="tb sq" id="tFly">Fly</button>
+    <button class="tb sq" id="tInv" aria-label="Block menu"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></button>
+    </div>
+  </div>
+</div>
+<div id="overlay"><div id="card">
+  <h1>Fantasy BlockCraft</h1>
+  <p id="seedline">Building a world.</p>
+  <div id="load"><div id="loadfill"></div></div>
+  <div id="status">Starting</div>
+  <div class="keys" id="keys"></div>
+  <div class="set">
+    <label>Look speed <input type="range" id="sens" min="0.3" max="2.5" step="0.1"></label>
+    <label>Field of view <input type="range" id="fovr" min="60" max="100" step="1"></label>
+    <div class="seg" id="viewseg">View <button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
+    <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
+    <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
+    <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Lantern</button><button data-v="2">Bright</button></div>
+    <div class="seg" id="wxseg">Weather <button data-v="1">On</button><button data-v="0">Off</button></div>
+    <button id="sndbtn">Sound on</button>
+  </div>
+  <div class="btns"><button class="big go" id="play" disabled>Play</button><button class="big" id="photo">Photo mode</button><input id="seedin" placeholder="Seed (optional)" aria-label="Seed for the new world" autocomplete="off"><button class="big" id="newworld">New world</button></div>
+</div></div>
+<div id="death"><div style="text-align:center"><h1>You died</h1><p id="deathmsg"></p><button class="big go" id="respawnbtn">Respawn</button></div></div>
+<div id="inv"><div id="invcard"><h2 id="invtitle">Pick a block</h2><div id="sinv"></div><div id="trade"></div><div id="lore"></div><div id="invgrid"></div><div id="bplist" class="recipes"></div><div id="invname">Tap a block to put it in the hotbar.</div></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+{{GAME_SCRIPT}}
+</body>
+</html>

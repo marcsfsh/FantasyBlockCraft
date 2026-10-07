@@ -1,0 +1,167 @@
+{
+  "note": "Classic script source, bundled in this order into one script inside prefix/suffix (an IIFE in strict mode). Every file shares one scope after bundling, so order matters for top-level code.",
+  "files": [
+    {
+      "path": "core/config.js",
+      "about": "Grid size, sea level, keys, settings and save data"
+    },
+    {
+      "path": "core/noise.js",
+      "about": "Seeded random numbers, hashing and fractal noise"
+    },
+    {
+      "path": "blocks/blocks.js",
+      "about": "Block ids, block definitions, hardness and sounds"
+    },
+    {
+      "path": "blocks/items.js",
+      "about": "Items that are not blocks: fuel, ores, ingots, tools"
+    },
+    {
+      "path": "blocks/atlas.js",
+      "about": "Texture atlas painted pixel by pixel, average tile colours"
+    },
+    {
+      "path": "world/terrain.js",
+      "about": "World arrays, column terrain and biomes, lakes, town blending"
+    },
+    {
+      "path": "world/caves.js",
+      "about": "Layered worm caves, caverns, sinkholes, flooding, cave lakes"
+    },
+    {
+      "path": "world/underground-sites.js",
+      "about": "Mineshafts, supply crates, points of interest, dripstone and springs"
+    },
+    {
+      "path": "ruins/city-plan.js",
+      "about": "Dwarven city: districts, street plan, decay level, room shapes, shells, openings, decay passes"
+    },
+    {
+      "path": "ruins/holds-and-lore.js",
+      "about": "Holds, names, lore pages, gates, chasms, cellars, room conditions"
+    },
+    {
+      "path": "ruins/pillared-deep.js",
+      "about": "The pillared hall, heavy decay, tidy pass, connectivity rules, applyRuins"
+    },
+    {
+      "path": "ruins/rooms.js",
+      "about": "Single-chunk room types"
+    },
+    {
+      "path": "ruins/megastructures.js",
+      "about": "Two-by-two chunk great structures"
+    },
+    {
+      "path": "world/cave-life.js",
+      "about": "Cave regions and their decoration"
+    },
+    {
+      "path": "world/features.js",
+      "about": "Chunk clipping, column fill, trees, barrows, standing stones, willows"
+    },
+    {
+      "path": "legacy/towns.js",
+      "about": "Towns (disabled: townPlan returns null)"
+    },
+    {
+      "path": "legacy/roads.js",
+      "about": "Roads between towns (disabled)"
+    },
+    {
+      "path": "world/chunk-generation.js",
+      "about": "Per-chunk features, ores, plants and genChunk pipeline"
+    },
+    {
+      "path": "engine/lighting.js",
+      "about": "Block light flood fill and sky light"
+    },
+    {
+      "path": "engine/renderer.js",
+      "about": "three.js setup, sun, clouds, shadow, selection, mesh buffers"
+    },
+    {
+      "path": "world/mines.js",
+      "about": "Dwarven mines: galleries, inclines, junctions, great pits, descents"
+    },
+    {
+      "path": "engine/chunk-mesher.js",
+      "about": "Underground naming, mesh band and chunk meshing"
+    },
+    {
+      "path": "engine/editing-and-physics.js",
+      "about": "Block editing, water flow, falling blocks, waypoint beams"
+    },
+    {
+      "path": "engine/audio.js",
+      "about": "Synthesized sound and haptics"
+    },
+    {
+      "path": "input/gamepad.js",
+      "about": "Controller support through the Gamepad API"
+    },
+    {
+      "path": "engine/particles.js",
+      "about": "Particles and explosives"
+    },
+    {
+      "path": "gameplay/player-and-input.js",
+      "about": "Player physics, held item, keyboard and mouse"
+    },
+    {
+      "path": "legacy/power-tools.js",
+      "about": "Power tools (removed from play by the BANNED list)"
+    },
+    {
+      "path": "gameplay/crafting.js",
+      "about": "Recipes and crafting"
+    },
+    {
+      "path": "legacy/power-network.js",
+      "about": "Power network (removed from play by the BANNED list)"
+    },
+    {
+      "path": "gameplay/trading.js",
+      "about": "Banned-item filter, values, coins and trading counters"
+    },
+    {
+      "path": "gameplay/ore-processing.js",
+      "about": "Gold pan, sluices and crusher"
+    },
+    {
+      "path": "gameplay/blueprints.js",
+      "about": "Blueprint capture and placement"
+    },
+    {
+      "path": "gameplay/survival.js",
+      "about": "Health, hunger, air, damage, death, graves and the survival HUD"
+    },
+    {
+      "path": "input/touch.js",
+      "about": "Touch controls"
+    },
+    {
+      "path": "ui/menus.js",
+      "about": "Hotbar, block menu, overlay and settings"
+    },
+    {
+      "path": "ui/save-and-minimap.js",
+      "about": "Saving and the minimap"
+    },
+    {
+      "path": "engine/world-streaming.js",
+      "about": "Initial generation, rebuild on travel, sliding window streaming"
+    },
+    {
+      "path": "gameplay/sky-weather-farming.js",
+      "about": "Day and night, weather, grass spread, farming"
+    },
+    {
+      "path": "core/main-loop.js",
+      "about": "Main loop"
+    }
+  ],
+  "prefix": "\n(function(){\n'use strict';\n",
+  "suffix": "})();\n"
+}
