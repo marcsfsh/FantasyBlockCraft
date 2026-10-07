@@ -64,6 +64,10 @@ Details of the test harness: `docs/TESTING.md`.
 5. **Record durable changes:** `docs/DECISIONS.md` (decisions a later change could undo), `docs/KNOWN_ISSUES.md` (found, fixed or changed issues), `CHANGELOG.md` (anything a player would notice, plus tooling changes).
 6. **PR description:** what changed and why, actual test output (pass lines and metrics), build output, docs updated, and a short "Check in-game" list.
 
+## Project skills (`.claude/skills/`)
+
+`task-packet` (start here for anything non-trivial), `worldgen-change`, `ruins-change`, `add-block-or-item`, `test-pass`, `decision-log`, `release-build`.
+
 ## Definition of done
 
 - `npm test` passes in full, with the output quoted in the PR.

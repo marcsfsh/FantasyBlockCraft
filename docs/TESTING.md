@@ -19,6 +19,7 @@
 | 07-gamepad | A simulated controller drives menus and play |
 | 08-determinism | Every chunk is identical when regenerated in reverse and shuffled order, after a window shift (kept, streamed and freshly regenerated chunks) and after shifting back |
 | 09-world-hash | Hash snapshot of the starting world for seeds 123456789 and 4242: blocks and water by layer, column data, block light, terrain over 16 000 blocks and the city plan over 81 x 81 cells |
+| 10-content-tables | Block ids fit 0 to 255 and avoid 101 to 107 (water levels in saves), items never share a block id, tiles are inside the atlas, recipes and loot tables reference existing, allowed items. Prints free block ids and unreferenced atlas tiles |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 
