@@ -1,0 +1,15 @@
+# Build output (never commit; CI and Pages rebuild it)
+dist/
+
+# Dependencies
+node_modules/
+
+# Test scratch files written by tests/run-tests.mjs
+tests/.tmp/
+
+# Local, per-person Claude Code settings
+.claude/settings.local.json
+
+# OS clutter
+.DS_Store
+Thumbs.db

@@ -1,0 +1,22 @@
+{
+  "name": "fantasy-blockcraft",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A voxel sandbox set in a long-abandoned fantasy world.",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "build:single": "node tools/build.mjs --single",
+    "build:web": "node tools/build.mjs --web",
+    "dev": "node tools/serve.mjs --watch",
+    "test": "node tests/run-tests.mjs",
+    "test:quick": "node tests/run-tests.mjs smoke lighting",
+    "check": "node tools/check.mjs",
+    "check:syntax": "node tools/check-syntax.mjs",
+    "bench": "node tools/bench.mjs",
+    "test:update-snapshots": "node tests/run-tests.mjs --update-snapshots world-hash"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,100 @@
+// ---- what to call a place underground, by depth
+function layerName(y,X,Z){
+  const m=mineName(X,y,Z);if(m)return m;
+  return y<12?'The Fire Below':y<58?'The Deep Mines':y<100?'The Dwarven Deeps':y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
+}
+const MB={c:SEA,lo:SEA-120,hi:SEA+120};
+function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
+const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
+function buildChunk(cx,cz){
+  const O=newM(),Wt=newM();
+  const x0=cx*CS,z0=cz*CS,s1=[0,0,0],s2=[0,0,0];
+  let ymax=0;for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){let y=H-1;while(y>ymax&&!world[x+W*(z+D*y)])y--;if(y>ymax)ymax=y;}
+  const ytop=Math.min(H-1,ymax+1,MB.hi+1),ylo=Math.max(0,MB.lo-1);
+  for(let y=ylo;y<=ytop;y++)for(let z=z0-1;z<=z0+CS;z++)for(let x=x0-1;x<=x0+CS;x++){const k=(y*MP+(z-z0+1))*MP+(x-x0+1);MID[k]=get(x,y,z);MSK[k]=sky(x,y,z);MBL[k]=bl(x,y,z);}
+  const mk=(x,y,z)=>(y<ylo||y>ytop)?-1:(y*MP+(z-z0+1))*MP+(x-x0+1);
+  const gid=(x,y,z)=>{const k=mk(x,y,z);return k<0?get(x,y,z):MID[k];},gsky=(x,y,z)=>{const k=mk(x,y,z);return k<0?sky(x,y,z):MSK[k];},gbl=(x,y,z)=>{const k=mk(x,y,z);return k<0?bl(x,y,z):MBL[k];};
+  for(let y=Math.max(0,MB.lo);y<=Math.min(ymax,MB.hi);y++)for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){
+    const ii=x+W*(z+D*y),id=world[ii];if(!id)continue;
+    if(OPQ[id]&&x>0&&x<W-1&&z>0&&z<D-1&&y>0&&y<H-1&&OPQ[world[ii+1]]&&OPQ[world[ii-1]]&&OPQ[world[ii+W]]&&OPQ[world[ii-W]]&&OPQ[world[ii+WD]]&&OPQ[world[ii-WD]])continue;
+    const b=BL[id];
+    if(b.flat){const L=sky(x,y,z),B=bl(x,y,z),t=b.t[0],base=O.p.length/3,f=1/16;
+      for(const c of [[0,f,1,1,1],[1,f,1,0,1],[0,f,0,1,0],[1,f,0,0,0]]){O.p.push(x+c[0],y+c[1],z+c[2]);if(b.rot)pushUV(O.u,t,c[4],c[3]);else pushUV(O.u,t,c[3],c[4]);O.l.push(L);O.b.push(B);O.a.push(1);}
+      O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);continue;}
+    if(b.cross){
+      const L=sky(x,y,z)*0.92,B=b.emit?2:bl(x,y,z)*0.92,t=b.t[0];
+      for(let q=0;q<2;q++){const base=O.p.length/3;
+        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(0.92);}
+        O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
+      continue;
+    }
+    if(b.wire){
+      const t=b.t[0],L=sky(x,y,z),Bk=bl(x,y,z);
+      const boxes=[[6,6,6,10,10,10]];
+      if(CONDUCT[get(x-1,y,z)])boxes.push([0,6.5,6.5,6,9.5,9.5]);if(CONDUCT[get(x+1,y,z)])boxes.push([10,6.5,6.5,16,9.5,9.5]);
+      if(CONDUCT[get(x,y-1,z)])boxes.push([6.5,0,6.5,9.5,6,9.5]);if(CONDUCT[get(x,y+1,z)])boxes.push([6.5,10,6.5,9.5,16,9.5]);
+      if(CONDUCT[get(x,y,z-1)])boxes.push([6.5,6.5,0,9.5,9.5,6]);if(CONDUCT[get(x,y,z+1)])boxes.push([6.5,6.5,10,9.5,9.5,16]);
+      for(const bx of boxes){const a=[bx[0]/16,bx[1]/16,bx[2]/16],c=[bx[3]/16,bx[4]/16,bx[5]/16];
+        for(const F of FACES){const base=O.p.length/3;
+          for(const k of F.c){O.p.push(x+(k[0]?c[0]:a[0]),y+(k[1]?c[1]:a[1]),z+(k[2]?c[2]:a[2]));pushUV(O.u,t,k[3]*0.5+0.25,k[4]*0.5+0.25);O.l.push(L*F.s);O.b.push(Bk*F.s);O.a.push(F.s);}
+          O.i.push(base,base+1,base+2,base+2,base+1,base+3);}}
+      continue;
+    }
+    if(b.sconce){
+      let ox=0,oz=0;if(OPQ[get(x+1,y,z)])ox=1;else if(OPQ[get(x-1,y,z)])ox=-1;else if(OPQ[get(x,y,z+1)])oz=1;else if(OPQ[get(x,y,z-1)])oz=-1;
+      const bx=x+0.5+ox*0.3,bz=z+0.5+oz*0.3;
+      const box=(x0,y0,z0,x1,y1,z1,t,top8)=>{for(const F of FACES){const base=O.p.length/3,top=F.d[1]!==0;
+        for(const c of F.c){O.p.push(c[0]?x1:x0,c[1]?y1:y0,c[2]?z1:z0);pushUV(O.u,t,top8?(7+c[3]*2)/16:c[3],top?(top8?(8+c[4]*2)/16:c[4]):(top8?c[4]*10/16:c[4]));O.l.push(1);O.b.push(2);O.a.push(1);}
+        O.i.push(base,base+1,base+2,base+2,base+1,base+3);}};
+      box(bx-1/16,y+0.2,bz-1/16,bx+1/16,y+0.82,bz+1/16,53,true);
+      box(x+0.5+ox*0.42-(oz?0.12:0.04),y+0.15,z+0.5+oz*0.42-(ox?0.12:0.04),x+0.5+ox*0.42+(oz?0.12:0.04),y+0.32,z+0.5+oz*0.42+(ox?0.12:0.04),71,false);
+      continue;
+    }
+    if(b.torch){
+      const t=b.t[0];
+      for(const F of FACES){const base=O.p.length/3,top=F.d[1]!==0;
+        for(const c of F.c){O.p.push(x+7/16+c[0]*2/16,y+c[1]*10/16,z+7/16+c[2]*2/16);pushUV(O.u,t,(7+c[3]*2)/16,top?(8+c[4]*2)/16:c[4]*10/16);O.l.push(1);O.b.push(2);O.a.push(1);}
+        O.i.push(base,base+1,base+2,base+2,base+1,base+3);}
+      continue;
+    }
+    const isW=id===WATER,M=isW?Wt:O;
+    const drop=isW?wDrop(x,y,z):0;
+    for(let f=0;f<6;f++){
+      const F=FACES[f],d=F.d,nx=x+d[0],ny=y+d[1],nz=z+d[2],nid=gid(nx,ny,nz);
+      let draw;
+      if(isW)draw=(nid!==WATER&&!OPQ[nid])||(nid===WATER&&!d[1]&&wDrop(nx,ny,nz)>drop+0.01);
+      else if(b.opq)draw=!OPQ[nid];
+      else draw=!OPQ[nid]&&!(nid===id&&id===GLASS);
+      if(!draw)continue;
+      const L=b.emit?1:gsky(nx,ny,nz),Bk=b.emit?2:gbl(nx,ny,nz),t=b.t[F.tf],base=M.p.length/3,ao=[3,3,3,3];
+      for(let k=0;k<4;k++){
+        const c=F.c[k];
+        M.p.push(x+c[0],y+c[1]-(c[1]===1?drop:0),z+c[2]);
+        pushUV(M.u,t,c[3],c[4]);
+        let a=3,vl=L,vb=Bk;
+        if(!b.emit&&!isW){
+          s1[0]=s1[1]=s1[2]=0;s2[0]=s2[1]=s2[2]=0;
+          s1[F.ax[0]]=c[F.ax[0]]?1:-1;s2[F.ax[1]]=c[F.ax[1]]?1:-1;
+          const ax=nx+s1[0],ay=ny+s1[1],az=nz+s1[2],bx2=nx+s2[0],by2=ny+s2[1],bz2=nz+s2[2],qx=ax+s2[0],qy=ay+s2[1],qz=az+s2[2];
+          const ia=gid(ax,ay,az),ib=gid(bx2,by2,bz2),ic=gid(qx,qy,qz);
+          const A=ia&&BL[ia].occ?1:0,B=ib&&BL[ib].occ?1:0,C=ic&&BL[ic].occ?1:0;
+          let sl=L,sb=Bk,n=1;
+          if(!OPQ[ia]){sl+=gsky(ax,ay,az);sb+=gbl(ax,ay,az);n++;}
+          if(!OPQ[ib]){sl+=gsky(bx2,by2,bz2);sb+=gbl(bx2,by2,bz2);n++;}
+          if(!(OPQ[ia]&&OPQ[ib])&&!OPQ[ic]){sl+=gsky(qx,qy,qz);sb+=gbl(qx,qy,qz);n++;}
+          vl=sl/n;vb=sb/n;
+          a=(A&&B)?0:3-A-B-C;
+        }
+        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?2:vb*v);M.a.push(v);
+      }
+      if(ao[0]+ao[3]>ao[1]+ao[2])M.i.push(base,base+1,base+2,base+2,base+1,base+3);
+      else M.i.push(base,base+1,base+3,base,base+3,base+2);
+    }
+  }
+  const ci=cx+cz*NCX,old=chunks[ci];
+  if(old){for(const m of old){scene.remove(m);m.geometry.dispose();}}
+  const meshes=[];
+  for(const [m,mt] of [[O,matO],[Wt,matW]]){if(!m.p.length)continue;const mesh=new THREE.Mesh(mkGeo(m),mt);mesh.matrixAutoUpdate=false;scene.add(mesh);meshes.push(mesh);}
+  chunks[ci]=meshes;
+}
+
