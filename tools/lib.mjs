@@ -30,6 +30,14 @@ export function buildSingle(){
   return template().replace('{{STYLE_BLOCK}}',()=>'<style>'+css()+'</style>').replace('{{GAME_SCRIPT}}',()=>'<script>'+bundleJS()+'</script>');
 }
 
+// The playable copy: the single-file build committed at the repository root, so the latest game can be
+// downloaded straight from GitHub without CI. Returns null when it matches the source, else why not.
+export const PLAYABLE='fantasy-blockcraft.html';
+export function playableStale(html=buildSingle()){
+  const f=path.join(ROOT,PLAYABLE);if(!fs.existsSync(f))return PLAYABLE+' is missing';
+  return fs.readFileSync(f,'utf8')===html?null:PLAYABLE+' is out of date with src/';
+}
+
 // A game directory: index.html, css/, js/, vendor/ and assets/ when present.
 // three: 'vendor' (default) points the page at vendor/three.min.js so the folder runs offline; 'cdn' keeps the CDN tag.
 export function buildWeb(out,{three='vendor'}={}){

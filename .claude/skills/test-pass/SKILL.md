@@ -26,7 +26,7 @@ npm test
 npm run build
 npm run check
 ```
-Run them for real in this session. Do not reuse output from before the last edit.
+Run them for real in this session. Do not reuse output from before the last edit. `npm run build` refreshes the committed root `fantasy-blockcraft.html`; commit it with the change (`npm run check` fails if it was stale).
 
 ## 3. Report
 - Paste the summary lines exactly: each `ok`/`FAIL` line and the final `all N test files passed (M runs)` line, plus the `INFO` metrics relevant to the change, before and after.

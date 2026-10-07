@@ -1,6 +1,6 @@
 ---
 name: release-build
-description: Cut a Fantasy BlockCraft release - build both targets, confirm CI, bump the version, write the changelog entry, and tell the owner how to get the build onto their devices (GitHub Pages or CI artifacts).
+description: Cut a Fantasy BlockCraft release - build both targets, refresh the committed root fantasy-blockcraft.html, confirm CI when Actions minutes allow, bump the version, write the changelog entry, and tell the owner how to get the build onto their devices.
 ---
 
 # Release build
@@ -11,7 +11,7 @@ npm test
 npm run build
 npm run check
 ```
-All must pass (see `test-pass`). Then confirm CI is green on the branch head: list the latest CI run for the branch with the GitHub tools and check its conclusion and that both artifacts (`fantasy-blockcraft.html`, `fantasy-blockcraft-web`) exist. A red or missing run blocks the release.
+All must pass (see `test-pass`); `npm run check` also confirms the committed root `fantasy-blockcraft.html` matches the source. If GitHub Actions is running (the owner's monthly minutes can run out), confirm the latest CI run for the branch head is green and has both artifacts. If runs fail in about 2 seconds with no logs, the minutes are used up: say so, and rely on the local results.
 
 ## 2. Version
 Semantic version in `package.json` (`"version"`): patch for fixes, minor for new content or generation changes, major only if saves are retired in a way players must know about. Edit the file directly; do not run `npm version` (it tags and commits on its own).
@@ -20,11 +20,11 @@ Semantic version in `package.json` (`"version"`): patch for fixes, minor for new
 Rename `## Unreleased` in `CHANGELOG.md` to `## X.Y.Z (YYYY-MM-DD)`, add a fresh empty `## Unreleased` above it, and make sure Game lines come first and say if old saves no longer load (save key bumped).
 
 ## 4. Commit and PR
-Commit "Release X.Y.Z" with only the version and changelog. The release reaches players when the PR merges into `main`.
+Commit "Release X.Y.Z" with the version, the changelog and, if the build changed, the refreshed root `fantasy-blockcraft.html`. The release reaches players when the PR merges into `main`.
 
 ## 5. Tell the owner how to get it
-- **Pages enabled:** after the merge, the Pages workflow publishes `https://marcsfsh.github.io/FantasyBlockCraft/` (game folder) and `.../fantasy-blockcraft.html` (single file). On a phone, tablet or handheld, open that address; reload to update. Saves are per address and per browser.
-- **Pages not enabled:** Actions tab > CI run for the merge commit > Artifacts: `fantasy-blockcraft.html` (open directly; needs internet for three.js) or `fantasy-blockcraft-web` (zip; unzip and open `index.html`, works offline). Artifacts expire after 30 days.
-- Optionally the owner can attach both files to a GitHub Release by hand; there is no release workflow.
+- **Always available:** after the merge, `fantasy-blockcraft.html` at the root of `main` is the release. On GitHub: open the file, **Download raw file**, open it in a browser (needs internet for three.js). Saves are per browser and per file location.
+- **Pages, if enabled and Actions has minutes:** `https://marcsfsh.github.io/FantasyBlockCraft/` (game folder) and `.../fantasy-blockcraft.html`.
+- **CI artifacts, if Actions has minutes:** Actions tab > CI run for the merge commit > Artifacts. They expire after 30 days.
 
 Say in the PR which seed and places are worth a look for the changes in this release.
