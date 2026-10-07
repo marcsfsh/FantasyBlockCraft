@@ -1,6 +1,6 @@
 # Fantasy BlockCraft
 
-A voxel sandbox in a long-abandoned, Tolkien-esque world. Read `docs/DESIGN.md` before changing content and `docs/ARCHITECTURE.md` before changing code. This file only points the way; the docs are the source of truth.
+A voxel sandbox in a long-abandoned, Tolkien-esque world. Read `docs/DESIGN.md` before changing content and `docs/ARCHITECTURE.md` before changing code. Planned work is in `docs/ROADMAP.md`. This file only points the way; the docs are the source of truth.
 
 ## The game in one paragraph
 

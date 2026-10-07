@@ -7,7 +7,7 @@ The game began as one HTML file with one inline script. That script is now split
 Consequences:
 
 - Any file can use anything declared in any other file, but **top-level code runs in manifest order**. Moving a file earlier can break code that runs at load time (function declarations are hoisted across the whole bundle; `const` and `let` are not).
-- There are no imports or exports yet. Moving to ES modules is a planned refactor, best done one system at a time with tests passing after each step.
+- There are no imports or exports yet. Moving to ES modules is a planned refactor, best done one system at a time with tests passing after each step: see `docs/ES_MODULES_PLAN.md` and `docs/ROADMAP.md`.
 - three.js **r128** (npm `three@0.128.0`) is the only library. The template loads it from the cdnjs CDN; the single-file build keeps that tag. The game-folder build swaps the tag for `vendor/three.min.js`, a committed, byte-identical copy, so `dist/web` runs offline (see `vendor/README.md`). The web build copies `vendor/` and `assets/` automatically.
 
 ## Modules, in bundle order
