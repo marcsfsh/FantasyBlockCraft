@@ -30,6 +30,8 @@ Needs Node 18 or newer (CI uses Node 22). There are no packages to install: tool
 | `npm run dev` | Builds the game folder, serves it at http://localhost:5173 and rebuilds on every change in `src/` |
 | `npm test` | Runs every headless test in `tests/cases/` |
 | `npm run test:quick` | Runs the smoke and lighting tests only |
+| `npm run test:update-snapshots` | Rewrites the world-hash snapshot after a deliberate generation change (see `docs/TESTING.md`) |
+| `npm run bench` | Headless CPU benchmark of startup, chunk generation and meshing (see `docs/PERF.md`) |
 | `npm run check` | Builds both targets, syntax-checks the bundle and the built files, runs the smoke test |
 | `npm run check:syntax` | Syntax-checks the bundle only (well under a second) |
 

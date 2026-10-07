@@ -12,7 +12,9 @@
     "test": "node tests/run-tests.mjs",
     "test:quick": "node tests/run-tests.mjs smoke lighting",
     "check": "node tools/check.mjs",
-    "check:syntax": "node tools/check-syntax.mjs"
+    "check:syntax": "node tools/check-syntax.mjs",
+    "bench": "node tools/bench.mjs",
+    "test:update-snapshots": "node tests/run-tests.mjs --update-snapshots world-hash"
   },
   "engines": {
     "node": ">=18"

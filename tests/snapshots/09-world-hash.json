@@ -1,0 +1,30 @@
+{
+  "4242": {
+    "blocks:fire-below:y0-12": "1a4748b2",
+    "blocks:mines:y13-57": "2ee9b1b4",
+    "blocks:dwarven-city:y58-101": "705ab4fd",
+    "blocks:great-caverns:y102-151": "5df50ba8",
+    "blocks:old-workings:y152-203": "9b89dd98",
+    "blocks:old-caves:y204-259": "7a136d8a",
+    "blocks:crawlways:y260-290": "c2b6dff5",
+    "blocks:surface:y291-383": "9937e51a",
+    "columns:ground-biome-heightmap": "ac875b52",
+    "light:block-light": "17974dfc",
+    "plan:terrain-16k": "bf9b606c",
+    "plan:city-81x81-cells": "6ea60e74"
+  },
+  "123456789": {
+    "blocks:fire-below:y0-12": "d3096cd5",
+    "blocks:mines:y13-57": "07f69225",
+    "blocks:dwarven-city:y58-101": "d19326e1",
+    "blocks:great-caverns:y102-151": "4e478b07",
+    "blocks:old-workings:y152-203": "bbf9e4fd",
+    "blocks:old-caves:y204-259": "1e0c73c4",
+    "blocks:crawlways:y260-290": "ecac45d6",
+    "blocks:surface:y291-383": "dafb181b",
+    "columns:ground-biome-heightmap": "8adafcf9",
+    "light:block-light": "f1f25efd",
+    "plan:terrain-16k": "c9cbd1cc",
+    "plan:city-81x81-cells": "c6be4f75"
+  }
+}

@@ -24,6 +24,8 @@ Old lands on the surface; a deep, layered underground that ends in a ruined dwar
 | `npm test -- doorways` | Only cases whose file name contains `doorways` |
 | `npm test -- --seed=777 ruin-graph` | Override the seed (cases with a `// @seed` line keep theirs) |
 | `npm run test:quick` | Smoke and lighting only |
+| `npm run test:update-snapshots` | Rewrite the world-hash snapshot; only for a deliberate generation change (`docs/TESTING.md`) |
+| `npm run bench` | CPU benchmark, not part of `npm test`; compare against `docs/PERF.md` |
 | `npm run build` | Both targets: `dist/single/fantasy-blockcraft.html` and `dist/web/` |
 | `npm run build:single` / `build:web` | One target. The game folder uses `vendor/three.min.js`; the single file loads three.js r128 from the CDN |
 | `npm run check` | Both builds, syntax check, smoke test: the quick gate before committing |
