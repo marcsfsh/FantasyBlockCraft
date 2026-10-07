@@ -12,6 +12,7 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 - Vendored three.js r128 in `vendor/`; the game folder build now runs offline. The single-file build is unchanged.
 - Added `npm run check` and `npm run check:syntax`.
 - Added a determinism test (08), a world-hash snapshot test for two seeds (09), `snapshot()` and multi-seed cases in the harness, and `npm run bench` with a baseline in `docs/PERF.md`.
+- Added `.claude/settings.json`: permission rules for the project's scripts, node and git, and a post-edit syntax-check hook for `src/`.
 - Added GitHub Actions: CI (tests, both builds, downloadable artifacts) and Pages (publishes `main`, skips itself while Pages is off).
 
 ## 0.1.0 (2026-10-05)

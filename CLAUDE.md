@@ -35,6 +35,8 @@ Old lands on the surface; a deep, layered underground that ends in a ruined dwar
 
 Details of the test harness: `docs/TESTING.md`.
 
+`.claude/settings.json` pre-approves the npm scripts, `node` and `git` (force pushes are denied), and runs `tools/hook-syntax.mjs` after every edit to `src/`: a sub-second syntax check of the bundle that reports the source file and line. It does not run tests; run them yourself. No packages need installing, so there is no SessionStart hook (D-016).
+
 ## How the source works
 
 - `src/js/*` is **classic script code, not modules**. `tools/build.mjs` concatenates the files in the order of `src/js/manifest.json` inside one strict-mode IIFE. Everything shares one scope.
