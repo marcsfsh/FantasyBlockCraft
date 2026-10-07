@@ -1,0 +1,25 @@
+# Store and check out every text file with LF line endings, on every platform.
+# The build concatenates source files byte for byte, so CRLF from a Windows
+# checkout would change the bundle and break the byte-identical build check.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF if any are ever added.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets: never touch line endings, never diff.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ogg binary
+*.mp3 binary
+*.wav binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+
+# Vendored third-party code: keep it out of diffs and language stats.
+vendor/** -diff linguist-vendored
