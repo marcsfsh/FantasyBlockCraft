@@ -1,0 +1,58 @@
+# Tests and builds every push and pull request, and uploads both builds as downloadable artifacts.
+# Open a run under the Actions tab and scroll to "Artifacts" at the bottom of its summary page.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      # No npm install: tooling uses Node built-ins only (docs/DECISIONS.md D-016).
+      # Node 22 matches the cloud sessions; the world-hash snapshot is recorded with it (docs/TESTING.md).
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Syntax check
+        run: npm run check:syntax
+
+      - name: Test
+        run: npm test
+
+      - name: Build both targets
+        run: npm run build
+
+      - name: Check the built files
+        run: npm run check
+
+      # Downloads as the bare HTML file (not zipped). Open it in a browser; it loads three.js from the CDN.
+      - name: Upload single-file build
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/single/fantasy-blockcraft.html
+          archive: false
+          retention-days: 30
+          if-no-files-found: error
+
+      # Downloads as a zip of the game folder. Serve it over http (see README.md); it includes three.js.
+      - name: Upload game folder
+        uses: actions/upload-artifact@v7
+        with:
+          name: fantasy-blockcraft-web
+          path: dist/web/
+          retention-days: 30
+          if-no-files-found: error
