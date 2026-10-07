@@ -4,6 +4,10 @@ A voxel sandbox set in a long-abandoned, Tolkien-esque world: old lands on the s
 
 ## Play the latest build
 
+**The committed file (always available).** `fantasy-blockcraft.html` at the root of this repository is the single-file build of the latest `main`, rebuilt and committed with every change. On GitHub, open the file and use **Download raw file** (the download icon above the file), then open the downloaded file in a browser. It needs an internet connection for three.js and the font. On a pull request branch, switch to that branch first to get its build.
+
+The routes below need GitHub Actions minutes.
+
 **With GitHub Pages (once enabled).** Every push to `main` runs the Pages workflow, which tests, builds and publishes:
 
 - `https://<owner>.github.io/<repository>/` (for this repository, `https://marcsfsh.github.io/FantasyBlockCraft/`) : the game folder (three.js included, works on any device with a modern browser)
@@ -24,7 +28,7 @@ Needs Node 18 or newer (CI uses Node 22). There are no packages to install: tool
 
 | Command | What it does |
 |---|---|
-| `npm run build` | Builds both targets into `dist/` |
+| `npm run build` | Builds both targets into `dist/` and refreshes the committed `fantasy-blockcraft.html` at the root |
 | `npm run build:single` | One self-contained HTML file: `dist/single/fantasy-blockcraft.html` |
 | `npm run build:web` | A game folder: `dist/web/index.html` with `css/`, `js/`, `vendor/` and `assets/`. Uses the vendored three.js, so it runs offline; add `-- --three=cdn` to load it from the CDN instead |
 | `npm run dev` | Builds the game folder, serves it at http://localhost:5173 and rebuilds on every change in `src/` |
@@ -32,13 +36,14 @@ Needs Node 18 or newer (CI uses Node 22). There are no packages to install: tool
 | `npm run test:quick` | Runs the smoke and lighting tests only |
 | `npm run test:update-snapshots` | Rewrites the world-hash snapshot after a deliberate generation change (see `docs/TESTING.md`) |
 | `npm run bench` | Headless CPU benchmark of startup, chunk generation and meshing (see `docs/PERF.md`) |
-| `npm run check` | Builds both targets, syntax-checks the bundle and the built files, runs the smoke test |
+| `npm run check` | Builds both targets, syntax-checks the bundle and the built files, fails if the committed root copy was out of date, runs the smoke test |
 | `npm run check:syntax` | Syntax-checks the bundle only (well under a second) |
 
 ## Layout
 
 | Path | Contents |
 |---|---|
+| `fantasy-blockcraft.html` | The playable single-file build, committed. Generated; never edit by hand |
 | `src/html/index.template.html` | Page markup with `{{STYLE_BLOCK}}` and `{{GAME_SCRIPT}}` placeholders |
 | `src/css/style.css` | All styles |
 | `src/js/` | Game source, one file per system, bundled in the order given by `src/js/manifest.json` |

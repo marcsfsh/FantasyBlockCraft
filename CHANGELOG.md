@@ -6,6 +6,7 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 ## Unreleased
 
 ### Tooling
+- The playable single-file build is now committed at the repository root (`fantasy-blockcraft.html`), so the latest game can be downloaded from GitHub without Actions. `npm run build` refreshes it; `npm run check` and a Claude Code Stop hook catch a stale copy.
 - Imported the modular source into this repository.
 - Added `CLAUDE.md` and this changelog.
 - Added `.gitattributes` (LF line endings everywhere).

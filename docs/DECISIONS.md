@@ -56,3 +56,7 @@ The source is deliberately dense; reformatting it all would bury every future di
 2. Make that bug-only lint blocking once it is clean.
 3. Format only files that a change already rewrites substantially, ideally as part of the ES module conversion (`docs/ES_MODULES_PLAN.md`), one system per PR, in a commit separate from logic changes, and list the commit in a `.git-blame-ignore-revs` file.
 4. Never format generation code in the same PR as a generation change, so the world-hash snapshot test isolates behaviour from layout.
+
+### D-018 The single-file build is committed at the repository root (2026-10-07)
+Every change that affects the build commits a fresh `fantasy-blockcraft.html` at the root, byte-identical to `dist/single/fantasy-blockcraft.html`. The owner plays the latest game by downloading that file from GitHub, which works without GitHub Actions minutes or Pages. `npm run build` refreshes it, `npm run check` fails if it was stale, and a Claude Code Stop hook blocks finishing a turn while it is stale. `dist/` stays uncommitted (D-001); this one file is the exception. Constrains: PRs that touch `src/`, the template, CSS or build tools include the regenerated file; nobody edits it by hand; `.gitattributes` keeps it LF so it stays byte-identical across platforms.
+
