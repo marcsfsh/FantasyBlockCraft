@@ -20,7 +20,7 @@ Old lands on the surface; a deep, layered underground that ends in a ruined dwar
 
 | Command | Use |
 |---|---|
-| `npm test` | All headless tests in `tests/cases/` (about 30 to 60 s) |
+| `npm test` | All headless tests in `tests/cases/` (about 75 s on the cloud VM) |
 | `npm test -- doorways` | Only cases whose file name contains `doorways` |
 | `npm test -- --seed=777 ruin-graph` | Override the seed (cases with a `// @seed` line keep theirs) |
 | `npm run test:quick` | Smoke and lighting only |
@@ -49,7 +49,7 @@ Details of the test harness: `docs/TESTING.md`.
 ## Generation rules (from `docs/ARCHITECTURE.md`; keep them true)
 
 1. **Determinism.** Generation is a pure function of the seed and world coordinates. Never use `Math.random()` in generation; use `hsh`, `rngAt`, `fbm2`, `noise3`. Never use stateful streams such as `wr` or `tr` in generation either.
-2. **Chunk-local writes.** Write only through `PW(X,Y,Z,id,mode)`, which clips to the chunk being generated (`gx0`, `gz0`). Read only through `GW`. A structure spanning chunks is recomputed from its anchor by every chunk it touches.
+2. **Chunk-local writes.** Write through `PW(X,Y,Z,id,mode)`, which clips to the chunk being generated (`gx0`, `gz0`), and read through `GW`. Only per-column passes that loop over the chunk's own columns (`fillCol`, `plants`) touch `world` directly. A structure spanning chunks is recomputed from its anchor by every chunk it touches.
 3. **Random-stream invariants.** When a generator skips work for a chunk it cannot reach, it must still draw the same number of values from its stream (see `veinP` in `src/js/world/chunk-generation.js`), or every later structure from that stream shifts. Adding or removing a draw changes the world: treat it as a generation change.
 4. **Write modes.** `MODE_SET`, `MODE_AIR`, `MODE_STONE`, `MODE_FILL`; pick the weakest that works.
 5. **Save key policy.** Saves store only edits by world coordinate. If a change moves terrain or structures, bump `SAVE_KEY` in `src/js/core/config.js` and log it in `docs/DECISIONS.md`. If you decide not to bump it, log that decision and the reason too.
