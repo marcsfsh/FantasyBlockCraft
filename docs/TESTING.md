@@ -19,11 +19,13 @@
 | 07-gamepad | A simulated controller drives menus and play |
 | 08-determinism | Every chunk is identical when regenerated in reverse and shuffled order, after a window shift (kept, streamed and freshly regenerated chunks) and after shifting back |
 | 09-world-hash | Hash snapshot of the starting world for seeds 123456789 and 4242: blocks and water by layer, column data, block light, terrain over 16 000 blocks and the city plan over 81 x 81 cells |
-| 10-content-tables | Block ids fit 0 to 255 and avoid 101 to 107 (water levels in saves), items never share a block id, tiles are inside the atlas, recipes and loot tables reference existing, allowed items. Prints free block ids and unreferenced atlas tiles |
-| 11-saves | World keys decode exactly at every height; a surface edit survives a save and reload at the same place; undo restores the right block |
+| 10-content-tables | Block ids fit 0 to 255 and avoid 101 to 107 (water levels in saves), items never share a block id, tiles are inside the atlas, recipes and loot tables reference existing, allowed items, and no removed kind of block or item (power, trade, ore processing, rails) exists. Prints free block ids and unreferenced atlas tiles |
+| 11-saves | World keys decode exactly at every height; a surface edit survives a save (under the world's own key) and reload at the same place; undo restores the right block |
 | 12-weather-farming | A lit crop under a roof grows; mountain snow starts at the snow line; farmland tracking survives window shifts |
 | 13-survival | Crate loot is never lost with a full pack; creative only looks inside; blasts spare graves; using a block beats the held item |
 | 14-engine | Torches in streamed chunks are registered; lit kegs wait while paused |
+| 15-names | The Tolkien blocklist catches names, near misses and roots; 30 000 generated names across ten peoples, hold names over a wide area, and every fixed place, block and item name pass |
+| 16-worlds | Worlds can be created, exported, imported and deleted; seeds typed as numbers are exact; only player changes are saved (automatic changes and flowing water add nothing) |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

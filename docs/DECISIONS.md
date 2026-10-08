@@ -81,3 +81,12 @@ Choices made while fixing the M0 bugs that later work could undo:
 - **Doorway clearing** reaches the wall line (k <= h). Lecterns are no longer gutted by decay.
 - **Hunger stays non-lethal** (Q16); the unreachable "You starved" message was removed.
 
+### D-021 M1a: what was removed and how saves work now (2026-10-08)
+- **M1 is split** into M1a (removals, save format v3, naming module; 0.3.0) and M1b (entity registry, input action layer, equipment slots, and the ES module decision), each with its own PR and checkpoint.
+- **Removed for good:** the town and road generator, the power network and power tools, trading counters and coin mints, ore processing (crusher, gold pan, sluice, crushed ores, nuggets) and rails. `legacy/` is gone. Coins stay defined but out of play via `BANNED` (now in `gameplay/crafting.js`) for settlement traders in E2. `10-content-tables` refuses any removed kind of block or item.
+- **Generated replacements** (no gaps where things were): the alchemist's lab gets barrels, books, flasks (glass) and stoves (furnaces); the outpost's counter is a barrel; the mine-junction crusher is a steel block; the Machine Hall's wheel and battery are copper and brass blocks; rails simply vanish, leaving the gravel and barrels that shared their rolls. Cave decoration in affected chunks shifts because it samples what is already in the chunk.
+- **Save format v3:** a world index under `SAVE_KEY` and one entry per world; export files only load under the same `SAVE_KEY`; older keys are deleted on load.
+- **Player changes only:** automatic changes are recorded only where the player already changed that block. Trade-off: water that flowed into a player-dug space is rebuilt on load by re-queuing water next to player changes, and sand that fell on its own is not tracked unless the player caused it.
+- **Seeds:** a whole number typed as a seed is used exactly; other text is hashed.
+- **Names:** `core/names.js` styles for ten peoples; dwarf is final for now, the others are drafts for owner approval (Q28). Generated names are redrawn if they match a Tolkien name, are one letter off one, or contain a distinctive Tolkien root.
+

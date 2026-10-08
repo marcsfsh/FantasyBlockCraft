@@ -27,7 +27,7 @@
     },
     {
       "path": "world/terrain.js",
-      "about": "World arrays, column terrain and biomes, lakes, town blending"
+      "about": "World arrays, column terrain and biomes, rivers and lakes"
     },
     {
       "path": "world/caves.js",
@@ -43,7 +43,7 @@
     },
     {
       "path": "ruins/holds-and-lore.js",
-      "about": "Holds, names, lore pages, gates, chasms, cellars, room conditions"
+      "about": "Holds, hold names, lore pages, chasms, cellars, room conditions"
     },
     {
       "path": "ruins/pillared-deep.js",
@@ -63,7 +63,7 @@
     },
     {
       "path": "world/features.js",
-      "about": "Chunk clipping, column fill, trees, barrows, standing stones, willows"
+      "about": "Chunk clipping, trees, barrows, standing stones, willows, ice spikes, old sealed rooms"
     },
     {
       "path": "world/chunk-generation.js",
@@ -111,7 +111,7 @@
     },
     {
       "path": "gameplay/crafting.js",
-      "about": "Recipes and crafting"
+      "about": "Recipes, crafting, and the BANNED set (defined but out of play)"
     },
     {
       "path": "gameplay/blueprints.js",
@@ -131,7 +131,7 @@
     },
     {
       "path": "ui/save-and-minimap.js",
-      "about": "Saving and the minimap"
+      "about": "Saving, worlds (create, switch, delete, export, import) and the minimap"
     },
     {
       "path": "engine/world-streaming.js",

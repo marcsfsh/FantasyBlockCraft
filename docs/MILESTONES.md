@@ -82,6 +82,8 @@ Fix every known bug. Most were found by reading the code on 2026-10-08 and are l
 
 ## M1: Foundations (Q53)
 
+**Split (D-021):** M1a (removals, save format v3, naming module) is done in 0.3.0. M1b covers the entity registry, the input action layer, equipment slots and the ES module decision.
+
 **Remove what is leaving.** Live helpers move out of `legacy/` first; see `docs/ROADMAP.md` section 2.
 
 - Towns and roads code (Q6).
