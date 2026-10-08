@@ -1,18 +1,18 @@
 {
   "4242": {
     "blocks:fire-below:y0-12": "27264dd7",
-    "blocks:mines:y13-57": "7157af87",
-    "blocks:dwarven-city:y58-101": "2cc11b0b",
-    "blocks:great-caverns:y102-151": "048cca8a",
-    "blocks:old-workings:y152-203": "78b8636c",
-    "blocks:old-caves:y204-259": "7183de8c",
-    "blocks:crawlways:y260-290": "079f5309",
+    "blocks:mines:y13-57": "0fee6297",
+    "blocks:dwarven-city:y58-101": "81df4975",
+    "blocks:great-caverns:y102-151": "d809946a",
+    "blocks:old-workings:y152-203": "57a5329a",
+    "blocks:old-caves:y204-259": "9f9fe013",
+    "blocks:crawlways:y260-290": "75802901",
     "blocks:surface:y291-383": "b80f54d0",
-    "columns:ground-biome-heightmap": "c4213097",
-    "light:block-light": "f6710272",
+    "columns:ground-biome-heightmap": "556d71bb",
+    "light:block-light": "268e64e2",
     "plan:terrain-16k": "20196269",
     "plan:city-81x81-cells": "53527697",
-    "blocks:surface:y291-511": "84e93276"
+    "blocks:surface:y291-511": "6726199a"
   },
   "123456789": {
     "blocks:fire-below:y0-12": "36488ae0",
@@ -23,10 +23,10 @@
     "blocks:old-caves:y204-259": "850adeae",
     "blocks:crawlways:y260-290": "9795bed6",
     "blocks:surface:y291-383": "b6ebc871",
-    "columns:ground-biome-heightmap": "4e9a77a3",
-    "light:block-light": "17aacbaa",
+    "columns:ground-biome-heightmap": "73d7705f",
+    "light:block-light": "bedcb6c4",
     "plan:terrain-16k": "edbac933",
     "plan:city-81x81-cells": "15ae469a",
-    "blocks:surface:y291-511": "d864d654"
+    "blocks:surface:y291-511": "b28d1a61"
   }
 }

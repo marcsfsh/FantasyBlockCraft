@@ -99,6 +99,38 @@ function spikeP(X,Z,g,r){
   const h=8+(r()*10|0),r0=1+r()*1.4;
   for(let k=0;k<h&&g+1+k<H-1;k++){const rr=r0*(1-k/h)+0.4;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.hypot(dx,dz)<=rr)PW(X+dx,g+1+k,Z+dz,ICE,MODE_SET);}
 }
+// ---- Ruined stairways (Q22): a small walled shaft on open ground, its stair winding down to a worm cave of the chunk
+const stairwayC=new Map();
+function stairwayAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(stairwayC.has(key))return stairwayC.get(key);if(stairwayC.size>8000)stairwayC.clear();
+  let s=null;
+  if(hsh(WCX,6301,WCZ)<0.009){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
+    if(!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+      const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
+  stairwayC.set(key,s);return s;
+}
+function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
+// Surface columns that structures have claimed: trees, boulders and other surface features keep off them
+function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m);}
+const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
+function stairwayP(s,r){
+  const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};
+  // the shaft: walls of old stone, a core, a floor at the bottom; one step up per block of height, the last at g-1
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    for(let y=ys-1;y<=g;y++)PW(X+dx,y,Z+dz,m===2?wall():m===0?(y===ys-1?COBBLE:SBRICK):(y===ys-1?COBBLE:AIR),MODE_SET);
+    for(let y=g+1;y<=g+5;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);}
+  for(let y=ys;y<=g;y++){const [dx,dz]=SW_RING[(y-ys)%8];PW(X+dx,y-1,Z+dz,y%5===0?MOSSY:SBRICK,MODE_SET);}
+  // the ruin above ground: broken corner posts and a little fallen wall (low enough to step over)
+  for(const [dx,dz] of [[-2,-2],[2,-2],[-2,2],[2,2]]){const hgt=1+(r()*4|0);for(let y=g+1;y<=g+hgt;y++)PW(X+dx,y,Z+dz,wall(),MODE_SET);}
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.max(Math.abs(dx),Math.abs(dz))===2&&Math.abs(dx)!==Math.abs(dz)&&r()<0.35)PW(X+dx,g+1,Z+dz,wall(),MODE_SET);
+  // a door at the bottom on the side facing the cave (east, south or west: the north door would open under the second step)
+  const ddx=a.x-X,ddz=a.z-Z,side=Math.abs(ddx)>=Math.abs(ddz)||ddz<0?(ddx>=0?[1,0]:[-1,0]):[0,1];
+  const cell=(x,z)=>{PW(x,ys-1,z,COBBLE,MODE_FILL);for(let y=ys;y<ys+3;y++)PW(x,y,z,AIR,MODE_SET);};
+  // a passage from the door to the cave: out past the wall, across, then along
+  let x=X+side[0]*2,z=Z+side[1]*2;cell(x,z);
+  if(side[0]){x+=side[0];cell(x,z);while(side[0]>0?x<Math.max(a.x,X+3):x>Math.min(a.x,X-3)){x+=side[0];cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}}
+  else{z+=1;cell(x,z);while(z<Math.max(a.z,Z+3)){z++;cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}}
+}
 function dungeonP(X,y,Z,r){
   for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=5;dy++)for(let dz=-3;dz<=3;dz++){
     const wall=Math.abs(dx)===3||Math.abs(dz)===3||dy===0||dy===5,m=r()<.5;

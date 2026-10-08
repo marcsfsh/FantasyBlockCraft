@@ -640,7 +640,8 @@ function colInfoBase(X,Z,o){
   o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
-  o.rvBot=(!o.wet&&rv<0.008&&fbm2(X/180,Z/180,2,433.7)>0.28)?Math.max(SEA-56,h-Math.round(6+(1-rv/0.012)*22)):999;
+  const rf=rv<0.008&&!o.wet?fbm2(X/180,Z/180,2,433.7):0; // ravines: deep enough to cut into the crawlways, sloping in at their ends (Q22)
+  o.rvBot=rf>0.28?Math.max(SEA-56,h-Math.round(3+(5+(1-rv/0.012)*58)*sstep(0.28,0.4,rf))):999;
   return o;
 }
 const colCache=new Map();
@@ -717,9 +718,38 @@ function wormsFor(WCX,WCZ){
   if(r()<0.06){const cx=bx+8,cz=bz+8,cy=108+r()*34;out.push(cx,cy,cz,18+r()*10,9+r()*5,3);}
   if(r()<0.004){const cx=WCX*CS+4+r()*8,cz=WCZ*CS+4+r()*8,o=colInfo(Math.floor(cx),Math.floor(cz),{});
     if(!o.lake&&!o.wet&&o.b!==0){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
+  if(r()<0.12)caveMouth(WCX,WCZ,r(),r(),out);
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
   w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
+}
+// A point on an ordinary worm cave that starts in chunk (WCX,WCZ), inside the chunk's middle and within a height band, or null.
+// A structure that opens onto it is always connected to the caves (Q22, Q24). Pure: chosen by hash among the candidates.
+function caveAnchor(WCX,WCZ,y0,y1,salt){
+  const w=wormsFor(WCX,WCZ),c=[],x0=WCX*CS,z0=WCZ*CS;
+  for(let k=0;k<w.length;k+=6){if(w[k+5]!==0)continue;const x=w[k],y=w[k+1],z=w[k+2];if(y<y0||y>y1||x<x0+2||x>=x0+14||z<z0+2||z>=z0+14)continue;c.push(k);}
+  if(!c.length)return null;const k=c[Math.floor(hsh(WCX,salt,WCZ)*c.length)];
+  return{x:Math.floor(w[k]),y:Math.floor(w[k+1]),z:Math.floor(w[k+2])};
+}
+// A cave mouth in a cliff (Q22): a passage enters the steepest slope of the chunk and winds down, one block per step, to a
+// worm cave of the same chunk (always connected). Points are kind 2, which may open at the surface.
+function caveMouth(WCX,WCZ,q1,q2,out){
+  let best=null;for(let k=0;k<5;k++){const X=WCX*CS+3+Math.floor(hsh(WCX*5+k,6201,WCZ)*10),Z=WCZ*CS+3+Math.floor(hsh(WCX*5+k,6202,WCZ)*10),h=hAt(X,Z),s=slopeAt(X,Z,h);if(!best||s>best.s)best={X:X,Z:Z,h:h,s:s};}
+  if(best.s<3)return;const o=colInfo(best.X,best.Z,{});if(o.wet||o.lake||o.river||o.b===0||best.h<SEA+6||o.rvBot<999)return;
+  let tgt=null;for(let k=0;k<out.length;k+=6){if(out[k+5]!==0)continue;const y=out[k+1];if(y>best.h-30||y<best.h-110||y<20)continue;if(!tgt||Math.abs(y-(best.h-45))<Math.abs(tgt[1]-(best.h-45)))tgt=[out[k],y,out[k+2]];}
+  if(!tgt)return;
+  // the low side of the cliff: step out from the steep column toward lower ground, then turn into the hill
+  let dx=hAt(best.X+3,best.Z)-hAt(best.X-3,best.Z),dz=hAt(best.X,best.Z+3)-hAt(best.X,best.Z-3);const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
+  let x=best.X+0.5-dx*3,z=best.Z+0.5-dz*3;const h0=hAt(Math.floor(x),Math.floor(z));let y=h0+1.5,yaw=Math.atan2(dz,dx);const turn=q1<0.5?1:-1;
+  const st=0.6; // half-block steps keep the floor a smooth ramp a player can walk
+  for(let s=0;s<800;s++){
+    const tx=tgt[0]-x,tz=tgt[2]-z,hd=Math.hypot(tx,tz),drop=y-tgt[1];
+    if(hd<1.5&&drop<1.5)break;
+    if(s<14){y-=0.15;}                                         // straight into the hillside first
+    else if(drop>hd+2){yaw+=turn*st*(0.06+0.02*Math.sin(s*0.12+q2*6));y-=st*0.85;} // too high above the target: wind down in a loop
+    else{yaw=Math.atan2(tz,tx);y-=st*Math.min(0.85,drop/Math.max(1,hd));}          // then head for it, gentler than one block per block
+    x+=Math.cos(yaw)*st;z+=Math.sin(yaw)*st;out.push(x,y,z,2.7,2.6,2);
+  }
 }
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
 function applyWorms(WCX,WCZ){
@@ -2008,6 +2038,38 @@ function spikeP(X,Z,g,r){
   const h=8+(r()*10|0),r0=1+r()*1.4;
   for(let k=0;k<h&&g+1+k<H-1;k++){const rr=r0*(1-k/h)+0.4;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.hypot(dx,dz)<=rr)PW(X+dx,g+1+k,Z+dz,ICE,MODE_SET);}
 }
+// ---- Ruined stairways (Q22): a small walled shaft on open ground, its stair winding down to a worm cave of the chunk
+const stairwayC=new Map();
+function stairwayAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(stairwayC.has(key))return stairwayC.get(key);if(stairwayC.size>8000)stairwayC.clear();
+  let s=null;
+  if(hsh(WCX,6301,WCZ)<0.009){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
+    if(!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+      const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
+  stairwayC.set(key,s);return s;
+}
+function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
+// Surface columns that structures have claimed: trees, boulders and other surface features keep off them
+function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m);}
+const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
+function stairwayP(s,r){
+  const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};
+  // the shaft: walls of old stone, a core, a floor at the bottom; one step up per block of height, the last at g-1
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    for(let y=ys-1;y<=g;y++)PW(X+dx,y,Z+dz,m===2?wall():m===0?(y===ys-1?COBBLE:SBRICK):(y===ys-1?COBBLE:AIR),MODE_SET);
+    for(let y=g+1;y<=g+5;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);}
+  for(let y=ys;y<=g;y++){const [dx,dz]=SW_RING[(y-ys)%8];PW(X+dx,y-1,Z+dz,y%5===0?MOSSY:SBRICK,MODE_SET);}
+  // the ruin above ground: broken corner posts and a little fallen wall (low enough to step over)
+  for(const [dx,dz] of [[-2,-2],[2,-2],[-2,2],[2,2]]){const hgt=1+(r()*4|0);for(let y=g+1;y<=g+hgt;y++)PW(X+dx,y,Z+dz,wall(),MODE_SET);}
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.max(Math.abs(dx),Math.abs(dz))===2&&Math.abs(dx)!==Math.abs(dz)&&r()<0.35)PW(X+dx,g+1,Z+dz,wall(),MODE_SET);
+  // a door at the bottom on the side facing the cave (east, south or west: the north door would open under the second step)
+  const ddx=a.x-X,ddz=a.z-Z,side=Math.abs(ddx)>=Math.abs(ddz)||ddz<0?(ddx>=0?[1,0]:[-1,0]):[0,1];
+  const cell=(x,z)=>{PW(x,ys-1,z,COBBLE,MODE_FILL);for(let y=ys;y<ys+3;y++)PW(x,y,z,AIR,MODE_SET);};
+  // a passage from the door to the cave: out past the wall, across, then along
+  let x=X+side[0]*2,z=Z+side[1]*2;cell(x,z);
+  if(side[0]){x+=side[0];cell(x,z);while(side[0]>0?x<Math.max(a.x,X+3):x>Math.min(a.x,X-3)){x+=side[0];cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}}
+  else{z+=1;cell(x,z);while(z<Math.max(a.z,Z+3)){z++;cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}}
+}
 function dungeonP(X,y,Z,r){
   for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=5;dy++)for(let dz=-3;dz<=3;dz++){
     const wall=Math.abs(dx)===3||Math.abs(dz)===3||dy===0||dy===5,m=r()<.5;
@@ -2052,18 +2114,18 @@ function features(WCX,WCZ,self){
   // the odd mossy boulder on open ground
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||gateNear(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
   // barrows and standing stones, long forgotten
   {const q=hsh(WCX,6001,WCZ);if(q<0.3){const cx=X0+8,cz=Z0+8;colInfo(cx,cz,T2);
-    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)&&!gateNear(cx,cz,7)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
+    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)&&!surfTaken(cx,cz,7)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
   // Trees on the ground and on sky islands
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!gateNear(X,Z),top=topBlock(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z),top=topBlock(T2);
     if(clear){
       if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012))spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
@@ -2075,11 +2137,12 @@ function features(WCX,WCZ,self){
   // Structures
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
-  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!gateNear(sx,sz,4)){
+  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)){
     if((b===2||b===3)&&sr<0.05&&flatOK(sx,sz,g))towerP(sx,sz,g,rngAt(sx,12,sz));
     else if(b===4&&sr<0.06&&flatOK(sx,sz,g))wellP(sx,sz,g);
     else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
   }
+  {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
   if(dr<0.2&&colInfo(dx2,dz2,T2).h-dy>=12&&!(ruinZone(Math.floor(dx2/CS),Math.floor(dz2/CS))&&dy>=RUIN_Y[0]-12&&dy<=RUIN_Y[1]+16))dungeonP(dx2,dy,dz2,rngAt(dx2,14,dz2));
   if(!self)return;
   // Moss, obsidian and crystals only touch the chunk itself
