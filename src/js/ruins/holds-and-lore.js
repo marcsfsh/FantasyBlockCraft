@@ -32,9 +32,11 @@ function loreText(X,Y,Z){
     'Market day in '+h.name+'. Brass for mushrooms, mushrooms for ale, ale for stories. Queen '+h.queen+' bought every lantern in the row.',
     'Song of the hammer, verse four: strike once for the stone, once for the king, once for the ones below who never saw the sun.'
   ];
-  const room=roomAt(X,Y,Z);
+  const room=roomAt(X,Y,Z);let gate='';
+  {const gs=holdGates(holdNear(cx,cz));let bd=1e9,g=null;for(const q of gs){const dx=q.cx*CS+8-X,dz=q.cz*CS+8-Z,d=Math.hypot(dx,dz);if(d<bd){bd=d;g=[dx,dz];}}
+    if(g)gate=' Scratched beneath it: the way up to the surface is a gate about '+Math.round(bd/10)*10+' paces to the '+compass(g[0],g[1])+', on the upper deep.';}
   if(room==='plaza')return 'A waymarker of '+h.name+'. '+(tr?'Carved arrows point toward the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+', about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+'.':'Most of the carved arrows have worn away.')+gate;
-  return T[n]+hint;
+  return T[n]+hint+gate;
 }
 function openLore(X,Y,Z){
   const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
@@ -44,7 +46,49 @@ function openLore(X,Y,Z){
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
   tone(500,420,0.25,0.06);
 }
-// Surface gates lead down into the upper deep
+// ---- Hold gates (Q22, Q72): up to three per hold, on avenues in the hold's outer ring under the highest dry ground, at least
+// eight cells apart. A spiral stair climbs a shaft from the upper floor (y82) to a gatehouse terrace on the surface.
+const gateC=new Map(),TG={};
+function holdGates(h){
+  const key=ckey(h.rx,h.rz);let out=gateC.get(key);if(out)return out;if(gateC.size>400)gateC.clear();
+  const cand=[],R=Math.ceil(h.R*1.4);
+  for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){const cx=h.cx+a,cz=h.cz+b,d=holdReach(h,cx,cz);if(d<0.5||d>=0.95)continue;
+    if(!isAvenue(cx,cz)||isPlaza(cx,cz)||inDelf(cx,cz)||stairAt(cx,cz))continue;
+    colInfo(cx*CS+8,cz*CS+8,TG);if(TG.wet||TG.lake||TG.river||TG.h<=SEA+2||TG.rvBot<999)continue;
+    cand.push({cx:cx,cz:cz,s:TG.h+hsh(cx,1401,cz)*30});}
+  cand.sort((p,q)=>q.s-p.s);out=[];
+  for(const c of cand){if(out.length>=3)break;if(out.every(o=>Math.hypot(o.cx-c.cx,o.cz-c.cz)>=8))out.push(c);}
+  gateC.set(key,out);return out;
+}
+function gateAt(cx,cz){return ruinZone(cx,cz)&&holdGates(holdNear(cx,cz)).some(g=>g.cx===cx&&g.cz===cz);}
+// The terrace sits at the highest ground under it, so the hillside never buries it
+function gateTop(X,Z){let t=RUIN_Y[1]+6;for(let a=-5;a<=5;a+=5)for(let b=-5;b<=5;b+=5)t=Math.max(t,colInfo(X+a,Z+b,TG).h);return t;}
+// Is a surface column taken by a gatehouse? (trees, boulders and other surface features stay off it)
+function gateNear(X,Z,m){const e=7+(m||0),cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(!ruinZone(cx,cz)&&!ruinZone(Math.floor((X+e)/CS),cz)&&!ruinZone(Math.floor((X-e)/CS),cz)&&!ruinZone(cx,Math.floor((Z+e)/CS))&&!ruinZone(cx,Math.floor((Z-e)/CS)))return false;
+  for(const g of holdGates(holdNear(cx,cz)))if(Math.abs(X-(g.cx*CS+8))<=e&&Math.abs(Z-(g.cz*CS+8))<=e)return true;return false;}
+const GATE_RING=[];for(let a=-2;a<2;a++)GATE_RING.push([a,-2]);for(let a=-2;a<2;a++)GATE_RING.push([2,a]);for(let a=2;a>-2;a--)GATE_RING.push([a,2]);for(let a=2;a>-2;a--)GATE_RING.push([-2,a]);
+function dwGate(cx,cz,r){ // cx,cz: block coordinates of the cell's centre
+  const yb=RUIN_Y[1],g=colInfo(cx,cz,TG).h,top=gateTop(cx,cz);
+  // the shaft: walls, a 3 x 3 core, and a floor at the upper deep
+  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    for(let y=yb-1;y<=top;y++)PW(cx+dx,y,cz+dz,m===3?(y<g-1?dwWall(r):DWBRICK):m<=1?(y===yb-1?DWTILE:(y-yb)%8===4&&m===1&&(dx===0||dz===0)?RUNE:DWPILLAR):(y===yb-1?DWTILE:AIR),MODE_SET);}
+  // a spiral stair, one step up per block of height; the last step is at top-1
+  for(let y=yb;y<=top;y++){const [dx,dz]=GATE_RING[(y-yb)%GATE_RING.length];PW(cx+dx,y-1,cz+dz,DWTILE,MODE_SET);}
+  // doors at the bottom on the east, south and west (the north door would open under the third step)
+  for(const [a,b] of [[3,0],[0,3],[-3,0]])for(let y=yb;y<yb+3;y++)PW(cx+a,y,cz+b,AIR,MODE_SET);
+  // the terrace: a brick platform around the shaft, cleared above
+  for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    if(m>=4){for(let y=top-5;y<top;y++)PW(cx+dx,y,cz+dz,DWBRICK,MODE_FILL);PW(cx+dx,top,cz+dz,m===6?DWBRICK:DWTILE,MODE_SET);}
+    for(let y=top+1;y<=top+9;y++)PW(cx+dx,y,cz+dz,AIR,MODE_SET);}
+  // the way out at the top: through the shaft wall beside the last step
+  {const [dx,dz]=GATE_RING[(top-yb)%GATE_RING.length],ox=Math.abs(dx)===2?Math.sign(dx)*3:dx,oz=Math.abs(dx)===2?dz:Math.sign(dz)*3;PW(cx+ox,top,cz+oz,DWTILE,MODE_SET);}
+  // four pillars carrying lintels, braziers, a little rubble
+  for(const [a,b] of [[-5,-5],[5,-5],[-5,5],[5,5]]){for(let y=top+1;y<=top+6;y++)PW(cx+a,y,cz+b,DWPILLAR,MODE_SET);}
+  for(let k=-5;k<=5;k++){PW(cx+k,top+7,cz-5,DWBRICK,MODE_SET);PW(cx+k,top+7,cz+5,DWBRICK,MODE_SET);}
+  PW(cx,top+7,cz-5,GOLDB,MODE_SET);PW(cx,top+7,cz+5,GOLDB,MODE_SET);PW(cx,top+6,cz-5,RUNE,MODE_SET);PW(cx,top+6,cz+5,RUNE,MODE_SET);
+  for(const [a,b] of [[-6,0],[6,0],[0,-6],[0,6]])brazierP(cx+a,top+1,cz+b);
+  for(let k=0;k<6;k++){const a=(r()*13|0)-6,b=(r()*13|0)-6;if(Math.max(Math.abs(a),Math.abs(b))>=4&&r()<0.6*curI)PW(cx+a,top+1,cz+b,r()<0.5?COBBLE:GRAVEL,MODE_AIR);}
+}
 // A chasm room: a deep drop to the lava with stone bridges along open corridors
 function dwChasm(cx,cz,yb,r,L,WCX,WCZ){
   const bottom=9,ex=edgeOpen(WCX,WCZ,1,0,L)||edgeOpen(WCX,WCZ,-1,0,L),ez=edgeOpen(WCX,WCZ,0,1,L)||edgeOpen(WCX,WCZ,0,-1,L);

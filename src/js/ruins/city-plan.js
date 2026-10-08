@@ -151,6 +151,7 @@ function edgeBase(cx,cz,dx,dz,L){
 }
 function ruinAt(X,Y,Z){
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
+  if(Y>RUIN_Y[1]+12&&Math.abs(X-cx*CS-8)<=6&&Math.abs(Z-cz*CS-8)<=6&&gateAt(cx,cz))return 'The Gate of '+holdOf(cx,cz).name;
   for(let L=0;L<2;L++){const yb=RUIN_Y[L];if(Y<yb-12||Y>yb+16)continue;
     if(L===0&&inDelf(cx,cz)&&Y<=yb+31)return 'The Hall of a Thousand Pillars of '+holdOf(cx,cz).name;
     const m=megaAt(cx,cz,L);if(m){if(X>=m.x0&&X<=m.x1&&Z>=m.z0&&Z<=m.z1&&Y>=yb-12)return RUIN_NAMES[m.tp]+' of '+holdOf(cx,cz).name;continue;}
