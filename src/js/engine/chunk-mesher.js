@@ -3,8 +3,9 @@ function layerName(y,X,Z){
   const m=mineName(X,y,Z);if(m)return m;
   return y<12?'The Fire Below':y<58?'The Deep Mines':y<100?'The Dwarven Deeps':y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
 }
-const MB={c:SEA,lo:SEA-120,hi:SEA+120};
-function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
+// Only a band of heights around the player is meshed; from near the surface up, the band reaches the top of the world so peaks stay visible
+const MB={c:SEA,lo:SEA-120,hi:H-1};
+function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c>=SEA-60?H-1:c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
 const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
 function buildChunk(cx,cz){
   const O=newM(),Wt=newM();

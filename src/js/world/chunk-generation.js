@@ -1,3 +1,4 @@
+const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
 // Features rooted in world chunk (WCX,WCZ); only the parts landing in the target chunk are written
 function veinP(x,y,z,t,n,r,ok){
   const a=r()*Math.PI,dx=Math.sin(a)*n/8,dz=Math.cos(a)*n/8,dy=(r()-0.5)*2;
@@ -16,13 +17,13 @@ function features(WCX,WCZ,self){
   const X0=WCX*CS,Z0=WCZ*CS,r=rngAt(WCX,11,WCZ);
   // Ore veins
   for(let v=0;v<48;v++){
-    let x=X0+(r()*CS|0),y=1+(r()*(H-2)|0),z=Z0+(r()*CS|0);const t0=r();let t,n,ok=true;
+    let x=X0+(r()*CS|0),y=1+(r()*ORE_SPAN|0),z=Z0+(r()*CS|0);const t0=r();let t,n,ok=true;
     if(t0<.5){t=COAL;n=10;ok=y>=90;}else if(t0<.78){ok=y<=260;t=IRON;n=7;}else if(t0<.92){ok=y<=150;t=GOLD;n=6;}else{ok=y<=70;t=DIAMOND;n=5;}
     veinP(x,y,z,t,n,r,ok);
   }
   const r3=rngAt(WCX,16,WCZ);
   for(let v=0;v<36;v++){
-    let x=X0+(r3()*CS|0),y=1+(r3()*(H-2)|0),z=Z0+(r3()*CS|0);const t0=r3();let t,n,ok;
+    let x=X0+(r3()*CS|0),y=1+(r3()*ORE_SPAN|0),z=Z0+(r3()*CS|0);const t0=r3();let t,n,ok;
     if(t0<.34){t=COPO;n=9;ok=y<=290;}else if(t0<.56){t=TINO;n=7;ok=y<=270;}else if(t0<.76){t=ZINO;n=7;ok=y<=240;}else if(t0<.9){t=PLATO;n=4;ok=y<=100;}else{t=TITO;n=4;ok=y<=60;}
     veinP(x,y,z,t,n,r3,ok);
   }
