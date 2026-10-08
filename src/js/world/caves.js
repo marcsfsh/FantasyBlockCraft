@@ -42,10 +42,41 @@ function wormsFor(WCX,WCZ){
   if(r()<0.06){const cx=bx+8,cz=bz+8,cy=108+r()*34;out.push(cx,cy,cz,18+r()*10,9+r()*5,3);}
   if(r()<0.004){const cx=WCX*CS+4+r()*8,cz=WCZ*CS+4+r()*8,o=colInfo(Math.floor(cx),Math.floor(cz),{});
     if(!o.lake&&!o.wet&&o.b!==0){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
+  if(r()<0.12)caveMouth(WCX,WCZ,r(),r(),out);
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
   w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
 }
+// A point on an ordinary worm cave that starts in chunk (WCX,WCZ), inside the chunk's middle and within a height band, or null.
+// A structure that opens onto it is always connected to the caves (Q22, Q24). Pure: chosen by hash among the candidates.
+function caveAnchor(WCX,WCZ,y0,y1,salt){
+  const w=wormsFor(WCX,WCZ),c=[],x0=WCX*CS,z0=WCZ*CS;
+  for(let k=0;k<w.length;k+=6){if(w[k+5]!==0)continue;const x=w[k],y=w[k+1],z=w[k+2];if(y<y0||y>y1||x<x0+2||x>=x0+14||z<z0+2||z>=z0+14)continue;c.push(k);}
+  if(!c.length)return null;const k=c[Math.floor(hsh(WCX,salt,WCZ)*c.length)];
+  return{x:Math.floor(w[k]),y:Math.floor(w[k+1]),z:Math.floor(w[k+2])};
+}
+// A cave mouth in a cliff (Q22): a passage enters the steepest slope of the chunk and winds down, one block per step, to a
+// worm cave of the same chunk (always connected). Points are kind 2, which may open at the surface.
+function caveMouth(WCX,WCZ,q1,q2,out){
+  let best=null;for(let k=0;k<5;k++){const X=WCX*CS+3+Math.floor(hsh(WCX*5+k,6201,WCZ)*10),Z=WCZ*CS+3+Math.floor(hsh(WCX*5+k,6202,WCZ)*10),h=hAt(X,Z),s=slopeAt(X,Z,h);if(!best||s>best.s)best={X:X,Z:Z,h:h,s:s};}
+  if(best.s<3)return;const o=colInfo(best.X,best.Z,{});if(o.wet||o.lake||o.river||o.b===0||best.h<SEA+6||o.rvBot<999)return;
+  let tgt=null;for(let k=0;k<out.length;k+=6){if(out[k+5]!==0)continue;const y=out[k+1];if(y>best.h-30||y<best.h-110||y<20)continue;if(!tgt||Math.abs(y-(best.h-45))<Math.abs(tgt[1]-(best.h-45)))tgt=[out[k],y,out[k+2]];}
+  if(!tgt)return;
+  // the low side of the cliff: step out from the steep column toward lower ground, then turn into the hill
+  let dx=hAt(best.X+3,best.Z)-hAt(best.X-3,best.Z),dz=hAt(best.X,best.Z+3)-hAt(best.X,best.Z-3);const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
+  let x=best.X+0.5-dx*3,z=best.Z+0.5-dz*3;const h0=hAt(Math.floor(x),Math.floor(z));let y=h0+1.5,yaw=Math.atan2(dz,dx);const turn=q1<0.5?1:-1;
+  const st=0.6; // half-block steps keep the floor a smooth ramp a player can walk
+  for(let s=0;s<800;s++){
+    const tx=tgt[0]-x,tz=tgt[2]-z,hd=Math.hypot(tx,tz),drop=y-tgt[1];
+    if(hd<1.5&&drop<1.5)break;
+    if(s<14){y-=0.15;}                                         // straight into the hillside first
+    else if(drop>hd+2){yaw+=turn*st*(0.06+0.02*Math.sin(s*0.12+q2*6));y-=st*0.85;} // too high above the target: wind down in a loop
+    else{yaw=Math.atan2(tz,tx);y-=st*Math.min(0.85,drop/Math.max(1,hd));}          // then head for it, gentler than one block per block
+    x+=Math.cos(yaw)*st;z+=Math.sin(yaw)*st;out.push(x,y,z,2.7,2.6,2);
+  }
+}
+// Is (X,Y,Z) part of the rock that holds a deep lake or river: beside it, under it, under its floor, or under its side walls?
+function deepRim(X,Y,Z){for(const [a,b,c] of [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,2,0],[1,1,0],[-1,1,0],[0,1,1],[0,1,-1]])if(deepWaterAt(X+a,Y+b,Z+c))return true;return false;}
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
 function applyWorms(WCX,WCZ){
   const streamCells=[],zoneR=ruinZone(WCX,WCZ);
@@ -71,7 +102,7 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(Y>=55&&Y<=DEEP_WL+1&&deepRim(X,Y,Z))continue; // leave sound rock around deep lakes and rivers, in this chunk and the next
           if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}

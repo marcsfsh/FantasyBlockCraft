@@ -11,6 +11,8 @@ description: Rules and procedure for any change that can alter Fantasy BlockCraf
 3. **Random-stream invariants.** Each `rngAt` stream must yield the same sequence in every chunk that reads it. If you skip work early for a chunk that cannot be reached, still draw the same number of values (see `veinP`). New draws go at the end of a stream, or in a new stream with a fresh salt (`rngAt(WCX, <unused number>, WCZ)`); grep the salt first.
 4. **Weakest write mode:** `MODE_AIR` over `MODE_FILL` over `MODE_STONE` over `MODE_SET`.
 5. **Lighting stays exact:** do not change `lightChunk`/`genDone` gating without keeping 02-lighting at exactly 0 differing cells.
+6. **Underground water sits in sound rock (owner's rule, D-024):** water or solid under and beside every underground water block, and nothing holding it may float. `drainCaveWater` runs last and drains anything else; never weaken it. New deep water belongs at `DEEP_WL`.
+7. **Reachable places open onto `caveAnchor`;** surface structures keep off `surfTaken` columns.
 
 ## Tests to choose
 | Change touches | Run |

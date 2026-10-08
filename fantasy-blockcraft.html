@@ -186,20 +186,20 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v4',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v5',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 // Worlds: an index under SAVE_KEY ({active, list:[{id,name,seed,mode,created,played}]}) and each world's data under SAVE_KEY+':'+id.
 // Bumping SAVE_KEY retires every world: saves always yield to updates (D-019).
-for(const k of ['fantasy-blockcraft-save-v1','fantasy-blockcraft-save-v2','fantasy-blockcraft-save-v3','blockcraft-nextseed'])lsDel(k); // retired formats: free their storage
+for(const k of ['fantasy-blockcraft-save-v1','fantasy-blockcraft-save-v2','fantasy-blockcraft-save-v3','fantasy-blockcraft-save-v4','blockcraft-nextseed'])lsDel(k); // retired formats: free their storage
 const worldKey=id=>SAVE_KEY+':'+id;
 function worldIndex(){const x=lsGet(SAVE_KEY);return x&&Array.isArray(x.list)?x:{active:null,list:[]};}
 function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Math.random()*1679616|0).toString(36),name:name,seed:seed||((Math.random()*2147483000|0)+1),mode:mode==='creative'?'creative':'survival',created:Date.now(),played:Date.now()};}
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===4&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const saved=(d=>d&&d.v===5&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -365,10 +365,12 @@ def(DLANTERN,'Cold Lantern',[192,192,192],{snd:'glass'});
 def(DSCONCE,'Cold Sconce',[193,193,193],{solid:false,opq:false,occ:false,sconce:true,snd:'wood'});
 def(DTORCH,'Burnt-out Torch',[193,193,193],{solid:false,opq:false,occ:false,torch:true,snd:'wood'});
 def(DGLOW,'Dim Glowstone',[194,194,194],{snd:'glass'});
+// Ancient waystones stand at old sites and hold gates (Q71); attunement comes in M4. Their runes still glow faintly.
+const WAYSTONE=83;def(WAYSTONE,'Ancient Waystone',[195,195,195],{emit:true,lum:6});
 const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 setH([COAL],5,'ore',1);setH([COPO,TINO,ZINO],5,'ore',2);setH([IRON],5,'ore',3);setH([GOLD],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
+setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
@@ -586,6 +588,7 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const e=x<2||y<2||x>13||y>13,bar=x===7||x===8,c=px(80,x,y);
     P(192,x,y,e||bar?[c[0]*0.62,c[1]*0.58,c[2]*0.5]:sh([58,54,50],(x*7+y*3)%5*3-Math.hypot(x-7.5,y-7.5)*2));
     const g=px(34,x,y),m=(g[0]+g[1]+g[2])/3;P(194,x,y,[m*0.42+30,m*0.4+28,m*0.36+26]);}
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=px(3,x,y),rune=(x===7||x===8)&&y>2&&y<13||(y===5||y===10)&&x>4&&x<11;P(195,x,y,rune?[120,190,230]:[c[0]*0.85+10,c[1]*0.85+12,c[2]*0.85+18]);} // waystone: worn stone with a glowing rune
   clear(193);for(let y=6;y<16;y++)for(let x=7;x<=8;x++)P(193,x,y,y<=7?[38,32,30]:y===8?[64,50,40]:sh([112,82,46],x===8?-18:0));
   actx.putImageData(im,0,0);
 })();
@@ -640,7 +643,8 @@ function colInfoBase(X,Z,o){
   o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
-  o.rvBot=(!o.wet&&rv<0.008&&fbm2(X/180,Z/180,2,433.7)>0.28)?Math.max(SEA-56,h-Math.round(6+(1-rv/0.012)*22)):999;
+  const rf=rv<0.008&&!o.wet?fbm2(X/180,Z/180,2,433.7):0; // ravines: deep enough to cut into the crawlways, sloping in at their ends (Q22)
+  o.rvBot=rf>0.28?Math.max(SEA-56,h-Math.round(3+(5+(1-rv/0.012)*58)*sstep(0.28,0.4,rf))):999;
   return o;
 }
 const colCache=new Map();
@@ -717,10 +721,41 @@ function wormsFor(WCX,WCZ){
   if(r()<0.06){const cx=bx+8,cz=bz+8,cy=108+r()*34;out.push(cx,cy,cz,18+r()*10,9+r()*5,3);}
   if(r()<0.004){const cx=WCX*CS+4+r()*8,cz=WCZ*CS+4+r()*8,o=colInfo(Math.floor(cx),Math.floor(cz),{});
     if(!o.lake&&!o.wet&&o.b!==0){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
+  if(r()<0.12)caveMouth(WCX,WCZ,r(),r(),out);
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
   w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
 }
+// A point on an ordinary worm cave that starts in chunk (WCX,WCZ), inside the chunk's middle and within a height band, or null.
+// A structure that opens onto it is always connected to the caves (Q22, Q24). Pure: chosen by hash among the candidates.
+function caveAnchor(WCX,WCZ,y0,y1,salt){
+  const w=wormsFor(WCX,WCZ),c=[],x0=WCX*CS,z0=WCZ*CS;
+  for(let k=0;k<w.length;k+=6){if(w[k+5]!==0)continue;const x=w[k],y=w[k+1],z=w[k+2];if(y<y0||y>y1||x<x0+2||x>=x0+14||z<z0+2||z>=z0+14)continue;c.push(k);}
+  if(!c.length)return null;const k=c[Math.floor(hsh(WCX,salt,WCZ)*c.length)];
+  return{x:Math.floor(w[k]),y:Math.floor(w[k+1]),z:Math.floor(w[k+2])};
+}
+// A cave mouth in a cliff (Q22): a passage enters the steepest slope of the chunk and winds down, one block per step, to a
+// worm cave of the same chunk (always connected). Points are kind 2, which may open at the surface.
+function caveMouth(WCX,WCZ,q1,q2,out){
+  let best=null;for(let k=0;k<5;k++){const X=WCX*CS+3+Math.floor(hsh(WCX*5+k,6201,WCZ)*10),Z=WCZ*CS+3+Math.floor(hsh(WCX*5+k,6202,WCZ)*10),h=hAt(X,Z),s=slopeAt(X,Z,h);if(!best||s>best.s)best={X:X,Z:Z,h:h,s:s};}
+  if(best.s<3)return;const o=colInfo(best.X,best.Z,{});if(o.wet||o.lake||o.river||o.b===0||best.h<SEA+6||o.rvBot<999)return;
+  let tgt=null;for(let k=0;k<out.length;k+=6){if(out[k+5]!==0)continue;const y=out[k+1];if(y>best.h-30||y<best.h-110||y<20)continue;if(!tgt||Math.abs(y-(best.h-45))<Math.abs(tgt[1]-(best.h-45)))tgt=[out[k],y,out[k+2]];}
+  if(!tgt)return;
+  // the low side of the cliff: step out from the steep column toward lower ground, then turn into the hill
+  let dx=hAt(best.X+3,best.Z)-hAt(best.X-3,best.Z),dz=hAt(best.X,best.Z+3)-hAt(best.X,best.Z-3);const L=Math.hypot(dx,dz)||1;dx/=L;dz/=L;
+  let x=best.X+0.5-dx*3,z=best.Z+0.5-dz*3;const h0=hAt(Math.floor(x),Math.floor(z));let y=h0+1.5,yaw=Math.atan2(dz,dx);const turn=q1<0.5?1:-1;
+  const st=0.6; // half-block steps keep the floor a smooth ramp a player can walk
+  for(let s=0;s<800;s++){
+    const tx=tgt[0]-x,tz=tgt[2]-z,hd=Math.hypot(tx,tz),drop=y-tgt[1];
+    if(hd<1.5&&drop<1.5)break;
+    if(s<14){y-=0.15;}                                         // straight into the hillside first
+    else if(drop>hd+2){yaw+=turn*st*(0.06+0.02*Math.sin(s*0.12+q2*6));y-=st*0.85;} // too high above the target: wind down in a loop
+    else{yaw=Math.atan2(tz,tx);y-=st*Math.min(0.85,drop/Math.max(1,hd));}          // then head for it, gentler than one block per block
+    x+=Math.cos(yaw)*st;z+=Math.sin(yaw)*st;out.push(x,y,z,2.7,2.6,2);
+  }
+}
+// Is (X,Y,Z) part of the rock that holds a deep lake or river: beside it, under it, under its floor, or under its side walls?
+function deepRim(X,Y,Z){for(const [a,b,c] of [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,2,0],[1,1,0],[-1,1,0],[0,1,1],[0,1,-1]])if(deepWaterAt(X+a,Y+b,Z+c))return true;return false;}
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
 function applyWorms(WCX,WCZ){
   const streamCells=[],zoneR=ruinZone(WCX,WCZ);
@@ -746,7 +781,7 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(Y>=55&&Y<=DEEP_WL+1&&deepRim(X,Y,Z))continue; // leave sound rock around deep lakes and rivers, in this chunk and the next
           if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}
@@ -810,6 +845,23 @@ function deepCaves(lcx,lcz){
       for(let y=bed;y<=top;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;world[i]=y<=DEEP_WL?WATER:AIR;lvl[i]=0;}}}
   }
 }
+// Will deepCaves leave water at (X,Y,Z)? The same lattice and river test as deepCaves, cached by lattice point, so worm caves
+// in any chunk can keep a rock rim around deep lakes and rivers, also across chunk borders.
+const dlatC=new Map();
+function dlat(X,Y,Z){const k=(X*4096+Z)*32+(Y-DC_Y0)/4;let v=dlatC.get(k);if(v===undefined){if(dlatC.size>200000)dlatC.clear();v=deepDensity(X,Y,Z,deepSup(X,Z));dlatC.set(k,v);}return v;}
+// Is (X,Y,Z) inside a deep cavern (the same interpolation as deepCaves)? Y in DC_Y0 to DC_Y0+4*(DC_NY-1)-1.
+function deepOpenAt(X,Y,Z){
+  if(Y<DC_Y0||Y>=DC_Y0+4*(DC_NY-1))return false;
+  const LX=X-(X&3),LZ=Z-(Z&3),fx=(X&3)/4,fz=(Z&3)/4,k=Math.floor((Y-DC_Y0)/4),j=Y-DC_Y0-k*4,y0=DC_Y0+k*4,y1=y0+4;
+  const c0=lerp(lerp(dlat(LX,y0,LZ),dlat(LX+4,y0,LZ),fx),lerp(dlat(LX,y0,LZ+4),dlat(LX+4,y0,LZ+4),fx),fz);
+  const c1=lerp(lerp(dlat(LX,y1,LZ),dlat(LX+4,y1,LZ),fx),lerp(dlat(LX,y1,LZ+4),dlat(LX+4,y1,LZ+4),fx),fz);
+  if(c0<=0&&c1<=0)return false;return c0+(c1-c0)*j/4>0;
+}
+function deepRiverAt(X,Y,Z){if(Y<DEEP_WL-3||Y>DEEP_WL+5)return false;const rv=Math.abs(fbm2(X/240,Z/240,2,8301.7));return rv<0.026&&deepSup(X,Z)>-0.3&&Y>=DEEP_WL-1-Math.round(2*(1-rv/0.026))&&Y<=DEEP_WL+2+Math.round(3*(1-rv/0.026));}
+function deepWaterAt(X,Y,Z){
+  if(Y<58||Y>DEEP_WL)return false;
+  return deepRiverAt(X,Y,Z)||deepOpenAt(X,Y,Z);
+}
 const DEEP_NAMES={lush:'The Mossy Deeps',crystal:'The Crystal Deeps',drip:'The Dripstone Deeps',fungal:'The Fungal Deeps',plain:'The Deep Caverns'};
 // ---- Abandoned mineshafts: timbered corridors with lanterns and supply crates
 const shaftCache=new Map();
@@ -859,17 +911,30 @@ function openCrate(X,Y,Z){
 // ---- Points of interest underground: natural formations and lost places
 const POI_TYPES=[['geode',2],['fossil',1.3],['grove',1.6],['camp',1.5],['ruins',1.1],['lab',0.7],['outpost',0.8],['shrine',1.4],['forge',0.9]];
 const POI_NAMES={geode:'Crystal Geode',fossil:'Fossil',grove:'Mushroom Grove',camp:'Miners\u2019 Camp',ruins:'Ancient Ruins',lab:'Alchemist\'s Cellar',outpost:'Deep Outpost',shrine:'Crystal Shrine',forge:'Lava Forge'};
-const poiCache=new Map();
+const poiCache=new Map(),poiBaseC=new Map();
+// A place gives way to a neighbouring one that would overlap it and has a higher priority (by hash), so no place is built over another
 function poiFor(WCX,WCZ){
-  const key=ckey(WCX,WCZ);if(poiCache.has(key))return poiCache.get(key);
-  if(poiCache.size>8000)poiCache.clear();
+  const key=ckey(WCX,WCZ);if(poiCache.has(key))return poiCache.get(key);if(poiCache.size>8000)poiCache.clear();
+  let p=poiBase(WCX,WCZ);
+  if(p){const pr=hsh(WCX,6414,WCZ);for(let a=-2;a<=2&&p;a++)for(let b=-2;b<=2&&p;b++){if(!a&&!b)continue;const q=poiBase(WCX+a,WCZ+b);
+    if(q&&hsh(WCX+a,6414,WCZ+b)>pr&&Math.abs(q.x-p.x)<26&&Math.abs(q.z-p.z)<26&&Math.abs(q.y-p.y)<16)p=null;}}
+  poiCache.set(key,p);return p;
+}
+function poiBase(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(poiBaseC.has(key))return poiBaseC.get(key);
+  if(poiBaseC.size>8000)poiBaseC.clear();
   let p=null;const r=rngAt(WCX,81,WCZ);
   if(r()<0.32){
     let tot=0;for(const t of POI_TYPES)tot+=t[1];let v=r()*tot,tp=POI_TYPES[0][0];for(const t of POI_TYPES){v-=t[1];if(v<=0){tp=t[0];break;}}
     const x=WCX*CS+4+(r()*8|0),z=WCZ*CS+4+(r()*8|0),gh=colInfo(x,z,{}).h,top=gh-14;
-    {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};}
+    {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
+      // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
+      if(hsh(WCX,6411,WCZ)>=0.4)p=null;
+      else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
+        if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
+          if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}
   }
-  poiCache.set(key,p);return p;
+  poiBaseC.set(key,p);return p;
 }
 function poiNear(X,Y,Z){
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
@@ -950,8 +1015,9 @@ function buildPOI(p){
   }
 }
 function applyPOIs(WCX,WCZ){
-  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const p=poiFor(WCX+a,WCZ+b);if(!p)continue;
-    if(p.x+16<gx0||p.x-16>gx0+CS||p.z+16<gz0||p.z-16>gz0+CS)continue;buildPOI(p);}
+  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const p=poiFor(WCX+a,WCZ+b);if(!p)continue;
+    if(p.x+16<gx0||p.x-16>gx0+CS||p.z+16<gz0||p.z-16>gz0+CS)continue;buildPOI(p);
+    if(p.a)tunnelTo(p.x,p.y+1,p.z,p.a.x,p.a.y-1,p.a.z,0,COBBLE);}
 }
 // ---- Dripstone and springs in the existing caves
 function cavernDetail(X0,Z0,r2){
@@ -960,10 +1026,98 @@ function cavernDetail(X0,Z0,r2){
     const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-18)|0),c=GW(X,y,Z);
     if(c!==AIR||inRuin(X,y,Z))continue;
     if(SOLID[Math.max(0,GW(X,y+1,Z))]&&GW(X,y-1,Z)===AIR){
-      if(r2()<0.004&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){const i=I(X-OX,y+1,Z-OZ);if(world[i]===STONE&&y+2<g-6){world[i]=WATER;lvl[i]=0;flowQ.add(i);}}
+      if(r2()<0.0012&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){} // ceiling springs are gone: underground water only stands in sound basins (D-024); the draw stays so later details keep their places
       else if(y<48&&r2()<0.06){let f=y;while(f>2&&GW(X,f-1,Z)===AIR)f--;if(y-f>=5&&!(zone2&&inRuin(X,f,Z))){for(let t=f;t<=y;t++)PW(X,t,Z,LAVA,MODE_SET);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){PW(X+a,f-1,Z+b,LAVA,MODE_STONE);PW(X+a,f-2,Z+b,OBSID,MODE_STONE);}}}
       else{PW(X,y,Z,DRIPD,MODE_SET);if(r2()<0.4&&GW(X,y-1,Z)===AIR&&GW(X,y-2,Z)===AIR)PW(X,y-1,Z,DRIPD,MODE_SET);}
     }else if(SOLID[Math.max(0,GW(X,y-1,Z))]&&GW(X,y+1,Z)===AIR)PW(X,y,Z,DRIPU,MODE_SET);
+  }
+}
+// ---- Remains of other peoples in the deep (Q10, Q70, D-024): goblin warrens, gnome workshops, drow halls and older, nameless
+// ruins, built on the floor of a natural deep cavern away from the holds. Some are only leftovers: a few walls in a cave.
+// One site at most per region of REM_REG x REM_REG chunks; a site is rebuilt from its region by every chunk it touches.
+const REM_REG=10,REM_KINDS=[['warren',3],['workshop',2.5],['drow',2],['nameless',2.5]];
+const REM_TITLE={warren:'Goblin Warren',workshop:'Gnome Workshop',drow:'Drow Hall',nameless:'Nameless Ruins'};
+const remC=new Map();
+function remainsAt(rx,rz){
+  const key=ckey(rx,rz);if(remC.has(key))return remC.get(key);if(remC.size>4000)remC.clear();
+  let s=null;const r=rngAt(rx,6501,rz);
+  if(r()<0.32){
+    let tot=0;for(const k of REM_KINDS)tot+=k[1];let v=r()*tot,kind=REM_KINDS[0][0];for(const k of REM_KINDS){v-=k[1];if(v<=0){kind=k[0];break;}}
+    const left=r()<0.4,seed=r(),span=REM_REG*CS-56;
+    for(let t=0;t<8&&!s;t++){
+      const X=rx*REM_REG*CS+28+(r()*span|0),Z=rz*REM_REG*CS+28+(r()*span|0),lowFirst=r()<0.5;
+      if(holdReach(holdNear(Math.floor(X/CS),Math.floor(Z/CS)),X/CS-0.5,Z/CS-0.5)<1.9)continue;
+      // a cavern floor with room above it: the lower tier (dry) or the upper tier above the lake level
+      for(const [lo,hi] of lowFirst?[[20,50],[DEEP_WL+3,94]]:[[DEEP_WL+3,94],[20,50]]){if(s)break;
+        for(let y=lo;y<=hi;y++){if(!deepOpenAt(X,y,Z)||deepOpenAt(X,y-1,Z)||deepRiverAt(X,y,Z))continue;
+          let room=true;for(let k=1;k<=6&&room;k++)if(!deepOpenAt(X,y+k,Z))room=false;
+          if(room){s={kind:kind,left:left,X:X,Z:Z,y:y,seed:seed};break;}}}
+    }
+    if(s){const rr=mkRng(Math.floor(s.seed*1e9)+7);
+      const n=s.kind==='warren'?'The Warren of '+nameWord('goblin',rr):s.kind==='workshop'?'The Workshop of '+fullName('gnome',rr,false):s.kind==='drow'?'The Hall of House '+nameWord('drow',rr):'Nameless Ruins';
+      s.name=s.left?(s.kind==='nameless'?'Scattered Nameless Ruins':'Remains of a '+REM_TITLE[s.kind]):n;}
+  }
+  remC.set(key,s);return s;
+}
+function remainsNear(X,Y,Z){
+  const rx=Math.floor(X/CS/REM_REG),rz=Math.floor(Z/CS/REM_REG);
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=remainsAt(rx+a,rz+b);if(s&&Math.abs(X-s.X)<=16&&Math.abs(Z-s.Z)<=16&&Y>=s.y-3&&Y<=s.y+10)return s;}
+  return null;
+}
+function applyRemains(WCX,WCZ){
+  const seen=new Set();
+  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const rx=Math.floor((WCX+a)/REM_REG),rz=Math.floor((WCZ+b)/REM_REG),k=rx+','+rz;if(seen.has(k))continue;seen.add(k);
+    const s=remainsAt(rx,rz);if(!s||s.X+20<gx0||s.X-20>gx0+CS||s.Z+20<gz0||s.Z-20>gz0+CS)continue;buildRemains(s);}
+}
+function buildRemains(s){
+  const r=mkRng(Math.floor(s.seed*1e9)+11),X=s.X,Z=s.Z,y=s.y,left=s.left;
+  // leftovers keep only part of what was built, the same in every chunk (by position)
+  const keepP=left?0.35:0.93,put=(x,yy,z,id)=>{if(hsh(x,yy*7+3,z)<keepP)PW(x,yy,z,id,MODE_SET);};
+  // a floor block that never floats: anything open under it is filled with rock, a few blocks down
+  const floor=(x,z,id)=>{PW(x,y-1,z,id,MODE_SET);for(let d=2;d<=8;d++){const c=GW(x,y-d,z);if(c<0||SOLID[c])break;PW(x,y-d,z,d<3?id:STONE,MODE_SET);}};
+  const clear=(x,z,h)=>{for(let k=0;k<h;k++)PW(x,y+k,z,AIR,MODE_SET);};
+  if(s.kind==='warren'){
+    // a round central burrow with a fire pit, and side burrows on low tunnels
+    const dig=(cx,cz,R,H)=>{for(let dx=-Math.ceil(R);dx<=Math.ceil(R);dx++)for(let dz=-Math.ceil(R);dz<=Math.ceil(R);dz++){const d=Math.hypot(dx,dz)/R;if(d>1)continue;
+      floor(cx+dx,cz+dz,hsh(cx+dx,y,cz+dz)<0.5?DIRT:hsh(cx+dx,y+1,cz+dz)<0.5?GRAVEL:COBBLE);clear(cx+dx,cz+dz,Math.max(2,Math.round(H*Math.sqrt(1-d*d))));}};
+    dig(X,Z,4.5,4);
+    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)put(X+a,y,Z+b,COBBLE);put(X,y-1,Z,GRAVEL);put(X,y,Z,DTORCH);
+    const n=3+(r()*3|0),a0=r()*6.283;
+    for(let k=0;k<n;k++){const ang=a0+k*6.283/n+(r()-0.5)*0.6,dist=9+r()*4,cx=X+Math.round(Math.cos(ang)*dist),cz=Z+Math.round(Math.sin(ang)*dist),R=2.5+r();
+      for(let t=4;t<=dist-R+1;t++){const tx=X+Math.round(Math.cos(ang)*t),tz=Z+Math.round(Math.sin(ang)*t);for(const [p,q] of [[0,0],[1,0],[0,1]]){floor(tx+p,tz+q,DIRT);clear(tx+p,tz+q,2);}}
+      dig(cx,cz,R,3);
+      for(let m=0;m<3;m++){const fx=cx+((r()*3|0)-1),fz=cz+((r()*3|0)-1),q=r();put(fx,y,fz,q<0.2?BARREL:q<0.35?CRATE:q<0.55?BONES:q<0.7?WOOLK:q<0.8?LOG:q<0.9?GLOWSHROOM:PLANKS);}
+      if(r()<0.5)PW(cx,y+1,cz+1,COBWEB,MODE_AIR);}
+  }else if(s.kind==='workshop'){
+    // two small brick rooms with low doors, copper pipes under the roof, benches and stores
+    const ax=r()<0.5,L=6,Wd=4,P=(u,v)=>ax?[X+u,Z+v]:[X+v,Z+u];
+    for(let u=-L;u<=L;u++)for(let v=-Wd;v<=Wd;v++){const [x,z]=P(u,v),edge=Math.abs(u)===L||Math.abs(v)===Wd||u===0;
+      floor(x,z,PLANKS);
+      for(let k=0;k<4;k++){let id=edge?BRICK:AIR;
+        if(edge&&k===1&&Math.abs(v)===Wd&&(u===-3||u===3))id=GLASS;                     // windows
+        if(edge&&k<2&&((u===0&&v===0)||(Math.abs(u)===L&&v===0)))id=AIR;                 // doors, two blocks high
+        if(id===AIR)PW(x,y+k,z,AIR,MODE_SET);else put(x,y+k,z,id);}
+      put(x,y+4,z,BRICK);if(!edge&&v===Wd-1)put(x,y+3,z,COPB);}
+    const furn=[[FURN,-5,-3],[FURN,-4,-3],[BOOKS,-2,-3],[BOOKS,-1,-3],[GLASS,-5,3],[BARREL,-1,3],[CRATE,2,3],[BRASB,4,-3],[COPB,5,-3],[BARREL,5,3],[BOOKS,2,-3]];
+    for(const [id,u,v] of furn){const [x,z]=P(u,v);put(x,y,z,id);}
+    {const [x,z]=P(3,0);put(x,y+3,z,LANTERN);}{const [x,z]=P(-3,0);put(x,y+3,z,LANTERN);}
+  }else if(s.kind==='drow'){
+    // a long dark hall: obsidian walls, pillars capped with amethyst, black banners, an altar with a crystal; open at both ends
+    const ax=r()<0.5,L=10,Wd=4,Ht=7,P=(u,v)=>ax?[X+u,Z+v]:[X+v,Z+u];
+    for(let u=-L;u<=L;u++)for(let v=-Wd;v<=Wd;v++){const [x,z]=P(u,v),side=Math.abs(v)===Wd,end=Math.abs(u)===L;
+      floor(x,z,v===0?AMETH:DEEP);
+      for(let k=0;k<Ht;k++){if(side&&!(Math.abs(u)<=1&&k<3))put(x,y+k,z,k===Ht-1?OBSID:hsh(x,y+k,z)<0.6?OBSID:DEEP);else if(end&&Math.abs(v)>1)put(x,y+k,z,OBSID);else PW(x,y+k,z,AIR,MODE_SET);}
+      if(side&&u%4===2&&!left)PW(x,y+3,z,WOOLK,MODE_SET);
+      if(!side&&!end&&Math.abs(v)===Wd-1&&u%4===0){for(let k=0;k<Ht-1;k++)put(x,y+k,z,OBSID);put(x,y+Ht-1,z,AMETH);}}
+    {const [x,z]=P(L-2,0);put(x,y,z,OBSID);put(x,y+1,z,CRYSTAL);const [x2,z2]=P(L-2,1);put(x2,y,z2,GLOWMOSS);const [x3,z3]=P(L-2,-1);put(x3,y,z3,GLOWMOSS);}
+    for(let k=0;k<6;k++){const u=(r()*(2*L-2)|0)-L+1,v=r()<0.5?-(Wd-1):Wd-1,[x,z]=P(u,v);PW(x,y+Ht-2,z,COBWEB,MODE_AIR);}
+  }else{
+    // older than the holds: weathered columns in a grid, a low broken wall, a dais with a glowing stone, half buried in gravel
+    for(let a=-9;a<=9;a++)for(let b=-9;b<=9;b++){const m=Math.max(Math.abs(a),Math.abs(b));if(m<=9)floor(X+a,Z+b,m<=2?CALCITE:hsh(X+a,y,Z+b)<0.5?SBRICK:MOSSY);
+      if(m===9&&hsh(X+a,y+2,Z+b)<0.7)put(X+a,y,Z+b,hsh(X+a,y+4,Z+b)<0.5?MOSSY:SBRICK);}
+    for(let a=-6;a<=6;a+=6)for(let b=-6;b<=6;b+=6){if(!a&&!b)continue;const hgt=2+(r()*6|0);for(let k=0;k<hgt;k++)put(X+a,y+k,Z+b,k%3===2?SBRICK:CALCITE);}
+    for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)put(X+a,y,Z+b,CALCITE);PW(X,y+1,Z,RUNE,MODE_SET);
+    for(let k=0;k<5;k++){const gx=X+(r()*17|0)-8,gz=Z+(r()*17|0)-8,R=1+r()*2;for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const hgt=Math.round(R-Math.hypot(a,b));for(let j=0;j<hgt;j++)PW(gx+a,y+j,gz+b,GRAVEL,MODE_AIR);}}
   }
 }
 // ---- Ancient dwarven undercity: a grid of halls and corridors on two levels, one cell per chunk
@@ -1119,6 +1273,7 @@ function edgeBase(cx,cz,dx,dz,L){
 }
 function ruinAt(X,Y,Z){
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
+  if(Y>RUIN_Y[1]+12&&Math.abs(X-cx*CS-8)<=6&&Math.abs(Z-cz*CS-8)<=6&&gateAt(cx,cz))return 'The Gate of '+holdOf(cx,cz).name;
   for(let L=0;L<2;L++){const yb=RUIN_Y[L];if(Y<yb-12||Y>yb+16)continue;
     if(L===0&&inDelf(cx,cz)&&Y<=yb+31)return 'The Hall of a Thousand Pillars of '+holdOf(cx,cz).name;
     const m=megaAt(cx,cz,L);if(m){if(X>=m.x0&&X<=m.x1&&Z>=m.z0&&Z<=m.z1&&Y>=yb-12)return RUIN_NAMES[m.tp]+' of '+holdOf(cx,cz).name;continue;}
@@ -1362,9 +1517,11 @@ function loreText(X,Y,Z){
     'Market day in '+h.name+'. Brass for mushrooms, mushrooms for ale, ale for stories. Queen '+h.queen+' bought every lantern in the row.',
     'Song of the hammer, verse four: strike once for the stone, once for the king, once for the ones below who never saw the sun.'
   ];
-  const room=roomAt(X,Y,Z);
+  const room=roomAt(X,Y,Z);let gate='';
+  {const gs=holdGates(holdNear(cx,cz));let bd=1e9,g=null;for(const q of gs){const dx=q.cx*CS+8-X,dz=q.cz*CS+8-Z,d=Math.hypot(dx,dz);if(d<bd){bd=d;g=[dx,dz];}}
+    if(g)gate=' Scratched beneath it: the way up to the surface is a gate about '+Math.round(bd/10)*10+' paces to the '+compass(g[0],g[1])+', on the upper deep.';}
   if(room==='plaza')return 'A waymarker of '+h.name+'. '+(tr?'Carved arrows point toward the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+', about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+'.':'Most of the carved arrows have worn away.')+gate;
-  return T[n]+hint;
+  return T[n]+hint+gate;
 }
 function openLore(X,Y,Z){
   const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
@@ -1374,7 +1531,50 @@ function openLore(X,Y,Z){
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
   tone(500,420,0.25,0.06);
 }
-// Surface gates lead down into the upper deep
+// ---- Hold gates (Q22, Q72): up to three per hold, on avenues in the hold's outer ring under the highest dry ground, at least
+// eight cells apart. A spiral stair climbs a shaft from the upper floor (y82) to a gatehouse terrace on the surface.
+const gateC=new Map(),TG={};
+function holdGates(h){
+  const key=ckey(h.rx,h.rz);let out=gateC.get(key);if(out)return out;if(gateC.size>400)gateC.clear();
+  const cand=[],R=Math.ceil(h.R*1.4);
+  for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){const cx=h.cx+a,cz=h.cz+b,d=holdReach(h,cx,cz);if(d<0.5||d>=0.95)continue;
+    if(!isAvenue(cx,cz)||isPlaza(cx,cz)||inDelf(cx,cz)||stairAt(cx,cz))continue;
+    colInfo(cx*CS+8,cz*CS+8,TG);if(TG.wet||TG.lake||TG.river||TG.h<=SEA+2||TG.rvBot<999)continue;
+    cand.push({cx:cx,cz:cz,s:TG.h+hsh(cx,1401,cz)*30});}
+  cand.sort((p,q)=>q.s-p.s);out=[];
+  for(const c of cand){if(out.length>=3)break;if(out.every(o=>Math.hypot(o.cx-c.cx,o.cz-c.cz)>=8))out.push(c);}
+  gateC.set(key,out);return out;
+}
+function gateAt(cx,cz){return ruinZone(cx,cz)&&holdGates(holdNear(cx,cz)).some(g=>g.cx===cx&&g.cz===cz);}
+// The terrace sits at the highest ground under it, so the hillside never buries it
+function gateTop(X,Z){let t=RUIN_Y[1]+6;for(let a=-5;a<=5;a+=5)for(let b=-5;b<=5;b+=5)t=Math.max(t,colInfo(X+a,Z+b,TG).h);return t;}
+// Is a surface column taken by a gatehouse? (trees, boulders and other surface features stay off it)
+function gateNear(X,Z,m){const e=7+(m||0),cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(!ruinZone(cx,cz)&&!ruinZone(Math.floor((X+e)/CS),cz)&&!ruinZone(Math.floor((X-e)/CS),cz)&&!ruinZone(cx,Math.floor((Z+e)/CS))&&!ruinZone(cx,Math.floor((Z-e)/CS)))return false;
+  for(const g of holdGates(holdNear(cx,cz)))if(Math.abs(X-(g.cx*CS+8))<=e&&Math.abs(Z-(g.cz*CS+8))<=e)return true;return false;}
+const GATE_RING=[];for(let a=-2;a<2;a++)GATE_RING.push([a,-2]);for(let a=-2;a<2;a++)GATE_RING.push([2,a]);for(let a=2;a>-2;a--)GATE_RING.push([a,2]);for(let a=2;a>-2;a--)GATE_RING.push([-2,a]);
+function dwGate(cx,cz,r){ // cx,cz: block coordinates of the cell's centre
+  const yb=RUIN_Y[1],g=colInfo(cx,cz,TG).h,top=gateTop(cx,cz);
+  // the shaft: walls, a 3 x 3 core, and a floor at the upper deep
+  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    for(let y=yb-1;y<=top;y++)PW(cx+dx,y,cz+dz,m===3?(y<g-1?dwWall(r):DWBRICK):m<=1?(y===yb-1?DWTILE:(y-yb)%8===4&&m===1&&(dx===0||dz===0)?RUNE:DWPILLAR):(y===yb-1?DWTILE:AIR),MODE_SET);}
+  // a spiral stair, one step up per block of height; the last step is at top-1
+  for(let y=yb;y<=top;y++){const [dx,dz]=GATE_RING[(y-yb)%GATE_RING.length];PW(cx+dx,y-1,cz+dz,DWTILE,MODE_SET);}
+  // doors at the bottom on the east, south and west (the north door would open under the third step)
+  for(const [a,b] of [[3,0],[0,3],[-3,0]])for(let y=yb;y<yb+3;y++)PW(cx+a,y,cz+b,AIR,MODE_SET);
+  // the terrace: a brick platform around the shaft, cleared above
+  for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    if(m>=4){for(let y=top-5;y<top;y++)PW(cx+dx,y,cz+dz,DWBRICK,MODE_FILL);PW(cx+dx,top,cz+dz,m===6?DWBRICK:DWTILE,MODE_SET);}
+    for(let y=top+1;y<=top+9;y++)PW(cx+dx,y,cz+dz,AIR,MODE_SET);}
+  // the way out at the top: through the shaft wall beside the last step
+  {const [dx,dz]=GATE_RING[(top-yb)%GATE_RING.length],ox=Math.abs(dx)===2?Math.sign(dx)*3:dx,oz=Math.abs(dx)===2?dz:Math.sign(dz)*3;PW(cx+ox,top,cz+oz,DWTILE,MODE_SET);}
+  // four pillars carrying lintels, braziers, a little rubble
+  for(const [a,b] of [[-5,-5],[5,-5],[-5,5],[5,5]]){for(let y=top+1;y<=top+6;y++)PW(cx+a,y,cz+b,DWPILLAR,MODE_SET);}
+  for(let k=-5;k<=5;k++){PW(cx+k,top+7,cz-5,DWBRICK,MODE_SET);PW(cx+k,top+7,cz+5,DWBRICK,MODE_SET);}
+  PW(cx,top+7,cz-5,GOLDB,MODE_SET);PW(cx,top+7,cz+5,GOLDB,MODE_SET);PW(cx,top+6,cz-5,RUNE,MODE_SET);PW(cx,top+6,cz+5,RUNE,MODE_SET);
+  for(const [a,b] of [[-6,0],[6,0],[0,-6],[0,6]])brazierP(cx+a,top+1,cz+b);
+  {const gs=holdGates(holdNear(Math.floor(cx/CS),Math.floor(cz/CS)));if(gs.length&&gs[0].cx*CS+8===cx&&gs[0].cz*CS+8===cz){PW(cx+4,top+1,cz-4,WAYSTONE,MODE_SET);PW(cx+4,top+2,cz-4,WAYSTONE,MODE_SET);PW(cx+4,top+3,cz-4,CALCITE,MODE_SET);}} // the hold's waystone
+  for(let k=0;k<6;k++){const a=(r()*13|0)-6,b=(r()*13|0)-6;if(Math.max(Math.abs(a),Math.abs(b))>=4&&r()<0.6*curI)PW(cx+a,top+1,cz+b,r()<0.5?COBBLE:GRAVEL,MODE_AIR);}
+}
 // A chasm room: a deep drop to the lava with stone bridges along open corridors
 function dwChasm(cx,cz,yb,r,L,WCX,WCZ){
   const bottom=9,ex=edgeOpen(WCX,WCZ,1,0,L)||edgeOpen(WCX,WCZ,-1,0,L),ez=edgeOpen(WCX,WCZ,0,1,L)||edgeOpen(WCX,WCZ,0,-1,L);
@@ -1963,14 +2163,187 @@ function spikeP(X,Z,g,r){
   const h=8+(r()*10|0),r0=1+r()*1.4;
   for(let k=0;k<h&&g+1+k<H-1;k++){const rr=r0*(1-k/h)+0.4;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.hypot(dx,dz)<=rr)PW(X+dx,g+1+k,Z+dz,ICE,MODE_SET);}
 }
-function dungeonP(X,y,Z,r){
-  for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=5;dy++)for(let dz=-3;dz<=3;dz++){
-    const wall=Math.abs(dx)===3||Math.abs(dz)===3||dy===0||dy===5,m=r()<.5;
-    PW(X+dx,y+dy,Z+dz,wall?(m?MOSSY:COBBLE):AIR,MODE_SET);
-  }
-  PW(X,y+5,Z,GLOW,MODE_SET);PW(X+2,y+1,Z+2,CRATE,MODE_SET);PW(X-2,y+1,Z+2,TNT,MODE_SET);PW(X-2,y+1,Z-2,CRATE,MODE_SET);PW(X+2,y+1,Z-2,BOOKS,MODE_SET);
+// ---- Ruined stairways (Q22): a small walled shaft on open ground, its stair winding down to a worm cave of the chunk
+const stairwayC=new Map();
+function stairwayAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(stairwayC.has(key))return stairwayC.get(key);if(stairwayC.size>8000)stairwayC.clear();
+  let s=null;
+  if(hsh(WCX,6301,WCZ)<0.009){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
+    if(!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+      const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
+  stairwayC.set(key,s);return s;
+}
+function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
+// Surface columns that structures have claimed: trees, boulders and other surface features keep off them
+function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z);}
+const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
+function stairwayP(s,r){
+  const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};
+  // the shaft: walls of old stone, a core, a floor at the bottom; one step up per block of height, the last at g-1
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));
+    for(let y=ys-1;y<=g;y++)PW(X+dx,y,Z+dz,m===2?wall():m===0?(y===ys-1?COBBLE:SBRICK):(y===ys-1?COBBLE:AIR),MODE_SET);
+    for(let y=g+1;y<=g+5;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);}
+  for(let y=ys;y<=g;y++){const [dx,dz]=SW_RING[(y-ys)%8];PW(X+dx,y-1,Z+dz,y%5===0?MOSSY:SBRICK,MODE_SET);}
+  // the ruin above ground: broken corner posts and a little fallen wall (low enough to step over)
+  for(const [dx,dz] of [[-2,-2],[2,-2],[-2,2],[2,2]]){const hgt=1+(r()*4|0);for(let y=g+1;y<=g+hgt;y++)PW(X+dx,y,Z+dz,wall(),MODE_SET);}
+  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.max(Math.abs(dx),Math.abs(dz))===2&&Math.abs(dx)!==Math.abs(dz)&&r()<0.35)PW(X+dx,g+1,Z+dz,wall(),MODE_SET);
+  // a door at the bottom on the side facing the cave (east, south or west: the north door would open under the second step)
+  const ddx=a.x-X,ddz=a.z-Z,side=Math.abs(ddx)>=Math.abs(ddz)||ddz<0?(ddx>=0?[1,0]:[-1,0]):[0,1];
+  const cell=(x,z)=>{PW(x,ys-1,z,COBBLE,MODE_FILL);for(let y=ys;y<ys+3;y++)PW(x,y,z,AIR,MODE_SET);};
+  // a passage from the door to the cave: out past the wall, across, then along
+  let x=X+side[0]*2,z=Z+side[1]*2;cell(x,z);
+  if(side[0]){x+=side[0];cell(x,z);while(side[0]>0?x<Math.max(a.x,X+3):x>Math.min(a.x,X-3)){x+=side[0];cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}}
+  else{z+=1;cell(x,z);while(z<Math.max(a.z,Z+3)){z++;cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}}
+}
+// A passage from a room to a cave: along X, then along Z, rising or falling evenly, on a floor that fills any gap under it
+// (`skip` steps without a floor at the start)
+function tunnelTo(x0,y0,z0,x1,y1,z1,skip,floor){
+  const n=Math.abs(x1-x0)+Math.abs(z1-z0);let x=x0,z=z0;
+  for(let t=0;t<=n;t++){const y=Math.round(y0+(y1-y0)*(n?t/n:1));
+    for(let k=0;k<3;k++)PW(x,y+k,z,AIR,MODE_SET);if(t>=skip)PW(x,y-1,z,floor,MODE_FILL);
+    if(x!==x1)x+=Math.sign(x1-x);else if(z!==z1)z+=Math.sign(z1-z);}
+}
+// ---- Old dungeon rooms (Q24): rarer, in four kinds and sizes, each joined by a passage to a worm cave of its chunk
+const DUNGEON_KINDS=['crypt','store','cells','chapel'],DUNGEON_NAMES={crypt:'Forgotten Crypt',store:'Old Storeroom',cells:'Old Cells',chapel:'Sunken Chapel'};
+const dungC=new Map();
+function dungeonAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(dungC.has(key))return dungC.get(key);if(dungC.size>8000)dungC.clear();
+  let d=null;
+  if(hsh(WCX,6401,WCZ)<0.05){const a=caveAnchor(WCX,WCZ,106,196,6402);
+    if(a){const ang=hsh(WCX,6403,WCZ)*6.283,X=a.x+Math.round(Math.cos(ang)*9),Z=a.z+Math.round(Math.sin(ang)*9),y=a.y-2;
+      let clash=false;for(let c=-2;c<=2&&!clash;c++)for(let e=-2;e<=2&&!clash;e++){const q=poiFor(WCX+c,WCZ+e);if(q&&Math.abs(q.x-X)<20&&Math.abs(q.z-Z)<20&&Math.abs(q.y-y)<16)clash=true;} // places come first
+      if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
+  dungC.set(key,d);return d;
+}
+function dungeonNear(X,Y,Z){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const d=dungeonAt(cx+a,cz+b);if(d&&Math.abs(X-d.X)<=d.hw&&Math.abs(Z-d.Z)<=d.hw&&Y>=d.y&&Y<=d.y+d.hh)return d;}return null;}
+function dungeonP(d,r){
+  const {X,Z,y,hw,hh}=d,k=d.kind,wallOf=()=>{const q=r();return k==='store'?(q<0.6?PLANKS:COBBLE):k==='chapel'?(q<0.5?CALCITE:SBRICK):k==='crypt'?(q<0.5?SBRICK:MOSSY):(q<0.5?COBBLE:MOSSY);};
+  for(let dx=-hw;dx<=hw;dx++)for(let dz=-hw;dz<=hw;dz++)for(let dy=0;dy<=hh;dy++){
+    const wall=Math.abs(dx)===hw||Math.abs(dz)===hw||dy===0||dy===hh;PW(X+dx,y+dy,Z+dz,wall?wallOf():AIR,MODE_SET);}
+  const fl=(dx,dz,id)=>PW(X+dx,y+1,Z+dz,id,MODE_SET),e=hw-1;
+  if(k==='crypt'){for(let a=-e+1;a<=e-1;a+=2){fl(a,-e,CALCITE);fl(a,e,CALCITE);}fl(0,0,BONES);fl(1,-1,BONES);PW(X,y+hh-1,Z,RUNE,MODE_SET);fl(e,0,CRATE);}
+  else if(k==='store'){for(let a=-e;a<=e;a++){if(r()<0.6)fl(a,-e,BARREL);if(r()<0.5)fl(a,e,r()<0.5?CRATE:BARREL);}if(r()<0.4)fl(-e,0,TNT);PW(X,y+hh-1,Z,LANTERN,MODE_SET);}
+  else if(k==='cells'){for(let a=-e;a<=e;a+=2)for(const b of [-e,e]){fl(a,b,BONES);PW(X+a,y+2,Z+b,COBWEB,MODE_SET);}fl(0,e,CRATE);PW(X,y+hh-1,Z,TORCH,MODE_SET);}
+  else{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)PW(X+a,y,Z+b-e+1,AMETH,MODE_SET);fl(0,-e,CALCITE);PW(X,y+2,Z-e,RUNE,MODE_SET);fl(e,e,CRATE);fl(-e,e,BOOKS);PW(X,y+hh-1,Z,GLOW,MODE_SET);}
+  tunnelTo(X,y+1,Z,d.a.x,d.a.y-1,d.a.z,0,COBBLE);
 }
 function flatOK(X,Z,g){for(let dx=-3;dx<=3;dx+=3)for(let dz=-3;dz<=3;dz+=3){if(!dx&&!dz)continue;if(Math.abs(colInfo(X+dx,Z+dz,T3).h-g)>2)return false;}return true;}
+// ---- Ruined surface sites, old roads and ancient waystones (Q71, Q72, D-024)
+// One site at most per region of SITE_REG x SITE_REG chunks (384 blocks): a watchtower, a keep or a castle of the men of old,
+// ruined, on ground level enough to build on. Old roads link each site to its nearest neighbours and run to the hold gates.
+// Some sites, and the first gate of every hold, have an ancient waystone (attuned in M4).
+const SITE_REG=24,SITE_KINDS=[['tower',4.5],['keep',3.5],['castle',2]];
+const siteC=new Map(),TS2={};
+function siteAt(rx,rz){
+  const key=ckey(rx,rz);if(siteC.has(key))return siteC.get(key);if(siteC.size>4000)siteC.clear();
+  let s=null;const r=rngAt(rx,6601,rz);
+  if(r()<0.7){
+    let tot=0;for(const k of SITE_KINDS)tot+=k[1];let v=r()*tot,kind=SITE_KINDS[0][0];for(const k of SITE_KINDS){v-=k[1];if(v<=0){kind=k[0];break;}}
+    const R=kind==='tower'?3+(r()*3|0):kind==='keep'?5+(r()*3|0):13+(r()*5|0),H=kind==='tower'?9+(r()*8|0):kind==='keep'?7+(r()*5|0):6+(r()*3|0),seed=r(),way=r()<0.45;
+    for(let t=0;t<8&&!s;t++){
+      const X=rx*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0),Z=rz*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0);
+      let lo=1e9,hi=-1e9,bad=false;
+      for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=SEA+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
+      if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4))continue;
+      s={kind:kind,X:X,Z:Z,R:R,H:H,g:hi,seed:seed,way:way};
+    }
+    if(s){const rr=mkRng(Math.floor(s.seed*1e9)+5),nm=fullName('human',rr,false);
+      s.name=s.kind==='tower'?'The Watchtower of '+nm:s.kind==='keep'?'The Ruined Keep of '+nm:'The Ruins of Castle '+nm;}
+  }
+  siteC.set(key,s);return s;
+}
+const siteOf=(X,Z)=>siteAt(Math.floor(X/CS/SITE_REG),Math.floor(Z/CS/SITE_REG));
+// Is a surface column within a site's footprint (plus a margin, and its waystone)?
+function siteNear(X,Z,m){
+  const rx=Math.floor(X/CS/SITE_REG),rz=Math.floor(Z/CS/SITE_REG);
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=siteAt(rx+a,rz+b);if(!s)continue;const e=s.R+(m||0)+(s.way?6:2);if(Math.abs(X-s.X)<=e&&Math.abs(Z-s.Z)<=e)return s;}
+  return null;
+}
+// ---- Old roads: between each site and its two nearest neighbours (in the regions around it), and from each hold gate to the
+// nearest site. Each road wanders about its straight line; a column is on it when its offset from the line is near the wander.
+function siteLinks(s){
+  if(s.links)return s.links;const rx=Math.floor(s.X/CS/SITE_REG),rz=Math.floor(s.Z/CS/SITE_REG),c=[];
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const t=siteAt(rx+a,rz+b);if(t){const d=Math.hypot(t.X-s.X,t.Z-s.Z);if(d<650)c.push([d,t]);}}
+  c.sort((p,q)=>p[0]-q[0]);s.links=c.slice(0,2).map(p=>p[1]);return s.links;
+}
+function nearestSite(X,Z){const rx=Math.floor(X/CS/SITE_REG),rz=Math.floor(Z/CS/SITE_REG);let best=null,bd=700;
+  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const t=siteAt(rx+a,rz+b);if(!t)continue;const d=Math.hypot(t.X-X,t.Z-Z);if(d<bd){bd=d;best=t;}}return best;}
+const roadSegC=new Map();
+// Road segments that may touch chunk (WCX,WCZ): [x0,z0,x1,z1], sorted endpoints so both chunks along a road agree
+function roadSegs(WCX,WCZ){
+  const key=ckey(WCX,WCZ);let segs=roadSegC.get(key);if(segs)return segs;if(roadSegC.size>4000)roadSegC.clear();
+  segs=[];const seen=new Set(),X0=WCX*CS,Z0=WCZ*CS,M=24;
+  const add=(ax,az,bx,bz)=>{if(ax>bx||(ax===bx&&az>bz)){[ax,bx]=[bx,ax];[az,bz]=[bz,az];}const k=ax+','+az+','+bx+','+bz;if(seen.has(k))return;seen.add(k);
+    if(Math.max(ax,bx)+M<X0||Math.min(ax,bx)-M>X0+CS||Math.max(az,bz)+M<Z0||Math.min(az,bz)-M>Z0+CS)return;segs.push([ax,az,bx,bz]);};
+  const rx=Math.floor(WCX/SITE_REG),rz=Math.floor(WCZ/SITE_REG);
+  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const s=siteAt(rx+a,rz+b);if(!s)continue;for(const t of siteLinks(s))add(s.X,s.Z,t.X,t.Z);}
+  const hs=new Set();for(const [a,b] of [[-44,-44],[44,-44],[-44,44],[44,44],[0,0]])hs.add(holdNear(WCX+a,WCZ+b));
+  for(const h of hs)for(const g of holdGates(h)){const gx=g.cx*CS+8,gz=g.cz*CS+8,t=nearestSite(gx,gz);if(t)add(gx,gz,t.X,t.Z);}
+  roadSegC.set(key,segs);return segs;
+}
+function oldRoadAt(X,Z){
+  for(const [ax,az,bx,bz] of roadSegs(Math.floor(X/CS),Math.floor(Z/CS))){
+    const dx=bx-ax,dz=bz-az,L=Math.hypot(dx,dz);if(L<1)continue;const ux=dx/L,uz=dz/L,px=X+0.5-ax,pz=Z+0.5-az,t=px*ux+pz*uz;if(t<0||t>L)continue;
+    const off=-px*uz+pz*ux,fade=Math.min(1,t/40,(L-t)/40),wob=fbm2((ax+ux*t)/110,(az+uz*t)/110,2,6701.3)*26*fade;
+    if(Math.abs(off-wob)<1.6)return true;}
+  return false;
+}
+// Lay the roads on the chunk's own columns: worn dirt path with old stones, off water, steep slopes, sites and gate terraces
+function applyRoads(lcx,lcz){
+  const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;if(!roadSegs(WCX,WCZ).length)return;
+  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){const X=WCX*CS+x,Z=WCZ*CS+z;if(!oldRoadAt(X,Z))continue;
+    colInfo(X,Z,TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.h<=SEA)continue;const g=TS2.h;if(slopeAt(X,Z,g)>=3||siteNear(X,Z,0)||gateNear(X,Z,0))continue;
+    const lx=lcx*CS+x,lz=lcz*CS+z,i=I(lx,g,lz),top=world[i];if(![GRASS,DIRT,SNOWG,SAND,GRAVEL,STONE,PATH].includes(top))continue;
+    const q=hsh(X,6702,Z);world[i]=q<0.1?COBBLE:q<0.22?GRAVEL:PATH;lvl[i]=0;
+    const up=world[i+W*D];if(up&&BL[up].cross){world[i+W*D]=AIR;}}
+}
+// ---- Building a site (and its waystone); every chunk the site touches rebuilds it, clipped by PW
+function applySites(WCX,WCZ){
+  const rx0=Math.floor((WCX-2)/SITE_REG),rx1=Math.floor((WCX+2)/SITE_REG),rz0=Math.floor((WCZ-2)/SITE_REG),rz1=Math.floor((WCZ+2)/SITE_REG);
+  for(let rx=rx0;rx<=rx1;rx++)for(let rz=rz0;rz<=rz1;rz++){const s=siteAt(rx,rz);if(!s)continue;const e=s.R+8;if(s.X+e<gx0||s.X-e>gx0+CS||s.Z+e<gz0||s.Z-e>gz0+CS)continue;buildSite(s);}
+}
+function waystoneP(X,Z,g){
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){PW(X+a,g,Z+b,SBRICK,MODE_SET);for(let y=g-1;y>g-6;y--)PW(X+a,y,Z+b,STONE,MODE_FILL);for(let y=g+1;y<=g+4;y++)PW(X+a,y,Z+b,AIR,MODE_SET);}
+  PW(X,g+1,Z,WAYSTONE,MODE_SET);PW(X,g+2,Z,WAYSTONE,MODE_SET);PW(X,g+3,Z,CALCITE,MODE_SET);
+}
+function buildSite(s){
+  const r=mkRng(Math.floor(s.seed*1e9)+9),X=s.X,Z=s.Z,R=s.R,g=s.g,H=s.H,stone=()=>{const q=r();return q<0.45?SBRICK:q<0.75?COBBLE:MOSSY;};
+  // level ground: a stone plinth up to the floor wherever the ground is lower (never floating), and open air above
+  const pad=(x,z,floorId)=>{for(let y=g-1;y>g-12;y--){const c=GW(x,y,z);if(c<0||(SOLID[c]&&c!==LEAVES&&!BL[c].leaf))break;PW(x,y,z,COBBLE,MODE_SET);}PW(x,g,z,floorId,MODE_SET);for(let y=g+1;y<=g+H+6;y++)PW(x,y,z,AIR,MODE_SET);};
+  const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*5)-(hsh(x,6604,z)<0.15?h:0)); // broken wall tops and a few gaps
+  if(s.kind==='tower'){
+    for(let dx=-R-1;dx<=R+1;dx++)for(let dz=-R-1;dz<=R+1;dz++){const d=Math.hypot(dx,dz);if(d>R+0.5)continue;pad(X+dx,Z+dz,d>R-0.6?stone():COBBLE);
+      if(d>R-0.6){const door=dz>R-1.5&&Math.abs(dx)<=0,h=Math.max(2,Math.round(H*(1-0.5*hsh(X+dx,6605,Z+dz))));for(let y=1;y<=h;y++)if(!(door&&y<=2)&&hsh(X+dx,g+y,Z+dz)>0.05+0.25*y/H)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}}
+    for(let y=4;y<H-1;y+=4)for(let dx=-R+1;dx<=R-1;dx++)for(let dz=-R+1;dz<=R-1;dz++)if(Math.hypot(dx,dz)<R-0.6&&hsh(X+dx,g+y,Z+dz)<0.55)PW(X+dx,g+y,Z+dz,PLANKS,MODE_SET); // what is left of the floors
+    PW(X,g+1,Z-R+1,CRATE,MODE_SET);PW(X+1,g+1,Z,DTORCH,MODE_SET);
+  }else{
+    const wallH=s.kind==='castle'?H:H,inner=s.kind==='castle'?5:0;
+    for(let dx=-R-3;dx<=R+3;dx++)for(let dz=-R-3;dz<=R+3;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz)),cx=Math.abs(dx)>=R-2&&Math.abs(dz)>=R-2;
+      if(m>R+(cx?2:0))continue;
+      const corner=Math.abs(Math.abs(dx)-R)<=2&&Math.abs(Math.abs(dz)-R)<=2,towerWall=corner&&(Math.abs(Math.abs(dx)-R)===2||Math.abs(Math.abs(dz)-R)===2);
+      pad(X+dx,Z+dz,m<R?(s.kind==='castle'?GRASS:hsh(X+dx,g,Z+dz)<0.3?PLANKS:COBBLE):stone());
+      const gate=Math.abs(dx)<=1&&dz===R; // the gateway, on the south wall
+      let h=0;if(towerWall)h=ragged(X+dx,Z+dz,wallH+4);else if(m===R&&!corner)h=gate?0:ragged(X+dx,Z+dz,wallH);
+      for(let y=1;y<=h;y++)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);
+      if(gate)for(let y=4;y<=5&&wallH>5;y++)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}
+    if(inner){ // the castle's own keep in the middle, its door facing the gate
+      for(let dx=-inner;dx<=inner;dx++)for(let dz=-inner;dz<=inner;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));PW(X+dx,g,Z+dz,m<inner?PLANKS:stone(),MODE_SET);
+        if(m===inner){const door=Math.abs(dx)<=0&&dz===inner,h=ragged(X+dx,Z+dz,H+5);for(let y=1;y<=h;y++)if(!(door&&y<=3))PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}}
+      PW(X-inner+1,g+1,Z-inner+1,CRATE,MODE_SET);PW(X+inner-1,g+1,Z-inner+1,BARREL,MODE_SET);PW(X,g+1,Z-inner+1,DWCHEST,MODE_SET);
+    }else{PW(X-R+1,g+1,Z-R+1,CRATE,MODE_SET);PW(X+R-1,g+1,Z-R+1,BARREL,MODE_SET);PW(X+R-1,g+1,Z-R+2,BARREL,MODE_SET);
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)PW(X+a,g+1,Z+b-2,COBBLE,MODE_SET);PW(X,g+1,Z-2,DTORCH,MODE_SET);} // a cold hearth
+    for(let k=0;k<8;k++){const a=(r()*(2*R-3)|0)-R+2,b=(r()*(2*R-3)|0)-R+2,hh=1+(r()*2|0);for(let y=1;y<=hh;y++)PW(X+a,g+y,Z+b,y===1?GRAVEL:COBBLE,MODE_AIR);} // rubble
+  }
+  if(s.way)waystoneP(X+s.R+4,Z,s.g);
+}
+// What to call a place on the surface
+function surfaceName(X,Y,Z){
+  const s=siteNear(X,Z,1);if(s){if(s.way&&Math.abs(X-(s.X+s.R+4))<=2&&Math.abs(Z-s.Z)<=2)return 'An Ancient Waystone';return s.name;}
+  const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(gateNear(X,Z,0))return 'The Gate of '+holdOf(cx,cz).name;
+  if(stairwayNear(X,Z,1))return 'A Ruined Stairway';
+  if(oldRoadAt(X,Z))return 'An Old Road';
+  return null;
+}
 const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
 // Features rooted in world chunk (WCX,WCZ); only the parts landing in the target chunk are written
 function veinP(x,y,z,t,n,r,ok){
@@ -2007,18 +2380,18 @@ function features(WCX,WCZ,self){
   // the odd mossy boulder on open ground
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
   // barrows and standing stones, long forgotten
   {const q=hsh(WCX,6001,WCZ);if(q<0.3){const cx=X0+8,cz=Z0+8;colInfo(cx,cz,T2);
-    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
+    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)&&!surfTaken(cx,cz,7)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
   // Trees on the ground and on sky islands
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2),top=topBlock(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3),top=topBlock(T2);
     if(clear){
       if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012))spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
@@ -2030,12 +2403,13 @@ function features(WCX,WCZ,self){
   // Structures
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
-  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)){
+  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)){
     if((b===2||b===3)&&sr<0.05&&flatOK(sx,sz,g))towerP(sx,sz,g,rngAt(sx,12,sz));
     else if(b===4&&sr<0.06&&flatOK(sx,sz,g))wellP(sx,sz,g);
     else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
   }
-  if(dr<0.2&&colInfo(dx2,dz2,T2).h-dy>=12&&!(ruinZone(Math.floor(dx2/CS),Math.floor(dz2/CS))&&dy>=RUIN_Y[0]-12&&dy<=RUIN_Y[1]+16))dungeonP(dx2,dy,dz2,rngAt(dx2,14,dz2));
+  {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
+  {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was
   if(!self)return;
   // Moss, obsidian and crystals only touch the chunk itself
   const r2=rngAt(WCX,15,WCZ);
@@ -2062,15 +2436,38 @@ function genChunk(lcx,lcz){
   genDone[lcx+lcz*NCX]=1;
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
+  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
+  applySites(WCX,WCZ);
+  // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
+  if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}
+  drainCaveWater(lcx,lcz);
   plants(WCX,WCZ);
+  applyRoads(lcx,lcz);
   const m=editsByChunk.get(ckey(WCX,WCZ));
   if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
     const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
     for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
   }
+}
+// Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
+// it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
+// the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk
+// cannot be seen, so water at the chunk's edge drains too, except at the deep lake level (y58 to DEEP_WL), whose lakes and rivers
+// are built to meet across chunks (worm caves keep clear of them, deepWaterAt), and on the floors of holds, whose aqueducts
+// and cisterns are walled by the ruins' own tidy pass.
+function drainCaveWater(lcx,lcz){
+  const WD=W*D,x0=lcx*CS,z0=lcz*CS,q=[],zone=ruinZone(OX/CS+lcx,OZ/CS+lcz);
+  const held=j=>world[j]===WATER||SOLID[world[j]],rests=j=>j<WD||held(j-WD); // a block is held up when the one under it is solid or water
+  for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){const g=ground[x+W*z];for(let y=2;y<g-2;y++){const i=I(x,y,z);if(world[i]===WATER)q.push(i);}}
+  while(q.length){const i=q.pop();if(world[i]!==WATER)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0,deep=(y>=58&&y<=DEEP_WL)||(zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18);
+    const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
+    const b=i-WD,ok=!(edge&&!deep)&&held(b)&&(world[b]===WATER||rests(b))&&sides.every(j=>held(j)&&(world[j]===WATER||rests(j)));
+    if(ok)continue;
+    world[i]=AIR;lvl[i]=0;
+    // what may have relied on it: water above, beside, above-beside, and two above
+    for(const j of [i+WD,i+2*WD,...sides,...sides.map(k=>k+WD)])if(j<VOL&&world[j]===WATER)q.push(j);}
 }
 const roof=id=>id&&OPQ[id]&&!BL[id].leaf&&id!==LAVA;
 function calcHM(x,z){
@@ -3406,7 +3803,7 @@ function drawBar(quiet){
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[HOOK,FIREWORK,BPTOOL]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
     ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH]],['Building',[BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
-    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
+    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
@@ -3471,7 +3868,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:4,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
+  const ok=lsSet(worldKey(WORLD.id),{v:5,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -3873,7 +4270,7 @@ function frame(now){
   if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
-    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):BIOMES[biome[ci]];
+    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
 }

@@ -1,6 +1,6 @@
 # Design
 
-> **Direction change (2026-10-08, D-019).** This file describes the game as built today; sections are rewritten as each milestone lands. Since 0.5.0 (M2a) the world is 512 tall, dwarven holds are rare and vast, the deep is natural caves over a lava sea, and old lights are cold. Still to come: the dwindling age's lived-in places and peoples, entrances and surface ruins (M2b), and more. See `docs/DIRECTION_QA.md` and `docs/MILESTONES.md`.
+> **Direction change (2026-10-08, D-019).** This file describes the game as built today; sections are rewritten as each milestone lands. Since 0.5.0 (M2a) the world is 512 tall, dwarven holds are rare and vast, the deep is natural caves over a lava sea, and old lights are cold. Since 0.6.0 (M2b) there are ways down, varied places underground, other peoples' remains, ruined surface sites, old roads and waystones. Still to come: the dwindling age's lived-in places and peoples, and more. See `docs/DIRECTION_QA.md` and `docs/MILESTONES.md`.
 
 ## Setting and pillars
 
@@ -44,7 +44,29 @@ The world is 512 blocks tall and sea level is y310, so the underground keeps its
 | The deep, lower tier | 14 to 57 | Outside holds: large dry caverns and worm caves. Under and around a hold: its mines, galleries at 20, 32 and 44, inclines, great stepped pits |
 | The Fire Below | 3 to ~24 | An open lava sea (lava y3 to y8) under most of the land, with rock pillars and islands; low under the holds' mines |
 
-Targets: underground standing water under about 1% of open cave space (0.4% on seed 4242); cave openings within five blocks of the surface under about 0.6% of land columns.
+Targets: underground standing water under about 1% of open cave space (0.2% on seed 4242); cave openings within five blocks of the surface under about 0.6% of land columns.
+
+**Underground water is always held in sound rock** (owner's rule, D-024): water or solid under and beside every water block, the floor under it resting on more rock, the walls beside it resting on something. Nothing floats. Deep lakes and rivers sit at y64; elsewhere pools are small.
+
+## Ways down (D-024)
+
+- **Cave mouths** open in steep slopes and wind down at a walkable slope into the caves.
+- **Ruined stairways** stand on level ground: a broken stone shaft with a stair winding down to a cave.
+- **Ravines** cut up to about 60 blocks deep; about a third reach the crawlways.
+- **Hold gates** lead down into the holds (below).
+A way down is usually within 80 to 90 blocks of any open land.
+
+## Places underground (D-024)
+
+- **Dungeon rooms** (about 1 chunk in 25): Forgotten Crypt, Old Storeroom, Old Cells, Sunken Chapel, each opening onto a cave by a short passage.
+- **Points of interest** (about 1 chunk in 12): miners' camps, alchemists' cellars, deep outposts, lava forges, crystal shrines, ancient ruins and mushroom groves open onto a cave; crystal geodes and fossils are sealed in the rock.
+- **Remains of other peoples** in the natural deep caverns, away from holds (about one per 160 x 160 blocks in four): goblin warrens, gnome workshops, drow halls, and nameless ruins older than the holds. About a third are only leftovers.
+
+## The surface (D-024)
+
+- **Ruined sites** of the men of old, on level ground (about two areas of 384 x 384 blocks in three): round watchtowers, walled keeps with corner towers, castles with a curtain wall and a keep. Each has a name.
+- **Old roads** of worn path, stones and gravel wander between neighbouring sites and up to the hold gates.
+- **Ancient waystones** stand at about a third of sites and at the first gate of every hold. Attuning to them comes in M4.
 
 ## Old lights
 
@@ -59,7 +81,7 @@ The old peoples' lamps went out long ago. Lanterns, sconces, torches and glowsto
 - Great structures span 2 x 2 chunks; the Hall of a Thousand Pillars spans 3 x 3 and both floors, a few per hold.
 - Decay is heavy in abandoned holds (ruin intensity 0.55 to 1) and light in inhabited ones. Despite that, every room must be reachable: doorways open on both sides, every room has a doorway route toward an avenue, rubble is cleared between each doorway and the room's middle, and a tidy pass removes anything floating or leaking.
 - **Mines are tied to holds** (Q12): galleries and pits run under the whole hold and thin out to nothing by about twice its radius. Stairwells on lower-floor avenues lead down into them.
-- Coming in M2b: hold gates on the mountainsides above holds, other peoples' remains, old roads and ruined surface keeps.
+- **Hold gates** (up to three per hold) stand on the highest ground over the hold's outer ring: a terrace with pillars and braziers over a spiral stair that climbs from the upper floor (y82). Waymarkers in the plazas point to the nearest gate. The first gate has an Ancient Waystone.
 
 ## Controls
 

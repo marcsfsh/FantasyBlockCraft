@@ -45,7 +45,8 @@ function colInfoBase(X,Z,o){
   o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
-  o.rvBot=(!o.wet&&rv<0.008&&fbm2(X/180,Z/180,2,433.7)>0.28)?Math.max(SEA-56,h-Math.round(6+(1-rv/0.012)*22)):999;
+  const rf=rv<0.008&&!o.wet?fbm2(X/180,Z/180,2,433.7):0; // ravines: deep enough to cut into the crawlways, sloping in at their ends (Q22)
+  o.rvBot=rf>0.28?Math.max(SEA-56,h-Math.round(3+(5+(1-rv/0.012)*58)*sstep(0.28,0.4,rf))):999;
   return o;
 }
 const colCache=new Map();

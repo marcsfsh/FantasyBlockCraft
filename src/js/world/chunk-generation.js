@@ -34,18 +34,18 @@ function features(WCX,WCZ,self){
   // the odd mossy boulder on open ground
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
   // barrows and standing stones, long forgotten
   {const q=hsh(WCX,6001,WCZ);if(q<0.3){const cx=X0+8,cz=Z0+8;colInfo(cx,cz,T2);
-    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
+    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)&&!surfTaken(cx,cz,7)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
   // Trees on the ground and on sky islands
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2),top=topBlock(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3),top=topBlock(T2);
     if(clear){
       if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012))spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
@@ -57,12 +57,13 @@ function features(WCX,WCZ,self){
   // Structures
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
-  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)){
+  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)){
     if((b===2||b===3)&&sr<0.05&&flatOK(sx,sz,g))towerP(sx,sz,g,rngAt(sx,12,sz));
     else if(b===4&&sr<0.06&&flatOK(sx,sz,g))wellP(sx,sz,g);
     else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
   }
-  if(dr<0.2&&colInfo(dx2,dz2,T2).h-dy>=12&&!(ruinZone(Math.floor(dx2/CS),Math.floor(dz2/CS))&&dy>=RUIN_Y[0]-12&&dy<=RUIN_Y[1]+16))dungeonP(dx2,dy,dz2,rngAt(dx2,14,dz2));
+  {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
+  {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was
   if(!self)return;
   // Moss, obsidian and crystals only touch the chunk itself
   const r2=rngAt(WCX,15,WCZ);
@@ -89,15 +90,38 @@ function genChunk(lcx,lcz){
   genDone[lcx+lcz*NCX]=1;
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
+  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
+  applySites(WCX,WCZ);
+  // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
+  if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}
+  drainCaveWater(lcx,lcz);
   plants(WCX,WCZ);
+  applyRoads(lcx,lcz);
   const m=editsByChunk.get(ckey(WCX,WCZ));
   if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
     const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
     for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
   }
+}
+// Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
+// it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
+// the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk
+// cannot be seen, so water at the chunk's edge drains too, except at the deep lake level (y58 to DEEP_WL), whose lakes and rivers
+// are built to meet across chunks (worm caves keep clear of them, deepWaterAt), and on the floors of holds, whose aqueducts
+// and cisterns are walled by the ruins' own tidy pass.
+function drainCaveWater(lcx,lcz){
+  const WD=W*D,x0=lcx*CS,z0=lcz*CS,q=[],zone=ruinZone(OX/CS+lcx,OZ/CS+lcz);
+  const held=j=>world[j]===WATER||SOLID[world[j]],rests=j=>j<WD||held(j-WD); // a block is held up when the one under it is solid or water
+  for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){const g=ground[x+W*z];for(let y=2;y<g-2;y++){const i=I(x,y,z);if(world[i]===WATER)q.push(i);}}
+  while(q.length){const i=q.pop();if(world[i]!==WATER)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0,deep=(y>=58&&y<=DEEP_WL)||(zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18);
+    const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
+    const b=i-WD,ok=!(edge&&!deep)&&held(b)&&(world[b]===WATER||rests(b))&&sides.every(j=>held(j)&&(world[j]===WATER||rests(j)));
+    if(ok)continue;
+    world[i]=AIR;lvl[i]=0;
+    // what may have relied on it: water above, beside, above-beside, and two above
+    for(const j of [i+WD,i+2*WD,...sides,...sides.map(k=>k+WD)])if(j<VOL&&world[j]===WATER)q.push(j);}
 }
 const roof=id=>id&&OPQ[id]&&!BL[id].leaf&&id!==LAVA;
 function calcHM(x,z){

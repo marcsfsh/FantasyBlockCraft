@@ -12,7 +12,7 @@ A Minecraft-style game in a medieval fantasy world, for one player (the owner). 
 - **Deep and layered underground.** Going down feels like going back in time. Dwarven holds are rare, vast discoveries, not a layer under everything (from M2).
 - **Saves yield to updates.** Breaking saves is always acceptable; bump `SAVE_KEY` and move on.
 
-Since 0.5.0 (M2a, D-023) the world is 512 tall, holds are rare and vast, and the deep is natural caves over a lava sea; M2b (entrances, other remains, surface ruins) is next. `docs/DESIGN.md` describes what is built.
+Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast with gates, the deep is natural caves over a lava sea, and there are ways down, other peoples' remains, surface ruins, roads and waystones. Underground water must sit in sound rock (owner's rule). M3 (performance) is next. `docs/DESIGN.md` describes what is built.
 
 ## How sessions run
 
@@ -23,7 +23,7 @@ Since 0.5.0 (M2a, D-023) the world is 512 tall, holds are rare and vast, and the
 
 | Command | Use |
 |---|---|
-| `npm test` | All headless tests in `tests/cases/` (about 75 s on the cloud VM) |
+| `npm test` | All headless tests in `tests/cases/` (about 7 minutes on the cloud VM; run single cases while working) |
 | `npm test -- doorways` | Only cases whose file name contains `doorways` |
 | `npm test -- --seed=777 ruin-graph` | Override the seed (cases with a `// @seed` line keep theirs) |
 | `npm run test:quick` | Smoke and lighting only |
