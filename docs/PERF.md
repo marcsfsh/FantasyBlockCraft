@@ -60,3 +60,14 @@ The cloud VM this session ran on was slower than the one above (Intel Xeon @ 2.8
 | 0.5.0 | 4242 | 2378 | 14.79 / 15.68 / 18.44 / 25.65 | 17.59 / 18.57 / 21.52 / 31.28 | 19.14 / 17.66 / 27.38 / 75.61 | 155 |
 
 The world is 512 tall (columns are a third longer) and every chunk runs the new deep pass (lava sea, caverns, lakes, rivers). Generation and streaming medians rose by roughly 0 to 30% depending on the seed (noise on this VM is about 10 to 20%), meshing at the surface did not rise, and full lighting is within noise but has more lava to light. M3 targets all of these.
+
+## After M2b (2026-10-08, 0.6.0)
+
+Same VM as the M2a section, `npm run bench`, one run per seed.
+
+| Seed | Startup | genChunk | Stream 1 chunk | buildChunk | lightAll |
+|---|---|---|---|---|---|
+| 123456789 | 2303 | 15.96 / 16.86 / 19.95 / 21.27 | 19.65 / 20.2 / 24.31 / 26.36 | 27.35 / 26.8 / 38.68 / 74.3 | 154 |
+| 4242 | 2372 | 14.87 / 15.11 / 19.79 / 21.75 | 17.72 / 18.14 / 23.15 / 25.33 | 17.49 / 15.33 / 26.71 / 54.34 | 104 |
+
+Generation medians are about 0 to 20% above 0.5.0 (roads, sites, remains, the water drain), within this VM's noise for some measures. M3 targets streaming.

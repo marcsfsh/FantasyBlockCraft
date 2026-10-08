@@ -14,7 +14,7 @@
 | 02-lighting | Streamed lighting equals a full recompute, exactly |
 | 03-ruin-graph | Doorways open on both sides; under 3% of rooms sealed; checked over the hold of region (0,0) |
 | 04-doorways | Doorways can be walked through; at most 2% blocked (seeds 4242 and 777), with the window moved to the hold of region (0,0) |
-| 05-underground | Underground water and surface openings stay under their targets |
+| 05-underground | Underground water and surface openings stay under their targets; no underground water floats or rests on anything floating (D-024) |
 | 06-biomes | Lands are wide and balanced |
 | 07-gamepad | A simulated controller drives menus and play |
 | 08-determinism | Every chunk is identical when regenerated in reverse and shuffled order, after a window shift (kept, streamed and freshly regenerated chunks) and after shifting back |
@@ -30,8 +30,12 @@
 | 18-actions | Every binding names a real action; held controls read through `keyHeld`; a rebound key, held control and controller button take effect |
 | 19-equipment | Equip, swap and unequip; equipment is saved with the world and goes into the grave on death |
 | 20-holds | Holds are 1000+ blocks apart and a few thousand on average, several hundred across, inside their own region, never under spawn; one name each; some inhabited; mines fade with distance from the hold |
-| 21-deep | The lava sea is open under most land and under holds; both cavern tiers are open; deep water stands at one level; deep caverns have cave life; no lava hangs over the sea |
+| 21-deep | The lava sea is open under most land and under holds; both cavern tiers are open; deep water stands at one level and in sound rock, in open country and in a hold; deep caverns have cave life; no lava hangs over the sea |
 | 22-old-lights | An abandoned hold has only cold lamps and still has eerie lights; an inhabited hold keeps its lamps lit; coal relights lamps |
+| 23-entrances | Hold gates can be climbed from y82 to the terrace and the first has a waystone; plaza waymarkers name the nearest gate; cave mouths, ruined stairways and deep ravines are common enough, a way down is usually within 250 blocks, and the nearest stairways and mouths can be walked down to their caves |
+| 24-places | Dungeon rooms and points of interest are rarer, all four dungeon kinds occur, and every room in two windows opens onto its cave |
+| 25-remains | All four kinds of remains occur, whole and as leftovers, about one region in four; the nearest of each stands built in an open cavern |
+| 26-surface | Most regions have a ruined site of each kind; roads link nearly every site and are laid near them; the nearest of each kind stands, rests on the ground and has its waystone |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

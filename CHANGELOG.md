@@ -5,6 +5,24 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.6.0 (2026-10-08): M2b world restructure, part two
+
+Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v5`.
+
+### Game
+- **Hold gates.** Each hold has up to three gates on the highest ground above its outer ring: a terrace with pillars and braziers over a spiral stair down to the hold's upper floor (y82). Plaza waymarkers point to the nearest gate (reading them no longer fails).
+- **Ways down from open land:** cave mouths in steep slopes that wind down into the caves, small ruined stairways on level ground, and deeper ravines. One is usually within about 80 to 90 blocks.
+- **Dungeon rooms are rarer and varied** (Forgotten Crypt, Old Storeroom, Old Cells, Sunken Chapel), and **points of interest are rarer**. Every one opens onto a cave; crystal geodes and fossils stay sealed in the rock.
+- **Remains of other peoples** in the deep caverns away from the holds: goblin warrens, gnome workshops, drow halls and nameless ruins older than the holds, some only as scattered leftovers.
+- **Ruined watchtowers, keeps and castles** on the surface, each with a name, linked by **old roads** that also lead to the hold gates.
+- **Ancient waystones** (a new block) at some ruined sites and at the first gate of every hold. Attuning to them comes in a later update.
+- **Underground water no longer floats.** Every underground pool, lake and river sits in sound rock, with nothing floating under or beside it; there is much less of it, and ceiling springs are gone.
+- The location display names gates, ruined stairways, old roads, sites, waystones, dungeon rooms and remains.
+
+### Tooling
+- New `world/remains.js` and `world/surface-sites.js`; `caveAnchor`, `caveMouth`, `deepRim` in `world/caves.js`; `deepOpenAt`, `deepWaterAt` in `world/deep-caves.js`; ruined stairways, dungeon rooms, `tunnelTo` and `surfTaken` in `world/features.js`; `drainCaveWater` in `world/chunk-generation.js`.
+- New tests 23-entrances, 24-places, 25-remains, 26-surface; 05-underground and 21-deep require sound underground water. D-024.
+
 ## 0.5.0 (2026-10-08): M2a world restructure, part one
 
 Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v4`.

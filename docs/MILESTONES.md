@@ -118,7 +118,7 @@ Fix every known bug. Most were found by reading the code on 2026-10-08 and are l
 
 ## M2: World restructure (Q61)
 
-The biggest change, split (D-023) into **M2a**, done in 0.5.0: height, holds, mines, the natural deep, the lava sea and old lights; and **M2b**: other peoples' remains, findable entrances, surface preparation, dungeons and waystones.
+The biggest change, split (D-023) into **M2a**, done in 0.5.0: height, holds, mines, the natural deep, the lava sea and old lights; and **M2b**, done in 0.6.0: other peoples' remains, findable entrances, surface preparation, dungeons and waystones, plus sound underground water (owner's report, D-024).
 
 - **Height 512 (Q69, Q73).** Done in M2a. The extra 128 blocks go above ground and sea level stays at 310 (D-023), so mountains get taller and the underground keeps its depth. This touches memory (about 77 MB of world data), saves, the mesh band and every height constant.
 - **Dwarven holds become rare, vast structures that spawn (Q5, Q9).** Done in M2a.
@@ -127,16 +127,16 @@ The biggest change, split (D-023) into **M2a**, done in 0.5.0: height, holds, mi
   - The plan supports an inhabited variant (Q11); inhabitants arrive with settlements in E2.
 - **Mines tied to holds (Q12).** Done in M2a. They spread from each hold and fade with distance, replacing the endless straight gallery grid.
 - **Natural deep caves fill the deep layers by default (Q10).** Done in M2a. Large caverns, underground rivers and lakes, and crystal and fungal regions.
-- **Remains of other peoples (Q10, Q70).** M2b. Goblin warrens, gnome workshops, drow halls, and older, nameless ruins. Rarer than natural caves, sometimes only as leftovers inside caves.
+- **Remains of other peoples (Q10, Q70).** Done in M2b. Goblin warrens, gnome workshops, drow halls, and older, nameless ruins. Rarer than natural caves, sometimes only as leftovers inside caves.
 - **The Fire Below as a real lava sea (Q21).** Done in M2a.
-- **Findable entrances (Q22, Q72).** M2b. Cave mouths in cliffs, ravines that reach caves, ruined stairways, and hold gates on mountainsides above holds.
-- **Surface preparation for settlements (Q72).** M2b. Old roads and paths linking ruins, and ruined surface keeps and watchtowers in varied sizes.
-- **Dungeons and points of interest (Q24).** M2b. Rarer and varied, always connected to a cave or passage.
+- **Findable entrances (Q22, Q72).** Done in M2b. Cave mouths in cliffs, ravines that reach caves, ruined stairways, and hold gates on mountainsides above holds.
+- **Surface preparation for settlements (Q72).** Done in M2b. Old roads and paths linking ruins, and ruined surface keeps and watchtowers in varied sizes.
+- **Dungeons and points of interest (Q24).** Done in M2b. Rarer and varied, always connected to a cave or passage.
 - **Old lights mostly dead (Q8).** Done in M2a. Generated lanterns and torches are unlit. Rare eerie lights remain: runes, crystals, fungi.
-- **Ancient waystones placed in the world (Q71).** M2b. Attunement comes in M4.
+- **Ancient waystones placed in the world (Q71).** Done in M2b. Attunement comes in M4.
 - **Tests:**
   - The world-hash snapshot is re-recorded.
-  - New tests: hold spacing and size, mine extent around holds, the lava sea (M2a: 20-holds, 21-deep, 22-old-lights); entrance frequency, reachability of points of interest (M2b).
+  - New tests: hold spacing and size, mine extent around holds, the lava sea (M2a: 20-holds, 21-deep, 22-old-lights); entrance frequency, reachability of points of interest (M2b: 23-entrances, 24-places, 25-remains, 26-surface).
   - The doorway and ruin-graph tests target hold areas.
 
 **Checkpoint:**

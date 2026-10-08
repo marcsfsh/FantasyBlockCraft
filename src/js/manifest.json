@@ -31,7 +31,7 @@
     },
     {
       "path": "world/caves.js",
-      "about": "Layered worm caves, caverns, sinkholes, flooding, cave lakes"
+      "about": "Layered worm caves, caverns, sinkholes, cave mouths, cave anchors, cave lakes"
     },
     {
       "path": "world/deep-caves.js",
@@ -39,7 +39,7 @@
     },
     {
       "path": "world/underground-sites.js",
-      "about": "Mineshafts, supply crates, points of interest, dripstone and springs"
+      "about": "Mineshafts, supply crates, points of interest (each opening onto a cave), dripstone"
     },
     {
       "path": "world/remains.js",
@@ -71,7 +71,7 @@
     },
     {
       "path": "world/features.js",
-      "about": "Chunk clipping, trees, barrows, standing stones, willows, ice spikes, old sealed rooms"
+      "about": "Chunk clipping, trees, barrows, standing stones, willows, ice spikes, ruined stairways, dungeon rooms, surface claims"
     },
     {
       "path": "world/surface-sites.js",
@@ -79,7 +79,7 @@
     },
     {
       "path": "world/chunk-generation.js",
-      "about": "Per-chunk features, ores, plants and genChunk pipeline"
+      "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },
     {
       "path": "engine/lighting.js",

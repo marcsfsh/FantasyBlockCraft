@@ -21,17 +21,19 @@ Consequences:
 | `src/js/blocks/items.js` | Items that are not blocks: fuel, ores, ingots, tools |
 | `src/js/blocks/atlas.js` | Texture atlas painted pixel by pixel, average tile colours |
 | `src/js/world/terrain.js` | World arrays, column terrain and biomes, rivers and lakes |
-| `src/js/world/caves.js` | Layered worm caves, caverns, sinkholes, flooding, cave lakes |
+| `src/js/world/caves.js` | Layered worm caves, caverns, sinkholes, cave mouths, cave anchors, cave lakes |
 | `src/js/world/deep-caves.js` | The deep outside the holds: the lava sea, two tiers of natural caverns, underground rivers and lakes |
-| `src/js/world/underground-sites.js` | Mineshafts, supply crates, points of interest, dripstone and springs |
+| `src/js/world/underground-sites.js` | Mineshafts, supply crates, points of interest (each opening onto a cave), dripstone |
+| `src/js/world/remains.js` | Remains of other peoples in the deep: goblin warrens, gnome workshops, drow halls, nameless ruins |
 | `src/js/ruins/city-plan.js` | Holds (one per region, D-023) and their city: districts, street plan, decay level, room shapes, shells, openings, decay passes |
 | `src/js/ruins/holds-and-lore.js` | Holds, hold names, lore pages, chasms, cellars, room conditions |
 | `src/js/ruins/pillared-deep.js` | The pillared hall, heavy decay, tidy pass, connectivity rules, applyRuins |
 | `src/js/ruins/rooms.js` | Single-chunk room types |
 | `src/js/ruins/megastructures.js` | Two-by-two chunk great structures |
 | `src/js/world/cave-life.js` | Cave regions and their decoration |
-| `src/js/world/features.js` | Chunk clipping, trees, barrows, standing stones, willows, ice spikes, old sealed rooms |
-| `src/js/world/chunk-generation.js` | Per-chunk features, ores, plants and genChunk pipeline |
+| `src/js/world/features.js` | Chunk clipping, trees, barrows, standing stones, willows, ice spikes, ruined stairways, dungeon rooms, surface claims |
+| `src/js/world/surface-sites.js` | Ruined watchtowers, keeps and castles, old roads between them and to hold gates, ancient waystones |
+| `src/js/world/chunk-generation.js` | Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline |
 | `src/js/engine/lighting.js` | Block light flood fill and sky light |
 | `src/js/engine/renderer.js` | three.js setup, sun, clouds, shadow, selection, mesh buffers |
 | `src/js/engine/entities.js` | Entity registry: moving things register once; shifted with the window, cleared on rebuild, updated while playing |
@@ -72,7 +74,7 @@ Removed in M1 (0.3.0) for the setting: the town and road generator, the power ne
 
 ## Chunk generation pipeline (`genChunk`)
 
-Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural caverns, deep lakes and rivers) -> `applyWorms` (layered caves, caverns, flooding) -> `applyShafts` (mineshafts) -> `applyPOIs` (camps, cellars, old ruins) -> `applyMines` (dwarven mines) -> `applyRuins` (the hold's city, ending with the tidy pass; both with `genLit` set in inhabited holds) -> `features` for the 3 x 3 surrounding chunks (ores, pockets, boulders, barrows, stone rings, trees) -> `plants` -> saved player edits (water next to them is queued to flow again).
+Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural caverns, deep lakes and rivers) -> `applyWorms` (layered caves, caverns, cave mouths, flooding) -> `applyShafts` (mineshafts) -> `applyPOIs` (camps, cellars, old ruins, each with a passage to its cave) -> `applyRemains` (other peoples' remains) -> `applyMines` (dwarven mines) -> `applyRuins` (the hold's city, ending with the tidy pass; both with `genLit` set in inhabited holds) -> `features` for the 3 x 3 surrounding chunks (ores, pockets, boulders, barrows, stone rings, trees, ruined stairways, dungeon rooms) -> `applySites` (ruined surface sites and waystones) -> hold gates (last, so nothing cuts their stair) -> `drainCaveWater` -> `plants` -> `applyRoads` -> saved player edits (water next to them is queued to flow again).
 
 ## Lighting
 
@@ -104,4 +106,12 @@ Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural 
 - **Holds** (`ruins/city-plan.js`, D-023): `holdAt(rx,rz)` gives the one hold of a region of `HOLD_REG` x `HOLD_REG` chunks (centre, radius, `inhabited`); `holdNear(cx,cz)` asks a chunk's own region, which is enough because a hold and its mines never reach the region edge. `holdReach(h,cx,cz)` is the distance from the centre in units of the hold's ragged radius: `ruinZone` is `holdReach < 1`, `mineZone` is under 1.15 and patchy out to 1.9. Inside a hold the old city plan applies unchanged (8 x 8-chunk quarters with avenues to a plaza, rooms, great structures, decay, connectivity rules). `holdOf` gives one name and history per hold.
 - **The deep** (`world/deep-caves.js`): `deepCaves` runs over the chunk's own columns after the column fill. The lava sea (`FIRE_LV`, lava y3 to y8) is open under most columns. Two cavern tiers come from 3D noise sampled on a 4-block lattice anchored to world coordinates, suppressed near holds (`deepSup`). Every lake and river of the upper tier sits at one level (`DEEP_WL`), and `applyWorms` leaves a rock rim around deep water inside the chunk.
 - **Cold lights:** `PW` writes `COLD_OF[id]` (cold lantern, sconce, torch, dim glowstone) in place of a lit lamp unless `genLit` is set; `genChunk` sets it around `applyMines` and `applyRuins` in inhabited holds. Generation that needs a lit lamp in an abandoned place must use another emitter (runes, crystals, fungi).
+
+## Ways down, places and the surface (M2b)
+
+- **`caveAnchor(WCX,WCZ,y0,y1,salt)`** (`world/caves.js`) picks a point on an ordinary worm cave that starts in the chunk. Cave mouths, ruined stairways, dungeon rooms and built points of interest open onto one, so they are always connected. Worm points are carved unless other rules skip them, so prefer anchors well below the surface.
+- **Claims on the surface:** `surfTaken(X,Z,m)` (`world/features.js`) is true near a gate terrace, ruined stairway, site or old road; trees, boulders, barrows and old towers keep off it.
+- **Remains** (`world/remains.js`) and **sites** (`world/surface-sites.js`) are planned per region (`remainsAt`, `siteAt`) and rebuilt by every chunk they touch. Remains find a cavern floor with `deepOpenAt`, which predicts `deepCaves` exactly.
+- **Roads:** `roadSegs` lists the segments that may touch a chunk (site to two nearest sites, gate to nearest site), and `oldRoadAt` tests a column against them with a wander that fades at both ends; `applyRoads` lays them on the chunk's own columns.
+- **Underground water** must stay in a sound basin (D-024): `drainCaveWater` runs after everything else that writes underground, and worm caves keep a sound rim around deep water in any chunk with `deepRim`/`deepWaterAt`.
 
