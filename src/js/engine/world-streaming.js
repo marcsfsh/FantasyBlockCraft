@@ -82,8 +82,8 @@ function findSpawn(){
   return[W/2+0.5,H-4,D/2+0.5];
 }
 async function generate(){
-  const resumed=saved&&saved.v===2&&saved.seed===SEED&&Array.isArray(saved.e);
-  $('seedline').textContent=(resumed?'Loading your saved world, seed ':'New endless world, seed ')+SEED+'.';
+  const resumed=!!saved&&Array.isArray(saved.e);
+  $('seedline').textContent=WORLD.name+(resumed?', seed ':', a new endless world, seed ')+SEED+'.';
   if(resumed){
     const e=saved.e;for(let k=0;k+1<e.length;k+=2){storeEdit(e[k],e[k+1]);if(e[k+1]===WAYPT)addWPk(e[k]);}
     if(typeof saved.t==='number')tod=saved.t;

@@ -53,10 +53,10 @@ const keys={},tch={jump:false,down:false,jx:0,jy:0};
 let playing=false,invOpen=false,ready=false,hold=-1,holdT=0,lastSpace=0;
 const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,HOOK];
 while(hot.length<9)hot.push(STONE);
-let mode=saved&&saved.v===2?(saved.mode||'creative'):(settings.newMode||'survival');
+let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
 const inv=new Array(36).fill(null);
-if(saved&&saved.v===2&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0,e:q[3]||0};});
+if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
 const stackMax=id=>id>=240&&id<=255?1:64;
 function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
 function addItem(id,n){

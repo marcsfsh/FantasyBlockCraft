@@ -1,12 +1,14 @@
 // Editing
-const edits=new Map(),editsByChunk=new Map();let saveDirty=false;
+// Saves keep player changes only. Automatic systems (water flow, grass spread, snow, farmland and crops) set autoEdit:
+// their changes are recorded only where the player already changed that block (planted crops keep their growth).
+const edits=new Map(),editsByChunk=new Map();let saveDirty=false,autoEdit=false;
 // World key: X and Z in 21 bits each, y in 9 bits (heights 0 to 511), so keys stay exact below 2^53
 const KOFF=1048576,KY=512,wkey=(X,y,Z)=>((X+KOFF)*2097152+(Z+KOFF))*KY+y,ckey=(cx,cz)=>(cx+65536)*131072+(cz+65536);
 function keyXYZ(k){const y=k%KY,r=(k-y)/KY,Z=r%2097152-KOFF,X=Math.floor(r/2097152)-KOFF;return[X,y,Z];}
 function iToKey(i){const x=i%W,t=(i/W)|0;return wkey(x+OX,(t/D)|0,(t%D)+OZ);}
 function keyToI(k){const c=keyXYZ(k),x=c[0]-OX,z=c[2]-OZ;if(x<0||z<0||x>=W||z>=D)return -1;return I(x,c[1],z);}
 function storeEdit(k,v){edits.set(k,v);const c=keyXYZ(k),ck=ckey(Math.floor(c[0]/CS),Math.floor(c[2]/CS));let m=editsByChunk.get(ck);if(!m)editsByChunk.set(ck,m=new Map());m.set(k,v);}
-function recordEdit(i,v){storeEdit(iToKey(i),v);saveDirty=true;}
+function recordEdit(i,v){const k=iToKey(i);if(autoEdit&&!edits.has(k))return;storeEdit(k,v);saveDirty=true;}
 function put(i,v){world[i]=v;recordEdit(i,v);}
 const undoStack=[];let curAct=null;
 function beginAct(){curAct=[];}
@@ -27,7 +29,8 @@ function wakeWater(x,y,z){
 }
 function setLvl(i,L){lvl[i]=L;recordEdit(i,L?100+L:WATER);const x=i%W,t=(i/W)|0;dirty.add(((x/CS)|0)+(((t%D)/CS)|0)*NCX);wakeWater(x,(t/D)|0,t%D);}
 function waterAt(x,y,z,L){setBlock(x,y,z,WATER,true);const i=I(x,y,z);if(world[i]===WATER&&L)setLvl(i,L);}
-function flowStep(){
+function flowStep(){autoEdit=true;try{flowWork();}finally{autoEdit=false;}}
+function flowWork(){
   let n=0;const q=[];for(const i of flowQ){q.push(i);if(++n>=600)break;}
   for(const i of q)flowQ.delete(i);
   for(const i of q){

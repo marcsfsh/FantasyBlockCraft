@@ -78,7 +78,12 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 .btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 button.big{font:inherit;font-size:26px;padding:6px 18px;background:var(--dirt);color:var(--ink);border:3px solid #3b2a1a;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.18);cursor:pointer}
 button:focus-visible,.slot:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
-#seedin{font:inherit;font-size:21px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:4px 8px;width:180px}
+#seedin,#worldname{font:inherit;font-size:21px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:4px 8px;width:180px}
+.worlds{margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto}
+.wrow{display:flex;align-items:center;gap:8px;padding:4px 6px;border:2px solid #463a28}
+.wrow.on{border-color:var(--ink)}
+.wrow .t{flex:1;display:flex;flex-direction:column}
+.wrow small{opacity:.7}
 button.big.go{background:#5f8a35;border-color:#2b3a1a}
 button.big:disabled{opacity:.5;cursor:default}
 #inv{position:fixed;inset:0;display:none;place-items:center;background:rgba(20,26,34,.5);z-index:6}
@@ -164,7 +169,8 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg" id="touchseg">Touch <button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div>
     <button id="sndbtn">Sound on</button>
   </div>
-  <div class="btns"><button class="big go" id="play" disabled>Play</button><button class="big" id="photo">Photo mode</button><input id="seedin" placeholder="Seed (optional)" aria-label="Seed for the new world" autocomplete="off"><button class="big" id="newworld">New world</button></div>
+  <div class="btns"><button class="big go" id="play" disabled>Play</button><button class="big" id="photo">Photo mode</button><input id="worldname" placeholder="New world name" aria-label="Name for the new world" autocomplete="off"><input id="seedin" placeholder="Seed (optional)" aria-label="Seed for the new world" autocomplete="off"><button class="big" id="newworld">New world</button></div>
+  <div id="worlds" class="worlds"></div><input type="file" id="importfile" accept=".json,application/json" hidden>
 </div></div>
 <div id="death"><div style="text-align:center"><h1>You died</h1><p id="deathmsg"></p><button class="big go" id="respawnbtn">Respawn</button></div></div>
 <div id="inv"><div id="invcard"><h2 id="invtitle">Pick a block</h2><div id="sinv"></div><div id="lore"></div><div id="invgrid"></div><div id="bplist" class="recipes"></div><div id="invname">Tap a block to put it in the hotbar.</div></div></div>
@@ -180,14 +186,21 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=384,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v2',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v3',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
-lsDel('fantasy-blockcraft-save-v1'); // retired save format: free its storage
-const saved=lsGet(SAVE_KEY);
-const nextSeed=lsGet('blockcraft-nextseed');if(nextSeed!==null)lsDel('blockcraft-nextseed');
-const SEED=saved&&saved.seed?saved.seed:(nextSeed||((Math.random()*2147483000|0)+1));
+// Worlds: an index under SAVE_KEY ({active, list:[{id,name,seed,mode,created,played}]}) and each world's data under SAVE_KEY+':'+id.
+// Bumping SAVE_KEY retires every world: saves always yield to updates (D-019).
+for(const k of ['fantasy-blockcraft-save-v1','fantasy-blockcraft-save-v2','blockcraft-nextseed'])lsDel(k); // retired formats: free their storage
+const worldKey=id=>SAVE_KEY+':'+id;
+function worldIndex(){const x=lsGet(SAVE_KEY);return x&&Array.isArray(x.list)?x:{active:null,list:[]};}
+function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Math.random()*1679616|0).toString(36),name:name,seed:seed||((Math.random()*2147483000|0)+1),mode:mode==='creative'?'creative':'survival',created:Date.now(),played:Date.now()};}
+const WIX=worldIndex();
+if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
+const WORLD=WIX.list.find(w=>w.id===WIX.active);
+const saved=(d=>d&&d.v===3&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
 
@@ -1978,7 +1991,7 @@ function genChunk(lcx,lcz){
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));
-  if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}});
+  if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
     const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
     for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
@@ -2345,14 +2358,16 @@ function buildChunk(cx,cz){
 }
 
 // Editing
-const edits=new Map(),editsByChunk=new Map();let saveDirty=false;
+// Saves keep player changes only. Automatic systems (water flow, grass spread, snow, farmland and crops) set autoEdit:
+// their changes are recorded only where the player already changed that block (planted crops keep their growth).
+const edits=new Map(),editsByChunk=new Map();let saveDirty=false,autoEdit=false;
 // World key: X and Z in 21 bits each, y in 9 bits (heights 0 to 511), so keys stay exact below 2^53
 const KOFF=1048576,KY=512,wkey=(X,y,Z)=>((X+KOFF)*2097152+(Z+KOFF))*KY+y,ckey=(cx,cz)=>(cx+65536)*131072+(cz+65536);
 function keyXYZ(k){const y=k%KY,r=(k-y)/KY,Z=r%2097152-KOFF,X=Math.floor(r/2097152)-KOFF;return[X,y,Z];}
 function iToKey(i){const x=i%W,t=(i/W)|0;return wkey(x+OX,(t/D)|0,(t%D)+OZ);}
 function keyToI(k){const c=keyXYZ(k),x=c[0]-OX,z=c[2]-OZ;if(x<0||z<0||x>=W||z>=D)return -1;return I(x,c[1],z);}
 function storeEdit(k,v){edits.set(k,v);const c=keyXYZ(k),ck=ckey(Math.floor(c[0]/CS),Math.floor(c[2]/CS));let m=editsByChunk.get(ck);if(!m)editsByChunk.set(ck,m=new Map());m.set(k,v);}
-function recordEdit(i,v){storeEdit(iToKey(i),v);saveDirty=true;}
+function recordEdit(i,v){const k=iToKey(i);if(autoEdit&&!edits.has(k))return;storeEdit(k,v);saveDirty=true;}
 function put(i,v){world[i]=v;recordEdit(i,v);}
 const undoStack=[];let curAct=null;
 function beginAct(){curAct=[];}
@@ -2373,7 +2388,8 @@ function wakeWater(x,y,z){
 }
 function setLvl(i,L){lvl[i]=L;recordEdit(i,L?100+L:WATER);const x=i%W,t=(i/W)|0;dirty.add(((x/CS)|0)+(((t%D)/CS)|0)*NCX);wakeWater(x,(t/D)|0,t%D);}
 function waterAt(x,y,z,L){setBlock(x,y,z,WATER,true);const i=I(x,y,z);if(world[i]===WATER&&L)setLvl(i,L);}
-function flowStep(){
+function flowStep(){autoEdit=true;try{flowWork();}finally{autoEdit=false;}}
+function flowWork(){
   let n=0;const q=[];for(const i of flowQ){q.push(i);if(++n>=600)break;}
   for(const i of q)flowQ.delete(i);
   for(const i of q){
@@ -2726,10 +2742,10 @@ const keys={},tch={jump:false,down:false,jx:0,jy:0};
 let playing=false,invOpen=false,ready=false,hold=-1,holdT=0,lastSpace=0;
 const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,HOOK];
 while(hot.length<9)hot.push(STONE);
-let mode=saved&&saved.v===2?(saved.mode||'creative'):(settings.newMode||'survival');
+let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
 const inv=new Array(36).fill(null);
-if(saved&&saved.v===2&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0,e:q[3]||0};});
+if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
 const stackMax=id=>id>=240&&id<=255?1:64;
 function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
 function addItem(id,n){
@@ -2891,10 +2907,10 @@ function renderBlueprints(box){
 }
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
-if(saved&&saved.v===2&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
+if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
 const DUR={255:4000,251:150,240:60,241:132,242:180,243:260,244:250,245:600,246:1600,247:120},FOOD={270:2,206:5,207:4,209:1,269:5};
 const graves=new Map();
-if(saved&&saved.v===2&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
+if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
   if(!SURV())return;const q=inv[sel];if(!q||!DUR[q.id])return;
   q.d=(q.d||0)+n;if(q.d>=DUR[q.id]){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
@@ -3275,25 +3291,58 @@ sndBtn.addEventListener('click',()=>{settings.sound=!settings.sound;lsSet(SET_KE
 $('play').addEventListener('click',lockOrPlay);
 $('respawnbtn').addEventListener('click',revive);
 $('photo').addEventListener('click',()=>{setPhoto(true);lockOrPlay();toast('');});
-let confirmNew=false;
-$('newworld').addEventListener('click',()=>{
-  if(edits.size&&!confirmNew){confirmNew=true;$('newworld').textContent='Tap again to replace this world';return;}
-  const sv=$('seedin').value.trim();
-  if(sv){let n;if(/^\d+$/.test(sv))n=Number(sv)%2147483646+1;else{let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;n=Math.abs(h)%2147483646+1;}lsSet('blockcraft-nextseed',n);}
-  lsDel(SAVE_KEY);skipSave=true;location.reload();
-});
-function showPause(){$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
+$('newworld').addEventListener('click',()=>{const w=createWorld($('worldname').value.trim(),parseSeed($('seedin').value),settings.newMode||mode);switchWorld(w.id);});
+// The world list: play another world, export any world to a file, delete worlds you are not in, import a file
+let delArm=null;
+function renderWorlds(){
+  const box=$('worlds');box.innerHTML='';
+  const h=document.createElement('div');h.className='inv-h';h.textContent='Your worlds';box.appendChild(h);
+  [...WIX.list].sort((a,b)=>(b.played||0)-(a.played||0)).forEach(w=>{
+    const row=document.createElement('div');row.className='wrow'+(w.id===WIX.active?' on':'');
+    const t=document.createElement('div');t.className='t';t.textContent=w.name+(w.id===WIX.active?' (playing)':'');
+    const sm=document.createElement('small');sm.textContent='seed '+w.seed+', '+w.mode;t.appendChild(sm);row.appendChild(t);
+    const btn=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.addEventListener('click',fn);row.appendChild(b);return b;};
+    if(w.id!==WIX.active)btn('Play',()=>switchWorld(w.id));
+    btn('Export',()=>{const txt=exportWorld(w.id);if(txt){downloadText(w.name.replace(/[^\w -]+/g,'').trim().replace(/ +/g,'-')+'.fbcworld.json',txt);toast('Exported '+w.name);}});
+    if(w.id!==WIX.active)btn(delArm===w.id?'Sure?':'Delete',()=>{if(delArm!==w.id){delArm=w.id;renderWorlds();return;}delArm=null;deleteWorld(w.id);toast('Deleted '+w.name);renderWorlds();});
+    box.appendChild(row);
+  });
+  const imp=document.createElement('button');imp.textContent='Import a world file';imp.addEventListener('click',()=>$('importfile').click());box.appendChild(imp);
+}
+renderWorlds();
+$('importfile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(txt=>{try{const w=importWorld(txt);toast('Imported '+w.name);renderWorlds();}catch(err){toast(err.message);}e.target.value='';});});
+function showPause(){renderWorlds();$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
 
 // Saving
 let skipSave=false,saveWarned=false;
 function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
-  const ok=lsSet(SAVE_KEY,{v:2,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
+  WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
+  const ok=lsSet(worldKey(WORLD.id),{v:3,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
 setInterval(()=>{if(saveDirty||playing)saveNow();},5000);
+// ---- Worlds: create, switch, delete, export and import (one storage entry per world, see core/config.js)
+// A seed typed as a whole number is used exactly; any other text is hashed to a seed
+function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
+function uniqueWorldName(name){const used=new Set(WIX.list.map(w=>w.name));let n=name,k=2;while(used.has(n))n=name+' '+(k++);return n;}
+function createWorld(name,seed,mode){const w=newWorldEntry(uniqueWorldName(name||'World '+(WIX.list.length+1)),seed,mode);WIX.list.push(w);lsSet(SAVE_KEY,WIX);return w;}
+function switchWorld(id){if(!WIX.list.some(w=>w.id===id))return;saveNow();WIX.active=id;lsSet(SAVE_KEY,WIX);skipSave=true;location.reload();}
+function deleteWorld(id){if(id===WIX.active)return false;const i=WIX.list.findIndex(w=>w.id===id);if(i<0)return false;WIX.list.splice(i,1);lsDel(worldKey(id));lsSet(SAVE_KEY,WIX);return true;}
+const WORLD_FILE='fantasy-blockcraft-world';
+function exportWorld(id){if(id===WIX.active)saveNow();const w=WIX.list.find(x=>x.id===id);if(!w)return null;return JSON.stringify({format:WORLD_FILE,saveKey:SAVE_KEY,world:{name:w.name,seed:w.seed,mode:w.mode},data:lsGet(worldKey(id))});}
+// Returns the new world entry, or throws with a message the player can read
+function importWorld(text){
+  let o;try{o=JSON.parse(text);}catch(e){throw new Error('That file is not a saved world');}
+  if(!o||o.format!==WORLD_FILE||!o.world)throw new Error('That file is not a saved world');
+  if(o.saveKey!==SAVE_KEY)throw new Error('That world is from another version of the game and cannot be loaded');
+  const w=createWorld(o.world.name||'Imported world',o.world.seed,o.world.mode);
+  if(o.data&&!lsSet(worldKey(w.id),Object.assign({},o.data,{seed:w.seed}))){deleteWorld(w.id);throw new Error('Storage is full');}
+  return w;
+}
+function downloadText(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
 addEventListener('pagehide',saveNow);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow();});
 
@@ -3431,8 +3480,8 @@ function findSpawn(){
   return[W/2+0.5,H-4,D/2+0.5];
 }
 async function generate(){
-  const resumed=saved&&saved.v===2&&saved.seed===SEED&&Array.isArray(saved.e);
-  $('seedline').textContent=(resumed?'Loading your saved world, seed ':'New endless world, seed ')+SEED+'.';
+  const resumed=!!saved&&Array.isArray(saved.e);
+  $('seedline').textContent=WORLD.name+(resumed?', seed ':', a new endless world, seed ')+SEED+'.';
   if(resumed){
     const e=saved.e;for(let k=0;k+1<e.length;k+=2){storeEdit(e[k],e[k+1]);if(e[k+1]===WAYPT)addWPk(e[k]);}
     if(typeof saved.t==='number')tod=saved.t;
@@ -3542,7 +3591,8 @@ function farmTick(x,y,z,top,up){
 }
 // Farmland anywhere (under roofs, underground) is tracked here, so crops grow wherever they have light
 const farms=new Set(),isFarm=id=>id===FARM_D||id===FARM_W;
-function randomTicks(){
+function randomTicks(){autoEdit=true;try{tickWork();}finally{autoEdit=false;}}
+function tickWork(){
   for(const i of farms){const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;if(Math.abs(x-PL.x)>24||Math.abs(z-PL.z)>24||y>=H-1)continue;if(Math.random()<40/2304)farmTick(x,y,z,world[i],world[i+W*D]);} // same odds as a ticked surface column
   for(let k=0;k<40;k++){
     const x=Math.floor(PL.x+(Math.random()-.5)*48),z=Math.floor(PL.z+(Math.random()-.5)*48);

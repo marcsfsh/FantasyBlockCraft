@@ -55,12 +55,25 @@ sndBtn.addEventListener('click',()=>{settings.sound=!settings.sound;lsSet(SET_KE
 $('play').addEventListener('click',lockOrPlay);
 $('respawnbtn').addEventListener('click',revive);
 $('photo').addEventListener('click',()=>{setPhoto(true);lockOrPlay();toast('');});
-let confirmNew=false;
-$('newworld').addEventListener('click',()=>{
-  if(edits.size&&!confirmNew){confirmNew=true;$('newworld').textContent='Tap again to replace this world';return;}
-  const sv=$('seedin').value.trim();
-  if(sv){let n;if(/^\d+$/.test(sv))n=Number(sv)%2147483646+1;else{let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;n=Math.abs(h)%2147483646+1;}lsSet('blockcraft-nextseed',n);}
-  lsDel(SAVE_KEY);skipSave=true;location.reload();
-});
-function showPause(){$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
+$('newworld').addEventListener('click',()=>{const w=createWorld($('worldname').value.trim(),parseSeed($('seedin').value),settings.newMode||mode);switchWorld(w.id);});
+// The world list: play another world, export any world to a file, delete worlds you are not in, import a file
+let delArm=null;
+function renderWorlds(){
+  const box=$('worlds');box.innerHTML='';
+  const h=document.createElement('div');h.className='inv-h';h.textContent='Your worlds';box.appendChild(h);
+  [...WIX.list].sort((a,b)=>(b.played||0)-(a.played||0)).forEach(w=>{
+    const row=document.createElement('div');row.className='wrow'+(w.id===WIX.active?' on':'');
+    const t=document.createElement('div');t.className='t';t.textContent=w.name+(w.id===WIX.active?' (playing)':'');
+    const sm=document.createElement('small');sm.textContent='seed '+w.seed+', '+w.mode;t.appendChild(sm);row.appendChild(t);
+    const btn=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.addEventListener('click',fn);row.appendChild(b);return b;};
+    if(w.id!==WIX.active)btn('Play',()=>switchWorld(w.id));
+    btn('Export',()=>{const txt=exportWorld(w.id);if(txt){downloadText(w.name.replace(/[^\w -]+/g,'').trim().replace(/ +/g,'-')+'.fbcworld.json',txt);toast('Exported '+w.name);}});
+    if(w.id!==WIX.active)btn(delArm===w.id?'Sure?':'Delete',()=>{if(delArm!==w.id){delArm=w.id;renderWorlds();return;}delArm=null;deleteWorld(w.id);toast('Deleted '+w.name);renderWorlds();});
+    box.appendChild(row);
+  });
+  const imp=document.createElement('button');imp.textContent='Import a world file';imp.addEventListener('click',()=>$('importfile').click());box.appendChild(imp);
+}
+renderWorlds();
+$('importfile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(txt=>{try{const w=importWorld(txt);toast('Imported '+w.name);renderWorlds();}catch(err){toast(err.message);}e.target.value='';});});
+function showPause(){renderWorlds();$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
 

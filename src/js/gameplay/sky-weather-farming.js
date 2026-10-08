@@ -83,7 +83,8 @@ function farmTick(x,y,z,top,up){
 }
 // Farmland anywhere (under roofs, underground) is tracked here, so crops grow wherever they have light
 const farms=new Set(),isFarm=id=>id===FARM_D||id===FARM_W;
-function randomTicks(){
+function randomTicks(){autoEdit=true;try{tickWork();}finally{autoEdit=false;}}
+function tickWork(){
   for(const i of farms){const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;if(Math.abs(x-PL.x)>24||Math.abs(z-PL.z)>24||y>=H-1)continue;if(Math.random()<40/2304)farmTick(x,y,z,world[i],world[i+W*D]);} // same odds as a ticked surface column
   for(let k=0;k<40;k++){
     const x=Math.floor(PL.x+(Math.random()-.5)*48),z=Math.floor(PL.z+(Math.random()-.5)*48);

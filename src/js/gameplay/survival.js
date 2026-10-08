@@ -1,9 +1,9 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
-if(saved&&saved.v===2&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
+if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
 const DUR={255:4000,251:150,240:60,241:132,242:180,243:260,244:250,245:600,246:1600,247:120},FOOD={270:2,206:5,207:4,209:1,269:5};
 const graves=new Map();
-if(saved&&saved.v===2&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
+if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
   if(!SURV())return;const q=inv[sel];if(!q||!DUR[q.id])return;
   q.d=(q.d||0)+n;if(q.d>=DUR[q.id]){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
