@@ -1,0 +1,241 @@
+# Build order and milestones
+
+The plan from the direction interview (`docs/DIRECTION_QA.md`, cited as Q1 to Q76). It replaces the ordering in `docs/ROADMAP.md`, which keeps its detail on known issues and legacy deletion.
+
+## How milestones run
+
+- **Order (Q53, Q56, Q61, Q62, Q74):** bugs, then foundations, then the world restructure. After that come performance, survival, controls, surface and lore, with audio last. Expansion phases follow, starting with wildlife (Q63).
+- **One branch and one PR per milestone (Q54, Q55).** The owner reviews and playtests at the checkpoint, from the committed root `fantasy-blockcraft.html`. Large milestones may be split into a and b parts if a single PR becomes unreviewable; each part still ends in a checkpoint.
+- **Saves break whenever needed (Q29, Q31).** Every generation or save-format change bumps `SAVE_KEY` without migration. Old worlds are not preserved.
+- **Every milestone ends with:**
+  - all tests green, plus new tests for what it adds
+  - both builds, and the refreshed root file
+  - `docs/DECISIONS.md`, `docs/KNOWN_ISSUES.md` and `CHANGELOG.md` updated
+  - a version bump
+  - a "Check in-game" list for the Ally X and the desktop (Q2)
+- **Touch:** must keep working, but is not separately tested (Q75). Every new action gets a touch control.
+- **Constraints:**
+  - Single player only (Q50), so no multiplayer design constraints.
+  - Peaceful creatures only until hostility is revisited (Q3, Q46).
+  - Gentle survival (Q13, Q16).
+  - No music (Q57).
+  - Simple block physics (Q60).
+  - Cosmetic weather (Q58).
+- **Lore and setting text:** Claude drafts it into `docs/`, and the owner approves it in the milestone PR (Q28).
+
+## Milestone overview
+
+| # | Milestone | Goal |
+|---|---|---|
+| M0 | Bug sweep | Every known bug fixed before anything else |
+| M1 | Foundations | Remove what is leaving, rebuild the save format, add the base systems later milestones need |
+| M2 | World restructure | A 512-tall world: rare vast holds, natural deep caves, other peoples' remains, the lava sea, findable entrances |
+| M3 | Performance and visuals | Smooth on the Ally X at the highest frame rate possible, with view distance scaled by device and a livelier look |
+| M4 | Survival and items | Metal ladder, broader tool kit, storage, the worn lamp, earned fast travel, food |
+| M5 | Controls and interface | Remapping, hints, maps, world management, creative tools |
+| M6 | Surface enrichment | Thin lands, varied structures, rivers, weather |
+| M7 | Lore and chronicles | Hold chronicles, the journal, the discovery log |
+| M8 | Audio | Ambient soundscapes, volume controls, positional sound |
+| E1 | Wildlife | Entities in play: animals for atmosphere, resources, hunting, mounts |
+| E2+ | Further expansions | Settlements and peoples, building and furniture, magic, new lands; order to be confirmed |
+
+## M0: Bug sweep (Q56)
+
+Fix every known bug. Most were found by reading the code on 2026-10-08 and are listed in `docs/KNOWN_ISSUES.md`.
+
+- **Saves**
+  - Edit keys only store heights 0 to 127 (`wkey`/`keyXYZ`). Every surface edit reloads in the wrong place; undo and waypoints use the wrong position too.
+  - Add a save round-trip test that would have caught this.
+- **City**
+  - The seed 777 blocked doorway. Decay leaves rubble on the wall line, and the path-clearing strip stops one block short of it (`k<h`).
+  - The duplicate `junction` key in `RUIN_NAMES`.
+  - Lecterns removed by decay.
+- **Weather and farming**
+  - High Mountains always snow: a leftover `PL.y>90` check.
+  - No rain on Heath Moors and Barrow Hills: old desert ids.
+  - Crops only grow on the top block of a column, so farms under a roof or underground never grow.
+- **Survival**
+  - The "You starved" death message can never appear. Hunger stays non-lethal (Q16).
+  - Explosions empty a grave into the player's inventory wherever they are.
+  - Crate loot that does not fit is silently lost.
+  - In creative, opening crates and graves fills the survival inventory. Free mode switching itself stays (Q14).
+  - Held food, seeds or tools take priority over opening lecterns and crates.
+- **Engine**
+  - Streamed-in torches have no flames: `lightChunk` never registers them.
+  - The simulation keeps running while paused (kegs, falling blocks, water).
+  - Esc does not close the inventory.
+  - Switching from gamepad to mouse mid-play leaves the game with no pointer lock.
+  - The ROG Ally X may be detected as a touch device: phone defaults, touch help, no pointer lock. Verify and fix.
+- **Content**
+  - Banned power blocks leak into the creative menu's "Other" category. Removing them entirely is M1.
+  - The HUD says "TNT" for the Blasting Keg.
+  - Lore mentions "titanium" (the metal is Moonsilver).
+- **Free performance fix:** hoist the per-column deepstone noise out of the y loop in `fillCol`, with identical output.
+
+**Checkpoint:**
+- Survival edits on the surface survive a reload.
+- Farms grow under a roof.
+- Mountain weather is right.
+- The seed 777 doorway is open.
+
+## M1: Foundations (Q53)
+
+**Remove what is leaving.** Live helpers move out of `legacy/` first; see `docs/ROADMAP.md` section 2.
+
+- Towns and roads code (Q6).
+- Power blocks, items, ticks and UI entirely (Q41).
+- Trading counters, mints and coins from survival (Q7). Coin items may stay defined for E2.
+- Ore processing: crusher, gold pan, sluice (Q43).
+- Rails (Q45).
+- Generated off-theme blocks: the lab point of interest's batteries and wires, the outpost trader, the Machine Hall's water wheel and battery.
+- Dead code found in the survey:
+  - sky-island and oasis machinery
+  - `houseP` and friends
+  - `dwCorridor`, `canalEdge`, `ROOM_TYPES`
+  - the gate and light-well stubs (M2 replaces them)
+
+**Save format v3 (Q29 to Q32):**
+- Correct world keys for any height.
+- Only player changes are stored, plus minimal state (water sources, farms, containers).
+- Several worlds per browser, each with a name, seed, mode and generator version.
+- Export and import of a world to a file. The world list UI comes in M5; M1 adds a minimal list.
+
+**Engine foundations:**
+- An entity registry in world coordinates. It replaces the hand-patched arrays in `shiftWindow` (falling blocks, kegs, particles, rain, waypoints) and is the base for E1 wildlife.
+- An input action layer: named actions bound to keyboard, mouse, gamepad and touch. This is the base for remapping in M5 (Q37).
+- Equipment slots in the player model (belt lamp, pack, bag), the base for M4 (Q65, Q67).
+- A naming module with one style per people, plus a test-enforced blocklist of Tolkien names (Q25, Q26). Dwarven is the first style; the others are stubs to be filled in later: goblin, gnome, human, orc, halfling, wood elf, drow, high elf, beastfolk.
+- ES module conversion following `docs/ES_MODULES_PLAN.md`. It can happen here because legacy is gone; whether it happens here or alongside M2 is decided at the M1 task packet, depending on size.
+
+**Checkpoint:**
+- No power, trade, ore-processing or rail items anywhere.
+- Several worlds can be created, and one can be exported and imported.
+- Nothing else plays differently.
+
+## M2: World restructure (Q61)
+
+The biggest change. Expect to split it into M2a (height, layers, holds) and M2b (other remains, entrances, surface prep).
+
+- **Height 512 (Q69, Q73).** The extra 128 blocks go above ground, with sea level raised to match, so mountains get taller and the underground keeps its depth. This touches memory (about 77 MB of world data), saves, the mesh band and every height constant. It is done first in the milestone.
+- **Dwarven holds become rare, vast structures that spawn (Q5, Q9).**
+  - Several hundred blocks across, a few thousand blocks apart.
+  - The existing city plan, rooms, great structures, decay and connectivity rules are kept and placed per hold instead of everywhere.
+  - The plan supports an inhabited variant (Q11); inhabitants arrive with settlements in E2.
+- **Mines tied to holds (Q12).** They spread from each hold and fade with distance, replacing the endless straight gallery grid.
+- **Natural deep caves fill the deep layers by default (Q10).** Large caverns, underground rivers and lakes, and crystal and fungal regions.
+- **Remains of other peoples (Q10, Q70).** Goblin warrens, gnome workshops, drow halls, and older, nameless ruins. Rarer than natural caves, sometimes only as leftovers inside caves.
+- **The Fire Below as a real lava sea (Q21).**
+- **Findable entrances (Q22, Q72).** Cave mouths in cliffs, ravines that reach caves, ruined stairways, and hold gates on mountainsides above holds.
+- **Surface preparation for settlements (Q72).** Old roads and paths linking ruins, and ruined surface keeps and watchtowers in varied sizes.
+- **Dungeons and points of interest (Q24).** Rarer and varied, always connected to a cave or passage.
+- **Old lights mostly dead (Q8).** Generated lanterns and torches are unlit. Rare eerie lights remain: runes, crystals, fungi.
+- **Ancient waystones placed in the world (Q71).** Attunement comes in M4.
+- **Tests:**
+  - The world-hash snapshot is re-recorded.
+  - New tests: hold spacing and size, mine extent around holds, the lava sea, entrance frequency, reachability of points of interest.
+  - The doorway and ruin-graph tests target hold areas.
+
+**Checkpoint:**
+- A seed and coordinates for a hold.
+- A route from the surface down through a findable entrance.
+- The lava sea.
+- One example of each kind of remains.
+
+## M3: Performance and visuals (Q74)
+
+- **Frame rate as high as possible on the Ally X and desktop (Q33).**
+  - Spread chunk generation and lighting across frames.
+  - Cut mesh geometry: skip faces enclosed in caves, smaller vertex formats, possibly greedy meshing.
+  - Remove the vertical mesh-band rebuild hitch and the freeze on waypoint travel.
+  - Throttle the minimap and autosave.
+  - Cap the explored-map memory.
+- **View distance scales by device automatically, with manual override (Q34).**
+- **Sky light spreads sideways into overhangs and cave mouths (Q36).** The lighting tests are extended to keep streamed light exactly equal to a full recompute.
+- **Livelier look (Q35):**
+  - animated water and lava
+  - better clouds
+  - moon phases
+  - swaying plants
+  - glow on emitters
+- **A new `docs/PERF.md` baseline,** and an in-browser frame-time readout for the owner's checks.
+
+**Checkpoint:**
+- Fly in a straight line on the Ally X with no visible hitch.
+- Compare frame rate and view distance before and after.
+
+## M4: Survival and items
+
+- **The metal ladder rebalanced (Q19):** wood, stone, copper, bronze, iron, steel, moonsilver, each strictly better. Gold and platinum become decoration, special tools, and later currency and magic ingredients (Q68).
+- **The broader kit (Q18, Q66):** axe, shovel, shears, sickle, rope and grapnel (replacing the hook, Q45), ladders, pitons, compass, depth gauge, and a map item.
+- **Storage (Q20, Q67):** craftable chests that keep items; world chests keep leftovers instead of vanishing; craftable pack upgrades; an equippable bag. Pack animals come in E1.
+- **The worn lamp (Q36, Q65):** a belt-slot lantern that burns oil or candles. The always-on carried lamp goes away and deep layers get darker; torches still work in hand. Darkness stays atmosphere, not damage (Q13).
+- **Earned fast travel (Q15, Q71):**
+  - No free R respawn teleport in survival.
+  - Attune ancient waystones by touch; craftable waystones cost a lot; travel only between attuned stones.
+  - Free teleport stays in creative.
+- **Signal flares replace fireworks (Q45).** The Blasting Keg keeps its role as a dwarven mining charge with one consistent name (Q44).
+- **The Blueprint Tool becomes creative-only (Q42).**
+- **Food (Q52):** more crops, simple cooking and foraging.
+- **A small starting kit for new survival worlds (Q59).**
+- **Tests:** content tables, recipes reachable from the start, tier ladder ordering, lamp fuel, waystone rules.
+
+**Checkpoint:** start a new survival world on the Ally X and play from the starting kit to a steel pickaxe.
+
+## M5: Controls and interface
+
+- **Remapping (Q37):** better defaults (for example, teleport moves off D-pad up), and a rebinding screen for keyboard and controller built on the M1 action layer.
+- **Context hints (Q38):** one-time hints on firsts (first ore, first hunger, first lectern, first waystone), and help rewritten per mode and device.
+- **The HUD readout is on by default and can be turned off (Q39).**
+- **Maps (Q40):** the minimap, an underground layer view at your depth, and a full explored world map saved with the world, with your own markers and discovered place names.
+- **A world list screen** for the M1 save format, with export and import (Q30).
+- **Creative upgrades (Q76):** a searchable block menu, larger brushes, fill and replace, a noclip spectator camera, teleport to coordinates, time and weather controls, and structure placement for testing.
+
+**Checkpoint:** rebind a control on the Ally X; find a marker you placed on the world map after a reload.
+
+## M6: Surface enrichment
+
+- **Enrich the thin lands (Q23):** Western Sea, Grey Shore, High Mountains (now taller), Northern Fells, Lake and Fens get plants, features and ground variety.
+- **Vary repeated structures:** barrows, towers, wells and stone rings get varied shapes, sizes and orientations.
+- **Rivers and water:** better rivers, streams, waterfalls and valleys.
+- **Weather fixed and enriched, still cosmetic (Q58):** fog, mist and storms by land.
+- New lands (Q23), for example a desert that reuses the kept desert blocks (Q41), are planned as an expansion.
+
+**Checkpoint:** a seed tour through each enriched land.
+
+## M7: Lore and chronicles
+
+- **Hold chronicles (Q27):** each hold has an ordered history (founding, prosperity, the fall, or the present day for inhabited holds), drafted for owner approval (Q28).
+- **The journal:** collects pages in order as you read them. Rune Tablets become readable.
+- **The discovery log (Q17):** lands, layers, holds, remains and relics found. The game still works with no goal at all.
+- **Names for every people** in the naming module, so places from other peoples read consistently (Q26).
+
+**Checkpoint:** read three pages in one hold and see them ordered in the journal.
+
+## M8: Audio (last, Q62)
+
+- Ambient soundscapes by land and layer (Q57).
+- Volume sliders: master, effects, ambience.
+- Positional sound.
+- No music.
+
+**Checkpoint:** walk from a forest into a cave on the Ally X with headphones.
+
+## Expansion phases
+
+These are planned now so refinements leave room for them.
+
+- **E1 Wildlife (Q47, Q48, Q63).**
+  - Built on the M1 entity registry.
+  - Animals for atmosphere, resources (wool, milk, eggs, hides), hunting for food, mounts, companions and pack animals (Q67).
+- **E2 Settlements and peoples (Q4, Q5, Q11, Q26, Q46).**
+  - Inhabited places: hamlets, camps, travelers, inhabited dwarven holds.
+  - Peoples: dwarves, humans, halflings, gnomes, goblins, orcs, wood elves, drow, high elves, beastfolk and more.
+  - Orcs and goblins are neutral, not violent; hostility is revisited later.
+  - NPC trading brings coins back (Q7, Q68), and NPCs give quests (Q17).
+  - New worlds start near a settlement with the starting kit (Q59).
+  - Built on the M2 roads, keeps and gates.
+- **E3 Building and furniture (Q51).** Stairs, slabs, fences, doors, windows, roof shapes, timber framing; beds that set spawn; tables and workstations; crafting stations (anvil, loom, carpenter's bench); banners, carpets, signs and other decoration.
+- **E4 Magic (Q49).** Player magic: runes, enchanting, spells. Gold and platinum become ingredients (Q68).
+- **E5 New lands (Q23).** For example a desert; more to be chosen.
+
+The order of E2 to E5 is not yet decided; confirm it before E1 ends.

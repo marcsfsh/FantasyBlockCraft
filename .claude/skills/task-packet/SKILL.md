@@ -19,7 +19,7 @@ Scope:       files/systems that will change; explicitly out of scope
 Constraints: setting pillars that apply; generation rules that apply (determinism, PW/GW,
              random-stream invariants, save key, exact lighting); no new dependencies
 Generation:  does this change the generated world? yes/no. If yes: snapshot update and
-             save key decision needed (use the worldgen-change skill)
+             save key bump needed (use the worldgen-change skill)
 Acceptance:  numbered, checkable criteria (test names, metrics, thresholds)
 Tests:       exact commands, e.g. npm test -- doorways ruin-graph, then npm test
 Docs:        which of DECISIONS / KNOWN_ISSUES / CHANGELOG / DESIGN / ARCHITECTURE / TESTING

@@ -1,5 +1,7 @@
 # Design
 
+> **Direction change (2026-10-08, D-019).** This file describes the game as built today. The agreed direction differs: a dwindling age with ancient ruins alongside lived-in places, rare spawnable dwarven holds instead of a city under the whole world, a 512-tall world, peaceful creatures, and more. See `docs/DIRECTION_QA.md` and `docs/MILESTONES.md`. Sections here are rewritten as each milestone lands.
+
 ## Setting and pillars
 
 - A Tolkien-esque world, **long abandoned**. No living towns, no roads, no machines or modern equipment.

@@ -25,7 +25,7 @@ Never rewrite an old entry; supersede it: "Supersedes D-0xx" in the new one, and
 Under `## Unreleased`, in `### Game` (anything a player would notice: world, blocks, controls, performance) or `### Tooling` (build, tests, CI, docs). One line each, plain words, no internal names unless needed. Generation changes say so and say whether old saves were retired.
 
 ## Checklist before the PR
-- Generation changed: DECISIONS entry with the save key decision, CHANGELOG Game line.
+- Generation changed: `SAVE_KEY` bumped and noted in DECISIONS, CHANGELOG Game line.
 - Threshold or snapshot changed: DECISIONS entry with the reason.
 - Known issue found or fixed: KNOWN_ISSUES and ROADMAP updated.
 - New file, command or rule: ARCHITECTURE, TESTING, README or CLAUDE.md updated as fits.

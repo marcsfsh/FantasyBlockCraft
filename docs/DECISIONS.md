@@ -60,3 +60,13 @@ The source is deliberately dense; reformatting it all would bury every future di
 ### D-018 The single-file build is committed at the repository root (2026-10-07)
 Every change that affects the build commits a fresh `fantasy-blockcraft.html` at the root, byte-identical to `dist/single/fantasy-blockcraft.html`. The owner plays the latest game by downloading that file from GitHub, which works without GitHub Actions minutes or Pages. `npm run build` refreshes it, `npm run check` fails if it was stale, and a Claude Code Stop hook blocks finishing a turn while it is stale. `dist/` stays uncommitted (D-001); this one file is the exception. Constrains: PRs that touch `src/`, the template, CSS or build tools include the regenerated file; nobody edits it by hand; `.gitattributes` keeps it LF so it stays byte-identical across platforms.
 
+### D-019 New direction and milestone plan (2026-10-08)
+The owner answered 76 direction questions (`docs/DIRECTION_QA.md`); `docs/MILESTONES.md` is the resulting build order (M0 bugs, M1 foundations, M2 world restructure, M3 performance, M4 survival, M5 interface, M6 surface, M7 lore, M8 audio, then expansions starting with wildlife). Main changes to earlier decisions:
+- The setting is a dwindling age, not a long-abandoned world: ancient ruins alongside lived-in settlements, camps and travelers. Partly supersedes D-007 (towns and roads are deleted now and rebuilt later as medieval settlements; nothing modern remains the rule).
+- Dwarven holds become rare, vast structures that spawn, some inhabited, with mines tied to them; the deep layers default to natural caves. Hold gates return as findable entrances. Supersedes D-006, and partly D-004 and D-010.
+- The world becomes 512 tall, with the extra height above ground (M2). Will supersede D-004's height once built.
+- Saves always yield to updates: bump `SAVE_KEY` whenever generation or the save format changes, with no migration. Supersedes D-014's caution.
+- Creatures are peaceful only for now; orcs and goblins are neutral; hostility will be revisited.
+- Work runs bugs first, then foundations, with one milestone-sized PR per milestone reviewed at a checkpoint.
+Constrains: every milestone follows the sheet's order unless a new decision changes it; DESIGN.md is rewritten as each milestone lands, not before.
+

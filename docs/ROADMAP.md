@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Ordering superseded (2026-10-08):** `docs/MILESTONES.md` is the build order. This file keeps the detail on known issues, deleting the legacy code (M1) and the streaming cost (M3).
+
 Only work that is already known: entries from `docs/KNOWN_ISSUES.md` and the refactors named in `docs/ARCHITECTURE.md` and `docs/DECISIONS.md`. No new features. Order is a suggestion; each item is its own PR with a task packet (`.claude/skills/task-packet`).
 
 ## 1. Known issues
