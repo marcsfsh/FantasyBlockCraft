@@ -22,8 +22,9 @@ Consequences:
 | `src/js/blocks/atlas.js` | Texture atlas painted pixel by pixel, average tile colours |
 | `src/js/world/terrain.js` | World arrays, column terrain and biomes, rivers and lakes |
 | `src/js/world/caves.js` | Layered worm caves, caverns, sinkholes, flooding, cave lakes |
+| `src/js/world/deep-caves.js` | The deep outside the holds: the lava sea, two tiers of natural caverns, underground rivers and lakes |
 | `src/js/world/underground-sites.js` | Mineshafts, supply crates, points of interest, dripstone and springs |
-| `src/js/ruins/city-plan.js` | Dwarven city: districts, street plan, decay level, room shapes, shells, openings, decay passes |
+| `src/js/ruins/city-plan.js` | Holds (one per region, D-023) and their city: districts, street plan, decay level, room shapes, shells, openings, decay passes |
 | `src/js/ruins/holds-and-lore.js` | Holds, hold names, lore pages, chasms, cellars, room conditions |
 | `src/js/ruins/pillared-deep.js` | The pillared hall, heavy decay, tidy pass, connectivity rules, applyRuins |
 | `src/js/ruins/rooms.js` | Single-chunk room types |
@@ -57,7 +58,7 @@ Removed in M1 (0.3.0) for the setting: the town and road generator, the power ne
 
 ## World coordinates and the loaded window
 
-- The world is endless horizontally. A window of `W` x `D` = 224 x 224 columns (14 x 14 chunks of 16) and `H` = 384 blocks is kept in memory around the player.
+- The world is endless horizontally. A window of `W` x `D` = 224 x 224 columns (14 x 14 chunks of 16) and `H` = 512 blocks (sea level 310, D-023) is kept in memory around the player.
 - World coordinates are `X, Y, Z`. Window coordinates are `x = X - OX`, `z = Z - OZ`. World chunk coordinates are `WCX, WCZ`; window chunk indexes are `cx, cz`.
 - `world` (block ids), `lvl` (water level), `BLK` (block light) are flat typed arrays indexed by `I(x, y, z)`. Per-column arrays include `ground`, `hm`, `biome`.
 - Moving more than a chunk from the centre slides the window (`shiftWindow`) and queues the new strip of chunks (`genQ`), which `processGenQ` generates a few milliseconds per frame.
@@ -71,7 +72,7 @@ Removed in M1 (0.3.0) for the setting: the town and road generator, the power ne
 
 ## Chunk generation pipeline (`genChunk`)
 
-Column fill (terrain, soil, water, deepstone) -> `applyWorms` (layered caves, caverns, flooding) -> `applyShafts` (mineshafts) -> `applyPOIs` (camps, cellars, old ruins) -> `applyMines` (dwarven mines) -> `applyRuins` (dwarven city, ending with the tidy pass) -> `features` for the 3 x 3 surrounding chunks (ores, pockets, boulders, barrows, stone rings, trees) -> `plants` -> saved player edits (water next to them is queued to flow again).
+Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural caverns, deep lakes and rivers) -> `applyWorms` (layered caves, caverns, flooding) -> `applyShafts` (mineshafts) -> `applyPOIs` (camps, cellars, old ruins) -> `applyMines` (dwarven mines) -> `applyRuins` (the hold's city, ending with the tidy pass; both with `genLit` set in inhabited holds) -> `features` for the 3 x 3 surrounding chunks (ores, pockets, boulders, barrows, stone rings, trees) -> `plants` -> saved player edits (water next to them is queued to flow again).
 
 ## Lighting
 
@@ -81,12 +82,12 @@ Column fill (terrain, soil, water, deepstone) -> `applyWorms` (layered caves, ca
 ## Meshing and rendering
 
 - Each chunk builds an opaque and a water mesh with smooth light and ambient occlusion. Chunks wait for all their neighbours to exist before meshing, so each is built once.
-- Only a vertical band of about 120 blocks above and below the player is meshed (`MB`, `meshBand`). Moving far up or down rebuilds the band.
+- Only a vertical band of about 120 blocks above and below the player is meshed (`MB`, `meshBand`); from 60 blocks under sea level up, the band reaches the top of the world so peaks are never cut off. Moving far up or down rebuilds the band.
 - Chunks beyond the fog are hidden; the texture atlas is a power-of-two with mipmaps.
 
 ## Saves
 
-- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v3`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:3, seed, e, spawn, p, hot, mode, inv, hp, food, gv, t}`). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
+- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v4`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:4, seed, e, spawn, p, hot, mode, inv, hp, food, gv, t}`). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
 - `createWorld`, `switchWorld` (saves, then reloads into the other world), `deleteWorld`, `exportWorld` and `importWorld` live in `ui/save-and-minimap.js`; the pause menu lists the worlds. An exported file is `{format:'fantasy-blockcraft-world', saveKey, world, data}` and only loads under the same `SAVE_KEY`.
 - **Player changes only.** Automatic systems (`flowStep`, `randomTicks`) set `autoEdit`; their changes are recorded only where the player already changed that block, so crops keep their growth while natural water flow, grass spread and snow never grow the save.
 - A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).
@@ -97,3 +98,10 @@ Column fill (terrain, soil, water, deepstone) -> `applyWorms` (layered caves, ca
 - **Entities** (`engine/entities.js`): every kind of moving thing registers once with `entityKind({name, list, update?, persist?, shift?, clear?})`. `shiftWindow` calls `shiftEntities`, `regenerateAll` calls `clearEntities` (persistent kinds such as waypoint beams and rain follow the new origin), and the main loop calls `updateEntities` only while playing. Positions are window coordinates, like all physics; `entityWorld(e)` gives world coordinates. New creatures (E1) register the same way.
 - **Input** (`input/actions.js`): `ACTIONS` names every discrete action; `BINDS.keys` (KeyboardEvent codes), `BINDS.pad` (standard-mapping button numbers) and `BINDS.held` (movement, jump, sprint keys) map inputs to them, from `BIND_DEFAULTS` overridden by `settings.binds` (`loadBinds`). Keyboard, controller and touch dispatch through `runAction`; movement reads `keyHeld`. Sticks, triggers, the mouse and menu navigation stay in their own code.
 - **Equipment** (`gameplay/player-and-input.js`): `equip.belt`, `equip.pack`, `equip.bag`. An item fits the slot named by `ITEMS[id].equip`; `equipFrom(i)` and `unequip(slot)` move items; equipment is saved as `eq` and goes to the grave on death. The inventory shows the slots once any item has an `equip` slot.
+
+## Holds, the deep and cold lights (M2a)
+
+- **Holds** (`ruins/city-plan.js`, D-023): `holdAt(rx,rz)` gives the one hold of a region of `HOLD_REG` x `HOLD_REG` chunks (centre, radius, `inhabited`); `holdNear(cx,cz)` asks a chunk's own region, which is enough because a hold and its mines never reach the region edge. `holdReach(h,cx,cz)` is the distance from the centre in units of the hold's ragged radius: `ruinZone` is `holdReach < 1`, `mineZone` is under 1.15 and patchy out to 1.9. Inside a hold the old city plan applies unchanged (8 x 8-chunk quarters with avenues to a plaza, rooms, great structures, decay, connectivity rules). `holdOf` gives one name and history per hold.
+- **The deep** (`world/deep-caves.js`): `deepCaves` runs over the chunk's own columns after the column fill. The lava sea (`FIRE_LV`, lava y3 to y8) is open under most columns. Two cavern tiers come from 3D noise sampled on a 4-block lattice anchored to world coordinates, suppressed near holds (`deepSup`). Every lake and river of the upper tier sits at one level (`DEEP_WL`), and `applyWorms` leaves a rock rim around deep water inside the chunk.
+- **Cold lights:** `PW` writes `COLD_OF[id]` (cold lantern, sconce, torch, dim glowstone) in place of a lit lamp unless `genLit` is set; `genChunk` sets it around `applyMines` and `applyRuins` in inhabited holds. Generation that needs a lit lamp in an abandoned place must use another emitter (runes, crystals, fungi).
+

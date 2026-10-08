@@ -12,7 +12,7 @@ A Minecraft-style game in a medieval fantasy world, for one player (the owner). 
 - **Deep and layered underground.** Going down feels like going back in time. Dwarven holds are rare, vast discoveries, not a layer under everything (from M2).
 - **Saves yield to updates.** Breaking saves is always acceptable; bump `SAVE_KEY` and move on.
 
-The code still reflects the old "long abandoned" design (a city under the whole world) until M2 lands; `docs/DESIGN.md` describes what is built.
+Since 0.5.0 (M2a, D-023) the world is 512 tall, holds are rare and vast, and the deep is natural caves over a lava sea; M2b (entrances, other remains, surface ruins) is next. `docs/DESIGN.md` describes what is built.
 
 ## How sessions run
 

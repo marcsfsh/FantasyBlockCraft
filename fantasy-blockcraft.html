@@ -185,21 +185,21 @@ const TOUCH=(p=>p==='on'||(p!=='off'&&window.matchMedia('(pointer:coarse)').matc
 if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
-const W=224,D=224,H=384,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v3',SET_KEY='blockcraft-settings-v1';
+const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v4',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 // Worlds: an index under SAVE_KEY ({active, list:[{id,name,seed,mode,created,played}]}) and each world's data under SAVE_KEY+':'+id.
 // Bumping SAVE_KEY retires every world: saves always yield to updates (D-019).
-for(const k of ['fantasy-blockcraft-save-v1','fantasy-blockcraft-save-v2','blockcraft-nextseed'])lsDel(k); // retired formats: free their storage
+for(const k of ['fantasy-blockcraft-save-v1','fantasy-blockcraft-save-v2','fantasy-blockcraft-save-v3','blockcraft-nextseed'])lsDel(k); // retired formats: free their storage
 const worldKey=id=>SAVE_KEY+':'+id;
 function worldIndex(){const x=lsGet(SAVE_KEY);return x&&Array.isArray(x.list)?x:{active:null,list:[]};}
 function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Math.random()*1679616|0).toString(36),name:name,seed:seed||((Math.random()*2147483000|0)+1),mode:mode==='creative'?'creative':'survival',created:Date.now(),played:Date.now()};}
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===3&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const saved=(d=>d&&d.v===4&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -358,9 +358,17 @@ function setH(ids,hard,mat,tier){ids.forEach(i=>{BL[i].hard=hard;BL[i].mat=mat;B
 setH([GRASS,DIRT,SAND,GRAVEL,SNOWG,RSAND,CACTUS,SPONGE,PATH],0.6,'soft');setH([TGRASS,FLOWR,FLOWY,DBUSH,TORCH,WHEAT,HEATHER],0,'soft');
 setH([LEAVES,BLEAVES,SLEAVES,JLEAVES,SNOWLEAF],0.3,'soft');setH([LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS],2.2,'wood');
 setH([WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK],0.8,'soft');setH([TNT],0.1,'soft');setH([GLASS,GLOW,ICE,CRYSTAL],0.45,'misc');
+// Cold lights: what is left of the old peoples' lamps after the ages (Q8, D-023). Generation writes them in place of lit ones
+// outside inhabited holds (COLD_OF, used by PW); coal relights lanterns, sconces and torches (crafting.js).
+const DLANTERN=69,DSCONCE=70,DTORCH=71,DGLOW=72;
+def(DLANTERN,'Cold Lantern',[192,192,192],{snd:'glass'});
+def(DSCONCE,'Cold Sconce',[193,193,193],{solid:false,opq:false,occ:false,sconce:true,snd:'wood'});
+def(DTORCH,'Burnt-out Torch',[193,193,193],{solid:false,opq:false,occ:false,torch:true,snd:'wood'});
+def(DGLOW,'Dim Glowstone',[194,194,194],{snd:'glass'});
+const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 setH([COAL],5,'ore',1);setH([COPO,TINO,ZINO],5,'ore',2);setH([IRON],5,'ore',3);setH([GOLD],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN],1,'misc');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
+setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
@@ -573,6 +581,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(59,x,y,sh([162,84,40],(tr()-.5)*8));P(60,x,y,sh([112,70,52],(tr()-.5)*8));P(61,x,y,sh([204,164,122],(tr()-.5)*8));}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(62,x,y,tr()<.05?[70,110,40]:sh([92,72,34],(x%3===1?-16:0)+((y+x*3)%9===0?-12:0)+(tr()-.5)*14));
   leaves(63,[42,124,30],0.15);
+  // cold lights (D-023), drawn from their lit tiles without the shared random stream
+  const px=(t,x,y)=>{const i=((((t/AC)|0)*TS+y)*AW+(t%AC)*TS+x)*4;return[dat[i],dat[i+1],dat[i+2],dat[i+3]];};
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const e=x<2||y<2||x>13||y>13,bar=x===7||x===8,c=px(80,x,y);
+    P(192,x,y,e||bar?[c[0]*0.62,c[1]*0.58,c[2]*0.5]:sh([58,54,50],(x*7+y*3)%5*3-Math.hypot(x-7.5,y-7.5)*2));
+    const g=px(34,x,y),m=(g[0]+g[1]+g[2])/3;P(194,x,y,[m*0.42+30,m*0.4+28,m*0.36+26]);}
+  clear(193);for(let y=6;y<16;y++)for(let x=7;x<=8;x++)P(193,x,y,y<=7?[38,32,30]:y===8?[64,50,40]:sh([112,82,46],x===8?-18:0));
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles
@@ -599,6 +613,7 @@ function colInfoBase(X,Z,o){
   let h=SEA+6+cont*34+hill*(4+10*rough);
   const mf=sstep(0.08,0.32,mtn);
   h+=mf*mf*(32+18*(0.5-Math.abs(rid)));
+  const pk=sstep(0.22,0.5,mtn);if(pk>0)h+=pk*pk*(70+40*fbm2(X/150,Z/150,2,7301.3)); // the high peaks at the hearts of the ranges (the world is 512 tall, D-023)
   const warmF=sstep(-0.26,-0.14,temp),sw=sstep(0.04,0.2,hum)*sstep(-0.08,0.04,temp)*(1-mf); // sw: damp, mild shadowed forest
   const dw=sstep(0.02,0.26,temp)*(1-mf)*(1-sw);
   h=h*(1-dw)+(SEA+14+hill*9+Math.abs(rid)*6)*dw; // heath moors: open uplands
@@ -731,7 +746,8 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=10?LAVA:AIR;lvl[i]=0;}
+          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}
     }
@@ -753,6 +769,48 @@ function applyWorms(WCX,WCZ){
     }
   }
 }
+// ---- The deep outside the holds (D-023): the lava sea of the Fire Below, two tiers of natural caverns, underground rivers and lakes.
+// A per-column pass over the chunk's own columns, run after fillCol and before the worm caves. Every value is a pure function of
+// world coordinates; the cavern noise is sampled on a 4-block lattice anchored to world coordinates, so neighbouring chunks agree.
+const FIRE_LV=8;          // lava surface of the sea (lava from y3 to y8)
+const DEEP_WL=64;         // one water level for every lake and river of the upper tier, so no walls of water stand where they meet
+const DC_Y0=16,DC_NY=23;  // cavern lattice: y16 to y104 every 4 blocks
+const dcLat=new Float32Array(5*5*DC_NY);
+// Cavern density: positive is open. Lower tier around y37 (dry), upper tier around y81 (lakes below DEEP_WL); none inside a hold.
+function deepDensity(X,Y,Z,sup){
+  const lo=Y<59,t=lo?(Y-37)/20:(Y-81)/20,v=1-t*t;if(v<=0)return -1;
+  return noise3(X/52,Y/26,Z/52)*0.8+noise3(X/17,Y/11,Z/17)*0.35+v*0.4-(lo?0.76:0.62)+sup;
+}
+// How strongly a hold keeps the caverns out at a point (0 far away, -2 inside): holds and their inner mines stay intact
+function deepSup(X,Z){const h=holdNear(Math.floor(X/CS),Math.floor(Z/CS)),d=holdReach(h,X/CS-0.5,Z/CS-0.5);return -2*(1-sstep(1.1,1.6,d))+0.12*fbm2(X/380,Z/380,1,8107.3);}
+function deepCaves(lcx,lcz){
+  // the lattice for this chunk, shared at its edges with the neighbours
+  for(let a=0;a<5;a++)for(let b=0;b<5;b++){const X=gx0+a*4,Z=gz0+b*4,sup=deepSup(X,Z);for(let k=0;k<DC_NY;k++)dcLat[(a*5+b)*DC_NY+k]=deepDensity(X,DC_Y0+k*4,Z,sup);}
+  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
+    const X=gx0+x,Z=gz0+z,lx=lcx*CS+x,lz=lcz*CS+z,col=lx+W*lz,WD=W*D;
+    // the lava sea: open from y3 up to a ceiling 4 to 16 above the lava, with rock pillars and islands; low under the holds' mines
+    if(fbm2(X/13,Z/13,1,8103.7)<0.4){
+      const s=sstep(-0.35,0.35,fbm2(X/70,Z/70,2,8101.3)),mz=mineZone(Math.floor(X/CS),Math.floor(Z/CS));
+      let ceil=FIRE_LV+4+Math.round(12*s);if(mz&&ceil>13)ceil=13;
+      const isl=fbm2(X/36,Z/36,1,8105.1)>0.32;
+      for(let y=3;y<=ceil;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;
+        if(y<=FIRE_LV){if(isl&&y>=FIRE_LV-1)continue;world[i]=LAVA;}else if(!(isl&&y===FIRE_LV+1))world[i]=AIR;lvl[i]=0;}
+    }
+    // caverns, trilinear between lattice points
+    const ax=x>>2,az=z>>2,fx=(x&3)/4,fz=(z&3)/4,p00=(ax*5+az)*DC_NY,p10=((ax+1)*5+az)*DC_NY,p01=(ax*5+az+1)*DC_NY,p11=((ax+1)*5+az+1)*DC_NY;
+    for(let k=0;k<DC_NY-1;k++){
+      const c0=lerp(lerp(dcLat[p00+k],dcLat[p10+k],fx),lerp(dcLat[p01+k],dcLat[p11+k],fx),fz),c1=lerp(lerp(dcLat[p00+k+1],dcLat[p10+k+1],fx),lerp(dcLat[p01+k+1],dcLat[p11+k+1],fx),fz);
+      if(c0<=0&&c1<=0)continue;
+      for(let j=0;j<4;j++){const y=DC_Y0+k*4+j;if(c0+(c1-c0)*j/4<=0)continue;const i=col+WD*y,id=world[i];if(id===AIR||id===BEDROCK||id===LAVA||id===WATER)continue;
+        world[i]=y>=58&&y<=DEEP_WL?WATER:AIR;lvl[i]=0;}
+    }
+    // underground rivers wind through the upper tier at the lake level
+    const rv=Math.abs(fbm2(X/240,Z/240,2,8301.7));
+    if(rv<0.026){const c=1-rv/0.026,sup=deepSup(X,Z);if(sup>-0.3){const bed=DEEP_WL-1-Math.round(2*c),top=DEEP_WL+2+Math.round(3*c);
+      for(let y=bed;y<=top;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;world[i]=y<=DEEP_WL?WATER:AIR;lvl[i]=0;}}}
+  }
+}
+const DEEP_NAMES={lush:'The Mossy Deeps',crystal:'The Crystal Deeps',drip:'The Dripstone Deeps',fungal:'The Fungal Deeps',plain:'The Deep Caverns'};
 // ---- Abandoned mineshafts: timbered corridors with lanterns and supply crates
 const shaftCache=new Map();
 function shaftsFor(WCX,WCZ){
@@ -935,8 +993,20 @@ function megaAt(cx,cz,L){
   }
   megaC.set(key,m);return m;
 }
+// ---- Holds: rare, vast cities (D-023). Each region of HOLD_REG x HOLD_REG chunks (2560 blocks) holds one, its centre kept
+// far enough inside the region that the hold and its mines never cross into the next one, so a chunk only asks its own region.
+const HOLD_REG=160,holdRC=new Map();
+function holdAt(rx,rz){
+  const key=ckey(rx,rz);let h=holdRC.get(key);if(h!==undefined)return h;if(holdRC.size>4000)holdRC.clear();
+  const r=rngAt(rx,1701,rz);
+  h={rx:rx,rz:rz,cx:rx*HOLD_REG+44+(r()*72|0),cz:rz*HOLD_REG+44+(r()*72|0),R:12+r()*6,inhabited:r()<0.3};
+  holdRC.set(key,h);return h;
+}
+const holdNear=(cx,cz)=>holdAt(Math.floor(cx/HOLD_REG),Math.floor(cz/HOLD_REG));
+// Distance from a hold's centre in units of its ragged radius: under 1 is inside the hold
+function holdReach(h,cx,cz){return Math.hypot(cx+0.5-h.cx,cz+0.5-h.cz)/(h.R*(1+0.3*fbm2(cx/6,cz/6,2,909.1)));}
 const ruinZoneC=new Map();
-function ruinZone(cx,cz){const k=ckey(cx,cz);let v=ruinZoneC.get(k);if(v===undefined){if(ruinZoneC.size>20000)ruinZoneC.clear();v=fbm2(cx/9,cz/9,2,909.1)>-0.1;ruinZoneC.set(k,v);}return v;}
+function ruinZone(cx,cz){const k=ckey(cx,cz);let v=ruinZoneC.get(k);if(v===undefined){if(ruinZoneC.size>20000)ruinZoneC.clear();v=holdReach(holdNear(cx,cz),cx,cz)<1;ruinZoneC.set(k,v);}return v;}
 const md=(a)=>((a%6)+6)%6;
 // ---- Street plan per hold: winding avenues from each hold edge to a central plaza
 const planC=new Map();
@@ -962,7 +1032,8 @@ function isPlaza(cx,cz){if(!isAvenue(cx,cz))return false;if(isHub(cx,cz))return 
 function ruinActive(cx,cz,L){return ruinZone(cx,cz)&&(isAvenue(cx,cz)||hsh(cx,L*97+1,cz)<0.82);}
 function stairAt(cx,cz){return !inDelf(cx,cz)&&isHub(cx,cz)&&isAvenue(cx,cz)&&hsh(cx,333,cz)<0.85;}
 // How decayed this part of the city is (0 = kept up, 1 = falling apart)
-function ruinI(cx,cz){return 0.55+0.45*sstep(-0.25,0.15,fbm2(cx/5,cz/5,2,1777.3));}
+// An inhabited hold is kept up (decay under 0.25 skips structural damage); its people arrive with settlements (E2)
+function ruinI(cx,cz){const f=sstep(-0.25,0.15,fbm2(cx/5,cz/5,2,1777.3));return holdNear(cx,cz).inhabited?0.05+0.15*f:0.55+0.45*f;}
 // Room footprint and floor offset vary per cell
 const SMALLOK=new Set(['office','shrine','crypt','bath','archive','barracks','junction','farm']);
 function cellShape(cx,cz,L,t){
@@ -1260,8 +1331,8 @@ function dwStair(cx,cz,r){
 // ---- Holds, lore and the extra layers of the undercity
 const GUILDS=['the Brasswrights','the Deep Delvers','the Rune Masons','the Lamplighters','the Ironbinders','the Gemcutters','the Brewers of the Black Vat','the Platinum Wardens','the Stonesingers'];
 const holdC=new Map();
-function holdOf(cx,cz){
-  const hx=Math.floor(cx/8),hz=Math.floor(cz/8),k=ckey(hx,hz);let h=holdC.get(k);if(h)return h;
+function holdOf(cx,cz){ // the name and history of the hold a chunk belongs to
+  const H0=holdNear(cx,cz),hx=H0.rx,hz=H0.rz,k=ckey(hx,hz);let h=holdC.get(k);if(h)return h;
   const r=rngAt(hx,1301,hz);
   h={name:fullName('dwarf',r,r()<0.35),king:nameWord('dwarf',r),queen:nameWord('dwarf',r),guild:GUILDS[r()*GUILDS.length|0],year:120+(r()*880|0)};
   holdC.set(k,h);return h;
@@ -1342,7 +1413,7 @@ function delfAt(cx,cz){
   const ax=Math.floor(cx/3)*3,az=Math.floor(cz/3)*3,key=ckey(ax,az);
   if(delfC.has(key))return delfC.get(key);if(delfC.size>20000)delfC.clear();
   let d=null;
-  if(hsh(ax,2001,az)<0.14){let ok=true;for(let a=0;a<3&&ok;a++)for(let b=0;b<3&&ok;b++)if(!ruinZone(ax+a,az+b))ok=false;
+  if(hsh(ax,2001,az)<0.05){let ok=true;for(let a=0;a<3&&ok;a++)for(let b=0;b<3&&ok;b++)if(!ruinZone(ax+a,az+b))ok=false;
     if(ok)d={ax:ax,az:az,x0:ax*CS,x1:ax*CS+47,z0:az*CS,z1:az*CS+47,cx:ax*CS+24,cz:az*CS+24};}
   delfC.set(key,d);return d;
 }
@@ -1439,7 +1510,7 @@ function dwTidy(){
     else if((id===COBBLE||id===DWCRACK)&&bl===AIR&&!isS(GW(X,y+1,Z))){let side=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(isS(GW(X+a,y,Z+b)))side=true;if(!side)PW(X,y,Z,AIR,MODE_SET);}
   }
   // chains and lanterns: keep only what hangs from a ceiling, stands on a floor, or hangs off a kept chain
-  const chain=(id)=>id===STEELB||id===LANTERN,anchorS=(id)=>id>0&&SOLID[id]&&id!==STEELB;
+  const chain=(id)=>id===STEELB||id===LANTERN||id===DLANTERN,anchorS=(id)=>id>0&&SOLID[id]&&id!==STEELB;
   const runs=[];
   for(let Z=gz0;Z<gz0+CS;Z++)for(let X=gx0;X<gx0+CS;X++){let y=yA;while(y<=yB){if(!chain(GW(X,y,Z))){y++;continue;}let y1=y;while(y1+1<=yB&&chain(GW(X,y1+1,Z)))y1++;
     let ok=anchorS(GW(X,y1+1,Z))||anchorS(GW(X,y-1,Z));
@@ -1710,36 +1781,38 @@ function caveRegion(X,Z){const a=fbm2(X/110,Z/110,1,3501.1),b=fbm2(X/110,Z/110,1
 const CAVE_NAMES={lush:'Mossy Caves',crystal:'Crystal Caves',drip:'Dripstone Caves',fungal:'Fungal Caves',plain:'Caves',deep:'Deep Caves'};
 function caveLife(X0,Z0,r2){
   cavernDetail(X0,Z0,r2);
-  const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8);
+  const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8),wild=!zone&&!mineZone(Math.floor(X0/CS),Math.floor(Z0/CS));
   // floors
-  for(let k=0;k<260;k++){
-    const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],y0=6+(r2()*Math.max(1,g-14)|0);
-    let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
-    const kind=r2(),q=r2();
-    if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))continue;
-    if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);continue;}
-    if(y<100){ // deep: sparse life, crystals and scorched rock
-      if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
-      continue;
-    }
-    const patch=(id)=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.7||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);};
-    const cluster=(id,n)=>{PW(X,y,Z,id,MODE_SET);for(let t=0;t<n;t++){const XX=X+((r2()*3|0)-1),ZZ=Z+((r2()*3|0)-1),bl=GW(XX,y-1,ZZ);if(bl>0&&SOLID[bl]&&GW(XX,y,ZZ)===AIR)PW(XX,y,ZZ,id,MODE_SET);}};
-    if(reg==='lush'){if(kind<0.45){patch(MOSSY);cluster(GLOWSHROOM,4);}else if(kind<0.75)patch(MOSSY);else if(kind<0.8&&GW(X,y,Z+1)===AIR&&GW(X+1,y,Z)===AIR){for(let a=0;a<2;a++)for(let b=0;b<2;b++)PW(X+a,y-1,Z+b,WATER,MODE_STONE);}}
-    else if(reg==='crystal'){if(kind<0.55)cluster(CRYSTAL,3);else if(kind<0.8)patch(AMETH);}
-    else if(reg==='drip'){if(kind<0.6)PW(X,y,Z,DRIPU,MODE_SET);else if(kind<0.8)patch(CALCITE);}
-    else if(reg==='fungal'){
-      let room=true;for(let t=1;t<7&&room;t++)if(GW(X,y+t,Z)!==AIR)room=false;
-      if(kind<0.18&&room){const hgt=3+(q*3|0);for(let t=0;t<hgt;t++)PW(X,y+t,Z,MUSHSTEM,MODE_SET);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(Math.abs(a)+Math.abs(b)<4)PW(X+a,y+hgt,Z+b,GLOWCAP,MODE_AIR);}
-      else if(kind<0.65){patch(MOSSY);cluster(GLOWSHROOM,5);}}
-    else{if(kind<0.3)cluster(GLOWSHROOM,3);else if(kind<0.45)cluster(CRYSTAL,2);else if(kind<0.46&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.6)PW(X,y-1,Z,MOSSY,MODE_STONE);}
-  }
+  const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];
+      let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
+      const kind=rr(),q=rr();
+      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))return;
+      if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);return;}
+      if(y<100&&!(wild&&y>=26)){ // deep under a hold, its mines and near the lava: sparse life, crystals and scorched rock
+        if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
+        return;
+      }
+      const patch=(id)=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.7||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);};
+      const cluster=(id,n)=>{PW(X,y,Z,id,MODE_SET);for(let t=0;t<n;t++){const XX=X+((rr()*3|0)-1),ZZ=Z+((rr()*3|0)-1),bl=GW(XX,y-1,ZZ);if(bl>0&&SOLID[bl]&&GW(XX,y,ZZ)===AIR)PW(XX,y,ZZ,id,MODE_SET);}};
+      if(reg==='lush'){if(kind<0.45){patch(MOSSY);cluster(GLOWSHROOM,4);}else if(kind<0.75)patch(MOSSY);else if(kind<0.8&&GW(X,y,Z+1)===AIR&&GW(X+1,y,Z)===AIR){for(let a=0;a<2;a++)for(let b=0;b<2;b++)PW(X+a,y-1,Z+b,WATER,MODE_STONE);}}
+      else if(reg==='crystal'){if(kind<0.55)cluster(CRYSTAL,3);else if(kind<0.8)patch(AMETH);}
+      else if(reg==='drip'){if(kind<0.6)PW(X,y,Z,DRIPU,MODE_SET);else if(kind<0.8)patch(CALCITE);}
+      else if(reg==='fungal'){
+        let room=true;for(let t=1;t<7&&room;t++)if(GW(X,y+t,Z)!==AIR)room=false;
+        if(kind<0.18&&room){const hgt=3+(q*3|0);for(let t=0;t<hgt;t++)PW(X,y+t,Z,MUSHSTEM,MODE_SET);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(Math.abs(a)+Math.abs(b)<4)PW(X+a,y+hgt,Z+b,GLOWCAP,MODE_AIR);}
+        else if(kind<0.65){patch(MOSSY);cluster(GLOWSHROOM,5);}}
+      else{if(kind<0.3)cluster(GLOWSHROOM,3);else if(kind<0.45)cluster(CRYSTAL,2);else if(kind<0.46&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.6)PW(X,y-1,Z,MOSSY,MODE_STONE);}
+  };
+  for(let k=0;k<260;k++){const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)];floor(r2,X,Z,6+(r2()*Math.max(1,g-14)|0));}
+  // the natural deep caverns get floors of their own, in their region's character (D-023)
+  if(wild){const r6=rngAt(Math.floor(X0/CS),21,Math.floor(Z0/CS));for(let k=0;k<140;k++){const X=X0+(r6()*CS|0),Z=Z0+(r6()*CS|0);floor(r6,X,Z,26+(r6()*76|0));}}
   // walls: moss that glows, amethyst seams, calcite flowstone
   for(let k=0;k<200;k++){
     const X=X0+1+(r2()*(CS-2)|0),Z=Z0+1+(r2()*(CS-2)|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-16)|0),q=r2();
     if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z)))continue;
     for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const c=GW(X+a,y,Z+b);if(c!==STONE&&c!==DEEP)continue;
       let id=0;
-      if(y<100)id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
+      if(y<100&&!(wild&&y>=26))id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
       else if(reg==='lush')id=q<0.55?GLOWMOSS:q<0.85?MOSSY:0;
       else if(reg==='crystal')id=q<0.5?AMETH:0;
       else if(reg==='drip')id=q<0.45?CALCITE:0;
@@ -1790,12 +1863,13 @@ function fillCol(x,z,X,Z,o){
   }
 }
 // Writes from features are clipped to the chunk being generated
-let gx0=0,gz0=0;
+let gx0=0,gz0=0,genLit=false; // genLit: generation is building an inhabited hold, whose lamps still burn
 const MODE_SET=0,MODE_AIR=1,MODE_STONE=2,MODE_FILL=3;
 function PW(X,Y,Z,id,m){
   if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS||Y<0||Y>=H)return;
   const i=I(X-OX,Y,Z-OZ),cur=world[i];
   if(m===MODE_AIR&&cur!==AIR)return;if(m===MODE_STONE&&cur!==STONE&&cur!==DEEP)return;if(m===MODE_FILL&&SOLID[cur])return;
+  if(COLD_OF[id]&&!genLit)id=COLD_OF[id]; // the old lamps went out long ago (Q8)
   world[i]=id;lvl[i]=0;
 }
 function GW(X,Y,Z){if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS||Y<0||Y>=H)return -1;return world[I(X-OX,Y,Z-OZ)];}
@@ -1897,6 +1971,7 @@ function dungeonP(X,y,Z,r){
   PW(X,y+5,Z,GLOW,MODE_SET);PW(X+2,y+1,Z+2,CRATE,MODE_SET);PW(X-2,y+1,Z+2,TNT,MODE_SET);PW(X-2,y+1,Z-2,CRATE,MODE_SET);PW(X+2,y+1,Z-2,BOOKS,MODE_SET);
 }
 function flatOK(X,Z,g){for(let dx=-3;dx<=3;dx+=3)for(let dz=-3;dz<=3;dz+=3){if(!dx&&!dz)continue;if(Math.abs(colInfo(X+dx,Z+dz,T3).h-g)>2)return false;}return true;}
+const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
 // Features rooted in world chunk (WCX,WCZ); only the parts landing in the target chunk are written
 function veinP(x,y,z,t,n,r,ok){
   const a=r()*Math.PI,dx=Math.sin(a)*n/8,dz=Math.cos(a)*n/8,dy=(r()-0.5)*2;
@@ -1915,13 +1990,13 @@ function features(WCX,WCZ,self){
   const X0=WCX*CS,Z0=WCZ*CS,r=rngAt(WCX,11,WCZ);
   // Ore veins
   for(let v=0;v<48;v++){
-    let x=X0+(r()*CS|0),y=1+(r()*(H-2)|0),z=Z0+(r()*CS|0);const t0=r();let t,n,ok=true;
+    let x=X0+(r()*CS|0),y=1+(r()*ORE_SPAN|0),z=Z0+(r()*CS|0);const t0=r();let t,n,ok=true;
     if(t0<.5){t=COAL;n=10;ok=y>=90;}else if(t0<.78){ok=y<=260;t=IRON;n=7;}else if(t0<.92){ok=y<=150;t=GOLD;n=6;}else{ok=y<=70;t=DIAMOND;n=5;}
     veinP(x,y,z,t,n,r,ok);
   }
   const r3=rngAt(WCX,16,WCZ);
   for(let v=0;v<36;v++){
-    let x=X0+(r3()*CS|0),y=1+(r3()*(H-2)|0),z=Z0+(r3()*CS|0);const t0=r3();let t,n,ok;
+    let x=X0+(r3()*CS|0),y=1+(r3()*ORE_SPAN|0),z=Z0+(r3()*CS|0);const t0=r3();let t,n,ok;
     if(t0<.34){t=COPO;n=9;ok=y<=290;}else if(t0<.56){t=TINO;n=7;ok=y<=270;}else if(t0<.76){t=ZINO;n=7;ok=y<=240;}else if(t0<.9){t=PLATO;n=4;ok=y<=100;}else{t=TITO;n=4;ok=y<=60;}
     veinP(x,y,z,t,n,r3,ok);
   }
@@ -1987,7 +2062,7 @@ function genChunk(lcx,lcz){
   genDone[lcx+lcz*NCX]=1;
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyMines(WCX,WCZ);applyRuins(WCX,WCZ);
+  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));
@@ -2177,7 +2252,10 @@ function updateEntities(dt){for(const k of ENTITY_KINDS)if(k.update)k.update(dt)
 const entityWorld=e=>[e.x+OX,e.y,e.z+OZ];
 // ---- The dwarven mines: worked galleries on three levels and great stepped pits beneath the city
 const MINE_LV=[20,32,44];
-function mineZone(cx,cz){return fbm2(cx/9,cz/9,2,909.1)>-0.2;}
+// Mines spread out from each hold and fade with distance (Q12): solid under the hold, then patchy, gone by about twice its radius
+const mineZC=new Map();
+function mineZone(cx,cz){const k=ckey(cx,cz);let v=mineZC.get(k);if(v===undefined){if(mineZC.size>20000)mineZC.clear();const d=holdReach(holdNear(cx,cz),cx,cz);
+  v=d<1.15||(d<1.9&&0.5+0.6*fbm2(cx/4,cz/4,1,5703.1)>(d-1.15)/0.75);mineZC.set(k,v);}return v;}
 function galRow(cz,k){return hsh(cz,5100+k*7,17)<0.55;}
 function galCol(cx,k){return hsh(cx,5200+k*7,29)<0.55;}
 const pitC=new Map();
@@ -2297,10 +2375,13 @@ function dwDescent(cx,cz,yb,axX){
 // ---- what to call a place underground, by depth
 function layerName(y,X,Z){
   const m=mineName(X,y,Z);if(m)return m;
-  return y<12?'The Fire Below':y<58?'The Deep Mines':y<100?'The Dwarven Deeps':y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
+  if(y<12)return 'The Fire Below';
+  if(y<100){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(y>=58&&ruinZone(cx,cz))return 'The Deeps of '+holdOf(cx,cz).name;return mineZone(cx,cz)?'The Mines of '+holdOf(cx,cz).name:DEEP_NAMES[caveRegion(X,Z)];}
+  return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
 }
-const MB={c:SEA,lo:SEA-120,hi:SEA+120};
-function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
+// Only a band of heights around the player is meshed; from near the surface up, the band reaches the top of the world so peaks stay visible
+const MB={c:SEA,lo:SEA-120,hi:H-1};
+function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c>=SEA-60?H-1:c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
 const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
 function buildChunk(cx,cz){
   const O=newM(),Wt=newM();
@@ -2324,20 +2405,21 @@ function buildChunk(cx,cz){
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
+    const tL=b.emit?1:sky(x,y,z),tB=b.emit?2:bl(x,y,z); // torch and sconce shapes: full bright when lit, lit by their cell when cold
     if(b.sconce){
       let ox=0,oz=0;if(OPQ[get(x+1,y,z)])ox=1;else if(OPQ[get(x-1,y,z)])ox=-1;else if(OPQ[get(x,y,z+1)])oz=1;else if(OPQ[get(x,y,z-1)])oz=-1;
       const bx=x+0.5+ox*0.3,bz=z+0.5+oz*0.3;
       const box=(x0,y0,z0,x1,y1,z1,t,top8)=>{for(const F of FACES){const base=O.p.length/3,top=F.d[1]!==0;
-        for(const c of F.c){O.p.push(c[0]?x1:x0,c[1]?y1:y0,c[2]?z1:z0);pushUV(O.u,t,top8?(7+c[3]*2)/16:c[3],top?(top8?(8+c[4]*2)/16:c[4]):(top8?c[4]*10/16:c[4]));O.l.push(1);O.b.push(2);O.a.push(1);}
+        for(const c of F.c){O.p.push(c[0]?x1:x0,c[1]?y1:y0,c[2]?z1:z0);pushUV(O.u,t,top8?(7+c[3]*2)/16:c[3],top?(top8?(8+c[4]*2)/16:c[4]):(top8?c[4]*10/16:c[4]));O.l.push(tL);O.b.push(tB);O.a.push(1);}
         O.i.push(base,base+1,base+2,base+2,base+1,base+3);}};
-      box(bx-1/16,y+0.2,bz-1/16,bx+1/16,y+0.82,bz+1/16,53,true);
+      box(bx-1/16,y+0.2,bz-1/16,bx+1/16,y+0.82,bz+1/16,b.t[0],true);
       box(x+0.5+ox*0.42-(oz?0.12:0.04),y+0.15,z+0.5+oz*0.42-(ox?0.12:0.04),x+0.5+ox*0.42+(oz?0.12:0.04),y+0.32,z+0.5+oz*0.42+(ox?0.12:0.04),71,false);
       continue;
     }
     if(b.torch){
       const t=b.t[0];
       for(const F of FACES){const base=O.p.length/3,top=F.d[1]!==0;
-        for(const c of F.c){O.p.push(x+7/16+c[0]*2/16,y+c[1]*10/16,z+7/16+c[2]*2/16);pushUV(O.u,t,(7+c[3]*2)/16,top?(8+c[4]*2)/16:c[4]*10/16);O.l.push(1);O.b.push(2);O.a.push(1);}
+        for(const c of F.c){O.p.push(x+7/16+c[0]*2/16,y+c[1]*10/16,z+7/16+c[2]*2/16);pushUV(O.u,t,(7+c[3]*2)/16,top?(8+c[4]*2)/16:c[4]*10/16);O.l.push(tL);O.b.push(tB);O.a.push(1);}
         O.i.push(base,base+1,base+2,base+2,base+1,base+3);}
       continue;
     }
@@ -2889,7 +2971,7 @@ const RECIPES=[
   [BLAST,1,[[FURN,1],[227,5],[SBRICK,3]]],[228,2,[[216,2],[200,2]],'b'],
   [242,1,[[220,3],[201,2]]],[243,1,[[225,3],[201,2]]],[244,1,[[223,3],[201,2]]],[245,1,[[227,3],[201,2]]],[246,1,[[228,3],[201,2]]],[247,1,[[229,3],[201,2]]],
   [COPB,1,[[220,9]]],[BRONB,1,[[225,9]]],[BRASB,1,[[226,9]]],[STEELB,1,[[227,9]]],[TITB,1,[[228,9]]],[PLATB,1,[[229,9]]],
-  [LANTERN,1,[[226,4],[TORCH,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,1],[229,2],[GLASS,4]]],
+  [LANTERN,1,[[226,4],[TORCH,1]]],[LANTERN,1,[[DLANTERN,1],[200,1]]],[SCONCE,1,[[DSCONCE,1],[200,1]]],[TORCH,1,[[DTORCH,1],[200,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,1],[229,2],[GLASS,4]]],
   [BPTOOL,1,[[PLANKS,4],[220,1],[GLASS,1]]],
   [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f'],[251,1,[[PLANKS,2],[201,2]]]
 ];
@@ -3324,7 +3406,7 @@ function drawBar(quiet){
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[HOOK,FIREWORK,BPTOOL]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
     ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH]],['Building',[BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
-    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
+    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
@@ -3389,7 +3471,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:3,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
+  const ok=lsSet(worldKey(WORLD.id),{v:4,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }

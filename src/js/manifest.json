@@ -34,12 +34,16 @@
       "about": "Layered worm caves, caverns, sinkholes, flooding, cave lakes"
     },
     {
+      "path": "world/deep-caves.js",
+      "about": "The deep outside the holds: the lava sea, two tiers of natural caverns, underground rivers and lakes"
+    },
+    {
       "path": "world/underground-sites.js",
       "about": "Mineshafts, supply crates, points of interest, dripstone and springs"
     },
     {
       "path": "ruins/city-plan.js",
-      "about": "Dwarven city: districts, street plan, decay level, room shapes, shells, openings, decay passes"
+      "about": "Holds (one per region, D-023) and their city: districts, street plan, decay level, room shapes, shells, openings, decay passes"
     },
     {
       "path": "ruins/holds-and-lore.js",

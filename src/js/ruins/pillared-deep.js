@@ -4,7 +4,7 @@ function delfAt(cx,cz){
   const ax=Math.floor(cx/3)*3,az=Math.floor(cz/3)*3,key=ckey(ax,az);
   if(delfC.has(key))return delfC.get(key);if(delfC.size>20000)delfC.clear();
   let d=null;
-  if(hsh(ax,2001,az)<0.14){let ok=true;for(let a=0;a<3&&ok;a++)for(let b=0;b<3&&ok;b++)if(!ruinZone(ax+a,az+b))ok=false;
+  if(hsh(ax,2001,az)<0.05){let ok=true;for(let a=0;a<3&&ok;a++)for(let b=0;b<3&&ok;b++)if(!ruinZone(ax+a,az+b))ok=false;
     if(ok)d={ax:ax,az:az,x0:ax*CS,x1:ax*CS+47,z0:az*CS,z1:az*CS+47,cx:ax*CS+24,cz:az*CS+24};}
   delfC.set(key,d);return d;
 }
@@ -101,7 +101,7 @@ function dwTidy(){
     else if((id===COBBLE||id===DWCRACK)&&bl===AIR&&!isS(GW(X,y+1,Z))){let side=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(isS(GW(X+a,y,Z+b)))side=true;if(!side)PW(X,y,Z,AIR,MODE_SET);}
   }
   // chains and lanterns: keep only what hangs from a ceiling, stands on a floor, or hangs off a kept chain
-  const chain=(id)=>id===STEELB||id===LANTERN,anchorS=(id)=>id>0&&SOLID[id]&&id!==STEELB;
+  const chain=(id)=>id===STEELB||id===LANTERN||id===DLANTERN,anchorS=(id)=>id>0&&SOLID[id]&&id!==STEELB;
   const runs=[];
   for(let Z=gz0;Z<gz0+CS;Z++)for(let X=gx0;X<gx0+CS;X++){let y=yA;while(y<=yB){if(!chain(GW(X,y,Z))){y++;continue;}let y1=y;while(y1+1<=yB&&chain(GW(X,y1+1,Z)))y1++;
     let ok=anchorS(GW(X,y1+1,Z))||anchorS(GW(X,y-1,Z));

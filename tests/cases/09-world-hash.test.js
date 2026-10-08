@@ -10,6 +10,6 @@ const LAYERS=[['fire-below',0,12],['mines',13,57],['dwarven-city',58,101],['grea
 for(const [name,y0,y1] of LAYERS)snapshot('blocks:'+name+':y'+y0+'-'+y1,band(y0,y1));
 {const f=fnv();for(let i=0;i<W*D;i++){f.add(ground[i]);f.add(biome[i]);f.add(hm[i]);}snapshot('columns:ground-biome-heightmap',f.hex());}
 {const f=fnv();for(let i=0;i<VOL;i++)f.add(BLK[i]);snapshot('light:block-light',f.hex());}
-// Far beyond the window: terrain height and land over a 64 x 64 grid spanning 16000 blocks, and the city plan over 81 x 81 cells
+// Far beyond the window: terrain height and land over a 64 x 64 grid spanning 16000 blocks, and the city plan over 81 x 81 cells around the hold of region (0,0)
 {const f=fnv(),o={};for(let a=0;a<64;a++)for(let b=0;b<64;b++){const X=-8000+a*250+17,Z=-8000+b*250+29;colInfo(X,Z,o);f.add(o.h);f.add(o.b);}snapshot('plan:terrain-16k',f.hex());}
-{const f=fnv();for(let a=-40;a<=40;a++)for(let b=-40;b<=40;b++)for(let L=0;L<2;L++){const t=ruinType(a,b,L)||'-';for(let k=0;k<t.length;k++)f.add(t.charCodeAt(k));f.add(ruinActive(a,b,L)?1:0);f.add(megaAt(a,b,L)?1:0);for(const [dx,dz] of DIRS4)f.add(edgeOpen(a,b,dx,dz,L)?1:0);}snapshot('plan:city-81x81-cells',f.hex());}
+{const f=fnv(),HH=holdAt(0,0);f.add(HH.cx);f.add(HH.cz);for(let a=HH.cx-40;a<=HH.cx+40;a++)for(let b=HH.cz-40;b<=HH.cz+40;b++)for(let L=0;L<2;L++){const t=ruinType(a,b,L)||'-';for(let k=0;k<t.length;k++)f.add(t.charCodeAt(k));f.add(ruinActive(a,b,L)?1:0);f.add(megaAt(a,b,L)?1:0);for(const [dx,dz] of DIRS4)f.add(edgeOpen(a,b,dx,dz,L)?1:0);}snapshot('plan:city-81x81-cells',f.hex());}

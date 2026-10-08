@@ -1,10 +1,11 @@
 // Writes from features are clipped to the chunk being generated
-let gx0=0,gz0=0;
+let gx0=0,gz0=0,genLit=false; // genLit: generation is building an inhabited hold, whose lamps still burn
 const MODE_SET=0,MODE_AIR=1,MODE_STONE=2,MODE_FILL=3;
 function PW(X,Y,Z,id,m){
   if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS||Y<0||Y>=H)return;
   const i=I(X-OX,Y,Z-OZ),cur=world[i];
   if(m===MODE_AIR&&cur!==AIR)return;if(m===MODE_STONE&&cur!==STONE&&cur!==DEEP)return;if(m===MODE_FILL&&SOLID[cur])return;
+  if(COLD_OF[id]&&!genLit)id=COLD_OF[id]; // the old lamps went out long ago (Q8)
   world[i]=id;lvl[i]=0;
 }
 function GW(X,Y,Z){if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS||Y<0||Y>=H)return -1;return world[I(X-OX,Y,Z-OZ)];}

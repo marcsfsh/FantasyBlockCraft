@@ -1,6 +1,9 @@
 // ---- The dwarven mines: worked galleries on three levels and great stepped pits beneath the city
 const MINE_LV=[20,32,44];
-function mineZone(cx,cz){return fbm2(cx/9,cz/9,2,909.1)>-0.2;}
+// Mines spread out from each hold and fade with distance (Q12): solid under the hold, then patchy, gone by about twice its radius
+const mineZC=new Map();
+function mineZone(cx,cz){const k=ckey(cx,cz);let v=mineZC.get(k);if(v===undefined){if(mineZC.size>20000)mineZC.clear();const d=holdReach(holdNear(cx,cz),cx,cz);
+  v=d<1.15||(d<1.9&&0.5+0.6*fbm2(cx/4,cz/4,1,5703.1)>(d-1.15)/0.75);mineZC.set(k,v);}return v;}
 function galRow(cz,k){return hsh(cz,5100+k*7,17)<0.55;}
 function galCol(cx,k){return hsh(cx,5200+k*7,29)<0.55;}
 const pitC=new Map();

@@ -3,36 +3,38 @@ function caveRegion(X,Z){const a=fbm2(X/110,Z/110,1,3501.1),b=fbm2(X/110,Z/110,1
 const CAVE_NAMES={lush:'Mossy Caves',crystal:'Crystal Caves',drip:'Dripstone Caves',fungal:'Fungal Caves',plain:'Caves',deep:'Deep Caves'};
 function caveLife(X0,Z0,r2){
   cavernDetail(X0,Z0,r2);
-  const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8);
+  const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8),wild=!zone&&!mineZone(Math.floor(X0/CS),Math.floor(Z0/CS));
   // floors
-  for(let k=0;k<260;k++){
-    const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],y0=6+(r2()*Math.max(1,g-14)|0);
-    let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
-    const kind=r2(),q=r2();
-    if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))continue;
-    if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);continue;}
-    if(y<100){ // deep: sparse life, crystals and scorched rock
-      if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
-      continue;
-    }
-    const patch=(id)=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.7||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);};
-    const cluster=(id,n)=>{PW(X,y,Z,id,MODE_SET);for(let t=0;t<n;t++){const XX=X+((r2()*3|0)-1),ZZ=Z+((r2()*3|0)-1),bl=GW(XX,y-1,ZZ);if(bl>0&&SOLID[bl]&&GW(XX,y,ZZ)===AIR)PW(XX,y,ZZ,id,MODE_SET);}};
-    if(reg==='lush'){if(kind<0.45){patch(MOSSY);cluster(GLOWSHROOM,4);}else if(kind<0.75)patch(MOSSY);else if(kind<0.8&&GW(X,y,Z+1)===AIR&&GW(X+1,y,Z)===AIR){for(let a=0;a<2;a++)for(let b=0;b<2;b++)PW(X+a,y-1,Z+b,WATER,MODE_STONE);}}
-    else if(reg==='crystal'){if(kind<0.55)cluster(CRYSTAL,3);else if(kind<0.8)patch(AMETH);}
-    else if(reg==='drip'){if(kind<0.6)PW(X,y,Z,DRIPU,MODE_SET);else if(kind<0.8)patch(CALCITE);}
-    else if(reg==='fungal'){
-      let room=true;for(let t=1;t<7&&room;t++)if(GW(X,y+t,Z)!==AIR)room=false;
-      if(kind<0.18&&room){const hgt=3+(q*3|0);for(let t=0;t<hgt;t++)PW(X,y+t,Z,MUSHSTEM,MODE_SET);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(Math.abs(a)+Math.abs(b)<4)PW(X+a,y+hgt,Z+b,GLOWCAP,MODE_AIR);}
-      else if(kind<0.65){patch(MOSSY);cluster(GLOWSHROOM,5);}}
-    else{if(kind<0.3)cluster(GLOWSHROOM,3);else if(kind<0.45)cluster(CRYSTAL,2);else if(kind<0.46&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.6)PW(X,y-1,Z,MOSSY,MODE_STONE);}
-  }
+  const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];
+      let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
+      const kind=rr(),q=rr();
+      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))return;
+      if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);return;}
+      if(y<100&&!(wild&&y>=26)){ // deep under a hold, its mines and near the lava: sparse life, crystals and scorched rock
+        if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
+        return;
+      }
+      const patch=(id)=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.7||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);};
+      const cluster=(id,n)=>{PW(X,y,Z,id,MODE_SET);for(let t=0;t<n;t++){const XX=X+((rr()*3|0)-1),ZZ=Z+((rr()*3|0)-1),bl=GW(XX,y-1,ZZ);if(bl>0&&SOLID[bl]&&GW(XX,y,ZZ)===AIR)PW(XX,y,ZZ,id,MODE_SET);}};
+      if(reg==='lush'){if(kind<0.45){patch(MOSSY);cluster(GLOWSHROOM,4);}else if(kind<0.75)patch(MOSSY);else if(kind<0.8&&GW(X,y,Z+1)===AIR&&GW(X+1,y,Z)===AIR){for(let a=0;a<2;a++)for(let b=0;b<2;b++)PW(X+a,y-1,Z+b,WATER,MODE_STONE);}}
+      else if(reg==='crystal'){if(kind<0.55)cluster(CRYSTAL,3);else if(kind<0.8)patch(AMETH);}
+      else if(reg==='drip'){if(kind<0.6)PW(X,y,Z,DRIPU,MODE_SET);else if(kind<0.8)patch(CALCITE);}
+      else if(reg==='fungal'){
+        let room=true;for(let t=1;t<7&&room;t++)if(GW(X,y+t,Z)!==AIR)room=false;
+        if(kind<0.18&&room){const hgt=3+(q*3|0);for(let t=0;t<hgt;t++)PW(X,y+t,Z,MUSHSTEM,MODE_SET);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(Math.abs(a)+Math.abs(b)<4)PW(X+a,y+hgt,Z+b,GLOWCAP,MODE_AIR);}
+        else if(kind<0.65){patch(MOSSY);cluster(GLOWSHROOM,5);}}
+      else{if(kind<0.3)cluster(GLOWSHROOM,3);else if(kind<0.45)cluster(CRYSTAL,2);else if(kind<0.46&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.6)PW(X,y-1,Z,MOSSY,MODE_STONE);}
+  };
+  for(let k=0;k<260;k++){const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)];floor(r2,X,Z,6+(r2()*Math.max(1,g-14)|0));}
+  // the natural deep caverns get floors of their own, in their region's character (D-023)
+  if(wild){const r6=rngAt(Math.floor(X0/CS),21,Math.floor(Z0/CS));for(let k=0;k<140;k++){const X=X0+(r6()*CS|0),Z=Z0+(r6()*CS|0);floor(r6,X,Z,26+(r6()*76|0));}}
   // walls: moss that glows, amethyst seams, calcite flowstone
   for(let k=0;k<200;k++){
     const X=X0+1+(r2()*(CS-2)|0),Z=Z0+1+(r2()*(CS-2)|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-16)|0),q=r2();
     if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z)))continue;
     for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const c=GW(X+a,y,Z+b);if(c!==STONE&&c!==DEEP)continue;
       let id=0;
-      if(y<100)id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
+      if(y<100&&!(wild&&y>=26))id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
       else if(reg==='lush')id=q<0.55?GLOWMOSS:q<0.85?MOSSY:0;
       else if(reg==='crystal')id=q<0.5?AMETH:0;
       else if(reg==='drip')id=q<0.45?CALCITE:0;

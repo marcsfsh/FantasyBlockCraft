@@ -18,6 +18,7 @@ function colInfoBase(X,Z,o){
   let h=SEA+6+cont*34+hill*(4+10*rough);
   const mf=sstep(0.08,0.32,mtn);
   h+=mf*mf*(32+18*(0.5-Math.abs(rid)));
+  const pk=sstep(0.22,0.5,mtn);if(pk>0)h+=pk*pk*(70+40*fbm2(X/150,Z/150,2,7301.3)); // the high peaks at the hearts of the ranges (the world is 512 tall, D-023)
   const warmF=sstep(-0.26,-0.14,temp),sw=sstep(0.04,0.2,hum)*sstep(-0.08,0.04,temp)*(1-mf); // sw: damp, mild shadowed forest
   const dw=sstep(0.02,0.26,temp)*(1-mf)*(1-sw);
   h=h*(1-dw)+(SEA+14+hill*9+Math.abs(rid)*6)*dw; // heath moors: open uplands

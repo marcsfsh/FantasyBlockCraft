@@ -5,6 +5,6 @@ info('sampled solid blocks',solid);
 assert(solid>1000,'world has terrain');
 frame(16);frame(33);assert(true,'frames run without throwing');
 assert(BIOMES.length===12,'twelve biome names');
-assert(H===384&&SEA===310,'world height and sea level');
+assert(H===512&&SEA===310,'world height 512 and sea level 310 (D-023)');
 assert(RECIPES.every(r=>!BANNED.has(r[0])),'no banned items are craftable');
 assert(typeof townPlan==='undefined'&&typeof roadAt==='undefined','the old town and road generator is gone');

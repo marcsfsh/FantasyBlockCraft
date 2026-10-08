@@ -48,3 +48,15 @@ Same machine type and command. The deepstone line in `fillCol` is now computed o
 
 genChunk medians fell from about 10.7 to 11.7 ms to about 8.1 to 8.8 ms (roughly 25%); one streamed chunk from about 12.3 to 13.6 ms to about 9.4 to 11 ms. Meshing is unchanged.
 
+## After M2a (2026-10-08, 0.5.0)
+
+The cloud VM this session ran on was slower than the one above (Intel Xeon @ 2.80 GHz, 4 cores, Node v22.22.0), so 0.4.0 (`main`) and 0.5.0 were measured back to back on it with `npm run bench` (one run per seed).
+
+| Build | Seed | Startup | genChunk | Stream 1 chunk | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 0.4.0 | 123456789 | 2359 | 13.98 / 14.24 / 16.5 / 17.63 | 15.34 / 15.95 / 19.37 / 21.55 | 23.21 / 23.17 / 32.34 / 38.53 | 101 |
+| 0.4.0 | 4242 | 2189 | 12.59 / 11.85 / 17.02 / 18.5 | 13.64 / 12.71 / 19.84 / 22.52 | 23.52 / 23.46 / 29.42 / 48.16 | 114 |
+| 0.5.0 | 123456789 | 2085 | 13.23 / 13.98 / 16.8 / 21.95 | 17.69 / 18.12 / 20.01 / 25.41 | 22.02 / 20.61 / 33.38 / 88.89 | 97 |
+| 0.5.0 | 4242 | 2378 | 14.79 / 15.68 / 18.44 / 25.65 | 17.59 / 18.57 / 21.52 / 31.28 | 19.14 / 17.66 / 27.38 / 75.61 | 155 |
+
+The world is 512 tall (columns are a third longer) and every chunk runs the new deep pass (lava sea, caverns, lakes, rivers). Generation and streaming medians rose by roughly 0 to 30% depending on the seed (noise on this VM is about 10 to 20%), meshing at the surface did not rise, and full lighting is within noise but has more lava to light. M3 targets all of these.

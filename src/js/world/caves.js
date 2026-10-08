@@ -71,7 +71,8 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=10?LAVA:AIR;lvl[i]=0;}
+          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}
     }
