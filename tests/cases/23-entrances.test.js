@@ -17,6 +17,7 @@ for(const [rx,rz] of [[0,0],[-1,0]]){const h=holdAt(rx,rz),gs=holdGates(h);
   const x=X-OX,z=Z-OZ,top=gateTop(X,Z);
   // start on the avenue floor just east of the shaft, walk; success when standing on the terrace
   let sy=RUIN_Y[1];const w=walkFrom(x+5,sy,z,400000);const hit=[[5,0],[-5,0],[0,5],[0,-5]].some(([a,b])=>w.seen.has(w.key(x+a,top+1,z+b)));
+  if(g===gs[0])assert(world[I(x+4,top+1,z-4)]===WAYSTONE&&world[I(x+4,top+2,z-4)]===WAYSTONE,'the first gate of '+holdOf(h.cx,h.cz).name+' has an ancient waystone');
   n++;if(hit)ok++;gateInfo.push(holdOf(h.cx,h.cz).name+' gate at X '+X+' Z '+Z+' terrace y'+(top)+(hit?' walkable':' BLOCKED'));}
 }
 info(gateInfo.join('; '));

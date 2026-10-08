@@ -87,6 +87,7 @@ function dwGate(cx,cz,r){ // cx,cz: block coordinates of the cell's centre
   for(let k=-5;k<=5;k++){PW(cx+k,top+7,cz-5,DWBRICK,MODE_SET);PW(cx+k,top+7,cz+5,DWBRICK,MODE_SET);}
   PW(cx,top+7,cz-5,GOLDB,MODE_SET);PW(cx,top+7,cz+5,GOLDB,MODE_SET);PW(cx,top+6,cz-5,RUNE,MODE_SET);PW(cx,top+6,cz+5,RUNE,MODE_SET);
   for(const [a,b] of [[-6,0],[6,0],[0,-6],[0,6]])brazierP(cx+a,top+1,cz+b);
+  {const gs=holdGates(holdNear(Math.floor(cx/CS),Math.floor(cz/CS)));if(gs.length&&gs[0].cx*CS+8===cx&&gs[0].cz*CS+8===cz){PW(cx+4,top+1,cz-4,WAYSTONE,MODE_SET);PW(cx+4,top+2,cz-4,WAYSTONE,MODE_SET);PW(cx+4,top+3,cz-4,CALCITE,MODE_SET);}} // the hold's waystone
   for(let k=0;k<6;k++){const a=(r()*13|0)-6,b=(r()*13|0)-6;if(Math.max(Math.abs(a),Math.abs(b))>=4&&r()<0.6*curI)PW(cx+a,top+1,cz+b,r()<0.5?COBBLE:GRAVEL,MODE_AIR);}
 }
 // A chasm room: a deep drop to the lava with stone bridges along open corridors

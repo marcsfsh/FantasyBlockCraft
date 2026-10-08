@@ -74,6 +74,10 @@
       "about": "Chunk clipping, trees, barrows, standing stones, willows, ice spikes, old sealed rooms"
     },
     {
+      "path": "world/surface-sites.js",
+      "about": "Ruined watchtowers, keeps and castles, old roads between them and to hold gates, ancient waystones"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants and genChunk pipeline"
     },

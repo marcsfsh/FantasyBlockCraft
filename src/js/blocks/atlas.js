@@ -161,6 +161,7 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const e=x<2||y<2||x>13||y>13,bar=x===7||x===8,c=px(80,x,y);
     P(192,x,y,e||bar?[c[0]*0.62,c[1]*0.58,c[2]*0.5]:sh([58,54,50],(x*7+y*3)%5*3-Math.hypot(x-7.5,y-7.5)*2));
     const g=px(34,x,y),m=(g[0]+g[1]+g[2])/3;P(194,x,y,[m*0.42+30,m*0.4+28,m*0.36+26]);}
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=px(3,x,y),rune=(x===7||x===8)&&y>2&&y<13||(y===5||y===10)&&x>4&&x<11;P(195,x,y,rune?[120,190,230]:[c[0]*0.85+10,c[1]*0.85+12,c[2]*0.85+18]);} // waystone: worn stone with a glowing rune
   clear(193);for(let y=6;y<16;y++)for(let x=7;x<=8;x++)P(193,x,y,y<=7?[38,32,30]:y===8?[64,50,40]:sh([112,82,46],x===8?-18:0));
   actx.putImageData(im,0,0);
 })();
