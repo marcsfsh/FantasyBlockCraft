@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.7.0 (2026-10-08): M3a performance
+
+No change to the world or the save format: 0.6.0 worlds keep working.
+
+### Game
+- **Smoother streaming.** New terrain is built a little each frame (about half a millisecond per frame on the test machine) instead of a whole chunk in one frame, which caused the stutter when moving.
+- **Lighter meshing.** Above ground, cave interiors far below the surface are no longer meshed (about 77% fewer vertices at spawn, chunks mesh four to five times faster). Underground, meshing reaches as far as the cave fog setting lets you see.
+- **No long freeze on waypoint travel** or respawning far away: the area right around you appears at once and the rest streams in.
+- **Auto view distance**, the new default (Near, Normal and Far are still there): it starts from your device and adjusts to keep the frame rate up.
+- The info panel shows frame time (average, worst, and the game's own work), the auto view distance and how much terrain is still streaming.
+- The minimap redraws ten times a second, autosave no longer rewrites the save every 5 seconds, and the explored map's memory is capped.
+- Fixed: after loading or travelling, some light deep underground could be a level too dark.
+
+### Tooling
+- `GEN_STEPS` and `genJob` (staged generation), worm points indexed by chunk, `meshFloor` and `MESH_DEEP`, `AUTO_VIEW` and `autoView`; the benchmark gains a per-frame streaming step.
+- New tests 27-streaming, 28-meshing, 29-view. D-025.
+
 ## 0.6.0 (2026-10-08): M2b world restructure, part two
 
 Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v5`.

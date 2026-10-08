@@ -63,7 +63,7 @@ Removed in M1 (0.3.0) for the setting: the town and road generator, the power ne
 - The world is endless horizontally. A window of `W` x `D` = 224 x 224 columns (14 x 14 chunks of 16) and `H` = 512 blocks (sea level 310, D-023) is kept in memory around the player.
 - World coordinates are `X, Y, Z`. Window coordinates are `x = X - OX`, `z = Z - OZ`. World chunk coordinates are `WCX, WCZ`; window chunk indexes are `cx, cz`.
 - `world` (block ids), `lvl` (water level), `BLK` (block light) are flat typed arrays indexed by `I(x, y, z)`. Per-column arrays include `ground`, `hm`, `biome`.
-- Moving more than a chunk from the centre slides the window (`shiftWindow`) and queues the new strip of chunks (`genQ`), which `processGenQ` generates a few milliseconds per frame.
+- Moving more than a chunk from the centre slides the window (`shiftWindow`) and queues the new strip of chunks (`genQ`). `processGenQ` works on one chunk at a time (`genJob`): its generation steps (`GEN_STEPS`), then its light, then its map tile, within a per-frame budget (D-025). Travel (`regenerateAll`) makes the 3 x 3 chunks around the arrival at once and streams the rest.
 
 ## Generation rules (keep these true)
 
@@ -73,6 +73,8 @@ Removed in M1 (0.3.0) for the setting: the town and road generator, the power ne
 4. **Write modes.** `MODE_SET` overwrites, `MODE_AIR` writes only into air, `MODE_STONE` replaces only stone and deepstone, `MODE_FILL` fills.
 
 ## Chunk generation pipeline (`genChunk`)
+
+`genChunk` runs every step of `GEN_STEPS` at once; streaming runs them a few per frame. The order is the same either way:
 
 Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural caverns, deep lakes and rivers) -> `applyWorms` (layered caves, caverns, cave mouths, flooding) -> `applyShafts` (mineshafts) -> `applyPOIs` (camps, cellars, old ruins, each with a passage to its cave) -> `applyRemains` (other peoples' remains) -> `applyMines` (dwarven mines) -> `applyRuins` (the hold's city, ending with the tidy pass; both with `genLit` set in inhabited holds) -> `features` for the 3 x 3 surrounding chunks (ores, pockets, boulders, barrows, stone rings, trees, ruined stairways, dungeon rooms) -> `applySites` (ruined surface sites and waystones) -> hold gates (last, so nothing cuts their stair) -> `drainCaveWater` -> `plants` -> `applyRoads` -> saved player edits (water next to them is queued to flow again).
 
@@ -84,7 +86,7 @@ Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural 
 ## Meshing and rendering
 
 - Each chunk builds an opaque and a water mesh with smooth light and ambient occlusion. Chunks wait for all their neighbours to exist before meshing, so each is built once.
-- Only a vertical band of about 120 blocks above and below the player is meshed (`MB`, `meshBand`); from 60 blocks under sea level up, the band reaches the top of the world so peaks are never cut off. Moving far up or down rebuilds the band.
+- Only a vertical band around the player is meshed (`MB`, `meshBand`). Above ground (`MB.surf`) it reaches the top of the world, and each chunk stops `MESH_DEEP` blocks under the lowest sky-exposed ground in and around it (`meshFloor`), with a dark quad there; underground the band follows the cave fog setting. Changing band or mode rebuilds the chunks, nearest first, within a per-frame budget.
 - Chunks beyond the fog are hidden; the texture atlas is a power-of-two with mipmaps.
 
 ## Saves

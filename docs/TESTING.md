@@ -36,6 +36,9 @@
 | 24-places | Dungeon rooms and points of interest are rarer, all four dungeon kinds occur, and every room in two windows opens onto its cave |
 | 25-remains | All four kinds of remains occur, whole and as leftovers, about one region in four; the nearest of each stands built in an open cavern |
 | 26-surface | Most regions have a ruined site of each kind; roads link nearly every site and are laid near them; the nearest of each kind stands, rests on the ground and has its waystone |
+| 27-streaming | Streaming one step per frame (with window slides mid-chunk) equals whole-chunk generation; streamed light equals a full recompute; typical step under the 4 ms budget; travel makes only 3 x 3 chunks at once; the explored map is capped |
+| 28-meshing | The surface floor at least halves the vertices at spawn and never cuts above 24 blocks under open ground; cave mode and its band switch with some give |
+| 29-view | Auto is the default view; it grows while smooth, shrinks when frames slow, on 60 Hz and 120 Hz screens |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

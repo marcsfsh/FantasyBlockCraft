@@ -145,6 +145,8 @@ The biggest change, split (D-023) into **M2a**, done in 0.5.0: height, holds, mi
 
 ## M3: Performance and visuals (Q74)
 
+Split (D-025) into **M3a**, done in 0.7.0 (staged streaming, lighter meshing, travel without the freeze, throttles, auto view distance, frame readout), and **M3b** (sky light spread, the livelier look, smaller vertex formats).
+
 - **Frame rate as high as possible on the Ally X and desktop (Q33).**
   - Spread chunk generation and lighting across frames.
   - Cut mesh geometry: skip faces enclosed in caves, smaller vertex formats, possibly greedy meshing.
