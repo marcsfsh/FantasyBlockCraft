@@ -1,6 +1,6 @@
 ---
 name: worldgen-change
-description: Rules and procedure for any change that can alter Fantasy BlockCraft world generation (terrain, biomes, caves, underground sites, ruins, mines, features, ores, plants). Covers determinism, PW/GW, random-stream invariants, choosing tests, the world-hash snapshot update policy and the save key decision.
+description: Rules and procedure for any change that can alter Fantasy BlockCraft world generation (terrain, biomes, caves, underground sites, ruins, mines, features, ores, plants). Covers determinism, PW/GW, random-stream invariants, choosing tests, the world-hash snapshot update policy and the save key bump.
 ---
 
 # World generation change
@@ -29,8 +29,8 @@ Use `info()` to print the metric you are changing, before and after, and quote b
 - **Meant to change it:** confirm only the expected names fail, then `npm run test:update-snapshots`, then `npm test`. Commit the snapshot with the code change. List changed names in the PR.
 - Never update the snapshot in a commit without the generation change that caused it (exception: a Node upgrade alone, in its own commit).
 
-## Save key decision
-Saves keep only player edits by world coordinate (`SAVE_KEY` in `src/js/core/config.js`). If blocks move where players are likely to have built or dug (surface, caves, ruins), bump the version suffix (`-v1` to `-v2`) so old edits do not land in the wrong places. Adding rare decoration deep underground may not need it. Either way, add a `docs/DECISIONS.md` entry stating bump or no bump and why; note that old saves are retired if bumped.
+## Save key
+Saves keep only player edits by world coordinate (`SAVE_KEY` in `src/js/core/config.js`). The owner's rule (D-019): saves always yield to updates. Any change that alters generated blocks bumps the version suffix (`-v1` to `-v2`), with no migration. Mention the bump in `docs/DECISIONS.md` and the CHANGELOG Game line.
 
 ## Done
-Determinism and snapshot outcome as above, targeted metrics quoted, full suite and both builds passing, DECISIONS/CHANGELOG (and DESIGN if the world reads differently) updated, PR says where to look in-game (seed 123456789 and 4242 starting areas make good comparisons).
+Determinism and snapshot outcome as above, `SAVE_KEY` bumped, targeted metrics quoted, full suite and both builds passing, DECISIONS/CHANGELOG (and DESIGN if the world reads differently) updated, PR says where to look in-game (seed 123456789 and 4242 starting areas make good comparisons).

@@ -1,15 +1,18 @@
 # Fantasy BlockCraft
 
-A voxel sandbox in a long-abandoned, Tolkien-esque world. Read `docs/DESIGN.md` before changing content and `docs/ARCHITECTURE.md` before changing code. Planned work is in `docs/ROADMAP.md`. This file only points the way; the docs are the source of truth.
+A voxel sandbox in a long-abandoned, Tolkien-esque world. Read `docs/DESIGN.md` before changing content and `docs/ARCHITECTURE.md` before changing code. Planned work is in `docs/MILESTONES.md`. This file only points the way; the docs are the source of truth.
 
 ## The game in one paragraph
 
-Old lands on the surface; a deep, layered underground that ends in a ruined dwarven city, its mines and the Fire Below. Pillars (from `docs/DESIGN.md`):
+A Minecraft-style game in a medieval fantasy world, for one player (the owner). Old lands on the surface; a deep, layered underground. **The direction changed on 2026-10-08** (D-019): read `docs/DIRECTION_QA.md` and `docs/MILESTONES.md` before planning work. Pillars going forward:
 
-- **Long abandoned.** No living towns, no roads, nothing modern: no machines, power or modern equipment.
-- **Original names.** Evoke the setting; never use Tolkien's names.
-- **Ancient and decaying.** Everything the old peoples built is broken, dusty and decrepit, yet the ruins stay walkable.
-- **Deep and layered underground.** Going down feels like going back in time (layer table in `docs/DESIGN.md`).
+- **A dwindling age.** Like Tolkien's late Third Age: ancient ruins and long-abandoned places alongside lived-in settlements, camps and travelers (arriving in later milestones). Nothing modern: no machines, power or gunpowder-era gadgets beyond the dwarven Blasting Keg.
+- **Original names.** Evoke the setting; never use Tolkien's names. Each people gets its own naming style.
+- **Peaceful creatures, gentle survival.** No hostile creatures for now; death and hunger stay forgiving.
+- **Deep and layered underground.** Going down feels like going back in time. Dwarven holds are rare, vast discoveries, not a layer under everything (from M2).
+- **Saves yield to updates.** Breaking saves is always acceptable; bump `SAVE_KEY` and move on.
+
+The code still reflects the old "long abandoned" design (a city under the whole world) until M2 lands; `docs/DESIGN.md` describes what is built.
 
 ## How sessions run
 
@@ -53,7 +56,7 @@ Details of the test harness: `docs/TESTING.md`.
 2. **Chunk-local writes.** Write through `PW(X,Y,Z,id,mode)`, which clips to the chunk being generated (`gx0`, `gz0`), and read through `GW`. Only per-column passes that loop over the chunk's own columns (`fillCol`, `plants`) touch `world` directly. A structure spanning chunks is recomputed from its anchor by every chunk it touches.
 3. **Random-stream invariants.** When a generator skips work for a chunk it cannot reach, it must still draw the same number of values from its stream (see `veinP` in `src/js/world/chunk-generation.js`), or every later structure from that stream shifts. Adding or removing a draw changes the world: treat it as a generation change.
 4. **Write modes.** `MODE_SET`, `MODE_AIR`, `MODE_STONE`, `MODE_FILL`; pick the weakest that works.
-5. **Save key policy.** Saves store only edits by world coordinate. If a change moves terrain or structures, bump `SAVE_KEY` in `src/js/core/config.js` and log it in `docs/DECISIONS.md`. If you decide not to bump it, log that decision and the reason too.
+5. **Save key policy.** Saves store only edits by world coordinate. Any change to generation or the save format bumps `SAVE_KEY` in `src/js/core/config.js`; saves always yield to updates (D-019), with no migration. Note the bump in `docs/DECISIONS.md` and `CHANGELOG.md`.
 6. **Lighting stays exact.** Block light never enters chunks that are not generated (`genDone`), so streaming light equals a full recompute. `tests/cases/02-lighting.test.js` enforces exact equality; never loosen it.
 
 ## Workflow for every change
@@ -73,7 +76,7 @@ Details of the test harness: `docs/TESTING.md`.
 
 - `npm test` passes in full, with the output quoted in the PR.
 - `npm run build` succeeds for both targets, and `npm run check` confirms the committed root `fantasy-blockcraft.html` matches the source.
-- If generation was not meant to change, the world-hash snapshot still matches. If it was, the snapshot update is deliberate and explained, and the save key decision is logged.
+- If generation was not meant to change, the world-hash snapshot still matches. If it was, the snapshot update is deliberate and explained, and `SAVE_KEY` is bumped.
 - Docs and `CHANGELOG.md` updated where something durable changed.
 - The PR says what to check in-game.
 

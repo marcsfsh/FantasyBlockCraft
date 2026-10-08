@@ -6,6 +6,7 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 ## Unreleased
 
 ### Tooling
+- Recorded the direction interview (`docs/DIRECTION_QA.md`, 76 questions) and the build order (`docs/MILESTONES.md`); logged D-019; listed the bugs found by a full code read in `docs/KNOWN_ISSUES.md`.
 - The playable single-file build is now committed at the repository root (`fantasy-blockcraft.html`), so the latest game can be downloaded from GitHub without Actions. `npm run build` refreshes it; `npm run check` and a Claude Code Stop hook catch a stale copy.
 - Imported the modular source into this repository.
 - Added `CLAUDE.md` and this changelog.
