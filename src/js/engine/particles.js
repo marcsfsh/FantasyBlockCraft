@@ -44,6 +44,7 @@ function explode(cx,cy,cz){
     const x=bx+dx,y=by+dy,z=bz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;
     const id=world[I(x,y,z)];if(!id||id===BEDROCK||id===OBSID||BL[id].liquid)continue;
     if(id===TNT){prime(x,y,z,0.5+Math.random()*1.0);continue;}
+    if(id===GRAVE||id===CRATE||id===DWCHEST||id===BARREL)continue; // blasts never destroy graves or containers (their contents would be lost or teleported)
     if(Math.random()<0.35){const c=TAVG[BL[id].t[2]];for(let k=0;k<2;k++)spawnP(x+.5,y+.5,z+.5,dx*2.2+(Math.random()-.5)*3,dy*1.5+3+Math.random()*4,dz*2.2+(Math.random()-.5)*3,c,1+Math.random()*0.8,16);}
     setBlock(x,y,z,AIR);
   }

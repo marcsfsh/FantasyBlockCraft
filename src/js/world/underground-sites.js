@@ -35,7 +35,11 @@ const LOOT=[[203,8,24,10],[204,1,5,5],[200,4,12,10],[220,1,4,7],[223,1,4,6],[225
   [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[268,1,3,3],[267,2,6,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[WIRE,4,8,2],[270,2,5,3]];
 function openCrate(X,Y,Z){
   const dw=world[I(X,Y,Z)]===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(X+OX,Y,Z+OZ)]||DWLOOT):world[I(X,Y,Z)]===BARREL?BARRELLOOT:LOOT,WX=X+OX,WZ=Z+OZ,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0),got=[];let tot=0;for(const l of TBL)tot+=l[3];
-  for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));addItem(it[0],n);got.push(n+' '+nameOf(it[0]));}
+  const loot=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));loot.push([it[0],n]);got.push(n+' '+nameOf(it[0]));}
+  // Creative only looks inside; survival takes everything or nothing (the roll depends only on position, so it is the same next time)
+  if(!SURV()){toast('Inside: '+got.join(', '));return;}
+  if(!fitsAll(loot)){toast('Not enough room to take what is inside');return;}
+  for(const [id,n] of loot)addItem(id,n);
   setBlock(X,Y,Z,AIR,true);breakFx(X,Y,Z,CRATE,12);sfxBlock(PLANKS,false);tone(900,1500,0.15,0.1);
   toast('Found '+got.join(', '));drawBar(true);
 }

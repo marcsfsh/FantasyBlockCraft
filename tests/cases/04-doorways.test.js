@@ -1,4 +1,4 @@
-// @seed 4242
+// @seed 4242 777
 // Every open doorway between two built rooms can be walked through (steps of one block allowed).
 while(genQ.length)processGenQ();
 const Y0=54,Y1=104,NY=Y1-Y0;

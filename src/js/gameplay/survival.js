@@ -16,7 +16,7 @@ function hurt(n,cause){
   tone(220,120,0.18,0.25);const f=$('hurt');f.style.opacity=0.55;setTimeout(()=>{f.style.opacity=0;},120);
   drawStats();if(hp<=0)die(cause);
 }
-const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',starved:'You starved',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
+const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
 function die(cause){
   dead=true;hold=-1;G.on=false;
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
@@ -174,14 +174,20 @@ function jumpPress(){
 }
 function camDir(){return new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);}
 function eyePos(){return new THREE.Vector3(PL.x,PL.y+EYE,PL.z);}
+// Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
+function useBlock(th){
+  const f={[TRADER]:openTrade,[SLUICE]:collectSluice,[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore,[COALGEN]:useGenerator}[th.id];
+  if(!f)return false;f(th.x,th.y,th.z);return true;
+}
 function act(btn){
   const held=curId();
+  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===HOOK){fireHook();return;}
   if(btn===2&&held===FIREWORK){launchFirework();return;}
   if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2&&held===250){usePan();return;}
-  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&th.id===TRADER){openTrade(th.x,th.y,th.z);return;}if(th&&th.id===SLUICE){collectSluice(th.x,th.y,th.z);return;}if(th&&th.id===GRAVE){openGrave(th.x,th.y,th.z);return;}if(th&&(th.id===CRATE||th.id===DWCHEST||th.id===BARREL)){openCrate(th.x,th.y,th.z);return;}if(th&&th.id===LECTERN){openLore(th.x,th.y,th.z);return;}if(th&&th.id===COALGEN){useGenerator(th.x,th.y,th.z);return;}if(th&&CONDUCT[th.id]&&th.id!==WIRE&&held!==WIRE&&!(held>0&&held<100)){powerStatus(I(th.x,th.y,th.z));return;}
+  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&CONDUCT[th.id]&&th.id!==WIRE&&held!==WIRE&&!(held>0&&held<100)){powerStatus(I(th.x,th.y,th.z));return;}
     if(held===BPTOOL){if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
   if(btn===0&&SURV())return;
   const hit=raycast(eyePos(),camDir(),6);if(!hit)return;
@@ -228,6 +234,8 @@ addEventListener('keydown',e=>{
   keys[e.code]=true;
   if(!ready)return;
   if(e.code==='KeyE'&&!e.repeat){invOpen?closeInv():openInv();return;}
+  // Esc closes the inventory; browsers refuse pointer lock from Esc, so show the pause menu rather than re-locking
+  if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
   if(!playing)return;
   if(e.code.startsWith('Digit')){const n=+e.code.slice(5);if(n>=1&&n<=9){sel=n-1;drawBar();}}
   if(e.code==='KeyF'&&!e.repeat)toggleFly();
@@ -261,6 +269,7 @@ document.addEventListener('pointerlockchange',()=>{
   if(document.pointerLockElement===canvas){playing=true;$('overlay').style.display='none';}
   else{playing=false;hold=-1;if(!invOpen&&!dead)showPause();}
 });
+document.addEventListener('pointerlockerror',()=>{playing=false;hold=-1;if(!invOpen&&!dead)showPause();}); // a refused lock falls back to the pause menu
 function lockOrPlay(){
   audioInit();
   if(TOUCH||PAD.active){playing=true;$('overlay').style.display='none';}

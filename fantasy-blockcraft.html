@@ -161,6 +161,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
     <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Lantern</button><button data-v="2">Bright</button></div>
     <div class="seg" id="wxseg">Weather <button data-v="1">On</button><button data-v="0">Off</button></div>
+    <div class="seg" id="touchseg">Touch <button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div>
     <button id="sndbtn">Sound on</button>
   </div>
   <div class="btns"><button class="big go" id="play" disabled>Play</button><button class="big" id="photo">Photo mode</button><input id="seedin" placeholder="Seed (optional)" aria-label="Seed for the new world" autocomplete="off"><button class="big" id="newworld">New world</button></div>
@@ -173,19 +174,21 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const TOUCH=window.matchMedia('(pointer:coarse)').matches;
+// Touch layout: the Touch setting (auto/on/off, read before settings load) or, on auto, a coarse pointer with no precise pointer at all
+const TOUCH=(p=>p==='on'||(p!=='off'&&window.matchMedia('(pointer:coarse)').matches&&!window.matchMedia('(any-pointer:fine)').matches))((lsGet('blockcraft-settings-v1')||{}).touch);
 if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=384,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v1',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v2',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+lsDel('fantasy-blockcraft-save-v1'); // retired save format: free its storage
 const saved=lsGet(SAVE_KEY);
 const nextSeed=lsGet('blockcraft-nextseed');if(nextSeed!==null)lsDel('blockcraft-nextseed');
 const SEED=saved&&saved.seed?saved.seed:(nextSeed||((Math.random()*2147483000|0)+1));
-const settings=Object.assign({cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
 
 // Seeded random and noise
@@ -745,7 +748,11 @@ const LOOT=[[203,8,24,10],[204,1,5,5],[200,4,12,10],[220,1,4,7],[223,1,4,6],[225
   [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[268,1,3,3],[267,2,6,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[WIRE,4,8,2],[270,2,5,3]];
 function openCrate(X,Y,Z){
   const dw=world[I(X,Y,Z)]===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(X+OX,Y,Z+OZ)]||DWLOOT):world[I(X,Y,Z)]===BARREL?BARRELLOOT:LOOT,WX=X+OX,WZ=Z+OZ,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0),got=[];let tot=0;for(const l of TBL)tot+=l[3];
-  for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));addItem(it[0],n);got.push(n+' '+nameOf(it[0]));}
+  const loot=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));loot.push([it[0],n]);got.push(n+' '+nameOf(it[0]));}
+  // Creative only looks inside; survival takes everything or nothing (the roll depends only on position, so it is the same next time)
+  if(!SURV()){toast('Inside: '+got.join(', '));return;}
+  if(!fitsAll(loot)){toast('Not enough room to take what is inside');return;}
+  for(const [id,n] of loot)addItem(id,n);
   setBlock(X,Y,Z,AIR,true);breakFx(X,Y,Z,CRATE,12);sfxBlock(PLANKS,false);tone(900,1500,0.15,0.1);
   toast('Found '+got.join(', '));drawBar(true);
 }
@@ -873,7 +880,7 @@ const DISTRICTS={
 function districtOf(cx,cz){const v=fbm2(cx/7,cz/7,2,919.3);return v<-0.1?'sacred':v<0.03?'residential':v<0.15?'industrial':'royal';}
 const ROOM_HALF={cistern:7,kitchen:7,armory:7,statuary:7,avenue:7,plaza:7,minehall:7,chasm:7,hall:7,forge:7,archive:7,barracks:7,vault:7,storage:7,crypt:7,machine:7,farm:7,collapsed:7,throne:7,junction:7,stair:7,quarters:7,office:7,tavern:7,bath:7,games:7,arena:7,shrine:7,mineworks:7};
 const ROOM_H={cistern:10,kitchen:8,armory:8,statuary:11,avenue:12,plaza:12,minehall:10,chasm:9,hall:13,forge:10,archive:10,barracks:8,vault:7,storage:8,crypt:9,machine:11,farm:8,collapsed:10,throne:14,junction:9,stair:8,quarters:8,office:8,tavern:9,bath:9,games:9,arena:11,shrine:12,mineworks:4};
-const RUIN_NAMES={gardens:'The Royal Gardens',colosseum:'The Great Arena',cistern:'Dwarven Cistern',kitchen:'Dwarven Kitchens',armory:'Dwarven Armory',statuary:'Hall of the Ancestors',delf:'The Hall of a Thousand Pillars',avenue:'Dwarven Avenue',plaza:'Dwarven Plaza',minehall:'Dwarven Mine Hall',junction:'Dwarven Gallery',chasm:'Bridge over the Deep',gate:'Dwarven Gate',hall:'Dwarven Great Hall',forge:'Dwarven Forge',archive:'Dwarven Archive',barracks:'Dwarven Barracks',vault:'Dwarven Treasury',storage:'Dwarven Storehouse',crypt:'Dwarven Crypt',machine:'Dwarven Machine Hall',farm:'Dwarven Mushroom Farm',collapsed:'Collapsed Chamber',throne:'Dwarven Throne Room',junction:'Dwarven Crossroads',stair:'Dwarven Stairwell',
+const RUIN_NAMES={gardens:'The Royal Gardens',colosseum:'The Great Arena',cistern:'Dwarven Cistern',kitchen:'Dwarven Kitchens',armory:'Dwarven Armory',statuary:'Hall of the Ancestors',delf:'The Hall of a Thousand Pillars',avenue:'Dwarven Avenue',plaza:'Dwarven Plaza',minehall:'Dwarven Mine Hall',chasm:'Bridge over the Deep',gate:'Dwarven Gate',hall:'Dwarven Great Hall',forge:'Dwarven Forge',archive:'Dwarven Archive',barracks:'Dwarven Barracks',vault:'Dwarven Treasury',storage:'Dwarven Storehouse',crypt:'Dwarven Crypt',machine:'Dwarven Machine Hall',farm:'Dwarven Mushroom Farm',collapsed:'Collapsed Chamber',throne:'Dwarven Throne Room',junction:'Dwarven Crossroads',stair:'Dwarven Stairwell',
   quarters:'Dwarven Sleeping Quarters',office:'Dwarven Counting House',tavern:'Dwarven Alehouse',bath:'Dwarven Bathhouse',games:'Dwarven Games Hall',arena:'Dwarven Sparring Pit',shrine:'Dwarven Shrine',mineworks:'Dwarven Mine Works',
   greathall:'The Colossal Hall',grandthrone:'The King\u2019s Throne Hall',foundry:'Dwarven Grand Foundry',temple:'Dwarven Grand Temple',grandlibrary:'Dwarven Grand Library',quarry:'Dwarven Deep Quarry'};
 const megaC=new Map();
@@ -1255,7 +1262,7 @@ function loreText(X,Y,Z){
     'We broke into a cavern of living crystal today. The Rune Masons say it hums at night. Queen '+h.queen+' has forbidden anyone to cut it.',
     'Third warning from the lower shafts. The lava rises a hand each season. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' have begun to seal the deepest gates.',
     'Recipe of the Black Vat: mushroom caps, wheat from the surface traders, and patience. Never serve it to a king before noon.',
-    'The titanium seams lie below the second deep, near the fire. Only steel bites them. The old picks of '+h.name+' were forged with runes for this.',
+    'The moonsilver seams lie below the second deep, near the fire. Only steel bites them. The old picks of '+h.name+' were forged with runes for this.',
     'We are leaving. The roof of the eastern hall has come down twice this month. King '+h.king+' says we will return to '+h.name+' when the stone is quiet.',
     'Account of the treasury, year '+(h.year+3)+': gold enough to plate the throne twice over. The rest is kept beneath the floor where only the stewards know.',
     'To whoever reads this: the cracked tiles are not all damage. Some of us hid our savings under them.',
@@ -1384,7 +1391,7 @@ function buildDelf(d,WCX,WCZ){
   for(let k=0;k<12;k++){const X=gx0+(hsh(WCX,2100+k,WCZ)*16|0),Z=gz0+(hsh(WCX,2200+k,WCZ)*16|0);if(GW(X,y0,Z)===AIR&&GW(X,y0-1,Z)>0&&SOLID[GW(X,y0-1,Z)])PW(X,y0,Z,k%3?GRAVEL:BONES,MODE_SET);}
 }
 // Heavier decay: several collapses per room, gutted furniture, bones and cobwebs
-const FURNISH=new Set([PLANKS,BARREL,BOOKS,WOOLR,WOOLB,WOOLG,WOOLY,WOOLW,LECTERN,FURN,STEELB,BRASB,COPB,BRONB]);
+const FURNISH=new Set([PLANKS,BARREL,BOOKS,WOOLR,WOOLB,WOOLG,WOOLY,WOOLW,FURN,STEELB,BRASB,COPB,BRONB]);
 function dwRuin(cx,cz,yb,h,hh,I,seed){
   const q=(k)=>hsh(seed,k,cz*7+cx);
   const events=1+Math.floor(I*3);
@@ -1523,9 +1530,9 @@ function applyRuins(WCX,WCZ){
   }
   if(holeAt(WCX,WCZ))dwHole(cx,cz);
   for(const f of postFns)f();postFns.length=0;
-  // keep a walkable way from every doorway to the middle of the room: decay rubble along it is cleared
+  // keep a walkable way from every doorway to the middle of the room: decay rubble along it is cleared, up to and including the wall line
   for(const [cx,cz,fy,h,WX,WZ,L] of roomRecs)for(const [dx,dz] of DIRS4){if(!edgeOpen(WX,WZ,dx,dz,L))continue;
-    for(let k=0;k<h;k++)for(let w=-1;w<=1;w++){const X=cx+dx*k+(dz?w:0),Z=cz+dz*k+(dx?w:0);for(let y=fy;y<fy+3;y++){const c=GW(X,y,Z);if(c===GRAVEL||c===COBBLE||c===DWCRACK)PW(X,y,Z,AIR,MODE_SET);}}}
+    for(let k=0;k<=h;k++)for(let w=-1;w<=1;w++){const X=cx+dx*k+(dz?w:0),Z=cz+dz*k+(dx?w:0);for(let y=fy;y<fy+3;y++){const c=GW(X,y,Z);if(c===GRAVEL||c===COBBLE||c===DWCRACK)PW(X,y,Z,AIR,MODE_SET);}}}
   roomRecs.length=0;
   dwTidy();
   if(lightwellAt(WCX,WCZ))dwLightwell(gx0+8,gz0+8);
@@ -1789,6 +1796,7 @@ function fillCol(x,z,X,Z,o){
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6))top=SNOWG;
   biome[ci]=o.lake?9:b;ground[ci]=h;islTop[ci]=o.isl;townCol[ci]=o.town?1:0;entCol[ci]=o.ent?1:0;
+  let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){
     let id=AIR;
     if(y<=h){
@@ -1796,7 +1804,7 @@ function fillCol(x,z,X,Z,o){
       else{
         if(y===h)id=top;
         else if(y>h-1-soil)id=b===1?SAND:(b===0?(h>SEA-5?SAND:DIRT):DIRT);
-        else{const dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:STONE;}
+        else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:STONE;}
         if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;
       }
     }else if(y<=Math.max(SEA,o.lake))id=(y===Math.max(SEA,o.lake)&&o.cold)?ICE:WATER;
@@ -2422,7 +2430,7 @@ function genChunk(lcx,lcz){
   if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}});
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
     const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
-    for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(world[i]===SLUICE)sluices.add(i);else if(CONDUCT[world[i]])powerBlocks.add(i);}
+    for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(world[i]===SLUICE)sluices.add(i);else if(isFarm(world[i]))farms.add(i);else if(CONDUCT[world[i]])powerBlocks.add(i);}
   }
 }
 const roof=id=>id&&OPQ[id]&&!BL[id].leaf&&id!==LAVA;
@@ -2799,8 +2807,9 @@ function buildChunk(cx,cz){
 
 // Editing
 const edits=new Map(),editsByChunk=new Map();let saveDirty=false;
-const KOFF=1048576,wkey=(X,y,Z)=>((X+KOFF)*2097152+(Z+KOFF))*128+y,ckey=(cx,cz)=>(cx+65536)*131072+(cz+65536);
-function keyXYZ(k){const y=k%128,r=(k-y)/128,Z=r%2097152-KOFF,X=Math.floor(r/2097152)-KOFF;return[X,y,Z];}
+// World key: X and Z in 21 bits each, y in 9 bits (heights 0 to 511), so keys stay exact below 2^53
+const KOFF=1048576,KY=512,wkey=(X,y,Z)=>((X+KOFF)*2097152+(Z+KOFF))*KY+y,ckey=(cx,cz)=>(cx+65536)*131072+(cz+65536);
+function keyXYZ(k){const y=k%KY,r=(k-y)/KY,Z=r%2097152-KOFF,X=Math.floor(r/2097152)-KOFF;return[X,y,Z];}
 function iToKey(i){const x=i%W,t=(i/W)|0;return wkey(x+OX,(t/D)|0,(t%D)+OZ);}
 function keyToI(k){const c=keyXYZ(k),x=c[0]-OX,z=c[2]-OZ;if(x<0||z<0||x>=W||z>=D)return -1;return I(x,c[1],z);}
 function storeEdit(k,v){edits.set(k,v);const c=keyXYZ(k),ck=ckey(Math.floor(c[0]/CS),Math.floor(c[2]/CS));let m=editsByChunk.get(ck);if(!m)editsByChunk.set(ck,m=new Map());m.set(k,v);}
@@ -2858,7 +2867,7 @@ function setBlock(x,y,z,v,force){
   calcHM(x,z);mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
   if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
-  if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);
+  if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
   if(CONDUCT[old]&&!CONDUCT[v])powerBlocks.delete(i);if(CONDUCT[v])powerBlocks.add(i);
   if(old===BATTERY&&v!==BATTERY)batCharge.delete(iToKey(i));if(old===COALGEN&&v!==COALGEN)genFuel.delete(iToKey(i));
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}
@@ -2971,7 +2980,7 @@ const padCur=document.createElement('div');padCur.id='padcur';
 padCur.innerHTML='<svg viewBox="0 0 24 24" width="30" height="30"><path d="M3 2l15 9-6.5 1.5L15 20l-3 1.5-3.5-7.5L3 19z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 document.body.appendChild(padCur);
 function padDZ(x,y,d){const m=Math.hypot(x,y);if(m<d)return[0,0];const s=Math.min(1,(m-d)/(1-d))/m;return[x*s,y*s];}
-function setPadActive(on){if(PAD.active===on)return;PAD.active=on;document.body.classList.toggle('gp',on);if(!on){padCur.style.display='none';PAD.lx=PAD.ly=0;PAD.jump=PAD.down=PAD.sprint=false;}updateKeysHelp();}
+function setPadActive(on){if(PAD.active===on)return;PAD.active=on;document.body.classList.toggle('gp',on);if(!on){padCur.style.display='none';PAD.lx=PAD.ly=0;PAD.jump=PAD.down=PAD.sprint=false;if(playing&&!TOUCH&&document.pointerLockElement!==canvas){playing=false;hold=-1;if(!invOpen&&!dead)showPause();}}updateKeysHelp();}
 function padRumble(strong,weak,ms){const g=PAD.gp;if(!PAD.active||!g||!g.vibrationActuator)return;try{g.vibrationActuator.playEffect('dual-rumble',{duration:ms,strongMagnitude:strong,weakMagnitude:weak});}catch(e){}}
 addEventListener('gamepadconnected',()=>toast('Controller connected'));
 addEventListener('gamepaddisconnected',()=>{setPadActive(false);toast('Controller disconnected');});
@@ -3093,6 +3102,7 @@ function explode(cx,cy,cz){
     const x=bx+dx,y=by+dy,z=bz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;
     const id=world[I(x,y,z)];if(!id||id===BEDROCK||id===OBSID||BL[id].liquid)continue;
     if(id===TNT){prime(x,y,z,0.5+Math.random()*1.0);continue;}
+    if(id===GRAVE||id===CRATE||id===DWCHEST||id===BARREL)continue; // blasts never destroy graves or containers (their contents would be lost or teleported)
     if(Math.random()<0.35){const c=TAVG[BL[id].t[2]];for(let k=0;k<2;k++)spawnP(x+.5,y+.5,z+.5,dx*2.2+(Math.random()-.5)*3,dy*1.5+3+Math.random()*4,dz*2.2+(Math.random()-.5)*3,c,1+Math.random()*0.8,16);}
     setBlock(x,y,z,AIR);
   }
@@ -3191,6 +3201,8 @@ function addItem(id,n){
   for(let i=0;i<36&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
   saveDirty=true;return n;
 }
+// Would every [id,count] in the list fit in the inventory? (addItem's rules, on a copy)
+function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<36&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
 const asList=x=>Array.isArray(x)?x:[x];
 function countOf(ids){ids=asList(ids);let n=0;for(const q of inv)if(q&&ids.includes(q.id))n+=q.c;return n;}
 function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}
@@ -3562,7 +3574,7 @@ function hurt(n,cause){
   tone(220,120,0.18,0.25);const f=$('hurt');f.style.opacity=0.55;setTimeout(()=>{f.style.opacity=0;},120);
   drawStats();if(hp<=0)die(cause);
 }
-const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',starved:'You starved',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
+const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
 function die(cause){
   dead=true;hold=-1;G.on=false;
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
@@ -3720,14 +3732,20 @@ function jumpPress(){
 }
 function camDir(){return new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);}
 function eyePos(){return new THREE.Vector3(PL.x,PL.y+EYE,PL.z);}
+// Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
+function useBlock(th){
+  const f={[TRADER]:openTrade,[SLUICE]:collectSluice,[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore,[COALGEN]:useGenerator}[th.id];
+  if(!f)return false;f(th.x,th.y,th.z);return true;
+}
 function act(btn){
   const held=curId();
+  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===HOOK){fireHook();return;}
   if(btn===2&&held===FIREWORK){launchFirework();return;}
   if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2&&held===250){usePan();return;}
-  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&th.id===TRADER){openTrade(th.x,th.y,th.z);return;}if(th&&th.id===SLUICE){collectSluice(th.x,th.y,th.z);return;}if(th&&th.id===GRAVE){openGrave(th.x,th.y,th.z);return;}if(th&&(th.id===CRATE||th.id===DWCHEST||th.id===BARREL)){openCrate(th.x,th.y,th.z);return;}if(th&&th.id===LECTERN){openLore(th.x,th.y,th.z);return;}if(th&&th.id===COALGEN){useGenerator(th.x,th.y,th.z);return;}if(th&&CONDUCT[th.id]&&th.id!==WIRE&&held!==WIRE&&!(held>0&&held<100)){powerStatus(I(th.x,th.y,th.z));return;}
+  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&CONDUCT[th.id]&&th.id!==WIRE&&held!==WIRE&&!(held>0&&held<100)){powerStatus(I(th.x,th.y,th.z));return;}
     if(held===BPTOOL){if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
   if(btn===0&&SURV())return;
   const hit=raycast(eyePos(),camDir(),6);if(!hit)return;
@@ -3774,6 +3792,8 @@ addEventListener('keydown',e=>{
   keys[e.code]=true;
   if(!ready)return;
   if(e.code==='KeyE'&&!e.repeat){invOpen?closeInv():openInv();return;}
+  // Esc closes the inventory; browsers refuse pointer lock from Esc, so show the pause menu rather than re-locking
+  if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
   if(!playing)return;
   if(e.code.startsWith('Digit')){const n=+e.code.slice(5);if(n>=1&&n<=9){sel=n-1;drawBar();}}
   if(e.code==='KeyF'&&!e.repeat)toggleFly();
@@ -3807,6 +3827,7 @@ document.addEventListener('pointerlockchange',()=>{
   if(document.pointerLockElement===canvas){playing=true;$('overlay').style.display='none';}
   else{playing=false;hold=-1;if(!invOpen&&!dead)showPause();}
 });
+document.addEventListener('pointerlockerror',()=>{playing=false;hold=-1;if(!invOpen&&!dead)showPause();}); // a refused lock falls back to the pause menu
 function lockOrPlay(){
   audioInit();
   if(TOUCH||PAD.active){playing=true;$('overlay').style.display='none';}
@@ -3888,7 +3909,7 @@ function drawBar(quiet){
     ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH]],['Building',[BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Power',[CHARGER,WIRE,COALGEN,WHEEL,SOLAR,BATTERY,LAMP_OFF,EFURN]],['Dwarven',[RAILX,RAILZ,BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,TRADER,MINT,CRUSHER,SLUICE,WHEAT,TORCH,GLOW,LANTERN,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
-  const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
+  const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
     ids.forEach(id=>{const nm=nameOf(id);const el=document.createElement('button');el.className='inv-item';el.title=nm;el.setAttribute('aria-label',nm);el.appendChild(icon(id));
       el.addEventListener('mouseenter',()=>{$('invname').textContent=nm;});
@@ -3904,8 +3925,8 @@ $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 
 // Overlay and settings
 const KEYS_HTML=TOUCH
-  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Tap TNT</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Hook</b> tap to fire, tap again to let go</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
-  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>Left click</b> break, or light TNT</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Hook</b> right click to swing, again to let go</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
+  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Hook</b> tap to fire, tap again to let go</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
+  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Hook</b> right click to swing, again to let go</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
@@ -3915,6 +3936,7 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
 function drawMode(){[...$('modeseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===mode));}
 $('modeseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&v!==mode){setMode(v);toast(v==='survival'?'Survival mode':'Creative mode');}});segBind('caveseg','cave',v=>+v);segBind('wxseg','weather',v=>v==='1');
 const sndBtn=$('sndbtn');function drawSnd(){sndBtn.textContent=settings.sound?'Sound on':'Sound off';}drawSnd();
@@ -4011,7 +4033,7 @@ function respawn(){
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
-  torches.clear();sluices.clear();powerBlocks.clear();netInfo.clear();poweredEF.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
+  torches.clear();sluices.clear();farms.clear();powerBlocks.clear();netInfo.clear();poweredEF.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
   for(const p of primed)scene.remove(p.m);primed.length=0;for(const f of falling)scene.remove(f.m);falling.length=0;rockets.length=0;parts.length=0;G.on=false;
   BLK.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;
@@ -4055,7 +4077,7 @@ function shiftWindow(dx,dz){
   }
   {const g2=new Uint8Array(NCX*NCZ);for(let z=0;z<NCZ;z++)for(let x=0;x<NCX;x++){const ox=x+cdx,oz=z+cdz;if(ox>=0&&oz>=0&&ox<NCX&&oz<NCZ)g2[x+z*NCX]=genDone[ox+oz*NCX];}genDone.set(g2);}
   const nd=[];dirty.forEach(c=>{const x=c%NCX-cdx,z=((c/NCX)|0)-cdz;if(x>=0&&z>=0&&x<NCX&&z<NCZ)nd.push(x+z*NCX);});dirty.clear();nd.forEach(c=>dirty.add(c));
-  shiftIdx(torches,dx,dz);shiftIdx(sluices,dx,dz);shiftIdx(powerBlocks,dx,dz);netInfo.clear();poweredEF.clear();shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
+  shiftIdx(torches,dx,dz);shiftIdx(sluices,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(powerBlocks,dx,dz);netInfo.clear();poweredEF.clear();shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
   if(lbox){lbox[0]-=dx;lbox[1]-=dx;lbox[4]-=dz;lbox[5]-=dz;}
   // queue the new strip; it is generated a chunk or two per frame
   const keep=genQ.filter(c=>(c[0]-=cdx,c[1]-=cdz,c[0]>=0&&c[1]>=0&&c[0]<NCX&&c[1]<NCZ));genQ.length=0;keep.forEach(c=>genQ.push(c));
@@ -4147,8 +4169,8 @@ function updWeather(dt,now){
   if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;flash=1;const dl=0.4+Math.random()*2.5;burst(1.5,'lowpass',170,0.5,0.7,dl);burst(0.7,'lowpass',520,0.6,0.35,dl);buzz(30);}}
   rainAmt+=(((settings.weather&&raining)?1:0)-rainAmt)*Math.min(1,dt*0.25);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),bi=(bx>=0&&bz>=0&&bx<W&&bz<D)?biome[bx+W*bz]:2;
-  snowing=bi===6||(bi===5&&PL.y>90);
-  const n=(bi===4||bi===7)?0:Math.floor(NR*rainAmt),len=snowing?0.09:0.75;
+  snowing=bi===6||(bi===5&&PL.y>=SEA+33); // High Mountains snow above their snow line (fillCol)
+  const n=Math.floor(NR*rainAmt),len=snowing?0.09:0.75;
   rainMat.color.setHex(snowing?0xffffff:0xa4b8d4);rainMat.opacity=snowing?0.9:0.5;
   for(let i=0;i<n;i++){
     const p=drops[i];
@@ -4160,7 +4182,7 @@ function updWeather(dt,now){
   if(windGain){const sp=Math.hypot(PL.vx,PL.vy,PL.vz);windGain.gain.value=settings.sound&&playing?Math.max(0,Math.min(1,(sp-7)/18))*0.1:0;}
   const hx=Math.floor(PL.x),hy=Math.floor(PL.y+EYE),hz=Math.floor(PL.z);
   if(playing&&sky(hx,hy,hz)<0.35){dripT-=dt;if(dripT<=0){dripT=3+Math.random()*7;const f=1500+Math.random()*900;tone(f,f*0.6,0.09,0.05);tone(f,f*0.6,0.09,0.018,0.22);}}
-  if(rainGain){const cx=Math.floor(PL.x),cz=Math.floor(PL.z),covered=PL.y+1<colTop(cx,cz);rainGain.gain.value=settings.sound&&bi!==4&&bi!==7&&!snowing?rainAmt*0.06*(covered?0.35:1):0;}
+  if(rainGain){const cx=Math.floor(PL.x),cz=Math.floor(PL.z),covered=PL.y+1<colTop(cx,cz);rainGain.gain.value=settings.sound&&!snowing?rainAmt*0.06*(covered?0.35:1):0;}
 }
 
 let flameT=0;
@@ -4196,13 +4218,16 @@ function farmTick(x,y,z,top,up){
   if(CROP_NEXT[up]){const lit=sky(x,y+1,z)*U.skyMul.value>0.45||bl(x,y+1,z)>0.5;if(lit&&Math.random()<(wet?0.45:0.15))setBlock(x,y+1,z,CROP_NEXT[up],true);}
   else if(up===AIR&&!wet&&Math.random()<0.08)setBlock(x,y,z,DIRT,true);
 }
+// Farmland anywhere (under roofs, underground) is tracked here, so crops grow wherever they have light
+const farms=new Set(),isFarm=id=>id===FARM_D||id===FARM_W;
 function randomTicks(){
+  for(const i of farms){const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;if(Math.abs(x-PL.x)>24||Math.abs(z-PL.z)>24||y>=H-1)continue;if(Math.random()<40/2304)farmTick(x,y,z,world[i],world[i+W*D]);} // same odds as a ticked surface column
   for(let k=0;k<40;k++){
     const x=Math.floor(PL.x+(Math.random()-.5)*48),z=Math.floor(PL.z+(Math.random()-.5)*48);
     if(x<1||z<1||x>=W-1||z>=D-1)continue;
     const y=hm[x+W*z];if(y<1||y>=H-1)continue;
     const top=world[I(x,y,z)],up=world[I(x,y+1,z)];
-    if(top===FARM_D||top===FARM_W){farmTick(x,y,z,top,up);continue;}
+    if(isFarm(top))continue; // ticked above
     if(top===GRASS&&snowing&&rainAmt>0.5&&up===AIR&&(biome[x+W*z]===5||biome[x+W*z]===6)){setBlock(x,y,z,SNOWG,true);continue;}
     if(top!==DIRT||OPQ[up]||BL[up].liquid)continue;
     let g=0;for(let dx=-1;dx<=1&&!g;dx++)for(let dz=-1;dz<=1&&!g;dz++)for(let dy=-1;dy<=1;dy++){const id=get(x+dx,y+dy,z+dz);if(id===GRASS||id===SNOWG){g=id;break;}}
@@ -4281,7 +4306,7 @@ function frame(now){
   if(ready&&playing){update(dt);
     const ex=PL.x-W/2,ez=PL.z-D/2;
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
-  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;updTNT(dt);updFalling(dt);updRockets(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
+  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updTNT(dt);updFalling(dt);updRockets(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
   camera.position.set(PL.x,PL.y+EYE,PL.z);
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}
@@ -4334,7 +4359,7 @@ function frame(now){
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=hg[ci]>=0&&yy>hm[ci]?'Sky Island':(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):townAt(bx+OX,bz+OZ,0)?'Town':BIOMES[biome[ci]];
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
-    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nTNT lit: '+primed.length:'')+infoExtra();}
+    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
 }
 let lastWhere='',lastWhereT=0;
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}
