@@ -20,6 +20,9 @@ if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWo
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const saved=(d=>d&&d.v===5&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
+// Auto view distance (view -1, the default; M3, D-025): start from the device, then follow the frame rate.
+// AUTO_VIEW.far moves between 56 and 104 blocks; the near fog is 55% of it.
+const AUTO_VIEW={far:(()=>{const m=navigator.deviceMemory,c=navigator.hardwareConcurrency||4;return TOUCH||(m&&m<4)?64:c>=8?96:84;})(),refresh:1/60,t:0,n:0,sum:0,work:0,fast:1};
 

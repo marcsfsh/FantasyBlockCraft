@@ -161,7 +161,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
   <div class="set">
     <label>Look speed <input type="range" id="sens" min="0.3" max="2.5" step="0.1"></label>
     <label>Field of view <input type="range" id="fovr" min="60" max="100" step="1"></label>
-    <div class="seg" id="viewseg">View <button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
+    <div class="seg" id="viewseg">View <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
     <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
     <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Lantern</button><button data-v="2">Bright</button></div>
@@ -201,8 +201,11 @@ if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWo
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const saved=(d=>d&&d.v===5&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
+// Auto view distance (view -1, the default; M3, D-025): start from the device, then follow the frame rate.
+// AUTO_VIEW.far moves between 56 and 104 blocks; the near fog is 55% of it.
+const AUTO_VIEW={far:(()=>{const m=navigator.deviceMemory,c=navigator.hardwareConcurrency||4;return TOUCH||(m&&m<4)?64:c>=8?96:84;})(),refresh:1/60,t:0,n:0,sum:0,work:0,fast:1};
 
 // Seeded random and noise
 function mkRng(s){return function(){s=(s*16807)%2147483647;return s/2147483647;};}
@@ -2568,7 +2571,7 @@ const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);
 camera.rotation.order='YXZ';scene.add(camera);
 const tex=new THREE.CanvasTexture(atlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
-let FOGN=VIEWS[settings.view][0],FOGF=VIEWS[settings.view][1];
+let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
 const VS='attribute float light;attribute float blk;attribute float aov;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
 const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;uniform float fogFar;uniform float opacity;uniform float alphaTest;uniform float lamp;uniform float time;uniform float wave;uniform float bright;uniform float skyMul;uniform vec3 skyTint;uniform float caveMin;uniform float lampR;uniform vec3 caveTint;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
@@ -3868,7 +3871,7 @@ const KEYS_HTML=TOUCH
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
-function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));FOGN=VIEWS[settings.view][0];FOGF=VIEWS[settings.view][1];}
+function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));if(settings.view<0){FOGF=AUTO_VIEW.far;FOGN=FOGF*0.55;}else{FOGN=VIEWS[settings.view][0];FOGF=VIEWS[settings.view][1];}}
 $('viewseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings.view=+v;lsSet(SET_KEY,settings);drawView();});
 drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
@@ -4264,9 +4267,22 @@ function update(dt){
   if(inLiq&&!wasLiq&&PL.vy<-3){burst(0.4,'lowpass',1200,0.6,0.3);for(let k=0;k<26;k++)spawnP(PL.x,PL.y+0.3,PL.z,(Math.random()-.5)*4,2+Math.random()*4,(Math.random()-.5)*4,[.75,.85,1],0.7,14);}
   wasLiq=inLiq;
 }
+// Auto view distance: every two seconds take the median frame time. The best median seen stands for the screen's refresh
+// (60 or 120 Hz alike); pull the fog in when frames run 15% slower than that, push it out when they keep pace with time to
+// spare (frame work under half a frame). Medians shrug off single slow or fast frames.
+const AV_S=[];
+function autoView(raw,work){
+  const A=AUTO_VIEW;AV_S.push(raw);A.t+=raw;A.work=Math.max(A.work,work);if(A.t<2)return;
+  AV_S.sort((a,b)=>a-b);const med=AV_S[AV_S.length>>1];AV_S.length=0;
+  if(med<A.refresh||A.fast)A.refresh=Math.min(A.fast?1:A.refresh,med);A.fast=0;
+  if(med>A.refresh*1.15&&A.far>56)A.far=Math.max(56,A.far-6);else if(med<A.refresh*1.05&&A.work<A.refresh*500&&A.far<104)A.far=Math.min(104,A.far+3);
+  A.t=A.work=0;if(settings.view<0){FOGF=A.far;FOGN=FOGF*0.55;}
+}
+let fmax=0,fwork=0;
 function frame(now){
   requestAnimationFrame(frame);
-  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  const raw=(now-last)/1000,dt=Math.min(0.05,raw);last=now;const w0=performance.now();
+  if(raw>fmax)fmax=raw;
   pollPad(dt);
   if(ready)meshBand();
   U.time.value=now/1000;
@@ -4326,8 +4342,9 @@ function frame(now){
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
-    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
-}
+    const fms=1000/Math.max(1,fps);
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+  {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}
 function infoExtra(){
