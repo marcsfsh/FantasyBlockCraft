@@ -1,10 +1,10 @@
 # Design
 
-> **Direction change (2026-10-08, D-019).** This file describes the game as built today. The agreed direction differs: a dwindling age with ancient ruins alongside lived-in places, rare spawnable dwarven holds instead of a city under the whole world, a 512-tall world, peaceful creatures, and more. See `docs/DIRECTION_QA.md` and `docs/MILESTONES.md`. Sections here are rewritten as each milestone lands.
+> **Direction change (2026-10-08, D-019).** This file describes the game as built today; sections are rewritten as each milestone lands. Since 0.5.0 (M2a) the world is 512 tall, dwarven holds are rare and vast, the deep is natural caves over a lava sea, and old lights are cold. Still to come: the dwindling age's lived-in places and peoples, entrances and surface ruins (M2b), and more. See `docs/DIRECTION_QA.md` and `docs/MILESTONES.md`.
 
 ## Setting and pillars
 
-- A Tolkien-esque world, **long abandoned**. No living towns, no roads, no machines or modern equipment.
+- A Tolkien-esque world in a **dwindling age** (D-019): ancient ruins everywhere, a few dwarven holds still kept up, and lived-in places and travelers to come in later milestones. No machines or modern equipment.
 - **Original names only.** Places evoke the feel of that kind of setting without using Tolkien's names, which are still under copyright.
 - Everything built by the old peoples is **ancient, decaying and decrepit**: broken walls, rubble, fallen pillars, dead lamps, dust and bones.
 - The underground is deep and layered; going down should feel like going back in time.
@@ -28,7 +28,11 @@
 
 Lands are driven by large climate fields (warmth, damp) and region fields, with continuous weights (`dw`, `bw`, `pw`, `fen`, `sw`, `fwd`) so terrain, trees and ground cover blend across borders. Current balance: every land covers roughly 6 to 14% of the land surface.
 
-## The underground (sea level is y310, the world is 384 tall)
+## The world's height (D-023)
+
+The world is 512 blocks tall and sea level is y310, so the underground keeps its old depth and there are about 200 blocks of sky above the sea. The hearts of the High Mountains rise far above the old limit; snow starts at the snow line (y343 and up).
+
+## The underground
 
 | Layer | y | Contents |
 |---|---|---|
@@ -36,19 +40,26 @@ Lands are driven by large climate fields (warmth, damp) and region fields, with 
 | Old caves | 205 to 258 | Big older caves, rooms, rare cavern lakes; cave regions (mossy, crystal, dripstone, fungal) |
 | Old workings | 155 to 202 | Mineshafts, camps, alchemists' cellars, old smithies, monster-room dungeons |
 | Great caverns | 102 to 150 | Huge pillared caverns, older stone ruins and shrines; deepstone begins here |
-| Dwarven city | 58 to 100 | Floors at 64 and 82 |
-| Dwarven mines | 14 to 56 | Galleries at 20, 32 and 44, inclines, great stepped pits |
-| The Fire Below | under 12 | The lava sea |
+| The deep, upper tier | 58 to 101 | Outside holds: large caverns with lakes and underground rivers at one water level (y64), in their region's character (The Crystal Deeps, The Fungal Deeps, ...). Inside a hold: its city, floors at 64 and 82 |
+| The deep, lower tier | 14 to 57 | Outside holds: large dry caverns and worm caves. Under and around a hold: its mines, galleries at 20, 32 and 44, inclines, great stepped pits |
+| The Fire Below | 3 to ~24 | An open lava sea (lava y3 to y8) under most of the land, with rock pillars and islands; low under the holds' mines |
 
-Targets: underground standing water under about 0.5% of open cave space; cave openings within five blocks of the surface under about 0.5% of land columns.
+Targets: underground standing water under about 1% of open cave space (0.4% on seed 4242); cave openings within five blocks of the surface under about 0.6% of land columns.
 
-## The dwarven city
+## Old lights
 
-- Two floors per hold, organised into districts (residential, industrial, sacred, royal) with themed rooms and loot.
-- Avenues wind from each hold's edge to a central plaza; plazas carry waymarkers.
-- Great structures span 2 x 2 chunks; the Hall of a Thousand Pillars spans 3 x 3 and both floors.
-- Decay is heavy everywhere (baseline ruin intensity 0.55 to 1). Despite that, every room must be reachable: doorways open on both sides, every room has a doorway route toward an avenue, rubble is cleared between each doorway and the room's middle, and a tidy pass removes anything floating or leaking.
-- Stairwells on lower-floor avenues lead down into the mines.
+The old peoples' lamps went out long ago. Lanterns, sconces, torches and glowstone in ruins, mines, camps and towers are found cold (Cold Lantern, Cold Sconce, Burnt-out Torch, Dim Glowstone); coal relights the first three. Rune stones, crystals and glowing fungi and moss still shine. Inhabited holds keep their lamps burning.
+
+## Dwarven holds
+
+- **Rare and vast** (Q9): one hold in each region of 2560 x 2560 blocks, about 400 to 575 blocks across and about 2000 blocks from the next. None lies under the spawn area; the nearest is usually 1500 to 2500 blocks away. Each hold has one name.
+- **Some are inhabited** (about 3 in 10): kept up and lit, but empty until settlements and their peoples arrive (E2). The rest are ruins.
+- A hold is made of quarters of 8 x 8 chunks, organised into districts (residential, industrial, sacred, royal) with themed rooms and loot, on two floors (y64 and y82).
+- Avenues wind from each quarter's edge to a central plaza; plazas carry waymarkers.
+- Great structures span 2 x 2 chunks; the Hall of a Thousand Pillars spans 3 x 3 and both floors, a few per hold.
+- Decay is heavy in abandoned holds (ruin intensity 0.55 to 1) and light in inhabited ones. Despite that, every room must be reachable: doorways open on both sides, every room has a doorway route toward an avenue, rubble is cleared between each doorway and the room's middle, and a tidy pass removes anything floating or leaking.
+- **Mines are tied to holds** (Q12): galleries and pits run under the whole hold and thin out to nothing by about twice its radius. Stairwells on lower-floor avenues lead down into them.
+- Coming in M2b: hold gates on the mountainsides above holds, other peoples' remains, old roads and ruined surface keeps.
 
 ## Controls
 

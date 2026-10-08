@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.5.0 (2026-10-08): M2a world restructure, part one
+
+Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v4`.
+
+### Game
+- **The world is 512 blocks tall.** Sea level is unchanged, so there are about 200 blocks of sky and the hearts of mountain ranges rise far higher than before. The underground keeps its depth.
+- **Dwarven holds are rare and vast.** The city no longer runs under the whole world: each region of about 2560 x 2560 blocks has one hold, 400 to 575 blocks across, with one name. About 3 in 10 holds are inhabited: kept up and lit, though their people only arrive in a later update. None lies under the spawn area; the nearest is usually 1500 to 2500 blocks away.
+- **Mines belong to holds,** running under each hold and thinning out around it.
+- **The deep is natural** away from the holds: large caverns in two tiers, underground lakes and rivers (all at y64), and caverns dressed in their region's character (The Crystal Deeps, The Fungal Deeps, The Mossy Deeps, The Dripstone Deeps, The Deep Caverns). The location display names them, and names a hold's deeps and mines after the hold.
+- **The Fire Below is a lava sea:** open lava (surface at y8) with rock pillars and islands under most of the land.
+- **The old lights are out.** Lanterns, sconces, torches and glowstone found in ruins, mines, camps and towers are cold: new blocks Cold Lantern, Cold Sconce, Burnt-out Torch and Dim Glowstone. Coal relights a cold lantern, sconce or torch. Rune stones, crystals and glowing fungi still shine, and inhabited holds keep their lamps lit.
+- The Hall of a Thousand Pillars is rarer: a few per hold.
+
+### Tooling
+- New `world/deep-caves.js`; holds, `holdNear` and `holdReach` in `ruins/city-plan.js`; mines follow `holdReach`; `PW` writes cold lights unless `genLit`.
+- New tests 20-holds, 21-deep, 22-old-lights. 03-ruin-graph, 04-doorways and the city plan in 09-world-hash now check the hold of region (0,0). The world-hash snapshot was re-recorded. D-023.
+
 ## 0.4.0 (2026-10-08): M1b foundations, part two
 
 No change to the world or the save format: 0.3.0 worlds keep working.

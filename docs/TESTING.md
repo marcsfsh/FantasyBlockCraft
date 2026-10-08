@@ -12,13 +12,13 @@
 |---|---|
 | 01-smoke | The world generates, frames run, core tables and switches are intact |
 | 02-lighting | Streamed lighting equals a full recompute, exactly |
-| 03-ruin-graph | Doorways open on both sides; under 3% of rooms sealed |
-| 04-doorways | Doorways can be walked through; at most 2% blocked (seeds 4242 and 777) |
+| 03-ruin-graph | Doorways open on both sides; under 3% of rooms sealed; checked over the hold of region (0,0) |
+| 04-doorways | Doorways can be walked through; at most 2% blocked (seeds 4242 and 777), with the window moved to the hold of region (0,0) |
 | 05-underground | Underground water and surface openings stay under their targets |
 | 06-biomes | Lands are wide and balanced |
 | 07-gamepad | A simulated controller drives menus and play |
 | 08-determinism | Every chunk is identical when regenerated in reverse and shuffled order, after a window shift (kept, streamed and freshly regenerated chunks) and after shifting back |
-| 09-world-hash | Hash snapshot of the starting world for seeds 123456789 and 4242: blocks and water by layer, column data, block light, terrain over 16 000 blocks and the city plan over 81 x 81 cells |
+| 09-world-hash | Hash snapshot of the starting world for seeds 123456789 and 4242: blocks and water by layer, column data, block light, terrain over 16 000 blocks and the city plan over 81 x 81 cells around the hold of region (0,0) |
 | 10-content-tables | Block ids fit 0 to 255 and avoid 101 to 107 (water levels in saves), items never share a block id, tiles are inside the atlas, recipes and loot tables reference existing, allowed items, and no removed kind of block or item (power, trade, ore processing, rails) exists. Prints free block ids and unreferenced atlas tiles |
 | 11-saves | World keys decode exactly at every height; a surface edit survives a save (under the world's own key) and reload at the same place; undo restores the right block |
 | 12-weather-farming | A lit crop under a roof grows; mountain snow starts at the snow line; farmland tracking survives window shifts |
@@ -29,6 +29,9 @@
 | 17-entities | Every moving kind is registered; entities and meshes keep their world position through a window shift; updates wait while paused; rebuilds clear ordinary entities and keep waypoint beams in place |
 | 18-actions | Every binding names a real action; held controls read through `keyHeld`; a rebound key, held control and controller button take effect |
 | 19-equipment | Equip, swap and unequip; equipment is saved with the world and goes into the grave on death |
+| 20-holds | Holds are 1000+ blocks apart and a few thousand on average, several hundred across, inside their own region, never under spawn; one name each; some inhabited; mines fade with distance from the hold |
+| 21-deep | The lava sea is open under most land and under holds; both cavern tiers are open; deep water stands at one level; deep caverns have cave life; no lava hangs over the sea |
+| 22-old-lights | An abandoned hold has only cold lamps and still has eerie lights; an inhabited hold keeps its lamps lit; coal relights lamps |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

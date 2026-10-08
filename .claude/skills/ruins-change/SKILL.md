@@ -8,6 +8,7 @@ description: How to change the dwarven city ruins (src/js/ruins/*) in Fantasy Bl
 Also follow the `worldgen-change` skill: ruins are generation.
 
 ## How the city is planned (src/js/ruins/city-plan.js)
+- Since D-023 the city exists only inside holds: `holdAt(rx,rz)` gives the one hold of each 160 x 160-chunk region, `ruinZone(cx,cz)` is `holdReach(holdNear(cx,cz),cx,cz) < 1`. The spawn area has no hold; the tests use the hold of region (0,0) (`holdAt(0,0)`, centre chunk `h.cx,h.cz`; move the window there with `regenerateAll(h.cx*CS+8,h.cz*CS+8)`).
 - The city is a grid of 16 x 16 cells (one per chunk) on two floors, `RUIN_Y=[64,82]`, `L` = 0 or 1. `ruinType(cx,cz,L)` gives the room type; `ruinActive`, `isAvenue`, `megaAt` (2 x 2 great structures), `inDelf` (the pillared hall) classify cells.
 - Doorways are decided per edge by `edgeOpen(cx,cz,dx,dz,L)`, from the plan alone, never from blocks. Each chunk builds its own half of every opening with `dwOpening`.
 
@@ -21,10 +22,10 @@ Also follow the `worldgen-change` skill: ruins are generation.
 ## Tests
 - `03-ruin-graph`: every doorway symmetric (0 asymmetric edges); under 3% of rooms sealed.
 - `04-doorways` (seed 4242): block-level walk test; every doorway passable, at most 2% blocked. Read its `INFO` lines: they name the blocked room pairs and edge kinds.
-- `npm test -- --seed=777 ruin-graph` and similar to try other seeds; the known blocked doorway is seed 777, cistern to archive.
+- `npm test -- --seed=777 ruin-graph` and similar to try other seeds.
 - `determinism`, `world-hash` as for any generation change.
 
 Run `npm test -- ruin-graph doorways determinism world-hash` while iterating; full suite before committing. Quote the `rooms`, `sealed`, `edges`, `impassable` numbers before and after.
 
 ## In-game check to request
-Give the seed and the world X/Z of the changed rooms (cell `cx,cz` is X = cx*16+8, Z = cz*16+8) at y 64 or 82, and say what the owner should be able to walk through.
+Give the seed and the world X/Z of the changed rooms (cell `cx,cz` is X = cx*16+8, Z = cz*16+8) at y 64 or 82, inside a hold (print `holdAt` centres in a scratch case), and say what the owner should be able to walk through. Holds are 1500+ blocks from spawn, so say so.
