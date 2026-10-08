@@ -5,6 +5,19 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.4.0 (2026-10-08): M1b foundations, part two
+
+No change to the world or the save format: 0.3.0 worlds keep working.
+
+### Game
+- No visible changes. Controls, menus and the world play as in 0.3.0.
+
+### Tooling
+- Entity registry (`engine/entities.js`): moving things register once and are shifted, cleared and updated by the registry.
+- Input action layer (`input/actions.js`): keyboard, controller and touch dispatch named actions through bindings that `settings.binds` can override, ready for the M5 rebinding screen.
+- Equipment slots (belt, pack, bag) in the player model, saved with the world, ready for M4.
+- New tests: 17-entities, 18-actions, 19-equipment. ES modules are deferred until after M2 (D-022).
+
 ## 0.3.0 (2026-10-08): M1a foundations, part one
 
 Old saves do not load: the save format changed (key `fantasy-blockcraft-save-v3`), and the world itself changed.

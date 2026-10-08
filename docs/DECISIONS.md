@@ -90,3 +90,9 @@ Choices made while fixing the M0 bugs that later work could undo:
 - **Seeds:** a whole number typed as a seed is used exactly; other text is hashed.
 - **Names:** `core/names.js` styles for ten peoples; dwarf is final for now, the others are drafts for owner approval (Q28). Generated names are redrawn if they match a Tolkien name, are one letter off one, or contain a distinctive Tolkien root.
 
+### D-022 M1b foundations, and ES modules deferred (2026-10-08)
+- **ES modules wait until after M2** (owner's choice). The world restructure will decide which files survive, so converting first would be redone. No dev dependency is added yet; the plan in `docs/ES_MODULES_PLAN.md` stands.
+- **Entity positions stay in window coordinates**, not world coordinates as MILESTONES first said: every collision and physics function works in window coordinates, so the registry shifts entities with the window instead, and `entityWorld` converts. Creatures that must outlive the loaded window (E1) will store their own world position when unloaded.
+- **Input defaults are unchanged** in M1b; better defaults (Q37, such as moving waypoint travel off D-pad up) come with the M5 rebinding screen. Sticks, triggers and menu navigation are not remappable yet.
+- **Equipment slots exist but nothing fits them** until M4; the inventory row stays hidden until then. Pack and bag capacity (more inventory rows) is M4 work: the inventory is still 36 slots.
+

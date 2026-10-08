@@ -26,6 +26,9 @@
 | 14-engine | Torches in streamed chunks are registered; lit kegs wait while paused |
 | 15-names | The Tolkien blocklist catches names, near misses and roots; 30 000 generated names across ten peoples, hold names over a wide area, and every fixed place, block and item name pass |
 | 16-worlds | Worlds can be created, exported, imported and deleted; seeds typed as numbers are exact; only player changes are saved (automatic changes and flowing water add nothing) |
+| 17-entities | Every moving kind is registered; entities and meshes keep their world position through a window shift; updates wait while paused; rebuilds clear ordinary entities and keep waypoint beams in place |
+| 18-actions | Every binding names a real action; held controls read through `keyHeld`; a rebound key, held control and controller button take effect |
+| 19-equipment | Equip, swap and unequip; equipment is saved with the world and goes into the grave on death |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 
