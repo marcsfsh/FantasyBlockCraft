@@ -31,20 +31,21 @@ function buildChunk(cx,cz){
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
+    const tL=b.emit?1:sky(x,y,z),tB=b.emit?2:bl(x,y,z); // torch and sconce shapes: full bright when lit, lit by their cell when cold
     if(b.sconce){
       let ox=0,oz=0;if(OPQ[get(x+1,y,z)])ox=1;else if(OPQ[get(x-1,y,z)])ox=-1;else if(OPQ[get(x,y,z+1)])oz=1;else if(OPQ[get(x,y,z-1)])oz=-1;
       const bx=x+0.5+ox*0.3,bz=z+0.5+oz*0.3;
       const box=(x0,y0,z0,x1,y1,z1,t,top8)=>{for(const F of FACES){const base=O.p.length/3,top=F.d[1]!==0;
-        for(const c of F.c){O.p.push(c[0]?x1:x0,c[1]?y1:y0,c[2]?z1:z0);pushUV(O.u,t,top8?(7+c[3]*2)/16:c[3],top?(top8?(8+c[4]*2)/16:c[4]):(top8?c[4]*10/16:c[4]));O.l.push(1);O.b.push(2);O.a.push(1);}
+        for(const c of F.c){O.p.push(c[0]?x1:x0,c[1]?y1:y0,c[2]?z1:z0);pushUV(O.u,t,top8?(7+c[3]*2)/16:c[3],top?(top8?(8+c[4]*2)/16:c[4]):(top8?c[4]*10/16:c[4]));O.l.push(tL);O.b.push(tB);O.a.push(1);}
         O.i.push(base,base+1,base+2,base+2,base+1,base+3);}};
-      box(bx-1/16,y+0.2,bz-1/16,bx+1/16,y+0.82,bz+1/16,53,true);
+      box(bx-1/16,y+0.2,bz-1/16,bx+1/16,y+0.82,bz+1/16,b.t[0],true);
       box(x+0.5+ox*0.42-(oz?0.12:0.04),y+0.15,z+0.5+oz*0.42-(ox?0.12:0.04),x+0.5+ox*0.42+(oz?0.12:0.04),y+0.32,z+0.5+oz*0.42+(ox?0.12:0.04),71,false);
       continue;
     }
     if(b.torch){
       const t=b.t[0];
       for(const F of FACES){const base=O.p.length/3,top=F.d[1]!==0;
-        for(const c of F.c){O.p.push(x+7/16+c[0]*2/16,y+c[1]*10/16,z+7/16+c[2]*2/16);pushUV(O.u,t,(7+c[3]*2)/16,top?(8+c[4]*2)/16:c[4]*10/16);O.l.push(1);O.b.push(2);O.a.push(1);}
+        for(const c of F.c){O.p.push(x+7/16+c[0]*2/16,y+c[1]*10/16,z+7/16+c[2]*2/16);pushUV(O.u,t,(7+c[3]*2)/16,top?(8+c[4]*2)/16:c[4]*10/16);O.l.push(tL);O.b.push(tB);O.a.push(1);}
         O.i.push(base,base+1,base+2,base+2,base+1,base+3);}
       continue;
     }

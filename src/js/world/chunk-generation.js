@@ -89,7 +89,7 @@ function genChunk(lcx,lcz){
   genDone[lcx+lcz*NCX]=1;
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyMines(WCX,WCZ);applyRuins(WCX,WCZ);
+  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));

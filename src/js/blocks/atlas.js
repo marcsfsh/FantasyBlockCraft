@@ -156,6 +156,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(59,x,y,sh([162,84,40],(tr()-.5)*8));P(60,x,y,sh([112,70,52],(tr()-.5)*8));P(61,x,y,sh([204,164,122],(tr()-.5)*8));}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(62,x,y,tr()<.05?[70,110,40]:sh([92,72,34],(x%3===1?-16:0)+((y+x*3)%9===0?-12:0)+(tr()-.5)*14));
   leaves(63,[42,124,30],0.15);
+  // cold lights (D-023), drawn from their lit tiles without the shared random stream
+  const px=(t,x,y)=>{const i=((((t/AC)|0)*TS+y)*AW+(t%AC)*TS+x)*4;return[dat[i],dat[i+1],dat[i+2],dat[i+3]];};
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const e=x<2||y<2||x>13||y>13,bar=x===7||x===8,c=px(80,x,y);
+    P(192,x,y,e||bar?[c[0]*0.62,c[1]*0.58,c[2]*0.5]:sh([58,54,50],(x*7+y*3)%5*3-Math.hypot(x-7.5,y-7.5)*2));
+    const g=px(34,x,y),m=(g[0]+g[1]+g[2])/3;P(194,x,y,[m*0.42+30,m*0.4+28,m*0.36+26]);}
+  clear(193);for(let y=6;y<16;y++)for(let x=7;x<=8;x++)P(193,x,y,y<=7?[38,32,30]:y===8?[64,50,40]:sh([112,82,46],x===8?-18:0));
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

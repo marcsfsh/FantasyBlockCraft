@@ -101,7 +101,7 @@ function dwTidy(){
     else if((id===COBBLE||id===DWCRACK)&&bl===AIR&&!isS(GW(X,y+1,Z))){let side=false;for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(isS(GW(X+a,y,Z+b)))side=true;if(!side)PW(X,y,Z,AIR,MODE_SET);}
   }
   // chains and lanterns: keep only what hangs from a ceiling, stands on a floor, or hangs off a kept chain
-  const chain=(id)=>id===STEELB||id===LANTERN,anchorS=(id)=>id>0&&SOLID[id]&&id!==STEELB;
+  const chain=(id)=>id===STEELB||id===LANTERN||id===DLANTERN,anchorS=(id)=>id>0&&SOLID[id]&&id!==STEELB;
   const runs=[];
   for(let Z=gz0;Z<gz0+CS;Z++)for(let X=gx0;X<gx0+CS;X++){let y=yA;while(y<=yB){if(!chain(GW(X,y,Z))){y++;continue;}let y1=y;while(y1+1<=yB&&chain(GW(X,y1+1,Z)))y1++;
     let ok=anchorS(GW(X,y1+1,Z))||anchorS(GW(X,y-1,Z));
