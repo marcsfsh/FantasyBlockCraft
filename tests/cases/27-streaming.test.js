@@ -30,3 +30,10 @@ const times=[];regenerateAll(-2600,4100);
 times.sort((a,b)=>a-b);const q=p=>times[Math.min(times.length-1,Math.floor(times.length*p))].toFixed(2);
 info('one streaming step: median',q(0.5),'ms, p95',q(0.95),'ms, worst',times[times.length-1].toFixed(1),'ms over',times.length,'steps');
 assert(+q(0.5)<4,'a typical streaming step fits the per-frame budget');
+// Travel (and respawn far away) makes only the 3 x 3 chunks around the arrival at once; the rest stream in
+regenerateAll(-9000,7000);{let made=0;for(let i=0;i<NCX*NCZ;i++)if(genDone[i])made++;info('chunks made at once on travel',made,'queued',genQ.length);
+  assert(made===9&&genQ.length===NCX*NCZ-9,'travel makes the 3 x 3 chunks around the arrival at once and streams the rest');}
+while(genQ.length)processGenQ();lightAll();
+// The explored map is capped
+{const ox=OX,oz=OZ;for(let k=0;k<TILE_CAP+500;k++){OX=k*CS*CS;captureTile(0,0);}info('explored map tiles after',TILE_CAP+500,'captures:',tiles.size);OX=ox;OZ=oz;
+  assert(tiles.size<=TILE_CAP,'the explored map keeps at most '+TILE_CAP+' tiles');}

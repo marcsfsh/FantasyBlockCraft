@@ -6,18 +6,19 @@ function respawn(){
   if(x<40||z<40||x>W-40||z>D-40){regenerateAll(spawnW[0],spawnW[2]);x=spawnW[0]-OX;z=spawnW[2]-OZ;}
   PL.x=x;PL.y=spawnW[1];PL.z=z;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
 }
-// Rebuild the whole loaded area around a world position
+// Rebuild the whole loaded area around a world position (travel, respawn far away). Only the 3 x 3 chunks around the arrival
+// are made at once, each lit as streaming lights it; the rest stream in around the player (M3: no long freeze, D-025).
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
   torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
   BLK.fill(0);world.fill(0);genDone.fill(0);
-  const cm=NCX>>1;
-  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=3&&Math.abs(cz-cm)<=3)genChunk(cx,cz);else genQ.push([cx,cz]);}
+  const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
+  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=1&&Math.abs(cz-cm)<=1)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
-  lightAll();mmAll();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)captureTile(cx,cz);
-  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=3&&Math.abs(z-cm)<=3)dirty.add(c);}
+  for(let cz=cm-1;cz<=cm+1;cz++)for(let cx=cm-1;cx<=cm+1;cx++){lightChunk(cx*CS,cz*CS);for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++)mmCol(x,z);captureTile(cx,cz);}
+  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=1&&Math.abs(z-cm)<=1)dirty.add(c);}
 }
 // Slide the loaded area by one chunk and generate the new strip
 function shiftIdx(S,dx,dz){const out=[];S.forEach(i=>{const x=i%W-dx,t=(i/W)|0,z=t%D-dz;if(x>=0&&z>=0&&x<W&&z<D)out.push(I(x,(t/D)|0,z));});S.clear();out.forEach(v=>S.add(v));}

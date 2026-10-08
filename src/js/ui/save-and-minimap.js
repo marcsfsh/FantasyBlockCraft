@@ -8,7 +8,8 @@ function saveNow(){
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
-setInterval(()=>{if(saveDirty||playing)saveNow();},5000);
+// Autosave: within 5 s of a change, and every 30 s while playing (position and time of day) (M3: no constant rewrites)
+let lastSaveT=0;setInterval(()=>{const now=Date.now();if(saveDirty||(playing&&now-lastSaveT>30000)){saveNow();lastSaveT=now;}},5000);
 // ---- Worlds: create, switch, delete, export and import (one storage entry per world, see core/config.js)
 // A seed typed as a whole number is used exactly; any other text is hashed to a seed
 function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
@@ -36,9 +37,12 @@ const mmBase=document.createElement('canvas');mmBase.width=W;mmBase.height=D;
 const mmCtx=mmBase.getContext('2d'),mmImg=mmCtx.createImageData(W,D),mmDirty=new Set();
 const mmC=$('mm'),mmG=mmC.getContext('2d');let mmZoom=0;const mmView={ox:0,oz:0,span:64};
 const tiles=new Map();
+// The explored map keeps at most TILE_CAP chunk tiles (about 16 km² of explored ground); the longest unvisited go first (M3)
+const TILE_CAP=6000;
 function captureTile(lcx,lcz){
   const ck=ckey(OX/CS+lcx,OZ/CS+lcz);let c=tiles.get(ck);
-  if(!c){c=document.createElement('canvas');c.width=c.height=CS;tiles.set(ck,c);}
+  if(c)tiles.delete(ck);else{c=document.createElement('canvas');c.width=c.height=CS;if(tiles.size>=TILE_CAP)tiles.delete(tiles.keys().next().value);}
+  tiles.set(ck,c);
   c.getContext('2d').putImageData(mmImg,-lcx*CS,-lcz*CS,lcx*CS,lcz*CS,CS,CS);
 }
 mmC.addEventListener('pointerdown',e=>{

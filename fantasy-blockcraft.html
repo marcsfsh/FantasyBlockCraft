@@ -3914,7 +3914,8 @@ function saveNow(){
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
-setInterval(()=>{if(saveDirty||playing)saveNow();},5000);
+// Autosave: within 5 s of a change, and every 30 s while playing (position and time of day) (M3: no constant rewrites)
+let lastSaveT=0;setInterval(()=>{const now=Date.now();if(saveDirty||(playing&&now-lastSaveT>30000)){saveNow();lastSaveT=now;}},5000);
 // ---- Worlds: create, switch, delete, export and import (one storage entry per world, see core/config.js)
 // A seed typed as a whole number is used exactly; any other text is hashed to a seed
 function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
@@ -3942,9 +3943,12 @@ const mmBase=document.createElement('canvas');mmBase.width=W;mmBase.height=D;
 const mmCtx=mmBase.getContext('2d'),mmImg=mmCtx.createImageData(W,D),mmDirty=new Set();
 const mmC=$('mm'),mmG=mmC.getContext('2d');let mmZoom=0;const mmView={ox:0,oz:0,span:64};
 const tiles=new Map();
+// The explored map keeps at most TILE_CAP chunk tiles (about 16 km² of explored ground); the longest unvisited go first (M3)
+const TILE_CAP=6000;
 function captureTile(lcx,lcz){
   const ck=ckey(OX/CS+lcx,OZ/CS+lcz);let c=tiles.get(ck);
-  if(!c){c=document.createElement('canvas');c.width=c.height=CS;tiles.set(ck,c);}
+  if(c)tiles.delete(ck);else{c=document.createElement('canvas');c.width=c.height=CS;if(tiles.size>=TILE_CAP)tiles.delete(tiles.keys().next().value);}
+  tiles.set(ck,c);
   c.getContext('2d').putImageData(mmImg,-lcx*CS,-lcz*CS,lcx*CS,lcz*CS,CS,CS);
 }
 mmC.addEventListener('pointerdown',e=>{
@@ -3996,18 +4000,19 @@ function respawn(){
   if(x<40||z<40||x>W-40||z>D-40){regenerateAll(spawnW[0],spawnW[2]);x=spawnW[0]-OX;z=spawnW[2]-OZ;}
   PL.x=x;PL.y=spawnW[1];PL.z=z;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
 }
-// Rebuild the whole loaded area around a world position
+// Rebuild the whole loaded area around a world position (travel, respawn far away). Only the 3 x 3 chunks around the arrival
+// are made at once, each lit as streaming lights it; the rest stream in around the player (M3: no long freeze, D-025).
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
   torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
   BLK.fill(0);world.fill(0);genDone.fill(0);
-  const cm=NCX>>1;
-  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=3&&Math.abs(cz-cm)<=3)genChunk(cx,cz);else genQ.push([cx,cz]);}
+  const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
+  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=1&&Math.abs(cz-cm)<=1)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
-  lightAll();mmAll();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)captureTile(cx,cz);
-  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=3&&Math.abs(z-cm)<=3)dirty.add(c);}
+  for(let cz=cm-1;cz<=cm+1;cz++)for(let cx=cm-1;cx<=cm+1;cx++){lightChunk(cx*CS,cz*CS);for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++)mmCol(x,z);captureTile(cx,cz);}
+  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=1&&Math.abs(z-cm)<=1)dirty.add(c);}
 }
 // Slide the loaded area by one chunk and generate the new strip
 function shiftIdx(S,dx,dz){const out=[];S.forEach(i=>{const x=i%W-dx,t=(i/W)|0,z=t%D-dz;if(x>=0&&z>=0&&x<W&&z<D)out.push(I(x,(t/D)|0,z));});S.clear();out.forEach(v=>S.add(v));}
