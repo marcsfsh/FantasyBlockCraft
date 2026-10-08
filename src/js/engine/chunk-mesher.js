@@ -6,18 +6,31 @@ function layerName(y,X,Z){
   return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
 }
 // Only a band of heights around the player is meshed; from near the surface up, the band reaches the top of the world so peaks stay visible
-const MB={c:SEA,lo:SEA-120,hi:H-1};
-function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c>=SEA-60?H-1:c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
+// Above ground (MB.surf) each chunk is also meshed only down to MESH_DEEP blocks under the lowest sky-exposed ground in and around
+// it, so cave interiors nobody can see from the surface are skipped (M3, D-025). Underground the band reaches as far as cave fog
+// lets you see. Surface or underground is judged against the terrain height, with some give so a doorway does not flip it.
+const MESH_DEEP=24,MB={c:SEA,lo:SEA-120,hi:H-1,surf:true};
+function meshBand(){
+  const px=Math.floor(PL.x),pz=Math.floor(PL.z),g=(px>=0&&pz>=0&&px<W&&pz<D)?ground[px+W*pz]:SEA;
+  const surf=MB.surf?PL.y>g-6:PL.y>g-2,half=surf?120:[48,72,118][settings.cave||0],c=Math.round(PL.y/16)*16;
+  if(surf===MB.surf&&Math.abs(c-MB.c)<half*0.4)return;
+  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
+}
+function meshFloor(x0,z0){
+  let lo=MB.lo;if(!MB.surf)return lo;let ms=H;
+  for(let z=Math.max(0,z0-1);z<=Math.min(D-1,z0+CS);z++)for(let x=Math.max(0,x0-1);x<=Math.min(W-1,x0+CS);x++){const h=hm[x+W*z];if(h<ms)ms=h;}
+  return Math.max(lo,ms-MESH_DEEP);
+}
 const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
 function buildChunk(cx,cz){
   const O=newM(),Wt=newM();
   const x0=cx*CS,z0=cz*CS,s1=[0,0,0],s2=[0,0,0];
   let ymax=0;for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){let y=H-1;while(y>ymax&&!world[x+W*(z+D*y)])y--;if(y>ymax)ymax=y;}
-  const ytop=Math.min(H-1,ymax+1,MB.hi+1),ylo=Math.max(0,MB.lo-1);
+  const yfl=meshFloor(x0,z0),ytop=Math.min(H-1,ymax+1,MB.hi+1),ylo=Math.max(0,yfl-1);
   for(let y=ylo;y<=ytop;y++)for(let z=z0-1;z<=z0+CS;z++)for(let x=x0-1;x<=x0+CS;x++){const k=(y*MP+(z-z0+1))*MP+(x-x0+1);MID[k]=get(x,y,z);MSK[k]=sky(x,y,z);MBL[k]=bl(x,y,z);}
   const mk=(x,y,z)=>(y<ylo||y>ytop)?-1:(y*MP+(z-z0+1))*MP+(x-x0+1);
   const gid=(x,y,z)=>{const k=mk(x,y,z);return k<0?get(x,y,z):MID[k];},gsky=(x,y,z)=>{const k=mk(x,y,z);return k<0?sky(x,y,z):MSK[k];},gbl=(x,y,z)=>{const k=mk(x,y,z);return k<0?bl(x,y,z):MBL[k];};
-  for(let y=Math.max(0,MB.lo);y<=Math.min(ymax,MB.hi);y++)for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){
+  for(let y=Math.max(0,yfl);y<=Math.min(ymax,MB.hi);y++)for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){
     const ii=x+W*(z+D*y),id=world[ii];if(!id)continue;
     if(OPQ[id]&&x>0&&x<W-1&&z>0&&z<D-1&&y>0&&y<H-1&&OPQ[world[ii+1]]&&OPQ[world[ii-1]]&&OPQ[world[ii+W]]&&OPQ[world[ii-W]]&&OPQ[world[ii+WD]]&&OPQ[world[ii-WD]])continue;
     const b=BL[id];
@@ -83,6 +96,10 @@ function buildChunk(cx,cz){
       else M.i.push(base,base+1,base+3,base,base+3,base+2);
     }
   }
+  // above ground, a dark floor across the chunk where meshing stops: a deep shaft or hole shows darkness there, not the sky behind
+  if(MB.surf&&yfl>MB.lo){const t=BL[DEEP].t[0],base=O.p.length/3,F=FACES[3];
+    for(const c of F.c){O.p.push(x0+c[0]*CS,yfl,z0+c[2]*CS);pushUV(O.u,t,c[3],c[4]);O.l.push(0);O.b.push(0);O.a.push(1);}
+    O.i.push(base,base+1,base+2,base+2,base+1,base+3);}
   const ci=cx+cz*NCX,old=chunks[ci];
   if(old){for(const m of old){scene.remove(m);m.geometry.dispose();}}
   const meshes=[];
