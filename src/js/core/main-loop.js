@@ -4,7 +4,7 @@ const ropeV=new THREE.Vector3(),ropeGeo=new THREE.BufferGeometry();
 ropeGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
 const rope=new THREE.Line(ropeGeo,new THREE.LineBasicMaterial({color:0x2a1c10}));rope.frustumCulled=false;rope.visible=false;scene.add(rope);
 const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBasicMaterial({color:0xa8aeb8}));hookTip.visible=false;scene.add(hookTip);
-let last=performance.now(),infoT=0,fc=0,fps=0,ft=0;
+let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
   const shift=keyHeld('sprint');
@@ -112,7 +112,7 @@ function frame(now){
   if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;
-    }else{selBox.visible=false;faceHi.visible=false;}drawMM();}
+    }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
   renderer.render(scene,camera);
   fc++;ft+=dt;infoT-=dt;
   if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;

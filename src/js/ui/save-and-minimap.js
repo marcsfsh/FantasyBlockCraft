@@ -66,6 +66,7 @@ function mmCol(x,z){
 }
 function mmAll(){for(let z=0;z<D;z++)for(let x=0;x<W;x++)mmCol(x,z);mmCtx.putImageData(mmImg,0,0);}
 function drawMM(){
+  if(mmPut){mmCtx.putImageData(mmImg,0,0);mmPut=false;} // streamed columns since the last draw
   const S=mmC.width,span=mmZoom===2?512:mmZoom?W:64,ox=mmZoom===1?0:PL.x-span/2,oz=mmZoom===1?0:PL.z-span/2,k=S/span;
   mmView.ox=ox;mmView.oz=oz;mmView.span=span;
   mmG.imageSmoothingEnabled=false;mmG.fillStyle='#1c1810';mmG.fillRect(0,0,S,S);
