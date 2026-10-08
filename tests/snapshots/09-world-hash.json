@@ -1,32 +1,32 @@
 {
   "4242": {
-    "blocks:fire-below:y0-12": "769c5bef",
-    "blocks:mines:y13-57": "8de1067a",
-    "blocks:dwarven-city:y58-101": "91d0e64a",
-    "blocks:great-caverns:y102-151": "486bec0e",
-    "blocks:old-workings:y152-203": "74db66d4",
-    "blocks:old-caves:y204-259": "88c1f612",
-    "blocks:crawlways:y260-290": "bb937088",
+    "blocks:fire-below:y0-12": "27264dd7",
+    "blocks:mines:y13-57": "7157af87",
+    "blocks:dwarven-city:y58-101": "2cc11b0b",
+    "blocks:great-caverns:y102-151": "6e42087e",
+    "blocks:old-workings:y152-203": "07c48c8b",
+    "blocks:old-caves:y204-259": "7183de8c",
+    "blocks:crawlways:y260-290": "079f5309",
     "blocks:surface:y291-383": "b80f54d0",
     "columns:ground-biome-heightmap": "c4213097",
-    "light:block-light": "14c5b915",
+    "light:block-light": "db06c69b",
     "plan:terrain-16k": "20196269",
     "plan:city-81x81-cells": "53527697",
-    "blocks:surface:y291-511": "ecbfb582"
+    "blocks:surface:y291-511": "84e93276"
   },
   "123456789": {
-    "blocks:fire-below:y0-12": "969ac62d",
-    "blocks:mines:y13-57": "4c2fb081",
-    "blocks:dwarven-city:y58-101": "2612e679",
-    "blocks:great-caverns:y102-151": "cd9f6cab",
-    "blocks:old-workings:y152-203": "0c433128",
-    "blocks:old-caves:y204-259": "539a90ea",
-    "blocks:crawlways:y260-290": "febeb3f7",
+    "blocks:fire-below:y0-12": "36488ae0",
+    "blocks:mines:y13-57": "33eb25d3",
+    "blocks:dwarven-city:y58-101": "dc80261d",
+    "blocks:great-caverns:y102-151": "6e5febf9",
+    "blocks:old-workings:y152-203": "7220af66",
+    "blocks:old-caves:y204-259": "850adeae",
+    "blocks:crawlways:y260-290": "9795bed6",
     "blocks:surface:y291-383": "b6ebc871",
     "columns:ground-biome-heightmap": "4e9a77a3",
-    "light:block-light": "772493ce",
+    "light:block-light": "9ba7dfa0",
     "plan:terrain-16k": "edbac933",
     "plan:city-81x81-cells": "15ae469a",
-    "blocks:surface:y291-511": "e049f8ec"
+    "blocks:surface:y291-511": "d864d654"
   }
 }

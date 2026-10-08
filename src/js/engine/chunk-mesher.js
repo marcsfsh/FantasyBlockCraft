@@ -1,7 +1,9 @@
 // ---- what to call a place underground, by depth
 function layerName(y,X,Z){
   const m=mineName(X,y,Z);if(m)return m;
-  return y<12?'The Fire Below':y<58?'The Deep Mines':y<100?'The Dwarven Deeps':y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
+  if(y<12)return 'The Fire Below';
+  if(y<100){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(y>=58&&ruinZone(cx,cz))return 'The Deeps of '+holdOf(cx,cz).name;return mineZone(cx,cz)?'The Mines of '+holdOf(cx,cz).name:DEEP_NAMES[caveRegion(X,Z)];}
+  return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
 }
 // Only a band of heights around the player is meshed; from near the surface up, the band reaches the top of the world so peaks stay visible
 const MB={c:SEA,lo:SEA-120,hi:H-1};

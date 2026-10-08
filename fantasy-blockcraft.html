@@ -732,7 +732,8 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=10?LAVA:AIR;lvl[i]=0;}
+          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}
     }
@@ -754,6 +755,48 @@ function applyWorms(WCX,WCZ){
     }
   }
 }
+// ---- The deep outside the holds (D-023): the lava sea of the Fire Below, two tiers of natural caverns, underground rivers and lakes.
+// A per-column pass over the chunk's own columns, run after fillCol and before the worm caves. Every value is a pure function of
+// world coordinates; the cavern noise is sampled on a 4-block lattice anchored to world coordinates, so neighbouring chunks agree.
+const FIRE_LV=8;          // lava surface of the sea (lava from y3 to y8)
+const DEEP_WL=64;         // one water level for every lake and river of the upper tier, so no walls of water stand where they meet
+const DC_Y0=16,DC_NY=23;  // cavern lattice: y16 to y104 every 4 blocks
+const dcLat=new Float32Array(5*5*DC_NY);
+// Cavern density: positive is open. Lower tier around y37 (dry), upper tier around y81 (lakes below DEEP_WL); none inside a hold.
+function deepDensity(X,Y,Z,sup){
+  const lo=Y<59,t=lo?(Y-37)/20:(Y-81)/20,v=1-t*t;if(v<=0)return -1;
+  return noise3(X/52,Y/26,Z/52)*0.8+noise3(X/17,Y/11,Z/17)*0.35+v*0.4-(lo?0.76:0.62)+sup;
+}
+// How strongly a hold keeps the caverns out at a point (0 far away, -2 inside): holds and their inner mines stay intact
+function deepSup(X,Z){const h=holdNear(Math.floor(X/CS),Math.floor(Z/CS)),d=holdReach(h,X/CS-0.5,Z/CS-0.5);return -2*(1-sstep(1.1,1.6,d))+0.12*fbm2(X/380,Z/380,1,8107.3);}
+function deepCaves(lcx,lcz){
+  // the lattice for this chunk, shared at its edges with the neighbours
+  for(let a=0;a<5;a++)for(let b=0;b<5;b++){const X=gx0+a*4,Z=gz0+b*4,sup=deepSup(X,Z);for(let k=0;k<DC_NY;k++)dcLat[(a*5+b)*DC_NY+k]=deepDensity(X,DC_Y0+k*4,Z,sup);}
+  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
+    const X=gx0+x,Z=gz0+z,lx=lcx*CS+x,lz=lcz*CS+z,col=lx+W*lz,WD=W*D;
+    // the lava sea: open from y3 up to a ceiling 4 to 16 above the lava, with rock pillars and islands; low under the holds' mines
+    if(fbm2(X/13,Z/13,1,8103.7)<0.4){
+      const s=sstep(-0.35,0.35,fbm2(X/70,Z/70,2,8101.3)),mz=mineZone(Math.floor(X/CS),Math.floor(Z/CS));
+      let ceil=FIRE_LV+4+Math.round(12*s);if(mz&&ceil>13)ceil=13;
+      const isl=fbm2(X/36,Z/36,1,8105.1)>0.32;
+      for(let y=3;y<=ceil;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;
+        if(y<=FIRE_LV){if(isl&&y>=FIRE_LV-1)continue;world[i]=LAVA;}else if(!(isl&&y===FIRE_LV+1))world[i]=AIR;lvl[i]=0;}
+    }
+    // caverns, trilinear between lattice points
+    const ax=x>>2,az=z>>2,fx=(x&3)/4,fz=(z&3)/4,p00=(ax*5+az)*DC_NY,p10=((ax+1)*5+az)*DC_NY,p01=(ax*5+az+1)*DC_NY,p11=((ax+1)*5+az+1)*DC_NY;
+    for(let k=0;k<DC_NY-1;k++){
+      const c0=lerp(lerp(dcLat[p00+k],dcLat[p10+k],fx),lerp(dcLat[p01+k],dcLat[p11+k],fx),fz),c1=lerp(lerp(dcLat[p00+k+1],dcLat[p10+k+1],fx),lerp(dcLat[p01+k+1],dcLat[p11+k+1],fx),fz);
+      if(c0<=0&&c1<=0)continue;
+      for(let j=0;j<4;j++){const y=DC_Y0+k*4+j;if(c0+(c1-c0)*j/4<=0)continue;const i=col+WD*y,id=world[i];if(id===AIR||id===BEDROCK||id===LAVA||id===WATER)continue;
+        world[i]=y>=58&&y<=DEEP_WL?WATER:AIR;lvl[i]=0;}
+    }
+    // underground rivers wind through the upper tier at the lake level
+    const rv=Math.abs(fbm2(X/240,Z/240,2,8301.7));
+    if(rv<0.026){const c=1-rv/0.026,sup=deepSup(X,Z);if(sup>-0.3){const bed=DEEP_WL-1-Math.round(2*c),top=DEEP_WL+2+Math.round(3*c);
+      for(let y=bed;y<=top;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;world[i]=y<=DEEP_WL?WATER:AIR;lvl[i]=0;}}}
+  }
+}
+const DEEP_NAMES={lush:'The Mossy Deeps',crystal:'The Crystal Deeps',drip:'The Dripstone Deeps',fungal:'The Fungal Deeps',plain:'The Deep Caverns'};
 // ---- Abandoned mineshafts: timbered corridors with lanterns and supply crates
 const shaftCache=new Map();
 function shaftsFor(WCX,WCZ){
@@ -1724,36 +1767,38 @@ function caveRegion(X,Z){const a=fbm2(X/110,Z/110,1,3501.1),b=fbm2(X/110,Z/110,1
 const CAVE_NAMES={lush:'Mossy Caves',crystal:'Crystal Caves',drip:'Dripstone Caves',fungal:'Fungal Caves',plain:'Caves',deep:'Deep Caves'};
 function caveLife(X0,Z0,r2){
   cavernDetail(X0,Z0,r2);
-  const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8);
+  const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8),wild=!zone&&!mineZone(Math.floor(X0/CS),Math.floor(Z0/CS));
   // floors
-  for(let k=0;k<260;k++){
-    const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],y0=6+(r2()*Math.max(1,g-14)|0);
-    let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
-    const kind=r2(),q=r2();
-    if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))continue;
-    if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);continue;}
-    if(y<100){ // deep: sparse life, crystals and scorched rock
-      if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
-      continue;
-    }
-    const patch=(id)=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.7||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);};
-    const cluster=(id,n)=>{PW(X,y,Z,id,MODE_SET);for(let t=0;t<n;t++){const XX=X+((r2()*3|0)-1),ZZ=Z+((r2()*3|0)-1),bl=GW(XX,y-1,ZZ);if(bl>0&&SOLID[bl]&&GW(XX,y,ZZ)===AIR)PW(XX,y,ZZ,id,MODE_SET);}};
-    if(reg==='lush'){if(kind<0.45){patch(MOSSY);cluster(GLOWSHROOM,4);}else if(kind<0.75)patch(MOSSY);else if(kind<0.8&&GW(X,y,Z+1)===AIR&&GW(X+1,y,Z)===AIR){for(let a=0;a<2;a++)for(let b=0;b<2;b++)PW(X+a,y-1,Z+b,WATER,MODE_STONE);}}
-    else if(reg==='crystal'){if(kind<0.55)cluster(CRYSTAL,3);else if(kind<0.8)patch(AMETH);}
-    else if(reg==='drip'){if(kind<0.6)PW(X,y,Z,DRIPU,MODE_SET);else if(kind<0.8)patch(CALCITE);}
-    else if(reg==='fungal'){
-      let room=true;for(let t=1;t<7&&room;t++)if(GW(X,y+t,Z)!==AIR)room=false;
-      if(kind<0.18&&room){const hgt=3+(q*3|0);for(let t=0;t<hgt;t++)PW(X,y+t,Z,MUSHSTEM,MODE_SET);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(Math.abs(a)+Math.abs(b)<4)PW(X+a,y+hgt,Z+b,GLOWCAP,MODE_AIR);}
-      else if(kind<0.65){patch(MOSSY);cluster(GLOWSHROOM,5);}}
-    else{if(kind<0.3)cluster(GLOWSHROOM,3);else if(kind<0.45)cluster(CRYSTAL,2);else if(kind<0.46&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.6)PW(X,y-1,Z,MOSSY,MODE_STONE);}
-  }
+  const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];
+      let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
+      const kind=rr(),q=rr();
+      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))return;
+      if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);return;}
+      if(y<100&&!(wild&&y>=26)){ // deep under a hold, its mines and near the lava: sparse life, crystals and scorched rock
+        if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
+        return;
+      }
+      const patch=(id)=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.7||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);};
+      const cluster=(id,n)=>{PW(X,y,Z,id,MODE_SET);for(let t=0;t<n;t++){const XX=X+((rr()*3|0)-1),ZZ=Z+((rr()*3|0)-1),bl=GW(XX,y-1,ZZ);if(bl>0&&SOLID[bl]&&GW(XX,y,ZZ)===AIR)PW(XX,y,ZZ,id,MODE_SET);}};
+      if(reg==='lush'){if(kind<0.45){patch(MOSSY);cluster(GLOWSHROOM,4);}else if(kind<0.75)patch(MOSSY);else if(kind<0.8&&GW(X,y,Z+1)===AIR&&GW(X+1,y,Z)===AIR){for(let a=0;a<2;a++)for(let b=0;b<2;b++)PW(X+a,y-1,Z+b,WATER,MODE_STONE);}}
+      else if(reg==='crystal'){if(kind<0.55)cluster(CRYSTAL,3);else if(kind<0.8)patch(AMETH);}
+      else if(reg==='drip'){if(kind<0.6)PW(X,y,Z,DRIPU,MODE_SET);else if(kind<0.8)patch(CALCITE);}
+      else if(reg==='fungal'){
+        let room=true;for(let t=1;t<7&&room;t++)if(GW(X,y+t,Z)!==AIR)room=false;
+        if(kind<0.18&&room){const hgt=3+(q*3|0);for(let t=0;t<hgt;t++)PW(X,y+t,Z,MUSHSTEM,MODE_SET);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(Math.abs(a)+Math.abs(b)<4)PW(X+a,y+hgt,Z+b,GLOWCAP,MODE_AIR);}
+        else if(kind<0.65){patch(MOSSY);cluster(GLOWSHROOM,5);}}
+      else{if(kind<0.3)cluster(GLOWSHROOM,3);else if(kind<0.45)cluster(CRYSTAL,2);else if(kind<0.46&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.6)PW(X,y-1,Z,MOSSY,MODE_STONE);}
+  };
+  for(let k=0;k<260;k++){const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)];floor(r2,X,Z,6+(r2()*Math.max(1,g-14)|0));}
+  // the natural deep caverns get floors of their own, in their region's character (D-023)
+  if(wild){const r6=rngAt(Math.floor(X0/CS),21,Math.floor(Z0/CS));for(let k=0;k<140;k++){const X=X0+(r6()*CS|0),Z=Z0+(r6()*CS|0);floor(r6,X,Z,26+(r6()*76|0));}}
   // walls: moss that glows, amethyst seams, calcite flowstone
   for(let k=0;k<200;k++){
     const X=X0+1+(r2()*(CS-2)|0),Z=Z0+1+(r2()*(CS-2)|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-16)|0),q=r2();
     if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z)))continue;
     for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const c=GW(X+a,y,Z+b);if(c!==STONE&&c!==DEEP)continue;
       let id=0;
-      if(y<100)id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
+      if(y<100&&!(wild&&y>=26))id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
       else if(reg==='lush')id=q<0.55?GLOWMOSS:q<0.85?MOSSY:0;
       else if(reg==='crystal')id=q<0.5?AMETH:0;
       else if(reg==='drip')id=q<0.45?CALCITE:0;
@@ -2002,7 +2047,7 @@ function genChunk(lcx,lcz){
   genDone[lcx+lcz*NCX]=1;
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyMines(WCX,WCZ);applyRuins(WCX,WCZ);
+  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyMines(WCX,WCZ);applyRuins(WCX,WCZ);
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));
@@ -2315,7 +2360,9 @@ function dwDescent(cx,cz,yb,axX){
 // ---- what to call a place underground, by depth
 function layerName(y,X,Z){
   const m=mineName(X,y,Z);if(m)return m;
-  return y<12?'The Fire Below':y<58?'The Deep Mines':y<100?'The Dwarven Deeps':y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
+  if(y<12)return 'The Fire Below';
+  if(y<100){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(y>=58&&ruinZone(cx,cz))return 'The Deeps of '+holdOf(cx,cz).name;return mineZone(cx,cz)?'The Mines of '+holdOf(cx,cz).name:DEEP_NAMES[caveRegion(X,Z)];}
+  return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
 }
 // Only a band of heights around the player is meshed; from near the surface up, the band reaches the top of the world so peaks stay visible
 const MB={c:SEA,lo:SEA-120,hi:H-1};
