@@ -82,7 +82,7 @@ function dwBreach(cx,cz,yb,h,WCX,WCZ,L){
     }}
 }
 // ---- Final tidy of a ruin chunk: nothing floats, hanging chains reach a ceiling, and sunken water never opens into the caves
-const TIDY_DROP=new Set([GRAVEL,BONES,GLOWSHROOM,BARREL,RAILX,RAILZ]);
+const TIDY_DROP=new Set([GRAVEL,BONES,GLOWSHROOM,BARREL]);
 function dwTidy(){
   const yA=RUIN_Y[0]-7,yB=RUIN_Y[1]+18,isS=(id)=>id>0&&SOLID[id];
   // sunken water: wall it in wherever it meets open air below the floors

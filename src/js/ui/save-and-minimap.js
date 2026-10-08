@@ -3,7 +3,7 @@ let skipSave=false,saveWarned=false;
 function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
-  const ok=lsSet(SAVE_KEY,{v:2,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,sl:[...sluiceStore].map(([k,v])=>[k,v.g,v.p]),bat:[...batCharge].map(([k,v])=>[k,Math.round(v)]),fuel:[...genFuel],inv:inv.map(q=>q?[q.id,q.c,q.d||0,Math.round(q.e||0)]:0),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
+  const ok=lsSet(SAVE_KEY,{v:2,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }

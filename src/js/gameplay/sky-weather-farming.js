@@ -17,7 +17,7 @@ function updSky(){
   sun.visible=elev>-0.15;moon.visible=elev<0.2;
   U.skyMul.value=Math.min(1.2,U.skyMul.value+flash*0.9);skyC.lerp(flashC,flash*0.5);
   halo.visible=sun.visible&&rainAmt<0.6;halo.material.opacity=(0.55+0.45*sunset)*(1-rainAmt);
-  paintDome(d,sunset);sunPower=d*(1-rainAmt*0.7);
+  paintDome(d,sunset);
   return d;
 }
 const NR=900,rainPos=new Float32Array(NR*6),drops=[];

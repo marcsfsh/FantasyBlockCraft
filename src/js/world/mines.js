@@ -40,7 +40,7 @@ function mineGallery(WCX,WCZ,f,alongX,k,I){
       if(hsh(along,k+5,c)<0.3*I)PW(alongX?X:X+1,f+3,alongX?Z+1:Z,COBWEB,MODE_SET);
     }
     const q2=hsh(X,f+2,Z);
-    if(q2>0.25*I)PW(X,f,Z,alongX?RAILX:RAILZ,MODE_SET);else if(q2<0.08)PW(X,f,Z,GRAVEL,MODE_SET);
+    if(q2<=0.25*I&&q2<0.08)PW(X,f,Z,GRAVEL,MODE_SET); // where rails once ran, only the gravel remains
     if(hsh(X,f+8,Z)<0.015)PW(X,f,Z,BARREL,MODE_SET);
     if(hsh(X,f+11,Z)<0.012*I)PW(alongX?X:X-1,f,alongX?Z-1:Z,BONES,MODE_SET);
   }
@@ -53,7 +53,7 @@ function mineJunction(WCX,WCZ,f,k,I){
   for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++){for(let y=f;y<f+5;y++)PW(cx+a,y,cz+b,AIR,MODE_SET);PW(cx+a,f-1,cz+b,(a+b)&1?DEEP:DWTILE,MODE_SET);PW(cx+a,f+5,cz+b,DWBRICK,MODE_SET);}
   for(const a of [-3,3])for(const b of [-3,3])for(let y=f;y<f+5;y++)PW(cx+a,y,cz+b,DWPILLAR,MODE_SET);
   if(kind<0.3){ // an old smelting floor
-    for(let a=-2;a<=2;a+=2)PW(cx+a,f,cz-4,FURN,MODE_SET);PW(cx-4,f,cz+3,CRUSHER,MODE_SET);
+    for(let a=-2;a<=2;a+=2)PW(cx+a,f,cz-4,FURN,MODE_SET);PW(cx-4,f,cz+3,STEELB,MODE_SET);
     for(let a=2;a<=3;a++)for(let b=1;b<=2;b++)PW(cx+a,f-1,cz+b,LAVA,MODE_SET);
     if(r()<0.6)PW(cx-4,f,cz-3,DWCHEST,MODE_SET);
   }else if(kind<0.55){ // ore store

@@ -65,23 +65,23 @@ BL[SAND].fall=true;BL[GRAVEL].fall=true;
 const COPO=53,TINO=54,ZINO=55,PLATO=56,TITO=57,COPB=58,BRONB=59,BRASB=60,STEELB=61,TITB=62,PLATB=63,FURN=64,BLAST=65,LANTERN=66;
 def(COPO,'Copper Ore',[64,64,64]);def(TINO,'Tin Ore',[65,65,65]);def(ZINO,'Zinc Ore',[66,66,66]);def(PLATO,'Platinum Ore',[67,67,67]);def(TITO,'Moonsilver Ore',[68,68,68]);
 def(COPB,'Block of Copper',[69,69,69]);def(BRONB,'Block of Bronze',[70,70,70]);def(BRASB,'Block of Brass',[71,71,71]);def(STEELB,'Block of Steel',[72,72,72]);def(TITB,'Block of Moonsilver',[73,73,73]);def(PLATB,'Block of Platinum',[74,74,74]);
-const PATH=67,WHEAT=68,TRADER=69,MINT=70,CRUSHER=71,SLUICE=72,GRAVE=73,FARM_D=74,FARM_W=75,WHEAT0=76,WHEAT1=77,WHEAT2=78,POT0=79,POT1=80,POT2=81,POT3=82,WIRE=83,COALGEN=84,WHEEL=85,SOLAR=86,BATTERY=87,LAMP_OFF=88,LAMP_ON=89,EFURN=90,CHARGER=91,GLOWSHROOM=92,CRATE=93,DRIPU=94,DRIPD=95,CALCITE=96,AMETH=97,MUSHSTEM=98,GLOWCAP=99,DWBRICK=110,DWTILE=111,DWPILLAR=112,GOLDB=113,RUNE=114,DWCHEST=115,DWCRACK=116,BARREL=117,LECTERN=118,SCONCE=119,BONES=120,COBWEB=121,SNOWLEAF=122,DEEP=123,GLOWMOSS=124,RAILX=125,RAILZ=126,HEATHER=127;
-def(WIRE,'Copper Wire',[102,102,102],{solid:false,opq:false,occ:false,wire:true,snd:'glass'});
-def(COALGEN,'Coal Generator',[104,104,103]);def(WHEEL,'Water Wheel',[107,107,106],{snd:'wood'});def(SOLAR,'Solar Panel',[108,109,109]);
-def(BATTERY,'Battery',[111,111,110]);def(LAMP_OFF,'Electric Lamp',[112,112,112],{snd:'glass'});def(LAMP_ON,'Electric Lamp (lit)',[113,113,113],{snd:'glass',emit:true,lum:15,place:false});
-def(EFURN,'Electric Furnace',[115,115,114]);def(CHARGER,'Charger',[117,111,116]);def(GLOWSHROOM,'Glow Mushroom',[118,118,118],{solid:false,opq:false,occ:false,cross:true,emit:true,lum:11,snd:'soft'});def(CRATE,'Supply Crate',[120,120,119],{snd:'wood'});
+const PATH=67,WHEAT=68,GRAVE=73,FARM_D=74,FARM_W=75,WHEAT0=76,WHEAT1=77,WHEAT2=78,POT0=79,POT1=80,POT2=81,POT3=82,GLOWSHROOM=92,CRATE=93,DRIPU=94,DRIPD=95,CALCITE=96,AMETH=97,MUSHSTEM=98,GLOWCAP=99,DWBRICK=110,DWTILE=111,DWPILLAR=112,GOLDB=113,RUNE=114,DWCHEST=115,DWCRACK=116,BARREL=117,LECTERN=118,SCONCE=119,BONES=120,COBWEB=121,SNOWLEAF=122,DEEP=123,GLOWMOSS=124,HEATHER=127;
+
+
+
+def(GLOWSHROOM,'Glow Mushroom',[118,118,118],{solid:false,opq:false,occ:false,cross:true,emit:true,lum:11,snd:'soft'});def(CRATE,'Supply Crate',[120,120,119],{snd:'wood'});
 def(DRIPU,'Stalagmite',[121,121,121],{solid:false,opq:false,occ:false,cross:true});def(DRIPD,'Stalactite',[122,122,122],{solid:false,opq:false,occ:false,cross:true});
 def(DWBRICK,'Dwarven Brick',[128,128,128]);def(DWTILE,'Dwarven Floor Tile',[129,129,129]);def(DWPILLAR,'Dwarven Pillar',[131,131,130]);
 def(GOLDB,'Block of Gold',[132,132,132]);def(RUNE,'Rune Stone',[133,133,133],{emit:true,lum:8});def(DWCHEST,'Dwarven Chest',[135,128,134],{snd:'wood'});
-def(DWCRACK,'Cracked Dwarven Brick',[136,136,136]);def(LECTERN,'Lectern',[139,9,140],{snd:'wood'});def(DEEP,'Deepstone',[145,145,145]);def(HEATHER,'Heather',[148,148,148],PLANT);def(RAILX,'Rails (east-west)',[147,147,147],{solid:false,opq:false,occ:false,flat:true,rot:true,snd:'metal'});def(RAILZ,'Rails (north-south)',[147,147,147],{solid:false,opq:false,occ:false,flat:true,snd:'metal'});def(GLOWMOSS,'Glowing Moss',[146,146,146],{emit:true,lum:7,snd:'soft'});
+def(DWCRACK,'Cracked Dwarven Brick',[136,136,136]);def(LECTERN,'Lectern',[139,9,140],{snd:'wood'});def(DEEP,'Deepstone',[145,145,145]);def(HEATHER,'Heather',[148,148,148],PLANT);def(GLOWMOSS,'Glowing Moss',[146,146,146],{emit:true,lum:7,snd:'soft'});
 def(SNOWLEAF,'Snowy Spruce Leaves',[143,144,144],{opq:false,leaf:true,snd:'soft'});def(BONES,'Bone Pile',[141,141,141],{solid:false,opq:false,occ:false,cross:true});def(COBWEB,'Cobweb',[142,142,142],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
 def(SCONCE,'Wall Sconce',[53,53,53],{solid:false,opq:false,occ:false,sconce:true,lum:14,emit:true,snd:'wood'});def(BARREL,'Barrel',[138,138,137],{snd:'wood'});
 def(CALCITE,'Calcite',[123,123,123]);def(AMETH,'Amethyst',[124,124,124],{emit:true,lum:7,snd:'glass'});def(MUSHSTEM,'Mushroom Stem',[126,126,125],{snd:'wood'});def(GLOWCAP,'Glowing Cap',[127,127,127],{emit:true,lum:13,snd:'soft'});
 def(FARM_D,'Farmland',[93,2,2],{snd:'soft'});def(FARM_W,'Wet Farmland',[94,2,2],{snd:'soft',place:false});
 [[WHEAT0,'Wheat Sprouts',95],[WHEAT1,'Young Wheat',96],[WHEAT2,'Growing Wheat',97],[POT0,'Potato Sprouts',98],[POT1,'Young Potatoes',99],[POT2,'Growing Potatoes',100],[POT3,'Potatoes',101]]
   .forEach(([id,n,t])=>def(id,n,[t,t,t],{solid:false,opq:false,occ:false,cross:true,snd:'soft',place:id===POT3}));
-def(GRAVE,'Grave',[92,92,92],{place:false,opq:false,occ:false});def(CRUSHER,'Crusher',[89,89,88]);def(SLUICE,'Sluice',[90,9,91],{snd:'wood'});
-def(TRADER,'Trading Counter',[86,9,84],{snd:'wood'});def(MINT,'Coin Mint',[85,85,85]);
+def(GRAVE,'Grave',[92,92,92],{place:false,opq:false,occ:false});
+
 def(PATH,'Dirt Path',[81,2,82],{snd:'soft'});def(WHEAT,'Wheat',[83,83,83],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
 def(FURN,'Furnace',[77,77,76]);def(BLAST,'Blast Furnace',[78,78,79]);def(LANTERN,'Brass Lantern',[80,80,80],{emit:true,lum:15,snd:'glass'});
 // How long each block takes to break by hand, what it is made of, and the pickaxe tier it needs to drop anything
@@ -90,9 +90,9 @@ function setH(ids,hard,mat,tier){ids.forEach(i=>{BL[i].hard=hard;BL[i].mat=mat;B
 setH([GRASS,DIRT,SAND,GRAVEL,SNOWG,RSAND,CACTUS,SPONGE,PATH],0.6,'soft');setH([TGRASS,FLOWR,FLOWY,DBUSH,TORCH,WHEAT,HEATHER],0,'soft');
 setH([LEAVES,BLEAVES,SLEAVES,JLEAVES,SNOWLEAF],0.3,'soft');setH([LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS],2.2,'wood');
 setH([WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK],0.8,'soft');setH([TNT],0.1,'soft');setH([GLASS,GLOW,ICE,CRYSTAL],0.45,'misc');
-setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([RAILX,RAILZ],0.6,'misc');setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
+setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 setH([COAL],5,'ore',1);setH([COPO,TINO,ZINO],5,'ore',2);setH([IRON],5,'ore',3);setH([GOLD],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN],1,'misc');setH([TRADER,SLUICE],2.2,'wood');setH([FARM_D,FARM_W],0.6,'soft');setH([WIRE],0.2,'misc');setH([LAMP_OFF,LAMP_ON],0.5,'misc');setH([COALGEN,SOLAR,BATTERY,EFURN,CHARGER],4,'metal',1);setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEEL],2.2,'wood');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([CRUSHER],5,'metal',2);setH([MINT],6,'metal',2);
+setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN],1,'misc');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});

@@ -61,10 +61,7 @@ function setBlock(x,y,z,v,force){
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
   if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
   if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
-  if(CONDUCT[old]&&!CONDUCT[v])powerBlocks.delete(i);if(CONDUCT[v])powerBlocks.add(i);
-  if(old===BATTERY&&v!==BATTERY)batCharge.delete(iToKey(i));if(old===COALGEN&&v!==COALGEN)genFuel.delete(iToKey(i));
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}
-  if(old===SLUICE){sluices.delete(i);const k=iToKey(i),st=sluiceStore.get(k);if(st&&SURV()){addItem(267,st.g);addItem(268,st.p);}sluiceStore.delete(k);}if(v===SLUICE)sluices.add(i);
   lvl[i]=0;wakeWater(x,y,z);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const X=x+dx,Z=z+dz;if(X<0||Z<0||X>=W||Z>=D)continue;dirty.add(((X/CS)|0)+((Z/CS)|0)*NCX);}
   if(LUM[old]||LUM[v]||(OPQ[old]!==OPQ[v]&&(BLK[i]>0||nbLight(x,y,z)>0))){

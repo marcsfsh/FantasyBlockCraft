@@ -51,7 +51,6 @@ function update(dt){
   if(PL.ground)airT=0;else airT+=dt;
   if(inLiq&&wallHit&&jump)PL.vy=Math.max(PL.vy,5.6);
   if(TOUCH&&look.id!==null&&!look.moved&&!look.breaking&&performance.now()-look.t0>380){look.breaking=true;act(0);hold=0;holdT=0.25;}
-  panCool=Math.max(0,panCool-dt);tickSluices(dt);powerTick(dt);
   if(SURV()&&hold===0)mineTick(dt);else if(mineI>=0){mineI=-1;mineP=0;crack.visible=false;}
   if(hold>=0&&!(hold===2&&isTool(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
   const mv=Math.hypot(PL.vx,PL.vz);if(PL.ground&&mv>0.5)bob+=mv*dt*1.9;

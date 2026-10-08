@@ -1,6 +1,7 @@
 // Hotbar and block menu
 function icon(id){if(isItem(id)){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').drawImage(itemIcon(id),0,0);return c;}return tileCanvas(isTool(id)?TOOLS[id][1]:BL[id].t[2]);}
 let nameTimer=0;
+function showName(t){const el=$('name');el.textContent=t;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},1400);}
 function drawBar(quiet){
   const bar=$('bar');bar.innerHTML='';
   for(let i=0;i<9;i++){
@@ -8,7 +9,6 @@ function drawBar(quiet){
     const sl=document.createElement('div');sl.className='slot'+(i===sel?' on':'');if(id)sl.appendChild(icon(id));
     const n=document.createElement('span');n.textContent=i+1;sl.appendChild(n);
     if(SURV()&&inv[i]&&inv[i].c>1){const c=document.createElement('b');c.className='cnt';c.textContent=inv[i].c;sl.appendChild(c);}
-    if(SURV()&&inv[i]&&ITEMS[inv[i].id]&&ITEMS[inv[i].id].power){const f=(inv[i].e||0)/ITEMS[inv[i].id].cap,bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='#4ab0ff';sl.appendChild(bb);}
     if(SURV()&&inv[i]&&DUR[inv[i].id]&&inv[i].d){const f=1-inv[i].d/DUR[inv[i].id],bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';sl.appendChild(bb);}
     sl.addEventListener('pointerdown',e=>{e.stopPropagation();if(i===sel&&TOUCH){openInv();return;}sel=i;drawBar();});bar.appendChild(sl);
   }
@@ -18,7 +18,7 @@ function drawBar(quiet){
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[HOOK,FIREWORK,BPTOOL]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
     ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH]],['Building',[BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
-    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Power',[CHARGER,WIRE,COALGEN,WHEEL,SOLAR,BATTERY,LAMP_OFF,EFURN]],['Dwarven',[RAILX,RAILZ,BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,TRADER,MINT,CRUSHER,SLUICE,WHEAT,TORCH,GLOW,LANTERN,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
+    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
@@ -27,7 +27,7 @@ function drawBar(quiet){
       el.addEventListener('click',()=>{hot[sel]=id;drawBar();closeInv();});g.appendChild(el);});});
 })();
 function openInv(){invOpen=true;
-  $('trade').style.display='none';$('lore').style.display='none';$('bplist').style.display='flex';renderBlueprints($('bplist'));
+  $('lore').style.display='none';$('bplist').style.display='flex';renderBlueprints($('bplist'));
   const sv=SURV();$('invgrid').style.display=sv?'none':'';$('invname').style.display=sv?'none':'';$('sinv').style.display=sv?'flex':'none';
   $('invtitle').textContent=sv?'Inventory and crafting':'Pick a block for slot '+(sel+1);heldSlot=-1;if(sv)renderSInv();
   $('inv').style.display='grid';hold=-1;if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;}

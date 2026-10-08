@@ -102,24 +102,12 @@
       "about": "Player physics, held item, keyboard and mouse"
     },
     {
-      "path": "legacy/power-tools.js",
-      "about": "Power tools (removed from play by the BANNED list)"
+      "path": "gameplay/mining.js",
+      "about": "Survival mining: hold-to-break timing, pickaxe tiers and drops"
     },
     {
       "path": "gameplay/crafting.js",
       "about": "Recipes and crafting"
-    },
-    {
-      "path": "legacy/power-network.js",
-      "about": "Power network (removed from play by the BANNED list)"
-    },
-    {
-      "path": "gameplay/trading.js",
-      "about": "Banned-item filter, values, coins and trading counters"
-    },
-    {
-      "path": "gameplay/ore-processing.js",
-      "about": "Gold pan, sluices and crusher"
     },
     {
       "path": "gameplay/blueprints.js",

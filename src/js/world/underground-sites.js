@@ -25,14 +25,13 @@ function applyShafts(WCX,WCZ){
       const along=ax==='x'?X:Z;
       if(along%4===0){if(p)PW(X,y,Z,LOG,MODE_SET),PW(X,y+1,Z,LOG,MODE_SET);PW(X,y+2,Z,(!p&&along%12===0)?LANTERN:PLANKS,MODE_SET);}
       else if(p&&hsh(X,y,Z)<0.02)PW(X,y,Z,CRATE,MODE_SET);
-      if(!p&&GW(X,y,Z)===AIR&&hsh(X,y+5,Z)>0.12)PW(X,y,Z,ax==='x'?RAILX:RAILZ,MODE_SET);
     }
   }
 }
 // ---- Supply crates hold a random haul, decided by where they sit
 const BARRELLOOT=[[206,1,3,6],[269,2,5,6],[207,2,5,5],[270,2,6,5],[202,3,8,4],[200,2,6,4]];
 const LOOT=[[203,8,24,10],[204,1,5,5],[200,4,12,10],[220,1,4,7],[223,1,4,6],[225,1,3,4],[226,1,3,4],[227,1,2,3],[206,1,3,6],[269,2,4,5],[208,3,8,4],[209,2,5,4],
-  [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[268,1,3,3],[267,2,6,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[WIRE,4,8,2],[270,2,5,3]];
+  [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[270,2,5,3]];
 function openCrate(X,Y,Z){
   const dw=world[I(X,Y,Z)]===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(X+OX,Y,Z+OZ)]||DWLOOT):world[I(X,Y,Z)]===BARREL?BARRELLOOT:LOOT,WX=X+OX,WZ=Z+OZ,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0),got=[];let tot=0;for(const l of TBL)tot+=l[3];
   const loot=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));loot.push([it[0],n]);got.push(n+' '+nameOf(it[0]));}
@@ -113,14 +112,14 @@ function buildPOI(p){
     case 'lab':{roomP(x-5,y,z-4,x+5,y+5,z+4,STEELB,STEELB);
       for(let X=x-4;X<=x+4;X++)for(let Z=z-3;Z<=z+3;Z++)PW(X,y,Z,(X+Z)&1?SBRICK:STEELB,MODE_SET);
       PW(x-2,y+4,z,LANTERN,MODE_SET);PW(x+2,y+4,z,LANTERN,MODE_SET);
-      PW(x-4,y+1,z-3,BATTERY,MODE_SET);PW(x-3,y+1,z-3,WIRE,MODE_SET);PW(x-2,y+1,z-3,CHARGER,MODE_SET);PW(x+4,y+1,z-3,COALGEN,MODE_SET);
-      PW(x+4,y+1,z+3,EFURN,MODE_SET);PW(x+3,y+1,z+3,LAMP_OFF,MODE_SET);crateP(x-4,y+1,z+3);crateP(x,y+1,z+3);
+      PW(x-4,y+1,z-3,BARREL,MODE_SET);PW(x-3,y+1,z-3,BOOKS,MODE_SET);PW(x-2,y+1,z-3,GLASS,MODE_SET);PW(x+4,y+1,z-3,FURN,MODE_SET); // the alchemist's barrels, books, flasks and stoves
+      PW(x+4,y+1,z+3,FURN,MODE_SET);PW(x+3,y+1,z+3,GLASS,MODE_SET);crateP(x-4,y+1,z+3);crateP(x,y+1,z+3);
       for(let Y=y+1;Y<=y+2;Y++)PW(x,Y,z-4,AIR,MODE_SET);
       break;}
     case 'outpost':{const R=10;
       for(let dx=-R;dx<=R;dx++)for(let dz=-R;dz<=R;dz++){if(Math.hypot(dx,dz)>R)continue;PW(x+dx,y-1,z+dz,COBBLE,MODE_SET);for(let Y=0;Y<7;Y++)PW(x+dx,y+Y,z+dz,AIR,MODE_SET);}
       for(const [hx,hz] of [[-6,-3],[2,-7],[3,4]]){roomP(x+hx-2,y-1,z+hz-2,x+hx+2,y+3,z+hz+2,PLANKS,r()<0.5?PLANKS:COBBLE);for(let Y=y;Y<=y+1;Y++)PW(x+hx,Y,z+hz-2,AIR,MODE_SET);PW(x+hx,y+2,z+hz,LANTERN,MODE_SET);}
-      PW(x,y,z,TRADER,MODE_SET);PW(x+1,y,z,PLANKS,MODE_SET);PW(x-1,y,z,PLANKS,MODE_SET);
+      PW(x,y,z,BARREL,MODE_SET);PW(x+1,y,z,PLANKS,MODE_SET);PW(x-1,y,z,PLANKS,MODE_SET);
       for(const [a,b] of [[-3,3],[4,-1],[-2,-6]]){for(let Y=y;Y<=y+2;Y++)PW(x+a,Y,z+b,LOG,MODE_SET);PW(x+a,y+3,z+b,LANTERN,MODE_SET);}
       crateP(x+3,y+1,z+5);crateP(x-6,y,z-1);
       break;}
