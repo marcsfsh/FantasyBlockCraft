@@ -25,8 +25,20 @@ function megaAt(cx,cz,L){
   }
   megaC.set(key,m);return m;
 }
+// ---- Holds: rare, vast cities (D-023). Each region of HOLD_REG x HOLD_REG chunks (2560 blocks) holds one, its centre kept
+// far enough inside the region that the hold and its mines never cross into the next one, so a chunk only asks its own region.
+const HOLD_REG=160,holdRC=new Map();
+function holdAt(rx,rz){
+  const key=ckey(rx,rz);let h=holdRC.get(key);if(h!==undefined)return h;if(holdRC.size>4000)holdRC.clear();
+  const r=rngAt(rx,1701,rz);
+  h={rx:rx,rz:rz,cx:rx*HOLD_REG+44+(r()*72|0),cz:rz*HOLD_REG+44+(r()*72|0),R:12+r()*6,inhabited:r()<0.3};
+  holdRC.set(key,h);return h;
+}
+const holdNear=(cx,cz)=>holdAt(Math.floor(cx/HOLD_REG),Math.floor(cz/HOLD_REG));
+// Distance from a hold's centre in units of its ragged radius: under 1 is inside the hold
+function holdReach(h,cx,cz){return Math.hypot(cx+0.5-h.cx,cz+0.5-h.cz)/(h.R*(1+0.3*fbm2(cx/6,cz/6,2,909.1)));}
 const ruinZoneC=new Map();
-function ruinZone(cx,cz){const k=ckey(cx,cz);let v=ruinZoneC.get(k);if(v===undefined){if(ruinZoneC.size>20000)ruinZoneC.clear();v=fbm2(cx/9,cz/9,2,909.1)>-0.1;ruinZoneC.set(k,v);}return v;}
+function ruinZone(cx,cz){const k=ckey(cx,cz);let v=ruinZoneC.get(k);if(v===undefined){if(ruinZoneC.size>20000)ruinZoneC.clear();v=holdReach(holdNear(cx,cz),cx,cz)<1;ruinZoneC.set(k,v);}return v;}
 const md=(a)=>((a%6)+6)%6;
 // ---- Street plan per hold: winding avenues from each hold edge to a central plaza
 const planC=new Map();
@@ -52,7 +64,8 @@ function isPlaza(cx,cz){if(!isAvenue(cx,cz))return false;if(isHub(cx,cz))return 
 function ruinActive(cx,cz,L){return ruinZone(cx,cz)&&(isAvenue(cx,cz)||hsh(cx,L*97+1,cz)<0.82);}
 function stairAt(cx,cz){return !inDelf(cx,cz)&&isHub(cx,cz)&&isAvenue(cx,cz)&&hsh(cx,333,cz)<0.85;}
 // How decayed this part of the city is (0 = kept up, 1 = falling apart)
-function ruinI(cx,cz){return 0.55+0.45*sstep(-0.25,0.15,fbm2(cx/5,cz/5,2,1777.3));}
+// An inhabited hold is kept up (decay under 0.25 skips structural damage); its people arrive with settlements (E2)
+function ruinI(cx,cz){const f=sstep(-0.25,0.15,fbm2(cx/5,cz/5,2,1777.3));return holdNear(cx,cz).inhabited?0.05+0.15*f:0.55+0.45*f;}
 // Room footprint and floor offset vary per cell
 const SMALLOK=new Set(['office','shrine','crypt','bath','archive','barracks','junction','farm']);
 function cellShape(cx,cz,L,t){

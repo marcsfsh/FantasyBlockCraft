@@ -1,8 +1,8 @@
 // ---- Holds, lore and the extra layers of the undercity
 const GUILDS=['the Brasswrights','the Deep Delvers','the Rune Masons','the Lamplighters','the Ironbinders','the Gemcutters','the Brewers of the Black Vat','the Platinum Wardens','the Stonesingers'];
 const holdC=new Map();
-function holdOf(cx,cz){
-  const hx=Math.floor(cx/8),hz=Math.floor(cz/8),k=ckey(hx,hz);let h=holdC.get(k);if(h)return h;
+function holdOf(cx,cz){ // the name and history of the hold a chunk belongs to
+  const H0=holdNear(cx,cz),hx=H0.rx,hz=H0.rz,k=ckey(hx,hz);let h=holdC.get(k);if(h)return h;
   const r=rngAt(hx,1301,hz);
   h={name:fullName('dwarf',r,r()<0.35),king:nameWord('dwarf',r),queen:nameWord('dwarf',r),guild:GUILDS[r()*GUILDS.length|0],year:120+(r()*880|0)};
   holdC.set(k,h);return h;

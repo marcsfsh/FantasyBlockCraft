@@ -4,7 +4,7 @@ function delfAt(cx,cz){
   const ax=Math.floor(cx/3)*3,az=Math.floor(cz/3)*3,key=ckey(ax,az);
   if(delfC.has(key))return delfC.get(key);if(delfC.size>20000)delfC.clear();
   let d=null;
-  if(hsh(ax,2001,az)<0.14){let ok=true;for(let a=0;a<3&&ok;a++)for(let b=0;b<3&&ok;b++)if(!ruinZone(ax+a,az+b))ok=false;
+  if(hsh(ax,2001,az)<0.05){let ok=true;for(let a=0;a<3&&ok;a++)for(let b=0;b<3&&ok;b++)if(!ruinZone(ax+a,az+b))ok=false;
     if(ok)d={ax:ax,az:az,x0:ax*CS,x1:ax*CS+47,z0:az*CS,z1:az*CS+47,cx:ax*CS+24,cz:az*CS+24};}
   delfC.set(key,d);return d;
 }

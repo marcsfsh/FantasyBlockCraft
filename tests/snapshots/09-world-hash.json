@@ -1,32 +1,32 @@
 {
   "4242": {
-    "blocks:fire-below:y0-12": "2ee308c3",
-    "blocks:mines:y13-57": "29952f71",
-    "blocks:dwarven-city:y58-101": "24858e01",
-    "blocks:great-caverns:y102-151": "97ece013",
-    "blocks:old-workings:y152-203": "ecea21f5",
-    "blocks:old-caves:y204-259": "c6a030bd",
-    "blocks:crawlways:y260-290": "8b320a6b",
+    "blocks:fire-below:y0-12": "769c5bef",
+    "blocks:mines:y13-57": "8de1067a",
+    "blocks:dwarven-city:y58-101": "91d0e64a",
+    "blocks:great-caverns:y102-151": "486bec0e",
+    "blocks:old-workings:y152-203": "74db66d4",
+    "blocks:old-caves:y204-259": "88c1f612",
+    "blocks:crawlways:y260-290": "bb937088",
     "blocks:surface:y291-383": "b80f54d0",
     "columns:ground-biome-heightmap": "c4213097",
-    "light:block-light": "9dcb9326",
+    "light:block-light": "14c5b915",
     "plan:terrain-16k": "20196269",
-    "plan:city-81x81-cells": "6ea60e74",
-    "blocks:surface:y291-511": "518fc1ad"
+    "plan:city-81x81-cells": "53527697",
+    "blocks:surface:y291-511": "ecbfb582"
   },
   "123456789": {
-    "blocks:fire-below:y0-12": "ad82d357",
-    "blocks:mines:y13-57": "6b9effbb",
-    "blocks:dwarven-city:y58-101": "79b11216",
-    "blocks:great-caverns:y102-151": "9be7eac3",
-    "blocks:old-workings:y152-203": "34508c99",
-    "blocks:old-caves:y204-259": "4688bcd1",
-    "blocks:crawlways:y260-290": "1b93894c",
+    "blocks:fire-below:y0-12": "969ac62d",
+    "blocks:mines:y13-57": "4c2fb081",
+    "blocks:dwarven-city:y58-101": "2612e679",
+    "blocks:great-caverns:y102-151": "cd9f6cab",
+    "blocks:old-workings:y152-203": "0c433128",
+    "blocks:old-caves:y204-259": "539a90ea",
+    "blocks:crawlways:y260-290": "febeb3f7",
     "blocks:surface:y291-383": "b6ebc871",
     "columns:ground-biome-heightmap": "4e9a77a3",
-    "light:block-light": "c00a4802",
+    "light:block-light": "772493ce",
     "plan:terrain-16k": "edbac933",
-    "plan:city-81x81-cells": "c6be4f75",
-    "blocks:surface:y291-511": "0f222f4e"
+    "plan:city-81x81-cells": "15ae469a",
+    "blocks:surface:y291-511": "e049f8ec"
   }
 }
