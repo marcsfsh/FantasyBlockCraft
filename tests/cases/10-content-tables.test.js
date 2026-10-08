@@ -19,3 +19,7 @@ const freeT=[];for(let t=0;t<AC*AR;t++)if(!used.has(t))freeT.push(t);
 info('blocks',blocks.length,'items',Object.keys(ITEMS).length,'recipes',RECIPES.length);
 info('free block ids below 200 (first 12):',freeIds.slice(0,12).join(','));
 info('atlas tiles not referenced',freeT.length,'of',AC*AR,'(first 12):',freeT.slice(0,12).join(','),'; check atlas.js before using one, a few are painted for icons');
+// Removed for the setting (D-019, M1): power, trading counters, ore processing and rails never come back by accident
+const GONE=/wire|generator|water wheel|solar|battery|electric|charger|rails|crusher|sluice|trading counter|coin mint|gold pan|drill|jackhammer|chainsaw|nugget|crushed/i;
+const back=[...blocks.map(i=>BL[i].n),...Object.values(ITEMS).map(it=>it.n)].filter(n=>GONE.test(n));
+assert(back.length===0,'no power, trade, ore-processing or rail blocks or items exist'+(back.length?' ('+back.join(', ')+')':''));
