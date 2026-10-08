@@ -64,16 +64,7 @@ function pollPad(dt){
     const rtOn=PAD.rt?rtv>0.2:rtv>0.4,ltOn=PAD.lt?ltv>0.2:ltv>0.4;
     if(rtOn&&!PAD.rt){act(0);hold=0;holdT=0.28;}if(!rtOn&&PAD.rt&&hold===0)hold=-1;PAD.rt=rtOn;
     if(ltOn&&!PAD.lt){act(2);if(!isTool(curId())){hold=2;holdT=0.28;}}if(!ltOn&&PAD.lt&&hold===2)hold=-1;PAD.lt=ltOn;
-    if(ed(4)){sel=(sel+8)%9;drawBar();}if(ed(5)){sel=(sel+1)%9;drawBar();}
-    if(ed(3))openInv();
-    if(ed(2))toggleFly();
-    if(ed(11))act(1);
-    if(ed(8))toggleSwap();
-    if(ed(12))nextWaypoint();
-    if(ed(13))mmZoom=(mmZoom+1)%3;
-    if(ed(14)){if(BP.sel>=0||BP.a){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}else undo();}
-    if(ed(15)){if(BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}else cycleBrush();}
-    if(ed(9)){playing=false;hold=-1;PAD.rt=PAD.lt=false;showPause();PAD.cx=innerWidth/2;PAD.cy=innerHeight/2;}
+    for(const b in BINDS.pad)if(ed(+b)){const a=BINDS.pad[b];if(a==='pause'){PAD.rt=PAD.lt=false;PAD.cx=innerWidth/2;PAD.cy=innerHeight/2;}runAction(a);}
   }
   PAD.prev=now;
 }

@@ -2552,6 +2552,43 @@ function sfxBlock(id,place){
 }
 function sfxBoom(dist){const v=Math.max(0.06,1-dist/80);burst(1.4,'lowpass',420,0.7,0.95*v);burst(0.45,'lowpass',1800,0.5,0.6*v);tone(95,28,1.0,0.9*v);}
 function buzz(ms){if(TOUCH&&navigator.vibrate&&!PAD.active)try{navigator.vibrate(ms);}catch(e){}padRumble(0.15,0.35,Math.min(160,ms*3));}
+// ---- Input actions: named actions, and the keys and controller buttons bound to them.
+// Keyboard, controller and touch all dispatch through runAction, so a rebinding screen (M5) only edits settings.binds.
+// Held controls (movement, jump, sprint) are read with keyHeld; analog sticks, triggers and the mouse stay in their own code.
+const ACTIONS={
+  inventory:{name:'Inventory',run:()=>{invOpen?closeInv():openInv();},anytime:true},
+  jump:{name:'Jump, swim up, double tap to fly',run:()=>jumpPress()},
+  fly:{name:'Fly on or off',run:()=>toggleFly()},
+  respawn:{name:'Back to spawn',run:()=>respawn()},
+  brush:{name:'Brush size',run:()=>cycleBrush()},
+  swap:{name:'Replace mode',run:()=>toggleSwap()},
+  photo:{name:'Photo mode',run:()=>setPhoto(!photo)},
+  waypoint:{name:'Travel to the next waypoint',run:()=>nextWaypoint()},
+  bpRotate:{name:'Turn blueprint',run:()=>{if(BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}}},
+  bpClear:{name:'Clear blueprint',run:()=>{if(BP.sel>=0||BP.a){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}}},
+  undo:{name:'Undo',run:()=>undo()},
+  undoOrClear:{name:'Undo, or clear the blueprint',run:()=>{if(BP.sel>=0||BP.a)ACTIONS.bpClear.run();else undo();}},
+  brushOrRotate:{name:'Brush size, or turn the blueprint',run:()=>{if(BP.sel>=0)ACTIONS.bpRotate.run();else cycleBrush();}},
+  mapZoom:{name:'Map zoom',run:()=>{mmZoom=(mmZoom+1)%3;}},
+  pick:{name:'Pick the block you look at',run:()=>act(1)},
+  pause:{name:'Pause',run:()=>{playing=false;hold=-1;showPause();}},
+  hotbarPrev:{name:'Previous slot',run:()=>{sel=(sel+8)%9;drawBar();}},
+  hotbarNext:{name:'Next slot',run:()=>{sel=(sel+1)%9;drawBar();}}
+};
+for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
+// Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
+const BIND_DEFAULTS={
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',
+        Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
+  held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
+  // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code
+  pad:{2:'fly',3:'inventory',4:'hotbarPrev',5:'hotbarNext',8:'swap',9:'pause',11:'pick',12:'waypoint',13:'mapZoom',14:'undoOrClear',15:'brushOrRotate'}
+};
+const BINDS={};
+function loadBinds(){const b=settings.binds||{};for(const k of ['keys','held','pad'])BINDS[k]=Object.assign({},BIND_DEFAULTS[k],b[k]||{});}
+loadBinds();
+function runAction(name){const a=ACTIONS[name];if(!a)return false;a.run();return true;}
+function keyHeld(action){const codes=BINDS.held[action];if(!codes)return false;for(const c of codes)if(keys[c])return true;return false;}
 // ---- Controller support: Xbox-layout pads through the browser Gamepad API
 // (ROG Ally / Ally X in Armoury Crate gamepad mode, Xbox and most PC controllers)
 const PAD={active:false,prev:[],lx:0,ly:0,jump:false,down:false,sprint:false,rt:false,lt:false,cx:innerWidth/2,cy:innerHeight/2,gp:null,rep:0};
@@ -2618,16 +2655,7 @@ function pollPad(dt){
     const rtOn=PAD.rt?rtv>0.2:rtv>0.4,ltOn=PAD.lt?ltv>0.2:ltv>0.4;
     if(rtOn&&!PAD.rt){act(0);hold=0;holdT=0.28;}if(!rtOn&&PAD.rt&&hold===0)hold=-1;PAD.rt=rtOn;
     if(ltOn&&!PAD.lt){act(2);if(!isTool(curId())){hold=2;holdT=0.28;}}if(!ltOn&&PAD.lt&&hold===2)hold=-1;PAD.lt=ltOn;
-    if(ed(4)){sel=(sel+8)%9;drawBar();}if(ed(5)){sel=(sel+1)%9;drawBar();}
-    if(ed(3))openInv();
-    if(ed(2))toggleFly();
-    if(ed(11))act(1);
-    if(ed(8))toggleSwap();
-    if(ed(12))nextWaypoint();
-    if(ed(13))mmZoom=(mmZoom+1)%3;
-    if(ed(14)){if(BP.sel>=0||BP.a){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}else undo();}
-    if(ed(15)){if(BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}else cycleBrush();}
-    if(ed(9)){playing=false;hold=-1;PAD.rt=PAD.lt=false;showPause();PAD.cx=innerWidth/2;PAD.cy=innerHeight/2;}
+    for(const b in BINDS.pad)if(ed(+b)){const a=BINDS.pad[b];if(a==='pause'){PAD.rt=PAD.lt=false;PAD.cx=innerWidth/2;PAD.cy=innerHeight/2;}runAction(a);}
   }
   PAD.prev=now;
 }
@@ -3169,25 +3197,16 @@ addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
   keys[e.code]=true;
   if(!ready)return;
-  if(e.code==='KeyE'&&!e.repeat){invOpen?closeInv():openInv();return;}
+  const a=BINDS.keys[e.code];
+  if(a&&ACTIONS[a]&&ACTIONS[a].anytime&&!e.repeat){runAction(a);return;}
   // Esc closes the inventory; browsers refuse pointer lock from Esc, so show the pause menu rather than re-locking
   if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
   if(!playing)return;
-  if(e.code.startsWith('Digit')){const n=+e.code.slice(5);if(n>=1&&n<=9){sel=n-1;drawBar();}}
-  if(e.code==='KeyF'&&!e.repeat)toggleFly();
-  if(e.code==='KeyR'&&!e.repeat)respawn();
-  if(e.code==='Space'){e.preventDefault();if(!e.repeat)jumpPress();}
-  if(e.code==='KeyW'&&!e.repeat){const n=performance.now();if(n-lastW<300)sprintLatch=true;lastW=n;}
-  if(e.code==='KeyB'&&!e.repeat)cycleBrush();
-  if(e.code==='KeyV'&&!e.repeat)toggleSwap();
-  if(e.code==='KeyH'&&!e.repeat)setPhoto(!photo);
-  if(e.code==='KeyT'&&!e.repeat)nextWaypoint();
-  if(e.code==='KeyQ'&&!e.repeat&&BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}
-  if(e.code==='KeyX'&&!e.repeat&&(BP.sel>=0||BP.a)){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}
-  if((e.code==='KeyZ'||e.code==='KeyU')&&!e.repeat)undo();
-  if(e.code==='KeyM'&&!e.repeat)mmZoom=(mmZoom+1)%3;
+  if(e.code==='Space')e.preventDefault();
+  if(BINDS.held.forward.includes(e.code)&&!e.repeat){const n=performance.now();if(n-lastW<300)sprintLatch=true;lastW=n;} // double tap forward to sprint
+  if(a&&!e.repeat)runAction(a);
 });
-addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyW')sprintLatch=false;});
+addEventListener('keyup',e=>{keys[e.code]=false;if(BINDS.held.forward.includes(e.code))sprintLatch=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;hold=-1;});
 document.addEventListener('mousemove',e=>{
   if(document.pointerLockElement!==canvas)return;
@@ -3256,12 +3275,12 @@ if(TOUCH){
   btn('tDown',()=>{tch.down=true;},()=>{tch.down=false;});
   btn('tBreak',()=>{act(0);hold=0;holdT=0.3;},()=>{hold=-1;});
   btn('tPlace',()=>{act(2);if(!isTool(curId())){hold=2;holdT=0.3;}},()=>{hold=-1;});
-  btn('tBrush',()=>{cycleBrush();});
-  btn('tSwap',()=>{toggleSwap();});
-  btn('tUndo',()=>{undo();});
-  btn('tFly',()=>{toggleFly();});
-  btn('tInv',()=>{openInv();});
-  btn('tPause',()=>{playing=false;hold=-1;showPause();});
+  btn('tBrush',()=>{runAction('brush');});
+  btn('tSwap',()=>{runAction('swap');});
+  btn('tUndo',()=>{runAction('undo');});
+  btn('tFly',()=>{runAction('fly');});
+  btn('tInv',()=>{runAction('inventory');});
+  btn('tPause',()=>{runAction('pause');});
   addEventListener('resize',joyRest);
 }
 
@@ -3641,10 +3660,10 @@ const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBa
 let last=performance.now(),infoT=0,fc=0,fps=0,ft=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
-  const shift=keys.ShiftLeft||keys.ShiftRight;
-  const fwd=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-tch.jy-PAD.ly;
-  const str=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0)+tch.jx+PAD.lx;
-  const jump=keys.Space||tch.jump||PAD.jump,down=(PL.fly&&shift)||tch.down||PAD.down;
+  const shift=keyHeld('sprint');
+  const fwd=(keyHeld('forward')?1:0)-(keyHeld('back')?1:0)-tch.jy-PAD.ly;
+  const str=(keyHeld('right')?1:0)-(keyHeld('left')?1:0)+tch.jx+PAD.lx;
+  const jump=keyHeld('jump')||tch.jump||PAD.jump,down=(PL.fly&&shift)||tch.down||PAD.down;
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);

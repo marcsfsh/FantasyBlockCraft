@@ -98,6 +98,10 @@
       "about": "Synthesized sound and haptics"
     },
     {
+      "path": "input/actions.js",
+      "about": "Input actions: named actions with keyboard, controller and touch bindings (settings.binds overrides the defaults)"
+    },
+    {
       "path": "input/gamepad.js",
       "about": "Controller support through the Gamepad API"
     },
