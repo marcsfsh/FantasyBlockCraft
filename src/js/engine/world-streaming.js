@@ -11,13 +11,12 @@ function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
   torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
-  for(const p of primed)scene.remove(p.m);primed.length=0;for(const f of falling)scene.remove(f.m);falling.length=0;rockets.length=0;parts.length=0;G.on=false;
+  clearEntities(ddx,ddz);
   BLK.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=3&&Math.abs(cz-cm)<=3)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
   lightAll();mmAll();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)captureTile(cx,cz);
-  waypoints.forEach(m=>{m.position.x-=ddx;m.position.z-=ddz;});
   for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=3&&Math.abs(z-cm)<=3)dirty.add(c);}
 }
 // Slide the loaded area by one chunk and generate the new strip
@@ -63,14 +62,7 @@ function shiftWindow(dx,dz){
   if(cdz>0)for(let c=NCZ-cdz;c<NCZ;c++)for(let x=0;x<NCX;x++)genQ.push([x,c]);
   if(cdz<0)for(let c=0;c<-cdz;c++)for(let x=0;x<NCX;x++)genQ.push([x,c]);
   // move everything that lives in local coordinates
-  PL.x-=dx;PL.z-=dz;G.ax-=dx;G.az-=dz;G.bx-=dx;G.bz-=dz;
-  for(const p of primed){p.x-=dx;p.z-=dz;}
-  for(const f of falling){f.x-=dx;f.z-=dz;f.m.position.x-=dx;f.m.position.z-=dz;}
-  for(const r of rockets){r.x-=dx;r.z-=dz;}
-  for(const q of parts){q.x-=dx;q.z-=dz;}
-  for(const q of drops){q.x-=dx;q.z-=dz;}
-  for(const f of flashes){f.m.position.x-=dx;f.m.position.z-=dz;}
-  waypoints.forEach(m=>{m.position.x-=dx;m.position.z-=dz;});
+  PL.x-=dx;PL.z-=dz;shiftEntities(dx,dz);
 }
 function findSpawn(){
   for(let r=0;r<90;r++)for(let a=0;a<24;a++){

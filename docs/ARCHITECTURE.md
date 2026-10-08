@@ -7,7 +7,7 @@ The game began as one HTML file with one inline script. That script is now split
 Consequences:
 
 - Any file can use anything declared in any other file, but **top-level code runs in manifest order**. Moving a file earlier can break code that runs at load time (function declarations are hoisted across the whole bundle; `const` and `let` are not).
-- There are no imports or exports yet. Moving to ES modules is a planned refactor, best done one system at a time with tests passing after each step: see `docs/ES_MODULES_PLAN.md` and `docs/ROADMAP.md`.
+- There are no imports or exports yet. Moving to ES modules is planned for after M2 (D-022), one system at a time with tests passing after each step: see `docs/ES_MODULES_PLAN.md`.
 - three.js **r128** (npm `three@0.128.0`) is the only library. The template loads it from the cdnjs CDN; the single-file build keeps that tag. The game-folder build swaps the tag for `vendor/three.min.js`, a committed, byte-identical copy, so `dist/web` runs offline (see `vendor/README.md`). The web build copies `vendor/` and `assets/` automatically.
 
 ## Modules, in bundle order
@@ -33,10 +33,12 @@ Consequences:
 | `src/js/world/chunk-generation.js` | Per-chunk features, ores, plants and genChunk pipeline |
 | `src/js/engine/lighting.js` | Block light flood fill and sky light |
 | `src/js/engine/renderer.js` | three.js setup, sun, clouds, shadow, selection, mesh buffers |
+| `src/js/engine/entities.js` | Entity registry: moving things register once; shifted with the window, cleared on rebuild, updated while playing |
 | `src/js/world/mines.js` | Dwarven mines: galleries, inclines, junctions, great pits, descents |
 | `src/js/engine/chunk-mesher.js` | Underground naming, mesh band and chunk meshing |
 | `src/js/engine/editing-and-physics.js` | Block editing, water flow, falling blocks, waypoint beams |
 | `src/js/engine/audio.js` | Synthesized sound and haptics |
+| `src/js/input/actions.js` | Input actions: named actions with keyboard, controller and touch bindings (settings.binds overrides the defaults) |
 | `src/js/input/gamepad.js` | Controller support through the Gamepad API |
 | `src/js/engine/particles.js` | Particles and explosives |
 | `src/js/gameplay/player-and-input.js` | Player physics, held item, keyboard and mouse |
@@ -89,3 +91,9 @@ Column fill (terrain, soil, water, deepstone) -> `applyWorms` (layered caves, ca
 - **Player changes only.** Automatic systems (`flowStep`, `randomTicks`) set `autoEdit`; their changes are recorded only where the player already changed that block, so crops keep their growth while natural water flow, grass spread and snow never grow the save.
 - A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).
 - Per-block state lives in sets of window indexes that `shiftWindow` moves and `regenerateAll` clears: `torches` and `farms` (farmland, so crops grow anywhere lit). `genChunk` and `setBlock` keep them current.
+
+## Entities, input and equipment (M1b)
+
+- **Entities** (`engine/entities.js`): every kind of moving thing registers once with `entityKind({name, list, update?, persist?, shift?, clear?})`. `shiftWindow` calls `shiftEntities`, `regenerateAll` calls `clearEntities` (persistent kinds such as waypoint beams and rain follow the new origin), and the main loop calls `updateEntities` only while playing. Positions are window coordinates, like all physics; `entityWorld(e)` gives world coordinates. New creatures (E1) register the same way.
+- **Input** (`input/actions.js`): `ACTIONS` names every discrete action; `BINDS.keys` (KeyboardEvent codes), `BINDS.pad` (standard-mapping button numbers) and `BINDS.held` (movement, jump, sprint keys) map inputs to them, from `BIND_DEFAULTS` overridden by `settings.binds` (`loadBinds`). Keyboard, controller and touch dispatch through `runAction`; movement reads `keyHeld`. Sticks, triggers, the mouse and menu navigation stay in their own code.
+- **Equipment** (`gameplay/player-and-input.js`): `equip.belt`, `equip.pack`, `equip.bag`. An item fits the slot named by `ITEMS[id].equip`; `equipFrom(i)` and `unequip(slot)` move items; equipment is saved as `eq` and goes to the grave on death. The inventory shows the slots once any item has an `equip` slot.

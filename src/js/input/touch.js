@@ -42,12 +42,12 @@ if(TOUCH){
   btn('tDown',()=>{tch.down=true;},()=>{tch.down=false;});
   btn('tBreak',()=>{act(0);hold=0;holdT=0.3;},()=>{hold=-1;});
   btn('tPlace',()=>{act(2);if(!isTool(curId())){hold=2;holdT=0.3;}},()=>{hold=-1;});
-  btn('tBrush',()=>{cycleBrush();});
-  btn('tSwap',()=>{toggleSwap();});
-  btn('tUndo',()=>{undo();});
-  btn('tFly',()=>{toggleFly();});
-  btn('tInv',()=>{openInv();});
-  btn('tPause',()=>{playing=false;hold=-1;showPause();});
+  btn('tBrush',()=>{runAction('brush');});
+  btn('tSwap',()=>{runAction('swap');});
+  btn('tUndo',()=>{runAction('undo');});
+  btn('tFly',()=>{runAction('fly');});
+  btn('tInv',()=>{runAction('inventory');});
+  btn('tPause',()=>{runAction('pause');});
   addEventListener('resize',joyRest);
 }
 

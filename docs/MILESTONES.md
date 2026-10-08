@@ -82,7 +82,7 @@ Fix every known bug. Most were found by reading the code on 2026-10-08 and are l
 
 ## M1: Foundations (Q53)
 
-**Split (D-021):** M1a (removals, save format v3, naming module) is done in 0.3.0. M1b covers the entity registry, the input action layer, equipment slots and the ES module decision.
+**Split (D-021):** M1a (removals, save format v3, naming module) is done in 0.3.0. M1b (entity registry, input action layer, equipment slots) is done in 0.4.0; the ES module conversion moves to after M2 (D-022).
 
 **Remove what is leaving.** Live helpers move out of `legacy/` first; see `docs/ROADMAP.md` section 2.
 
@@ -105,7 +105,7 @@ Fix every known bug. Most were found by reading the code on 2026-10-08 and are l
 - Export and import of a world to a file. The world list UI comes in M5; M1 adds a minimal list.
 
 **Engine foundations:**
-- An entity registry in world coordinates. It replaces the hand-patched arrays in `shiftWindow` (falling blocks, kegs, particles, rain, waypoints) and is the base for E1 wildlife.
+- An entity registry (done in 0.4.0; positions stay in window coordinates with a world-coordinate helper, D-022). It replaces the hand-patched arrays in `shiftWindow` (falling blocks, kegs, particles, rain, waypoints) and is the base for E1 wildlife.
 - An input action layer: named actions bound to keyboard, mouse, gamepad and touch. This is the base for remapping in M5 (Q37).
 - Equipment slots in the player model (belt lamp, pack, bag), the base for M4 (Q65, Q67).
 - A naming module with one style per people, plus a test-enforced blocklist of Tolkien names (Q25, Q26). Dwarven is the first style; the others are stubs to be filled in later: goblin, gnome, human, orc, halfling, wood elf, drow, high elf, beastfolk.

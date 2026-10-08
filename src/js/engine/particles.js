@@ -1,5 +1,6 @@
 // Particles
 const MAXP=2400,pPos=new Float32Array(MAXP*3),pCol=new Float32Array(MAXP*3),parts=[];
+entityKind({name:'particles',list:parts});
 const pGeo=new THREE.BufferGeometry();
 pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3).setUsage(THREE.DynamicDrawUsage));
 pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3).setUsage(THREE.DynamicDrawUsage));
@@ -27,6 +28,7 @@ function tileCanvas(t){const c=document.createElement('canvas');c.width=c.height
 function tntMats(white){return[31,31,32,33,31,31].map(t=>{const tx=new THREE.CanvasTexture(tileCanvas(t));tx.magFilter=tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;const m=new THREE.MeshBasicMaterial({map:tx});if(white)m.color.setRGB(2.6,2.6,2.6);return m;});}
 const tntN=tntMats(false),tntW=tntMats(true),tntGeo=new THREE.BoxGeometry(0.98,0.98,0.98);
 const primed=[],flashes=[];
+entityKind({name:'lit kegs',list:primed,update:dt=>updTNT(dt)});entityKind({name:'blast flashes',list:flashes});
 const flashGeo=new THREE.SphereGeometry(1,14,10);
 let shake=0;
 function prime(x,y,z,fuse){

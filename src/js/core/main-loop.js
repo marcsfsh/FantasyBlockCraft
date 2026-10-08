@@ -7,10 +7,10 @@ const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBa
 let last=performance.now(),infoT=0,fc=0,fps=0,ft=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
-  const shift=keys.ShiftLeft||keys.ShiftRight;
-  const fwd=((keys.KeyW||keys.ArrowUp)?1:0)-((keys.KeyS||keys.ArrowDown)?1:0)-tch.jy-PAD.ly;
-  const str=((keys.KeyD||keys.ArrowRight)?1:0)-((keys.KeyA||keys.ArrowLeft)?1:0)+tch.jx+PAD.lx;
-  const jump=keys.Space||tch.jump||PAD.jump,down=(PL.fly&&shift)||tch.down||PAD.down;
+  const shift=keyHeld('sprint');
+  const fwd=(keyHeld('forward')?1:0)-(keyHeld('back')?1:0)-tch.jy-PAD.ly;
+  const str=(keyHeld('right')?1:0)-(keyHeld('left')?1:0)+tch.jx+PAD.lx;
+  const jump=keyHeld('jump')||tch.jump||PAD.jump,down=(PL.fly&&shift)||tch.down||PAD.down;
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
@@ -67,7 +67,7 @@ function frame(now){
   if(ready&&playing){update(dt);
     const ex=PL.x-W/2,ez=PL.z-D/2;
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
-  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updTNT(dt);updFalling(dt);updRockets(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
+  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
   camera.position.set(PL.x,PL.y+EYE,PL.z);
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}

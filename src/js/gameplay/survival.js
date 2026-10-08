@@ -20,6 +20,7 @@ const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',
 function die(cause){
   dead=true;hold=-1;G.on=false;
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
+  for(const s in equip)if(equip[s]){items.push([equip[s].id,1,equip[s].d||0]);equip[s]=null;}
   let msg=DEATH[cause]||'You died';
   if(items.length){
     let x=Math.floor(PL.x),y=Math.max(1,Math.floor(PL.y)),z=Math.floor(PL.z),ok=false;
@@ -108,8 +109,14 @@ function renderSInv(){
         heldSlot=-1;drawBar(true);}
       renderSInv();});
     grid.appendChild(b);});
+  let er=null;if(Object.values(ITEMS).some(it=>it.equip)){er=document.createElement('div');er.className='sgrid eq';
+    for(const s in EQUIP_SLOTS){const q=equip[s],b=document.createElement('button');b.className='sslot';b.title=EQUIP_SLOTS[s]+(q?': '+nameOf(q.id):'');
+      if(q)b.appendChild(icon(q.id));else{const t=document.createElement('span');t.className='n';t.textContent=EQUIP_SLOTS[s];b.appendChild(t);}
+      b.addEventListener('click',()=>{if(heldSlot>=0){if(equipSlotOf(inv[heldSlot]&&inv[heldSlot].id)===s&&!equipFrom(heldSlot))toast('No room');heldSlot=-1;}else if(q&&!unequip(s))toast('Inventory full');drawBar(true);renderSInv();});
+      er.appendChild(b);}}
   const left=document.createElement('div');left.className='scol';
   const h1=document.createElement('div');h1.className='inv-h';h1.textContent='Hotbar is the top row. Tap two slots to swap them.';left.appendChild(h1);left.appendChild(grid);
+  if(er){const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Equipment: tap an item, then its slot. Tap a filled slot to take it off.';left.appendChild(h2);left.appendChild(er);}
   const recs=document.createElement('div');recs.className='recipes';
   const hf=nearStation('f'),hb=nearStation('b');
   const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Crafting'+(hb?', blast furnace nearby':hf?', furnace nearby':'');recs.appendChild(h2);
@@ -127,6 +134,7 @@ function renderSInv(){
 }
 let airT=0,lagX=0,lagY=0,lastYaw=0,lastPitch=0,stepD=0,wasLiq=false,sel=0,brushR=0,gliding=false,sprintLatch=false,lastW=0;
 const G={on:false,t:0,ax:0,ay:0,az:0,bx:0,by:0,bz:0,len:1};
+entityKind({name:'hook',list:[],shift:(dx,dz)=>{G.ax-=dx;G.az-=dz;G.bx-=dx;G.bz-=dz;},clear:()=>{G.on=false;}});
 function fireHook(){
   if(G.on){releaseHook(false);return;}
   const hit=raycast(eyePos(),camDir(),48);
@@ -141,6 +149,7 @@ let swapMode=false,photo=false;
 function toggleSwap(){if(!swapMode&&creativeOnly())return;swapMode=!swapMode;$('tSwap').classList.toggle('on',swapMode);selBox.material.color.setHex(swapMode?0xffc83a:0x000000);toast(swapMode?'Swap mode: place replaces blocks':'Swap mode off');}
 function setPhoto(on){photo=on;$('hud').style.display=on?'none':'block';updateHand();if(on)toast('');}
 const rockets=[];
+entityKind({name:'rockets',list:rockets,update:dt=>updRockets(dt)});
 const FWC=[[1,.3,.3],[1,.85,.3],[.4,1,.5],[.4,.7,1],[.9,.45,1],[1,1,1]];
 function launchFirework(){
   const hit=raycast(eyePos(),camDir(),8),d=camDir();
@@ -231,25 +240,16 @@ addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
   keys[e.code]=true;
   if(!ready)return;
-  if(e.code==='KeyE'&&!e.repeat){invOpen?closeInv():openInv();return;}
+  const a=BINDS.keys[e.code];
+  if(a&&ACTIONS[a]&&ACTIONS[a].anytime&&!e.repeat){runAction(a);return;}
   // Esc closes the inventory; browsers refuse pointer lock from Esc, so show the pause menu rather than re-locking
   if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
   if(!playing)return;
-  if(e.code.startsWith('Digit')){const n=+e.code.slice(5);if(n>=1&&n<=9){sel=n-1;drawBar();}}
-  if(e.code==='KeyF'&&!e.repeat)toggleFly();
-  if(e.code==='KeyR'&&!e.repeat)respawn();
-  if(e.code==='Space'){e.preventDefault();if(!e.repeat)jumpPress();}
-  if(e.code==='KeyW'&&!e.repeat){const n=performance.now();if(n-lastW<300)sprintLatch=true;lastW=n;}
-  if(e.code==='KeyB'&&!e.repeat)cycleBrush();
-  if(e.code==='KeyV'&&!e.repeat)toggleSwap();
-  if(e.code==='KeyH'&&!e.repeat)setPhoto(!photo);
-  if(e.code==='KeyT'&&!e.repeat)nextWaypoint();
-  if(e.code==='KeyQ'&&!e.repeat&&BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}
-  if(e.code==='KeyX'&&!e.repeat&&(BP.sel>=0||BP.a)){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}
-  if((e.code==='KeyZ'||e.code==='KeyU')&&!e.repeat)undo();
-  if(e.code==='KeyM'&&!e.repeat)mmZoom=(mmZoom+1)%3;
+  if(e.code==='Space')e.preventDefault();
+  if(BINDS.held.forward.includes(e.code)&&!e.repeat){const n=performance.now();if(n-lastW<300)sprintLatch=true;lastW=n;} // double tap forward to sprint
+  if(a&&!e.repeat)runAction(a);
 });
-addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyW')sprintLatch=false;});
+addEventListener('keyup',e=>{keys[e.code]=false;if(BINDS.held.forward.includes(e.code))sprintLatch=false;});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;hold=-1;});
 document.addEventListener('mousemove',e=>{
   if(document.pointerLockElement!==canvas)return;

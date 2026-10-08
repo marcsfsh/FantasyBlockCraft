@@ -78,6 +78,10 @@
       "about": "three.js setup, sun, clouds, shadow, selection, mesh buffers"
     },
     {
+      "path": "engine/entities.js",
+      "about": "Entity registry: moving things register once; shifted with the window, cleared on rebuild, updated while playing"
+    },
+    {
       "path": "world/mines.js",
       "about": "Dwarven mines: galleries, inclines, junctions, great pits, descents"
     },
@@ -92,6 +96,10 @@
     {
       "path": "engine/audio.js",
       "about": "Synthesized sound and haptics"
+    },
+    {
+      "path": "input/actions.js",
+      "about": "Input actions: named actions with keyboard, controller and touch bindings (settings.binds overrides the defaults)"
     },
     {
       "path": "input/gamepad.js",
