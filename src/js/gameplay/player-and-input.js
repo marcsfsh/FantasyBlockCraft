@@ -57,6 +57,11 @@ let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
 const inv=new Array(36).fill(null);
 if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
+// Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
+// its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
+const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
+const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
+if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
 const stackMax=id=>id>=240&&id<=255?1:64;
 function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
 function addItem(id,n){
@@ -66,6 +71,14 @@ function addItem(id,n){
 }
 // Would every [id,count] in the list fit in the inventory? (addItem's rules, on a copy)
 function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<36&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
+// Put inventory slot i into its equipment slot (what was there goes back to the inventory); false if it does not fit
+function equipFrom(i){
+  const q=inv[i],s=q&&equipSlotOf(q.id);if(!s)return false;const old=equip[s];
+  if(q.c>1){if(old&&!inv.some(x=>!x))return false;q.c--;if(old)inv[inv.findIndex(x=>!x)]={id:old.id,c:1,d:old.d};}
+  else inv[i]=old?{id:old.id,c:1,d:old.d}:null;
+  equip[s]={id:q.id,c:1,d:q.d||0};saveDirty=true;return true;
+}
+function unequip(s){const q=equip[s],i=inv.findIndex(x=>!x);if(!q||i<0)return false;inv[i]={id:q.id,c:1,d:q.d};equip[s]=null;saveDirty=true;return true;}
 const asList=x=>Array.isArray(x)?x:[x];
 function countOf(ids){ids=asList(ids);let n=0;for(const q of inv)if(q&&ids.includes(q.id))n+=q.c;return n;}
 function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}

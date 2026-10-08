@@ -20,6 +20,7 @@ const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',
 function die(cause){
   dead=true;hold=-1;G.on=false;
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
+  for(const s in equip)if(equip[s]){items.push([equip[s].id,1,equip[s].d||0]);equip[s]=null;}
   let msg=DEATH[cause]||'You died';
   if(items.length){
     let x=Math.floor(PL.x),y=Math.max(1,Math.floor(PL.y)),z=Math.floor(PL.z),ok=false;
@@ -108,8 +109,14 @@ function renderSInv(){
         heldSlot=-1;drawBar(true);}
       renderSInv();});
     grid.appendChild(b);});
+  let er=null;if(Object.values(ITEMS).some(it=>it.equip)){er=document.createElement('div');er.className='sgrid eq';
+    for(const s in EQUIP_SLOTS){const q=equip[s],b=document.createElement('button');b.className='sslot';b.title=EQUIP_SLOTS[s]+(q?': '+nameOf(q.id):'');
+      if(q)b.appendChild(icon(q.id));else{const t=document.createElement('span');t.className='n';t.textContent=EQUIP_SLOTS[s];b.appendChild(t);}
+      b.addEventListener('click',()=>{if(heldSlot>=0){if(equipSlotOf(inv[heldSlot]&&inv[heldSlot].id)===s&&!equipFrom(heldSlot))toast('No room');heldSlot=-1;}else if(q&&!unequip(s))toast('Inventory full');drawBar(true);renderSInv();});
+      er.appendChild(b);}}
   const left=document.createElement('div');left.className='scol';
   const h1=document.createElement('div');h1.className='inv-h';h1.textContent='Hotbar is the top row. Tap two slots to swap them.';left.appendChild(h1);left.appendChild(grid);
+  if(er){const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Equipment: tap an item, then its slot. Tap a filled slot to take it off.';left.appendChild(h2);left.appendChild(er);}
   const recs=document.createElement('div');recs.className='recipes';
   const hf=nearStation('f'),hb=nearStation('b');
   const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Crafting'+(hb?', blast furnace nearby':hf?', furnace nearby':'');recs.appendChild(h2);
