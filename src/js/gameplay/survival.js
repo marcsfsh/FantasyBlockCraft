@@ -127,6 +127,7 @@ function renderSInv(){
 }
 let airT=0,lagX=0,lagY=0,lastYaw=0,lastPitch=0,stepD=0,wasLiq=false,sel=0,brushR=0,gliding=false,sprintLatch=false,lastW=0;
 const G={on:false,t:0,ax:0,ay:0,az:0,bx:0,by:0,bz:0,len:1};
+entityKind({name:'hook',list:[],shift:(dx,dz)=>{G.ax-=dx;G.az-=dz;G.bx-=dx;G.bz-=dz;},clear:()=>{G.on=false;}});
 function fireHook(){
   if(G.on){releaseHook(false);return;}
   const hit=raycast(eyePos(),camDir(),48);
@@ -141,6 +142,7 @@ let swapMode=false,photo=false;
 function toggleSwap(){if(!swapMode&&creativeOnly())return;swapMode=!swapMode;$('tSwap').classList.toggle('on',swapMode);selBox.material.color.setHex(swapMode?0xffc83a:0x000000);toast(swapMode?'Swap mode: place replaces blocks':'Swap mode off');}
 function setPhoto(on){photo=on;$('hud').style.display=on?'none':'block';updateHand();if(on)toast('');}
 const rockets=[];
+entityKind({name:'rockets',list:rockets,update:dt=>updRockets(dt)});
 const FWC=[[1,.3,.3],[1,.85,.3],[.4,1,.5],[.4,.7,1],[.9,.45,1],[1,1,1]];
 function launchFirework(){
   const hit=raycast(eyePos(),camDir(),8),d=camDir();

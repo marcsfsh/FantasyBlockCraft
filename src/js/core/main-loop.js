@@ -67,7 +67,7 @@ function frame(now){
   if(ready&&playing){update(dt);
     const ex=PL.x-W/2,ez=PL.z-D/2;
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
-  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updTNT(dt);updFalling(dt);updRockets(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
+  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
   camera.position.set(PL.x,PL.y+EYE,PL.z);
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}

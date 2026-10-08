@@ -22,6 +22,7 @@ function updSky(){
 }
 const NR=900,rainPos=new Float32Array(NR*6),drops=[];
 for(let i=0;i<NR;i++)drops.push({x:0,y:-999,z:0});
+entityKind({name:'rain',list:drops,persist:true});
 const rainGeo=new THREE.BufferGeometry();rainGeo.setAttribute('position',new THREE.BufferAttribute(rainPos,3).setUsage(THREE.DynamicDrawUsage));
 const rainMat=new THREE.LineBasicMaterial({color:0xa4b8d4,transparent:true,opacity:0.5,depthWrite:false});
 const rainLines=new THREE.LineSegments(rainGeo,rainMat);rainLines.frustumCulled=false;scene.add(rainLines);

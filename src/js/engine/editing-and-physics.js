@@ -73,6 +73,7 @@ function setBlock(x,y,z,v,force){
 }
 // Sand and gravel fall when nothing holds them up
 const falling=[],fallQ=new Set(),fallGeo={};
+entityKind({name:'falling blocks',list:falling,update:dt=>updFalling(dt)});
 function updFalling(dt){
   if(fallQ.size){const q=[...fallQ];fallQ.clear();
     for(const i of q){const id=world[i];if(!BL[id].fall)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;
@@ -94,6 +95,7 @@ function updFalling(dt){
 }
 // Waypoint beams
 const waypoints=new Map(),beamGeo=new THREE.BoxGeometry(0.36,1,0.36),BEAMC=['#5ff2ff','#ff6ad5','#9cff57','#ffd23f'];
+entityKind({name:'waypoint beams',list:waypoints,persist:true,shift:(dx,dz)=>waypoints.forEach(m=>{m.position.x-=dx;m.position.z-=dz;})});
 function addWPk(k){
   if(waypoints.has(k))return;const c=keyXYZ(k),X=c[0],y=c[1],Z=c[2],col=BEAMC[(((X*7+Z*13)%4)+4)%4];
   const m=new THREE.Mesh(beamGeo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false}));
