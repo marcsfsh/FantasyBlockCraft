@@ -1,6 +1,5 @@
 // ---- Ancient dwarven undercity: a grid of halls and corridors on two levels, one cell per chunk
 const RUIN_Y=[64,82],DEEPY=150;
-const ROOM_TYPES=[['hall',2.6],['forge',1.4],['archive',1.2],['barracks',1.3],['vault',0.5],['storage',1.4],['crypt',1.1],['machine',0.9],['farm',0.8],['collapsed',1.6],['throne',0.3],['junction',2.2]];
 // Districts give each part of the undercity a purpose
 const DISTRICTS={
   residential:{rooms:[['kitchen',1.4],['cistern',0.6],['chasm',0.6],['quarters',3],['office',1.6],['tavern',2],['bath',1],['games',1.1],['archive',1],['storage',1],['junction',1.4],['farm',1],['collapsed',0.9]],megas:['grandlibrary','greathall','gardens']},
@@ -145,28 +144,9 @@ function ruinAt(X,Y,Z){
     if(Y<yb-1||Y>yb+11)continue;const t=ruinType(cx,cz,L);if(!t)continue;
     const lx=X-cx*CS-8,lz=Z-cz*CS-8,h=ROOM_HALF[t]||5;if(Math.abs(lx)<=h&&Math.abs(lz)<=h)return RUIN_NAMES[t];
     if(Math.abs(lx)<=2||Math.abs(lz)<=2)return 'Halls of '+holdOf(cx,cz).name;}
-  if(gateAt(cx,cz)&&Math.abs(X-cx*CS-8)<=5&&Math.abs(Z-cz*CS-8)<=5&&Y>=RUIN_Y[1])return 'Gate of '+holdOf(cx,cz).name;
   return null;
 }
 function dwWall(r){const v=r();return v<0.05?DWCRACK:v<0.07?MOSSY:DWBRICK;}
-function dwCorridor(x0,z0,x1,z1,yb,r,canal){
-  const ax=x0!==x1,a0=ax?Math.min(x0,x1):Math.min(z0,z1),a1=ax?Math.max(x0,x1):Math.max(z0,z1),c=ax?z0:x0;
-  for(let a=a0;a<=a1;a++)for(let w=-2;w<=2;w++){
-    const X=ax?a:c+w,Z=ax?c+w:a,pil=a%4===0;
-    for(let y=yb-1;y<=yb+4;y++){
-      let id;
-      if(Math.abs(w)<=1&&y>=yb&&y<=yb+3)id=AIR;
-      else if(y===yb-1)id=canal&&!w?WATER:Math.abs(w)<=1?((a+w)%5===0?DWBRICK:DWTILE):DWBRICK;
-      else if(Math.abs(w)===2&&pil&&y<yb+4)id=DWPILLAR;
-      else id=dwWall(r);
-      PW(X,y,Z,id,MODE_SET);
-    }
-    if(!w&&a%8===4){const q=r();if(q<0.3)PW(X,yb+3,Z,LANTERN,MODE_SET);else if(q<0.55)PW(X,yb+4,Z,RUNE,MODE_SET);}
-    if(!w&&r()<0.05){PW(X,yb,Z,GRAVEL,MODE_SET);if(r()<0.5)PW(X+(ax?0:1),yb,Z+(ax?1:0),COBBLE,MODE_SET);}
-    if(Math.abs(w)===1&&r()<0.02)PW(X,yb,Z,r()<0.3?DWCHEST:r()<0.6?BARREL:CRATE,MODE_SET);
-    PW(X,yb-2,Z,DWBRICK,MODE_FILL);
-  }
-}
 // Grand room shell: pilasters, a glowing rune frieze, brass trim, a corbelled ceiling with beams, and a chandelier
 const mosaic=(dx,dz)=>{const g=Math.max(Math.abs(dx),Math.abs(dz));return g===0?GOLDB:g===1?RUNE:g%3===0?CALCITE:DWTILE;};
 let curDist='residential',curDeco=false;const BANNER_C={royal:WOOLR,sacred:WOOLB,industrial:WOOLY,residential:WOOLG};

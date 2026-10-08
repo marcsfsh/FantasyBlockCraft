@@ -13,5 +13,6 @@ function noise3(x,y,z){
               lerp(lerp(grad(p[AA+1],x,y,z-1),grad(p[BA+1],x-1,y,z-1),u),lerp(grad(p[AB+1],x,y-1,z-1),grad(p[BB+1],x-1,y-1,z-1),u),v),w);
 }
 function fbm2(x,z,oct,o){let a=1,f=1,s=0,n=0;for(let i=0;i<oct;i++){s+=a*noise3(x*f+o,0.31+i*7.13,z*f+o);n+=a;a*=0.5;f*=2;}return s/n;}
+const pick=(arr,r)=>arr[Math.floor(r()*arr.length)];
 const sstep=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 

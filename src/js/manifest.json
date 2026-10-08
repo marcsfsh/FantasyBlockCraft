@@ -62,14 +62,6 @@
       "about": "Chunk clipping, column fill, trees, barrows, standing stones, willows"
     },
     {
-      "path": "legacy/towns.js",
-      "about": "Towns (disabled: townPlan returns null)"
-    },
-    {
-      "path": "legacy/roads.js",
-      "about": "Roads between towns (disabled)"
-    },
-    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants and genChunk pipeline"
     },

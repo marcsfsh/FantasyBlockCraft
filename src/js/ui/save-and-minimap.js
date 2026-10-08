@@ -52,11 +52,6 @@ function drawMM(){
   if(mmZoom===2){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
     for(let cz=r0;cz<=r1;cz++)for(let cx=c0;cx<=c1;cx++){const t=tiles.get(ckey(cx,cz));if(t)mmG.drawImage(t,(cx*CS-OX-ox)*k,(cz*CS-OZ-oz)*k,CS*k+0.6,CS*k+0.6);}}
   mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
-  {const r0x=Math.floor((ox+OX)/TR),r1x=Math.floor((ox+OX+span)/TR),r0z=Math.floor((oz+OZ)/TR),r1z=Math.floor((oz+OZ+span)/TR);
-   for(let rz=r0z;rz<=r1z;rz++)for(let rx=r0x;rx<=r1x;rx++){const v=townPlan(rx,rz);if(!v)continue;const vx=(v.cx-OX-ox)*k,vz=(v.cz-OZ-oz)*k;if(vx<-6||vz<-6||vx>S+6||vz>S+6)continue;
-     mmG.fillStyle='#f3efe2';mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.beginPath();mmG.moveTo(vx,vz-7);mmG.lineTo(vx+6,vz-1);mmG.lineTo(vx+4,vz-1);mmG.lineTo(vx+4,vz+5);mmG.lineTo(vx-4,vz+5);mmG.lineTo(vx-4,vz-1);mmG.lineTo(vx-6,vz-1);mmG.closePath();mmG.fill();mmG.stroke();}}
-  if(mmZoom){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
-    for(let cz2=r0;cz2<=r1;cz2++)for(let cx2=c0;cx2<=c1;cx2++)if(gateAt(cx2,cz2)){const gx=(cx2*CS+8-OX-ox)*k,gz=(cz2*CS+8-OZ-oz)*k;mmG.fillStyle='#ffaa46';mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.fillRect(gx-5,gz-5,10,3);mmG.fillRect(gx-5,gz-5,3,10);mmG.fillRect(gx+2,gz-5,3,10);mmG.strokeRect(gx-5,gz-5,10,10);}}
   mmG.fillStyle='#ff4030';for(const p of primed)mmG.fillRect((p.x-ox)*k-2,(p.z-oz)*k-2,5,5);
   if(G.on){mmG.fillStyle='#fff6c8';mmG.fillRect((G.ax-ox)*k-2,(G.az-oz)*k-2,5,5);}
   waypoints.forEach(m=>{let wx=(m.position.x-ox)*k,wz=(m.position.z-oz)*k;wx=Math.max(5,Math.min(S-5,wx));wz=Math.max(5,Math.min(S-5,wz));

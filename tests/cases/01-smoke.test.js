@@ -7,4 +7,4 @@ frame(16);frame(33);assert(true,'frames run without throwing');
 assert(BIOMES.length===12,'twelve biome names');
 assert(H===384&&SEA===310,'world height and sea level');
 assert(RECIPES.every(r=>!BANNED.has(r[0])),'no banned items are craftable');
-assert(townPlan(0,0)===null&&roadAt(0,0,5)===false,'towns and roads are off');
+assert(typeof townPlan==='undefined'&&typeof roadAt==='undefined','the old town and road generator is gone');

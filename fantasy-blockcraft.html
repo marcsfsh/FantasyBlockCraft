@@ -206,6 +206,7 @@ function noise3(x,y,z){
               lerp(lerp(grad(p[AA+1],x,y,z-1),grad(p[BA+1],x-1,y,z-1),u),lerp(grad(p[AB+1],x,y-1,z-1),grad(p[BB+1],x-1,y-1,z-1),u),v),w);
 }
 function fbm2(x,z,oct,o){let a=1,f=1,s=0,n=0;for(let i=0;i<oct;i++){s+=a*noise3(x*f+o,0.31+i*7.13,z*f+o);n+=a;a*=0.5;f*=2;}return s/n;}
+const pick=(arr,r)=>arr[Math.floor(r()*arr.length)];
 const sstep=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 
 // Blocks
@@ -524,7 +525,7 @@ const TAVG=[];
 for(let t=0;t<AC*AR;t++){let r=0,g=0,b=0,n=0;for(let y=0;y<16;y++)for(let x=0;x<16;x++){const i=((((t/AC)|0)*16+y)*AW+(t%AC)*16+x)*4;if(dat[i+3]>100){r+=dat[i];g+=dat[i+1];b+=dat[i+2];n++;}}n=n||1;TAVG[t]=[r/n/255,g/n/255,b/n/255];}
 
 // World data
-const entCol=new Uint8Array(W*D),townCol=new Uint8Array(W*D),world=new Uint8Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1),islTop=new Int16Array(W*D).fill(-1);
+const entCol=new Uint8Array(W*D),world=new Uint8Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1);
 const I=(x,y,z)=>x+W*(z+D*y);
 function get(x,y,z){return(x<0||z<0||y<0||x>=W||z>=D||y>=H)?0:world[x+W*(z+D*y)];}
 
@@ -566,14 +567,12 @@ function colInfoBase(X,Z,o){
   let b;
   if(fen>0.5&&h>=SEA-2&&!cold)b=11;else if(h<SEA)b=0;else if(dw>0.5)b=bw>0.5?7:4;else if(mf>0.8&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;else if(cold)b=6;else if(sw>0.5)b=8;else if(pw>0.5)b=10;else b=fwd>0.5?3:2;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
-  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;o.town=false;
+  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
   o.rvBot=(!o.wet&&rv<0.008&&fbm2(X/180,Z/180,2,433.7)>0.28)?Math.max(SEA-56,h-Math.round(6+(1-rv/0.012)*22)):999;
-  o.isl=-1;o.iBot=0;
   return o;
 }
-// Towns flatten the ground they sit on and blend it into the land around them
 const colCache=new Map();
 function colInfo(X,Z,o){
   const key=X*1048576+Z,c=colCache.get(key);
@@ -590,28 +589,17 @@ function lakeAt(X,Z){
     const cx=gx*LG+24+(r()*48|0),cz=gz*LG+24+(r()*48|0),R=8+r()*10,b=colInfoBase(cx,cz,TL),L=b.h-1;
     if(![0,1,5,7].includes(b.b)&&!b.river&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
       let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;if(colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL).h<L)ok=false;}
-      if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L,oasis:false};
+      if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L};
     }
   }
   lakeC.set(key,lk);return lk;
 }
 function colInfoCompute(X,Z,o){
-  colInfoBase(X,Z,o);o.lake=0;o.oasis=false;
+  colInfoBase(X,Z,o);o.lake=0;
   const lk=lakeAt(X,Z);
   if(lk){const d=Math.hypot(X-lk.cx,(Z-lk.cz)*1.15)+fbm2(X/9,Z/9,1,2503.1)*3;
     if(d<lk.R){const f=1-d/lk.R,bottom=lk.L-1-Math.round(f*f*5+f*2);if(o.h>bottom)o.h=bottom;o.lake=lk.L;o.b=0;o.wet=true;o.river=false;o.rvBot=999;o.ent=false;}
-    else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}
-    if(lk.oasis&&d>=lk.R&&d<lk.R+6&&!o.lake)o.oasis=true;}
-  const t=townPlan(Math.floor(X/TR),Math.floor(Z/TR));
-  if(t){
-    const d=Math.max(Math.abs(X-t.cx),Math.abs(Z-t.cz)),w=d<=t.R+1?1:1-sstep(t.R+1,t.R+20,d);
-    if(w>0){
-      o.h=Math.round(o.h*(1-w)+t.g0*w);
-      if(w>0.5){o.town=true;o.rvBot=999;o.river=false;o.wet=false;o.b=t.biome;}
-      if(o.lake){o.lake=0;if(o.b===0)o.b=t.biome;}
-      else if(o.h>=SEA&&o.b===0)o.b=1;
-    }
-  }
+    else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}}
   return o;
 }
 function carved(X,y,Z,o){return y>=o.rvBot;}
@@ -658,7 +646,7 @@ function wormsFor(WCX,WCZ){
   if(r()<0.16){const x=bx+r()*CS,z=bz+r()*CS,y=60+r()*(SEA-80);wormTunnel(x,y,z,0.8+r()*0.8,r()*Math.PI*2,(r()<0.5?1:-1)*(0.7+r()*0.5),0,0,false,r,out,0,true,false,false,1.4);}
   if(r()<0.06){const cx=bx+8,cz=bz+8,cy=108+r()*34;out.push(cx,cy,cz,18+r()*10,9+r()*5,3);}
   if(r()<0.004){const cx=WCX*CS+4+r()*8,cz=WCZ*CS+4+r()*8,o=colInfo(Math.floor(cx),Math.floor(cz),{});
-    if(!o.town&&!o.lake&&!o.wet&&o.b!==0&&!roadAt(Math.floor(cx),Math.floor(cz),8)){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
+    if(!o.lake&&!o.wet&&o.b!==0){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
   w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
@@ -681,7 +669,6 @@ function applyWorms(WCX,WCZ){
         const lx=X-OX,lz=Z-OZ,ci=lx+W*lz,gh=ground[ci];
         for(let Y=Y0;Y<=Y1;Y++){
           const dy=(Y+.5-y)/rv;if(dy<=-0.7||dx*dx+dy*dy+dz*dz>=1)continue;
-          if(townCol[ci]&&Y>gh-8)continue;
           if(Y>gh-7&&!entCol[ci]&&kind!==2)continue;
           if(gh<SEA+2&&Y>gh-5)continue;
           if(kind===3){const px=Math.floor(X/7),pz=Math.floor(Z/7),ox=px*7+1+hsh(px,3201,pz)*5,oz=pz*7+1+hsh(px,3202,pz)*5;if(hsh(px,3203,pz)<0.3&&Math.hypot(X+.5-ox,Z+.5-oz)<1.3+hsh(px,3204,pz))continue;}
@@ -869,7 +856,6 @@ function cavernDetail(X0,Z0,r2){
 }
 // ---- Ancient dwarven undercity: a grid of halls and corridors on two levels, one cell per chunk
 const RUIN_Y=[64,82],DEEPY=150;
-const ROOM_TYPES=[['hall',2.6],['forge',1.4],['archive',1.2],['barracks',1.3],['vault',0.5],['storage',1.4],['crypt',1.1],['machine',0.9],['farm',0.8],['collapsed',1.6],['throne',0.3],['junction',2.2]];
 // Districts give each part of the undercity a purpose
 const DISTRICTS={
   residential:{rooms:[['kitchen',1.4],['cistern',0.6],['chasm',0.6],['quarters',3],['office',1.6],['tavern',2],['bath',1],['games',1.1],['archive',1],['storage',1],['junction',1.4],['farm',1],['collapsed',0.9]],megas:['grandlibrary','greathall','gardens']},
@@ -1014,28 +1000,9 @@ function ruinAt(X,Y,Z){
     if(Y<yb-1||Y>yb+11)continue;const t=ruinType(cx,cz,L);if(!t)continue;
     const lx=X-cx*CS-8,lz=Z-cz*CS-8,h=ROOM_HALF[t]||5;if(Math.abs(lx)<=h&&Math.abs(lz)<=h)return RUIN_NAMES[t];
     if(Math.abs(lx)<=2||Math.abs(lz)<=2)return 'Halls of '+holdOf(cx,cz).name;}
-  if(gateAt(cx,cz)&&Math.abs(X-cx*CS-8)<=5&&Math.abs(Z-cz*CS-8)<=5&&Y>=RUIN_Y[1])return 'Gate of '+holdOf(cx,cz).name;
   return null;
 }
 function dwWall(r){const v=r();return v<0.05?DWCRACK:v<0.07?MOSSY:DWBRICK;}
-function dwCorridor(x0,z0,x1,z1,yb,r,canal){
-  const ax=x0!==x1,a0=ax?Math.min(x0,x1):Math.min(z0,z1),a1=ax?Math.max(x0,x1):Math.max(z0,z1),c=ax?z0:x0;
-  for(let a=a0;a<=a1;a++)for(let w=-2;w<=2;w++){
-    const X=ax?a:c+w,Z=ax?c+w:a,pil=a%4===0;
-    for(let y=yb-1;y<=yb+4;y++){
-      let id;
-      if(Math.abs(w)<=1&&y>=yb&&y<=yb+3)id=AIR;
-      else if(y===yb-1)id=canal&&!w?WATER:Math.abs(w)<=1?((a+w)%5===0?DWBRICK:DWTILE):DWBRICK;
-      else if(Math.abs(w)===2&&pil&&y<yb+4)id=DWPILLAR;
-      else id=dwWall(r);
-      PW(X,y,Z,id,MODE_SET);
-    }
-    if(!w&&a%8===4){const q=r();if(q<0.3)PW(X,yb+3,Z,LANTERN,MODE_SET);else if(q<0.55)PW(X,yb+4,Z,RUNE,MODE_SET);}
-    if(!w&&r()<0.05){PW(X,yb,Z,GRAVEL,MODE_SET);if(r()<0.5)PW(X+(ax?0:1),yb,Z+(ax?1:0),COBBLE,MODE_SET);}
-    if(Math.abs(w)===1&&r()<0.02)PW(X,yb,Z,r()<0.3?DWCHEST:r()<0.6?BARREL:CRATE,MODE_SET);
-    PW(X,yb-2,Z,DWBRICK,MODE_FILL);
-  }
-}
 // Grand room shell: pilasters, a glowing rune frieze, brass trim, a corbelled ceiling with beams, and a chandelier
 const mosaic=(dx,dz)=>{const g=Math.max(Math.abs(dx),Math.abs(dz));return g===0?GOLDB:g===1?RUNE:g%3===0?CALCITE:DWTILE;};
 let curDist='residential',curDeco=false;const BANNER_C={royal:WOOLR,sacred:WOOLB,industrial:WOOLY,residential:WOOLG};
@@ -1271,11 +1238,9 @@ function loreText(X,Y,Z){
     'Market day in '+h.name+'. Brass for mushrooms, mushrooms for ale, ale for stories. Queen '+h.queen+' bought every lantern in the row.',
     'Song of the hammer, verse four: strike once for the stone, once for the king, once for the ones below who never saw the sun.'
   ];
-  let gate='';{const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);let bd=1e9,g=null;for(let a=-20;a<=20;a++)for(let b=-20;b<=20;b++){if(!gateAt(cx+a,cz+b))continue;const d=Math.hypot(a,b);if(d<bd){bd=d;g=[(cx+a)*CS+8-X,(cz+b)*CS+8-Z];}}
-    if(g)gate=' Scratched beneath it: the way up to the surface is a gate about '+Math.round(Math.hypot(g[0],g[1])/10)*10+' paces to the '+compass(g[0],g[1])+'.';}
   const room=roomAt(X,Y,Z);
   if(room==='plaza')return 'A waymarker of '+h.name+'. '+(tr?'Carved arrows point toward the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+', about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+'.':'Most of the carved arrows have worn away.')+gate;
-  return T[n]+hint+gate;
+  return T[n]+hint;
 }
 function openLore(X,Y,Z){
   const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
@@ -1286,28 +1251,6 @@ function openLore(X,Y,Z){
   tone(500,420,0.25,0.06);
 }
 // Surface gates lead down into the upper deep
-function gateAt(cx,cz){return false&&isAvenue(cx,cz)&&!isPlaza(cx,cz)&&hsh(cx,1401,cz)<0.08&&!townAt(cx*CS+8,cz*CS+8,24)&&!roadAt(cx*CS+8,cz*CS+8,8);}
-function dwGate(cx,cz,r){
-  const yb=RUIN_Y[1],g=colInfo(cx,cz,T4).h,top=Math.max(g,yb+6);
-  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){
-    const edge=Math.abs(dx)===3||Math.abs(dz)===3;
-    for(let y=yb-1;y<=top;y++)PW(cx+dx,y,cz+dz,edge?(y<g-1?dwWall(r):DWBRICK):(y===yb-1?DWTILE:AIR),MODE_SET);
-  }
-  const ring=[];for(let a=-2;a<2;a++)ring.push([a,-2]);for(let a=-2;a<2;a++)ring.push([2,a]);for(let a=2;a>-2;a--)ring.push([a,2]);for(let a=2;a>-2;a--)ring.push([-2,a]);
-  for(let y=yb;y<=top;y++){const [dx,dz]=ring[(y-yb)%ring.length];PW(cx+dx,y-1,cz+dz,DWTILE,MODE_SET);}
-  for(let y=yb;y<=top;y++)PW(cx,y,cz,(y-yb)%8===4?RUNE:DWPILLAR,MODE_SET);
-  // the gatehouse on the surface
-  for(let dx=-5;dx<=5;dx++)for(let dz=-5;dz<=5;dz++){
-    const d=Math.max(Math.abs(dx),Math.abs(dz));if(d<=3)continue;
-    for(let y=top-4;y<top;y++)PW(cx+dx,y,cz+dz,DWBRICK,MODE_FILL);
-    PW(cx+dx,top,cz+dz,DWTILE,MODE_SET);for(let y=top+1;y<=top+8;y++)PW(cx+dx,y,cz+dz,AIR,MODE_SET);
-  }
-  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)if(Math.max(Math.abs(dx),Math.abs(dz))===3&&!((dx===0||dz===0)))PW(cx+dx,top+1,cz+dz,DWBRICK,MODE_SET);
-  for(const [a,b] of [[-4,-4],[4,-4],[-4,4],[4,4]]){for(let y=top+1;y<=top+6;y++)PW(cx+a,y,cz+b,DWPILLAR,MODE_SET);PW(cx+a,top+7,cz+b,GLOW,MODE_SET);}
-  for(let k=-4;k<=4;k++){PW(cx+k,top+7,cz-4,DWBRICK,MODE_SET);PW(cx+k,top+7,cz+4,DWBRICK,MODE_SET);}
-  PW(cx,top+7,cz-4,GOLDB,MODE_SET);PW(cx,top+7,cz+4,GOLDB,MODE_SET);PW(cx,top+6,cz-4,RUNE,MODE_SET);PW(cx,top+6,cz+4,RUNE,MODE_SET);
-  for(const [a,b] of [[-5,0],[5,0],[0,-5],[0,5]])brazierP(cx+a,top+1,cz+b);
-}
 // A chasm room: a deep drop to the lava with stone bridges along open corridors
 function dwChasm(cx,cz,yb,r,L,WCX,WCZ){
   const bottom=9,ex=edgeOpen(WCX,WCZ,1,0,L)||edgeOpen(WCX,WCZ,-1,0,L),ez=edgeOpen(WCX,WCZ,0,1,L)||edgeOpen(WCX,WCZ,0,-1,L);
@@ -1340,7 +1283,6 @@ function dwCondition(cx,cz,yb,h,c){
     else if(c==='burned'){if(f===DWTILE&&q<0.35)PW(X,yb-1,Z,OBSID,MODE_SET);if((a===PLANKS||a===BOOKS||a===BARREL)&&q<0.6)PW(X,yb,Z,COBBLE,MODE_SET);}
   }
 }
-function canalEdge(cx,cz,dx,dz,L){if(dx<0||dz<0)return canalEdge(cx+dx,cz+dz,-dx,-dz,L);return hsh(cx*2+dx,L*97+88+dz*7,cz*2+dz)<0.16;}
 // ---- The Pillared Deep: a 3x3-chunk hall rising through both levels, a forest of giant columns
 const delfC=new Map();
 function delfAt(cx,cz){
@@ -1454,21 +1396,7 @@ function dwTidy(){
     for(const s of runs){if(!s.ok)continue;if(Math.abs(s.X-r.X)+Math.abs(s.Z-r.Z)!==1)continue;if(s.y0<=r.y1&&s.y1>=r.y0){r.ok=true;break;}}}
   for(const r of runs)if(!r.ok)for(let y=r.y0;y<=r.y1;y++)PW(r.X,y,r.Z,AIR,MODE_SET);
 }
-const postFns=[],roomRecs=[],lwC=new Map();
-function lightwellAt(cx,cz){
-  const key=ckey(cx,cz);if(lwC.has(key))return lwC.get(key);if(lwC.size>20000)lwC.clear();
-  let ok=false;
-  if(ok){const o=colInfo(cx*CS+8,cz*CS+8,{});ok=!o.town&&!o.lake&&!o.wet&&o.b!==0&&o.h>=SEA+2&&!roadAt(cx*CS+8,cz*CS+8,6);}
-  lwC.set(key,ok);return ok;
-}
-function dwLightwell(cx,cz){
-  const g=ground[(cx-OX)+W*(cz-OZ)];
-  for(let X=cx-1;X<=cx+1;X++)for(let Z=cz-1;Z<=cz+1;Z++)for(let y=RUIN_Y[1]+4;y<=g+2;y++)PW(X,y,Z,AIR,MODE_SET);
-  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){if(Math.max(Math.abs(a),Math.abs(b))!==2)continue;const X=cx+a,Z=cz+b;
-    for(let y=g-3;y<=g;y++)PW(X,y,Z,y===g?DWBRICK:DWBRICK,MODE_SET);
-    const corner=Math.abs(a)===2&&Math.abs(b)===2;PW(X,g+1,Z,corner?DWPILLAR:(hsh(X,g,Z)<0.3?MOSSY:COBBLE),MODE_SET);
-    if(corner){PW(X,g+2,Z,DWPILLAR,MODE_SET);PW(X,g+3,Z,RUNE,MODE_SET);}}
-}
+const postFns=[],roomRecs=[];
 function secretEdge(cx,cz,dx,dz,L){
   if(dx<0||dz<0)return secretEdge(cx+dx,cz+dz,-dx,-dz,L);
   if(hsh(cx*2+dx,L*97+111,cz*2+dz)>=0.25||edgeOpen(cx,cz,dx,dz,L))return false;
@@ -1526,7 +1454,6 @@ function applyRuins(WCX,WCZ){
       dwCondition(cx,cz,fy,h,wetR&&c<0.7?'flooded':(c<0.06+0.25*curI||(lushR&&c<0.6))?'overgrown':'');}
     if(t!=='chasm'&&t!=='stair')roomRecs.push([cx,cz,fy,h,WCX,WCZ,L]);
     if(!atr&&t!=='chasm'&&t!=='stair'){dwDecay(cx,cz,fy,h,hh,curI,WCX,WCZ,L);dwRuin(cx,cz,fy,h,hh,curI,WCX*31+L);dwBreach(cx,cz,fy,h,WCX,WCZ,L);if(fy===yb)dwSecret(cx,cz,fy,h,WCX,WCZ,L);}
-    if(L===1&&gateAt(WCX,WCZ))dwGate(cx,cz,rngAt(WCX,1402,WCZ));
   }
   if(holeAt(WCX,WCZ))dwHole(cx,cz);
   for(const f of postFns)f();postFns.length=0;
@@ -1535,7 +1462,6 @@ function applyRuins(WCX,WCZ){
     for(let k=0;k<=h;k++)for(let w=-1;w<=1;w++){const X=cx+dx*k+(dz?w:0),Z=cz+dz*k+(dx?w:0);for(let y=fy;y<fy+3;y++){const c=GW(X,y,Z);if(c===GRAVEL||c===COBBLE||c===DWCRACK)PW(X,y,Z,AIR,MODE_SET);}}}
   roomRecs.length=0;
   dwTidy();
-  if(lightwellAt(WCX,WCZ))dwLightwell(gx0+8,gz0+8);
   // sconces whose wall was knocked out by decay come down with it
   for(let y=RUIN_Y[0]-2;y<=RUIN_Y[1]+16;y++)for(let Z=gz0;Z<gz0+CS;Z++)for(let X=gx0;X<gx0+CS;X++){
     if(GW(X,y,Z)!==SCONCE)continue;let held=false;
@@ -1772,7 +1698,6 @@ function caveLife(X0,Z0,r2){
 }
 function topBlock(o){
   const b=o.b,h=o.h;
-  if(o.oasis)return GRASS;
   if(o.bank&&h<=SEA+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
   if(b===0)return o.hill>0.08?GRAVEL:(h>SEA-5?SAND:DIRT);
   if(b===1)return o.hill>0.12?GRAVEL:SAND;
@@ -1791,11 +1716,11 @@ function hAt(X,Z){const k=X*1048576+Z;let h=hCache.get(k);if(h===undefined){if(h
 function slopeAt(X,Z,h){return Math.max(Math.abs(hAt(X+1,Z)-h),Math.abs(hAt(X-1,Z)-h),Math.abs(hAt(X,Z+1)-h),Math.abs(hAt(X,Z-1)-h));}
 function fillCol(x,z,X,Z,o){
   const h=o.h,b=o.b,ci=x+W*z;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3);
-  if(b!==0&&b!==1&&!o.town&&!o.oasis){const sl=slopeAt(X,Z,h);
+  if(b!==0&&b!==1){const sl=slopeAt(X,Z,h);
     if(sl>=4){top=STONE;soil=0;}
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6))top=SNOWG;
-  biome[ci]=o.lake?9:b;ground[ci]=h;islTop[ci]=o.isl;townCol[ci]=o.town?1:0;entCol[ci]=o.ent?1:0;
+  biome[ci]=o.lake?9:b;ground[ci]=h;entCol[ci]=o.ent?1:0;
   let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){
     let id=AIR;
@@ -1808,7 +1733,6 @@ function fillCol(x,z,X,Z,o){
         if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;
       }
     }else if(y<=Math.max(SEA,o.lake))id=(y===Math.max(SEA,o.lake)&&o.cold)?ICE:WATER;
-    if(o.isl>=0&&y>=o.iBot&&y<=o.isl)id=y===o.isl?GRASS:y>o.isl-3?DIRT:STONE;
     const i=I(x,y,z);world[i]=id;lvl[i]=0;
   }
 }
@@ -1843,14 +1767,6 @@ function bigOakP(X,y,Z,r){
     for(let t=1;t<=len;t++){bx=X+Math.round(Math.cos(a)*t);bz=Z+Math.round(Math.sin(a)*t);yy=by+(t>1?1:0);PW(bx,yy,bz,LOG,MODE_SET);}
     blob(bx,yy+1,bz,2.3);}
   blob(X,y+th,Z,3);
-}
-function palmP(X,y,Z,r){
-  const th=5+(r()*3|0),dir=[[1,0],[-1,0],[0,1],[0,-1]][r()*4|0];let x=X,z=Z;
-  PW(X,y-1,Z,DIRT,MODE_SET);
-  for(let i=0;i<th;i++){if(i>=2&&i%2===0){x+=dir[0];z+=dir[1];}PW(x,y+i,z,JLOG,MODE_SET);}
-  const ty=y+th;PW(x,ty,z,JLEAVES,MODE_AIR);
-  for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])for(let k=1;k<=3;k++)PW(x+a*k,ty-(k===3?1:0),z+b*k,JLEAVES,MODE_AIR);
-  for(const [a,b] of [[1,1],[-1,1],[1,-1],[-1,-1]])for(let k=1;k<=2;k++)PW(x+a*k,ty-(k===2?1:0),z+b*k,JLEAVES,MODE_AIR);
 }
 function leafBushP(X,y,Z,r){PW(X,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X+1,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X,y,Z+1,LEAVES,MODE_AIR);if(r()<0.4)PW(X,y+1,Z,LEAVES,MODE_AIR);}
 // ---- Ancient things on the old hills: barrows and rings of standing stones
@@ -1915,407 +1831,7 @@ function wellP(X,Z,g,m,post){
   PW(X,g,Z,WATER,MODE_SET);PW(X,g-1,Z,WATER,MODE_SET);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx||dz)PW(X+dx,g+1,Z+dz,m,MODE_SET);PW(X+dx,g+4,Z+dz,m,MODE_SET);if(dx&&dz){PW(X+dx,g+2,Z+dz,post,MODE_SET);PW(X+dx,g+3,Z+dz,post,MODE_SET);}}
 }
-function doorAt(b,X,Z){const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1;return(b.face==='N'&&Z===b.z0&&X===mx)||(b.face==='S'&&Z===b.z1&&X===mx)||(b.face==='W'&&X===b.x0&&Z===mz)||(b.face==='E'&&X===b.x1&&Z===mz);}
-function groundWork(b,pal,clearH){
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    for(let y=b.g-1;y>b.g-7;y--)PW(X,y,Z,pal.found,MODE_FILL);
-    PW(X,b.g,Z,pal.floor,MODE_SET);for(let y=b.g+1;y<=b.g+clearH;y++)PW(X,y,Z,AIR,MODE_SET);
-  }
-}
-function houseP(b,pal){
-  const g=b.g,wh=4;groundWork(b,pal,wh+7);
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    const ex=X===b.x0||X===b.x1,ez=Z===b.z0||Z===b.z1;if(!ex&&!ez)continue;const corner=ex&&ez;
-    for(let y=g+1;y<=g+wh;y++){
-      let id=corner?pal.corner:pal.wall;
-      if(doorAt(b,X,Z)&&y<=g+2)id=AIR;else if(!corner&&y===g+2&&((ex?Z:X)%2===0))id=pal.win;
-      PW(X,y,Z,id,MODE_SET);
-    }
-  }
-  if(pal.flat){for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){PW(X,g+wh+1,Z,pal.roof,MODE_SET);if((X===b.x0||X===b.x1||Z===b.z0||Z===b.z1)&&(X+Z)%2===0)PW(X,g+wh+2,Z,pal.roof,MODE_SET);}}
-  else for(let k=0;k<6;k++){
-    const ax0=b.x0-1+k,ax1=b.x1+1-k,az0=b.z0-1+k,az1=b.z1+1-k;if(ax0>ax1||az0>az1)break;
-    const last=ax1-ax0<=1||az1-az0<=1;
-    for(let X=ax0;X<=ax1;X++)for(let Z=az0;Z<=az1;Z++)PW(X,g+wh+1+k,Z,last?pal.ridge:pal.roof,MODE_SET);
-    if(last)break;
-  }
-  const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1;PW(mx,g+wh,mz,LANTERN,MODE_SET);
-  if(b.x1-b.x0>=6){const bx=b.face==='E'?b.x0+1:b.x1-1,bz=b.face==='S'?b.z0+1:b.z1-1;PW(bx,g+1,bz,BOOKS,MODE_SET);PW(bx,g+2,bz,BOOKS,MODE_SET);}
-}
-function smithyP(b,pal){
-  const g=b.g;groundWork(b,pal,8);
-  const back=b.face==='N'?'z1':b.face==='S'?'z0':b.face==='W'?'x1':'x0';
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    const ex=X===b.x0||X===b.x1,ez=Z===b.z0||Z===b.z1;
-    const open=(b.face==='N'&&Z===b.z0)||(b.face==='S'&&Z===b.z1)||(b.face==='W'&&X===b.x0)||(b.face==='E'&&X===b.x1);
-    if((ex||ez)&&!open)for(let y=g+1;y<=g+4;y++)PW(X,y,Z,COBBLE,MODE_SET);
-    if(open&&(ex&&ez))for(let y=g+1;y<=g+4;y++)PW(X,y,Z,pal.post,MODE_SET);
-    PW(X,g+5,Z,b.face==='N'||b.face==='S'?(Z%2?SBRICK:COBBLE):(X%2?SBRICK:COBBLE),MODE_SET);
-  }
-  const rr=mkRng(Math.floor(b.seed*1e9)+7),inner=[];
-  if(back==='z1')for(let X=b.x0+1;X<b.x1;X++)inner.push([X,b.z1-1]);
-  if(back==='z0')for(let X=b.x0+1;X<b.x1;X++)inner.push([X,b.z0+1]);
-  if(back==='x1')for(let Z=b.z0+1;Z<b.z1;Z++)inner.push([b.x1-1,Z]);
-  if(back==='x0')for(let Z=b.z0+1;Z<b.z1;Z++)inner.push([b.x0+1,Z]);
-  const stock=[COPB,BRONB,BRASB,COPB,BRONB,BRASB,STEELB];
-  inner.forEach(([X,Z],i)=>{
-    if(i===0||i===1)PW(X,g+1,Z,FURN,MODE_SET);
-    else if(i===inner.length-1){PW(X,g,Z,LAVA,MODE_SET);PW(X,g-1,Z,COBBLE,MODE_SET);}
-    else if(rr()<0.6)PW(X,g+1,Z,stock[rr()*stock.length|0],MODE_SET);
-  });
-  PW((b.x0+b.x1)>>1,g+4,(b.z0+b.z1)>>1,LANTERN,MODE_SET);
-}
-function farmP(b){
-  const potato=hsh(b.x0,77,b.z0)<0.35;
-  const g=b.g,alongZ=b.face==='N'||b.face==='S',mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1,rr=mkRng(Math.floor(b.seed*1e9)+3);
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    for(let y=g-1;y>g-6;y--)PW(X,y,Z,DIRT,MODE_FILL);
-    for(let y=g+1;y<=g+4;y++)PW(X,y,Z,AIR,MODE_SET);
-    const edge=X===b.x0||X===b.x1||Z===b.z0||Z===b.z1,chan=!edge&&(alongZ?X===mx:Z===mz);
-    if(edge)PW(X,g,Z,LOG,MODE_SET);
-    else if(chan)PW(X,g,Z,WATER,MODE_SET);
-    else{PW(X,g,Z,FARM_W,MODE_SET);if(rr()<0.92)PW(X,g+1,Z,potato?[POT1,POT2,POT3,POT3][rr()*4|0]:[WHEAT1,WHEAT2,WHEAT,WHEAT][rr()*4|0],MODE_SET);}
-  }
-}
-// ---- Towns: one per 256x256 region, laid out on a street grid and built chunk by chunk
-const TR=384,townCache=new Map(),T4={};
-const TSTYLE={
-  plains:{walls:[PLANKS,COBBLE,BRICK,SBRICK,WOOLW,PLANKS],corners:[LOG,LOG,SPRUCE,SBRICK],roofs:[TERO,TERB,BRICK,PLANKS,WOOLR,SPRUCE],floor:PLANKS,found:COBBLE,main:SBRICK,side:COBBLE,walk:STONE,post:LOG,flat:false,win:GLASS},
-  jungle:{walls:[PLANKS,COBBLE,WOOLW],corners:[JLOG],roofs:[JLEAVES,TERO,PLANKS],floor:PLANKS,found:COBBLE,main:SBRICK,side:COBBLE,walk:MOSSY,post:JLOG,flat:false,win:GLASS},
-  snow:{walls:[PLANKS,COBBLE,SBRICK],corners:[SPRUCE],roofs:[SPRUCE,TERB,WOOLK,PLANKS],floor:PLANKS,found:COBBLE,main:SBRICK,side:COBBLE,walk:STONE,post:SPRUCE,flat:false,win:GLASS},
-  desert:{walls:[SANDSTONE,TERT,SANDSTONE,WOOLW],corners:[SANDSTONE,TERT],roofs:[SANDSTONE,TERT],floor:SANDSTONE,found:SANDSTONE,main:SBRICK,side:SANDSTONE,walk:TERT,post:SANDSTONE,flat:true,win:AIR}
-};
-const SIZES={hall:[11,9],chapel:[7,12],tavern:[11,8],library:[9,7],bank:[7,7],market:[9,7],clock:[5,5],bakery:[7,6],shop:[7,6],house2:[7,7],houseM:[7,6],houseS:[5,5],cottage:[5,5],manor:[11,9],smithy:[7,6],warehouse:[9,7],greenhouse:[7,5],barn:[9,7],windmill:[5,5],park:[9,8],yard:[7,6],farm:[9,11]};
-function townPlan(RX,RZ){return null;
-  const key=ckey(RX,RZ);if(townCache.has(key))return townCache.get(key);
-  townCache.set(key,null);
-  let t=null;const r=rngAt(RX,31,RZ);
-  if(r()<0.55){
-    const cx=RX*TR+110+(r()*164|0),cz=RZ*TR+110+(r()*164|0),R=28+(r()*15|0),o=colInfoBase(cx,cz,{});
-    if([2,3,4,6,8].includes(o.b)&&o.h>=SEA+2&&o.h<=SEA+26&&!o.river){
-      let sum=o.h,n=1,wet=0;
-      for(let k=0;k<12;k++){const a=k/12*6.283,rr=k%2?R*0.5:R,q=colInfoBase(cx+Math.round(Math.cos(a)*rr),cz+Math.round(Math.sin(a)*rr),TTP);if(q.h<SEA){wet++;continue;}sum+=q.h;n++;}
-      if(wet<=3){
-        const style=o.b===4?'desert':o.b===6?'snow':o.b===8?'jungle':'plains';
-        t={cx:cx,cz:cz,R:R,g0:Math.max(SEA+2,Math.round(sum/n)),biome:o.b===8?8:o.b===6?6:o.b===4?4:2,style:style,streets:[],lots:[],lamps:[],stalls:[]};
-        const occ=[[cx-8,cz-8,cx+8,cz+8]];
-        const offs=[0];for(let k=1;k<=2;k++)if(k*30<=R-8)offs.push(k*30,-k*30);
-        for(const of of offs){const w=of===0?5:3;t.streets.push({ax:'x',c:cz+of,hw:(w-1)/2,a0:cx-R,a1:cx+R,main:of===0});t.streets.push({ax:'z',c:cx+of,hw:(w-1)/2,a0:cz-R,a1:cz+R,main:of===0});}
-        const band=[];for(const s of t.streets){const e=s.hw+1;band.push(s.ax==='x'?[s.a0,s.c-e,s.a1,s.c+e]:[s.c-e,s.a0,s.c+e,s.a1]);}
-        for(const sx of t.streets)if(sx.ax==='x')for(const sz of t.streets)if(sz.ax==='z'){const e=Math.max(sx.hw,sz.hw)+2;t.lamps.push([sz.c+e,sx.c+e],[sz.c-e,sx.c-e]);}
-        t.lamps.push([cx-8,cz-8],[cx+8,cz+8],[cx-8,cz+8],[cx+8,cz-8]);
-        t.stalls.push([cx-5,cz-5],[cx+5,cz-5],[cx-5,cz+5],[cx+5,cz+5]);
-        const have={};
-        const fits=(x0,z0,x1,z1)=>Math.max(Math.abs(x0-cx),Math.abs(x1-cx),Math.abs(z0-cz),Math.abs(z1-cz))<=R-1&&!occ.some(q=>x0<=q[2]&&x1>=q[0]&&z0<=q[3]&&z1>=q[1])&&!band.some(q=>x0<=q[2]&&x1>=q[0]&&z0<=q[3]&&z1>=q[1]);
-        const ZONES={
-          core:[['shop',3],['bakery',1.2],['house2',2],['houseM',1],['park',0.8],['cottage',0.6]],
-          mid:[['cottage',3],['houseM',3],['house2',2],['manor',0.7],['smithy',0.5],['warehouse',0.6],['greenhouse',0.6],['yard',1.8],['park',0.6],['shop',0.5],['bakery',0.3]],
-          out:[['cottage',2],['farm',2.2],['barn',1.1],['windmill',0.6],['yard',1.6],['houseM',1],['greenhouse',0.3]]};
-        const wpick=list=>{let tot=0;for(const q of list)tot+=q[1];let x=r()*tot;for(const q of list){x-=q[1];if(x<=0)return q[0];}return list[0][0];};
-        const LIMIT={smithy:2,windmill:2,barn:3,manor:2,warehouse:2,greenhouse:2,bakery:2};const cnt={};
-        for(const s of t.streets)for(const sg of [1,-1]){
-          let a=s.a0+2+(r()*3|0);
-          while(a<s.a1-4){
-            const mid=s.ax==='x'?[a,s.c]:[s.c,a],zone=Math.max(Math.abs(mid[0]-cx),Math.abs(mid[1]-cz));
-            if(r()<0.16){a+=4+(r()*4|0);continue;}
-            let cands;
-            if(zone<34){cands=['hall','chapel','tavern','library','market','bank','clock'].filter(k=>!have[k]).slice(0,3);cands.push(wpick(ZONES.core),'cottage');}
-            else{let tp=wpick(zone<R-12?ZONES.mid:ZONES.out);if(LIMIT[tp]&&(cnt[tp]||0)>=LIMIT[tp])tp='cottage';cands=[tp,'cottage'];}
-            let placed=false;
-            for(const cand of cands){
-              const [wb,db]=SIZES[cand],sb=['shop','bank','hall','market','bakery','clock','tavern'].includes(cand)?(r()<0.5?0:1):cand==='farm'||cand==='park'||cand==='yard'?0:1+(r()*3|0);
-              let x0,z0,x1,z1,face,ox0,oz0,ox1,oz1;
-              if(s.ax==='x'){x0=a;x1=a+wb-1;ox0=x0;ox1=x1;const base=sg>0?s.c+s.hw+2:s.c-s.hw-2;
-                if(sg>0){z0=base+sb;z1=z0+db-1;oz0=base;oz1=z1;face='N';}else{z1=base-sb;z0=z1-db+1;oz0=z0;oz1=base;face='S';}}
-              else{z0=a;z1=a+wb-1;oz0=z0;oz1=z1;const base=sg>0?s.c+s.hw+2:s.c-s.hw-2;
-                if(sg>0){x0=base+sb;x1=x0+db-1;ox0=base;ox1=x1;face='W';}else{x1=base-sb;x0=x1-db+1;ox0=x0;ox1=base;face='E';}}
-              if(!fits(ox0,oz0,ox1,oz1))continue;
-              occ.push([ox0-1,oz0-1,ox1+1,oz1+1]);t.lots.push({tp:cand,x0:x0,z0:z0,x1:x1,z1:z1,face:face,sb:sb,g:0,seed:r()});
-              have[cand]=1;cnt[cand]=(cnt[cand]||0)+1;
-              a+=wb+2+(r()*4|0);placed=true;break;
-            }
-            if(!placed)a+=2;
-          }
-        }
-        if(R>=36)for(const [qx,qz] of [[1,1],[1,-1],[-1,1],[-1,-1]]){const x0=cx+qx*(R-3)-2,z0=cz+qz*(R-3)-2;if(fits(x0,z0,x0+4,z0+4)){occ.push([x0,z0,x0+4,z0+4]);t.lots.push({tp:'tower',x0:x0,z0:z0,x1:x0+4,z1:z0+4,face:'N',g:0,seed:r()});}}
-        t.lots.forEach(l=>{l.g=t.g0;});
-        if(t.lots.length<6)t=null;
-      }
-    }
-  }
-  townCache.set(key,t);return t;
-}
-function townAt(X,Z,m){const t=townPlan(Math.floor(X/TR),Math.floor(Z/TR));return t&&Math.max(Math.abs(X-t.cx),Math.abs(Z-t.cz))<=t.R+(m||0)?t:null;}
-const pick=(arr,r)=>arr[Math.floor(r()*arr.length)];
-function gableRoof(b,y0,roof,wall,ridge){
-  const alongX=(b.x1-b.x0)>=(b.z1-b.z0);
-  for(let k=0;k<10;k++){
-    const y=y0+k;
-    if(alongX){const zA=b.z0-1+k,zB=b.z1+1-k;if(zA>zB)break;
-      for(let X=b.x0-1;X<=b.x1+1;X++){PW(X,y,zA,zB-zA<=1?ridge:roof,MODE_SET);PW(X,y,zB,zB-zA<=1?ridge:roof,MODE_SET);}
-      for(let Z=zA+1;Z<zB;Z++){PW(b.x0,y,Z,wall,MODE_SET);PW(b.x1,y,Z,wall,MODE_SET);}
-      if(zB-zA<=1)break;}
-    else{const xA=b.x0-1+k,xB=b.x1+1-k;if(xA>xB)break;
-      for(let Z=b.z0-1;Z<=b.z1+1;Z++){PW(xA,y,Z,xB-xA<=1?ridge:roof,MODE_SET);PW(xB,y,Z,xB-xA<=1?ridge:roof,MODE_SET);}
-      for(let X=xA+1;X<xB;X++){PW(X,y,b.z0,wall,MODE_SET);PW(X,y,b.z1,wall,MODE_SET);}
-      if(xB-xA<=1)break;}
-  }
-}
-function interiorRing(b,fn){
-  for(let X=b.x0+1;X<b.x1;X++){fn(X,b.z0+1);fn(X,b.z1-1);}
-  for(let Z=b.z0+2;Z<b.z1-1;Z++){fn(b.x0+1,Z);fn(b.x1-1,Z);}
-}
-function nearDoor(b,X,Z){const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1;return(b.face==='N'||b.face==='S')?Math.abs(X-mx)<=1&&(b.face==='N'?Z<=b.z0+2:Z>=b.z1-2):Math.abs(Z-mz)<=1&&(b.face==='W'?X<=b.x0+2:X>=b.x1-2);}
-function hipRoof(b,y0,roof,ridge){
-  for(let k=0;k<12;k++){
-    const ax0=b.x0-1+k,ax1=b.x1+1-k,az0=b.z0-1+k,az1=b.z1+1-k;if(ax0>ax1||az0>az1)break;
-    const last=ax1-ax0<=1||az1-az0<=1;
-    for(let X=ax0;X<=ax1;X++)for(let Z=az0;Z<=az1;Z++)if(last||X===ax0||X===ax1||Z===az0||Z===az1)PW(X,y0+k,Z,last?ridge:roof,MODE_SET);
-    if(last)return y0+k;
-  }
-  return y0;
-}
-function frontCells(b,depth,fn){
-  for(let k=1;k<=depth;k++){
-    if(b.face==='N')for(let X=b.x0;X<=b.x1;X++)fn(X,b.z0-k,k);
-    if(b.face==='S')for(let X=b.x0;X<=b.x1;X++)fn(X,b.z1+k,k);
-    if(b.face==='W')for(let Z=b.z0;Z<=b.z1;Z++)fn(b.x0-k,Z,k);
-    if(b.face==='E')for(let Z=b.z0;Z<=b.z1;Z++)fn(b.x1+k,Z,k);
-  }
-}
-function isDoorLine(b,X,Z){const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1;return(b.face==='N'||b.face==='S')?X===mx:Z===mz;}
-function frontYard(b,st,r){
-  if(!b.sb)return;
-  frontCells(b,b.sb,(X,Z)=>{
-    for(let y=b.g+1;y<=b.g+4;y++)PW(X,y,Z,AIR,MODE_SET);
-    if(isDoorLine(b,X,Z))PW(X,b.g,Z,st.flat?st.walk:PATH,MODE_SET);
-    else{PW(X,b.g,Z,st.flat?SAND:GRASS,MODE_SET);if(r()<0.28)PW(X,b.g+1,Z,st.flat?DBUSH:pick([FLOWR,FLOWY,TGRASS],r),MODE_SET);}
-  });
-}
-function chimney(b,top,r){
-  const X=b.face==='E'?b.x0:b.x1,Z=b.face==='S'?b.z0:b.z1,m=pick([BRICK,COBBLE,SBRICK],r);
-  for(let y=b.g+1;y<=top+2;y++)PW(X,y,Z,m,MODE_SET);
-}
-function porch(b,st,roof){
-  if((b.sb||0)<2)return;
-  const posts=[];frontCells(b,2,(X,Z,k)=>{PW(X,b.g,Z,PLANKS,MODE_SET);PW(X,b.g+4,Z,roof,MODE_SET);
-    const end=(b.face==='N'||b.face==='S')?(X===b.x0||X===b.x1):(Z===b.z0||Z===b.z1);if(k===2&&end)posts.push([X,Z]);});
-  for(const [X,Z] of posts)for(let y=b.g+1;y<=b.g+3;y++)PW(X,y,Z,st.post,MODE_SET);
-}
-// Generic building with optional hip roof, chimney and porch
-function buildingT(b,st,o){
-  const r=mkRng(Math.floor(b.seed*1e9)+5),g=b.g,fl=o.floors||1,wh=o.wallH||fl*4;
-  const wall=o.wall||pick(st.walls,r),corner=o.corner||pick(st.corners,r),roof=o.roof||pick(st.roofs,r),ridge=st.flat?roof:corner;
-  frontYard(b,st,r);
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    for(let y=g-1;y>g-7;y--)PW(X,y,Z,st.found,MODE_FILL);
-    PW(X,g,Z,o.floor||st.floor,MODE_SET);for(let y=g+1;y<=g+wh+10;y++)PW(X,y,Z,AIR,MODE_SET);
-  }
-  const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1,winEvery=o.winEvery||2;
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    const ex=X===b.x0||X===b.x1,ez=Z===b.z0||Z===b.z1;if(!ex&&!ez)continue;const corn=ex&&ez;
-    const front=(b.face==='N'&&Z===b.z0)||(b.face==='S'&&Z===b.z1)||(b.face==='W'&&X===b.x0)||(b.face==='E'&&X===b.x1);
-    const along=ex?Z:X,dc=(b.face==='N'||b.face==='S')?Math.abs(X-mx):Math.abs(Z-mz);
-    for(let y=g+1;y<=g+wh;y++){
-      let id=corn?corner:wall;const fy=(y-g-1)%4;
-      if(!corn&&fl>1&&(y-g)%4===0)id=corner;
-      if(front&&dc<=(o.wideDoor?1:0)&&y<=g+(o.wideDoor?3:2))id=AIR;
-      else if(!corn&&fy===1&&(along%winEvery===0||(o.display&&front&&y<=g+2)))id=st.win;
-      PW(X,y,Z,id,MODE_SET);
-    }
-  }
-  if(fl>1){
-    const dx=(b.x1-b.x0)>(b.z1-b.z0)?1:0,dz=1-dx,back=b.face==='S'||b.face==='E';
-    for(let X=b.x0+1;X<b.x1;X++)for(let Z=b.z0+1;Z<b.z1;Z++)PW(X,g+4,Z,PLANKS,MODE_SET);
-    const s0x=back?b.x0+1:b.x1-1,s0z=back?b.z0+1:b.z1-1,ddx=back?dx:-dx,ddz=back?dz:-dz;
-    for(let k=0;k<3;k++){const X=s0x+ddx*k,Z=s0z+ddz*k;for(let y=g+1;y<=g+1+k;y++)PW(X,y,Z,st.found,MODE_SET);if(k<2)PW(X,g+4,Z,AIR,MODE_SET);}
-    PW(mx,g+8,mz,LANTERN,MODE_SET);
-  }
-  PW(mx,g+(fl>1?3:wh),mz,LANTERN,MODE_SET);
-  let top=g+wh+1;
-  const kind=st.flat||o.roofKind==='flat'?'flat':o.roofKind||(r()<0.35?'hip':'gable');
-  if(kind==='flat'){for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){PW(X,g+wh+1,Z,roof,MODE_SET);if((X===b.x0||X===b.x1||Z===b.z0||Z===b.z1)&&(X+Z)%2===0)PW(X,g+wh+2,Z,roof,MODE_SET);}top=g+wh+2;}
-  else if(kind==='hip')top=hipRoof(b,g+wh+1,roof,ridge);
-  else{gableRoof(b,g+wh+1,roof,wall,ridge);top=g+wh+1+Math.ceil(Math.min(b.x1-b.x0,b.z1-b.z0)/2)+1;}
-  if(o.chimney&&!st.flat)chimney(b,top,r);
-  if(o.porch&&!st.flat)porch(b,st,roof);
-  return {wall:wall,roof:roof,corner:corner,wh:wh,top:top};
-}
-function lotT(l,st,t){
-  const g=l.g,r=mkRng(Math.floor(l.seed*1e9)+11),mx=(l.x0+l.x1)>>1,mz=(l.z0+l.z1)>>1,ns=l.face==='N'||l.face==='S';
-  const backCells=fn=>{if(l.face==='N')for(let X=l.x0+1;X<l.x1;X++)fn(X,l.z1-1);if(l.face==='S')for(let X=l.x0+1;X<l.x1;X++)fn(X,l.z0+1);if(l.face==='W')for(let Z=l.z0+1;Z<l.z1;Z++)fn(l.x1-1,Z);if(l.face==='E')for(let Z=l.z0+1;Z<l.z1;Z++)fn(l.x0+1,Z);};
-  switch(l.tp){
-    case 'cottage':buildingT(l,st,{chimney:r()<0.6,porch:r()<0.4});break;
-    case 'houseS':case 'houseM':{buildingT(l,st,{chimney:r()<0.5,porch:r()<0.5});PW(l.x0+1,g+1,l.z1-1,BOOKS,MODE_SET);break;}
-    case 'house2':buildingT(l,st,{floors:2,chimney:r()<0.6,porch:r()<0.3});break;
-    case 'manor':{buildingT(l,st,{floors:2,wall:pick([BRICK,SBRICK,PLANKS,WOOLW],r),roofKind:'hip',chimney:true,porch:true,winEvery:2});
-      backCells((X,Z)=>{if(r()<0.4)PW(X,g+1,Z,BOOKS,MODE_SET);});break;}
-    case 'shop':{buildingT(l,st,{display:true});
-      const wools=[[WOOLR,WOOLW],[WOOLB,WOOLW],[WOOLG,WOOLY],[WOOLY,WOOLW]][r()*4|0];let i=0;
-      frontCells(l,1,(X,Z)=>{PW(X,g+3,Z,wools[(i++)%2],MODE_SET);});PW(l.x0+1,g+1,l.z0+1,TRADER,MODE_SET);break;}
-    case 'bakery':{const m=buildingT(l,st,{display:true,chimney:true,roof:st.flat?undefined:pick([BRICK,TERO],r)});backCells((X,Z)=>{PW(X,g+1,Z,r()<0.5?FURN:PLANKS,MODE_SET);});PW(l.x0+1,g+1,l.z0+1,TRADER,MODE_SET);break;}
-    case 'tavern':{buildingT(l,st,{floors:2,wall:pick([PLANKS,BRICK,COBBLE],r),chimney:true});
-      for(let X=l.x0+2;X<l.x1-1;X+=3)for(let Z=l.z0+2;Z<l.z1-1;Z+=3)if(!nearDoor(l,X,Z))PW(X,g+1,Z,PLANKS,MODE_SET);PW(l.x0+1,g+1,l.z0+1,FURN,MODE_SET);break;}
-    case 'library':{buildingT(l,st,{wallH:5,roofKind:'hip'});interiorRing(l,(X,Z)=>{if(!nearDoor(l,X,Z))for(let y=g+1;y<=g+3;y++)PW(X,y,Z,BOOKS,MODE_SET);});break;}
-    case 'hall':{buildingT(l,st,{floors:2,wall:st.flat?SANDSTONE:SBRICK,corner:st.flat?TERT:COBBLE,roof:st.flat?SANDSTONE:BRICK,roofKind:'hip'});
-      for(const d of [-2,2]){const X=ns?mx+d:(l.face==='W'?l.x0-1:l.x1+1),Z=ns?(l.face==='N'?l.z0-1:l.z1+1):mz+d;for(let y=g+1;y<=g+5;y++)PW(X,y,Z,st.post,MODE_SET);PW(X,g+6,Z,GLOW,MODE_SET);}
-      break;}
-    case 'bank':{buildingT(l,st,{wall:st.flat?SANDSTONE:SBRICK,corner:STEELB,roof:st.flat?SANDSTONE:SBRICK,roofKind:'flat',winEvery:3});
-      for(const d of [-1,1]){const X=ns?mx+d*2:(l.face==='W'?l.x0-1:l.x1+1),Z=ns?(l.face==='N'?l.z0-1:l.z1+1):mz+d*2;for(let y=g+1;y<=g+4;y++)PW(X,y,Z,STEELB,MODE_SET);}
-      backCells((X,Z)=>{PW(X,g+1,Z,pick([COPB,BRASB,BRONB,COPB],r),MODE_SET);});PW(mx,g+1,mz,TRADER,MODE_SET);PW(mx+(ns?1:0),g+1,mz+(ns?0:1),MINT,MODE_SET);break;}
-    case 'market':{
-      for(let X=l.x0;X<=l.x1;X++)for(let Z=l.z0;Z<=l.z1;Z++){for(let y=g-1;y>g-6;y--)PW(X,y,Z,st.found,MODE_FILL);PW(X,g,Z,st.main,MODE_SET);for(let y=g+1;y<=g+12;y++)PW(X,y,Z,AIR,MODE_SET);
-        const edge=X===l.x0||X===l.x1||Z===l.z0||Z===l.z1;if(edge&&(X+Z)%2===0)for(let y=g+1;y<=g+4;y++)PW(X,y,Z,st.post,MODE_SET);}
-      const rf=st.flat?SANDSTONE:pick([TERO,BRICK,SPRUCE],r);hipRoof(l,g+5,rf,rf);
-      for(let X=l.x0+2;X<l.x1-1;X+=3){PW(X,g+1,mz-1,TRADER,MODE_SET);PW(X,g+1,mz+1,PLANKS,MODE_SET);}
-      PW(mx,g+4,mz,LANTERN,MODE_SET);break;}
-    case 'clock':{const w=st.flat?SANDSTONE:SBRICK,top=g+17;
-      for(let X=l.x0;X<=l.x1;X++)for(let Z=l.z0;Z<=l.z1;Z++){for(let y=g-1;y>g-6;y--)PW(X,y,Z,st.found,MODE_FILL);const edge=X===l.x0||X===l.x1||Z===l.z0||Z===l.z1;
-        for(let y=g;y<=top;y++)PW(X,y,Z,edge||y===g?w:AIR,MODE_SET);}
-      PW(mx,top-3,l.z0,GLOW,MODE_SET);PW(mx,top-3,l.z1,GLOW,MODE_SET);PW(l.x0,top-3,mz,GLOW,MODE_SET);PW(l.x1,top-3,mz,GLOW,MODE_SET);
-      for(let y=g+1;y<=g+2;y++)PW(ns?mx:(l.face==='W'?l.x0:l.x1),y,ns?(l.face==='N'?l.z0:l.z1):mz,AIR,MODE_SET);
-      hipRoof(l,top+1,st.flat?SANDSTONE:pick([BRICK,TERB,SPRUCE],r),st.flat?TERT:COBBLE);break;}
-    case 'chapel':{const m=buildingT(l,st,{wallH:6,wall:st.flat?SANDSTONE:pick([SBRICK,COBBLE],r),corner:st.flat?TERT:SBRICK,roof:st.flat?SANDSTONE:pick([BRICK,SPRUCE,TERB],r),roofKind:'gable'});
-      const tx0=ns?mx-1:(l.face==='W'?l.x0:l.x1-2),tz0=ns?(l.face==='N'?l.z0:l.z1-2):mz-1,top=g+15;
-      for(let X=tx0;X<tx0+3;X++)for(let Z=tz0;Z<tz0+3;Z++)for(let y=g+1;y<=top;y++){
-        const edge=X===tx0||X===tx0+2||Z===tz0||Z===tz0+2,belfry=y>=top-3&&y<top&&!(X!==tx0+1&&Z!==tz0+1);
-        PW(X,y,Z,edge&&!belfry?m.wall:AIR,MODE_SET);}
-      PW(tx0+1,top-2,tz0+1,GLOW,MODE_SET);for(let X=tx0-1;X<=tx0+3;X++)for(let Z=tz0-1;Z<=tz0+3;Z++)PW(X,top,Z,m.roof,MODE_SET);PW(tx0+1,top+1,tz0+1,m.roof,MODE_SET);
-      for(let y=g+1;y<=g+2;y++)PW(ns?mx:(l.face==='W'?l.x0:l.x1),y,ns?(l.face==='N'?l.z0:l.z1):mz,AIR,MODE_SET);
-      break;}
-    case 'warehouse':{buildingT(l,st,{wall:pick([COBBLE,PLANKS,SBRICK],r),roofKind:'flat',wideDoor:true,winEvery:4,floor:COBBLE});
-      for(let X=l.x0+1;X<l.x1;X++)for(let Z=l.z0+1;Z<l.z1;Z++){if(nearDoor(l,X,Z)||isDoorLine(l,X,Z))continue;if(r()<0.45){const m=pick([LOG,PLANKS,COBBLE,SPRUCE,WOOLW],r),h=1+(r()*2|0);for(let y=g+1;y<=g+h;y++)PW(X,y,Z,m,MODE_SET);}}
-      break;}
-    case 'greenhouse':{
-      for(let X=l.x0;X<=l.x1;X++)for(let Z=l.z0;Z<=l.z1;Z++){for(let y=g-1;y>g-6;y--)PW(X,y,Z,st.found,MODE_FILL);for(let y=g+1;y<=g+9;y++)PW(X,y,Z,AIR,MODE_SET);
-        const ex=X===l.x0||X===l.x1,ez=Z===l.z0||Z===l.z1;PW(X,g,Z,ex||ez?st.found:DIRT,MODE_SET);
-        if(ex||ez)for(let y=g+1;y<=g+3;y++)PW(X,y,Z,ex&&ez?st.post:GLASS,MODE_SET);
-        else if(!isDoorLine(l,X,Z))PW(X,g+1,Z,pick([WHEAT,FLOWR,FLOWY,TGRASS,CACTUS],r),MODE_SET);}
-      for(let y=g+1;y<=g+2;y++)PW(ns?mx:(l.face==='W'?l.x0:l.x1),y,ns?(l.face==='N'?l.z0:l.z1):mz,AIR,MODE_SET);
-      hipRoof(l,g+4,GLASS,GLASS);PW(mx,g+4,mz,LANTERN,MODE_SET);break;}
-    case 'barn':{const red=r()<0.6&&!st.flat;
-      buildingT(l,st,{wallH:5,wall:red?WOOLR:PLANKS,corner:red?WOOLW:st.post,roof:st.flat?undefined:pick([SPRUCE,PLANKS,TERB],r),roofKind:'gable',wideDoor:true,winEvery:5,floor:DIRT});
-      for(let X=l.x0+1;X<l.x1;X++)for(let Z=l.z0+1;Z<l.z1;Z++)if(!isDoorLine(l,X,Z)&&r()<0.35)PW(X,g+1,Z,WHEAT,MODE_SET);break;}
-    case 'windmill':{const w=st.flat?SANDSTONE:COBBLE,top=g+10;
-      for(let X=l.x0;X<=l.x1;X++)for(let Z=l.z0;Z<=l.z1;Z++){for(let y=g-1;y>g-6;y--)PW(X,y,Z,st.found,MODE_FILL);const edge=X===l.x0||X===l.x1||Z===l.z0||Z===l.z1;for(let y=g;y<=top;y++)PW(X,y,Z,edge||y===g?w:AIR,MODE_SET);}
-      for(let y=g+1;y<=g+2;y++)PW(ns?mx:(l.face==='W'?l.x0:l.x1),y,ns?(l.face==='N'?l.z0:l.z1):mz,AIR,MODE_SET);
-      hipRoof(l,top+1,st.flat?SANDSTONE:pick([SPRUCE,PLANKS],r),st.post);
-      const hy=g+8,hx=ns?mx:(l.face==='W'?l.x0-1:l.x1+1),hz=ns?(l.face==='N'?l.z0-1:l.z1+1):mz;PW(hx,hy,hz,PLANKS,MODE_SET);
-      for(let k=1;k<=4;k++){PW(hx,hy+k,hz,WOOLW,MODE_SET);PW(hx,hy-k,hz,WOOLW,MODE_SET);if(ns){PW(hx+k,hy,hz,WOOLW,MODE_SET);PW(hx-k,hy,hz,WOOLW,MODE_SET);}else{PW(hx,hy,hz+k,WOOLW,MODE_SET);PW(hx,hy,hz-k,WOOLW,MODE_SET);}}
-      PW(mx,g+4,mz,LANTERN,MODE_SET);break;}
-    case 'smithy':smithyP(l,{found:st.found,floor:COBBLE,post:st.post});PW(mx,g+1,mz,TRADER,MODE_SET);break;
-    case 'farm':farmP(l);break;
-    case 'yard':case 'park':{
-      for(let X=l.x0;X<=l.x1;X++)for(let Z=l.z0;Z<=l.z1;Z++){for(let y=g+1;y<=g+9;y++)PW(X,y,Z,AIR,MODE_SET);
-        const edge=X===l.x0||X===l.x1||Z===l.z0||Z===l.z1,gate=edge&&isDoorLine(l,X,Z);PW(X,g,Z,gate?PATH:st.flat?SAND:GRASS,MODE_SET);
-        if(edge&&!gate)PW(X,g+1,Z,l.tp==='yard'?(st.flat?SANDSTONE:LEAVES):((X+Z)%3===0?st.post:AIR),MODE_SET);
-        else if(!edge&&r()<0.22)PW(X,g+1,Z,st.flat?DBUSH:pick([FLOWR,FLOWY,TGRASS,TGRASS],r),MODE_SET);}
-      const feat=r();
-      if(feat<0.4&&!st.flat)treeP(mx,g+1,mz,r()<0.5?BIRCH:LOG,r()<0.5?BLEAVES:LEAVES,4,r);
-      else if(feat<0.7){for(let dx=0;dx<=1;dx++)for(let dz=0;dz<=1;dz++){PW(mx+dx,g,mz+dz,WATER,MODE_SET);PW(mx+dx,g+1,mz+dz,AIR,MODE_SET);}}
-      else{const gz={x0:mx-1,x1:mx+1,z0:mz-1,z1:mz+1};for(const [X,Z] of [[gz.x0,gz.z0],[gz.x1,gz.z0],[gz.x0,gz.z1],[gz.x1,gz.z1]])for(let y=g+1;y<=g+3;y++)PW(X,y,Z,st.post,MODE_SET);hipRoof(gz,g+4,st.flat?SANDSTONE:pick(st.roofs,r),st.post);PW(mx,g+1,mz,AIR,MODE_SET);}
-      break;}
-    case 'tower':{
-      for(let X=l.x0;X<=l.x1;X++)for(let Z=l.z0;Z<=l.z1;Z++){
-        for(let y=g-1;y>g-7;y--)PW(X,y,Z,st.found,MODE_FILL);
-        const edge=X===l.x0||X===l.x1||Z===l.z0||Z===l.z1;
-        for(let y=g;y<=g+12;y++)PW(X,y,Z,edge||y===g?(st.flat?SANDSTONE:COBBLE):AIR,MODE_SET);
-        PW(X,g+12,Z,st.flat?SANDSTONE:SBRICK,MODE_SET);if(edge&&(X+Z)%2===0)PW(X,g+13,Z,st.flat?SANDSTONE:COBBLE,MODE_SET);
-      }
-      for(let y=g+1;y<=g+2;y++)PW(mx,y,l.z0,AIR,MODE_SET);
-      for(let y=g+1;y<=g+11;y++)PW(mx,y,mz,st.post,MODE_SET);PW(mx,g+13,mz,LANTERN,MODE_SET);
-      break;}
-  }
-}
-function applyTown(){
-  const t=townPlan(Math.floor(gx0/TR),Math.floor(gz0/TR));if(!t)return;
-  const E=t.R+2;if(gx0+CS<t.cx-E||gx0>t.cx+E||gz0+CS<t.cz-E||gz0>t.cz+E)return;
-  const st=TSTYLE[t.style],g=t.g0;
-  const inC=(X,Z)=>X>=gx0&&X<gx0+CS&&Z>=gz0&&Z<gz0+CS;
-  for(const s of t.streets){
-    for(let a=Math.max(s.a0,s.ax==='x'?gx0:gz0);a<=Math.min(s.a1,(s.ax==='x'?gx0:gz0)+CS-1);a++)for(let p=-s.hw-1;p<=s.hw+1;p++){
-      const X=s.ax==='x'?a:s.c+p,Z=s.ax==='x'?s.c+p:a;if(!inC(X,Z))continue;
-      const curb=Math.abs(p)===s.hw+1;
-      for(let y=g-1;y>g-5;y--)PW(X,y,Z,st.found,MODE_FILL);
-      PW(X,g,Z,curb?st.walk:s.main?st.main:st.side,MODE_SET);
-      for(let y=g+1;y<=g+5;y++)PW(X,y,Z,AIR,MODE_SET);
-    }
-  }
-  for(let dx=-8;dx<=8;dx++)for(let dz=-8;dz<=8;dz++){const X=t.cx+dx,Z=t.cz+dz;if(!inC(X,Z))continue;for(let y=g-1;y>g-5;y--)PW(X,y,Z,st.found,MODE_FILL);PW(X,g,Z,(dx+dz)&1?st.main:st.walk,MODE_SET);for(let y=g+1;y<=g+6;y++)PW(X,y,Z,AIR,MODE_SET);}
-  // fountain
-  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const X=t.cx+dx,Z=t.cz+dz,rim=Math.max(Math.abs(dx),Math.abs(dz))===2;PW(X,g+1,Z,rim?st.main:WATER,MODE_SET);if(!rim)PW(X,g,Z,st.main,MODE_SET);}
-  for(let y=g+1;y<=g+3;y++)PW(t.cx,y,t.cz,st.main,MODE_SET);PW(t.cx,g+4,t.cz,LANTERN,MODE_SET);
-  t.stalls.forEach(([X,Z],i)=>{const wl=[WOOLR,WOOLB,WOOLY,WOOLG][i];for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx&&dz)for(let y=g+1;y<=g+3;y++)PW(X+dx,y,Z+dz,st.post,MODE_SET);PW(X+dx,g+4,Z+dz,(dx+dz)&1?wl:WOOLW,MODE_SET);}PW(X,g+1,Z,TRADER,MODE_SET);});
-  for(const [X,Z] of t.lamps){if(!inC(X,Z))continue;for(let y=g+1;y<=g+3;y++)PW(X,y,Z,st.post,MODE_SET);PW(X,g+4,Z,LANTERN,MODE_SET);}
-  for(const l of t.lots){if(l.x1+2<gx0||l.x0-2>=gx0+CS||l.z1+2<gz0||l.z0-2>=gz0+CS)continue;lotT(l,st,t);}
-}
-// ---- Paved roads between neighbouring towns, raised over valleys and water
-const roadCache=new Map();
-function makeRoad(a,b,ax,r,sg){
-  sg=sg||1;
-  const A=ax==='x'?[a.cx+sg*(a.R+1),a.cz]:[a.cx,a.cz+sg*(a.R+1)],B=ax==='x'?[b.cx-sg*(b.R+1),b.cz]:[b.cx,b.cz-sg*(b.R+1)];
-  const dv=ax==='x'?[sg,0]:[0,sg],A2=[A[0]+dv[0]*14,A[1]+dv[1]*14],B2=[B[0]-dv[0]*14,B[1]-dv[1]*14];
-  const len0=Math.hypot(B2[0]-A2[0],B2[1]-A2[1])||1,nx=-(B2[1]-A2[1])/len0,nz=(B2[0]-A2[0])/len0,off=(r()-.5)*Math.min(70,len0*0.35);
-  const M=[(A2[0]+B2[0])/2+nx*off,(A2[1]+B2[1])/2+nz*off],pts=[A,A2,M,B2,B],cum=[0];
-  for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
-  const L=cum[cum.length-1],n=Math.ceil(L/4)+1,prof=new Float32Array(n);
-  const ptAt=s=>{let i=1;while(i<pts.length-1&&cum[i]<s)i++;const f=(s-cum[i-1])/Math.max(1e-6,cum[i]-cum[i-1]);return[pts[i-1][0]+(pts[i][0]-pts[i-1][0])*f,pts[i-1][1]+(pts[i][1]-pts[i-1][1])*f];};
-  for(let i=0;i<n;i++){const p=ptAt(Math.min(L,i*4));{const q=colInfo(Math.round(p[0]),Math.round(p[1]),T4);prof[i]=Math.max(SEA+2,q.h,q.lake?q.lake+2:0);}}
-  const fix=i=>i*4<=6?a.g0:i*4>=L-6?b.g0:null;
-  for(let pass=0;pass<3;pass++){const c=prof.slice();for(let i=0;i<n;i++){if(fix(i)!==null){prof[i]=fix(i);continue;}let s2=0,m=0;for(let k=-4;k<=4;k++){const j=Math.max(0,Math.min(n-1,i+k));s2+=c[j];m++;}prof[i]=s2/m;}}
-  for(let i=1;i<n;i++)prof[i]=Math.max(prof[i-1]-1,Math.min(prof[i-1]+1,prof[i]));
-  for(let i=n-2;i>=0;i--)prof[i]=Math.max(prof[i+1]-1,Math.min(prof[i+1]+1,prof[i]));
-  for(let i=0;i<n;i++)prof[i]=Math.max(SEA+2,Math.round(prof[i]));
-  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(const p of pts){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);}
-  return{pts:pts,cum:cum,prof:prof,box:[x0-4,z0-4,x1+4,z1+4]};
-}
-function nearestTown(RX,RZ){
-  const a=townPlan(RX,RZ);if(!a)return null;let best=null,bd=1000;
-  for(let x=RX-2;x<=RX+2;x++)for(let z=RZ-2;z<=RZ+2;z++){if(x===RX&&z===RZ)continue;const t=townPlan(x,z);if(!t)continue;const d=Math.hypot(t.cx-a.cx,t.cz-a.cz);if(d<bd){bd=d;best={t:t,RX:x,RZ:z};}}
-  return best;
-}
-function regionRoads(RX,RZ){return [];
-  const key=ckey(RX,RZ);if(roadCache.has(key))return roadCache.get(key);
-  const list=[],a=townPlan(RX,RZ);
-  if(a){
-    const nb=nearestTown(RX,RZ);
-    if(nb){const back=nearestTown(nb.RX,nb.RZ),mutual=back&&back.RX===RX&&back.RZ===RZ;
-      if(!mutual||ckey(RX,RZ)<ckey(nb.RX,nb.RZ)){const b=nb.t,dx=b.cx-a.cx,dz=b.cz-a.cz,ax=Math.abs(dx)>=Math.abs(dz)?'x':'z';list.push(makeRoad(a,b,ax,rngAt(RX,41,RZ),ax==='x'?Math.sign(dx):Math.sign(dz)));}}
-  }
-  roadCache.set(key,list);return list;
-}
-const RINFO={d:0,s:0,deck:0};
-function roadAt(X,Z,maxd){return false;
-  const rx=Math.floor(X/TR),rz=Math.floor(Z/TR);let best=maxd||2.6,found=null;
-  for(let RX=rx-2;RX<=rx+2;RX++)for(let RZ=rz-2;RZ<=rz+2;RZ++)for(const rd of regionRoads(RX,RZ)){
-    if(X<rd.box[0]||X>rd.box[2]||Z<rd.box[1]||Z>rd.box[3])continue;
-    for(let i=1;i<rd.pts.length;i++){
-      const p=rd.pts[i-1],q=rd.pts[i],vx=q[0]-p[0],vz=q[1]-p[1],l2=vx*vx+vz*vz||1;
-      let u=((X+.5-p[0])*vx+(Z+.5-p[1])*vz)/l2;u=Math.max(0,Math.min(1,u));
-      const d=Math.hypot(X+.5-p[0]-vx*u,Z+.5-p[1]-vz*u);
-      if(d<best){best=d;const s=rd.cum[i-1]+u*Math.sqrt(l2),f=s/4,i0=Math.min(rd.prof.length-1,Math.floor(f)),i1=Math.min(rd.prof.length-1,i0+1);
-        RINFO.d=d;RINFO.s=s;RINFO.deck=Math.round(rd.prof[i0]+(rd.prof[i1]-rd.prof[i0])*(f-i0));found=RINFO;}
-    }
-  }
-  return found;
-}
-function applyRoads(){
-  for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
-    const X=gx0+lx,Z=gz0+lz;if(townAt(X,Z,1))continue;
-    const ri=roadAt(X,Z);if(!ri)continue;
-    const D=ri.deck,edge=ri.d>1.5,rail=ri.d>2.0;
-    for(let y=D+1;y<=D+5;y++)PW(X,y,Z,AIR,MODE_SET);
-    PW(X,D,Z,edge?COBBLE:SBRICK,MODE_SET);
-    let gap=0;for(let y=D-1;y>0;y--){const c=GW(X,y,Z);if(c<0||SOLID[c])break;gap++;if(gap>60)break;}
-    if(gap<=3)for(let k=1;k<=gap;k++)PW(X,D-k,Z,COBBLE,MODE_SET);
-    else if(Math.floor(ri.s)%12<2)for(let k=1;k<=gap;k++)PW(X,D-k,Z,SBRICK,MODE_SET);
-    else PW(X,D-1,Z,SBRICK,MODE_SET);
-    if(rail){
-      if(Math.floor(ri.s)%36===0){for(let y=D+1;y<=D+3;y++)PW(X,y,Z,SBRICK,MODE_SET);PW(X,D+4,Z,LANTERN,MODE_SET);}
-      else if(gap>=2)PW(X,D+1,Z,COBBLE,MODE_SET);
-    }
-  }
-}
+// Ice spikes of the fells, old sealed rooms deep down, and a flatness check for surface structures
 function spikeP(X,Z,g,r){
   const h=8+(r()*10|0),r0=1+r()*1.4;
   for(let k=0;k<h&&g+1+k<H-1;k++){const rr=r0*(1-k/h)+0.4;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.hypot(dx,dz)<=rr)PW(X+dx,g+1+k,Z+dz,ICE,MODE_SET);}
@@ -2363,7 +1879,7 @@ function features(WCX,WCZ,self){
   // the odd mossy boulder on open ground
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(T2.town||![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||roadAt(X,Z,4))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -2372,10 +1888,9 @@ function features(WCX,WCZ,self){
     if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
   // Trees on the ground and on sky islands
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
-    const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08||townAt(X,Z,24)||roadAt(X,Z,5))continue;
-    {const gcx=Math.floor(X/CS),gcz=Math.floor(Z/CS);if(Math.abs(X-gcx*CS-8)<=7&&Math.abs(Z-gcz*CS-8)<=7&&gateAt(gcx,gcz))continue;if(Math.abs(X-gcx*CS-8)<=4&&Math.abs(Z-gcz*CS-8)<=4&&lightwellAt(gcx,gcz))continue;}
+    const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=!(T2.isl>=0&&T2.iBot<h+14)&&h+12<H&&!carved(X,h,Z,T2),top=topBlock(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2),top=topBlock(T2);
     if(clear){
       if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012))spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
@@ -2383,12 +1898,11 @@ function features(WCX,WCZ,self){
         if(hv<td){if(T2.sw>0.25&&hsh(X,3,Z)<T2.sw)jungleP(X,h+1,Z,tr2);else if(b===11)willowP(X,h+1,Z,tr2);else if(b===3&&hsh(X,2,Z)<0.15)treeP(X,h+1,Z,BIRCH,BLEAVES,5,tr2);else if((b===3&&hsh(X,4,Z)<0.35)||(b===10&&hsh(X,4,Z)<0.4))bigOakP(X,h+1,Z,tr2);else treeP(X,h+1,Z,LOG,LEAVES,4,tr2);}
         else if((b===2||b===3)&&hv<td+0.004)leafBushP(X,h+1,Z,tr2);}
     }
-    if(T2.isl>=0&&hv<0.03&&T2.isl+10<H){const bi=hsh(X,9,Z)<0.5;treeP(X,T2.isl+1,Z,bi?BIRCH:LOG,bi?BLEAVES:LEAVES,4,rngAt(X,10,Z));}
   }
   // Structures
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
-  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&T2.isl<0&&!townAt(sx,sz,30)&&!roadAt(sx,sz,10)){
+  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)){
     if((b===2||b===3)&&sr<0.05&&flatOK(sx,sz,g))towerP(sx,sz,g,rngAt(sx,12,sz));
     else if(b===4&&sr<0.06&&flatOK(sx,sz,g))wellP(sx,sz,g);
     else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
@@ -2414,8 +1928,6 @@ function plants(WCX,WCZ){
           const kind=hsh(Math.floor(X/12),1903,Math.floor(Z/12))<0.5?FLOWR:FLOWY;
           if(meadow)world[I(x,g+1,z)]=kind;else if(r<gr)world[I(x,g+1,z)]=TGRASS;else if(r<gr+0.006*fade)world[I(x,g+1,z)]=hsh(X,6,Z)<.5?FLOWR:FLOWY;}}
     }
-    const t=islTop[ci];
-    if(t>=0&&world[I(x,t,z)]===GRASS&&world[I(x,t+1,z)]===AIR){const r=hsh(X,8,Z);if(r<0.17)world[I(x,t+1,z)]=TGRASS;else if(r<0.21)world[I(x,t+1,z)]=hsh(X,6,Z)<.5?FLOWR:FLOWY;}
   }
 }
 function genChunk(lcx,lcz){
@@ -2424,7 +1936,6 @@ function genChunk(lcx,lcz){
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
   applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyMines(WCX,WCZ);applyRuins(WCX,WCZ);
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
-  applyTown();applyRoads();
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));
   if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}});
@@ -4007,11 +3518,6 @@ function drawMM(){
   if(mmZoom===2){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
     for(let cz=r0;cz<=r1;cz++)for(let cx=c0;cx<=c1;cx++){const t=tiles.get(ckey(cx,cz));if(t)mmG.drawImage(t,(cx*CS-OX-ox)*k,(cz*CS-OZ-oz)*k,CS*k+0.6,CS*k+0.6);}}
   mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
-  {const r0x=Math.floor((ox+OX)/TR),r1x=Math.floor((ox+OX+span)/TR),r0z=Math.floor((oz+OZ)/TR),r1z=Math.floor((oz+OZ+span)/TR);
-   for(let rz=r0z;rz<=r1z;rz++)for(let rx=r0x;rx<=r1x;rx++){const v=townPlan(rx,rz);if(!v)continue;const vx=(v.cx-OX-ox)*k,vz=(v.cz-OZ-oz)*k;if(vx<-6||vz<-6||vx>S+6||vz>S+6)continue;
-     mmG.fillStyle='#f3efe2';mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.beginPath();mmG.moveTo(vx,vz-7);mmG.lineTo(vx+6,vz-1);mmG.lineTo(vx+4,vz-1);mmG.lineTo(vx+4,vz+5);mmG.lineTo(vx-4,vz+5);mmG.lineTo(vx-4,vz-1);mmG.lineTo(vx-6,vz-1);mmG.closePath();mmG.fill();mmG.stroke();}}
-  if(mmZoom){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
-    for(let cz2=r0;cz2<=r1;cz2++)for(let cx2=c0;cx2<=c1;cx2++)if(gateAt(cx2,cz2)){const gx=(cx2*CS+8-OX-ox)*k,gz=(cz2*CS+8-OZ-oz)*k;mmG.fillStyle='#ffaa46';mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.fillRect(gx-5,gz-5,10,3);mmG.fillRect(gx-5,gz-5,3,10);mmG.fillRect(gx+2,gz-5,3,10);mmG.strokeRect(gx-5,gz-5,10,10);}}
   mmG.fillStyle='#ff4030';for(const p of primed)mmG.fillRect((p.x-ox)*k-2,(p.z-oz)*k-2,5,5);
   if(G.on){mmG.fillStyle='#fff6c8';mmG.fillRect((G.ax-ox)*k-2,(G.az-oz)*k-2,5,5);}
   waypoints.forEach(m=>{let wx=(m.position.x-ox)*k,wz=(m.position.z-oz)*k;wx=Math.max(5,Math.min(S-5,wx));wz=Math.max(5,Math.min(S-5,wz));
@@ -4065,7 +3571,7 @@ function shiftWindow(dx,dz){
   }
   const d3=dx+W*dz;
   shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
-  for(const a of [hm,hb,hg,ground,biome,islTop,townCol,entCol])shiftArr(a,d3);
+  for(const a of [hm,hb,hg,ground,biome,entCol])shiftArr(a,d3);
   shiftArr(mmImg.data,d3*4);
   OX+=dx;OZ+=dz;
   const cdx=dx/CS,cdz=dz/CS,old=chunks.slice();
@@ -4115,8 +3621,6 @@ async function generate(){
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}
   }
-  if(!resumed){let best=null,bd=1e9;for(let rx=-1;rx<=1;rx++)for(let rz=-1;rz<=1;rz++){const t=townPlan(rx,rz);if(t){const d=Math.hypot(t.cx,t.cz);if(d<bd){bd=d;best=t;}}}
-    if(best){OX=Math.floor((best.cx+12)/CS)*CS-W/2;OZ=Math.floor(best.cz/CS)*CS-D/2;}}
   let n=0;
   const cm=NCX>>1,RIN=2,near=(cx,cz)=>Math.abs(cx-cm)<=RIN&&Math.abs(cz-cm)<=RIN,inner=(2*RIN+1)*(2*RIN+1);genQ.length=0;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(!near(cx,cz)){genQ.push([cx,cz]);continue;}genChunk(cx,cz);if(++n%4===0){progress(n/inner*0.55,'Shaping terrain, caves and ruins');await tick();}}
@@ -4357,7 +3861,7 @@ function frame(now){
   if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
-    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=hg[ci]>=0&&yy>hm[ci]?'Sky Island':(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):townAt(bx+OX,bz+OZ,0)?'Town':BIOMES[biome[ci]];
+    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):BIOMES[biome[ci]];
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
 }

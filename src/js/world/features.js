@@ -30,14 +30,6 @@ function bigOakP(X,y,Z,r){
     blob(bx,yy+1,bz,2.3);}
   blob(X,y+th,Z,3);
 }
-function palmP(X,y,Z,r){
-  const th=5+(r()*3|0),dir=[[1,0],[-1,0],[0,1],[0,-1]][r()*4|0];let x=X,z=Z;
-  PW(X,y-1,Z,DIRT,MODE_SET);
-  for(let i=0;i<th;i++){if(i>=2&&i%2===0){x+=dir[0];z+=dir[1];}PW(x,y+i,z,JLOG,MODE_SET);}
-  const ty=y+th;PW(x,ty,z,JLEAVES,MODE_AIR);
-  for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])for(let k=1;k<=3;k++)PW(x+a*k,ty-(k===3?1:0),z+b*k,JLEAVES,MODE_AIR);
-  for(const [a,b] of [[1,1],[-1,1],[1,-1],[-1,-1]])for(let k=1;k<=2;k++)PW(x+a*k,ty-(k===2?1:0),z+b*k,JLEAVES,MODE_AIR);
-}
 function leafBushP(X,y,Z,r){PW(X,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X+1,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X,y,Z+1,LEAVES,MODE_AIR);if(r()<0.4)PW(X,y+1,Z,LEAVES,MODE_AIR);}
 // ---- Ancient things on the old hills: barrows and rings of standing stones
 function barrowP(X,h,Z,r){
@@ -101,65 +93,16 @@ function wellP(X,Z,g,m,post){
   PW(X,g,Z,WATER,MODE_SET);PW(X,g-1,Z,WATER,MODE_SET);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx||dz)PW(X+dx,g+1,Z+dz,m,MODE_SET);PW(X+dx,g+4,Z+dz,m,MODE_SET);if(dx&&dz){PW(X+dx,g+2,Z+dz,post,MODE_SET);PW(X+dx,g+3,Z+dz,post,MODE_SET);}}
 }
-function doorAt(b,X,Z){const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1;return(b.face==='N'&&Z===b.z0&&X===mx)||(b.face==='S'&&Z===b.z1&&X===mx)||(b.face==='W'&&X===b.x0&&Z===mz)||(b.face==='E'&&X===b.x1&&Z===mz);}
-function groundWork(b,pal,clearH){
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    for(let y=b.g-1;y>b.g-7;y--)PW(X,y,Z,pal.found,MODE_FILL);
-    PW(X,b.g,Z,pal.floor,MODE_SET);for(let y=b.g+1;y<=b.g+clearH;y++)PW(X,y,Z,AIR,MODE_SET);
-  }
+// Ice spikes of the fells, old sealed rooms deep down, and a flatness check for surface structures
+function spikeP(X,Z,g,r){
+  const h=8+(r()*10|0),r0=1+r()*1.4;
+  for(let k=0;k<h&&g+1+k<H-1;k++){const rr=r0*(1-k/h)+0.4;for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.hypot(dx,dz)<=rr)PW(X+dx,g+1+k,Z+dz,ICE,MODE_SET);}
 }
-function houseP(b,pal){
-  const g=b.g,wh=4;groundWork(b,pal,wh+7);
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    const ex=X===b.x0||X===b.x1,ez=Z===b.z0||Z===b.z1;if(!ex&&!ez)continue;const corner=ex&&ez;
-    for(let y=g+1;y<=g+wh;y++){
-      let id=corner?pal.corner:pal.wall;
-      if(doorAt(b,X,Z)&&y<=g+2)id=AIR;else if(!corner&&y===g+2&&((ex?Z:X)%2===0))id=pal.win;
-      PW(X,y,Z,id,MODE_SET);
-    }
+function dungeonP(X,y,Z,r){
+  for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=5;dy++)for(let dz=-3;dz<=3;dz++){
+    const wall=Math.abs(dx)===3||Math.abs(dz)===3||dy===0||dy===5,m=r()<.5;
+    PW(X+dx,y+dy,Z+dz,wall?(m?MOSSY:COBBLE):AIR,MODE_SET);
   }
-  if(pal.flat){for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){PW(X,g+wh+1,Z,pal.roof,MODE_SET);if((X===b.x0||X===b.x1||Z===b.z0||Z===b.z1)&&(X+Z)%2===0)PW(X,g+wh+2,Z,pal.roof,MODE_SET);}}
-  else for(let k=0;k<6;k++){
-    const ax0=b.x0-1+k,ax1=b.x1+1-k,az0=b.z0-1+k,az1=b.z1+1-k;if(ax0>ax1||az0>az1)break;
-    const last=ax1-ax0<=1||az1-az0<=1;
-    for(let X=ax0;X<=ax1;X++)for(let Z=az0;Z<=az1;Z++)PW(X,g+wh+1+k,Z,last?pal.ridge:pal.roof,MODE_SET);
-    if(last)break;
-  }
-  const mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1;PW(mx,g+wh,mz,LANTERN,MODE_SET);
-  if(b.x1-b.x0>=6){const bx=b.face==='E'?b.x0+1:b.x1-1,bz=b.face==='S'?b.z0+1:b.z1-1;PW(bx,g+1,bz,BOOKS,MODE_SET);PW(bx,g+2,bz,BOOKS,MODE_SET);}
+  PW(X,y+5,Z,GLOW,MODE_SET);PW(X+2,y+1,Z+2,CRATE,MODE_SET);PW(X-2,y+1,Z+2,TNT,MODE_SET);PW(X-2,y+1,Z-2,CRATE,MODE_SET);PW(X+2,y+1,Z-2,BOOKS,MODE_SET);
 }
-function smithyP(b,pal){
-  const g=b.g;groundWork(b,pal,8);
-  const back=b.face==='N'?'z1':b.face==='S'?'z0':b.face==='W'?'x1':'x0';
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    const ex=X===b.x0||X===b.x1,ez=Z===b.z0||Z===b.z1;
-    const open=(b.face==='N'&&Z===b.z0)||(b.face==='S'&&Z===b.z1)||(b.face==='W'&&X===b.x0)||(b.face==='E'&&X===b.x1);
-    if((ex||ez)&&!open)for(let y=g+1;y<=g+4;y++)PW(X,y,Z,COBBLE,MODE_SET);
-    if(open&&(ex&&ez))for(let y=g+1;y<=g+4;y++)PW(X,y,Z,pal.post,MODE_SET);
-    PW(X,g+5,Z,b.face==='N'||b.face==='S'?(Z%2?SBRICK:COBBLE):(X%2?SBRICK:COBBLE),MODE_SET);
-  }
-  const rr=mkRng(Math.floor(b.seed*1e9)+7),inner=[];
-  if(back==='z1')for(let X=b.x0+1;X<b.x1;X++)inner.push([X,b.z1-1]);
-  if(back==='z0')for(let X=b.x0+1;X<b.x1;X++)inner.push([X,b.z0+1]);
-  if(back==='x1')for(let Z=b.z0+1;Z<b.z1;Z++)inner.push([b.x1-1,Z]);
-  if(back==='x0')for(let Z=b.z0+1;Z<b.z1;Z++)inner.push([b.x0+1,Z]);
-  const stock=[COPB,BRONB,BRASB,COPB,BRONB,BRASB,STEELB];
-  inner.forEach(([X,Z],i)=>{
-    if(i===0||i===1)PW(X,g+1,Z,FURN,MODE_SET);
-    else if(i===inner.length-1){PW(X,g,Z,LAVA,MODE_SET);PW(X,g-1,Z,COBBLE,MODE_SET);}
-    else if(rr()<0.6)PW(X,g+1,Z,stock[rr()*stock.length|0],MODE_SET);
-  });
-  PW((b.x0+b.x1)>>1,g+4,(b.z0+b.z1)>>1,LANTERN,MODE_SET);
-}
-function farmP(b){
-  const potato=hsh(b.x0,77,b.z0)<0.35;
-  const g=b.g,alongZ=b.face==='N'||b.face==='S',mx=(b.x0+b.x1)>>1,mz=(b.z0+b.z1)>>1,rr=mkRng(Math.floor(b.seed*1e9)+3);
-  for(let X=b.x0;X<=b.x1;X++)for(let Z=b.z0;Z<=b.z1;Z++){
-    for(let y=g-1;y>g-6;y--)PW(X,y,Z,DIRT,MODE_FILL);
-    for(let y=g+1;y<=g+4;y++)PW(X,y,Z,AIR,MODE_SET);
-    const edge=X===b.x0||X===b.x1||Z===b.z0||Z===b.z1,chan=!edge&&(alongZ?X===mx:Z===mz);
-    if(edge)PW(X,g,Z,LOG,MODE_SET);
-    else if(chan)PW(X,g,Z,WATER,MODE_SET);
-    else{PW(X,g,Z,FARM_W,MODE_SET);if(rr()<0.92)PW(X,g+1,Z,potato?[POT1,POT2,POT3,POT3][rr()*4|0]:[WHEAT1,WHEAT2,WHEAT,WHEAT][rr()*4|0],MODE_SET);}
-  }
-}
+function flatOK(X,Z,g){for(let dx=-3;dx<=3;dx+=3)for(let dz=-3;dz<=3;dz+=3){if(!dx&&!dz)continue;if(Math.abs(colInfo(X+dx,Z+dz,T3).h-g)>2)return false;}return true;}

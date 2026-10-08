@@ -1,5 +1,5 @@
 // World data
-const entCol=new Uint8Array(W*D),townCol=new Uint8Array(W*D),world=new Uint8Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1),islTop=new Int16Array(W*D).fill(-1);
+const entCol=new Uint8Array(W*D),world=new Uint8Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1);
 const I=(x,y,z)=>x+W*(z+D*y);
 function get(x,y,z){return(x<0||z<0||y<0||x>=W||z>=D||y>=H)?0:world[x+W*(z+D*y)];}
 
@@ -41,14 +41,12 @@ function colInfoBase(X,Z,o){
   let b;
   if(fen>0.5&&h>=SEA-2&&!cold)b=11;else if(h<SEA)b=0;else if(dw>0.5)b=bw>0.5?7:4;else if(mf>0.8&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;else if(cold)b=6;else if(sw>0.5)b=8;else if(pw>0.5)b=10;else b=fwd>0.5?3:2;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
-  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;o.town=false;
+  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
   o.rvBot=(!o.wet&&rv<0.008&&fbm2(X/180,Z/180,2,433.7)>0.28)?Math.max(SEA-56,h-Math.round(6+(1-rv/0.012)*22)):999;
-  o.isl=-1;o.iBot=0;
   return o;
 }
-// Towns flatten the ground they sit on and blend it into the land around them
 const colCache=new Map();
 function colInfo(X,Z,o){
   const key=X*1048576+Z,c=colCache.get(key);
@@ -65,28 +63,17 @@ function lakeAt(X,Z){
     const cx=gx*LG+24+(r()*48|0),cz=gz*LG+24+(r()*48|0),R=8+r()*10,b=colInfoBase(cx,cz,TL),L=b.h-1;
     if(![0,1,5,7].includes(b.b)&&!b.river&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
       let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;if(colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL).h<L)ok=false;}
-      if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L,oasis:false};
+      if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L};
     }
   }
   lakeC.set(key,lk);return lk;
 }
 function colInfoCompute(X,Z,o){
-  colInfoBase(X,Z,o);o.lake=0;o.oasis=false;
+  colInfoBase(X,Z,o);o.lake=0;
   const lk=lakeAt(X,Z);
   if(lk){const d=Math.hypot(X-lk.cx,(Z-lk.cz)*1.15)+fbm2(X/9,Z/9,1,2503.1)*3;
     if(d<lk.R){const f=1-d/lk.R,bottom=lk.L-1-Math.round(f*f*5+f*2);if(o.h>bottom)o.h=bottom;o.lake=lk.L;o.b=0;o.wet=true;o.river=false;o.rvBot=999;o.ent=false;}
-    else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}
-    if(lk.oasis&&d>=lk.R&&d<lk.R+6&&!o.lake)o.oasis=true;}
-  const t=townPlan(Math.floor(X/TR),Math.floor(Z/TR));
-  if(t){
-    const d=Math.max(Math.abs(X-t.cx),Math.abs(Z-t.cz)),w=d<=t.R+1?1:1-sstep(t.R+1,t.R+20,d);
-    if(w>0){
-      o.h=Math.round(o.h*(1-w)+t.g0*w);
-      if(w>0.5){o.town=true;o.rvBot=999;o.river=false;o.wet=false;o.b=t.biome;}
-      if(o.lake){o.lake=0;if(o.b===0)o.b=t.biome;}
-      else if(o.h>=SEA&&o.b===0)o.b=1;
-    }
-  }
+    else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}}
   return o;
 }
 function carved(X,y,Z,o){return y>=o.rvBot;}

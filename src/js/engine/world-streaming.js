@@ -42,7 +42,7 @@ function shiftWindow(dx,dz){
   }
   const d3=dx+W*dz;
   shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
-  for(const a of [hm,hb,hg,ground,biome,islTop,townCol,entCol])shiftArr(a,d3);
+  for(const a of [hm,hb,hg,ground,biome,entCol])shiftArr(a,d3);
   shiftArr(mmImg.data,d3*4);
   OX+=dx;OZ+=dz;
   const cdx=dx/CS,cdz=dz/CS,old=chunks.slice();
@@ -92,8 +92,6 @@ async function generate(){
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}
   }
-  if(!resumed){let best=null,bd=1e9;for(let rx=-1;rx<=1;rx++)for(let rz=-1;rz<=1;rz++){const t=townPlan(rx,rz);if(t){const d=Math.hypot(t.cx,t.cz);if(d<bd){bd=d;best=t;}}}
-    if(best){OX=Math.floor((best.cx+12)/CS)*CS-W/2;OZ=Math.floor(best.cz/CS)*CS-D/2;}}
   let n=0;
   const cm=NCX>>1,RIN=2,near=(cx,cz)=>Math.abs(cx-cm)<=RIN&&Math.abs(cz-cm)<=RIN,inner=(2*RIN+1)*(2*RIN+1);genQ.length=0;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(!near(cx,cz)){genQ.push([cx,cz]);continue;}genChunk(cx,cz);if(++n%4===0){progress(n/inner*0.55,'Shaping terrain, caves and ruins');await tick();}}

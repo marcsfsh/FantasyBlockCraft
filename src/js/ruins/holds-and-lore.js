@@ -33,11 +33,9 @@ function loreText(X,Y,Z){
     'Market day in '+h.name+'. Brass for mushrooms, mushrooms for ale, ale for stories. Queen '+h.queen+' bought every lantern in the row.',
     'Song of the hammer, verse four: strike once for the stone, once for the king, once for the ones below who never saw the sun.'
   ];
-  let gate='';{const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);let bd=1e9,g=null;for(let a=-20;a<=20;a++)for(let b=-20;b<=20;b++){if(!gateAt(cx+a,cz+b))continue;const d=Math.hypot(a,b);if(d<bd){bd=d;g=[(cx+a)*CS+8-X,(cz+b)*CS+8-Z];}}
-    if(g)gate=' Scratched beneath it: the way up to the surface is a gate about '+Math.round(Math.hypot(g[0],g[1])/10)*10+' paces to the '+compass(g[0],g[1])+'.';}
   const room=roomAt(X,Y,Z);
   if(room==='plaza')return 'A waymarker of '+h.name+'. '+(tr?'Carved arrows point toward the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+', about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+'.':'Most of the carved arrows have worn away.')+gate;
-  return T[n]+hint+gate;
+  return T[n]+hint;
 }
 function openLore(X,Y,Z){
   const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
@@ -48,28 +46,6 @@ function openLore(X,Y,Z){
   tone(500,420,0.25,0.06);
 }
 // Surface gates lead down into the upper deep
-function gateAt(cx,cz){return false&&isAvenue(cx,cz)&&!isPlaza(cx,cz)&&hsh(cx,1401,cz)<0.08&&!townAt(cx*CS+8,cz*CS+8,24)&&!roadAt(cx*CS+8,cz*CS+8,8);}
-function dwGate(cx,cz,r){
-  const yb=RUIN_Y[1],g=colInfo(cx,cz,T4).h,top=Math.max(g,yb+6);
-  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){
-    const edge=Math.abs(dx)===3||Math.abs(dz)===3;
-    for(let y=yb-1;y<=top;y++)PW(cx+dx,y,cz+dz,edge?(y<g-1?dwWall(r):DWBRICK):(y===yb-1?DWTILE:AIR),MODE_SET);
-  }
-  const ring=[];for(let a=-2;a<2;a++)ring.push([a,-2]);for(let a=-2;a<2;a++)ring.push([2,a]);for(let a=2;a>-2;a--)ring.push([a,2]);for(let a=2;a>-2;a--)ring.push([-2,a]);
-  for(let y=yb;y<=top;y++){const [dx,dz]=ring[(y-yb)%ring.length];PW(cx+dx,y-1,cz+dz,DWTILE,MODE_SET);}
-  for(let y=yb;y<=top;y++)PW(cx,y,cz,(y-yb)%8===4?RUNE:DWPILLAR,MODE_SET);
-  // the gatehouse on the surface
-  for(let dx=-5;dx<=5;dx++)for(let dz=-5;dz<=5;dz++){
-    const d=Math.max(Math.abs(dx),Math.abs(dz));if(d<=3)continue;
-    for(let y=top-4;y<top;y++)PW(cx+dx,y,cz+dz,DWBRICK,MODE_FILL);
-    PW(cx+dx,top,cz+dz,DWTILE,MODE_SET);for(let y=top+1;y<=top+8;y++)PW(cx+dx,y,cz+dz,AIR,MODE_SET);
-  }
-  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)if(Math.max(Math.abs(dx),Math.abs(dz))===3&&!((dx===0||dz===0)))PW(cx+dx,top+1,cz+dz,DWBRICK,MODE_SET);
-  for(const [a,b] of [[-4,-4],[4,-4],[-4,4],[4,4]]){for(let y=top+1;y<=top+6;y++)PW(cx+a,y,cz+b,DWPILLAR,MODE_SET);PW(cx+a,top+7,cz+b,GLOW,MODE_SET);}
-  for(let k=-4;k<=4;k++){PW(cx+k,top+7,cz-4,DWBRICK,MODE_SET);PW(cx+k,top+7,cz+4,DWBRICK,MODE_SET);}
-  PW(cx,top+7,cz-4,GOLDB,MODE_SET);PW(cx,top+7,cz+4,GOLDB,MODE_SET);PW(cx,top+6,cz-4,RUNE,MODE_SET);PW(cx,top+6,cz+4,RUNE,MODE_SET);
-  for(const [a,b] of [[-5,0],[5,0],[0,-5],[0,5]])brazierP(cx+a,top+1,cz+b);
-}
 // A chasm room: a deep drop to the lava with stone bridges along open corridors
 function dwChasm(cx,cz,yb,r,L,WCX,WCZ){
   const bottom=9,ex=edgeOpen(WCX,WCZ,1,0,L)||edgeOpen(WCX,WCZ,-1,0,L),ez=edgeOpen(WCX,WCZ,0,1,L)||edgeOpen(WCX,WCZ,0,-1,L);
@@ -102,4 +78,3 @@ function dwCondition(cx,cz,yb,h,c){
     else if(c==='burned'){if(f===DWTILE&&q<0.35)PW(X,yb-1,Z,OBSID,MODE_SET);if((a===PLANKS||a===BOOKS||a===BARREL)&&q<0.6)PW(X,yb,Z,COBBLE,MODE_SET);}
   }
 }
-function canalEdge(cx,cz,dx,dz,L){if(dx<0||dz<0)return canalEdge(cx+dx,cz+dz,-dx,-dz,L);return hsh(cx*2+dx,L*97+88+dz*7,cz*2+dz)<0.16;}
