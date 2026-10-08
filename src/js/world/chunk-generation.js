@@ -90,7 +90,7 @@ function genChunk(lcx,lcz){
   genDone[lcx+lcz*NCX]=1;
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
+  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
   if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}

@@ -43,13 +43,17 @@ function deepCaves(lcx,lcz){
 // in any chunk can keep a rock rim around deep lakes and rivers, also across chunk borders.
 const dlatC=new Map();
 function dlat(X,Y,Z){const k=(X*4096+Z)*32+(Y-DC_Y0)/4;let v=dlatC.get(k);if(v===undefined){if(dlatC.size>200000)dlatC.clear();v=deepDensity(X,Y,Z,deepSup(X,Z));dlatC.set(k,v);}return v;}
-function deepWaterAt(X,Y,Z){
-  if(Y<58||Y>DEEP_WL)return false;
-  const rv=Math.abs(fbm2(X/240,Z/240,2,8301.7));
-  if(rv<0.026&&deepSup(X,Z)>-0.3&&Y>=DEEP_WL-1-Math.round(2*(1-rv/0.026)))return true;
+// Is (X,Y,Z) inside a deep cavern (the same interpolation as deepCaves)? Y in DC_Y0 to DC_Y0+4*(DC_NY-1)-1.
+function deepOpenAt(X,Y,Z){
+  if(Y<DC_Y0||Y>=DC_Y0+4*(DC_NY-1))return false;
   const LX=X-(X&3),LZ=Z-(Z&3),fx=(X&3)/4,fz=(Z&3)/4,k=Math.floor((Y-DC_Y0)/4),j=Y-DC_Y0-k*4,y0=DC_Y0+k*4,y1=y0+4;
   const c0=lerp(lerp(dlat(LX,y0,LZ),dlat(LX+4,y0,LZ),fx),lerp(dlat(LX,y0,LZ+4),dlat(LX+4,y0,LZ+4),fx),fz);
   const c1=lerp(lerp(dlat(LX,y1,LZ),dlat(LX+4,y1,LZ),fx),lerp(dlat(LX,y1,LZ+4),dlat(LX+4,y1,LZ+4),fx),fz);
   if(c0<=0&&c1<=0)return false;return c0+(c1-c0)*j/4>0;
+}
+function deepRiverAt(X,Y,Z){if(Y<DEEP_WL-3||Y>DEEP_WL+5)return false;const rv=Math.abs(fbm2(X/240,Z/240,2,8301.7));return rv<0.026&&deepSup(X,Z)>-0.3&&Y>=DEEP_WL-1-Math.round(2*(1-rv/0.026))&&Y<=DEEP_WL+2+Math.round(3*(1-rv/0.026));}
+function deepWaterAt(X,Y,Z){
+  if(Y<58||Y>DEEP_WL)return false;
+  return deepRiverAt(X,Y,Z)||deepOpenAt(X,Y,Z);
 }
 const DEEP_NAMES={lush:'The Mossy Deeps',crystal:'The Crystal Deeps',drip:'The Dripstone Deeps',fungal:'The Fungal Deeps',plain:'The Deep Caverns'};
