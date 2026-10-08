@@ -131,11 +131,36 @@ function stairwayP(s,r){
   if(side[0]){x+=side[0];cell(x,z);while(side[0]>0?x<Math.max(a.x,X+3):x>Math.min(a.x,X-3)){x+=side[0];cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}}
   else{z+=1;cell(x,z);while(z<Math.max(a.z,Z+3)){z++;cell(x,z);}while(x!==a.x){x+=Math.sign(a.x-x);cell(x,z);}while(z!==a.z){z+=Math.sign(a.z-z);cell(x,z);}}
 }
-function dungeonP(X,y,Z,r){
-  for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=5;dy++)for(let dz=-3;dz<=3;dz++){
-    const wall=Math.abs(dx)===3||Math.abs(dz)===3||dy===0||dy===5,m=r()<.5;
-    PW(X+dx,y+dy,Z+dz,wall?(m?MOSSY:COBBLE):AIR,MODE_SET);
-  }
-  PW(X,y+5,Z,GLOW,MODE_SET);PW(X+2,y+1,Z+2,CRATE,MODE_SET);PW(X-2,y+1,Z+2,TNT,MODE_SET);PW(X-2,y+1,Z-2,CRATE,MODE_SET);PW(X+2,y+1,Z-2,BOOKS,MODE_SET);
+// A passage from a room to a cave: along X, then along Z, rising or falling evenly, on a floor that fills any gap under it
+// (`skip` steps without a floor at the start)
+function tunnelTo(x0,y0,z0,x1,y1,z1,skip,floor){
+  const n=Math.abs(x1-x0)+Math.abs(z1-z0);let x=x0,z=z0;
+  for(let t=0;t<=n;t++){const y=Math.round(y0+(y1-y0)*(n?t/n:1));
+    for(let k=0;k<3;k++)PW(x,y+k,z,AIR,MODE_SET);if(t>=skip)PW(x,y-1,z,floor,MODE_FILL);
+    if(x!==x1)x+=Math.sign(x1-x);else if(z!==z1)z+=Math.sign(z1-z);}
+}
+// ---- Old dungeon rooms (Q24): rarer, in four kinds and sizes, each joined by a passage to a worm cave of its chunk
+const DUNGEON_KINDS=['crypt','store','cells','chapel'],DUNGEON_NAMES={crypt:'Forgotten Crypt',store:'Old Storeroom',cells:'Old Cells',chapel:'Sunken Chapel'};
+const dungC=new Map();
+function dungeonAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(dungC.has(key))return dungC.get(key);if(dungC.size>8000)dungC.clear();
+  let d=null;
+  if(hsh(WCX,6401,WCZ)<0.05){const a=caveAnchor(WCX,WCZ,106,196,6402);
+    if(a){const ang=hsh(WCX,6403,WCZ)*6.283,X=a.x+Math.round(Math.cos(ang)*9),Z=a.z+Math.round(Math.sin(ang)*9),y=a.y-2;
+      let clash=false;for(let c=-2;c<=2&&!clash;c++)for(let e=-2;e<=2&&!clash;e++){const q=poiFor(WCX+c,WCZ+e);if(q&&Math.abs(q.x-X)<20&&Math.abs(q.z-Z)<20&&Math.abs(q.y-y)<16)clash=true;} // places come first
+      if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
+  dungC.set(key,d);return d;
+}
+function dungeonNear(X,Y,Z){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const d=dungeonAt(cx+a,cz+b);if(d&&Math.abs(X-d.X)<=d.hw&&Math.abs(Z-d.Z)<=d.hw&&Y>=d.y&&Y<=d.y+d.hh)return d;}return null;}
+function dungeonP(d,r){
+  const {X,Z,y,hw,hh}=d,k=d.kind,wallOf=()=>{const q=r();return k==='store'?(q<0.6?PLANKS:COBBLE):k==='chapel'?(q<0.5?CALCITE:SBRICK):k==='crypt'?(q<0.5?SBRICK:MOSSY):(q<0.5?COBBLE:MOSSY);};
+  for(let dx=-hw;dx<=hw;dx++)for(let dz=-hw;dz<=hw;dz++)for(let dy=0;dy<=hh;dy++){
+    const wall=Math.abs(dx)===hw||Math.abs(dz)===hw||dy===0||dy===hh;PW(X+dx,y+dy,Z+dz,wall?wallOf():AIR,MODE_SET);}
+  const fl=(dx,dz,id)=>PW(X+dx,y+1,Z+dz,id,MODE_SET),e=hw-1;
+  if(k==='crypt'){for(let a=-e+1;a<=e-1;a+=2){fl(a,-e,CALCITE);fl(a,e,CALCITE);}fl(0,0,BONES);fl(1,-1,BONES);PW(X,y+hh-1,Z,RUNE,MODE_SET);fl(e,0,CRATE);}
+  else if(k==='store'){for(let a=-e;a<=e;a++){if(r()<0.6)fl(a,-e,BARREL);if(r()<0.5)fl(a,e,r()<0.5?CRATE:BARREL);}if(r()<0.4)fl(-e,0,TNT);PW(X,y+hh-1,Z,LANTERN,MODE_SET);}
+  else if(k==='cells'){for(let a=-e;a<=e;a+=2)for(const b of [-e,e]){fl(a,b,BONES);PW(X+a,y+2,Z+b,COBWEB,MODE_SET);}fl(0,e,CRATE);PW(X,y+hh-1,Z,TORCH,MODE_SET);}
+  else{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)PW(X+a,y,Z+b-e+1,AMETH,MODE_SET);fl(0,-e,CALCITE);PW(X,y+2,Z-e,RUNE,MODE_SET);fl(e,e,CRATE);fl(-e,e,BOOKS);PW(X,y+hh-1,Z,GLOW,MODE_SET);}
+  tunnelTo(X,y+1,Z,d.a.x,d.a.y-1,d.a.z,0,COBBLE);
 }
 function flatOK(X,Z,g){for(let dx=-3;dx<=3;dx+=3)for(let dz=-3;dz<=3;dz+=3){if(!dx&&!dz)continue;if(Math.abs(colInfo(X+dx,Z+dz,T3).h-g)>2)return false;}return true;}

@@ -63,7 +63,7 @@ function features(WCX,WCZ,self){
     else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
   }
   {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
-  if(dr<0.2&&colInfo(dx2,dz2,T2).h-dy>=12&&!(ruinZone(Math.floor(dx2/CS),Math.floor(dz2/CS))&&dy>=RUIN_Y[0]-12&&dy<=RUIN_Y[1]+16))dungeonP(dx2,dy,dz2,rngAt(dx2,14,dz2));
+  {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was
   if(!self)return;
   // Moss, obsidian and crystals only touch the chunk itself
   const r2=rngAt(WCX,15,WCZ);

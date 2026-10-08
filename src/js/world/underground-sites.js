@@ -46,17 +46,30 @@ function openCrate(X,Y,Z){
 // ---- Points of interest underground: natural formations and lost places
 const POI_TYPES=[['geode',2],['fossil',1.3],['grove',1.6],['camp',1.5],['ruins',1.1],['lab',0.7],['outpost',0.8],['shrine',1.4],['forge',0.9]];
 const POI_NAMES={geode:'Crystal Geode',fossil:'Fossil',grove:'Mushroom Grove',camp:'Miners\u2019 Camp',ruins:'Ancient Ruins',lab:'Alchemist\'s Cellar',outpost:'Deep Outpost',shrine:'Crystal Shrine',forge:'Lava Forge'};
-const poiCache=new Map();
+const poiCache=new Map(),poiBaseC=new Map();
+// A place gives way to a neighbouring one that would overlap it and has a higher priority (by hash), so no place is built over another
 function poiFor(WCX,WCZ){
-  const key=ckey(WCX,WCZ);if(poiCache.has(key))return poiCache.get(key);
-  if(poiCache.size>8000)poiCache.clear();
+  const key=ckey(WCX,WCZ);if(poiCache.has(key))return poiCache.get(key);if(poiCache.size>8000)poiCache.clear();
+  let p=poiBase(WCX,WCZ);
+  if(p){const pr=hsh(WCX,6414,WCZ);for(let a=-2;a<=2&&p;a++)for(let b=-2;b<=2&&p;b++){if(!a&&!b)continue;const q=poiBase(WCX+a,WCZ+b);
+    if(q&&hsh(WCX+a,6414,WCZ+b)>pr&&Math.abs(q.x-p.x)<26&&Math.abs(q.z-p.z)<26&&Math.abs(q.y-p.y)<16)p=null;}}
+  poiCache.set(key,p);return p;
+}
+function poiBase(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(poiBaseC.has(key))return poiBaseC.get(key);
+  if(poiBaseC.size>8000)poiBaseC.clear();
   let p=null;const r=rngAt(WCX,81,WCZ);
   if(r()<0.32){
     let tot=0;for(const t of POI_TYPES)tot+=t[1];let v=r()*tot,tp=POI_TYPES[0][0];for(const t of POI_TYPES){v-=t[1];if(v<=0){tp=t[0];break;}}
     const x=WCX*CS+4+(r()*8|0),z=WCZ*CS+4+(r()*8|0),gh=colInfo(x,z,{}).h,top=gh-14;
-    {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};}
+    {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
+      // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
+      if(hsh(WCX,6411,WCZ)>=0.4)p=null;
+      else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
+        if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
+          if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}
   }
-  poiCache.set(key,p);return p;
+  poiBaseC.set(key,p);return p;
 }
 function poiNear(X,Y,Z){
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
@@ -137,8 +150,9 @@ function buildPOI(p){
   }
 }
 function applyPOIs(WCX,WCZ){
-  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const p=poiFor(WCX+a,WCZ+b);if(!p)continue;
-    if(p.x+16<gx0||p.x-16>gx0+CS||p.z+16<gz0||p.z-16>gz0+CS)continue;buildPOI(p);}
+  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const p=poiFor(WCX+a,WCZ+b);if(!p)continue;
+    if(p.x+16<gx0||p.x-16>gx0+CS||p.z+16<gz0||p.z-16>gz0+CS)continue;buildPOI(p);
+    if(p.a)tunnelTo(p.x,p.y+1,p.z,p.a.x,p.a.y-1,p.a.z,0,COBBLE);}
 }
 // ---- Dripstone and springs in the existing caves
 function cavernDetail(X0,Z0,r2){
