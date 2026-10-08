@@ -7,5 +7,11 @@ for(let z=0;z<D;z++)for(let x=0;x<W;x++){const g=ground[x+W*z];if(g<SEA+1)contin
   for(let y=12;y<g-12;y++){const v=world[I(x,y,z)];if(v===WATER)wat++;else if(v===AIR)air++;}}
 info("underground water as share of open cave space",(100*wat/(wat+air)).toFixed(1)+"%","; land columns with a cave opening within 5 blocks of the surface",(100*open/cols).toFixed(2)+"%");
 
+// Standing water lies in sound basins (D-024): water or solid under and beside every block of it, and each solid holding it rests on something
+const WD=W*D,held=j=>world[j]===WATER||SOLID[world[j]],rests=j=>held(j-WD);
+let unsound=0;for(let z=1;z<D-1;z++)for(let x=1;x<W-1;x++){const g=ground[x+W*z];for(let y=3;y<g-2;y++){const i=I(x,y,z);if(world[i]!==WATER)continue;const b=i-WD;
+  if(!(held(b)&&(world[b]===WATER||rests(b))&&[i+1,i-1,i+W,i-W].every(j=>held(j)&&(world[j]===WATER||rests(j)))))unsound++;}}
+info('underground water not held in a sound basin',unsound,'blocks');
+assert(unsound===0,'no underground water floats, and nothing that holds it floats');
 assert(wat/(wat+air)<0.01,'underground water is under 1% of open cave space');
 assert(open/cols<0.006,'cave openings near the surface are under 0.6% of land columns');

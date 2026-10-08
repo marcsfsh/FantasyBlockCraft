@@ -751,6 +751,8 @@ function caveMouth(WCX,WCZ,q1,q2,out){
     x+=Math.cos(yaw)*st;z+=Math.sin(yaw)*st;out.push(x,y,z,2.7,2.6,2);
   }
 }
+// Is (X,Y,Z) part of the rock that holds a deep lake or river: beside it, under it, under its floor, or under its side walls?
+function deepRim(X,Y,Z){for(const [a,b,c] of [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,2,0],[1,1,0],[-1,1,0],[0,1,1],[0,1,-1]])if(deepWaterAt(X+a,Y+b,Z+c))return true;return false;}
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
 function applyWorms(WCX,WCZ){
   const streamCells=[],zoneR=ruinZone(WCX,WCZ);
@@ -776,7 +778,7 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(Y>=55&&Y<=DEEP_WL+1&&deepRim(X,Y,Z))continue; // leave sound rock around deep lakes and rivers, in this chunk and the next
           if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}
@@ -839,6 +841,19 @@ function deepCaves(lcx,lcz){
     if(rv<0.026){const c=1-rv/0.026,sup=deepSup(X,Z);if(sup>-0.3){const bed=DEEP_WL-1-Math.round(2*c),top=DEEP_WL+2+Math.round(3*c);
       for(let y=bed;y<=top;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;world[i]=y<=DEEP_WL?WATER:AIR;lvl[i]=0;}}}
   }
+}
+// Will deepCaves leave water at (X,Y,Z)? The same lattice and river test as deepCaves, cached by lattice point, so worm caves
+// in any chunk can keep a rock rim around deep lakes and rivers, also across chunk borders.
+const dlatC=new Map();
+function dlat(X,Y,Z){const k=(X*4096+Z)*32+(Y-DC_Y0)/4;let v=dlatC.get(k);if(v===undefined){if(dlatC.size>200000)dlatC.clear();v=deepDensity(X,Y,Z,deepSup(X,Z));dlatC.set(k,v);}return v;}
+function deepWaterAt(X,Y,Z){
+  if(Y<58||Y>DEEP_WL)return false;
+  const rv=Math.abs(fbm2(X/240,Z/240,2,8301.7));
+  if(rv<0.026&&deepSup(X,Z)>-0.3&&Y>=DEEP_WL-1-Math.round(2*(1-rv/0.026)))return true;
+  const LX=X-(X&3),LZ=Z-(Z&3),fx=(X&3)/4,fz=(Z&3)/4,k=Math.floor((Y-DC_Y0)/4),j=Y-DC_Y0-k*4,y0=DC_Y0+k*4,y1=y0+4;
+  const c0=lerp(lerp(dlat(LX,y0,LZ),dlat(LX+4,y0,LZ),fx),lerp(dlat(LX,y0,LZ+4),dlat(LX+4,y0,LZ+4),fx),fz);
+  const c1=lerp(lerp(dlat(LX,y1,LZ),dlat(LX+4,y1,LZ),fx),lerp(dlat(LX,y1,LZ+4),dlat(LX+4,y1,LZ+4),fx),fz);
+  if(c0<=0&&c1<=0)return false;return c0+(c1-c0)*j/4>0;
 }
 const DEEP_NAMES={lush:'The Mossy Deeps',crystal:'The Crystal Deeps',drip:'The Dripstone Deeps',fungal:'The Fungal Deeps',plain:'The Deep Caverns'};
 // ---- Abandoned mineshafts: timbered corridors with lanterns and supply crates
@@ -990,7 +1005,7 @@ function cavernDetail(X0,Z0,r2){
     const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-18)|0),c=GW(X,y,Z);
     if(c!==AIR||inRuin(X,y,Z))continue;
     if(SOLID[Math.max(0,GW(X,y+1,Z))]&&GW(X,y-1,Z)===AIR){
-      if(r2()<0.004&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){const i=I(X-OX,y+1,Z-OZ);if(world[i]===STONE&&y+2<g-6){world[i]=WATER;lvl[i]=0;flowQ.add(i);}}
+      if(r2()<0.0012&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){} // ceiling springs are gone: underground water only stands in sound basins (D-024); the draw stays so later details keep their places
       else if(y<48&&r2()<0.06){let f=y;while(f>2&&GW(X,f-1,Z)===AIR)f--;if(y-f>=5&&!(zone2&&inRuin(X,f,Z))){for(let t=f;t<=y;t++)PW(X,t,Z,LAVA,MODE_SET);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){PW(X+a,f-1,Z+b,LAVA,MODE_STONE);PW(X+a,f-2,Z+b,OBSID,MODE_STONE);}}}
       else{PW(X,y,Z,DRIPD,MODE_SET);if(r2()<0.4&&GW(X,y-1,Z)===AIR&&GW(X,y-2,Z)===AIR)PW(X,y-1,Z,DRIPD,MODE_SET);}
     }else if(SOLID[Math.max(0,GW(X,y-1,Z))]&&GW(X,y+1,Z)===AIR)PW(X,y,Z,DRIPU,MODE_SET);
@@ -2174,6 +2189,7 @@ function genChunk(lcx,lcz){
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
   if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}
+  drainCaveWater(lcx,lcz);
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));
   if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
@@ -2181,6 +2197,24 @@ function genChunk(lcx,lcz){
     const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
     for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
   }
+}
+// Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
+// it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
+// the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk
+// cannot be seen, so water at the chunk's edge drains too, except at the deep lake level (y58 to DEEP_WL), whose lakes and rivers
+// are built to meet across chunks (worm caves keep clear of them, deepWaterAt), and on the floors of holds, whose aqueducts
+// and cisterns are walled by the ruins' own tidy pass.
+function drainCaveWater(lcx,lcz){
+  const WD=W*D,x0=lcx*CS,z0=lcz*CS,q=[],zone=ruinZone(OX/CS+lcx,OZ/CS+lcz);
+  const held=j=>world[j]===WATER||SOLID[world[j]],rests=j=>j<WD||held(j-WD); // a block is held up when the one under it is solid or water
+  for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){const g=ground[x+W*z];for(let y=2;y<g-2;y++){const i=I(x,y,z);if(world[i]===WATER)q.push(i);}}
+  while(q.length){const i=q.pop();if(world[i]!==WATER)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0,deep=(y>=58&&y<=DEEP_WL)||(zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18);
+    const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
+    const b=i-WD,ok=!(edge&&!deep)&&held(b)&&(world[b]===WATER||rests(b))&&sides.every(j=>held(j)&&(world[j]===WATER||rests(j)));
+    if(ok)continue;
+    world[i]=AIR;lvl[i]=0;
+    // what may have relied on it: water above, beside, above-beside, and two above
+    for(const j of [i+WD,i+2*WD,...sides,...sides.map(k=>k+WD)])if(j<VOL&&world[j]===WATER)q.push(j);}
 }
 const roof=id=>id&&OPQ[id]&&!BL[id].leaf&&id!==LAVA;
 function calcHM(x,z){

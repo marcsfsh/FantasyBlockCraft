@@ -94,6 +94,7 @@ function genChunk(lcx,lcz){
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
   // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
   if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}
+  drainCaveWater(lcx,lcz);
   plants(WCX,WCZ);
   const m=editsByChunk.get(ckey(WCX,WCZ));
   if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
@@ -101,6 +102,24 @@ function genChunk(lcx,lcz){
     const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
     for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
   }
+}
+// Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
+// it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
+// the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk
+// cannot be seen, so water at the chunk's edge drains too, except at the deep lake level (y58 to DEEP_WL), whose lakes and rivers
+// are built to meet across chunks (worm caves keep clear of them, deepWaterAt), and on the floors of holds, whose aqueducts
+// and cisterns are walled by the ruins' own tidy pass.
+function drainCaveWater(lcx,lcz){
+  const WD=W*D,x0=lcx*CS,z0=lcz*CS,q=[],zone=ruinZone(OX/CS+lcx,OZ/CS+lcz);
+  const held=j=>world[j]===WATER||SOLID[world[j]],rests=j=>j<WD||held(j-WD); // a block is held up when the one under it is solid or water
+  for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){const g=ground[x+W*z];for(let y=2;y<g-2;y++){const i=I(x,y,z);if(world[i]===WATER)q.push(i);}}
+  while(q.length){const i=q.pop();if(world[i]!==WATER)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0,deep=(y>=58&&y<=DEEP_WL)||(zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18);
+    const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
+    const b=i-WD,ok=!(edge&&!deep)&&held(b)&&(world[b]===WATER||rests(b))&&sides.every(j=>held(j)&&(world[j]===WATER||rests(j)));
+    if(ok)continue;
+    world[i]=AIR;lvl[i]=0;
+    // what may have relied on it: water above, beside, above-beside, and two above
+    for(const j of [i+WD,i+2*WD,...sides,...sides.map(k=>k+WD)])if(j<VOL&&world[j]===WATER)q.push(j);}
 }
 const roof=id=>id&&OPQ[id]&&!BL[id].leaf&&id!==LAVA;
 function calcHM(x,z){

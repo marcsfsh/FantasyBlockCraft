@@ -147,7 +147,7 @@ function cavernDetail(X0,Z0,r2){
     const X=X0+(r2()*CS|0),Z=Z0+(r2()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-18)|0),c=GW(X,y,Z);
     if(c!==AIR||inRuin(X,y,Z))continue;
     if(SOLID[Math.max(0,GW(X,y+1,Z))]&&GW(X,y-1,Z)===AIR){
-      if(r2()<0.004&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){const i=I(X-OX,y+1,Z-OZ);if(world[i]===STONE&&y+2<g-6){world[i]=WATER;lvl[i]=0;flowQ.add(i);}}
+      if(r2()<0.0012&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){} // ceiling springs are gone: underground water only stands in sound basins (D-024); the draw stays so later details keep their places
       else if(y<48&&r2()<0.06){let f=y;while(f>2&&GW(X,f-1,Z)===AIR)f--;if(y-f>=5&&!(zone2&&inRuin(X,f,Z))){for(let t=f;t<=y;t++)PW(X,t,Z,LAVA,MODE_SET);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){PW(X+a,f-1,Z+b,LAVA,MODE_STONE);PW(X+a,f-2,Z+b,OBSID,MODE_STONE);}}}
       else{PW(X,y,Z,DRIPD,MODE_SET);if(r2()<0.4&&GW(X,y-1,Z)===AIR&&GW(X,y-2,Z)===AIR)PW(X,y-1,Z,DRIPD,MODE_SET);}
     }else if(SOLID[Math.max(0,GW(X,y-1,Z))]&&GW(X,y+1,Z)===AIR)PW(X,y,Z,DRIPU,MODE_SET);

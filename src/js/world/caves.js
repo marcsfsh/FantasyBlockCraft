@@ -75,6 +75,8 @@ function caveMouth(WCX,WCZ,q1,q2,out){
     x+=Math.cos(yaw)*st;z+=Math.sin(yaw)*st;out.push(x,y,z,2.7,2.6,2);
   }
 }
+// Is (X,Y,Z) part of the rock that holds a deep lake or river: beside it, under it, under its floor, or under its side walls?
+function deepRim(X,Y,Z){for(const [a,b,c] of [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,2,0],[1,1,0],[-1,1,0],[0,1,1],[0,1,-1]])if(deepWaterAt(X+a,Y+b,Z+c))return true;return false;}
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
 function applyWorms(WCX,WCZ){
   const streamCells=[],zoneR=ruinZone(WCX,WCZ);
@@ -100,7 +102,7 @@ function applyWorms(WCX,WCZ){
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
           if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))continue;
-          if(Y>=58&&Y<=DEEP_WL&&(GW(X+1,Y,Z)===WATER||GW(X-1,Y,Z)===WATER||GW(X,Y,Z+1)===WATER||GW(X,Y,Z-1)===WATER))continue; // leave a rock rim around deep lakes and rivers
+          if(Y>=55&&Y<=DEEP_WL+1&&deepRim(X,Y,Z))continue; // leave sound rock around deep lakes and rivers, in this chunk and the next
           if(kind===4&&Y>110&&dy<=-0.7+1.1/rv){world[i]=WATER;lvl[i]=0;streamCells.push(i);}else{world[i]=Y<=FIRE_LV?LAVA:AIR;lvl[i]=0;}
         }
       }}
