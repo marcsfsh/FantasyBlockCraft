@@ -1,11 +1,10 @@
 // ---- Holds, lore and the extra layers of the undercity
-const SYL1=['Kar','Dun','Khaz','Bar','Gor','Thal','Zir','Dur','Mor','Grim','Bael','Ost','Brun','Vor','Kel','Thra','Uld','Az'],SYL2=['ak','in','dum','gar','rak','heim','ul','ond','baz','grund','zar','mir','dor','nar','dek','hal'];
 const GUILDS=['the Brasswrights','the Deep Delvers','the Rune Masons','the Lamplighters','the Ironbinders','the Gemcutters','the Brewers of the Black Vat','the Platinum Wardens','the Stonesingers'];
 const holdC=new Map();
 function holdOf(cx,cz){
   const hx=Math.floor(cx/8),hz=Math.floor(cz/8),k=ckey(hx,hz);let h=holdC.get(k);if(h)return h;
-  const r=rngAt(hx,1301,hz),w=()=>SYL1[r()*SYL1.length|0]+SYL2[r()*SYL2.length|0];
-  h={name:w()+(r()<0.35?' '+w():''),king:w(),queen:w(),guild:GUILDS[r()*GUILDS.length|0],year:120+(r()*880|0)};
+  const r=rngAt(hx,1301,hz);
+  h={name:fullName('dwarf',r,r()<0.35),king:nameWord('dwarf',r),queen:nameWord('dwarf',r),guild:GUILDS[r()*GUILDS.length|0],year:120+(r()*880|0)};
   holdC.set(k,h);return h;
 }
 function compass(dx,dz){const a=Math.atan2(dz,dx)*180/Math.PI,dirs=['east','southeast','south','southwest','west','northwest','north','northeast'];return dirs[((Math.round(a/45)%8)+8)%8];}

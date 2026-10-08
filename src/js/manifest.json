@@ -10,6 +10,10 @@
       "about": "Seeded random numbers, hashing and fractal noise"
     },
     {
+      "path": "core/names.js",
+      "about": "Names per people (dwarf first, others drafts) and the Tolkien-name blocklist"
+    },
+    {
       "path": "blocks/blocks.js",
       "about": "Block ids, block definitions, hardness and sounds"
     },
