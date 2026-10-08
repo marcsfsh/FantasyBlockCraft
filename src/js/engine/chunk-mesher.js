@@ -28,18 +28,6 @@ function buildChunk(cx,cz){
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
-    if(b.wire){
-      const t=b.t[0],L=sky(x,y,z),Bk=bl(x,y,z);
-      const boxes=[[6,6,6,10,10,10]];
-      if(CONDUCT[get(x-1,y,z)])boxes.push([0,6.5,6.5,6,9.5,9.5]);if(CONDUCT[get(x+1,y,z)])boxes.push([10,6.5,6.5,16,9.5,9.5]);
-      if(CONDUCT[get(x,y-1,z)])boxes.push([6.5,0,6.5,9.5,6,9.5]);if(CONDUCT[get(x,y+1,z)])boxes.push([6.5,10,6.5,9.5,16,9.5]);
-      if(CONDUCT[get(x,y,z-1)])boxes.push([6.5,6.5,0,9.5,9.5,6]);if(CONDUCT[get(x,y,z+1)])boxes.push([6.5,6.5,10,9.5,9.5,16]);
-      for(const bx of boxes){const a=[bx[0]/16,bx[1]/16,bx[2]/16],c=[bx[3]/16,bx[4]/16,bx[5]/16];
-        for(const F of FACES){const base=O.p.length/3;
-          for(const k of F.c){O.p.push(x+(k[0]?c[0]:a[0]),y+(k[1]?c[1]:a[1]),z+(k[2]?c[2]:a[2]));pushUV(O.u,t,k[3]*0.5+0.25,k[4]*0.5+0.25);O.l.push(L*F.s);O.b.push(Bk*F.s);O.a.push(F.s);}
-          O.i.push(base,base+1,base+2,base+2,base+1,base+3);}}
-      continue;
-    }
     if(b.sconce){
       let ox=0,oz=0;if(OPQ[get(x+1,y,z)])ox=1;else if(OPQ[get(x-1,y,z)])ox=-1;else if(OPQ[get(x,y,z+1)])oz=1;else if(OPQ[get(x,y,z-1)])oz=-1;
       const bx=x+0.5+ox*0.3,bz=z+0.5+oz*0.3;

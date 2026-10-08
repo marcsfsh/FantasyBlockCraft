@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.3.0 (2026-10-08): M1a foundations, part one
+
+Old saves do not load: the save format changed (key `fantasy-blockcraft-save-v3`), and the world itself changed.
+
+### Game
+- **Several worlds.** New world no longer replaces your world: the pause menu lists your worlds to play, export to a file, delete, or import from a file. Give a new world a name and, optionally, a seed.
+- A seed typed as a whole number is used exactly (777 used to give seed 778).
+- **Removed for the setting:** power (wire, generators, water wheels, solar panels, batteries, electric lamps and furnaces, chargers, drills, jackhammers, chainsaws), trading counters, coin mints, coins in loot, ore processing (crusher, gold pan, sluice, crushed ores, nuggets), and rails in the mines and the city. The alchemist's lab, the outpost, the mine junctions and the Machine Hall have period-fitting objects in their place.
+- Hold, king and queen names come from a new dwarven name style and never match Tolkien's names (the old generator could produce Durin, Thrain and Mordor).
+- The leftover Town and Sky Island labels and map markers are gone.
+- Saves no longer grow on their own: flowing water, spreading grass and snow are saved only where you changed things yourself. Crops you plant still keep their growth.
+
+### Tooling
+- The town, road, power, trading and ore-processing code is deleted (`legacy/` is gone); mining moved to `gameplay/mining.js`, crafting and `BANNED` to `gameplay/crafting.js`.
+- New `core/names.js` with name styles for ten peoples (dwarf, plus drafts for the others) and a Tolkien-name blocklist.
+- New tests: 15-names and 16-worlds; the content test refuses removed content.
+
 ## 0.2.0 (2026-10-08): M0 bug sweep
 
 Old saves do not load: the save format changed (key `fantasy-blockcraft-save-v2`), and the retired v1 save is deleted from browser storage.

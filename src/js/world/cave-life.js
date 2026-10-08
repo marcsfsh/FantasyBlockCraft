@@ -44,7 +44,6 @@ function caveLife(X0,Z0,r2){
 }
 function topBlock(o){
   const b=o.b,h=o.h;
-  if(o.oasis)return GRASS;
   if(o.bank&&h<=SEA+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
   if(b===0)return o.hill>0.08?GRAVEL:(h>SEA-5?SAND:DIRT);
   if(b===1)return o.hill>0.12?GRAVEL:SAND;
@@ -63,11 +62,11 @@ function hAt(X,Z){const k=X*1048576+Z;let h=hCache.get(k);if(h===undefined){if(h
 function slopeAt(X,Z,h){return Math.max(Math.abs(hAt(X+1,Z)-h),Math.abs(hAt(X-1,Z)-h),Math.abs(hAt(X,Z+1)-h),Math.abs(hAt(X,Z-1)-h));}
 function fillCol(x,z,X,Z,o){
   const h=o.h,b=o.b,ci=x+W*z;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3);
-  if(b!==0&&b!==1&&!o.town&&!o.oasis){const sl=slopeAt(X,Z,h);
+  if(b!==0&&b!==1){const sl=slopeAt(X,Z,h);
     if(sl>=4){top=STONE;soil=0;}
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6))top=SNOWG;
-  biome[ci]=o.lake?9:b;ground[ci]=h;islTop[ci]=o.isl;townCol[ci]=o.town?1:0;entCol[ci]=o.ent?1:0;
+  biome[ci]=o.lake?9:b;ground[ci]=h;entCol[ci]=o.ent?1:0;
   let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){
     let id=AIR;
@@ -80,7 +79,6 @@ function fillCol(x,z,X,Z,o){
         if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;
       }
     }else if(y<=Math.max(SEA,o.lake))id=(y===Math.max(SEA,o.lake)&&o.cold)?ICE:WATER;
-    if(o.isl>=0&&y>=o.iBot&&y<=o.isl)id=y===o.isl?GRASS:y>o.isl-3?DIRT:STONE;
     const i=I(x,y,z);world[i]=id;lvl[i]=0;
   }
 }

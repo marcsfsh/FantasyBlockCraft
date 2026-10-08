@@ -53,10 +53,10 @@ const keys={},tch={jump:false,down:false,jx:0,jy:0};
 let playing=false,invOpen=false,ready=false,hold=-1,holdT=0,lastSpace=0;
 const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,HOOK];
 while(hot.length<9)hot.push(STONE);
-let mode=saved&&saved.v===2?(saved.mode||'creative'):(settings.newMode||'survival');
+let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
 const inv=new Array(36).fill(null);
-if(saved&&saved.v===2&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0,e:q[3]||0};});
+if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
 const stackMax=id=>id>=240&&id<=255?1:64;
 function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
 function addItem(id,n){
@@ -82,7 +82,7 @@ function dropsFor(id){
   switch(id){
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
-    case LAMP_ON:return[[LAMP_OFF,1]];case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
+    case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
     case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];

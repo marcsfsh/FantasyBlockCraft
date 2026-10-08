@@ -27,8 +27,8 @@ First check the setting: nothing modern, original names, things the old peoples 
 ## Menus, recipes, trade, loot
 - **Creative menu:** add the id to the right category in `CATS` in `src/js/ui/menus.js`. Placeable blocks not listed fall into "Other".
 - **Recipes:** `RECIPES` in `src/js/gameplay/crafting.js`, `[output, count, [[ingredient or list, count], ...], station]`; station `'f'` furnace, `'c'` crusher, `'m'` mint, none for the hand.
-- **BANNED** in `src/js/gameplay/trading.js` removes modern items from play: recipes, menus and loot tables are filtered by it. Never add a modern item; if old code adds one, put it in `BANNED`.
-- **Values:** `VAL` in `trading.js` (coins).
+- **BANNED** in `src/js/gameplay/crafting.js` keeps defined items out of play (today: coins, until settlement traders in E2): recipes, menus and loot tables are filtered by it. Never add a modern item; the content test refuses power, trade, ore-processing and rail items.
+- **Names:** anything named after a person or place uses `core/names.js` (`nameWord`, `fullName`, `isBlockedName`); `15-names` checks every fixed name too.
 - **Loot:** `[id, min, max, weight]` tables `LOOT`, `BARRELLOOT` (`src/js/world/underground-sites.js`), `DWLOOT`, `ARMORY_L`, `FOOD_L`, `SCHOLAR_L`, `SMITH_L`, `TREASURE_L` and `ROOM_LOOT` by room type (`src/js/ruins/megastructures.js`). Loot is rolled from the chest's world position when opened, so changing a table changes chest contents in existing worlds but not the world hash.
 
 ## Generation

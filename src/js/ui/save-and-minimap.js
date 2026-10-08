@@ -3,11 +3,31 @@ let skipSave=false,saveWarned=false;
 function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
-  const ok=lsSet(SAVE_KEY,{v:2,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,sl:[...sluiceStore].map(([k,v])=>[k,v.g,v.p]),bat:[...batCharge].map(([k,v])=>[k,Math.round(v)]),fuel:[...genFuel],inv:inv.map(q=>q?[q.id,q.c,q.d||0,Math.round(q.e||0)]:0),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
+  WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
+  const ok=lsSet(worldKey(WORLD.id),{v:3,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
 setInterval(()=>{if(saveDirty||playing)saveNow();},5000);
+// ---- Worlds: create, switch, delete, export and import (one storage entry per world, see core/config.js)
+// A seed typed as a whole number is used exactly; any other text is hashed to a seed
+function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
+function uniqueWorldName(name){const used=new Set(WIX.list.map(w=>w.name));let n=name,k=2;while(used.has(n))n=name+' '+(k++);return n;}
+function createWorld(name,seed,mode){const w=newWorldEntry(uniqueWorldName(name||'World '+(WIX.list.length+1)),seed,mode);WIX.list.push(w);lsSet(SAVE_KEY,WIX);return w;}
+function switchWorld(id){if(!WIX.list.some(w=>w.id===id))return;saveNow();WIX.active=id;lsSet(SAVE_KEY,WIX);skipSave=true;location.reload();}
+function deleteWorld(id){if(id===WIX.active)return false;const i=WIX.list.findIndex(w=>w.id===id);if(i<0)return false;WIX.list.splice(i,1);lsDel(worldKey(id));lsSet(SAVE_KEY,WIX);return true;}
+const WORLD_FILE='fantasy-blockcraft-world';
+function exportWorld(id){if(id===WIX.active)saveNow();const w=WIX.list.find(x=>x.id===id);if(!w)return null;return JSON.stringify({format:WORLD_FILE,saveKey:SAVE_KEY,world:{name:w.name,seed:w.seed,mode:w.mode},data:lsGet(worldKey(id))});}
+// Returns the new world entry, or throws with a message the player can read
+function importWorld(text){
+  let o;try{o=JSON.parse(text);}catch(e){throw new Error('That file is not a saved world');}
+  if(!o||o.format!==WORLD_FILE||!o.world)throw new Error('That file is not a saved world');
+  if(o.saveKey!==SAVE_KEY)throw new Error('That world is from another version of the game and cannot be loaded');
+  const w=createWorld(o.world.name||'Imported world',o.world.seed,o.world.mode);
+  if(o.data&&!lsSet(worldKey(w.id),Object.assign({},o.data,{seed:w.seed}))){deleteWorld(w.id);throw new Error('Storage is full');}
+  return w;
+}
+function downloadText(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
 addEventListener('pagehide',saveNow);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveNow();});
 
@@ -52,11 +72,6 @@ function drawMM(){
   if(mmZoom===2){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
     for(let cz=r0;cz<=r1;cz++)for(let cx=c0;cx<=c1;cx++){const t=tiles.get(ckey(cx,cz));if(t)mmG.drawImage(t,(cx*CS-OX-ox)*k,(cz*CS-OZ-oz)*k,CS*k+0.6,CS*k+0.6);}}
   mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
-  {const r0x=Math.floor((ox+OX)/TR),r1x=Math.floor((ox+OX+span)/TR),r0z=Math.floor((oz+OZ)/TR),r1z=Math.floor((oz+OZ+span)/TR);
-   for(let rz=r0z;rz<=r1z;rz++)for(let rx=r0x;rx<=r1x;rx++){const v=townPlan(rx,rz);if(!v)continue;const vx=(v.cx-OX-ox)*k,vz=(v.cz-OZ-oz)*k;if(vx<-6||vz<-6||vx>S+6||vz>S+6)continue;
-     mmG.fillStyle='#f3efe2';mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.beginPath();mmG.moveTo(vx,vz-7);mmG.lineTo(vx+6,vz-1);mmG.lineTo(vx+4,vz-1);mmG.lineTo(vx+4,vz+5);mmG.lineTo(vx-4,vz+5);mmG.lineTo(vx-4,vz-1);mmG.lineTo(vx-6,vz-1);mmG.closePath();mmG.fill();mmG.stroke();}}
-  if(mmZoom){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
-    for(let cz2=r0;cz2<=r1;cz2++)for(let cx2=c0;cx2<=c1;cx2++)if(gateAt(cx2,cz2)){const gx=(cx2*CS+8-OX-ox)*k,gz=(cz2*CS+8-OZ-oz)*k;mmG.fillStyle='#ffaa46';mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.fillRect(gx-5,gz-5,10,3);mmG.fillRect(gx-5,gz-5,3,10);mmG.fillRect(gx+2,gz-5,3,10);mmG.strokeRect(gx-5,gz-5,10,10);}}
   mmG.fillStyle='#ff4030';for(const p of primed)mmG.fillRect((p.x-ox)*k-2,(p.z-oz)*k-2,5,5);
   if(G.on){mmG.fillStyle='#fff6c8';mmG.fillRect((G.ax-ox)*k-2,(G.az-oz)*k-2,5,5);}
   waypoints.forEach(m=>{let wx=(m.position.x-ox)*k,wz=(m.position.z-oz)*k;wx=Math.max(5,Math.min(S-5,wx));wz=Math.max(5,Math.min(S-5,wz));

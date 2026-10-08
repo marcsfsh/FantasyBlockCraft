@@ -54,7 +54,7 @@ function dwRoom2(t,cx,cz,yb,r){
     case 'statuary':{dwShell(cx,cz,h,yb,hh,r,(dx,dz)=>Math.abs(dx)<=1?(dz%2?RUNE:DWTILE):CALCITE);
       for(const a of [-4,4])for(const b of [-4,0,4]){statueP(cx+a,yb,cz+b,b===0?GOLDB:CALCITE);PW(cx+a+(a<0?1:-1),yb,cz+b,DWBRICK,MODE_SET);}
       for(const b of [-6,6])brazierP(cx,yb,cz+b);break;}
-    case 'minehall':{postFns.push(()=>{for(let b=-6;b<=6;b++)if(GW(cx-4,yb,cz+b)===AIR)PW(cx-4,yb,cz+b,RAILZ,MODE_SET);});dwShell(cx,cz,h,yb,hh,r,(dx,dz)=>Math.max(Math.abs(dx),Math.abs(dz))<=2?DWBRICK:DWTILE);
+    case 'minehall':{dwShell(cx,cz,h,yb,hh,r,(dx,dz)=>Math.max(Math.abs(dx),Math.abs(dz))<=2?DWBRICK:DWTILE);
       for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const e=Math.max(Math.abs(dx),Math.abs(dz))===2;for(let y=yb-12;y<yb;y++)PW(cx+dx,y,cz+dz,e?DWBRICK:AIR,MODE_SET);if(e)PW(cx+dx,yb,cz+dz,(dx+dz)%2?STEELB:DWPILLAR,MODE_SET);}
       for(let y=yb-11;y<yb;y++){const k=(y-yb+11)%8,ring=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]][k];PW(cx+ring[0],y-1,cz+ring[1],DWTILE,MODE_SET);}
       for(let y=yb+1;y<yb+hh;y++){PW(cx-2,y,cz-2,STEELB,MODE_SET);PW(cx+2,y,cz+2,STEELB,MODE_SET);}

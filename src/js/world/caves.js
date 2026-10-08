@@ -41,7 +41,7 @@ function wormsFor(WCX,WCZ){
   if(r()<0.16){const x=bx+r()*CS,z=bz+r()*CS,y=60+r()*(SEA-80);wormTunnel(x,y,z,0.8+r()*0.8,r()*Math.PI*2,(r()<0.5?1:-1)*(0.7+r()*0.5),0,0,false,r,out,0,true,false,false,1.4);}
   if(r()<0.06){const cx=bx+8,cz=bz+8,cy=108+r()*34;out.push(cx,cy,cz,18+r()*10,9+r()*5,3);}
   if(r()<0.004){const cx=WCX*CS+4+r()*8,cz=WCZ*CS+4+r()*8,o=colInfo(Math.floor(cx),Math.floor(cz),{});
-    if(!o.town&&!o.lake&&!o.wet&&o.b!==0&&!roadAt(Math.floor(cx),Math.floor(cz),8)){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
+    if(!o.lake&&!o.wet&&o.b!==0){let x=cx,z=cz;for(let y=o.h+3;y>212;y-=2){x+=(r()-0.5)*0.8;z+=(r()-0.5)*0.8;out.push(x,y,z,3+r()*1.5,3,2);}}}
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
   w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
@@ -64,7 +64,6 @@ function applyWorms(WCX,WCZ){
         const lx=X-OX,lz=Z-OZ,ci=lx+W*lz,gh=ground[ci];
         for(let Y=Y0;Y<=Y1;Y++){
           const dy=(Y+.5-y)/rv;if(dy<=-0.7||dx*dx+dy*dy+dz*dz>=1)continue;
-          if(townCol[ci]&&Y>gh-8)continue;
           if(Y>gh-7&&!entCol[ci]&&kind!==2)continue;
           if(gh<SEA+2&&Y>gh-5)continue;
           if(kind===3){const px=Math.floor(X/7),pz=Math.floor(Z/7),ox=px*7+1+hsh(px,3201,pz)*5,oz=pz*7+1+hsh(px,3202,pz)*5;if(hsh(px,3203,pz)<0.3&&Math.hypot(X+.5-ox,Z+.5-oz)<1.3+hsh(px,3204,pz))continue;}

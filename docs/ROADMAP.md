@@ -19,6 +19,8 @@ Only work that is already known: entries from `docs/KNOWN_ISSUES.md` and the ref
 
 ## 2. Delete the legacy code safely
 
+**Done in 0.3.0 (M1a, D-021).** Kept below for the record.
+
 `src/js/legacy/` (towns, roads, power tools, power network) is switched off but still bundled, and parts of it are used by live code. Measured references from outside `legacy/` (2026-10-07):
 
 | File | Still used by live code |

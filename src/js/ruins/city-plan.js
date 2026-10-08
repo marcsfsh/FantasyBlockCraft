@@ -1,6 +1,5 @@
 // ---- Ancient dwarven undercity: a grid of halls and corridors on two levels, one cell per chunk
 const RUIN_Y=[64,82],DEEPY=150;
-const ROOM_TYPES=[['hall',2.6],['forge',1.4],['archive',1.2],['barracks',1.3],['vault',0.5],['storage',1.4],['crypt',1.1],['machine',0.9],['farm',0.8],['collapsed',1.6],['throne',0.3],['junction',2.2]];
 // Districts give each part of the undercity a purpose
 const DISTRICTS={
   residential:{rooms:[['kitchen',1.4],['cistern',0.6],['chasm',0.6],['quarters',3],['office',1.6],['tavern',2],['bath',1],['games',1.1],['archive',1],['storage',1],['junction',1.4],['farm',1],['collapsed',0.9]],megas:['grandlibrary','greathall','gardens']},
@@ -145,28 +144,9 @@ function ruinAt(X,Y,Z){
     if(Y<yb-1||Y>yb+11)continue;const t=ruinType(cx,cz,L);if(!t)continue;
     const lx=X-cx*CS-8,lz=Z-cz*CS-8,h=ROOM_HALF[t]||5;if(Math.abs(lx)<=h&&Math.abs(lz)<=h)return RUIN_NAMES[t];
     if(Math.abs(lx)<=2||Math.abs(lz)<=2)return 'Halls of '+holdOf(cx,cz).name;}
-  if(gateAt(cx,cz)&&Math.abs(X-cx*CS-8)<=5&&Math.abs(Z-cz*CS-8)<=5&&Y>=RUIN_Y[1])return 'Gate of '+holdOf(cx,cz).name;
   return null;
 }
 function dwWall(r){const v=r();return v<0.05?DWCRACK:v<0.07?MOSSY:DWBRICK;}
-function dwCorridor(x0,z0,x1,z1,yb,r,canal){
-  const ax=x0!==x1,a0=ax?Math.min(x0,x1):Math.min(z0,z1),a1=ax?Math.max(x0,x1):Math.max(z0,z1),c=ax?z0:x0;
-  for(let a=a0;a<=a1;a++)for(let w=-2;w<=2;w++){
-    const X=ax?a:c+w,Z=ax?c+w:a,pil=a%4===0;
-    for(let y=yb-1;y<=yb+4;y++){
-      let id;
-      if(Math.abs(w)<=1&&y>=yb&&y<=yb+3)id=AIR;
-      else if(y===yb-1)id=canal&&!w?WATER:Math.abs(w)<=1?((a+w)%5===0?DWBRICK:DWTILE):DWBRICK;
-      else if(Math.abs(w)===2&&pil&&y<yb+4)id=DWPILLAR;
-      else id=dwWall(r);
-      PW(X,y,Z,id,MODE_SET);
-    }
-    if(!w&&a%8===4){const q=r();if(q<0.3)PW(X,yb+3,Z,LANTERN,MODE_SET);else if(q<0.55)PW(X,yb+4,Z,RUNE,MODE_SET);}
-    if(!w&&r()<0.05){PW(X,yb,Z,GRAVEL,MODE_SET);if(r()<0.5)PW(X+(ax?0:1),yb,Z+(ax?1:0),COBBLE,MODE_SET);}
-    if(Math.abs(w)===1&&r()<0.02)PW(X,yb,Z,r()<0.3?DWCHEST:r()<0.6?BARREL:CRATE,MODE_SET);
-    PW(X,yb-2,Z,DWBRICK,MODE_FILL);
-  }
-}
 // Grand room shell: pilasters, a glowing rune frieze, brass trim, a corbelled ceiling with beams, and a chandelier
 const mosaic=(dx,dz)=>{const g=Math.max(Math.abs(dx),Math.abs(dz));return g===0?GOLDB:g===1?RUNE:g%3===0?CALCITE:DWTILE;};
 let curDist='residential',curDeco=false;const BANNER_C={royal:WOOLR,sacred:WOOLB,industrial:WOOLY,residential:WOOLG};
@@ -270,7 +250,7 @@ function dwAvenue(cx,cz,yb,r,plaza,axX){
   dwShell(cx,cz,h,yb,hh,r,(dx,dz)=>{const c=axX?dz:dx;if(plaza){const g=Math.max(Math.abs(dx),Math.abs(dz));return g===0?GOLDB:g===3?RUNE:(Math.abs(dx)===Math.abs(dz))?CALCITE:DWTILE;}return c===0?((axX?dx:dz)%4===0?GOLDB:RUNE):Math.abs(c)===3?CALCITE:DWTILE;},true);
   if(!plaza){
     const v=hsh(Math.floor(cx/CS),4001,Math.floor(cz/CS)),P=(a,c)=>[cx+(axX?a:c),cz+(axX?c:a)];
-    if(curDist==='industrial')postFns.push(()=>{for(let a=-7;a<=7;a++){const [X,Z]=P(a,2);if(GW(X,yb,Z)===AIR&&SOLID[Math.max(0,GW(X,yb-1,Z))]&&hsh(X,yb+9,Z)>0.15*curI)PW(X,yb,Z,hsh(X,yb+8,Z)<0.04?BARREL:axX?RAILX:RAILZ,MODE_SET);}});
+    if(curDist==='industrial')postFns.push(()=>{for(let a=-7;a<=7;a++){const [X,Z]=P(a,2);if(GW(X,yb,Z)===AIR&&SOLID[Math.max(0,GW(X,yb-1,Z))]&&hsh(X,yb+9,Z)>0.15*curI&&hsh(X,yb+8,Z)<0.04)PW(X,yb,Z,BARREL,MODE_SET);}});
     if(v<0.5){for(let a=-6;a<=6;a+=4)for(const c of [-5,5]){const [X,Z]=P(a,c);for(let y=yb;y<yb+4;y++)PW(X,y,Z,DWPILLAR,MODE_SET);if(hsh(X,yb,Z)>0.2+0.7*curI)PW(X,yb+4,Z,LANTERN,MODE_SET);}}
     else if(v<0.72){ // market row: stalls along both sides
       for(const c of [-5,5])for(let a=-5;a<=3;a+=4){const awn=[WOOLR,WOOLY,WOOLB,WOOLG][Math.floor(hsh(a+cx,c,cz)*4)];
@@ -339,7 +319,7 @@ function dwRoom(t,cx,cz,yb,r){
     case 'machine':{dwShell(cx,cz,h,yb,hh,r);
       for(let dx=-h+1;dx<=h-1;dx++){PW(cx+dx,yb+hh-1,cz-h+1,BRASB,MODE_SET);PW(cx+dx,yb+hh-1,cz+h-1,BRASB,MODE_SET);}
       for(const a of [-h,h])for(let y=yb+2;y<yb+6;y++)for(let b=-2;b<=2;b++){const d=Math.hypot(y-yb-3.5,b);if(d>1.4&&d<2.6)PW(cx+a,y,cz+b,d<2?BRASB:COPB,MODE_SET);}
-      for(let y=yb;y<yb+4;y++){PW(cx,y,cz,STEELB,MODE_SET);PW(cx+1,y,cz,y===yb+2?RUNE:STEELB,MODE_SET);}PW(cx-1,yb,cz,WHEEL,MODE_SET);PW(cx+2,yb,cz,BATTERY,MODE_SET);
+      for(let y=yb;y<yb+4;y++){PW(cx,y,cz,STEELB,MODE_SET);PW(cx+1,y,cz,y===yb+2?RUNE:STEELB,MODE_SET);}PW(cx-1,yb,cz,COPB,MODE_SET);PW(cx+2,yb,cz,BRASB,MODE_SET);
       PW(cx-3,yb,cz+3,CRATE,MODE_SET);PW(cx+3,yb,cz-3,DWCHEST,MODE_SET);PW(cx,yb+hh-1,cz+3,LANTERN,MODE_SET);break;}
     case 'farm':{dwShell(cx,cz,h,yb,hh,r,(dx,dz)=>dz===0&&Math.abs(dx)<=3?WATER:MOSSY);
       for(let dx=-3;dx<=3;dx++)for(const dz of [-2,-1,1,2])if(r()<0.8)PW(cx+dx,yb,cz+dz,GLOWSHROOM,MODE_SET);break;}

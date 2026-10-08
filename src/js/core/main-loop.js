@@ -51,7 +51,6 @@ function update(dt){
   if(PL.ground)airT=0;else airT+=dt;
   if(inLiq&&wallHit&&jump)PL.vy=Math.max(PL.vy,5.6);
   if(TOUCH&&look.id!==null&&!look.moved&&!look.breaking&&performance.now()-look.t0>380){look.breaking=true;act(0);hold=0;holdT=0.25;}
-  panCool=Math.max(0,panCool-dt);tickSluices(dt);powerTick(dt);
   if(SURV()&&hold===0)mineTick(dt);else if(mineI>=0){mineI=-1;mineP=0;crack.visible=false;}
   if(hold>=0&&!(hold===2&&isTool(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
   const mv=Math.hypot(PL.vx,PL.vz);if(PL.ground&&mv>0.5)bob+=mv*dt*1.9;
@@ -119,7 +118,7 @@ function frame(now){
   if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
-    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=hg[ci]>=0&&yy>hm[ci]?'Sky Island':(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):townAt(bx+OX,bz+OZ,0)?'Town':BIOMES[biome[ci]];
+    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):BIOMES[biome[ci]];
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
 }

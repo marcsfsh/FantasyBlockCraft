@@ -1,9 +1,9 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
-if(saved&&saved.v===2&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const DUR={255:4000,251:150,240:60,241:132,242:180,243:260,244:250,245:600,246:1600,247:120,250:200},FOOD={270:2,206:5,207:4,209:1,269:5};
+if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
+const DUR={255:4000,251:150,240:60,241:132,242:180,243:260,244:250,245:600,246:1600,247:120},FOOD={270:2,206:5,207:4,209:1,269:5};
 const graves=new Map();
-if(saved&&saved.v===2&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
+if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
   if(!SURV())return;const q=inv[sel];if(!q||!DUR[q.id])return;
   q.d=(q.d||0)+n;if(q.d>=DUR[q.id]){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
@@ -98,7 +98,6 @@ function renderSInv(){
   const box=$('sinv');box.innerHTML='';
   const grid=document.createElement('div');grid.className='sgrid';
   inv.forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
-    if(q&&ITEMS[q.id]&&ITEMS[q.id].power){const f=(q.e||0)/ITEMS[q.id].cap,bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='#4ab0ff';b.appendChild(bb);}
     if(q&&DUR[q.id]&&q.d){const f=1-q.d/DUR[q.id],bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
     if(q){b.appendChild(icon(q.id));if(q.c>1){const n=document.createElement('span');n.className='n';n.textContent=q.c;b.appendChild(n);}b.title=nameOf(q.id);}
     b.addEventListener('click',()=>{
@@ -119,7 +118,7 @@ function renderSInv(){
     const ok=canCraft(r),row=document.createElement('div');row.className='rec'+(ok?'':' no');
     row.appendChild(icon(r[0]));
     const t=document.createElement('div');t.className='t';t.textContent=nameOf(r[0])+(r[1]>1?' x'+r[1]:'');
-    const sm=document.createElement('small');sm.textContent=r[2].map(([ids,n])=>n+' '+(Array.isArray(ids)?'Any Log':nameOf(ids))).join(', ')+(r[3]==='f'?(elecRecipe(r)?' (electric furnace, no coal needed)':' (furnace)'):r[3]==='b'?' (blast furnace)':r[3]==='m'?' (coin mint)':r[3]==='c'?' (crusher)':'');
+    const sm=document.createElement('small');sm.textContent=r[2].map(([ids,n])=>n+' '+(Array.isArray(ids)?'Any Log':nameOf(ids))).join(', ')+(r[3]==='f'?' (furnace)':r[3]==='b'?' (blast furnace)':'');
     t.appendChild(sm);row.appendChild(t);
     const btn=document.createElement('button');btn.textContent='Craft';btn.disabled=!ok;btn.addEventListener('click',()=>craft(r));row.appendChild(btn);
     recs.appendChild(row);
@@ -176,7 +175,7 @@ function camDir(){return new THREE.Vector3(0,0,-1).applyQuaternion(camera.quater
 function eyePos(){return new THREE.Vector3(PL.x,PL.y+EYE,PL.z);}
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[TRADER]:openTrade,[SLUICE]:collectSluice,[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore,[COALGEN]:useGenerator}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore}[th.id];
   if(!f)return false;f(th.x,th.y,th.z);return true;
 }
 function act(btn){
@@ -186,8 +185,7 @@ function act(btn){
   if(btn===2&&held===FIREWORK){launchFirework();return;}
   if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
-  if(btn===2&&held===250){usePan();return;}
-  if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&CONDUCT[th.id]&&th.id!==WIRE&&held!==WIRE&&!(held>0&&held<100)){powerStatus(I(th.x,th.y,th.z));return;}
+  if(btn===2){const th=raycast(eyePos(),camDir(),6);
     if(held===BPTOOL){if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
   if(btn===0&&SURV())return;
   const hit=raycast(eyePos(),camDir(),6);if(!hit)return;
@@ -197,7 +195,7 @@ function act(btn){
     if(hit.id===BEDROCK&&brushR===0)return;
     beginAct();
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
-    if(brushR===0){setBlock(hit.x,hit.y,hit.z,AIR);powerExtras(hit,hit.id);}
+    if(brushR===0)setBlock(hit.x,hit.y,hit.z,AIR);
     else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,id)=>{if(id&&id!==BEDROCK&&!BL[id].liquid){if(Math.random()<0.12)breakFx(x,y,z,id,3);setBlock(x,y,z,AIR);}});
     endAct();
   }else if(btn===2){

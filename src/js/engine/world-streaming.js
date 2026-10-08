@@ -10,7 +10,7 @@ function respawn(){
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
-  torches.clear();sluices.clear();farms.clear();powerBlocks.clear();netInfo.clear();poweredEF.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
+  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
   for(const p of primed)scene.remove(p.m);primed.length=0;for(const f of falling)scene.remove(f.m);falling.length=0;rockets.length=0;parts.length=0;G.on=false;
   BLK.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;
@@ -42,7 +42,7 @@ function shiftWindow(dx,dz){
   }
   const d3=dx+W*dz;
   shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
-  for(const a of [hm,hb,hg,ground,biome,islTop,townCol,entCol])shiftArr(a,d3);
+  for(const a of [hm,hb,hg,ground,biome,entCol])shiftArr(a,d3);
   shiftArr(mmImg.data,d3*4);
   OX+=dx;OZ+=dz;
   const cdx=dx/CS,cdz=dz/CS,old=chunks.slice();
@@ -54,7 +54,7 @@ function shiftWindow(dx,dz){
   }
   {const g2=new Uint8Array(NCX*NCZ);for(let z=0;z<NCZ;z++)for(let x=0;x<NCX;x++){const ox=x+cdx,oz=z+cdz;if(ox>=0&&oz>=0&&ox<NCX&&oz<NCZ)g2[x+z*NCX]=genDone[ox+oz*NCX];}genDone.set(g2);}
   const nd=[];dirty.forEach(c=>{const x=c%NCX-cdx,z=((c/NCX)|0)-cdz;if(x>=0&&z>=0&&x<NCX&&z<NCZ)nd.push(x+z*NCX);});dirty.clear();nd.forEach(c=>dirty.add(c));
-  shiftIdx(torches,dx,dz);shiftIdx(sluices,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(powerBlocks,dx,dz);netInfo.clear();poweredEF.clear();shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
+  shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
   if(lbox){lbox[0]-=dx;lbox[1]-=dx;lbox[4]-=dz;lbox[5]-=dz;}
   // queue the new strip; it is generated a chunk or two per frame
   const keep=genQ.filter(c=>(c[0]-=cdx,c[1]-=cdz,c[0]>=0&&c[1]>=0&&c[0]<NCX&&c[1]<NCZ));genQ.length=0;keep.forEach(c=>genQ.push(c));
@@ -82,18 +82,14 @@ function findSpawn(){
   return[W/2+0.5,H-4,D/2+0.5];
 }
 async function generate(){
-  const resumed=saved&&saved.v===2&&saved.seed===SEED&&Array.isArray(saved.e);
-  $('seedline').textContent=(resumed?'Loading your saved world, seed ':'New endless world, seed ')+SEED+'.';
+  const resumed=!!saved&&Array.isArray(saved.e);
+  $('seedline').textContent=WORLD.name+(resumed?', seed ':', a new endless world, seed ')+SEED+'.';
   if(resumed){
     const e=saved.e;for(let k=0;k+1<e.length;k+=2){storeEdit(e[k],e[k+1]);if(e[k+1]===WAYPT)addWPk(e[k]);}
     if(typeof saved.t==='number')tod=saved.t;
-    if(Array.isArray(saved.bat))saved.bat.forEach(q=>batCharge.set(q[0],q[1]));if(Array.isArray(saved.fuel))saved.fuel.forEach(q=>genFuel.set(q[0],q[1]));
-    if(Array.isArray(saved.sl))saved.sl.forEach(q=>sluiceStore.set(q[0],{g:q[1],p:q[2]}));
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}
   }
-  if(!resumed){let best=null,bd=1e9;for(let rx=-1;rx<=1;rx++)for(let rz=-1;rz<=1;rz++){const t=townPlan(rx,rz);if(t){const d=Math.hypot(t.cx,t.cz);if(d<bd){bd=d;best=t;}}}
-    if(best){OX=Math.floor((best.cx+12)/CS)*CS-W/2;OZ=Math.floor(best.cz/CS)*CS-D/2;}}
   let n=0;
   const cm=NCX>>1,RIN=2,near=(cx,cz)=>Math.abs(cx-cm)<=RIN&&Math.abs(cz-cm)<=RIN,inner=(2*RIN+1)*(2*RIN+1);genQ.length=0;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(!near(cx,cz)){genQ.push([cx,cz]);continue;}genChunk(cx,cz);if(++n%4===0){progress(n/inner*0.55,'Shaping terrain, caves and ruins');await tick();}}

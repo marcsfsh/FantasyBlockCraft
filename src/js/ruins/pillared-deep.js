@@ -82,7 +82,7 @@ function dwBreach(cx,cz,yb,h,WCX,WCZ,L){
     }}
 }
 // ---- Final tidy of a ruin chunk: nothing floats, hanging chains reach a ceiling, and sunken water never opens into the caves
-const TIDY_DROP=new Set([GRAVEL,BONES,GLOWSHROOM,BARREL,RAILX,RAILZ]);
+const TIDY_DROP=new Set([GRAVEL,BONES,GLOWSHROOM,BARREL]);
 function dwTidy(){
   const yA=RUIN_Y[0]-7,yB=RUIN_Y[1]+18,isS=(id)=>id>0&&SOLID[id];
   // sunken water: wall it in wherever it meets open air below the floors
@@ -111,21 +111,7 @@ function dwTidy(){
     for(const s of runs){if(!s.ok)continue;if(Math.abs(s.X-r.X)+Math.abs(s.Z-r.Z)!==1)continue;if(s.y0<=r.y1&&s.y1>=r.y0){r.ok=true;break;}}}
   for(const r of runs)if(!r.ok)for(let y=r.y0;y<=r.y1;y++)PW(r.X,y,r.Z,AIR,MODE_SET);
 }
-const postFns=[],roomRecs=[],lwC=new Map();
-function lightwellAt(cx,cz){
-  const key=ckey(cx,cz);if(lwC.has(key))return lwC.get(key);if(lwC.size>20000)lwC.clear();
-  let ok=false;
-  if(ok){const o=colInfo(cx*CS+8,cz*CS+8,{});ok=!o.town&&!o.lake&&!o.wet&&o.b!==0&&o.h>=SEA+2&&!roadAt(cx*CS+8,cz*CS+8,6);}
-  lwC.set(key,ok);return ok;
-}
-function dwLightwell(cx,cz){
-  const g=ground[(cx-OX)+W*(cz-OZ)];
-  for(let X=cx-1;X<=cx+1;X++)for(let Z=cz-1;Z<=cz+1;Z++)for(let y=RUIN_Y[1]+4;y<=g+2;y++)PW(X,y,Z,AIR,MODE_SET);
-  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){if(Math.max(Math.abs(a),Math.abs(b))!==2)continue;const X=cx+a,Z=cz+b;
-    for(let y=g-3;y<=g;y++)PW(X,y,Z,y===g?DWBRICK:DWBRICK,MODE_SET);
-    const corner=Math.abs(a)===2&&Math.abs(b)===2;PW(X,g+1,Z,corner?DWPILLAR:(hsh(X,g,Z)<0.3?MOSSY:COBBLE),MODE_SET);
-    if(corner){PW(X,g+2,Z,DWPILLAR,MODE_SET);PW(X,g+3,Z,RUNE,MODE_SET);}}
-}
+const postFns=[],roomRecs=[];
 function secretEdge(cx,cz,dx,dz,L){
   if(dx<0||dz<0)return secretEdge(cx+dx,cz+dz,-dx,-dz,L);
   if(hsh(cx*2+dx,L*97+111,cz*2+dz)>=0.25||edgeOpen(cx,cz,dx,dz,L))return false;
@@ -183,7 +169,6 @@ function applyRuins(WCX,WCZ){
       dwCondition(cx,cz,fy,h,wetR&&c<0.7?'flooded':(c<0.06+0.25*curI||(lushR&&c<0.6))?'overgrown':'');}
     if(t!=='chasm'&&t!=='stair')roomRecs.push([cx,cz,fy,h,WCX,WCZ,L]);
     if(!atr&&t!=='chasm'&&t!=='stair'){dwDecay(cx,cz,fy,h,hh,curI,WCX,WCZ,L);dwRuin(cx,cz,fy,h,hh,curI,WCX*31+L);dwBreach(cx,cz,fy,h,WCX,WCZ,L);if(fy===yb)dwSecret(cx,cz,fy,h,WCX,WCZ,L);}
-    if(L===1&&gateAt(WCX,WCZ))dwGate(cx,cz,rngAt(WCX,1402,WCZ));
   }
   if(holeAt(WCX,WCZ))dwHole(cx,cz);
   for(const f of postFns)f();postFns.length=0;
@@ -192,7 +177,6 @@ function applyRuins(WCX,WCZ){
     for(let k=0;k<=h;k++)for(let w=-1;w<=1;w++){const X=cx+dx*k+(dz?w:0),Z=cz+dz*k+(dx?w:0);for(let y=fy;y<fy+3;y++){const c=GW(X,y,Z);if(c===GRAVEL||c===COBBLE||c===DWCRACK)PW(X,y,Z,AIR,MODE_SET);}}}
   roomRecs.length=0;
   dwTidy();
-  if(lightwellAt(WCX,WCZ))dwLightwell(gx0+8,gz0+8);
   // sconces whose wall was knocked out by decay come down with it
   for(let y=RUIN_Y[0]-2;y<=RUIN_Y[1]+16;y++)for(let Z=gz0;Z<gz0+CS;Z++)for(let X=gx0;X<gx0+CS;X++){
     if(GW(X,y,Z)!==SCONCE)continue;let held=false;

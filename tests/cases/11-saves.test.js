@@ -7,7 +7,7 @@ assert(bad===0,'world keys decode to the same X, y, Z for every height'+(bad?' (
 const x=W/2+3,z=D/2+5,g=ground[x+W*z],y=g+2,cx=x>>4,cz=z>>4;
 setBlock(x,y,z,BRICK,true);
 const store={};localStorage.setItem=(k,v)=>{store[k]=v;};saveNow();
-const data=JSON.parse(store[SAVE_KEY]||'null');
+const data=JSON.parse(store[worldKey(WORLD.id)]||'null');
 assert(!!data&&Array.isArray(data.e)&&data.e.length>=2,'saving writes the edit list');
 edits.clear();editsByChunk.clear();world[I(x,y,z)]=AIR;
 for(let k=0;k+1<data.e.length;k+=2)storeEdit(data.e[k],data.e[k+1]);

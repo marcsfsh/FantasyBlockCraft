@@ -10,6 +10,10 @@
       "about": "Seeded random numbers, hashing and fractal noise"
     },
     {
+      "path": "core/names.js",
+      "about": "Names per people (dwarf first, others drafts) and the Tolkien-name blocklist"
+    },
+    {
       "path": "blocks/blocks.js",
       "about": "Block ids, block definitions, hardness and sounds"
     },
@@ -23,7 +27,7 @@
     },
     {
       "path": "world/terrain.js",
-      "about": "World arrays, column terrain and biomes, lakes, town blending"
+      "about": "World arrays, column terrain and biomes, rivers and lakes"
     },
     {
       "path": "world/caves.js",
@@ -39,7 +43,7 @@
     },
     {
       "path": "ruins/holds-and-lore.js",
-      "about": "Holds, names, lore pages, gates, chasms, cellars, room conditions"
+      "about": "Holds, hold names, lore pages, chasms, cellars, room conditions"
     },
     {
       "path": "ruins/pillared-deep.js",
@@ -59,15 +63,7 @@
     },
     {
       "path": "world/features.js",
-      "about": "Chunk clipping, column fill, trees, barrows, standing stones, willows"
-    },
-    {
-      "path": "legacy/towns.js",
-      "about": "Towns (disabled: townPlan returns null)"
-    },
-    {
-      "path": "legacy/roads.js",
-      "about": "Roads between towns (disabled)"
+      "about": "Chunk clipping, trees, barrows, standing stones, willows, ice spikes, old sealed rooms"
     },
     {
       "path": "world/chunk-generation.js",
@@ -110,24 +106,12 @@
       "about": "Player physics, held item, keyboard and mouse"
     },
     {
-      "path": "legacy/power-tools.js",
-      "about": "Power tools (removed from play by the BANNED list)"
+      "path": "gameplay/mining.js",
+      "about": "Survival mining: hold-to-break timing, pickaxe tiers and drops"
     },
     {
       "path": "gameplay/crafting.js",
-      "about": "Recipes and crafting"
-    },
-    {
-      "path": "legacy/power-network.js",
-      "about": "Power network (removed from play by the BANNED list)"
-    },
-    {
-      "path": "gameplay/trading.js",
-      "about": "Banned-item filter, values, coins and trading counters"
-    },
-    {
-      "path": "gameplay/ore-processing.js",
-      "about": "Gold pan, sluices and crusher"
+      "about": "Recipes, crafting, and the BANNED set (defined but out of play)"
     },
     {
       "path": "gameplay/blueprints.js",
@@ -147,7 +131,7 @@
     },
     {
       "path": "ui/save-and-minimap.js",
-      "about": "Saving and the minimap"
+      "about": "Saving, worlds (create, switch, delete, export, import) and the minimap"
     },
     {
       "path": "engine/world-streaming.js",

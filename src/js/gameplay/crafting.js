@@ -10,17 +10,21 @@ const RECIPES=[
   [242,1,[[220,3],[201,2]]],[243,1,[[225,3],[201,2]]],[244,1,[[223,3],[201,2]]],[245,1,[[227,3],[201,2]]],[246,1,[[228,3],[201,2]]],[247,1,[[229,3],[201,2]]],
   [COPB,1,[[220,9]]],[BRONB,1,[[225,9]]],[BRASB,1,[[226,9]]],[STEELB,1,[[227,9]]],[TITB,1,[[228,9]]],[PLATB,1,[[229,9]]],
   [LANTERN,1,[[226,4],[TORCH,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,1],[229,2],[GLASS,4]]],
-  [203,8,[[220,1]],'m'],[204,8,[[224,1]],'m'],[205,8,[[229,1]],'m'],[MINT,1,[[227,4],[226,4],[FURN,1]]],[TRADER,1,[[PLANKS,6],[203,10]]],
-  [CRUSHER,1,[[225,4],[COBBLE,5]]],[SLUICE,1,[[PLANKS,6],[223,2]]],[250,1,[[220,3]]],[BPTOOL,1,[[PLANKS,4],[220,1],[GLASS,1]]],
-  [260,2,[[210,1]],'c'],[261,2,[[211,1]],'c'],[262,2,[[212,1]],'c'],[263,2,[[213,1]],'c'],[264,2,[[214,1]],'c'],[265,2,[[215,1]],'c'],[266,2,[[216,1]],'c'],
-  [220,2,[[260,2],[200,1]],'f'],[221,2,[[261,2],[200,1]],'f'],[222,2,[[262,2],[200,1]],'f'],[223,2,[[263,2],[200,1]],'f'],[224,2,[[264,2],[200,1]],'f'],[229,2,[[265,2],[200,1]],'f'],[228,2,[[266,2],[200,2]],'b'],
-  [CHARGER,1,[[227,2],[220,4],[BATTERY,1]]],[252,1,[[227,3],[220,2],[BATTERY,1],[230,1]]],[253,1,[[227,4],[225,2],[BATTERY,1]]],[254,1,[[227,3],[226,2],[BATTERY,1]]],
-  [WIRE,8,[[220,1]]],[COALGEN,1,[[223,4],[220,2],[FURN,1]]],[WHEEL,1,[[PLANKS,6],[223,2]]],[SOLAR,1,[[GLASS,3],[220,2],[227,2],[268,1]]],
-  [BATTERY,1,[[222,4],[220,2],[200,2]]],[LAMP_OFF,2,[[GLASS,2],[226,1],[221,1]]],[EFURN,1,[[FURN,1],[227,4],[220,2],[226,1]]],
-  [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f'],[251,1,[[PLANKS,2],[201,2]]],[GRAVEL,1,[[COBBLE,1]],'c'],[SAND,1,[[GRAVEL,1]],'c'],[224,1,[[267,9]]],[229,1,[[268,9]]]
+  [BPTOOL,1,[[PLANKS,4],[220,1],[GLASS,1]]],
+  [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f'],[251,1,[[PLANKS,2],[201,2]]]
 ];
 function nearStation(kind){
   const px=Math.floor(PL.x),py=Math.floor(PL.y),pz=Math.floor(PL.z);
-  for(let y=py-3;y<=py+4;y++)for(let z=pz-4;z<=pz+4;z++)for(let x=px-4;x<=px+4;x++){const id=get(x,y,z);if(kind==='m'?id===MINT:kind==='c'?id===CRUSHER:(id===BLAST||(kind==='f'&&(id===FURN||id===EFURN))))return true;}
+  for(let y=py-3;y<=py+4;y++)for(let z=pz-4;z<=pz+4;z++)for(let x=px-4;x<=px+4;x++){const id=get(x,y,z);if(id===BLAST||(kind==='f'&&id===FURN))return true;}
   return false;
 }
+function canCraft(r){if(r[3]&&!nearStation(r[3]))return false;return r[2].every(([ids,n])=>countOf(ids)>=n);}
+function craft(r){
+  if(!canCraft(r))return;if(roomFor(r[0])<r[1]){toast('Inventory full');return;}
+  r[2].forEach(([ids,n])=>takeItems(ids,n));addItem(r[0],r[1]);
+  tone(600,900,0.08,0.1);showName('+'+r[1]+' '+nameOf(r[0]));drawBar(true);renderSInv();
+}
+// Defined but out of play: coins return with settlement traders (E2). Filtered from recipes, loot and menus.
+const BANNED=new Set([203,204,205]);
+for(let i=RECIPES.length-1;i>=0;i--){const rc=RECIPES[i];if(BANNED.has(rc[0])||rc[2].some(q=>BANNED.has(q[0])))RECIPES.splice(i,1);}
+for(const T of [ARMORY_L,FOOD_L,SCHOLAR_L,SMITH_L,TREASURE_L,DWLOOT,LOOT,BARRELLOOT])for(let i=T.length-1;i>=0;i--)if(BANNED.has(T[i][0]))T.splice(i,1);
