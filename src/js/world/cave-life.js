@@ -68,6 +68,7 @@ function fillCol(x,z,X,Z,o){
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6))top=SNOWG;
   biome[ci]=o.lake?9:b;ground[ci]=h;islTop[ci]=o.isl;townCol[ci]=o.town?1:0;entCol[ci]=o.ent?1:0;
+  let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){
     let id=AIR;
     if(y<=h){
@@ -75,7 +76,7 @@ function fillCol(x,z,X,Z,o){
       else{
         if(y===h)id=top;
         else if(y>h-1-soil)id=b===1?SAND:(b===0?(h>SEA-5?SAND:DIRT):DIRT);
-        else{const dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:STONE;}
+        else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:STONE;}
         if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;
       }
     }else if(y<=Math.max(SEA,o.lake))id=(y===Math.max(SEA,o.lake)&&o.cold)?ICE:WATER;

@@ -1,7 +1,8 @@
 // Editing
 const edits=new Map(),editsByChunk=new Map();let saveDirty=false;
-const KOFF=1048576,wkey=(X,y,Z)=>((X+KOFF)*2097152+(Z+KOFF))*128+y,ckey=(cx,cz)=>(cx+65536)*131072+(cz+65536);
-function keyXYZ(k){const y=k%128,r=(k-y)/128,Z=r%2097152-KOFF,X=Math.floor(r/2097152)-KOFF;return[X,y,Z];}
+// World key: X and Z in 21 bits each, y in 9 bits (heights 0 to 511), so keys stay exact below 2^53
+const KOFF=1048576,KY=512,wkey=(X,y,Z)=>((X+KOFF)*2097152+(Z+KOFF))*KY+y,ckey=(cx,cz)=>(cx+65536)*131072+(cz+65536);
+function keyXYZ(k){const y=k%KY,r=(k-y)/KY,Z=r%2097152-KOFF,X=Math.floor(r/2097152)-KOFF;return[X,y,Z];}
 function iToKey(i){const x=i%W,t=(i/W)|0;return wkey(x+OX,(t/D)|0,(t%D)+OZ);}
 function keyToI(k){const c=keyXYZ(k),x=c[0]-OX,z=c[2]-OZ;if(x<0||z<0||x>=W||z>=D)return -1;return I(x,c[1],z);}
 function storeEdit(k,v){edits.set(k,v);const c=keyXYZ(k),ck=ckey(Math.floor(c[0]/CS),Math.floor(c[2]/CS));let m=editsByChunk.get(ck);if(!m)editsByChunk.set(ck,m=new Map());m.set(k,v);}
@@ -59,7 +60,7 @@ function setBlock(x,y,z,v,force){
   calcHM(x,z);mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
   if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
-  if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);
+  if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
   if(CONDUCT[old]&&!CONDUCT[v])powerBlocks.delete(i);if(CONDUCT[v])powerBlocks.add(i);
   if(old===BATTERY&&v!==BATTERY)batCharge.delete(iToKey(i));if(old===COALGEN&&v!==COALGEN)genFuel.delete(iToKey(i));
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}

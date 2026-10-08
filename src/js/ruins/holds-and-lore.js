@@ -24,7 +24,7 @@ function loreText(X,Y,Z){
     'We broke into a cavern of living crystal today. The Rune Masons say it hums at night. Queen '+h.queen+' has forbidden anyone to cut it.',
     'Third warning from the lower shafts. The lava rises a hand each season. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' have begun to seal the deepest gates.',
     'Recipe of the Black Vat: mushroom caps, wheat from the surface traders, and patience. Never serve it to a king before noon.',
-    'The titanium seams lie below the second deep, near the fire. Only steel bites them. The old picks of '+h.name+' were forged with runes for this.',
+    'The moonsilver seams lie below the second deep, near the fire. Only steel bites them. The old picks of '+h.name+' were forged with runes for this.',
     'We are leaving. The roof of the eastern hall has come down twice this month. King '+h.king+' says we will return to '+h.name+' when the stone is quiet.',
     'Account of the treasury, year '+(h.year+3)+': gold enough to plate the throne twice over. The rest is kept beneath the floor where only the stewards know.',
     'To whoever reads this: the cracked tiles are not all damage. Some of us hid our savings under them.',

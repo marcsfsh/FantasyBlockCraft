@@ -68,7 +68,7 @@ function frame(now){
   if(ready&&playing){update(dt);
     const ex=PL.x-W/2,ez=PL.z-D/2;
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
-  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;updTNT(dt);updFalling(dt);updRockets(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
+  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updTNT(dt);updFalling(dt);updRockets(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
   camera.position.set(PL.x,PL.y+EYE,PL.z);
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}
@@ -121,7 +121,7 @@ function frame(now){
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=hg[ci]>=0&&yy>hm[ci]?'Sky Island':(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:layerName(yy,bx+OX,bz+OZ))(poiNear(bx+OX,yy,bz+OZ))):townAt(bx+OX,bz+OZ,0)?'Town':BIOMES[biome[ci]];
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
-    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nTNT lit: '+primed.length:'')+infoExtra();}
+    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
 }
 let lastWhere='',lastWhereT=0;
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}

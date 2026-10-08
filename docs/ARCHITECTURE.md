@@ -88,5 +88,6 @@ Column fill (terrain, soil, water, deepstone) -> `applyWorms` (layered caves, ca
 
 ## Saves
 
-- Local storage key `SAVE_KEY` (currently `fantasy-blockcraft-save-v1`); settings under `blockcraft-settings-v1`; blueprints under `blockcraft-blueprints`.
-- A save stores the seed and the player's block edits by world coordinate. Any change to generation that moves terrain makes old edits land in the wrong places, so bump `SAVE_KEY` when generation changes in a way that matters.
+- Local storage key `SAVE_KEY` (currently `fantasy-blockcraft-save-v2`); settings under `blockcraft-settings-v1`; blueprints under `blockcraft-blueprints`.
+- A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).
+- Per-block state lives in sets of window indexes that `shiftWindow` moves and `regenerateAll` clears: `torches`, `sluices`, `farms` (farmland, so crops grow anywhere lit). `genChunk` and `setBlock` keep them current.

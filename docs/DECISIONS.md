@@ -70,3 +70,14 @@ The owner answered 76 direction questions (`docs/DIRECTION_QA.md`); `docs/MILEST
 - Work runs bugs first, then foundations, with one milestone-sized PR per milestone reviewed at a checkpoint.
 Constrains: every milestone follows the sheet's order unless a new decision changes it; DESIGN.md is rewritten as each milestone lands, not before.
 
+### D-020 M0 bug-fix behaviour (2026-10-08)
+Choices made while fixing the M0 bugs that later work could undo:
+- **Save keys:** y takes 9 bits (heights 0 to 511, ready for the 512-tall world in M2); `SAVE_KEY` is now `fantasy-blockcraft-save-v2` and the retired v1 save is deleted on load.
+- **Crates:** taking loot is all or nothing. With too little room the crate stays closed (the roll depends only on its position, so it is the same later). In creative, crates show their contents and stay. Storage that keeps leftovers comes in M4.
+- **Blasts** skip graves and containers rather than destroying them.
+- **Pause** stops lit kegs, falling blocks, rockets and water flow, including while the inventory is open; cosmetic effects (weather, torch flames, particles) keep animating.
+- **Esc in the inventory** shows the pause menu, because browsers refuse pointer lock from Esc; a refused lock always falls back to the pause menu. Leaving the controller for the mouse mid-play pauses for the same reason.
+- **Touch layout:** Auto uses touch only with a coarse pointer and no precise pointer (`any-pointer:fine`); the Touch setting (Auto / On / Off) overrides it and reloads the page.
+- **Doorway clearing** reaches the wall line (k <= h). Lecterns are no longer gutted by decay.
+- **Hunger stays non-lethal** (Q16); the unreachable "You starved" message was removed.
+

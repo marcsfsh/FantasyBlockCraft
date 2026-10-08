@@ -41,6 +41,8 @@ The plan from the direction interview (`docs/DIRECTION_QA.md`, cited as Q1 to Q7
 
 ## M0: Bug sweep (Q56)
 
+**Status: done in 0.2.0.** One reported bug was not real: torches in streamed chunks were already registered by `genChunk` (now guarded by 14-engine). The R and waypoint teleports are not bugs and move to M4.
+
 Fix every known bug. Most were found by reading the code on 2026-10-08 and are listed in `docs/KNOWN_ISSUES.md`.
 
 - **Saves**

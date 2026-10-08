@@ -32,8 +32,8 @@ function updWeather(dt,now){
   if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;flash=1;const dl=0.4+Math.random()*2.5;burst(1.5,'lowpass',170,0.5,0.7,dl);burst(0.7,'lowpass',520,0.6,0.35,dl);buzz(30);}}
   rainAmt+=(((settings.weather&&raining)?1:0)-rainAmt)*Math.min(1,dt*0.25);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),bi=(bx>=0&&bz>=0&&bx<W&&bz<D)?biome[bx+W*bz]:2;
-  snowing=bi===6||(bi===5&&PL.y>90);
-  const n=(bi===4||bi===7)?0:Math.floor(NR*rainAmt),len=snowing?0.09:0.75;
+  snowing=bi===6||(bi===5&&PL.y>=SEA+33); // High Mountains snow above their snow line (fillCol)
+  const n=Math.floor(NR*rainAmt),len=snowing?0.09:0.75;
   rainMat.color.setHex(snowing?0xffffff:0xa4b8d4);rainMat.opacity=snowing?0.9:0.5;
   for(let i=0;i<n;i++){
     const p=drops[i];
@@ -45,7 +45,7 @@ function updWeather(dt,now){
   if(windGain){const sp=Math.hypot(PL.vx,PL.vy,PL.vz);windGain.gain.value=settings.sound&&playing?Math.max(0,Math.min(1,(sp-7)/18))*0.1:0;}
   const hx=Math.floor(PL.x),hy=Math.floor(PL.y+EYE),hz=Math.floor(PL.z);
   if(playing&&sky(hx,hy,hz)<0.35){dripT-=dt;if(dripT<=0){dripT=3+Math.random()*7;const f=1500+Math.random()*900;tone(f,f*0.6,0.09,0.05);tone(f,f*0.6,0.09,0.018,0.22);}}
-  if(rainGain){const cx=Math.floor(PL.x),cz=Math.floor(PL.z),covered=PL.y+1<colTop(cx,cz);rainGain.gain.value=settings.sound&&bi!==4&&bi!==7&&!snowing?rainAmt*0.06*(covered?0.35:1):0;}
+  if(rainGain){const cx=Math.floor(PL.x),cz=Math.floor(PL.z),covered=PL.y+1<colTop(cx,cz);rainGain.gain.value=settings.sound&&!snowing?rainAmt*0.06*(covered?0.35:1):0;}
 }
 
 let flameT=0;
@@ -81,13 +81,16 @@ function farmTick(x,y,z,top,up){
   if(CROP_NEXT[up]){const lit=sky(x,y+1,z)*U.skyMul.value>0.45||bl(x,y+1,z)>0.5;if(lit&&Math.random()<(wet?0.45:0.15))setBlock(x,y+1,z,CROP_NEXT[up],true);}
   else if(up===AIR&&!wet&&Math.random()<0.08)setBlock(x,y,z,DIRT,true);
 }
+// Farmland anywhere (under roofs, underground) is tracked here, so crops grow wherever they have light
+const farms=new Set(),isFarm=id=>id===FARM_D||id===FARM_W;
 function randomTicks(){
+  for(const i of farms){const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;if(Math.abs(x-PL.x)>24||Math.abs(z-PL.z)>24||y>=H-1)continue;if(Math.random()<40/2304)farmTick(x,y,z,world[i],world[i+W*D]);} // same odds as a ticked surface column
   for(let k=0;k<40;k++){
     const x=Math.floor(PL.x+(Math.random()-.5)*48),z=Math.floor(PL.z+(Math.random()-.5)*48);
     if(x<1||z<1||x>=W-1||z>=D-1)continue;
     const y=hm[x+W*z];if(y<1||y>=H-1)continue;
     const top=world[I(x,y,z)],up=world[I(x,y+1,z)];
-    if(top===FARM_D||top===FARM_W){farmTick(x,y,z,top,up);continue;}
+    if(isFarm(top))continue; // ticked above
     if(top===GRASS&&snowing&&rainAmt>0.5&&up===AIR&&(biome[x+W*z]===5||biome[x+W*z]===6)){setBlock(x,y,z,SNOWG,true);continue;}
     if(top!==DIRT||OPQ[up]||BL[up].liquid)continue;
     let g=0;for(let dx=-1;dx<=1&&!g;dx++)for(let dz=-1;dz<=1&&!g;dz++)for(let dy=-1;dy<=1;dy++){const id=get(x+dx,y+dy,z+dz);if(id===GRASS||id===SNOWG){g=id;break;}}

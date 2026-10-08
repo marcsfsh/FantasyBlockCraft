@@ -64,6 +64,8 @@ function addItem(id,n){
   for(let i=0;i<36&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
   saveDirty=true;return n;
 }
+// Would every [id,count] in the list fit in the inventory? (addItem's rules, on a copy)
+function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<36&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
 const asList=x=>Array.isArray(x)?x:[x];
 function countOf(ids){ids=asList(ids);let n=0;for(const q of inv)if(q&&ids.includes(q.id))n+=q.c;return n;}
 function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}

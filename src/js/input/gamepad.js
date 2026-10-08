@@ -5,7 +5,7 @@ const padCur=document.createElement('div');padCur.id='padcur';
 padCur.innerHTML='<svg viewBox="0 0 24 24" width="30" height="30"><path d="M3 2l15 9-6.5 1.5L15 20l-3 1.5-3.5-7.5L3 19z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 document.body.appendChild(padCur);
 function padDZ(x,y,d){const m=Math.hypot(x,y);if(m<d)return[0,0];const s=Math.min(1,(m-d)/(1-d))/m;return[x*s,y*s];}
-function setPadActive(on){if(PAD.active===on)return;PAD.active=on;document.body.classList.toggle('gp',on);if(!on){padCur.style.display='none';PAD.lx=PAD.ly=0;PAD.jump=PAD.down=PAD.sprint=false;}updateKeysHelp();}
+function setPadActive(on){if(PAD.active===on)return;PAD.active=on;document.body.classList.toggle('gp',on);if(!on){padCur.style.display='none';PAD.lx=PAD.ly=0;PAD.jump=PAD.down=PAD.sprint=false;if(playing&&!TOUCH&&document.pointerLockElement!==canvas){playing=false;hold=-1;if(!invOpen&&!dead)showPause();}}updateKeysHelp();}
 function padRumble(strong,weak,ms){const g=PAD.gp;if(!PAD.active||!g||!g.vibrationActuator)return;try{g.vibrationActuator.playEffect('dual-rumble',{duration:ms,strongMagnitude:strong,weakMagnitude:weak});}catch(e){}}
 addEventListener('gamepadconnected',()=>toast('Controller connected'));
 addEventListener('gamepaddisconnected',()=>{setPadActive(false);toast('Controller disconnected');});

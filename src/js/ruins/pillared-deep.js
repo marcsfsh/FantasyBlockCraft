@@ -48,7 +48,7 @@ function buildDelf(d,WCX,WCZ){
   for(let k=0;k<12;k++){const X=gx0+(hsh(WCX,2100+k,WCZ)*16|0),Z=gz0+(hsh(WCX,2200+k,WCZ)*16|0);if(GW(X,y0,Z)===AIR&&GW(X,y0-1,Z)>0&&SOLID[GW(X,y0-1,Z)])PW(X,y0,Z,k%3?GRAVEL:BONES,MODE_SET);}
 }
 // Heavier decay: several collapses per room, gutted furniture, bones and cobwebs
-const FURNISH=new Set([PLANKS,BARREL,BOOKS,WOOLR,WOOLB,WOOLG,WOOLY,WOOLW,LECTERN,FURN,STEELB,BRASB,COPB,BRONB]);
+const FURNISH=new Set([PLANKS,BARREL,BOOKS,WOOLR,WOOLB,WOOLG,WOOLY,WOOLW,FURN,STEELB,BRASB,COPB,BRONB]);
 function dwRuin(cx,cz,yb,h,hh,I,seed){
   const q=(k)=>hsh(seed,k,cz*7+cx);
   const events=1+Math.floor(I*3);
@@ -187,9 +187,9 @@ function applyRuins(WCX,WCZ){
   }
   if(holeAt(WCX,WCZ))dwHole(cx,cz);
   for(const f of postFns)f();postFns.length=0;
-  // keep a walkable way from every doorway to the middle of the room: decay rubble along it is cleared
+  // keep a walkable way from every doorway to the middle of the room: decay rubble along it is cleared, up to and including the wall line
   for(const [cx,cz,fy,h,WX,WZ,L] of roomRecs)for(const [dx,dz] of DIRS4){if(!edgeOpen(WX,WZ,dx,dz,L))continue;
-    for(let k=0;k<h;k++)for(let w=-1;w<=1;w++){const X=cx+dx*k+(dz?w:0),Z=cz+dz*k+(dx?w:0);for(let y=fy;y<fy+3;y++){const c=GW(X,y,Z);if(c===GRAVEL||c===COBBLE||c===DWCRACK)PW(X,y,Z,AIR,MODE_SET);}}}
+    for(let k=0;k<=h;k++)for(let w=-1;w<=1;w++){const X=cx+dx*k+(dz?w:0),Z=cz+dz*k+(dx?w:0);for(let y=fy;y<fy+3;y++){const c=GW(X,y,Z);if(c===GRAVEL||c===COBBLE||c===DWCRACK)PW(X,y,Z,AIR,MODE_SET);}}}
   roomRecs.length=0;
   dwTidy();
   if(lightwellAt(WCX,WCZ))dwLightwell(gx0+8,gz0+8);
