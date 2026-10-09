@@ -186,7 +186,7 @@ Added after the owner played 0.8.0: generation feels disjointed and random, the 
 
 **M3.5a.2: noclip** (owner's request, before M3.5b). Done in 0.9.1 (D-030): a creative-mode toggle to fly through blocks.
 
-**M3.5b: the surface (Q77, Q89 to Q96)**
+**M3.5b: the surface (Q77, Q89 to Q96).** Done in 0.10.0 (D-031).
 - **Rivers follow valleys** from the hills to the sea or a lake, with gentle banks; a short gorge with sloped sides only where a river meets high ground (Q89).
 - **High Mountains as ranges:** ridgelines with fewer, grander peaks, valleys between them, walkable passes, cliffs only at crags and gorges (Q90).
 - **Smooth with character:** small-scale roughness only where the land calls for it (moors, mountains, the Shadowed Forest) (Q91).

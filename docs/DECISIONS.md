@@ -165,3 +165,19 @@ Constrains: any new underground generator plans in `caveBase`/`cavePlan` (or sta
 ### D-030 M3.5a.2: noclip in creative (2026-10-09)
 The owner asked for a noclip toggle before M3.5b. It is a creative-only action (`noclip`, `toggleNoclip`): `collide` returns false while `PL.noclip` is set, so movement passes through blocks; it implies flying, and turning flying off turns noclip off first. Leaving noclip inside rock moves the player up to the first place they fit. Keyboard N, a touch button, and a pause-menu switch; the controller has no free button, so it uses the pause menu until rebinding arrives (M5). The noclip flag is saved with the player's position (`p[6]`) and only restored in creative.
 Constrains: anything else that tests the player against blocks must go through `collide` (or check `PL.noclip`).
+
+### D-031 M3.5b: a natural surface (2026-10-09)
+- **Rivers in valleys (Q89):** the river band now lowers the land into a valley whose width grows with the height of the land beside it (up to about 65 blocks a side). The channel shelves into its banks, and rivers fade out where the land rises more than about 35 to 60 blocks or into a range. River columns with land more than 8 above the water within 5 blocks fell from 34% to about 1.3%. Ravines (the separate ravine noise) are unchanged.
+- **Mountain ranges (Q90):** a ridged field at scale 230 replaces the small-scale ridge noise in the mountains, with saddles from a slower field and peaks only on the high ridges. The ranges still reach 463 to 479; mountain columns with a step of 4 or more fell from 1.2% to about 0.3%.
+- **Smoothness (Q91):** the hill field is two octaves at scale 110 (was three at 90) with a smaller amplitude; green hills and elder wood use softer swells; the fine jitter on land borders is gone. High-frequency roughness roughly halved in most lands (green hills 0.66 to 0.37, moors 0.90 to 0.37, mountains 0.76 to 0.47).
+- **Blends (Q92):** the land of a column is decided against a patchy threshold instead of 0.5, so borders mix over a wide band. 06-biomes now counts a change of land only once the new land holds for 40 blocks, so the mixing does not read as narrow lands.
+- **Placement (Q93 to Q96):**
+  - Boulders by land (moors, mountains, barrow downs) and on slopes of 2 or more, rare elsewhere.
+  - The stray towers (`towerP`) and wells (`wellP`) are removed.
+  - Barrows and rings only on the Barrow Hills, in clusters (99% have a neighbour within 70 blocks), in four facings and sizes 0.7 to 1.4, a third of them long, a fifth broken open (`barrowAt`).
+  - Trees in groves: about 75 trunks per 1000 columns in groves against about 5 in clearings, on seed 123456789's spawn window.
+  - Ruined stairways at the foot of a slope (chance raised from 0.9% to 15% of chunks to keep a few, about 0.8 per 1000 chunks).
+  - Sites on commanding ground: towers and castles stand on average 4 to 5 blocks above the land around them, keeps by rivers, none in a hollow. They sit on an earth bank instead of a stone plinth.
+- **Tests:** new 31-natural-surface. 07-gamepad moves the player in open sky, and 16-worlds picks an open dry spot, so neither depends on the terrain at the window's middle. 06-biomes as above.
+- **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v7`, world data version 7.
+Constrains: rivers are tied to the land's relief, so a change to terrain heights changes where rivers run; surface features that should keep off cave entrances, roads and sites use `surfTaken`.

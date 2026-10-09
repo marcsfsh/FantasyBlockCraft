@@ -20,7 +20,7 @@ Consequences:
 | `src/js/blocks/blocks.js` | Block ids, block definitions, hardness and sounds |
 | `src/js/blocks/items.js` | Items that are not blocks: fuel, ores, ingots, tools |
 | `src/js/blocks/atlas.js` | Texture atlas painted pixel by pixel, average tile colours |
-| `src/js/world/terrain.js` | World arrays, column terrain and biomes, rivers and lakes |
+| `src/js/world/terrain.js` | World arrays, column terrain and biomes (ranges, river valleys, blended borders), lakes |
 | `src/js/world/caves.js` | Cave systems (D-028): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes |
 | `src/js/world/deep-caves.js` | The Fire Below: the lava sea with islands and flared pillars |
 | `src/js/world/underground-sites.js` | Mineshafts, supply crates, points of interest (each opening onto a cave), dripstone |
@@ -112,6 +112,13 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 - **Cave systems** (`world/caves.js`, D-028): each region of `CR` x `CR` chunks (10, 160 blocks) has a plan, `caveBase(rx,rz)`, a pure function of the region: up to three systems, each a trunk of nodes from an entrance (a mouth at the foot of a slope or a sinkhole, `B.ents`) down through ramps, steep passages and spirals, with branches, loops back into the trunk, shafts and chambers (`B.ch`: domed halls with pillars, rifts with ledges, stepped halls with a lake). Passages are curved paths of capsules (`cavePath`); `caveCheckPath` keeps every new path three blocks of rock away from all others and from chambers, except where they share a node, and keeps the deep parts out of holds and their mines (`caveHoldFree`). The main system's deepest hall can get a gorge down to the lava sea (`caveGorge`) and a causeway to an island (`caveToFire`). `cavePlan(rx,rz)` adds links between neighbouring regions' deepest halls (`caveLink`) and into a nearby hold's upper mine gallery (`caveHoldLink`), lava falls (`caveFall`) and stream pools, and indexes everything by chunk. A chunk carves the elements of the 3 x 3 regions around it that reach it (`caveEls`).
 - **Planned water and lava:** stepped-hall lakes and stream pools are shaped so rock holds them on every side; `plannedWater` lets the drain pass trust them at a chunk edge, and `plannedLava` marks the open face of a lava fall. A lake or pool is left dry where its own passages run low beside it, a gorge cuts its hall, a ravine reaches it, or a place built later reaches into it (`placesTouch`), so neighbouring chunks always agree.
 - **Cold lights:** `PW` writes `COLD_OF[id]` (cold lantern, sconce, torch, dim glowstone) in place of a lit lamp unless `genLit` is set; `genChunk` sets it around `applyMines` and `applyRuins` in inhabited holds. Generation that needs a lit lamp in an abandoned place must use another emitter (runes, crystals, fungi).
+
+## The surface (M3.5b, D-031)
+
+- **Terrain** stays a pure function per column (`colInfoBase`). Mountains add a ridged field (`1-|fbm2|` cubed, scale 230) with saddles from a slower field, and peaks only where the ridge is high. Rivers come from the same river noise as before, but their effect grows with the land around them: the valley half-width (in noise units) is `rw + relief*0.0075`, capped, and rivers fade out where the land is high or mountainous (`on`). The land a column belongs to (`o.b`) is chosen against `0.5 + fbm2(X/16)*0.4`, so borders mix in patches.
+- **Barrows and rings** come from `barrowAt(WCX,WCZ)` (`world/features.js`): the highest of three spots in the chunk, on the Barrow Hills only, with a higher chance inside burial-ground zones and beside old roads; facing, size, length and a broken roof come from hashes of the chunk.
+- **Sites** (`siteAt`) score up to 14 level candidates: towers and castles by how far they rise over a ring of land 36 blocks out, keeps by a river within 40 blocks; a hollow is never chosen. `buildSite` fills under the floor with earth and banks it down one block per block to the land.
+- **Trees** multiply their density by a grove field (`fbm2(X/70)`), a valley bonus and a steep-slope penalty.
 
 ## Ways down, places and the surface (M2b)
 

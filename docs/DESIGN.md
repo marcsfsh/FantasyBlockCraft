@@ -20,13 +20,24 @@
 | 4 | Heath Moors | Open rocky uplands, heather, bracken, peat, boulder tors, very few trees |
 | 5 | High Mountains | Coherent ranges, stone ridges, snow above the snow line |
 | 6 | Northern Fells | Snowy spruce country |
-| 7 | Barrow Hills | Smooth grassy downs with barrows and rings of standing stones |
+| 7 | Barrow Hills | Smooth grassy downs with clusters of barrows (round and long, facing every way, some broken open) and rings of standing stones; nowhere else |
 | 8 | Shadowed Forest | Dark oaks with near-black leaves, cobwebs, bare dark earth, hummocky ground |
 | 9 | Lake | Upland lakes with one water level and a raised shore |
 | 10 | Windswept Plains | Wide grassland, no flowers or tall grass, lone oaks, long low waves |
 | 11 | Fens | Flat wet ground, pools, mud, reeds, willows |
 
 Lands are driven by large climate fields (warmth, damp) and region fields, with continuous weights (`dw`, `bw`, `pw`, `fen`, `sw`, `fwd`) so terrain, trees and ground cover blend across borders. Current balance: every land covers roughly 6 to 14% of the land surface.
+
+**A natural surface (M3.5b, D-031):**
+- **Rivers follow valleys.** They rise in the hills and run down to the sea or a lake, never across a mountain range. The higher the land beside a river, the wider and gentler its valley; the channel shelves up into sandy or gravel banks. Before 0.10.0 a third of river stretches ran in ravines.
+- **Mountain ranges** have long ridgelines with valleys between them and saddles where a range can be crossed. The high peaks stand on the ridges at the hearts of the ranges, and cliffs are rare.
+- **Smooth ground with character:** gentle lands are about half as bumpy as before. The moors keep their rocky tors, the Shadowed Forest its hummocks, and the fens their pools.
+- **Lands blend:** heights blend through the weights, and which land a column belongs to is decided against a patchy threshold, so trees, ground cover and snow mix over a wide border.
+- **Placement:**
+  - Boulders and tors lie on the moors, in the mountains and on steep slopes, and are rare on gentle ground.
+  - Trees gather in groves with clearings between them, thicker in valleys and by water and thinner on steep slopes.
+  - The stray little towers and wells are gone; the ruins on the surface are the named sites.
+
 
 ## The world's height (D-023)
 
@@ -53,7 +64,7 @@ Ways between depths: ramps, steeper passages and spirals (all walkable), shafts 
 ## Ways down (D-024, D-028)
 
 - **Cave entrances**: a mouth at the foot of a slope, or a sinkhole on level ground with a ramp spiralling down its wall, into the trunk of a cave system.
-- **Ruined stairways** stand on level ground: a broken stone shaft with a stair winding down to a cave passage (rarer since 0.9.0).
+- **Ruined stairways** stand on level ground at the foot of a slope: a broken stone shaft with a stair winding down to a cave passage (rare since 0.9.0).
 - **Ravines** cut up to about 60 blocks deep; about a third reach the upper caves.
 - **Hold gates** lead down into the holds (below).
 A way down is usually within 50 to 70 blocks of open land.
@@ -66,7 +77,7 @@ A way down is usually within 50 to 70 blocks of open land.
 
 ## The surface (D-024)
 
-- **Ruined sites** of the men of old, on level ground (about two areas of 384 x 384 blocks in three): round watchtowers, walled keeps with corner towers, castles with a curtain wall and a keep. Each has a name.
+- **Ruined sites** of the men of old, on level ground in a commanding spot (about two areas of 384 x 384 blocks in three; towers and castles on high ground, keeps by a river; never in a hollow), on an earth bank sloping down to the land around: round watchtowers, walled keeps with corner towers, castles with a curtain wall and a keep. Each has a name.
 - **Old roads** of worn path, stones and gravel wander between neighbouring sites and up to the hold gates.
 - **Ancient waystones** stand at about a third of sites and at the first gate of every hold. Attuning to them comes in M4.
 
