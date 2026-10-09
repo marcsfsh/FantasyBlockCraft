@@ -40,7 +40,7 @@ function buildChunk(cx,cz){
     if(b.cross){
       const L=sky(x,y,z)*0.92,B=b.emit?2:bl(x,y,z)*0.92,t=b.t[0];
       for(let q=0;q<2;q++){const base=O.p.length/3;
-        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(0.92);}
+        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(c[1]?0.93:0.92);} // tops sway
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
@@ -90,7 +90,7 @@ function buildChunk(cx,cz){
           vl=sl/n;vb=sb/n;
           a=(A&&B)?0:3-A-B-C;
         }
-        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?2:vb*v);M.a.push(v);
+        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:2):vb*v);M.a.push(v);
       }
       if(ao[0]+ao[3]>ao[1]+ao[2])M.i.push(base,base+1,base+2,base+2,base+1,base+3);
       else M.i.push(base,base+1,base+3,base,base+3,base+2);

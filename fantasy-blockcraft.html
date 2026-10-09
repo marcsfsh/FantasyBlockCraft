@@ -2581,12 +2581,21 @@ const ACELL=32,APAD=8,gpuAtlas=document.createElement('canvas');gpuAtlas.width=A
 const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
 let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
-const VS='attribute float light;attribute float blk;attribute float aov;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
+// Vertex shader. The tops of plants (aov 0.93) sway in the wind (M3b).
+const VS='attribute float light;attribute float blk;attribute float aov;uniform float time;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
+  'void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec3 p=position;'+
+  'if(aov>0.925&&aov<0.935){p.x+=0.07*sin(time*1.6+position.x*0.8+position.z*0.6);p.z+=0.05*sin(time*1.3+position.z*0.9+position.x*0.4);}'+
+  'vec4 mv=modelViewMatrix*vec4(p,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
 const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;uniform float fogFar;uniform float opacity;uniform float alphaTest;uniform float lamp;uniform float time;uniform float wave;uniform float bright;uniform float skyMul;uniform vec3 skyTint;uniform float caveMin;uniform float lampR;uniform vec3 caveTint;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
   'void main(){vec4 t=texture2D(map,vUv);if(t.a<alphaTest)discard;float lm=lamp*vA*(1.0-smoothstep(3.0,lampR,vD));vec3 l=vB>1.5?vec3(1.0):max(max(max(vL*skyMul*skyTint,vec3(lm)*vec3(1.0,0.93,0.82)),vec3(1.0,0.8,0.55)*vB),caveTint*caveMin*vA)*bright;vec3 c=t.rgb*l;'+
-  'if(wave>0.5){c*=0.95+0.07*sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.05*sin(time*2.3-vW.x*0.5+vW.z*1.3);}float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
+  // water: a deeper blue with moving shimmer and glints in daylight; lava (blk 3): slow bright crests; emitters (blk 2 and up) pulse
+  // a little and glow through fog (M3b)
+  'if(wave>0.5){float s=sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.7*sin(time*2.3-vW.x*0.5+vW.z*1.3)+0.5*sin(time*0.9+(vW.x-vW.z)*0.35);c*=vec3(0.6,0.76,0.96)*(0.97+0.045*s);c+=vec3(0.07,0.09,0.11)*smoothstep(1.55,2.1,s)*vL*skyMul;}'+
+  'if(vB>2.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
+  'else if(vB>1.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
+  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
 function mat(op,at,transp,wave,overlay){return new THREE.ShaderMaterial({uniforms:Object.assign({},U,{opacity:{value:op},alphaTest:{value:at},wave:{value:wave?1:0},bright:{value:1}},overlay?{skyMul:{value:1}}:{}),vertexShader:VS,fragmentShader:FS,transparent:transp,depthWrite:!transp&&!overlay,depthTest:!overlay,side:transp?THREE.DoubleSide:THREE.FrontSide});}
-const matO=mat(1,0.5,false,false),matW=mat(0.72,0.0,true,true),matHand=mat(1,0.5,false,false,true);
+const matO=mat(1,0.5,false,false),matW=mat(0.8,0.0,true,true),matHand=mat(1,0.5,false,false,true);
 
 // Sun and clouds
 const sunDir=new THREE.Vector3(0.45,0.75,-0.5).normalize();
@@ -2869,7 +2878,7 @@ function buildChunk(cx,cz){
     if(b.cross){
       const L=sky(x,y,z)*0.92,B=b.emit?2:bl(x,y,z)*0.92,t=b.t[0];
       for(let q=0;q<2;q++){const base=O.p.length/3;
-        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(0.92);}
+        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(c[1]?0.93:0.92);} // tops sway
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
@@ -2919,7 +2928,7 @@ function buildChunk(cx,cz){
           vl=sl/n;vb=sb/n;
           a=(A&&B)?0:3-A-B-C;
         }
-        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?2:vb*v);M.a.push(v);
+        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:2):vb*v);M.a.push(v);
       }
       if(ao[0]+ao[3]>ao[1]+ao[2])M.i.push(base,base+1,base+2,base+2,base+1,base+3);
       else M.i.push(base,base+1,base+3,base,base+3,base+2);

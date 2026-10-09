@@ -17,7 +17,7 @@ const seed=args.seed||'123456789',out=path.resolve(ROOT,args.out||'tests/.tmp/sh
 // The standard views: [name, X, Y, Z, yaw, pitch, time of day]. Yaw 0 looks north (towards -Z); pitch is negative looking down.
 const SHOTS=[['spawn-day',0,345,40,0,-0.25,0.3],['spawn-dusk',0,345,40,2.4,-0.15,0.74],['spawn-night',0,345,40,0,0.15,0.95],
   ['mountains',-640,470,-560,2.3,-0.3,0.35],['lake-cavern',-18,82,44,0.6,-0.2,0.3],['lava-sea',70,16,-86,0.8,-0.25,0.3],
-  ['gate',824,338,1736,0,-0.55,0.3],['water',60,322,60,-2.2,-0.35,0.45]];
+  ['gate',824,338,1736,0,-0.55,0.3],['sea',119,318,-91,0.8,-0.4,0.45]];
 const views=args.view?args.view.split(';').map(v=>{const [n,r]=v.split(':');return [n,...r.split(',').map(Number)];}):SHOTS;
 
 let require;try{require=createRequire(import.meta.url);const g=execSync('npm root -g',{encoding:'utf8'}).trim();require=createRequire(path.join(g,'x.js'));require.resolve('playwright');}
