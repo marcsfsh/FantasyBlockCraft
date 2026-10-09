@@ -15,7 +15,8 @@
     "check:syntax": "node tools/check-syntax.mjs",
     "bench": "node tools/bench.mjs",
     "shots": "node tools/shot.mjs",
-    "test:update-snapshots": "node tests/run-tests.mjs --update-snapshots world-hash"
+    "test:update-snapshots": "node tests/run-tests.mjs --update-snapshots world-hash",
+    "map": "node tools/map.mjs"
   },
   "engines": {
     "node": ">=18"

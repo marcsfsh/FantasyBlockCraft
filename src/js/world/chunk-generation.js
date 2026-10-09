@@ -90,9 +90,11 @@ function plants(WCX,WCZ){
 // world chunk (WCX,WCZ) at window chunk (lcx,lcz); gx0 and gz0 are set before every step. A step may return false to be called again.
 const GEN_STEPS=[
   ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
-  (lcx,lcz)=>deepCaves(lcx,lcz),
-  (lcx,lcz,WCX,WCZ)=>{let n=0;for(let a=-WORM_R;a<=WORM_R;a++)for(let b=-WORM_R;b<=WORM_R;b++){if(wormCache.has(ckey(WCX+a,WCZ+b)))continue;if(++n>2)return false;wormsFor(WCX+a,WCZ+b);}}, // worm lists not built yet, a few at a time
-  ...[0,1,2,3,4,5,6,7].map(p=>(lcx,lcz,WCX,WCZ)=>applyWorms(WCX,WCZ,p,8)),
+  (lcx,lcz)=>lavaSea(lcx,lcz),
+  (lcx,lcz,WCX,WCZ)=>{const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);let n=0; // cave plans of the regions around, one region at a time
+    for(let a=-1;a<=2;a++)for(let b=-1;b<=2;b++){if(caveBaseC.has(ckey(rx+a,rz+b)))continue;if(++n>1)return false;caveBase(rx+a,rz+b);}},
+  ...[0,1,2,3].map(p=>(lcx,lcz,WCX,WCZ)=>carveCaves(WCX,WCZ,p,4)),
+  (lcx,lcz,WCX,WCZ)=>caveFormations(WCX,WCZ),
   (lcx,lcz,WCX,WCZ)=>{applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);},
   (lcx,lcz,WCX,WCZ)=>{genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;},
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX-1,WCZ+b,false);},
@@ -118,20 +120,22 @@ function genChunk(lcx,lcz){const j=newGenJob(lcx,lcz);while(j.step<GEN_STEPS.len
 // Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
 // it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
 // the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk
-// cannot be seen, so water at the chunk's edge drains too, except at the deep lake level (y58 to DEEP_WL), whose lakes and rivers
-// are built to meet across chunks (worm caves keep clear of them, deepWaterAt), and on the floors of holds, whose aqueducts
-// and cisterns are walled by the ruins' own tidy pass.
+// cannot be seen, so water at the chunk's edge drains too, except lakes a cave plan holds in its own hall (plannedWater) and
+// on the floors of holds, whose aqueducts and cisterns are walled by the ruins' own tidy pass. Lava outside the holds, their
+// mines and the lava sea follows the same rule (Q87).
 function drainCaveWater(lcx,lcz){
-  const WD=W*D,x0=lcx*CS,z0=lcz*CS,q=[],zone=ruinZone(OX/CS+lcx,OZ/CS+lcz);
-  const held=j=>world[j]===WATER||SOLID[world[j]],rests=j=>j<WD||held(j-WD); // a block is held up when the one under it is solid or water
-  for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){const g=ground[x+W*z];for(let y=2;y<g-2;y++){const i=I(x,y,z);if(world[i]===WATER)q.push(i);}}
-  while(q.length){const i=q.pop();if(world[i]!==WATER)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0,deep=(y>=58&&y<=DEEP_WL)||(zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18);
+  const WD=W*D,x0=lcx*CS,z0=lcz*CS,q=[],WCX=OX/CS+lcx,WCZ=OZ/CS+lcz,zone=ruinZone(WCX,WCZ),wild=!zone&&!mineZone(WCX,WCZ);
+  for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){const g=ground[x+W*z];for(let y=2;y<g-2;y++){const i=I(x,y,z),v=world[i];if(v===WATER||(v===LAVA&&y>FIRE_LV&&wild))q.push(i);}}
+  while(q.length){const i=q.pop(),F=world[i];if(F!==WATER&&F!==LAVA)continue;const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;
+    // a block is held up when the one under it is solid or the same fluid
+    const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const b=i-WD,ok=!(edge&&!deep)&&held(b)&&(world[b]===WATER||rests(b))&&sides.every(j=>held(j)&&(world[j]===WATER||rests(j)));
+    const trusted=F===WATER&&((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ)));
+    const b=i-WD,ok=!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j)));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
-    // what may have relied on it: water above, beside, above-beside, and two above
-    for(const j of [i+WD,i+2*WD,...sides,...sides.map(k=>k+WD)])if(j<VOL&&world[j]===WATER)q.push(j);}
+    // what may have relied on it: fluid above, beside, above-beside, and two above
+    for(const j of [i+WD,i+2*WD,...sides,...sides.map(k=>k+WD)])if(j<VOL&&(world[j]===WATER||world[j]===LAVA))q.push(j);}
 }
 const roof=id=>id&&OPQ[id]&&!BL[id].leaf&&id!==LAVA;
 function calcHM(x,z){
