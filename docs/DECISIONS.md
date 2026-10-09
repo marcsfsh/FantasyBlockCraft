@@ -296,5 +296,6 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Four lands built** (`world/dry.js`): Southern Drylands (dunes from `wDry`, sand and red sand over sandstone), Golden Steppe (the Windswept Plains reworked, Q119), Volcanic Wastes (broken ground from `wVolc`, ash over basalt), Blighted Lands (dead grass, dead trees). Sand counts as a floor for trees and plants only in the drylands (`floors`).
 - **A hotter deep (Q132):** under columns with a volcanic weight over half, `lavaSea` turns part of the rock of the lava sea's roof (its lowest six blocks) into magma stone (light 7). No loose lava is added; magma stone sits in solid rock, so lighting costs stay as they were (a volcanic window generates as fast as any other).
 - **Signatures** as before: sand-buried temple or dry wadi (its well's water is trusted by the underground water check, like signature ponds); horse stones or outcrop; fire shrine or smoking cone (its lava lake is walled by rock on every side and lies above the natural ground); dead lord's hall or grey grove.
+- **Roads** are laid over the new lands' ground as over grass (leaf litter, needles, moss, snow, chalk, black sand, peat, ash, golden and dead grass and the rest: `ROAD_GROUND`); before this they stopped at it.
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v14`, world data version 14.
 
