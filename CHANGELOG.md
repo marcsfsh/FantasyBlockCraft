@@ -5,6 +5,13 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.12.2 (2026-10-09): crisp textures on Windows desktops
+
+No change to the world or the save format.
+
+### Game
+- **Textures are crisp again on Windows.** Close-up blocks showed smoothed, blurry textures on desktop browsers because of anisotropic filtering, which Direct3D applies to near textures too. It is turned off; every block now shows its square pixels, as on phones (D-035).
+
 ## 0.12.1 (2026-10-09): sharper textures on desktop
 
 No change to the world or the save format: 0.12.0 worlds keep working.
