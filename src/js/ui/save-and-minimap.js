@@ -4,7 +4,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:7,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:8,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -49,18 +49,49 @@ mmC.addEventListener('pointerdown',e=>{
   e.stopPropagation();
   if(mmZoom&&waypoints.size){const r=mmC.getBoundingClientRect(),mx=mmView.ox+(e.clientX-r.left)/r.width*mmView.span,mz=mmView.oz+(e.clientY-r.top)/r.height*mmView.span;
     let best=null,bd=mmView.span/22;waypoints.forEach(m=>{const d=Math.hypot(m.position.x-mx,m.position.z-mz);if(d<bd){bd=d;best=m;}});
-    if(best){travelTo(best);return;}}
+    if(best){if(canTravel())travelTo(best);return;}}
   mmZoom=(mmZoom+1)%3;
 });
 let wpIdx=-1,mmShown=true;
 function travelTo(m){
   for(let k=0;k<20;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[.6,.95,1],0.6,2);
-  if(m.position.x<40||m.position.z<40||m.position.x>W-40||m.position.z>D-40){toast('Loading the area');const c=keyXYZ(m.userData.k);regenerateAll(c[0],c[2]);}
-  PL.x=m.position.x;PL.z=m.position.z;PL.y=m.userData.y+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
-  gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('Traveled to waypoint');
+  const c=keyXYZ(m.userData.k);let x=c[0]-OX,z=c[2]-OZ;
+  if(x<40||z<40||x>W-40||z>D-40){toast('Loading the area');regenerateAll(c[0],c[2]);x=c[0]-OX;z=c[2]-OZ;}
+  PL.x=x+0.5;PL.z=z+0.5;PL.y=c[1]+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
+  gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('You travel to '+wpName(m.userData.k));
   for(let k=0;k<30;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*5,Math.random()*5,(Math.random()-.5)*5,[.6,.95,1],0.8,2);
 }
-function nextWaypoint(){const L=[...waypoints.values()];if(!L.length){toast('Place a waypoint block to travel to it');return;}wpIdx=(wpIdx+1)%L.length;travelTo(L[wpIdx]);}
+// ---- Earned travel (M4b, Q15, Q71). Touch an Ancient Waystone to attune it; a Carved Waystone you build is yours at once. In
+// survival you travel only from a waystone (standing within 4 blocks of one) to another; creative travels freely, as before.
+// Attuned stones are saved with the world (save data `at`) and show a beam like a carved one.
+const attuned=new Map(); // world key of the stone's top block -> the name of the place
+function wpName(k){if(attuned.has(k))return attuned.get(k);const c=keyXYZ(k);return 'Carved waystone at '+c[0]+', '+c[2];}
+const wpDist=m=>{const c=keyXYZ(m.userData.k);return Math.hypot(c[0]-OX+0.5-PL.x,c[2]-OZ+0.5-PL.z);};
+function wpHere(){let best=null,bd=1e9;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k),dx=c[0]-OX+0.5-PL.x,dz=c[2]-OZ+0.5-PL.z,dy=c[1]-PL.y;if(Math.abs(dy)>6)return;const d=Math.hypot(dx,dz);if(d<4.5&&d<bd){bd=d;best=m;}});return best;}
+function canTravel(){if(!SURV())return true;if(wpHere())return true;toast('Stand by an attuned waystone to travel');return false;}
+function stonePlace(X,Y,Z){const s=siteNear(X,Z,1);if(s)return s.name;if(gateNear(X,Z,0))return 'The Gate of '+holdOf(Math.floor(X/CS),Math.floor(Z/CS)).name;return 'A lone waystone at '+X+', '+Z;}
+// Using a waystone: attune an ancient one the first time, else open the list of places to travel to
+function useWaystone(x,y,z){
+  let t=y;if(get(x,t,z)===WAYSTONE){while(get(x,t+1,z)===WAYSTONE)t++;if(get(x,t+1,z)===CALCITE)t++;}
+  const k=wkey(x+OX,t,z+OZ);
+  if(get(x,y,z)===WAYSTONE&&!attuned.has(k)){
+    attuned.set(k,stonePlace(x+OX,t,z+OZ));addWPk(k);saveDirty=true;
+    for(let n=0;n<30;n++)spawnP(x+.5,t+1,z+.5,(Math.random()-.5)*3,Math.random()*5,(Math.random()-.5)*3,[.5,.85,1],1,1);
+    tone(500,1400,0.5,0.12);tone(750,2100,0.4,0.06,0.1);toast('Attuned: '+attuned.get(k));return;}
+  openTravel(k);
+}
+function openTravel(here){
+  invOpen=true;hold=-1;['invgrid','invname','sinv','bplist'].forEach(id=>{$(id).style.display='none';});
+  const el=$('lore');el.innerHTML='';el.style.display='block';$('invtitle').textContent=wpName(here);
+  const L=[...waypoints.values()].filter(m=>m.userData.k!==here).map(m=>[m,wpDist(m)]).sort((a,b)=>a[1]-b[1]);
+  if(!L.length)el.textContent='No other waystone is attuned yet. Touch another Ancient Waystone, or build a Carved Waystone, to travel between them.';
+  for(const [m,d] of L){const b=document.createElement('button');b.className='wide';b.textContent=wpName(m.userData.k)+' ('+Math.round(d)+' blocks)';
+    b.addEventListener('click',()=>{closeInv();travelTo(m);});el.appendChild(b);el.appendChild(document.createElement('br'));}
+  $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
+}
+function nextWaypoint(){
+  if(!canTravel())return;const here=SURV()?wpHere():null,L=[...waypoints.values()].filter(m=>m!==here);
+  if(!L.length){toast(SURV()?'No other waystone is attuned yet':'Place a waystone to travel to it');return;}wpIdx=(wpIdx+1)%L.length;travelTo(L[wpIdx]);}
 function mmCol(x,z){
   let y=H-1;while(y>0&&world[I(x,y,z)]===AIR)y--;
   const id=world[I(x,y,z)];let r,g,b;

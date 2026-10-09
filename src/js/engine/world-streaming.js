@@ -85,6 +85,7 @@ async function generate(){
   $('seedline').textContent=WORLD.name+(resumed?', seed ':', a new endless world, seed ')+SEED+'.';
   if(resumed){
     const e=saved.e;for(let k=0;k+1<e.length;k+=2){storeEdit(e[k],e[k+1]);if(e[k+1]===WAYPT)addWPk(e[k]);}
+    if(Array.isArray(saved.at))saved.at.forEach(([k,n])=>{attuned.set(k,n);addWPk(k);});
     if(typeof saved.t==='number')tod=saved.t;if(typeof saved.dn==='number')dayN=saved.dn;
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}

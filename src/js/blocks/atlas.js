@@ -172,6 +172,17 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(199);for(let y=8;y<16;y++){const o=(y>>1)%2;P(199,7,y,sh([170,136,86],o?18:-6));P(199,8,y,sh([140,108,64],o?-10:10));}
   for(let y=0;y<9;y++){P(199,7,y,[170,174,184]);P(199,8,y,[110,114,124]);}
   for(const s2 of [-1,1])for(let k=0;k<5;k++){const x=s2<0?6-k:9+k,y=k<3?1+k:5-(k-3)*2;P(199,x,y,s2<0?[190,194,204]:[120,124,134]);P(199,x,y+1,[90,94,104]);}
+  // storage and food (M4b): oak chest top and side, bilberry bush, brown mushroom, turnip and bean stages; no shared random draws
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const e=x===0||y===0||x===15||y===15,pl=y%5===4;
+    P(200,x,y,e?[92,62,34]:sh([168,124,72],nz(x,y,4)*2+(pl?-30:0)));P(201,x,y,e||y===6?[84,58,32]:sh([160,118,68],nz(x,y,5)*2+(y%5===2?-24:0)));}
+  for(let y=5;y<9;y++)for(let x=6;x<10;x++)P(201,x,y,(x===6||x===9||y===8)?[70,70,78]:[176,178,186]);
+  clear(202);for(let y=6;y<16;y++)for(let x=1;x<15;x++){const d=Math.hypot((x-7.5)/7,(y-11)/5.2);if(d<1&&(x*5+y*3)%7)P(202,x,y,sh([58,104,46],nz(x,y,6)*3-(y>13?16:0)));}
+  for(const [x,y] of [[4,9],[7,8],[10,10],[12,8],[5,12],[9,12],[3,11],[11,13],[7,11]]){P(202,x,y,[70,84,170]);P(202,x+1,y,[46,52,120]);P(202,x,y+1,[40,44,104]);}
+  clear(203);for(let y=10;y<16;y++)for(let x=7;x<9;x++)P(203,x,y,[222,212,190]);for(let y=6;y<11;y++)for(let x=3;x<13;x++){const d=Math.hypot((x-7.5)/5,(y-10)/4);if(d<1)P(203,x,y,y===10?[96,70,48]:sh([150,102,62],nz(x,y,7)*2+(x<7&&y<8?18:0)));}
+  [[204,4,0],[205,8,0],[206,11,1]].forEach(([t,h,root])=>{clear(t);for(const ox of [4,7,10])for(let k=0;k<h;k++){const x=ox+Math.round(Math.sin(k*0.9+ox)*0.8);P(t,x,15-k-(root?2:0),sh([84,146,56],nz(x,k,8)*3+(k>h-3?14:0)));P(t,x+1,15-k-(root?2:0),[64,118,42]);}
+    if(root)for(let y=12;y<16;y++)for(let x=4;x<12;x++){const d=Math.hypot((x-7.5)/4,(y-14.5)/2.6);if(d<1)P(t,x,y,y<14?[160,90,170]:[232,226,214]);}});
+  [[207,5,0],[208,10,0],[209,15,1]].forEach(([t,h,pods])=>{clear(t);for(let k=0;k<h;k++){const x=7+Math.round(Math.sin(k*0.7)*1.5);P(t,x,15-k,[76,132,50]);if(k%3===1){P(t,x-1,15-k,[96,160,62]);P(t,x+1,14-k,[96,160,62]);}}
+    if(pods)for(const [x,y] of [[4,4],[10,6],[5,9],[11,11]]){for(let k=0;k<4;k++)P(t,x,y+k,[150,196,92]);P(t,x+1,y+1,[120,168,70]);}});
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

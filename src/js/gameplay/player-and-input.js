@@ -56,8 +56,9 @@ const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===S
 while(hot.length<9)hot.push(STONE);
 let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
-const inv=new Array(36).fill(null);
-if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
+// The inventory holds 36 slots, and more with a pack and a bag equipped (M4b, Q67): invCap() of the INV_MAX slots are in use
+const INV_MAX=63,inv=new Array(INV_MAX).fill(null);
+if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<INV_MAX&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
 // A new survival world starts with a small kit (M4, Q59): wooden pickaxe and axe, a map, torches and bread
 const START_KIT=[[240,1],[300,1],[325,1],[TORCH,8],[206,4]];
 if(!saved&&mode==='survival')START_KIT.forEach(([id,c],i)=>{inv[i]={id:id,c:c,d:0};});
@@ -71,26 +72,31 @@ const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
+function invCap(s,id){let n=36;for(const k of ['pack','bag']){const q=k===s?(id?{id:id}:null):equip[k];if(q&&ITEMS[q.id].slots)n+=ITEMS[q.id].slots;}return n;} // with slot s holding id instead, if given
+const freeSlot=(cap=invCap())=>{for(let i=0;i<cap;i++)if(!inv[i])return i;return -1;};
 const stackMax=id=>ITEMS[id]&&(ITEMS[id].dur||ITEMS[id].one)?1:ITEMS[id]&&ITEMS[id].kind==='grapnel'?8:64;
-function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
+function roomFor(id){let n=0;for(let i=0;i<invCap();i++){const q=inv[i];n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;}return n;}
 function addItem(id,n){
   for(const q of inv)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}
-  for(let i=0;i<36&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
+  for(let i=0,cap=invCap();i<cap&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
   saveDirty=true;return n;
 }
 // Would every [id,count] in the list fit in the inventory? (addItem's rules, on a copy)
-function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<36&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
+function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<invCap()&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
 // Put inventory slot i into its equipment slot (what was there goes back to the inventory); false if it does not fit
+// A smaller pack or bag is refused while the slots it would lose hold anything
+const spareFrom=(cap,skip)=>{for(let j=cap;j<INV_MAX;j++)if(inv[j]&&j!==skip)return false;return true;};
 function equipFrom(i){
-  const q=inv[i],s=q&&equipSlotOf(q.id);if(!s)return false;const old=equip[s];
-  if(q.c>1){if(old&&!inv.some(x=>!x))return false;q.c--;if(old)inv[inv.findIndex(x=>!x)]={id:old.id,c:1,d:old.d};}
+  const q=inv[i],s=q&&equipSlotOf(q.id);if(!s)return false;const old=equip[s],cap=invCap(s,q.id);
+  if(!spareFrom(cap,i)||i>=cap&&q.c===1&&old)return false;
+  if(q.c>1){const f=freeSlot(cap);if(old&&f<0)return false;q.c--;if(old)inv[f]={id:old.id,c:1,d:old.d};}
   else inv[i]=old?{id:old.id,c:1,d:old.d}:null;
   equip[s]={id:q.id,c:1,d:q.d||0};saveDirty=true;return true;
 }
-function unequip(s){const q=equip[s],i=inv.findIndex(x=>!x);if(!q||i<0)return false;inv[i]={id:q.id,c:1,d:q.d};equip[s]=null;saveDirty=true;return true;}
+function unequip(s){const q=equip[s],cap=invCap(s,0),i=freeSlot(cap);if(!q||i<0||!spareFrom(cap,-1))return false;inv[i]={id:q.id,c:1,d:q.d};equip[s]=null;saveDirty=true;return true;}
 const asList=x=>Array.isArray(x)?x:[x];
 function countOf(ids){ids=asList(ids);let n=0;for(const q of inv)if(q&&ids.includes(q.id))n+=q.c;return n;}
-function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}
+function takeItems(ids,n){ids=asList(ids);for(let i=0;i<INV_MAX&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}
 function curId(){if(SURV()){const q=inv[sel];return q?q.id:0;}return hot[sel];}
 function setMode(m){
   mode=m;settings.newMode=m;lsSet(SET_KEY,settings);
@@ -105,11 +111,12 @@ const SHEAR_KEEP=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,COBWEB]);
 function dropsFor(id,tool){
   if(ITEMS[tool]&&ITEMS[tool].tool==='shears'&&(BL[id].leaf||SHEAR_KEEP.has(id)))return[[id,1]];
   switch(id){
-    case DBUSH:return Math.random()<0.5?[[328,1]]:[];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
+    case DBUSH:return Math.random()<0.5?[[328,1]]:[];case BERRYB:return[[332,2+(Math.random()*3|0)]];case MUSHB:return[[333,1]];case WTURN:case TURN0:case TURN1:return[[330,1]];
+    case TURN2:return[[330,2+(Math.random()*2|0)]];case BEAN0:case BEAN1:return[[331,1]];case BEAN2:return[[331,2+(Math.random()*2|0)]];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
-    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.45?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
+    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.17?[[331,1]]:r<0.47?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];
   if(BL[id].leaf){const r=Math.random();return r<0.05?[[207,1]]:r<0.15?[[201,1]]:[];}

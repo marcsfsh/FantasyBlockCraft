@@ -25,6 +25,13 @@ item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});it
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
 item(322,'Grapnel','grapnel',[150,154,164],{once:true});item(323,'Compass','compass',[214,120,68],{one:true});item(324,'Depth Gauge','gauge',[226,188,86],{one:true});
 item(325,'Map','map',[222,204,156],{one:true});item(326,'Signal Flare','flare',[214,60,40],{once:true});item(327,'Parchment','parchment',[226,214,180]);item(328,'Plant Fibre','fibre',[140,166,80]);
+// Food (M4b, Q52): two crops planted as they are, foraged bilberries and mushrooms, and dishes cooked at a furnace
+item(330,'Turnip','turnip',[176,110,176]);item(331,'Beans','beans',[150,196,92]);item(332,'Bilberries','berries',[70,84,170]);item(333,'Brown Mushroom','tile',null,{tile:203});
+item(334,'Roast Turnip','turnip',[206,140,90]);item(335,'Pottage','bowl',[170,130,70]);item(336,'Bilberry Tart','tart',[196,150,90]);item(337,'Roast Mushrooms','tile',null,{tile:203});
+// The worn lamp (M4b, Q36, Q65): a lantern for the belt slot that burns lamp oil or pitch candles (fuel: seconds of light)
+item(338,'Lamp Oil','oil',[214,180,70],{fuel:1200});item(339,'Pitch Candle','candle',[60,52,46],{fuel:480});item(340,"Miner's Lantern",'lantern',[214,120,68],{equip:'belt',lamp:true,one:true});
+// More room (M4b, Q67): a pack for the pack slot (woven, then sturdy) and a satchel for the bag slot add inventory rows
+item(341,'Woven Pack','pack',[150,170,96],{equip:'pack',slots:9,one:true});item(342,'Sturdy Pack','pack',[150,110,60],{equip:'pack',slots:18,one:true});item(343,'Satchel','satchel',[170,140,90],{equip:'bag',slots:9,one:true});
 const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
 // Held to use once per press: holding the button does not repeat it
 const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
@@ -79,6 +86,16 @@ function itemIcon(id){
   else if(it.kind==='parchment'){for(let y=2;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===2?18:x===12||y===13?-28:0)+((x*7+y*3)%11===0?-14:0));
     g.fillStyle='#8a7a5a';for(const y of [5,7,9,11])g.fillRect(5,y,6,1);}
   else if(it.kind==='fibre'){for(let k=0;k<5;k++)for(let y=2;y<14;y++){const x=3+k*2+Math.round(Math.sin((y+k*3)/2.2));px(x,y,(k%2?-20:16)+(y%3?0:-14));}}
+  else if(it.kind==='turnip'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-9.5)*1.1);if(d<5)px(x,y,(y<8?0:40)+(d>4.2?-36:0)+(x<6?16:0));}g.fillStyle='#4f8f36';g.fillRect(6,1,1,4);g.fillRect(8,0,1,5);g.fillRect(10,2,1,3);}
+  else if(it.kind==='beans'){for(const [cx,cy] of [[5,6],[10,7],[7,11]])for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-cx)/2.2,(y-cy)/1.6);if(d<1)px(x,y,d>0.75?-36:(x<cx?20:0));}}
+  else if(it.kind==='berries'){for(const [cx,cy] of [[5,6],[10,6],[7,10],[11,11],[4,11]])for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-cx,y-cy);if(d<2.3)px(x,y,d>1.6?-36:(x<cx&&y<cy?40:0));}}
+  else if(it.kind==='bowl'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-7.5)/7,(y-8)/3);if(y>=8&&Math.hypot((x-7.5)/7,(y-8)/6)<1)g.fillStyle='#8a5a30',g.fillRect(x,y,1,1);else if(d<1&&y<9)px(x,y,(x*3+y)%5?0:-30);}}
+  else if(it.kind==='tart'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-7.5)/7,(y-9)/4.5);if(d<1)px(x,y,d>0.8?-20:0);}g.fillStyle='#3a3c88';for(const [x,y] of [[5,8],[8,7],[10,9],[7,10],[4,10],[9,11]])g.fillRect(x,y,2,1);}
+  else if(it.kind==='oil'){for(let y=4;y<15;y++){const w=y<7?1:y<9?3:4;for(let x=8-w;x<8+w;x++)px(x,y,(x<8?20:-10)+(y>11?-20:0));}g.fillStyle='#6a4a2a';g.fillRect(7,2,2,2);}
+  else if(it.kind==='candle'){for(let y=6;y<15;y++)for(let x=6;x<10;x++)px(x,y,x===6?24:x===9?-20:0);g.fillStyle='#2a2420';g.fillRect(7,4,1,2);g.fillStyle='#ffc850';g.fillRect(7,2,2,2);g.fillStyle='#fff2b0';g.fillRect(7,3,1,1);}
+  else if(it.kind==='lantern'){for(let y=3;y<14;y++)for(let x=4;x<12;x++){const e=x===4||x===11||y===3||y===13;px(x,y,e?-10:0);}g.fillStyle='#ffd27a';g.fillRect(6,5,4,7);g.fillStyle='#fff3c4';g.fillRect(7,7,2,3);g.fillStyle='#3a2a1a';g.fillRect(7,1,2,2);}
+  else if(it.kind==='pack'||it.kind==='satchel'){const sat=it.kind==='satchel';for(let y=sat?6:3;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===(sat?6:3)?20:x===12||y===13?-30:0)+((x+y)%4===0?-10:0));
+    g.fillStyle='#4a3420';g.fillRect(3,sat?8:6,10,1);g.fillRect(7,sat?8:6,2,3);if(sat){g.fillRect(4,2,1,4);g.fillRect(11,2,1,4);g.fillRect(4,2,8,1);}}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}

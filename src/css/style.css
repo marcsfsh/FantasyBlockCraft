@@ -39,6 +39,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
 .rec .t{flex:1;font-size:19px;line-height:1}
 .rec .t small{display:block;color:var(--dim);font-size:16px;margin-top:2px}
 .rec button{font:inherit;font-size:18px;background:#5f8a35;color:var(--ink);border:2px solid #2b3a1a;padding:0 10px;cursor:pointer}
+.scol button.wide,.recipes button.wide,#lore button.wide{font:inherit;font-size:18px;background:#5f8a35;color:var(--ink);border:2px solid #2b3a1a;padding:2px 12px;margin-top:8px;cursor:pointer}
 .rec button:disabled{background:#3a3326;border-color:#463a28;cursor:default}
 #hurt{position:absolute;inset:0;background:radial-gradient(circle,rgba(200,0,0,0) 40%,rgba(200,0,0,.6));opacity:0;transition:opacity .25s}
 #stats{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));width:min(480px,94vw);display:none;justify-content:space-between;align-items:flex-end}

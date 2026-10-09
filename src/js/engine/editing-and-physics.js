@@ -63,7 +63,7 @@ function setBlock(x,y,z,v,force){
   if(OPQ[v]&&y>0){const j=i-WD,bb=world[j];if(bb===GRASS||bb===SNOWG){if(curAct)curAct.push(iToKey(j),bb);put(j,DIRT);}}
   const oh=hm[x+W*z];calcHM(x,z);const nh=hm[x+W*z];mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
-  if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
+  if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);if(isBox(old))boxGone(x+OX,y,z+OZ);
   if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}
   lvl[i]=0;wakeWater(x,y,z);

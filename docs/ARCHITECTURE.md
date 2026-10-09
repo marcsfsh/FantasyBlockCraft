@@ -48,7 +48,8 @@ Consequences:
 | `src/js/gameplay/mining.js` | Survival mining: hold-to-break timing by tool and material (`toolFits`), pickaxe tiers, drops, the sickle's sweep |
 | `src/js/gameplay/crafting.js` | Recipes, crafting, and the BANNED set (defined but out of play) |
 | `src/js/gameplay/blueprints.js` | Blueprint capture and placement |
-| `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves, the survival HUD; climbing gear (rope, grapnel, `onClimb`), signal flares |
+| `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves, the survival HUD; climbing gear (rope, grapnel, `onClimb`), signal flares, the worn lamp (`lampLevel`, `lampTick`, `depthDim`) |
+| `src/js/gameplay/storage.js` | Containers that keep items by world position (`boxes`, saved as `cs`), loot rolled on first opening (`lootOf`), the container screen (D-033) |
 | `src/js/input/touch.js` | Touch controls |
 | `src/js/ui/menus.js` | Hotbar, block menu, overlay and settings |
 | `src/js/ui/save-and-minimap.js` | Saving, worlds (create, switch, delete, export, import) and the minimap |
@@ -93,7 +94,7 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 
 ## Saves
 
-- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v4`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:4, seed, e, spawn, p, hot, mode, inv, hp, food, gv, t}`). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
+- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v8`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:8, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, t, dn}`: `cs` holds container contents and `at` attuned waystones, D-033). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
 - `createWorld`, `switchWorld` (saves, then reloads into the other world), `deleteWorld`, `exportWorld` and `importWorld` live in `ui/save-and-minimap.js`; the pause menu lists the worlds. An exported file is `{format:'fantasy-blockcraft-world', saveKey, world, data}` and only loads under the same `SAVE_KEY`.
 - **Player changes only.** Automatic systems (`flowStep`, `randomTicks`) set `autoEdit`; their changes are recorded only where the player already changed that block, so crops keep their growth while natural water flow, grass spread and snow never grow the save.
 - A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).
@@ -103,7 +104,7 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 
 - **Entities** (`engine/entities.js`): every kind of moving thing registers once with `entityKind({name, list, update?, persist?, shift?, clear?})`. `shiftWindow` calls `shiftEntities`, `regenerateAll` calls `clearEntities` (persistent kinds such as waypoint beams and rain follow the new origin), and the main loop calls `updateEntities` only while playing. Positions are window coordinates, like all physics; `entityWorld(e)` gives world coordinates. New creatures (E1) register the same way.
 - **Input** (`input/actions.js`): `ACTIONS` names every discrete action; `BINDS.keys` (KeyboardEvent codes), `BINDS.pad` (standard-mapping button numbers) and `BINDS.held` (movement, jump, sprint keys) map inputs to them, from `BIND_DEFAULTS` overridden by `settings.binds` (`loadBinds`). Keyboard, controller and touch dispatch through `runAction`; movement reads `keyHeld`. Sticks, triggers, the mouse and menu navigation stay in their own code.
-- **Equipment** (`gameplay/player-and-input.js`): `equip.belt`, `equip.pack`, `equip.bag`. An item fits the slot named by `ITEMS[id].equip`; `equipFrom(i)` and `unequip(slot)` move items; equipment is saved as `eq` and goes to the grave on death. The inventory shows the slots once any item has an `equip` slot.
+- **Equipment** (`gameplay/player-and-input.js`): `equip.belt`, `equip.pack`, `equip.bag`. An item fits the slot named by `ITEMS[id].equip`; `equipFrom(i)` and `unequip(slot)` move items; equipment is saved as `eq` and goes to the grave on death. The inventory shows the slots once any item has an `equip` slot. Since M4b the belt holds the Miner's Lantern (fuel seconds in `d`), and the pack and bag add `ITEMS[id].slots` to `invCap()` (up to `INV_MAX` 63).
 
 ## Holds, the deep and cold lights (M2a)
 

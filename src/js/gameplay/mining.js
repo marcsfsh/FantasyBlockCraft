@@ -13,11 +13,12 @@ function mineInfo(id,tool){
   return{t:b.hard/speed*(ok?1:3.3),drop:ok};
 }
 // The sickle cuts every soft plant within two blocks in one stroke; ripe wheat and potatoes are harvested and replanted
-const SICKLE_CUT=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,WHEAT,POT3]);
+const SICKLE_CUT=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,WHEAT,POT3,TURN2,BEAN2,BERRYB,MUSHB,WTURN]);
+const RIPE={[WHEAT]:[WHEAT0,208],[POT3]:[POT0,209],[TURN2]:[TURN0,330],[BEAN2]:[BEAN0,331]}; // ripe crop: what it is replanted as, and the seed that takes
 function sickleSweep(cx,cy,cz){
   const out=[];
   for(let y=cy-1;y<=cy+1;y++)for(let z=cz-2;z<=cz+2;z++)for(let x=cx-2;x<=cx+2;x++){const id=get(x,y,z);if(!SICKLE_CUT.has(id))continue;
-    const d=dropsFor(id,320);if(id===WHEAT||id===POT3){const seed=id===WHEAT?208:209,q=d.find(e=>e[0]===seed);if(q)q[1]--;setBlock(x,y,z,id===WHEAT?WHEAT0:POT0);}else setBlock(x,y,z,AIR);
+    const d=dropsFor(id,320),rp=RIPE[id];if(rp){const q=d.find(e=>e[0]===rp[1]);if(q)q[1]--;setBlock(x,y,z,rp[0]);}else setBlock(x,y,z,AIR);
     breakFx(x,y,z,id,4);for(const e of d)if(e[1]>0)out.push(e);}
   return out;
 }
@@ -26,7 +27,7 @@ function mineTick(dt){
   const hit=raycast(eyePos(),camDir(),5);
   if(!hit){mineI=-1;mineP=0;crack.visible=false;return;}
   if(hit.id===TNT){prime(hit.x,hit.y,hit.z,4);hold=-1;crack.visible=false;return;}
-  if(hit.id===CRATE||hit.id===DWCHEST||hit.id===BARREL){openCrate(hit.x,hit.y,hit.z);hold=-1;crack.visible=false;return;}
+  if(BOX_IDS.has(hit.id)&&boxBusy(hit.x,hit.y,hit.z)){toast(boxes.has(wkey(hit.x+OX,hit.y,hit.z+OZ))||hit.id===CHEST?'Empty it before you break it':'Open it first (place button)');hold=-1;crack.visible=false;return;}
   const i=I(hit.x,hit.y,hit.z);if(i!==mineI){mineI=i;mineP=0;}
   const info=mineInfo(hit.id,curId());if(!info){crack.visible=false;return;}
   mineP+=info.t<=0?1:dt/info.t;

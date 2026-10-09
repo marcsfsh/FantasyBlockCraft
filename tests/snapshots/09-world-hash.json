@@ -12,7 +12,7 @@
     "light:block-light": "8fc3f85c",
     "plan:terrain-16k": "ad0599a6",
     "plan:city-81x81-cells": "53527697",
-    "blocks:surface:y291-511": "9152832b"
+    "blocks:surface:y291-511": "11e82a5f"
   },
   "123456789": {
     "blocks:fire-below:y0-12": "be3cbddc",
@@ -27,6 +27,6 @@
     "light:block-light": "1202a6f9",
     "plan:terrain-16k": "c3463c34",
     "plan:city-81x81-cells": "15ae469a",
-    "blocks:surface:y291-511": "5f006a6f"
+    "blocks:surface:y291-511": "51110be9"
   }
 }

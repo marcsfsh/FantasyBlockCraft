@@ -49,7 +49,7 @@ def(FLOWY,'Dandelion',[28,28,28],PLANT);
 def(DBUSH,'Bracken',[29,29,29],PLANT);
 const TORCH=43,WAYPT=44;
 def(TORCH,'Torch',[53,53,53],{solid:false,opq:false,occ:false,torch:true,lum:14,emit:true,snd:'wood'});
-def(WAYPT,'Waypoint',[54,54,54],{emit:true,lum:12,snd:'glass'});
+def(WAYPT,'Carved Waystone',[54,54,54],{emit:true,lum:12,snd:'glass'});
 const SPONGE=45,CRYSTAL=46;
 def(SPONGE,'Sponge',[55,55,55],{snd:'soft'});
 def(CRYSTAL,'Cave Crystal',[56,56,56],{solid:false,opq:false,occ:false,cross:true,emit:true,lum:10,snd:'glass'});
@@ -106,11 +106,17 @@ const LADDER=84,ROPE=85,PITON=86,GRAPNEL=87;
 const CLIMB={solid:false,opq:false,occ:false,climb:true,snd:'wood'};
 def(LADDER,'Ladder',[196,196,196],Object.assign({wall:true},CLIMB));def(PITON,'Iron Piton',[198,198,198],Object.assign({wall:true},CLIMB,{snd:'stone'}));
 def(ROPE,'Rope',[197,197,197],Object.assign({cross:true},CLIMB,{snd:'soft'}));def(GRAPNEL,'Grapnel Hook',[199,199,199],Object.assign({wall:true,place:false},CLIMB,{snd:'stone'}));
+// Storage and food (M4b): a chest you can build, two crops (turnips, beans) and wild plants to forage
+const CHEST=88,BERRYB=89,MUSHB=90,WTURN=91,TURN0=108,TURN1=109,TURN2=125,BEAN0=126,BEAN1=128,BEAN2=129;
+def(CHEST,'Oak Chest',[200,200,201],{snd:'wood'});
+def(BERRYB,'Bilberry Bush',[202,202,202],PLANT);def(MUSHB,'Brown Mushroom',[203,203,203],PLANT);def(WTURN,'Wild Turnip',[206,206,206],PLANT);
+[[TURN0,'Turnip Sprouts',204],[TURN1,'Young Turnips',205],[TURN2,'Turnips',206],[BEAN0,'Bean Sprouts',207],[BEAN1,'Young Beans',208],[BEAN2,'Bean Plants',209]]
+  .forEach(([id,n,t])=>def(id,n,[t,t,t],Object.assign({},PLANT,{place:false})));
 const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
 setH([COAL],5,'ore',1);setH([COPO,ZINO],5,'ore',2);setH([TINO,GOLD],5,'ore',3);setH([IRON],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
+setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([CHEST],2,'wood');setH([BERRYB,MUSHB,WTURN,TURN0,TURN1,TURN2,BEAN0,BEAN1,BEAN2],0,'soft');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});

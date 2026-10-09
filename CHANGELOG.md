@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.12.0 (2026-10-09): M4b, storage, the worn lamp, earned travel and food
+
+Old saves do not load: the world changed (foraging plants) and the save key is now `fantasy-blockcraft-save-v8`.
+
+### Game
+- **Chests:** build an Oak Chest (8 planks) and keep things in it. Supply crates, dwarven chests and barrels in the world now keep whatever you leave in them instead of vanishing. Open a container with the place button; the inventory screen shows it above your pack, and tapping a slot moves that stack across. A container must be empty before you can break it.
+- **More room:** a Woven Pack (+9 slots) and a Sturdy Pack (+18, made from a woven one) for the pack slot, and a Satchel (+9) for the bag slot, up to 63 slots.
+- **The worn lamp:** a Miner's Lantern in the belt slot lights the way without taking up your hand. It burns Lamp Oil (20 minutes, pressed from wheat seeds) or Pitch Candles (8 minutes, plant fibre and coal) only while it is dark, taking more from your pack as it runs out. Without it there is no light around you in survival; a torch in hand still lights a smaller circle. The deep caves are darker the further down you go. Creative keeps its lamp.
+- **Earned travel:** R no longer teleports in survival. Touch an Ancient Waystone to attune it; a Carved Waystone (expensive: diamonds, platinum, stone bricks, a rune stone) works as soon as you place it. Stand by a waystone and use it (or T, or the map) to choose where to travel; only waystone to waystone. Creative travels freely as before.
+- **Food:** turnips and beans to plant (as they are) and harvest with the sickle; bilberry bushes on the moors and in the woods, brown mushrooms in the woods, and wild turnips in open country to forage; tall grass sometimes gives beans. Cook roast turnips, pottage, bilberry tart and roast mushrooms at a furnace.
+- The Caves setting's middle option is now called Normal.
+- Fixed: the survival inventory could show the creative block menu after using creative mode (0.11.0).
+
+### Tooling
+- New test 33-survival-systems (containers, packs, lantern fuel, depth light, travel rules, crops, sickle, foraging). 13-survival updated for containers that keep leftovers; 32-items counts the new wild plants. New world-hash snapshot (surface band only).
+
 ## 0.11.0 (2026-10-09): M4a, tools, climbing and finding the way
 
 No change to the world or the save format: 0.10.0 worlds keep working.
