@@ -61,10 +61,10 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 27 | Southern Drylands | Dry and fiery (M6e) | common | hot | dry | low, hills | built | a temple half buried in sand | a dry wadi with an old well | 1.8% | 11 (525) |
 | 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | built | a ruined fire shrine | a smoking cone with a lava lake held in rock | 1.3% | 10 (451) |
 | 29 | Blighted Lands | Dry and fiery (M6e) | uncommon | cool to warm | dry to middling | low, hills | built | a dead lord's ruined hall | grey dead trees and ash pools | 2.1% | 25 (311) |
-| 30 | Crystal Barrens | Strange lands (M6f) | rare | cold to cool | dry | hills, high | Frozen Tundra | a crystal cutters' ruin | crystal spires | 0.3% | 3 (350) |
-| 31 | Glowcap Hollows | Strange lands (M6f) | rare | temperate to warm | wet | low, hills | Shadowed Forest | a mushroom dwelling | giant glowing mushrooms in a hollow | 0.8% | 12 (342) |
-| 32 | Petrified Forest | Strange lands (M6f) | rare | warm to hot | dry | low, hills | Golden Steppe | a waystation turned to stone | trees of stone | 0.7% | 11 (319) |
-| 33 | Starfall Craters | Strange lands (M6f) | rare | cool to warm | dry to middling | low, hills | Heath Moors | a ruined star tower | a crater round a starmetal heart | 0.9% | 15 (323) |
+| 30 | Crystal Barrens | Strange lands (M6f) | rare | cold to cool | dry | hills, high | built | a crystal cutters' ruin | crystal spires | 0.3% | 3 (350) |
+| 31 | Glowcap Hollows | Strange lands (M6f) | rare | temperate to warm | wet | low, hills | built | a mushroom dwelling | giant glowing mushrooms in a hollow | 0.8% | 12 (342) |
+| 32 | Petrified Forest | Strange lands (M6f) | rare | warm to hot | dry | low, hills | built | a waystation turned to stone | trees of stone | 0.7% | 11 (319) |
+| 33 | Starfall Craters | Strange lands (M6f) | rare | cool to warm | dry to middling | low, hills | built | a ruined star tower | a crater round a starmetal heart | 0.9% | 15 (323) |
 | 34 | Overgrown Farmland | Old lands of men (M6g) | uncommon | cool to warm | middling | low | Green Hills | an abandoned manor farm | wild crops in old furrows | 0.5% | 6 (438) |
 | 35 | Wild Orchards | Old lands of men (M6g) | uncommon | temperate to hot | middling | low | Green Hills | an orchard keeper's cottage | rows of gnarled fruit trees | 4.5% | 23 (450) |
 | 36 | Flower Meadows | Old lands of men (M6g) | uncommon | temperate to warm | middling to wet | low | Green Hills | a shrine wreathed in flowers | bands of wildflowers | 0.9% | 12 (331) |

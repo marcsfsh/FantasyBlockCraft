@@ -27,6 +27,7 @@ function hotDeep(x,z,X,Z,ceil){colInfo(X,Z,TVO);if(TVO.wVolc<0.5)return;const co
 function dryBuild(s,r){
   const X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){
+    default:strangeBuild(s,r);break; // the strange lands' signatures (M6f)
     case 'sandtemple':{ // a temple of sandstone half buried in the sand, its doorway dug clear, a barrel left in its hall
       const f=g-4;for(let dx=-6;dx<=6;dx++)for(let dz=-4;dz<=4;dz++){const edge=Math.abs(dx)===6||Math.abs(dz)===4,col=Math.abs(dx)%3===0&&Math.abs(dz)===2;
         for(let y=f-1;y<=g+3;y++){const id=y===f-1||y===f?SANDSTONE:edge?(y===f+3?TERO:SANDSTONE):col&&y<g+3?SANDSTONE:y===g+3?SANDSTONE:AIR;PW(X+dx,y,Z+dz,id,MODE_SET);}}
