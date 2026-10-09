@@ -57,7 +57,7 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 #wmpanel{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--panel);border:3px solid var(--edge);padding:6px 10px;font-size:19px;max-width:94vw}
 #wmpanel button,#wmpanel input{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px;cursor:pointer}
 body.surv .crea-only{display:none!important}
-#gotoseg input,#stampseg select,#stampseg button,#gobtn,#invsearch{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px}
+#gotoseg input,#stampseg select,#stampseg button,#tourseg select,#tourseg button,#gobtn,#invsearch{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px}
 #invsearch{display:block;width:100%;box-sizing:border-box;margin:0 0 8px}
 .fillrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.fillrow button canvas{width:20px;height:20px;image-rendering:pixelated;vertical-align:middle}#lore button.wide.on{border-color:var(--sel);color:var(--sel)}
 #overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(20,26,34,.45);z-index:5;overflow:auto}

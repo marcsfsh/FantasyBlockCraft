@@ -65,7 +65,7 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 #wmpanel{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--panel);border:3px solid var(--edge);padding:6px 10px;font-size:19px;max-width:94vw}
 #wmpanel button,#wmpanel input{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px;cursor:pointer}
 body.surv .crea-only{display:none!important}
-#gotoseg input,#stampseg select,#stampseg button,#gobtn,#invsearch{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px}
+#gotoseg input,#stampseg select,#stampseg button,#tourseg select,#tourseg button,#gobtn,#invsearch{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px}
 #invsearch{display:block;width:100%;box-sizing:border-box;margin:0 0 8px}
 .fillrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.fillrow button canvas{width:20px;height:20px;image-rendering:pixelated;vertical-align:middle}#lore button.wide.on{border-color:var(--sel);color:var(--sel)}
 #overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(20,26,34,.45);z-index:5;overflow:auto}
@@ -184,6 +184,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <label class="crea-only">Time of day <input type="range" id="todr" min="0" max="24" step="0.5" value="12"></label>
     <div class="seg crea-only" id="wxnow">Sky <button data-v="rain">Rain now</button><button data-v="clear">Clear now</button></div>
     <div class="seg crea-only" id="gotoseg">Go to <input id="gox" placeholder="X" size="6" autocomplete="off"><input id="goz" placeholder="Z" size="6" autocomplete="off"><input id="goy" placeholder="Y (optional)" size="9" autocomplete="off"><button id="gobtn">Go</button></div>
+    <div class="seg crea-only" id="tourseg">Land tour <select id="toursel"></select><button id="tourbtn">Go to the nearest</button></div>
     <div class="seg crea-only" id="stampseg">Test structure <select id="stampsel"></select><button id="stampbtn">Build where you look</button></div>
     <div class="seg" id="hudseg">Readout <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="hintseg">Hints <button data-v="1">On</button><button data-v="0">Off</button></div>
@@ -209,20 +210,20 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v9',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v10',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 // Worlds: an index under SAVE_KEY ({active, list:[{id,name,seed,mode,created,played}]}) and each world's data under SAVE_KEY+':'+id.
 // Bumping SAVE_KEY retires every world: saves always yield to updates (D-019).
-for(const k of ['fantasy-blockcraft-save-v1','fantasy-blockcraft-save-v2','fantasy-blockcraft-save-v3','fantasy-blockcraft-save-v4','blockcraft-nextseed'])lsDel(k); // retired formats: free their storage
+lsDel('blockcraft-nextseed');try{for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.startsWith('fantasy-blockcraft-save-v')&&k!==SAVE_KEY&&!k.startsWith(SAVE_KEY+':'))localStorage.removeItem(k);}}catch(e){} // retired formats and their worlds: free their storage
 const worldKey=id=>SAVE_KEY+':'+id;
 function worldIndex(){const x=lsGet(SAVE_KEY);return x&&Array.isArray(x.list)?x:{active:null,list:[]};}
 function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Math.random()*1679616|0).toString(36),name:name,seed:seed||((Math.random()*2147483000|0)+1),mode:mode==='creative'?'creative':'survival',created:Date.now(),played:Date.now()};}
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===9&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const saved=(d=>d&&d.v===10&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -406,13 +407,13 @@ def(CHEST,'Oak Chest',[200,200,201],{snd:'wood'});
 def(BERRYB,'Bilberry Bush',[202,202,202],PLANT);def(MUSHB,'Brown Mushroom',[203,203,203],PLANT);def(WTURN,'Wild Turnip',[206,206,206],PLANT);
 [[TURN0,'Turnip Sprouts',204],[TURN1,'Young Turnips',205],[TURN2,'Turnips',206],[BEAN0,'Bean Sprouts',207],[BEAN1,'Young Beans',208],[BEAN2,'Bean Plants',209]]
   .forEach(([id,n,t])=>def(id,n,[t,t,t],Object.assign({},PLANT,{place:false})));
-const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
+const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
 setH([COAL],5,'ore',1);setH([COPO,ZINO],5,'ore',2);setH([TINO,GOLD],5,'ore',3);setH([IRON],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
 setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([CHEST],2,'wood');setH([BERRYB,MUSHB,WTURN,TURN0,TURN1,TURN2,BEAN0,BEAN1,BEAN2],0,'soft');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
-const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
+const OPQ=new Uint8Array(NID),LUM=new Uint8Array(NID),SOLID=new Uint8Array(NID);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
 const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Fens'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
@@ -456,7 +457,7 @@ item(341,'Woven Pack','pack',[150,170,96],{equip:'pack',slots:9,one:true});item(
 const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
 // Held to use once per press: holding the button does not repeat it
 const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
-const isItem=id=>id>=200;
+const isItem=id=>id>=200&&id<1024; // blocks are 0 to 199 and 1024 up (M6a, two bytes per block)
 function nameOf(id){return isItem(id)?ITEMS[id].n:isTool(id)?TOOLS[id][0]:BL[id].n;}
 const iconCache={};
 function itemIcon(id){
@@ -715,8 +716,8 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
 const TAVG=[];
 for(let t=0;t<AC*AR;t++){let r=0,g=0,b=0,n=0;for(let y=0;y<16;y++)for(let x=0;x<16;x++){const i=((((t/AC)|0)*16+y)*AW+(t%AC)*16+x)*4;if(dat[i+3]>100){r+=dat[i];g+=dat[i+1];b+=dat[i+2];n++;}}n=n||1;TAVG[t]=[r/n/255,g/n/255,b/n/255];}
 
-// World data
-const entCol=new Uint8Array(W*D),world=new Uint8Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1);
+// World data. Two bytes per block since M6a (Q120): block ids run 0 to 199 and from 1024 up (NID), items 200 to 1023.
+const entCol=new Uint8Array(W*D),world=new Uint16Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1);
 const I=(x,y,z)=>x+W*(z+D*y);
 function get(x,y,z){return(x<0||z<0||y<0||x>=W||z>=D||y>=H)?0:world[x+W*(z+D*y)];}
 
@@ -725,36 +726,38 @@ function get(x,y,z){return(x<0||z<0||y<0||x>=W||z>=D||y>=H)?0:world[x+W*(z+D*y)]
 let OX=-W/2,OZ=-D/2;
 function hsh(a,b,c){let h=(Math.imul(a|0,374761393)+Math.imul(b|0,668265263)+Math.imul(c|0,1274126177)+Math.imul(SEED,1442695041))|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296;}
 function rngAt(a,b,c){return mkRng(1+Math.floor(hsh(a,b,c)*2147483640));}
-const T={},T2={},T3={},TTP={},TP={};
+const T={},T2={},T3={},TTP={},TP={},TGC={};
 function colInfoBase(X,Z,o){
-  const jit=fbm2(X/48,Z/48,2,977.1)*0.03; // organic edges between lands
-  const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),mtn=fbm2(X/360,Z/360,2,73.1)+jit*0.6,rid=fbm2(X/40,Z/40,2,91.4);
-  const temp=fbm2(X/1100,Z/1100,2,151.9)+jit,hum=fbm2(X/900,Z/900,2,701.9)+jit;
+  // Lands (M6a, D-039) come from the land layout (lands.js): the weights of nearby lands by look shape the ground below, so each
+  // old land keeps its look and lands blend across their borders.
+  landsAt(X,Z,o);
+  const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),rid=fbm2(X/40,Z/40,2,91.4);
   // Most land is gentle: rolling hills only where the "hilliness" field allows them
   const rough=sstep(-0.05,0.22,fbm2(X/420,Z/420,2,881.3));
-  let h=SEA+6+cont*34+hill*(3+9*rough); // smooth: no fine bumps outside the lands that call for them (Q91)
-  const mf=sstep(0.08,0.32,mtn);
+  let h=SEA+6+Math.max(-0.1,cont)*34+hill*(3+9*rough); // smooth: no fine bumps outside the lands that call for them (Q91)
+  const mf=o.w5;
   // Mountain ranges (Q90): long ridgelines with valleys between, saddles where a range can be crossed, and the high peaks only
   // on the ridges at the hearts of the ranges (the world is 512 tall, D-023)
   let ridge=0;
   if(mf>0){const rg=1-Math.abs(fbm2(X/230,Z/230,3,91.7)),pass=0.5+0.5*sstep(-0.3,0.3,fbm2(X/420,Z/420,1,93.1));ridge=rg*rg*rg*pass;
     h+=mf*mf*(24+46*ridge)+mf*fbm2(X/34,Z/34,2,95.3)*2.5;
-    const pk=sstep(0.22,0.5,mtn)*sstep(0.35,0.8,ridge);if(pk>0)h+=pk*pk*(60+40*fbm2(X/170,Z/170,1,7301.3));}
-  const warmF=sstep(-0.26,-0.14,temp),sw=sstep(0.04,0.2,hum)*sstep(-0.08,0.04,temp)*(1-mf); // sw: damp, mild shadowed forest
-  const dw=sstep(0.02,0.26,temp)*(1-mf)*(1-sw);
+    const pk=sstep(30,150,o.mdep)*sstep(0.35,0.8,ridge);if(pk>0)h+=pk*pk*(60+40*fbm2(X/170,Z/170,1,7301.3));}
+  const warmF=1-o.w6,sw=o.w8,dw=o.w4+o.w7; // sw: damp, mild shadowed forest; warmF: not the cold fells
   h=h*(1-dw)+(SEA+14+hill*9+Math.abs(rid)*6)*dw; // heath moors: open uplands
-  const bw=dw*sstep(-0.1,0.1,fbm2(X/420,Z/420,2,601.1));
+  const bw=o.w7;
   if(bw>0.01)h=h*(1-bw)+(SEA+10+hill*12+cont*4)*bw; // barrow hills: smooth grassy downs
-  const pw=sstep(-0.02,0.16,fbm2(X/1100,Z/1100,2,3901.7))*(1-mf)*(1-dw)*warmF*(1-sw);
+  const pw=o.w10;
   if(pw>0.01)h=h*(1-pw)+(SEA+7+hill*3+cont*5)*pw;
-  const fen=sstep(0.08,0.3,fbm2(X/800,Z/800,2,4101.3))*(1-mf)*(1-dw)*warmF; // fens: low wet ground with pools
+  const fen=o.w11; // fens: low wet ground with pools
   if(fen>0.01){const pool=fbm2(X/13,Z/13,2,4107.9)>0.1;h=h*(1-fen)+(pool&&fen>0.6?SEA-1:SEA+1+hill*1.5)*fen;}
-  const fwd=sstep(-0.1,0.14,fbm2(X/520,Z/520,2,201.3)+jit); // elder wood against green hills
+  const fwd=o.w3/(o.w2+o.w3+1e-6); // elder wood against green hills
   const open=(1-mf)*(1-dw)*(1-pw)*(1-fen)*(1-sw)*warmF;
   h+=open*(1-fwd)*fbm2(X/80,Z/80,2,4601.3)*7;   // green hills: soft rolling swells
   h+=open*fwd*fbm2(X/56,Z/56,1,4613.1)*3.5;     // elder wood: uneven old ground
   h+=sw*fbm2(X/22,Z/22,2,4607.9)*3;             // shadowed forest: hummocks and hollows
   h+=pw*fbm2(X/140,Z/140,1,4619.7)*3;           // windswept plains: long low waves
+  // the sea: lands fall away to its floor across the coast blend
+  if(o.wS>0)h=h*(1-o.wS)+(SEA-9-Math.abs(fbm2(X/300,Z/300,2,8301.1))*26+hill*3)*o.wS;
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
   const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SEA-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief)),vw=rw+Math.min(0.24,relief*0.0075);
@@ -764,17 +767,27 @@ function colInfoBase(X,Z,o){
     const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
   h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
-  // Lands meet in a wide blend (Q92): heights blend through the weights, and which land a column belongs to is decided
-  // against a patchy threshold, so trees, ground and snow mix over a band instead of stopping on a line.
-  const dth=fbm2(X/16,Z/16,1,2711.3)*0.4,tw=0.5+dth,cold=temp<-0.2+dth*0.1;
+  // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
+  const cold=o.tb===0,lk=LANDS[o.land].look;
   let b;
-  if(fen>tw&&h>=SEA-2&&!cold)b=11;else if(h<SEA)b=0;else if(dw>tw)b=bw>tw?7:4;else if(mf>0.8&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;else if(cold)b=6;else if(sw>tw)b=8;else if(pw>tw)b=10;else b=fwd>tw?3:2;
+  if(lk===11&&h>=SEA-2)b=11;else if(h<SEA)b=0;else if(lk===4||lk===7)b=lk;else if(lk===5&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;
+  else if(lk===0||lk===5)b=cold?6:2;else b=lk;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
   o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SEA+3;o.mf=mf;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
-  const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
-  const rf=rv<0.008&&!o.wet?fbm2(X/180,Z/180,2,433.7):0; // ravines: deep enough to cut into the crawlways, sloping in at their ends (Q22)
-  o.rvBot=rf>0.28?Math.max(SEA-56,h-Math.round(3+(5+(1-rv/0.012)*58)*sstep(0.28,0.4,rf))):999;
+  // Gorges (M6a, Q137; once the hairline ravines of M2b): fewer and wider, along a slow noise line where the land allows them.
+  // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
+  // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
+  o.rvBot=999;
+  if(!o.wet&&!o.river&&o.gz>0.05){
+    const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
+    if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
+      // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
+      const gx=(fbm2((X+2)/150,Z/150,2,401.1)-fbm2((X-2)/150,Z/150,2,401.1))/4,gzz=(fbm2(X/150,(Z+2)/150,2,401.1)-fbm2(X/150,(Z-2)/150,2,401.1))/4,g2=Math.max(1e-9,gx*gx+gzz*gzz);
+      const d=av/Math.sqrt(g2),cX=X-gv*gx/g2,cZ=Z-gv*gzz/g2;landsAt(cX,cZ,TGC);
+      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SEA+4,SEA+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
+      if(rf>0){const WT=8+12*rf,WF=3.5,Dm=8+52*rf;
+        if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SEA-56,h-dep);}}}}
   return o;
 }
 const colCache=new Map();
@@ -791,8 +804,8 @@ function lakeAt(X,Z){
   let lk=null;const r=rngAt(gx,2501,gz);
   if(r()<0.4){
     const cx=gx*LG+24+(r()*48|0),cz=gz*LG+24+(r()*48|0),R=8+r()*10,b=colInfoBase(cx,cz,TL),L=b.h-1;
-    if(![0,1,5,7].includes(b.b)&&!b.river&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
-      let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;if(colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL).h<L)ok=false;}
+    if(![0,1,5,7].includes(b.b)&&!b.river&&b.rvBot===999&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
+      let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;{const e=colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL);if(e.h<L||e.rvBot<999)ok=false;}}
       if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L};
     }
   }
@@ -807,6 +820,178 @@ function colInfoCompute(X,Z,o){
   return o;
 }
 function carved(X,y,Z,o){return y>=o.rvBot;}
+// ---- Lands (M6a, D-039; Q108, Q118, Q119, Q124, Q131): the registry of every land, the transition map of which lands may
+// border which, and the layout. The world is cut into cells about LS blocks across (jittered, with warped, organic edges); each
+// cell takes one land from the climate at its centre (warmth, damp, relief, sea or coast), never one that may not border a
+// neighbour, and often adopts a neighbour's common land, so common lands grow large and rare ones stay single cells.
+// A land not built yet stands in with the look of a built land (look: the old biome id), so the layout holds when its family
+// arrives in M6b to M6h. The Grey Shore and Lakes are edges, not areas: the shore where any land meets the sea, lakes inside lands.
+// Warmth bands: 0 cold, 1 cool, 2 temperate, 3 warm, 4 hot. Damp: 0 dry, 1 middling, 2 wet. Relief (bits): 1 low, 2 hills, 4 high.
+const LAND_FAM={kept:'Old lands',forest:'Forests (M6b)',high:'Highlands and cold (M6c)',coast:'Coasts and waters (M6d)',dry:'Dry and fiery (M6e)',strange:'Strange lands (M6f)',men:'Old lands of men (M6g)'};
+const TIERS=['','common','uncommon','rare'],TIER_W=[0,6,2,1];
+const LANDS=[];
+// k key, n name, fam family, tier, t warmth range, m damp range, r relief bits, look (old biome id drawn until built),
+// p naming people, s signature [landmark structure, natural feature]; o: sea (a sea land), coast (only beside the sea),
+// built (has its own look now), never (keys it may not border), gorge (how often gorges cut it, 0 to 1), was (old land it replaces)
+function land(k,n,fam,tier,t,m,r,look,p,s,o){LANDS.push(Object.assign({k:k,n:n,fam:fam,tier:tier,t:t,m:m,r:r,look:look,p:p,s:s,sea:false,coast:false,built:false,never:[],gorge:0.4},o||{}));}
+// the old lands (built)
+land('sea','The Western Sea','kept',1,[0,4],[0,2],7,0,'human',['a wreck on the shoals','sea stacks'],{sea:true,built:true,gorge:0});
+land('green','Green Hills','kept',1,[1,3],[1,1],3,2,'halfling',['an earthwork hill fort','a lone great oak on a knoll'],{built:true,gorge:0.3});
+land('elder','Elder Wood','kept',1,[2,3],[1,2],1,3,'woodelf',['a moss-grown woodland shrine','a hollow elder you can walk into'],{built:true});
+land('moors','Heath Moors','kept',1,[1,2],[0,1],3,4,'human',['a watch cairn on a tor','granite tors'],{built:true,gorge:0.8});
+land('mtn','High Mountains','kept',1,[0,3],[0,2],4,5,'dwarf',['a gatehouse in a high pass','a high tarn under the peaks'],{built:true,gorge:1});
+land('barrow','Barrow Hills','kept',2,[1,2],[0,1],3,7,'human',['a great chambered barrow','long rows of standing stones'],{built:true,gorge:0.3});
+land('shadow','Shadowed Forest','kept',2,[2,4],[2,2],3,8,'drow',['a temple sunk among the roots','a fallen giant spanning a hollow'],{built:true,gorge:0.5});
+// old lands reworked into new ones (Q119): until their family is built they keep the old look and name
+land('steppe','Golden Steppe','dry',1,[2,4],[0,0],3,10,'beastfolk',['a ring of horse stones','a lone rock outcrop over the grass'],{was:'Windswept Plains',gorge:0.3});
+land('willow','Willow Vales','forest',1,[2,3],[2,2],1,11,'halfling',['a stilt house over the water','willow-ringed pools with islets'],{was:'Fens',gorge:0});
+land('tundra','Frozen Tundra','high',1,[0,0],[0,1],3,6,'dwarf',['a frozen longhouse','frost mounds and ice wedges'],{was:'Northern Fells',gorge:0.6});
+// forests (M6b)
+land('autumn','Autumn Woods','forest',1,[1,2],[1,1],3,3,'woodelf',['a woodcutters\' lodge','a red-leaf glade around a still pond']);
+land('birch','Birch Glades','forest',1,[1,2],[1,2],3,3,'woodelf',['a birch-bark shrine','a ring of white birches round a clearing']);
+land('pine','Pine Highlands','forest',1,[0,1],[1,2],6,6,'dwarf',['a timber watch post','a lookout rock above the pines'],{gorge:0.7});
+land('giant','Ancient Giant Wood','forest',3,[2,3],[2,2],1,3,'highelf',['a platform ruin high in a giant tree','a giant tree over forty blocks tall'],{never:['blight']});
+land('yew','Yew Wood','forest',2,[1,2],[1,2],3,8,'woodelf',['a ruined archers\' hall','an ancient hollow yew']);
+land('silver','Silverwood','forest',2,[1,2],[1,2],3,3,'highelf',['a moon-gate arch','a silver-leaf grove round a spring'],{never:['blight','volcanic']});
+// highlands and cold (M6c)
+land('alpine','Alpine Meadows','high',2,[0,2],[1,2],4,5,'dwarf',['a shepherd\'s hut on the high pasture','a meadow tarn under a peak'],{gorge:0.8});
+land('glacier','Glacier Fields','high',2,[0,0],[0,2],4,5,'dwarf',['a tower bound in the ice','crevasses and ice caves'],{gorge:0.6});
+land('cloud','Cloud Forest Heights','high',2,[2,4],[1,2],4,5,'woodelf',['a mist shrine on a crag','mossy falls into the cloud'],{gorge:0.8});
+land('karst','Karst Crags','high',2,[1,3],[0,1],6,4,'gnome',['a hermitage in a cliff','a great sinkhole into the caves'],{gorge:1});
+// coasts and waters (M6d)
+land('chalk','Chalk Cliffs','coast',2,[1,3],[0,2],3,2,'human',['a beacon tower on the cliff top','a chalk sea arch'],{coast:true,gorge:0.3});
+land('isles','Rocky Isles','coast',2,[0,4],[0,2],7,0,'human',['a ruined chapel on an isle','sea arches and stacks'],{sea:true,coast:true,gorge:0});
+land('fjord','Fjords','coast',2,[0,1],[0,2],6,5,'dwarf',['a boathouse at a fjord\'s head','a fall from the fjord wall'],{coast:true,gorge:0.8});
+land('blacksand','Black Sand Shores','coast',2,[2,4],[0,2],1,10,'human',['a black-stone harbour wall','basalt columns on the shore'],{coast:true,gorge:0});
+land('kelp','Kelp Shallows','coast',2,[2,4],[0,2],7,0,'human',['a sunken causeway','kelp forests'],{sea:true,coast:true,gorge:0});
+land('bog','Raised Bogs','coast',2,[0,2],[2,2],1,11,'halfling',['an old plank trackway across the bog','a domed bog with pools and cotton grass'],{gorge:0});
+// dry and fiery (M6e)
+land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple half buried in sand','a dry wadi with an old well'],{gorge:0.6});
+land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8});
+land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver']});
+// strange lands (M6f)
+land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires']);
+land('glowcap','Glowcap Hollows','strange',3,[2,3],[2,2],3,8,'gnome',['a mushroom dwelling','giant glowing mushrooms in a hollow']);
+land('petrified','Petrified Forest','strange',3,[3,4],[0,0],3,10,'beastfolk',['a waystation turned to stone','trees of stone']);
+land('starfall','Starfall Craters','strange',3,[1,3],[0,1],3,4,'highelf',['a ruined star tower','a crater round a starmetal heart']);
+// old lands of men (M6g)
+land('farm','Overgrown Farmland','men',2,[1,3],[1,1],1,2,'human',['an abandoned manor farm','wild crops in old furrows'],{gorge:0.1});
+land('orchard','Wild Orchards','men',2,[2,4],[1,1],1,2,'halfling',['an orchard keeper\'s cottage','rows of gnarled fruit trees'],{gorge:0.1});
+land('flower','Flower Meadows','men',2,[2,3],[1,2],1,2,'halfling',['a shrine wreathed in flowers','bands of wildflowers'],{gorge:0.1});
+land('terrace','Old Terraces','men',2,[2,4],[0,1],2,2,'human',['a terraced village ruin','stone-walled terraces down a hillside'],{gorge:0.2});
+const LAND_I={};LANDS.forEach((L,i)=>{L.i=i;LAND_I[L.k]=i;});
+// What a land shows as until it is built: its own name, or the old land it stands in for
+const landShown=L=>L.built?L.n:L.was||BIOMES[L.look];
+// ---- The transition map: two lands may border if their warmth bands are at most one apart, their damp at most one apart,
+// and neither names the other in its never list. A land may always border itself.
+const bandGap=(a,b)=>Math.max(0,b[0]-a[1],a[0]-b[1]);
+function landsMeet(a,b){if(a===b)return true;const A=LANDS[a],B=LANDS[b];
+  return bandGap(A.t,B.t)<=1&&bandGap(A.m,B.m)<=1&&!A.never.includes(B.k)&&!B.never.includes(A.k);}
+const LAND_MEET=LANDS.map((_,a)=>LANDS.map((_,b)=>landsMeet(a,b)));
+// ---- Cells: a site per cell (jittered by up to a quarter cell), the climate at the site, and the land
+const LS=320,LCELL=new Map(),landKey=(i,j)=>(i+32768)*65536+(j+32768);
+function landClimate(X,Z){
+  const C=fbm2(X/1700,Z/1700,3,11.3),T=fbm2(X/4200,Z/4200,2,151.9),M=fbm2(X/3200,Z/3200,2,701.9),R=fbm2(X/1500,Z/1500,2,73.1);
+  return{sea:C<-0.17,tb:T<-0.24?0:T<-0.09?1:T<0.09?2:T<0.24?3:4,mb:M<-0.12?0:M<0.12?1:2,rb:R>0.17?4:R>0.0?2:1};
+}
+function landSite(i,j){
+  const key=landKey(i,j);let c=LCELL.get(key);if(c)return c;if(LCELL.size>60000)LCELL.clear();
+  const x=(i+0.5+(hsh(i,8101,j)-0.5)*0.5)*LS,z=(j+0.5+(hsh(i,8103,j)-0.5)*0.5)*LS;
+  c={i:i,j:j,x:x,z:z,cl:landClimate(x,z),pr:hsh(i,8111,j),L:-1,coastal:null};LCELL.set(key,c);return c;
+}
+const LN8=[[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+function cellCoastal(c){if(c.coastal===null){c.coastal=false;for(const [a,b] of LN8)if(landSite(c.i+a,c.j+b).cl.sea!==c.cl.sea){c.coastal=true;break;}}return c.coastal;}
+// How badly a land fits a cell's climate (lower is better); Infinity where it cannot go at all
+function landFit(L,c){
+  const cl=c.cl;if(L.sea!==cl.sea)return Infinity;if(L.coast&&!cellCoastal(c))return Infinity;
+  return bandGap(L.t,[cl.tb,cl.tb])*3+bandGap(L.m,[cl.mb,cl.mb])+((L.r&cl.rb)?0:1.5);
+}
+// The land of a cell. Neighbours with a higher priority are settled first; this cell then keeps a land every one of them may
+// border. Settled neighbours' common lands spread to it eight times in ten when they suit its climate (uncommon ones two in ten).
+function cellLand(c){
+  if(c.L>=0)return c.L;
+  const hi=[];for(const [a,b] of LN8){const n=landSite(c.i+a,c.j+b);if(n.pr>c.pr)hi.push(cellLand(n));}
+  // a land a settled diagonal neighbour has, where neither cell between them has it, would meet it only at a corner (a pinch)
+  const pinch=new Set();for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const d=landSite(c.i+a,c.j+b),e1=landSite(c.i+a,c.j),e2=landSite(c.i,c.j+b);
+    if(d.pr>c.pr&&e1.pr>c.pr&&e2.pr>c.pr){const L=cellLand(d);if(cellLand(e1)!==L&&cellLand(e2)!==L)pinch.add(L);}}
+  const ok=L=>hi.every(h=>LAND_MEET[L][h])&&!pinch.has(L);
+  let best=Infinity;const fit=LANDS.map(L=>{const f=landFit(L,c);if(f<best)best=f;return f;});
+  const cand=LANDS.filter((L,k)=>fit[k]<=best);
+  // bridge a corner: where two settled side neighbours share a land and the settled cell diagonally between them does not, the
+  // two would meet only at a point, so this cell takes their land when it can
+  for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const e1=landSite(c.i+a,c.j),e2=landSite(c.i,c.j+b),d=landSite(c.i+a,c.j+b);
+    if(e1.pr>c.pr&&e2.pr>c.pr&&d.pr>c.pr){const L=cellLand(e1);if(cellLand(e2)===L&&cellLand(d)!==L&&fit[L]<Infinity&&ok(L))return c.L=L;}}
+  // adopt a neighbour's land
+  const ad=hsh(c.i,8123,c.j);
+  for(const h of hi){const L=LANDS[h];if(fit[h]<=best+0.5&&(L.tier===1?ad<0.8:L.tier===2?ad<0.2:false)&&ok(h))return c.L=h;}
+  // or draw one by tier from the best fits, then from any land that fits at all, keeping only lands the neighbours may border
+  const draw=list=>{let tot=0;for(const L of list)tot+=TIER_W[L.tier];let u=hsh(c.i,8127,c.j)*tot;for(const L of list){u-=TIER_W[L.tier];if(u<=0)return L.i;}return list.length?list[list.length-1].i:-1;};
+  let L=draw(cand.filter(x=>ok(x.i)));
+  if(L<0){const any=LANDS.filter((x,k)=>fit[k]<Infinity&&ok(k)).sort((a,b)=>fit[a.i]-fit[b.i]);if(any.length)L=draw(any.filter(x=>fit[x.i]<=fit[any[0].i]));}
+  if(L<0){const any=LANDS.filter((x,k)=>fit[k]<Infinity&&hi.every(h=>LAND_MEET[k][h]));if(any.length)L=draw(any);}
+  if(L<0)L=draw(cand); // nothing may border every neighbour: keep the best fit (the tests check this never happens)
+  return c.L=L;
+}
+// ---- Per column: the blend of nearby cells. Each cell's weight falls from 1 at the border to 0 at blend/2 blocks inside the
+// next cell; weights are added up by look for the terrain, and the column's land is the heaviest one, chosen against a patchy
+// threshold near borders so lands mix over the band (Q92). Mountains and the sea blend wider.
+const LOOK_BLEND=[110,70,70,70,110,220,70,110,70,70,70,70],LW=new Float64Array(LANDS.length),LWL=new Float64Array(12),LSC=[];
+for(let k=0;k<16;k++)LSC.push({c:null,d:0});
+function landsAt(X,Z,o){
+  const wx=X+fbm2(X/280,Z/280,1,8201.3)*45+fbm2(X/60,Z/60,1,8203.9)*5,wz=Z+fbm2(X/280,Z/280,1,8207.1)*45+fbm2(X/60,Z/60,1,8209.7)*5; // never folds over
+  const ci=Math.floor(wx/LS-0.5),cj=Math.floor(wz/LS-0.5);let n=0,d1=Infinity,c1=null;
+  for(let b=-1;b<=2;b++)for(let a=-1;a<=2;a++){const c=landSite(ci+a,cj+b),d=Math.hypot(wx-c.x,wz-c.z),s=LSC[n++];s.c=c;s.d=d;if(d<d1){d1=d;c1=c;}}
+  LW.fill(0);LWL.fill(0);let wsea=0,wall=0,wland=0;
+  let dm=Infinity,dn=Infinity;
+  for(let k=0;k<n;k++){const s=LSC[k],L=LANDS[cellLand(s.c)],lk=L.look;
+    if(lk===5){if(s.d<dm)dm=s.d;}else if(s.d<dn)dn=s.d;
+    const w=sstep(LOOK_BLEND[lk],0,s.d-d1);if(w<=0)continue; // each cell's own width, so weights never jump where the nearest cell changes
+    LW[L.i]+=w;wall+=w;if(L.sea)wsea+=w;else{LWL[lk]+=w;wland+=w;}}
+  o.wS=wsea/wall;for(let k=0;k<12;k++)LWL[k]=wland>0?LWL[k]/wland:0;
+  o.w2=LWL[2];o.w3=LWL[3];o.w4=LWL[4];o.w5=LWL[5];o.w6=LWL[6];o.w7=LWL[7];o.w8=LWL[8];o.w10=LWL[10];o.w11=LWL[11];
+  o.area=c1.L; // the land of the cell the column lies in: the layout before border mixing (maps, sizes, the transition map)
+  o.mdep=dm<Infinity?(dn-dm)/2:-999; // how far inside a mountain land (blocks), for the high peaks at its heart
+  // the column's land: the heaviest, or the second against a patchy threshold
+  let a1=-1,a2=-1;for(let k=0;k<LW.length;k++){if(!LW[k])continue;if(a1<0||LW[k]>LW[a1]){a2=a1;a1=k;}else if(a2<0||LW[k]>LW[a2])a2=k;}
+  const dth=fbm2(X/16,Z/16,1,2711.3)*0.4;
+  o.land=a2>=0&&LW[a2]/(LW[a1]+LW[a2])>0.5+dth?a2:a1;
+  let g=0;for(let k=0;k<LW.length;k++)if(LW[k])g+=LW[k]*LANDS[k].gorge;o.gz=g/wall;
+  // the cell the column's land comes from (the nearest of that land), for its name and climate
+  let bc=null,bd=Infinity;for(let k=0;k<n;k++){const s=LSC[k];if(s.c.L===o.land&&s.d<bd){bd=s.d;bc=s.c;}}
+  o.lcell=landKey(bc.i,bc.j);o.tb=bc.cl.tb;
+  return o;
+}
+// ---- Stretch names (Q131): each stretch of a land has its own name in its people's style. Neighbouring cells of the same land
+// share the name of the highest-priority cell among them, so a stretch spans a few cells.
+const LNAME=new Map();
+function stretchCell(c){let best=c;for(const [a,b] of LN8){const n=landSite(c.i+a,c.j+b);if(cellLand(n)===cellLand(c)&&n.pr>best.pr)best=n;}return best===c?c:stretchCell(best);}
+function stretchName(key){
+  let s=LNAME.get(key);if(s)return s;if(LNAME.size>20000)LNAME.clear();
+  const i=Math.floor(key/65536)-32768,j=key%65536-32768,c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];
+  const w=nameWord(L.p,rngAt(c.i,8131,c.j)),base=landShown(L);
+  s=L.sea?'The Sea of '+w:(base.startsWith('The ')?base.slice(4):base)+' of '+w;LNAME.set(key,s);return s;
+}
+// The name the readout shows on open land: the stretch's name, or the edge it is on (the Grey Shore, a lake, open sea)
+const TLN={};
+function landPlaceName(X,Z){colInfo(X,Z,TLN);if(TLN.lake)return BIOMES[9];if(TLN.b===1)return BIOMES[1];if(TLN.b===0&&!LANDS[TLN.land].sea)return BIOMES[0];return stretchName(TLN.lcell);}
+// Where a new world starts (M6a): the nearest cell centre of a built land that is open lowland (not sea, mountains or fens),
+// on dry ground, searching outward from X 0, Z 0; the window is centred there before generation
+function landSpawn(){
+  const o={};let best=null,bd=Infinity;
+  for(let r=0;r<=6&&!best;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(a,b),L=LANDS[cellLand(c)];
+    if(L.sea||!L.built||L.look===5||L.look===11)continue;const X=Math.round(c.x),Z=Math.round(c.z);colInfo(X,Z,o);
+    if(o.h<SEA+3||o.wet||o.lake||o.river||o.b===0||o.b===9)continue;const d=Math.hypot(X,Z);if(d<bd){bd=d;best=[X,Z];}}
+  return best||[0,0];
+}
+// The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells
+function nearestLand(k,X,Z,rmax){
+  const ci=Math.floor(X/LS),cj=Math.floor(Z/LS);let best=null,bd=Infinity;
+  for(let r=0;r<=rmax;r++){
+    for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
+      if(cellLand(c)!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
+    if(best&&bd<(r-1)*LS)break;}
+  return best?{X:Math.round(best.x),Z:Math.round(best.z),d:Math.round(bd)}:null;
+}
 // ---- Cave systems (M3.5a, D-028): planned in place of noise. Each region of CR x CR chunks holds one main system and sometimes
 // a smaller one: a trunk that winds down from an entrance on a hillside, through the depths, to the Fire Below, with branches
 // that end in chambers, some loops back into the trunk, and chambers along the way. Passages meet only at their nodes and keep
@@ -3299,7 +3484,7 @@ function meshFloor(x0,z0){
   for(let z=Math.max(0,z0-1);z<=Math.min(D-1,z0+CS);z++)for(let x=Math.max(0,x0-1);x<=Math.min(W-1,x0+CS);x++){const h=hm[x+W*z];if(h<ms)ms=h;}
   return Math.max(lo,ms-MESH_DEEP);
 }
-const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
+const MP=CS+2,MID=new Uint16Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
 function buildChunk(cx,cz){
   const O=newM(),Wt=newM();
   const x0=cx*CS,z0=cz*CS,s1=[0,0,0],s2=[0,0,0];
@@ -3826,9 +4011,9 @@ function handGeo(id){
 }
 function updateHand(){
   const id=curId();hand.geometry.dispose();
-  if(id>0&&id<200){hand.geometry=handGeo(id);hand.visible=!photo;handItem.visible=false;}
+  if(id>0&&!isItem(id)){hand.geometry=handGeo(id);hand.visible=!photo;handItem.visible=false;}
   else{hand.geometry=new THREE.BufferGeometry();hand.visible=false;
-    if(id>=200){handItem.material.map=itemTex(id);handItem.material.needsUpdate=true;handItem.visible=!photo;}else handItem.visible=false;}
+    if(isItem(id)){handItem.material.map=itemTex(id);handItem.material.needsUpdate=true;handItem.visible=!photo;}else handItem.visible=false;}
 }
 
 // Input
@@ -4143,7 +4328,7 @@ function lampLevel(){
   const adj=LAMP_ADJ[settings.cave||0]||0;
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
   const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
-  const h=curId(),lum=h&&h<200&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];
+  const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
@@ -4543,7 +4728,7 @@ if(saved&&Array.isArray(saved.mk))for(const [X,Z,n,c] of saved.mk)markers.push({
 const mapSave=()=>({ex:exPack(),pl:places.map(p=>[p.n,p.X,p.Z]),mk:markers.map(m=>[m.X,m.Z,m.n,m.c])});
 function exploreChunk(cx,cz){const k=ckey(cx,cz);if(explored.has(k))return;if(explored.size>=EXPL_CAP)explored.delete(explored.values().next().value);explored.add(k);wmDirty.add(ckey(Math.floor(cx/16),Math.floor(cz/16)));}
 // Places: a named place the readout shows (a site, a hold, a point of interest, remains...) is kept the first time you are there.
-// Lands and the general names of cave layers are not places.
+// Lands, their stretches and the general names of cave layers are not places.
 const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.values(DEEP_NAMES),'Underground','Caves','The Fire Below','The Great Caverns','The Old Workings','Crawlways','An Old Road','An Ancient Waystone']);
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
@@ -4589,7 +4774,13 @@ function drawWorldMap(){
   for(let rz=r0z;rz<=r1z;rz++)for(let rx=r0x;rx<=r1x;rx++){const key=ckey(rx,rz),have=wmRegions.has(key)&&!wmDirty.has(key);
     if(!have){let any=false;for(let a=0;a<16&&!any;a++)for(let b=0;b<16;b++)if(explored.has(ckey(rx*16+a,rz*16+b))){any=true;break;}if(!any)continue;if(budget--<=0){pending=true;continue;}}
     g.drawImage(wmRegion(rx,rz),sx(rx*R),sz(rz*R),R*s+0.5,R*s+0.5);}
-  g.font='16px VT323, monospace';g.textAlign='center';
+  g.textAlign='center';
+  // stretch names (Q131), faint over the land, wherever you have explored the middle of one of the stretch's cells
+  if(s<=2){const seen=new Map();g.font='italic 20px VT323, monospace';g.fillStyle='rgba(42,28,14,0.55)';
+    for(let j=Math.floor((WM.Z-h/2/s)/LS)-1;j<=Math.floor((WM.Z+h/2/s)/LS)+1;j++)for(let i=Math.floor((WM.X-w/2/s)/LS)-1;i<=Math.floor((WM.X+w/2/s)/LS)+1;i++){
+      const c=landSite(i,j);if(!explored.has(ckey(Math.floor(c.x/CS),Math.floor(c.z/CS))))continue;const n=stretchName(landKey(i,j)),e=seen.get(n);if(e){e.x+=c.x;e.z+=c.z;e.k++;}else seen.set(n,{x:c.x,z:c.z,k:1});}
+    for(const [n,e] of seen)g.fillText(n,sx(e.x/e.k),sz(e.z/e.k));}
+  g.font='16px VT323, monospace';
   for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
   waypoints.forEach(m=>{const k=keyXYZ(m.userData.k),x=sx(k[0]+0.5),y=sz(k[2]+0.5);g.fillStyle=m.userData.c||'#5ff2ff';g.strokeStyle='#111';g.lineWidth=1.5;
     g.beginPath();g.moveTo(x,y-7);g.lineTo(x+6,y);g.lineTo(x,y+7);g.lineTo(x-6,y);g.closePath();g.fill();g.stroke();g.fillStyle='#10202a';g.fillText(wpName(m.userData.k),x,y+18);});
@@ -4694,6 +4885,15 @@ function goTo(X,Z,Y){
   PL.x=x+0.5;PL.z=z+0.5;PL.y=Math.max(1,Math.min(H-2,y));PL.vx=PL.vy=PL.vz=0;if(!PL.noclip)while(collide()&&PL.y<H-2)PL.y++;
   fallTop=null;gliding=false;toast('You go to X '+X+' Z '+Z);return true;
 }
+// ---- The land tour (Q136): go to the heart of the nearest stretch of a land. A land not built yet is shown with the look of
+// the land it stands in for, so its place in the layout can be checked before its family is built.
+function landTour(k){
+  if(creativeOnly())return null;const L=LANDS[k],c=nearestLand(k,PL.x+OX,PL.z+OZ,48);if(!c){toast('No '+L.n+' within reach');return null;}
+  let X=c.X,Z=c.Z;const o={};
+  for(let r=0;r<=150&&landsAt(X,Z,o).area!==k;r+=10){let hit=false;for(let a=0;a<16&&!hit;a++){const x=Math.round(c.X+Math.cos(a/16*6.283)*r),z=Math.round(c.Z+Math.sin(a/16*6.283)*r);if(landsAt(x,z,o).area===k){X=x;Z=z;hit=true;}}if(hit)break;}
+  goTo(X,Z,L.sea?SEA+4:undefined);toast(L.n+(L.built?'':' (planned for '+LAND_FAM[L.fam].replace(/.*\(|\)/g,'')+', shown as '+landShown(L)+')')+', '+c.d+' blocks from where you were');
+  return{X:X,Z:Z,d:c.d};
+}
 // ---- Time and weather (creative)
 function setTimeOfDay(h){settings.time='fixed';tod=((+h/24)%1+1)%1;lsSet(SET_KEY,settings);}
 function setWeatherNow(rain){settings.weather=true;raining=!!rain;rainT=rain?240:400;if(!rain)rainAmt=Math.min(rainAmt,0.3);lsSet(SET_KEY,settings);}
@@ -4710,7 +4910,7 @@ function stampAt(kind,X,g,Z){
   else if(kind==='dungeon'){const d={kind:DUNGEON_KINDS[(seed*4)|0],X:X,Z:Z,y:g-12,hw:4,hh:5,a:{x:X+10,y:g+1,z:Z}};run=()=>dungeonP(d,rs());rad=14;y0=g-14;y1=g+4;} // its tunnel comes up beside the spot
   else return 0;
   const x0=Math.max(0,X-rad-OX),x1=Math.min(W-1,X+rad-OX),z0=Math.max(0,Z-rad-OZ),z1=Math.min(D-1,Z+rad-OZ);y0=Math.max(0,y0);y1=Math.min(H-1,y1);
-  const nx=x1-x0+1,nz=z1-z0+1,ny=y1-y0+1,old=new Uint8Array(nx*ny*nz),K=(x,y,z)=>((y-y0)*nz+(z-z0))*nx+(x-x0);
+  const nx=x1-x0+1,nz=z1-z0+1,ny=y1-y0+1,old=new Uint16Array(nx*ny*nz),K=(x,y,z)=>((y-y0)*nz+(z-z0))*nx+(x-x0);
   for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)old[K(x,y,z)]=world[I(x,y,z)];
   const sx=gx0,sz=gz0;
   try{for(let cz=Math.floor((z0+OZ)/CS);cz<=Math.floor((z1+OZ)/CS);cz++)for(let cx=Math.floor((x0+OX)/CS);cx<=Math.floor((x1+OX)/CS);cx++){gx0=cx*CS;gz0=cz*CS;run();}}
@@ -4902,6 +5102,9 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
 ['gox','goy','goz'].forEach(id=>$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('gobtn').click();}));
 {const sel=$('stampsel');for(const k in STAMPS){const o=document.createElement('option');o.value=k;o.textContent=STAMPS[k];sel.appendChild(o);}
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
+{const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];
+    for(const L of LANDS)if(L.fam===f){const o=document.createElement('option');o.value=L.i;o.textContent=L.n+(L.built?'':' (planned)');g.appendChild(o);}sel.appendChild(g);}
+  $('tourbtn').addEventListener('click',()=>{if(landTour(+sel.value))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('ctlbtn').addEventListener('click',()=>{const c=$('ctl'),open=c.style.display==='none';c.style.display=open?'':'none';capture=null;if(open)renderControls();});
@@ -4947,7 +5150,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:9,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:10,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -5155,6 +5358,7 @@ async function generate(){
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}
   }
+  if(!resumed){const s=landSpawn();OX=Math.floor(s[0]/CS)*CS-W/2;OZ=Math.floor(s[1]/CS)*CS-D/2;} // a new world starts on open land near the middle
   let n=0;
   const cm=NCX>>1,RIN=2,near=(cx,cz)=>Math.abs(cx-cm)<=RIN&&Math.abs(cz-cm)<=RIN,inner=(2*RIN+1)*(2*RIN+1);genQ.length=0;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(!near(cx,cz)){genQ.push([cx,cz]);continue;}genChunk(cx,cz);if(++n%4===0){progress(n/inner*0.55,'Shaping terrain, caves and ruins');await tick();}}
@@ -5400,8 +5604,8 @@ function frame(now){
   if(infoT<=0&&ready){infoT=0.25;hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
-    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
-      notePlace(where,bx+OX,bz+OZ);
+    if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):surfaceName(bx+OX,yy,bz+OZ);
+      if(where)notePlace(where,bx+OX,bz+OZ);else where=landPlaceName(bx+OX,bz+OZ); // lands and their stretches are not places
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     const fms=1000/Math.max(1,fps);
     $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+'  res '+Math.round(RES.ratio/DPR*100)+'%'+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}

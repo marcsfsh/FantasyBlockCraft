@@ -14,7 +14,7 @@ if(saved&&Array.isArray(saved.mk))for(const [X,Z,n,c] of saved.mk)markers.push({
 const mapSave=()=>({ex:exPack(),pl:places.map(p=>[p.n,p.X,p.Z]),mk:markers.map(m=>[m.X,m.Z,m.n,m.c])});
 function exploreChunk(cx,cz){const k=ckey(cx,cz);if(explored.has(k))return;if(explored.size>=EXPL_CAP)explored.delete(explored.values().next().value);explored.add(k);wmDirty.add(ckey(Math.floor(cx/16),Math.floor(cz/16)));}
 // Places: a named place the readout shows (a site, a hold, a point of interest, remains...) is kept the first time you are there.
-// Lands and the general names of cave layers are not places.
+// Lands, their stretches and the general names of cave layers are not places.
 const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.values(DEEP_NAMES),'Underground','Caves','The Fire Below','The Great Caverns','The Old Workings','Crawlways','An Old Road','An Ancient Waystone']);
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
@@ -60,7 +60,13 @@ function drawWorldMap(){
   for(let rz=r0z;rz<=r1z;rz++)for(let rx=r0x;rx<=r1x;rx++){const key=ckey(rx,rz),have=wmRegions.has(key)&&!wmDirty.has(key);
     if(!have){let any=false;for(let a=0;a<16&&!any;a++)for(let b=0;b<16;b++)if(explored.has(ckey(rx*16+a,rz*16+b))){any=true;break;}if(!any)continue;if(budget--<=0){pending=true;continue;}}
     g.drawImage(wmRegion(rx,rz),sx(rx*R),sz(rz*R),R*s+0.5,R*s+0.5);}
-  g.font='16px VT323, monospace';g.textAlign='center';
+  g.textAlign='center';
+  // stretch names (Q131), faint over the land, wherever you have explored the middle of one of the stretch's cells
+  if(s<=2){const seen=new Map();g.font='italic 20px VT323, monospace';g.fillStyle='rgba(42,28,14,0.55)';
+    for(let j=Math.floor((WM.Z-h/2/s)/LS)-1;j<=Math.floor((WM.Z+h/2/s)/LS)+1;j++)for(let i=Math.floor((WM.X-w/2/s)/LS)-1;i<=Math.floor((WM.X+w/2/s)/LS)+1;i++){
+      const c=landSite(i,j);if(!explored.has(ckey(Math.floor(c.x/CS),Math.floor(c.z/CS))))continue;const n=stretchName(landKey(i,j)),e=seen.get(n);if(e){e.x+=c.x;e.z+=c.z;e.k++;}else seen.set(n,{x:c.x,z:c.z,k:1});}
+    for(const [n,e] of seen)g.fillText(n,sx(e.x/e.k),sz(e.z/e.k));}
+  g.font='16px VT323, monospace';
   for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
   waypoints.forEach(m=>{const k=keyXYZ(m.userData.k),x=sx(k[0]+0.5),y=sz(k[2]+0.5);g.fillStyle=m.userData.c||'#5ff2ff';g.strokeStyle='#111';g.lineWidth=1.5;
     g.beginPath();g.moveTo(x,y-7);g.lineTo(x+6,y);g.lineTo(x,y+7);g.lineTo(x-6,y);g.closePath();g.fill();g.stroke();g.fillStyle='#10202a';g.fillText(wpName(m.userData.k),x,y+18);});

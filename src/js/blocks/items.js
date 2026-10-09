@@ -35,7 +35,7 @@ item(341,'Woven Pack','pack',[150,170,96],{equip:'pack',slots:9,one:true});item(
 const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
 // Held to use once per press: holding the button does not repeat it
 const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
-const isItem=id=>id>=200;
+const isItem=id=>id>=200&&id<1024; // blocks are 0 to 199 and 1024 up (M6a, two bytes per block)
 function nameOf(id){return isItem(id)?ITEMS[id].n:isTool(id)?TOOLS[id][0]:BL[id].n;}
 const iconCache={};
 function itemIcon(id){

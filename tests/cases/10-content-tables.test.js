@@ -1,7 +1,8 @@
 // Content tables stay consistent: block and item ids, texture tiles, recipes and loot. Prints free ids and tiles.
 const blocks=[];BL.forEach((b,i)=>{if(b)blocks.push(i);});
 const known=id=>!!(BL[id]||ITEMS[id]||TOOLS[id]);
-assert(blocks.every(i=>i>=0&&i<256),'every block id fits the world array (0 to 255)');
+assert(blocks.every(i=>(i>=0&&i<200)||(i>=1024&&i<NID))&&world instanceof Uint16Array,'every block id fits the two-byte world array and stays clear of the item ids (0 to 199, 1024 up)');
+assert(Object.keys(ITEMS).every(i=>isItem(+i))&&!isItem(1024)&&!isItem(199),'item ids are 200 to 1023');
 assert(!blocks.some(i=>i>100&&i<108),'no block uses ids 101 to 107 (saves store water levels there)');
 assert(!Object.keys(ITEMS).some(i=>BL[i])&&!Object.keys(TOOLS).some(i=>BL[i]),'item and tool ids never collide with block ids');
 const noHard=blocks.filter(i=>typeof BL[i].hard!=='number'||typeof BL[i].tier!=='number'||!BL[i].mat);

@@ -44,9 +44,9 @@ function handGeo(id){
 }
 function updateHand(){
   const id=curId();hand.geometry.dispose();
-  if(id>0&&id<200){hand.geometry=handGeo(id);hand.visible=!photo;handItem.visible=false;}
+  if(id>0&&!isItem(id)){hand.geometry=handGeo(id);hand.visible=!photo;handItem.visible=false;}
   else{hand.geometry=new THREE.BufferGeometry();hand.visible=false;
-    if(id>=200){handItem.material.map=itemTex(id);handItem.material.needsUpdate=true;handItem.visible=!photo;}else handItem.visible=false;}
+    if(isItem(id)){handItem.material.map=itemTex(id);handItem.material.needsUpdate=true;handItem.visible=!photo;}else handItem.visible=false;}
 }
 
 // Input

@@ -21,7 +21,7 @@ function meshFloor(x0,z0){
   for(let z=Math.max(0,z0-1);z<=Math.min(D-1,z0+CS);z++)for(let x=Math.max(0,x0-1);x<=Math.min(W-1,x0+CS);x++){const h=hm[x+W*z];if(h<ms)ms=h;}
   return Math.max(lo,ms-MESH_DEEP);
 }
-const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
+const MP=CS+2,MID=new Uint16Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
 function buildChunk(cx,cz){
   const O=newM(),Wt=newM();
   const x0=cx*CS,z0=cz*CS,s1=[0,0,0],s2=[0,0,0];

@@ -30,6 +30,10 @@
       "about": "World arrays, column terrain and biomes, rivers and lakes"
     },
     {
+      "path": "world/lands.js",
+      "about": "Lands (M6a): the registry, the transition map of which lands may border which, the cell layout, blend weights and stretch names"
+    },
+    {
       "path": "world/caves.js",
       "about": "Cave systems (D-029): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes"
     },

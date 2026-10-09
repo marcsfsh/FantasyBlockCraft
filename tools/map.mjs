@@ -21,7 +21,7 @@ const HOOK=`{
 const fs=require('fs'),T=${tiles},S=W,N=T*S,X0=${cx}-Math.floor(N/2),Z0=${cz}-Math.floor(N/2);
 const BANDS=[[241,SEA-6],[151,240],[61,150],[9,60]];
 const gr=new Int16Array(N*N),bio=new Uint8Array(N*N),band=new Uint16Array(N*N*4),wet=new Uint8Array(N*N*4),hot=new Uint8Array(N*N*4);
-const secX=new Uint8Array(N*H),secZ=new Uint8Array(N*H),midZ=Math.floor(N/2),midX=Math.floor(N/2);
+const secX=new Uint16Array(N*H),secZ=new Uint16Array(N*H),midZ=Math.floor(N/2),midX=Math.floor(N/2);
 for(let tz=0;tz<T;tz++)for(let tx=0;tx<T;tx++){
   regenerateAll(X0+tx*S+S/2,Z0+tz*S+S/2);while(genQ.length)processGenQ();
   for(let z=0;z<S;z++)for(let x=0;x<S;x++){
@@ -33,7 +33,7 @@ for(let tz=0;tz<T;tz++)for(let tx=0;tx<T;tx++){
   }
 }
 const hdr=new Int32Array([N,H,X0,Z0,SEA,WATER,LAVA,AIR,STONE,DEEP,BEDROCK]);
-fs.writeFileSync(${JSON.stringify(data)},Buffer.concat([Buffer.from(hdr.buffer),Buffer.from(gr.buffer),Buffer.from(bio),Buffer.from(band.buffer),Buffer.from(wet),Buffer.from(hot),Buffer.from(secX),Buffer.from(secZ),Buffer.from(Uint8Array.from(SOLID))]));
+fs.writeFileSync(${JSON.stringify(data)},Buffer.concat([Buffer.from(hdr.buffer),Buffer.from(gr.buffer),Buffer.from(bio),Buffer.from(band.buffer),Buffer.from(wet),Buffer.from(hot),Buffer.from(secX.buffer),Buffer.from(secZ.buffer),Buffer.from(Uint8Array.from(SOLID))]));
 __fbcDone(0);}`;
 const tmp=path.join(ROOT,'tests/.tmp');fs.mkdirSync(tmp,{recursive:true});
 const file=path.join(tmp,'map-'+seed+'.bundle.js');fs.writeFileSync(file,prepare(gameBundle(),HOOK,seed));
@@ -44,7 +44,7 @@ if(!(p.stdout||'').includes('FBC_DONE 0')){console.error('map generation failed\
 // ---- read the data back
 const buf=fs.readFileSync(data);let o=0;const take=(n,T)=>{const a=new T(buf.buffer.slice(buf.byteOffset+o,buf.byteOffset+o+n*T.BYTES_PER_ELEMENT));o+=n*T.BYTES_PER_ELEMENT;return a;};
 const [N,H,X0,Z0,SEA,WATER,LAVA,AIR,STONE,DEEP,BEDROCK]=take(11,Int32Array);
-const gr=take(N*N,Int16Array),bio=take(N*N,Uint8Array),band=take(N*N*4,Uint16Array),wet=take(N*N*4,Uint8Array),hot=take(N*N*4,Uint8Array),secX=take(N*H,Uint8Array),secZ=take(N*H,Uint8Array),SOLID=take(256,Uint8Array);
+const gr=take(N*N,Int16Array),bio=take(N*N,Uint8Array),band=take(N*N*4,Uint16Array),wet=take(N*N*4,Uint8Array),hot=take(N*N*4,Uint8Array),secX=take(N*H,Uint16Array),secZ=take(N*H,Uint16Array),SOLID=take(4096,Uint8Array);
 
 // ---- a minimal PNG writer (RGB, no dependencies)
 const CRC=new Int32Array(256).map((_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c;});

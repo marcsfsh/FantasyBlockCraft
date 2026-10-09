@@ -1,5 +1,5 @@
-// World data
-const entCol=new Uint8Array(W*D),world=new Uint8Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1);
+// World data. Two bytes per block since M6a (Q120): block ids run 0 to 199 and from 1024 up (NID), items 200 to 1023.
+const entCol=new Uint8Array(W*D),world=new Uint16Array(VOL),BLK=new Uint8Array(VOL),hm=new Int16Array(W*D),ground=new Int16Array(W*D),biome=new Uint8Array(W*D),hb=new Int16Array(W*D),hg=new Int16Array(W*D).fill(-1);
 const I=(x,y,z)=>x+W*(z+D*y);
 function get(x,y,z){return(x<0||z<0||y<0||x>=W||z>=D||y>=H)?0:world[x+W*(z+D*y)];}
 
@@ -8,36 +8,38 @@ function get(x,y,z){return(x<0||z<0||y<0||x>=W||z>=D||y>=H)?0:world[x+W*(z+D*y)]
 let OX=-W/2,OZ=-D/2;
 function hsh(a,b,c){let h=(Math.imul(a|0,374761393)+Math.imul(b|0,668265263)+Math.imul(c|0,1274126177)+Math.imul(SEED,1442695041))|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296;}
 function rngAt(a,b,c){return mkRng(1+Math.floor(hsh(a,b,c)*2147483640));}
-const T={},T2={},T3={},TTP={},TP={};
+const T={},T2={},T3={},TTP={},TP={},TGC={};
 function colInfoBase(X,Z,o){
-  const jit=fbm2(X/48,Z/48,2,977.1)*0.03; // organic edges between lands
-  const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),mtn=fbm2(X/360,Z/360,2,73.1)+jit*0.6,rid=fbm2(X/40,Z/40,2,91.4);
-  const temp=fbm2(X/1100,Z/1100,2,151.9)+jit,hum=fbm2(X/900,Z/900,2,701.9)+jit;
+  // Lands (M6a, D-039) come from the land layout (lands.js): the weights of nearby lands by look shape the ground below, so each
+  // old land keeps its look and lands blend across their borders.
+  landsAt(X,Z,o);
+  const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),rid=fbm2(X/40,Z/40,2,91.4);
   // Most land is gentle: rolling hills only where the "hilliness" field allows them
   const rough=sstep(-0.05,0.22,fbm2(X/420,Z/420,2,881.3));
-  let h=SEA+6+cont*34+hill*(3+9*rough); // smooth: no fine bumps outside the lands that call for them (Q91)
-  const mf=sstep(0.08,0.32,mtn);
+  let h=SEA+6+Math.max(-0.1,cont)*34+hill*(3+9*rough); // smooth: no fine bumps outside the lands that call for them (Q91)
+  const mf=o.w5;
   // Mountain ranges (Q90): long ridgelines with valleys between, saddles where a range can be crossed, and the high peaks only
   // on the ridges at the hearts of the ranges (the world is 512 tall, D-023)
   let ridge=0;
   if(mf>0){const rg=1-Math.abs(fbm2(X/230,Z/230,3,91.7)),pass=0.5+0.5*sstep(-0.3,0.3,fbm2(X/420,Z/420,1,93.1));ridge=rg*rg*rg*pass;
     h+=mf*mf*(24+46*ridge)+mf*fbm2(X/34,Z/34,2,95.3)*2.5;
-    const pk=sstep(0.22,0.5,mtn)*sstep(0.35,0.8,ridge);if(pk>0)h+=pk*pk*(60+40*fbm2(X/170,Z/170,1,7301.3));}
-  const warmF=sstep(-0.26,-0.14,temp),sw=sstep(0.04,0.2,hum)*sstep(-0.08,0.04,temp)*(1-mf); // sw: damp, mild shadowed forest
-  const dw=sstep(0.02,0.26,temp)*(1-mf)*(1-sw);
+    const pk=sstep(30,150,o.mdep)*sstep(0.35,0.8,ridge);if(pk>0)h+=pk*pk*(60+40*fbm2(X/170,Z/170,1,7301.3));}
+  const warmF=1-o.w6,sw=o.w8,dw=o.w4+o.w7; // sw: damp, mild shadowed forest; warmF: not the cold fells
   h=h*(1-dw)+(SEA+14+hill*9+Math.abs(rid)*6)*dw; // heath moors: open uplands
-  const bw=dw*sstep(-0.1,0.1,fbm2(X/420,Z/420,2,601.1));
+  const bw=o.w7;
   if(bw>0.01)h=h*(1-bw)+(SEA+10+hill*12+cont*4)*bw; // barrow hills: smooth grassy downs
-  const pw=sstep(-0.02,0.16,fbm2(X/1100,Z/1100,2,3901.7))*(1-mf)*(1-dw)*warmF*(1-sw);
+  const pw=o.w10;
   if(pw>0.01)h=h*(1-pw)+(SEA+7+hill*3+cont*5)*pw;
-  const fen=sstep(0.08,0.3,fbm2(X/800,Z/800,2,4101.3))*(1-mf)*(1-dw)*warmF; // fens: low wet ground with pools
+  const fen=o.w11; // fens: low wet ground with pools
   if(fen>0.01){const pool=fbm2(X/13,Z/13,2,4107.9)>0.1;h=h*(1-fen)+(pool&&fen>0.6?SEA-1:SEA+1+hill*1.5)*fen;}
-  const fwd=sstep(-0.1,0.14,fbm2(X/520,Z/520,2,201.3)+jit); // elder wood against green hills
+  const fwd=o.w3/(o.w2+o.w3+1e-6); // elder wood against green hills
   const open=(1-mf)*(1-dw)*(1-pw)*(1-fen)*(1-sw)*warmF;
   h+=open*(1-fwd)*fbm2(X/80,Z/80,2,4601.3)*7;   // green hills: soft rolling swells
   h+=open*fwd*fbm2(X/56,Z/56,1,4613.1)*3.5;     // elder wood: uneven old ground
   h+=sw*fbm2(X/22,Z/22,2,4607.9)*3;             // shadowed forest: hummocks and hollows
   h+=pw*fbm2(X/140,Z/140,1,4619.7)*3;           // windswept plains: long low waves
+  // the sea: lands fall away to its floor across the coast blend
+  if(o.wS>0)h=h*(1-o.wS)+(SEA-9-Math.abs(fbm2(X/300,Z/300,2,8301.1))*26+hill*3)*o.wS;
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
   const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SEA-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief)),vw=rw+Math.min(0.24,relief*0.0075);
@@ -47,17 +49,27 @@ function colInfoBase(X,Z,o){
     const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
   h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
-  // Lands meet in a wide blend (Q92): heights blend through the weights, and which land a column belongs to is decided
-  // against a patchy threshold, so trees, ground and snow mix over a band instead of stopping on a line.
-  const dth=fbm2(X/16,Z/16,1,2711.3)*0.4,tw=0.5+dth,cold=temp<-0.2+dth*0.1;
+  // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
+  const cold=o.tb===0,lk=LANDS[o.land].look;
   let b;
-  if(fen>tw&&h>=SEA-2&&!cold)b=11;else if(h<SEA)b=0;else if(dw>tw)b=bw>tw?7:4;else if(mf>0.8&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;else if(cold)b=6;else if(sw>tw)b=8;else if(pw>tw)b=10;else b=fwd>tw?3:2;
+  if(lk===11&&h>=SEA-2)b=11;else if(h<SEA)b=0;else if(lk===4||lk===7)b=lk;else if(lk===5&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;
+  else if(lk===0||lk===5)b=cold?6:2;else b=lk;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
   o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SEA+3;o.mf=mf;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
-  const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
-  const rf=rv<0.008&&!o.wet?fbm2(X/180,Z/180,2,433.7):0; // ravines: deep enough to cut into the crawlways, sloping in at their ends (Q22)
-  o.rvBot=rf>0.28?Math.max(SEA-56,h-Math.round(3+(5+(1-rv/0.012)*58)*sstep(0.28,0.4,rf))):999;
+  // Gorges (M6a, Q137; once the hairline ravines of M2b): fewer and wider, along a slow noise line where the land allows them.
+  // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
+  // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
+  o.rvBot=999;
+  if(!o.wet&&!o.river&&o.gz>0.05){
+    const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
+    if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
+      // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
+      const gx=(fbm2((X+2)/150,Z/150,2,401.1)-fbm2((X-2)/150,Z/150,2,401.1))/4,gzz=(fbm2(X/150,(Z+2)/150,2,401.1)-fbm2(X/150,(Z-2)/150,2,401.1))/4,g2=Math.max(1e-9,gx*gx+gzz*gzz);
+      const d=av/Math.sqrt(g2),cX=X-gv*gx/g2,cZ=Z-gv*gzz/g2;landsAt(cX,cZ,TGC);
+      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SEA+4,SEA+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
+      if(rf>0){const WT=8+12*rf,WF=3.5,Dm=8+52*rf;
+        if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SEA-56,h-dep);}}}}
   return o;
 }
 const colCache=new Map();
@@ -74,8 +86,8 @@ function lakeAt(X,Z){
   let lk=null;const r=rngAt(gx,2501,gz);
   if(r()<0.4){
     const cx=gx*LG+24+(r()*48|0),cz=gz*LG+24+(r()*48|0),R=8+r()*10,b=colInfoBase(cx,cz,TL),L=b.h-1;
-    if(![0,1,5,7].includes(b.b)&&!b.river&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
-      let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;if(colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL).h<L)ok=false;}
+    if(![0,1,5,7].includes(b.b)&&!b.river&&b.rvBot===999&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
+      let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;{const e=colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL);if(e.h<L||e.rvBot<999)ok=false;}}
       if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L};
     }
   }
