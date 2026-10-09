@@ -233,7 +233,15 @@ function act(btn){
     drawBar();
   }
 }
-function toggleFly(){if(SURV()&&!PL.fly){toast('Flying is a creative mode ability');return;}PL.fly=!PL.fly;PL.vy=0;$('tFly').classList.toggle('on',PL.fly);$('tDown').style.display=PL.fly?'grid':'none';toast(PL.fly?'Flying':'Walking');}
+function toggleFly(){if(SURV()&&!PL.fly){toast('Flying is a creative mode ability');return;}if(PL.fly&&PL.noclip){toggleNoclip();return;}PL.fly=!PL.fly;PL.vy=0;$('tFly').classList.toggle('on',PL.fly);$('tDown').style.display=PL.fly?'grid':'none';toast(PL.fly?'Flying':'Walking');}
+// Noclip (creative, M3.5a.2): fly through blocks. Turning it on also turns flying on; turning it off inside rock lifts the
+// player up to the first place they fit, as respawning does, and leaves them flying.
+function toggleNoclip(){
+  if(SURV()&&!PL.noclip){toast('Noclip is a creative mode ability');return;}
+  PL.noclip=!PL.noclip;if(PL.noclip&&!PL.fly)toggleFly();
+  if(!PL.noclip){while(collide()&&PL.y<H)PL.y++;}
+  $('tClip').classList.toggle('on',PL.noclip);drawClip();toast(PL.noclip?'Noclip: flying through blocks':'Noclip off');
+}
 let toastT=0;
 function toast(s){const t=$('toast');if(!s){t.style.display='none';return;}t.textContent=s;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{t.style.display='none';},1300);}
 addEventListener('keydown',e=>{

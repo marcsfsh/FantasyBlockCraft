@@ -184,6 +184,8 @@ Added after the owner played 0.8.0: generation feels disjointed and random, the 
 - **Tests:** connectivity (every chamber reachable from its system's trunk; every entrance reaches a system), no crossings that cut a chamber, open-space share within target by depth, sound water and sound lava (zero unsound blocks), streaming equality and determinism as before.
 - **Mid-way checkpoint (Q100):** after the cave prototype, stop so the owner can play it before the rest of M3.5a is finished.
 
+**M3.5a.2: noclip** (owner's request, before M3.5b). Done in 0.9.1 (D-030): a creative-mode toggle to fly through blocks.
+
 **M3.5b: the surface (Q77, Q89 to Q96)**
 - **Rivers follow valleys** from the hills to the sea or a lake, with gentle banks; a short gorge with sloped sides only where a river meets high ground (Q89).
 - **High Mountains as ranges:** ridgelines with fewer, grander peaks, valleys between them, walkable passes, cliffs only at crags and gorges (Q90).

@@ -161,3 +161,7 @@ Constrains: the M2 layer table in `docs/DESIGN.md` becomes a gradient by depth; 
 - **Tools:** `npm run map` (`tools/map.mjs`) draws height, cave and section maps of generated windows, for the owner's before and after comparisons (Q100).
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v6`, world data version 6.
 Constrains: any new underground generator plans in `caveBase`/`cavePlan` (or stays clear of their elements) rather than carving its own tunnels; anything that opens rock after the caves must be visible to `placesTouch` or stay away from planned water.
+
+### D-030 M3.5a.2: noclip in creative (2026-10-09)
+The owner asked for a noclip toggle before M3.5b. It is a creative-only action (`noclip`, `toggleNoclip`): `collide` returns false while `PL.noclip` is set, so movement passes through blocks; it implies flying, and turning flying off turns noclip off first. Leaving noclip inside rock moves the player up to the first place they fit. Keyboard N, a touch button, and a pause-menu switch; the controller has no free button, so it uses the pause menu until rebinding arrives (M5). The noclip flag is saved with the player's position (`p[6]`) and only restored in creative.
+Constrains: anything else that tests the player against blocks must go through `collide` (or check `PL.noclip`).
