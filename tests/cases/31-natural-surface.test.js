@@ -20,7 +20,8 @@ const o={},q={};
   info('mountain columns',mt,'; highest',top,'; with a step of 4 or more',(100*steep/mt).toFixed(2)+'%');
   assert(top>420,'the ranges still rise to high peaks');assert(steep/mt<0.01,'mountain slopes are climbable, with cliffs only in places');}
 // barrows: only on the Barrow Hills, mostly in clusters, facing several ways, in several sizes, some broken open
-{const bs=[];for(let a=-120;a<120;a++)for(let b=-120;b<120;b++){const s=barrowAt(a,b);if(s)bs.push(s);}
+// around the nearest Barrow Hills (an uncommon land since M6a)
+{const bs=[],nb=nearestLand(LAND_I.barrow,0,0,40),ca=Math.floor(nb.X/CS),cb=Math.floor(nb.Z/CS);for(let a=ca-120;a<ca+120;a++)for(let b=cb-120;b<cb+120;b++){const s=barrowAt(a,b);if(s)bs.push(s);}
   const rot=new Set(bs.filter(s=>!s.ring).map(s=>s.rot)),sz=bs.map(s=>s.sz),near=bs.filter(s=>bs.some(t=>t!==s&&Math.hypot(t.X-s.X,t.Z-s.Z)<70)).length;
   let off=0;for(const s of bs){colInfo(s.X,s.Z,o);if(!(o.b===7||(o.bw>0.35&&o.dw>0.35)))off++;}
   info('barrows and rings in 240 x 240 chunks',bs.length,'; rings',bs.filter(s=>s.ring).length,'; facings',rot.size,'; sizes',Math.min(...sz).toFixed(2),'to',Math.max(...sz).toFixed(2),'; broken open',bs.filter(s=>s.broken&&!s.ring).length,'; with a neighbour within 70 blocks',near,'; off the downs',off);
@@ -32,8 +33,8 @@ const o={},q={};
     const p=s.g-ring/8;if(p<-1)hollow++;if(s.kind!=='keep'){prom+=p;pn++;}}
   info('sites',n,'; in a hollow',hollow,'; mean rise of towers and castles over the land around them',(prom/Math.max(1,pn)).toFixed(1),'blocks');
   assert(hollow===0,'no site stands in a hollow');assert(prom/Math.max(1,pn)>2,'towers and castles stand on high ground');}
-// trees gather in groves: the spawn window's trunks by grove field
-{while(genQ.length)processGenQ();const TR=new Set([LOG,BIRCH,SPRUCE,JLOG]);let inG=0,inGc=0,outG=0,outGc=0;
+// trees gather in groves: trunks by grove field in a window on the nearest Green Hills (woods are thick throughout)
+{const ne=nearestLand(LAND_I.green,PL.x+OX,PL.z+OZ,40);regenerateAll(ne.X,ne.Z);while(genQ.length)processGenQ();const TR=new Set([LOG,BIRCH,SPRUCE,JLOG]);let inG=0,inGc=0,outG=0,outGc=0;
   for(let z=0;z<D;z++)for(let x=0;x<W;x++){const g=ground[x+W*z],b=biome[x+W*z];if(![2,3,4,6,10].includes(b))continue;const G=fbm2((x+OX)/70,(z+OZ)/70,2,4801.3),t=TR.has(world[I(x,g+1,z)])?1:0;
     if(G>0.25){inG+=t;inGc++;}else if(G<-0.2){outG+=t;outGc++;}}
   info('trunks per 1000 columns of open land: in groves',(1000*inG/Math.max(1,inGc)).toFixed(1),'; in clearings',(1000*outG/Math.max(1,outGc)).toFixed(1));

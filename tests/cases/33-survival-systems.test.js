@@ -73,7 +73,7 @@ const cooked=[334,335,336,337].every(id=>RECIPES.some(r=>r[0]===id&&r[3]==='f')&
 assert(cooked&&FOOD[335]===9,'four dishes cook at a furnace and feed more than raw food (pottage 9)');
 // ---- foraging: wild bilberries, mushrooms and turnips in the generated world
 const cnt={[BERRYB]:0,[MUSHB]:0,[WTURN]:0},by={};let cols=0;
-for(const [X,Z] of [[0,0],[1600,-900],[-1400,1300]]){regenerateAll(X,Z);while(genQ.length)processGenQ();
+for(const k of ['elder','moors','green']){const c=nearestLand(LAND_I[k],0,0,40);regenerateAll(c.X,c.Z); // windows on the woods, the moors and open countrywhile(genQ.length)processGenQ();
   for(let z=0;z<D;z++)for(let x=0;x<W;x++){const g=ground[x+W*z],id=world[I(x,g+1,z)];cols++;if(cnt[id]!==undefined){cnt[id]++;const b=BIOMES[biome[x+W*z]];by[b]=(by[b]||0)+1;}}}
 info('forage in',cols,'columns: bilberry bushes',cnt[BERRYB],'brown mushrooms',cnt[MUSHB],'wild turnips',cnt[WTURN],'; by land',JSON.stringify(by));
 assert(cnt[BERRYB]>0&&cnt[MUSHB]>0&&cnt[WTURN]>0,'bilberries, mushrooms and wild turnips grow in the world');
