@@ -35,3 +35,6 @@
 - **Food balance is a first pass:** forage density (about 3 bilberry bushes, 0.5 brown mushrooms and 0.7 wild turnips per 1000 columns over three windows of seed 123456789), crop growth and food values are for the owner to judge in play.
 - **Auto resolution is unverified on a device.** On a 200% desktop or the Ally X, Auto should hold full density while frames are smooth and drop it only after the view has come in to 72 blocks (D-034). Choose Sharp or Fast in the pause menu to override it.
 - **Headless screenshots cannot show Direct3D texture filtering.** The cloud VM renders with SwiftShader, which follows WebGL's filter settings exactly; a Windows desktop (Direct3D 11 through ANGLE) can differ, as the anisotropic blur in 0.12.1 showed (D-035). Filtering changes need a check on the owner's desktop.
+- **Rebinding on the Ally X is untested on the device.** The controller capture reads the next button press through the Gamepad API (D-036); confirm it on the Ally X.
+- **Hints are per player, not per world.** Once seen they stay seen in every world; turning hints off and on again does not bring them back (clearing the site's storage does).
+- **Touch cannot rebind.** The Controls panel lists bindings on touch, but there are no keys or buttons to press; touch keeps its fixed buttons.

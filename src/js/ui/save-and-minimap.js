@@ -15,6 +15,7 @@ let lastSaveT=0;setInterval(()=>{const now=Date.now();if(saveDirty||(playing&&no
 function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
 function uniqueWorldName(name){const used=new Set(WIX.list.map(w=>w.name));let n=name,k=2;while(used.has(n))n=name+' '+(k++);return n;}
 function createWorld(name,seed,mode){const w=newWorldEntry(uniqueWorldName(name||'World '+(WIX.list.length+1)),seed,mode);WIX.list.push(w);lsSet(SAVE_KEY,WIX);return w;}
+function renameWorld(id,name){const w=WIX.list.find(x=>x.id===id);name=String(name||'').trim().slice(0,40);if(!w||!name)return false;if(name!==w.name){w.name='';w.name=uniqueWorldName(name);}lsSet(SAVE_KEY,WIX);if(id===WIX.active)WORLD.name=w.name;return true;}
 function switchWorld(id){if(!WIX.list.some(w=>w.id===id))return;saveNow();WIX.active=id;lsSet(SAVE_KEY,WIX);skipSave=true;location.reload();}
 function deleteWorld(id){if(id===WIX.active)return false;const i=WIX.list.findIndex(w=>w.id===id);if(i<0)return false;WIX.list.splice(i,1);lsDel(worldKey(id));lsSet(SAVE_KEY,WIX);return true;}
 const WORLD_FILE='fantasy-blockcraft-world';

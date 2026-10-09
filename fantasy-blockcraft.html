@@ -60,6 +60,7 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 #name{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));font-size:26px;text-shadow:2px 2px 0 rgba(0,0,0,.6);opacity:0;transition:opacity .4s;white-space:nowrap}
 #toast{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-size:22px;background:var(--panel);border:3px solid var(--edge);padding:2px 12px;display:none}
 #tint{position:absolute;inset:0;display:none}
+#hint{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:min(560px,88vw);background:rgba(20,18,14,.85);border:2px solid var(--edge);padding:8px 14px;font-size:20px;line-height:1.15;display:none;pointer-events:none;text-align:center;z-index:3}
 #overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(20,26,34,.45);z-index:5;overflow:auto}
 #card{background:var(--panel);border:4px solid var(--edge);padding:20px 24px;max-width:min(580px,94vw);max-height:94vh;overflow:auto;box-shadow:8px 8px 0 rgba(0,0,0,.35)}
 #card h1{margin:0;font-size:64px;line-height:.9;font-weight:400;color:var(--moss);text-shadow:4px 4px 0 #2b3a1a;letter-spacing:1px}
@@ -74,12 +75,15 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 .set label{display:flex;align-items:center;gap:8px}
 .set input[type=range]{width:120px;accent-color:#7fae4a}
 .seg{display:flex;align-items:center;gap:4px}
-.seg button,#sndbtn{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px;cursor:pointer}
+.seg button,#sndbtn,#ctlbtn,#ctl button{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px;cursor:pointer}
 .seg button.on{border-color:var(--sel);color:var(--sel)}
 .btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 button.big{font:inherit;font-size:26px;padding:6px 18px;background:var(--dirt);color:var(--ink);border:3px solid #3b2a1a;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.18);cursor:pointer}
 button:focus-visible,.slot:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
 #seedin,#worldname{font:inherit;font-size:21px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:4px 8px;width:180px}
+.ctlgrid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:4px 8px;align-items:center;font-size:18px}.ctlgrid .ch{color:var(--dim)}
+#ctl button{font-size:17px;text-align:left}#ctl button.on{border-color:var(--sel);color:var(--sel)}#ctl button:disabled{opacity:.45;cursor:default}
+#ctl{max-height:46vh}
 .worlds{margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto}
 .wrow{display:flex;align-items:center;gap:8px;padding:4px 6px;border:2px solid #463a28}
 .wrow.on{border-color:var(--ink)}
@@ -130,7 +134,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
 <canvas id="c"></canvas>
 <div id="hud">
   <div id="tint"></div><div id="hurt"></div>
-  <div id="info"></div>
+  <div id="hint"></div><div id="info"></div>
   <div id="toast"></div>
   <canvas id="mm" width="150" height="150" aria-label="Map, tap to zoom"></canvas>
   <div id="cross"></div>
@@ -170,9 +174,12 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
     <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Normal</button><button data-v="2">Bright</button></div>
     <div class="seg" id="wxseg">Weather <button data-v="1">On</button><button data-v="0">Off</button></div>
+    <div class="seg" id="hudseg">Readout <button data-v="1">On</button><button data-v="0">Off</button></div>
+    <div class="seg" id="hintseg">Hints <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="touchseg">Touch <button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div>
-    <button id="sndbtn">Sound on</button>
+    <button id="sndbtn">Sound on</button><button id="ctlbtn">Controls</button>
   </div>
+  <div id="ctl" class="worlds" style="display:none"></div>
   <div class="btns"><button class="big go" id="play" disabled>Play</button><button class="big" id="photo">Photo mode</button><input id="worldname" placeholder="New world name" aria-label="Name for the new world" autocomplete="off"><input id="seedin" placeholder="Seed (optional)" aria-label="Seed for the new world" autocomplete="off"><button class="big" id="newworld">New world</button></div>
   <div id="worlds" class="worlds"></div><input type="file" id="importfile" accept=".json,application/json" hidden>
 </div></div>
@@ -205,7 +212,7 @@ if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWo
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const saved=(d=>d&&d.v===8&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',res:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
 // Auto view distance (view -1, the default; M3, D-025): start from the device, then follow the frame rate.
 // AUTO_VIEW.far moves between 56 and 104 blocks; the near fog is 55% of it.
@@ -3549,18 +3556,19 @@ function buzz(ms){if(TOUCH&&navigator.vibrate&&!PAD.active)try{navigator.vibrate
 const ACTIONS={
   inventory:{name:'Inventory',run:()=>{invOpen?closeInv():openInv();},anytime:true},
   jump:{name:'Jump, swim up, double tap to fly',run:()=>jumpPress()},
-  fly:{name:'Fly on or off',run:()=>toggleFly()},
-  noclip:{name:'Noclip on or off (fly through blocks)',run:()=>toggleNoclip()},
-  respawn:{name:'Back to spawn (creative)',run:()=>{if(SURV()){toast('In survival you travel from waystone to waystone');return;}respawn();}},
-  brush:{name:'Brush size',run:()=>cycleBrush()},
-  swap:{name:'Replace mode',run:()=>toggleSwap()},
+  fly:{name:'Fly on or off',crea:1,run:()=>toggleFly()},
+  noclip:{name:'Noclip on or off (fly through blocks)',crea:1,run:()=>toggleNoclip()},
+  respawn:{name:'Back to spawn',crea:1,run:()=>{if(SURV()){toast('In survival you travel from waystone to waystone');return;}respawn();}},
+  brush:{name:'Brush size',crea:1,run:()=>cycleBrush()},
+  swap:{name:'Replace mode',crea:1,run:()=>toggleSwap()},
   photo:{name:'Photo mode',run:()=>setPhoto(!photo)},
+  hud:{name:'Readout on or off',run:()=>setHud(!settings.hud)},
   waypoint:{name:'Travel to the next waystone',run:()=>nextWaypoint()},
-  bpRotate:{name:'Turn blueprint',run:()=>{if(BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}}},
-  bpClear:{name:'Clear blueprint',run:()=>{if(BP.sel>=0||BP.a){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}}},
-  undo:{name:'Undo',run:()=>undo()},
-  undoOrClear:{name:'Undo, or clear the blueprint',run:()=>{if(BP.sel>=0||BP.a)ACTIONS.bpClear.run();else undo();}},
-  brushOrRotate:{name:'Brush size, or turn the blueprint',run:()=>{if(BP.sel>=0)ACTIONS.bpRotate.run();else cycleBrush();}},
+  bpRotate:{name:'Turn blueprint',crea:1,run:()=>{if(BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}}},
+  bpClear:{name:'Clear blueprint',crea:1,run:()=>{if(BP.sel>=0||BP.a){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}}},
+  undo:{name:'Undo',crea:1,run:()=>undo()},
+  undoOrClear:{name:'Undo, or clear the blueprint',crea:1,run:()=>{if(BP.sel>=0||BP.a)ACTIONS.bpClear.run();else undo();}},
+  brushOrRotate:{name:'Brush size, or turn the blueprint',crea:1,run:()=>{if(BP.sel>=0)ACTIONS.bpRotate.run();else cycleBrush();}},
   mapZoom:{name:'Map zoom',run:()=>{mmZoom=(mmZoom+1)%3;}},
   pick:{name:'Pick the block you look at',run:()=>act(1)},
   pause:{name:'Pause',run:()=>{playing=false;hold=-1;showPause();}},
@@ -3570,14 +3578,35 @@ const ACTIONS={
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',KeyI:'hud',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
-  // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code
-  pad:{2:'fly',3:'inventory',4:'hotbarPrev',5:'hotbarNext',8:'swap',9:'pause',11:'pick',12:'waypoint',13:'mapZoom',14:'undoOrClear',15:'brushOrRotate'}
+  // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code (PAD_FIXED).
+  // Travel sits on D-pad down since M5 (Q37): D-pad up, easy to press by accident, opens the map.
+  pad:{2:'fly',3:'inventory',4:'hotbarPrev',5:'hotbarNext',8:'swap',9:'pause',11:'pick',12:'mapZoom',13:'waypoint',14:'undoOrClear',15:'brushOrRotate'}
 };
 const BINDS={};
-function loadBinds(){const b=settings.binds||{};for(const k of ['keys','held','pad'])BINDS[k]=Object.assign({},BIND_DEFAULTS[k],b[k]||{});}
+const PAD_FIXED={0:'jump',1:'down',6:'place',7:'break',10:'sprint'};
+// Saved bindings (settings.binds, M5) are kept as they are; a default comes back only for an action left with no key or button
+// at all, and only if its key or button is free, so actions added in later versions still get one.
+function loadBinds(){
+  const b=settings.binds||{},h={};
+  for(const a in BIND_DEFAULTS.held)h[a]=[...(b.held&&Array.isArray(b.held[a])&&b.held[a].length?b.held[a]:BIND_DEFAULTS.held[a])];BINDS.held=h;
+  const heldCodes=new Set(Object.values(h).flat());
+  for(const k of ['keys','pad']){const m={};for(const [c,a] of Object.entries(b[k]||{}))if(ACTIONS[a]&&!(k==='keys'&&heldCodes.has(c))&&!(k==='pad'&&PAD_FIXED[c]))m[c]=a;
+    const bound=new Set(Object.values(m));for(const [c,a] of Object.entries(BIND_DEFAULTS[k]))if(!bound.has(a)&&m[c]===undefined&&!(k==='keys'&&heldCodes.has(c)))m[c]=a;
+    BINDS[k]=m;}
+}
+function saveBinds(){settings.binds={keys:Object.assign({},BINDS.keys),pad:Object.assign({},BINDS.pad),held:JSON.parse(JSON.stringify(BINDS.held))};lsSet(SET_KEY,settings);}
+// Bind a key (kind 'keys' or 'held') or a controller button ('pad') to an action. It replaces what the action had, and is taken
+// away from whatever else used it. Returns false for the controller's fixed buttons.
+function rebind(kind,action,code){
+  if(kind==='pad'){if(PAD_FIXED[code]!==undefined)return false;for(const c in BINDS.pad)if(BINDS.pad[c]===action)delete BINDS.pad[c];BINDS.pad[code]=action;saveBinds();return true;}
+  delete BINDS.keys[code];for(const a in BINDS.held)BINDS.held[a]=BINDS.held[a].filter(c=>c!==code);
+  if(kind==='held')BINDS.held[action]=[code];else{for(const c in BINDS.keys)if(BINDS.keys[c]===action)delete BINDS.keys[c];BINDS.keys[code]=action;}
+  saveBinds();return true;
+}
+function resetBinds(){settings.binds={};lsSet(SET_KEY,settings);loadBinds();}
 loadBinds();
 function runAction(name){const a=ACTIONS[name];if(!a)return false;a.run();return true;}
 function keyHeld(action){const codes=BINDS.held[action];if(!codes)return false;for(const c of codes)if(keys[c])return true;return false;}
@@ -3621,6 +3650,7 @@ function pollPad(dt){
   const rtv=gp.buttons[7]?gp.buttons[7].value:0,ltv=gp.buttons[6]?gp.buttons[6].value:0;
   if(!PAD.active&&(now.some(Boolean)||lx||ly||rx||ry||rtv>0.3||ltv>0.3))setPadActive(true);
   if(!PAD.active){PAD.prev=now;return;}
+  if(capture&&capture.kind==='pad'){const b=now.findIndex((v,i)=>v&&!PAD.prev[i]);if(b>=0)captureInput('pad',b);PAD.prev=now;return;} // the rebinding panel waits for a button
   const ui=!ready||!playing||invOpen;
   padCur.style.display=ui?'block':'none';
   if(ui){
@@ -3651,8 +3681,7 @@ function pollPad(dt){
   }
   PAD.prev=now;
 }
-const PAD_HTML='<div><b>Left stick</b> move, click it to sprint</div><div><b>Right stick</b> look, click it to pick a block</div><div><b>A</b> jump, swim up, double tap to fly</div><div><b>B</b> fly down</div><div><b>X</b> fly on or off</div><div><b>Noclip</b> (fly through blocks): in the pause menu, creative only</div><div><b>Y</b> block menu</div><div><b>RT</b> break, hold to mine</div><div><b>LT</b> place or use</div><div><b>LB / RB</b> change slot</div><div><b>D-pad up</b> next waystone (in survival, from beside one)</div><div><b>D-pad down</b> map zoom</div><div><b>D-pad left / right</b> undo, brush size</div><div><b>View</b> replace mode</div><div><b>Menu</b> pause</div><div><b>In menus</b> left stick moves the pointer, A clicks, X right clicks, B goes back, right stick scrolls, d-pad or bumpers adjust sliders</div>';
-function updateKeysHelp(){const k=$('keys');if(k)k.innerHTML=PAD.active?PAD_HTML:KEYS_HTML;}
+function updateKeysHelp(){const k=$('keys');if(k)k.innerHTML=helpHTML();} // ui/controls.js
 
 
 // Particles
@@ -3900,8 +3929,9 @@ function mineTick(dt){
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
     const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
     if(info.drop){let lost=0;const got=sick?sickleSweep(hit.x,hit.y,hit.z):id===ROPE||id===GRAPNEL?ropeTake(id,hit.x,hit.y,hit.z):dropsFor(id,tool);
+      if(BL[id].mat==='ore')hint('ore');
       for(const [d,n] of got){lost+=addItem(d,n);showName('+'+n+' '+nameOf(d));}if(lost)toast('Inventory full');drawBar(true);}
-    else if(BL[id].tier>0)toast('This needs a better pickaxe');
+    else if(BL[id].tier>0){toast('This needs a better pickaxe');hint('tier');}
     mineI=-1;mineP=0;crack.visible=false;return;
   }
   crack.visible=true;crack.position.set(hit.x+.5,hit.y+.5,hit.z+.5);crack.material.opacity=0.2+mineP*0.65;
@@ -4048,7 +4078,7 @@ function die(cause){
   if(document.pointerLockElement)document.exitPointerLock();playing=false;
 }
 function revive(){
-  hp=20;food=20;exh=0;air=10;fallTop=null;dead=false;$('death').style.display='none';respawn();drawStats();lockOrPlay();
+  const hadGrave=/grave/.test($('deathmsg').textContent);hp=20;food=20;exh=0;air=10;fallTop=null;dead=false;$('death').style.display='none';respawn();drawStats();lockOrPlay();if(hadGrave)hint('grave');
 }
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
@@ -4480,6 +4510,131 @@ if(TOUCH){
   addEventListener('resize',joyRest);
 }
 
+// ---- Controls (M5a, Q37, Q38, Q39): names for keys and buttons, the rebinding panel in the pause menu, the help panel built from
+// the bindings in use (by device and by mode), and the readout toggle.
+const KEY_NAMES={Space:'Space',ShiftLeft:'Left Shift',ShiftRight:'Right Shift',ControlLeft:'Left Ctrl',ControlRight:'Right Ctrl',AltLeft:'Left Alt',AltRight:'Right Alt',
+  ArrowUp:'Up',ArrowDown:'Down',ArrowLeft:'Left',ArrowRight:'Right',Tab:'Tab',Enter:'Enter',Backspace:'Backspace',CapsLock:'Caps Lock',Backquote:'`',Minus:'-',Equal:'=',
+  BracketLeft:'[',BracketRight:']',Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/',Backslash:'\\'};
+const keyName=c=>KEY_NAMES[c]||(c.startsWith('Key')?c.slice(3):c.startsWith('Digit')?c.slice(5):c.replace(/^Numpad/,'Num '));
+const PAD_NAMES=['A','B','X','Y','LB','RB','LT','RT','View','Menu','Left stick click','Right stick click','D-pad up','D-pad down','D-pad left','D-pad right'];
+const padName=b=>PAD_NAMES[b]||('Button '+b);
+const keysOf=a=>Object.keys(BINDS.keys).filter(c=>BINDS.keys[c]===a);
+const padOf=a=>Object.keys(BINDS.pad).filter(b=>BINDS.pad[b]===a).map(Number);
+// How the player does an action on the device in use, for hints: 'right click', 'LT', 'the pack button'...
+function ctl(a){
+  const dev=PAD.active?'pad':TOUCH?'touch':'keys';
+  const fixed={place:{keys:'right click',pad:'LT',touch:'tapping the view'},break:{keys:'left click',pad:'RT',touch:'holding on the view'},
+    jump:{keys:keyName(BINDS.held.jump[0]||'Space'),pad:'A',touch:'the arrow'},sprint:{keys:keyName(BINDS.held.sprint[0]||'ShiftLeft'),pad:'B',touch:'the down arrow'},
+    inventory:{touch:'the pack button'}};
+  if(fixed[a]&&fixed[a][dev])return fixed[a][dev];
+  if(dev==='pad'){const b=padOf(a);return b.length?padName(b[0]):'the pause menu';}
+  if(dev==='touch')return 'its button';
+  const k=keysOf(a);return k.length?keyName(k[0]):'the pause menu';
+}
+// ---- Help (Q38): what each control does in this mode, on this device
+const HELP={inventory:['inventory and crafting','block menu'],mapZoom:['map zoom'],waypoint:['travel to the next waystone, from beside one','travel to the next waystone'],
+  photo:['hide the HUD for screenshots'],hud:['readout on or off'],pick:['select the block you look at in the hotbar','pick the block you look at'],pause:['pause and settings'],
+  hotbarPrev:['previous slot'],hotbarNext:['next slot'],fly:[null,'fly on or off'],noclip:[null,'noclip: fly through blocks'],respawn:[null,'back to spawn'],brush:[null,'brush size'],
+  swap:[null,'replace mode: placing replaces blocks'],undo:[null,'undo'],bpRotate:[null,'turn the blueprint'],bpClear:[null,'clear the blueprint'],
+  undoOrClear:[null,'undo, or clear the blueprint'],brushOrRotate:[null,'brush size, or turn the blueprint']};
+const helpText=a=>{const h=HELP[a];if(!h)return null;return SURV()?h[0]:(h[1]===undefined?h[0]:h[1]);};
+const TIPS_SURV=[['Grapnel','place it at a wall below a ledge to hang rope'],['Waystones','touch one to attune it; travel only between attuned stones'],
+  ['Lantern','wear it in the belt slot; it burns lamp oil or pitch candles in the dark'],['Chests','what you leave in them stays']];
+function helpRows(){
+  const s=SURV(),rows=[];
+  if(PAD.active){
+    rows.push(['Left stick','move; click it to sprint'],['Right stick','look'],['A','jump, swim up, climb'+(s?'':'; double tap to fly')],['B',s?'climb down':'fly down, climb down'],
+      ['RT',s?'break, hold to mine':'break'],['LT',s?'place, use, eat':'place, use']);
+    for(const b of Object.keys(BINDS.pad).map(Number).sort((x,y)=>x-y)){const t=helpText(BINDS.pad[b]);if(t)rows.push([padName(b),t]);}
+  }else if(TOUCH){
+    rows.push(['Left side','drag to walk, push to the edge to run'],['Right side','drag to look'],['Tap','the view to place'+(s?', use or eat':'')],['Hold still','on the view to break'],
+      ['Arrow','jump, climb'+(s?'':'; double tap to fly')],['Down arrow',s?'climb down':'fly down, climb down'],['Tap the map','to zoom out'+(s?'':', then tap a waystone to travel')]);
+    if(!s)rows.push(['Clip','noclip: fly through blocks'],['Size','brush size'],['Undo','roll back'],['Swap','placing replaces blocks']);
+  }else{
+    const mv=['forward','left','back','right'].map(a=>keyName(BINDS.held[a][0]||'?')).join(' ');
+    rows.push([mv,'move'],[keyName(BINDS.held.jump[0]||'?'),'jump, swim up, climb'+(s?'':'; double tap to fly')],
+      [keyName(BINDS.held.sprint[0]||'?'),'sprint, climb down'+(s?'':', fly down')+'; double tap forward to sprint'],
+      ['Left click',s?'hold to break; light a Blasting Keg':'break; light a Blasting Keg'],['Right click',s?'place; use chests, lecterns and waystones; eat':'place; use blocks'],
+      ['Middle click',helpText('pick')],['1 to 9, wheel','choose a hotbar slot']);
+    const seen=new Set();for(const c of Object.keys(BINDS.keys)){const a=BINDS.keys[c];if(a.startsWith('slot')||seen.has(a))continue;const t=helpText(a);if(!t)continue;seen.add(a);rows.push([keysOf(a).map(keyName).join(' or '),t]);}
+    rows.push(['Esc','pause and settings']);
+  }
+  if(s)rows.push(...TIPS_SURV);
+  return rows;
+}
+const escH=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+function helpHTML(){return helpRows().map(([k,t])=>'<div><b>'+escH(k)+'</b> '+escH(t)+'</div>').join('');}
+// ---- The readout (Q39): on by default, I or the pause menu turns it off
+function setHud(on){settings.hud=on;lsSet(SET_KEY,settings);$('info').style.display=on?'':'none';const el=$('hudseg');if(el)[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',(b.dataset.v==='1')===on));}
+// ---- Rebinding (Q37): every remappable action with its keyboard keys and controller button; tap a cell, then press the new one
+const BIND_ROWS=[['held','forward','Move forward'],['held','back','Move back'],['held','left','Move left'],['held','right','Move right'],['held','jump','Jump, swim up, climb'],
+  ['held','sprint','Sprint, climb down'],['act','inventory','Inventory'],['act','pick','Pick block'],['act','hotbarPrev','Previous slot'],['act','hotbarNext','Next slot'],
+  ['act','mapZoom','Map zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
+  ['act','fly','Fly (creative)'],['act','noclip','Noclip (creative)'],['act','brush','Brush size (creative)'],['act','swap','Replace mode (creative)'],['act','undo','Undo (creative)'],
+  ['act','undoOrClear','Undo or clear blueprint (creative)'],['act','brushOrRotate','Brush or turn blueprint (creative)'],['act','respawn','Back to spawn (creative)'],
+  ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];
+let capture=null; // {kind:'keys'|'held'|'pad', action}
+function bindLabel(kind,a){
+  if(kind==='pad'){if(a==='jump')return 'A (fixed)';if(a==='sprint')return 'Left stick click (fixed)';const b=padOf(a);return b.length?b.map(padName).join(', '):'None';}
+  const k=kind==='held'?BINDS.held[a]:keysOf(a);return k.length?k.map(keyName).join(', '):'None';
+}
+function renderControls(){
+  const box=$('ctl');if(!box)return;box.innerHTML='';
+  const h=document.createElement('div');h.className='inv-h';h.textContent='Controls: tap a key or button, then press the new one. Esc or B cancels.';box.appendChild(h);
+  const t=document.createElement('div');t.className='ctlgrid';
+  const head=(x)=>{const d=document.createElement('div');d.className='ch';d.textContent=x;t.appendChild(d);};head('Action');head('Keyboard');head('Controller');
+  for(const [kind,a,label] of BIND_ROWS){
+    const n=document.createElement('div');n.textContent=label;t.appendChild(n);
+    const cell=(k,enabled,other)=>{const b=document.createElement('button');const on=capture&&capture.kind===k&&capture.action===a;
+      b.textContent=on?(k==='pad'?'Press a button':'Press a key'):enabled?bindLabel(k,a):(other||'-');b.disabled=!enabled;if(on)b.className='on';
+      b.addEventListener('click',()=>{capture={kind:k,action:a};renderControls();});t.appendChild(b);};
+    cell(kind==='held'?'held':'keys',!(kind==='act'&&a.startsWith('undoOr'))&&!(kind==='act'&&(a==='brushOrRotate'||a==='pause')));
+    cell('pad',kind==='act'&&!a.startsWith('slot'),a==='jump'||a==='sprint'?bindLabel('pad',a):'-');
+  }
+  box.appendChild(t);
+  const r=document.createElement('button');r.textContent='Reset all to defaults';r.addEventListener('click',()=>{resetBinds();capture=null;renderControls();updateKeysHelp();toast('Controls reset');});box.appendChild(r);
+}
+// Finish a capture with a key code or a button number; returns what happened, for the panel and the tests
+function captureInput(kind,code){
+  if(!capture)return 'none';
+  if(kind==='keys'&&code==='Escape'){capture=null;renderControls();return 'cancelled';}
+  if(kind==='pad'&&code===1&&capture.kind==='pad'){capture=null;renderControls();return 'cancelled';}
+  if((kind==='pad')!==(capture.kind==='pad'))return 'ignored';
+  if(capture.kind==='pad'&&(capture.action==='jump'||capture.action==='sprint')){capture=null;renderControls();return 'fixed';}
+  const ok=rebind(capture.kind,capture.action,code);
+  if(!ok)toast(padName(code)+' is fixed: '+PAD_FIXED[code]);
+  capture=null;renderControls();updateKeysHelp();return ok?'bound':'fixed';
+}
+addEventListener('keydown',e=>{if(!capture||capture.kind==='pad')return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)captureInput('keys',e.code);},true);
+// ---- Context hints (M5a, Q38): a short note the first time something happens, once per player (settings.seen) unless hints
+// are turned off in the pause menu. Each names the control for the device in use (ctl in ui/controls.js).
+const HINTS={
+  start:()=>'Hold '+ctl('break')+' to mine. Press '+ctl('inventory')+' to open your pack and craft: logs make planks, planks make sticks, and both make tools.',
+  ore:()=>'Ore gives raw metal. Build a furnace from 8 cobblestone and smelt the metal with coal into ingots for better tools.',
+  tier:()=>'This needs a better pickaxe. Each pickaxe mines the next metal: stone for copper, copper for tin and gold, bronze for iron, iron for platinum, steel for moonsilver.',
+  hunger:()=>'You are getting hungry. Hold food and press '+ctl('place')+' to eat. Cooked food fills you most.',
+  dark:()=>"It is dark. Hold a torch, or wear a Miner's Lantern in your belt slot: it burns lamp oil or pitch candles.",
+  lectern:()=>'A lectern. Press '+ctl('place')+" to read a page of the hold's history.",
+  waystone:()=>'An Ancient Waystone. Press '+ctl('place')+' to attune it; you can travel between attuned stones.',
+  box:()=>'Press '+ctl('place')+' to open it. What you leave inside stays there.',
+  climb:()=>'Climbing: '+ctl('jump')+' goes up, '+ctl('sprint')+' goes down, and letting go holds you still.',
+  grave:()=>'Your things are in a grave where you fell. Use it to get them back.'
+};
+let hintT=0,darkT=0;
+function hint(id){
+  if(settings.hints===false||!HINTS[id]||(settings.seen&&settings.seen[id]))return false;
+  settings.seen=settings.seen||{};settings.seen[id]=1;lsSet(SET_KEY,settings);
+  const el=$('hint');el.textContent=HINTS[id]();el.style.display='block';clearTimeout(hintT);hintT=setTimeout(()=>{el.style.display='none';},8000);return true;
+}
+// A few times a second while playing in survival: hints for the player's state and for what they look at
+function hintTick(dt,hit){
+  if(!SURV()||dead||!playing)return;
+  hint('start');
+  if(food<=14)hint('hunger');
+  if(PL.climb)hint('climb');
+  if(hit){if(hit.id===LECTERN)hint('lectern');else if(hit.id===WAYSTONE)hint('waystone');else if(isBox(hit.id))hint('box');}
+  if(lampLevel()[0]===0&&lampDark()){darkT+=dt;if(darkT>3)hint('dark');}else darkT=0;
+}
 // Hotbar and block menu
 function icon(id){if(isItem(id)){const c=document.createElement('canvas');c.width=c.height=16;c.getContext('2d').drawImage(itemIcon(id),0,0);return c;}return tileCanvas(isTool(id)?TOOLS[id][1]:BL[id].t[2]);}
 let nameTimer=0;
@@ -4517,9 +4672,6 @@ function closeInv(){invOpen=false;box=null;$('inv').style.display='none';lockOrP
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 
 // Overlay and settings
-const KEYS_HTML=TOUCH
-  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Grapnel</b> place it at a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> the arrow climbs, the down arrow climbs down</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waystone to travel (in survival, from beside a waystone)</div><div><b>Tap a waystone</b> with place to attune it or choose where to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
-  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn (creative)</div><div><b>Space in midair</b> glide</div><div><b>Grapnel</b> right click a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> Space climbs, Shift climbs down</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to the next waystone (in survival, from beside one)</div><div><b>Right click a waystone</b> to attune it, or to choose where to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
@@ -4529,6 +4681,9 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('hintseg','hints',v=>v==='1');
+$('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
+$('ctlbtn').addEventListener('click',()=>{const c=$('ctl'),open=c.style.display==='none';c.style.display=open?'':'none';capture=null;if(open)renderControls();});
 segBind('resseg','res',v=>v);$('resseg').addEventListener('click',()=>{setRes(resTarget());}); // Auto restarts from the full density
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
 function drawClip(){[...$('clipseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===(PL.noclip?'1':'0')));}
@@ -4549,8 +4704,11 @@ function renderWorlds(){
   [...WIX.list].sort((a,b)=>(b.played||0)-(a.played||0)).forEach(w=>{
     const row=document.createElement('div');row.className='wrow'+(w.id===WIX.active?' on':'');
     const t=document.createElement('div');t.className='t';t.textContent=w.name+(w.id===WIX.active?' (playing)':'');
-    const sm=document.createElement('small');sm.textContent='seed '+w.seed+', '+w.mode;t.appendChild(sm);row.appendChild(t);
+    const sm=document.createElement('small');sm.textContent='seed '+w.seed+', '+w.mode+(w.played?', played '+new Date(w.played).toLocaleDateString():'');t.appendChild(sm);row.appendChild(t);
     const btn=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.addEventListener('click',fn);row.appendChild(b);return b;};
+    btn('Rename',()=>{const inp=document.createElement('input');inp.value=w.name;inp.maxLength=40;inp.setAttribute('aria-label','New name for '+w.name);t.replaceChildren(inp);inp.focus();inp.select();
+      const done=ok=>{if(ok&&renameWorld(w.id,inp.value))toast('Renamed to '+WIX.list.find(x=>x.id===w.id).name);renderWorlds();};
+      inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);});inp.addEventListener('blur',()=>done(true));});
     if(w.id!==WIX.active)btn('Play',()=>switchWorld(w.id));
     btn('Export',()=>{const txt=exportWorld(w.id);if(txt){downloadText(w.name.replace(/[^\w -]+/g,'').trim().replace(/ +/g,'-')+'.fbcworld.json',txt);toast('Exported '+w.name);}});
     if(w.id!==WIX.active)btn(delArm===w.id?'Sure?':'Delete',()=>{if(delArm!==w.id){delArm=w.id;renderWorlds();return;}delArm=null;deleteWorld(w.id);toast('Deleted '+w.name);renderWorlds();});
@@ -4560,7 +4718,7 @@ function renderWorlds(){
 }
 renderWorlds();
 $('importfile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(txt=>{try{const w=importWorld(txt);toast('Imported '+w.name);renderWorlds();}catch(err){toast(err.message);}e.target.value='';});});
-function showPause(){renderWorlds();$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
+function showPause(){renderWorlds();updateKeysHelp();$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
 
 // Saving
 let skipSave=false,saveWarned=false;
@@ -4579,6 +4737,7 @@ let lastSaveT=0;setInterval(()=>{const now=Date.now();if(saveDirty||(playing&&no
 function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
 function uniqueWorldName(name){const used=new Set(WIX.list.map(w=>w.name));let n=name,k=2;while(used.has(n))n=name+' '+(k++);return n;}
 function createWorld(name,seed,mode){const w=newWorldEntry(uniqueWorldName(name||'World '+(WIX.list.length+1)),seed,mode);WIX.list.push(w);lsSet(SAVE_KEY,WIX);return w;}
+function renameWorld(id,name){const w=WIX.list.find(x=>x.id===id);name=String(name||'').trim().slice(0,40);if(!w||!name)return false;if(name!==w.name){w.name='';w.name=uniqueWorldName(name);}lsSet(SAVE_KEY,WIX);if(id===WIX.active)WORLD.name=w.name;return true;}
 function switchWorld(id){if(!WIX.list.some(w=>w.id===id))return;saveNow();WIX.active=id;lsSet(SAVE_KEY,WIX);skipSave=true;location.reload();}
 function deleteWorld(id){if(id===WIX.active)return false;const i=WIX.list.findIndex(w=>w.id===id);if(i<0)return false;WIX.list.splice(i,1);lsDel(worldKey(id));lsSet(SAVE_KEY,WIX);return true;}
 const WORLD_FILE='fantasy-blockcraft-world';
@@ -5015,7 +5174,7 @@ function frame(now){
     }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
   renderer.render(scene,camera);
   fc++;ft+=dt;infoT-=dt;
-  if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
+  if(infoT<=0&&ready){infoT=0.25;hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);

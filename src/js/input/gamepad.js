@@ -38,6 +38,7 @@ function pollPad(dt){
   const rtv=gp.buttons[7]?gp.buttons[7].value:0,ltv=gp.buttons[6]?gp.buttons[6].value:0;
   if(!PAD.active&&(now.some(Boolean)||lx||ly||rx||ry||rtv>0.3||ltv>0.3))setPadActive(true);
   if(!PAD.active){PAD.prev=now;return;}
+  if(capture&&capture.kind==='pad'){const b=now.findIndex((v,i)=>v&&!PAD.prev[i]);if(b>=0)captureInput('pad',b);PAD.prev=now;return;} // the rebinding panel waits for a button
   const ui=!ready||!playing||invOpen;
   padCur.style.display=ui?'block':'none';
   if(ui){
@@ -68,7 +69,6 @@ function pollPad(dt){
   }
   PAD.prev=now;
 }
-const PAD_HTML='<div><b>Left stick</b> move, click it to sprint</div><div><b>Right stick</b> look, click it to pick a block</div><div><b>A</b> jump, swim up, double tap to fly</div><div><b>B</b> fly down</div><div><b>X</b> fly on or off</div><div><b>Noclip</b> (fly through blocks): in the pause menu, creative only</div><div><b>Y</b> block menu</div><div><b>RT</b> break, hold to mine</div><div><b>LT</b> place or use</div><div><b>LB / RB</b> change slot</div><div><b>D-pad up</b> next waystone (in survival, from beside one)</div><div><b>D-pad down</b> map zoom</div><div><b>D-pad left / right</b> undo, brush size</div><div><b>View</b> replace mode</div><div><b>Menu</b> pause</div><div><b>In menus</b> left stick moves the pointer, A clicks, X right clicks, B goes back, right stick scrolls, d-pad or bumpers adjust sliders</div>';
-function updateKeysHelp(){const k=$('keys');if(k)k.innerHTML=PAD.active?PAD_HTML:KEYS_HTML;}
+function updateKeysHelp(){const k=$('keys');if(k)k.innerHTML=helpHTML();} // ui/controls.js
 
 

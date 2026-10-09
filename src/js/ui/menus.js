@@ -35,9 +35,6 @@ function closeInv(){invOpen=false;box=null;$('inv').style.display='none';lockOrP
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 
 // Overlay and settings
-const KEYS_HTML=TOUCH
-  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Grapnel</b> place it at a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> the arrow climbs, the down arrow climbs down</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waystone to travel (in survival, from beside a waystone)</div><div><b>Tap a waystone</b> with place to attune it or choose where to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
-  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn (creative)</div><div><b>Space in midair</b> glide</div><div><b>Grapnel</b> right click a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> Space climbs, Shift climbs down</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to the next waystone (in survival, from beside one)</div><div><b>Right click a waystone</b> to attune it, or to choose where to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
@@ -47,6 +44,9 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('hintseg','hints',v=>v==='1');
+$('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
+$('ctlbtn').addEventListener('click',()=>{const c=$('ctl'),open=c.style.display==='none';c.style.display=open?'':'none';capture=null;if(open)renderControls();});
 segBind('resseg','res',v=>v);$('resseg').addEventListener('click',()=>{setRes(resTarget());}); // Auto restarts from the full density
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
 function drawClip(){[...$('clipseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===(PL.noclip?'1':'0')));}
@@ -67,8 +67,11 @@ function renderWorlds(){
   [...WIX.list].sort((a,b)=>(b.played||0)-(a.played||0)).forEach(w=>{
     const row=document.createElement('div');row.className='wrow'+(w.id===WIX.active?' on':'');
     const t=document.createElement('div');t.className='t';t.textContent=w.name+(w.id===WIX.active?' (playing)':'');
-    const sm=document.createElement('small');sm.textContent='seed '+w.seed+', '+w.mode;t.appendChild(sm);row.appendChild(t);
+    const sm=document.createElement('small');sm.textContent='seed '+w.seed+', '+w.mode+(w.played?', played '+new Date(w.played).toLocaleDateString():'');t.appendChild(sm);row.appendChild(t);
     const btn=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.addEventListener('click',fn);row.appendChild(b);return b;};
+    btn('Rename',()=>{const inp=document.createElement('input');inp.value=w.name;inp.maxLength=40;inp.setAttribute('aria-label','New name for '+w.name);t.replaceChildren(inp);inp.focus();inp.select();
+      const done=ok=>{if(ok&&renameWorld(w.id,inp.value))toast('Renamed to '+WIX.list.find(x=>x.id===w.id).name);renderWorlds();};
+      inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);});inp.addEventListener('blur',()=>done(true));});
     if(w.id!==WIX.active)btn('Play',()=>switchWorld(w.id));
     btn('Export',()=>{const txt=exportWorld(w.id);if(txt){downloadText(w.name.replace(/[^\w -]+/g,'').trim().replace(/ +/g,'-')+'.fbcworld.json',txt);toast('Exported '+w.name);}});
     if(w.id!==WIX.active)btn(delArm===w.id?'Sure?':'Delete',()=>{if(delArm!==w.id){delArm=w.id;renderWorlds();return;}delArm=null;deleteWorld(w.id);toast('Deleted '+w.name);renderWorlds();});
@@ -78,5 +81,5 @@ function renderWorlds(){
 }
 renderWorlds();
 $('importfile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(txt=>{try{const w=importWorld(txt);toast('Imported '+w.name);renderWorlds();}catch(err){toast(err.message);}e.target.value='';});});
-function showPause(){renderWorlds();$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
+function showPause(){renderWorlds();updateKeysHelp();$('overlay').style.display='grid';$('play').textContent='Resume';$('status').textContent='Paused. Your world saves on its own.';}
 

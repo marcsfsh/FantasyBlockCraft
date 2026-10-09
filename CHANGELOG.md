@@ -5,6 +5,21 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.13.0 (2026-10-09): M5a, controls and interface
+
+No change to the world or the save format: 0.12 worlds keep working.
+
+### Game
+- **Rebind your controls:** a Controls panel in the pause menu lists every action with its keyboard keys and controller button. Tap one, then press the new key or button; Esc or B cancels; Reset brings back the defaults. A key you take for one action is freed from the one that had it.
+- **Better defaults:** on the controller, travel moved to D-pad down and D-pad up now opens the map, so a slip no longer moves you. I turns the readout on and off.
+- **Hints:** short one-time notes the first time something happens in survival (your first mining, ore, a pickaxe too weak, hunger, darkness, a lectern, a waystone, a chest, climbing, a grave). They name the right key or button for what you are using. Turn them off in the pause menu.
+- **Help that fits:** the pause menu's help now shows the keys you have set, for the keyboard, controller or touch, and only what applies to survival or creative.
+- **Readout switch:** the readout (fps, position, place name) is on by default and can be turned off with I or in the pause menu.
+- **Worlds:** rename a world, and see when each was last played.
+
+### Tooling
+- New test 34-controls (defaults, rebinding and conflicts, saved bindings, capture, help by mode and device, hints, readout, renaming) (D-036).
+
 ## 0.12.2 (2026-10-09): crisp textures on Windows desktops
 
 No change to the world or the save format.

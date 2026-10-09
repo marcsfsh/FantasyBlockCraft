@@ -229,6 +229,10 @@ Added after the owner played 0.8.0: generation feels disjointed and random, the 
 
 **Checkpoint:** rebind a control on the Ally X; find a marker you placed on the world map after a reload.
 
+**Split (D-036):**
+- **M5a, controls and interface (done in 0.13.0):** rebinding with better defaults, context hints, help by mode and device, the readout switch, renaming worlds. Checkpoint: rebind a control on the Ally X.
+- **M5b, maps and creative tools:** the underground layer view, the explored world map with markers and place names, and the creative upgrades. Checkpoint: find a marker you placed on the world map after a reload.
+
 ## M6: Surface enrichment
 
 - **Enrich the thin lands (Q23):** Western Sea, Grey Shore, High Mountains (now taller), Northern Fells, Lake and Fens get plants, features and ground variety.
