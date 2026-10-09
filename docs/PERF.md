@@ -84,3 +84,14 @@ Same VM, `node tools/bench.mjs --runs=3`, 0.6.0 (`main`) and 0.7.0 back to back.
 | 0.7.0 | 4242 | 11.62 / 15.19 / 12.51 | 13.66 / 15.92 / 20 | 0.59 to 0.85 / 0.39 to 0.71 / 2.1 to 3.0 / 5.4 to 6.7 | 2.14 / 2.48 / 3.42 (p95 7 to 9) | 145 to 191 |
 
 Reading it: a chunk costs about the same CPU in total, but streaming now spends well under a millisecond per frame instead of a whole chunk (about 14 to 22 ms) in one frame. Meshing a surface chunk fell from about 17 to 23 ms to about 2 to 4 ms. The full light recompute is a little slower (it seeds one chunk at a time to stay exact) and runs only at start-up.
+
+## After M3b (2026-10-09, 0.8.0)
+
+Same VM, `npm run bench`, one run per seed. lightAll now also spreads sky light sideways (D-027).
+
+| Seed | Startup | genChunk | Stream 1 chunk | Stream step (one frame) | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 123456789 | 2378 | 14.4 / 13.68 / 20.7 / 25.13 | 19.92 / 19.48 / 23.9 / 33.16 | 0.81 / 0.55 / 3.38 / 6.42 | 5.1 / 3.74 / 11.31 / 17.47 | 242 |
+| 4242 | 2468 | 15.68 / 14.73 / 23.1 / 31.86 | 21.39 / 20.47 / 31.72 / 40.79 | 0.75 / 0.55 / 3.31 / 5.41 | 4.12 / 2.96 / 8.93 / 30.69 | 307 |
+
+Streaming and meshing are within the noise of 0.7.0. The full light recompute takes about 100 ms longer (it fills and spreads the sky light store over the whole window) and runs only at start-up. The livelier look is all in the shader and the cloud mesh, which this CPU benchmark does not measure; the owner's devices judge it.
