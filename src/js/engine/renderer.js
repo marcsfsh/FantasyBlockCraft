@@ -1,8 +1,18 @@
 // Three.js setup
 const canvas=$('c');
 const renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:false,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,TOUCH?1.5:1.25));
-renderer.setSize(innerWidth,innerHeight);
+// Render resolution (0.12.1, D-034): how many drawn pixels per CSS pixel. Sharp uses the screen's full density (up to 3), Fast
+// one per CSS pixel; Auto starts at the full density (up to 2 on desktop, 1.5 on touch) and autoView steps it down to no less
+// than 1 when frames are slow, and back up. Drawing below the screen's density blurs the texture pixels when the browser
+// stretches the picture, and makes distant textures blend sooner (smaller mipmaps).
+let DPR=(d=>typeof d==='number'&&d>0?d:1)(window.devicePixelRatio);
+const RES={ratio:0};
+const resFloor=()=>Math.min(DPR,1);
+function resTarget(){const m=settings.res;return m==='fast'?resFloor():m==='sharp'?Math.min(DPR,3):Math.min(DPR,TOUCH?1.5:2);}
+function setRes(r){r=Math.max(resFloor(),Math.min(resTarget(),r));if(r===RES.ratio)return false;RES.ratio=r;renderer.setPixelRatio(r);renderer.setSize(innerWidth,innerHeight);return true;}
+// One step of Auto (d is +0.25 or -0.25); false when there is nothing to change
+function resStep(d){return settings.res==='auto'&&setRes(Math.round((RES.ratio+d)*4)/4);}
+setRes(resTarget());
 renderer.setClearColor(SKY);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);

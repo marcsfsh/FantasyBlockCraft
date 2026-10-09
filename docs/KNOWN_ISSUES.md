@@ -33,3 +33,4 @@
 - **The lantern's light is a shader effect, not block light.** It lights what you see around you but does not count as light for crops or for the lantern's own darkness check.
 - **Containers do not spill when blasted or broken by force.** Blasts spare them and survival refuses to break a full one; in creative, breaking a container deletes its contents.
 - **Food balance is a first pass:** forage density (about 3 bilberry bushes, 0.5 brown mushrooms and 0.7 wild turnips per 1000 columns over three windows of seed 123456789), crop growth and food values are for the owner to judge in play.
+- **Auto resolution is unverified on a device.** On a 200% desktop or the Ally X, Auto should hold full density while frames are smooth and drop it only after the view has come in to 72 blocks (D-034). Choose Sharp or Fast in the pause menu to override it.
