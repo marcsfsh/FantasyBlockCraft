@@ -38,8 +38,16 @@ function colInfoBase(X,Z,o){
   h+=open*fwd*fbm2(X/56,Z/56,1,4613.1)*3.5;     // elder wood: uneven old ground
   h+=sw*fbm2(X/22,Z/22,2,4607.9)*3;             // shadowed forest: hummocks and hollows
   h+=pw*fbm2(X/140,Z/140,1,4619.7)*3;           // windswept plains: long low waves
-  // the sea: lands fall away to its floor across the coast blend
-  if(o.wS>0)h=h*(1-o.wS)+(SEA-9-Math.abs(fbm2(X/300,Z/300,2,8301.1))*26+hill*3)*o.wS;
+  // Coast shapes (M6d): chalk downs stand higher; fjords cut sea inlets into their mountains
+  if(o.wChalk>0)h+=o.wChalk*14;
+  if(o.wFjord>0){const q=Math.abs(fbm2(X/240,Z/240,2,8311.3)),ch=sstep(0.075,0.03,q)*o.wFjord;if(ch>0)h=h*(1-ch)+(SEA-14+fbm2(X/40,Z/40,1,8313.1)*3)*ch;}
+  // the sea: lands fall away to its floor across the coast blend; the kelp shallows are shallow, the rocky isles rise out of it,
+  // and chalk and fjord coasts keep their height to the water's edge and drop sheer
+  if(o.wS>0){let sf=SEA-9-Math.abs(fbm2(X/300,Z/300,2,8301.1))*26+hill*3;const ks=o.wKelp/o.wS,is=o.wIsle/o.wS;
+    if(ks>0)sf=sf*(1-ks)+(SEA-4-Math.abs(fbm2(X/90,Z/90,2,8303.3))*5)*ks;
+    if(is>0){const n=fbm2(X/70,Z/70,2,8305.7),ih=n>0.08?Math.min(SEA+22,SEA-4+(n-0.08)*140):sf;sf=sf*(1-is)+Math.max(sf,ih)*is;}
+    const soft=h*(1-o.wS)+sf*o.wS,cl=Math.min(1,o.wChalk+o.wFjord);
+    if(cl>0){const t=0.5+fbm2(X/30,Z/30,1,8307.9)*0.15;h=soft*(1-cl)+(o.wS<t?h:sf)*cl;}else h=soft;}
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
   const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SEA-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief)),vw=rw+Math.min(0.24,relief*0.0075);

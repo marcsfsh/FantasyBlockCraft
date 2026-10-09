@@ -92,7 +92,7 @@ function frame(now){
   caveF+=((ready&&sky(ex,ey,ez)<0.3?1:0)-caveF)*Math.min(1,dt*1.5);
   matHand.uniforms.bright.value=Math.max(0.22,Math.min(1,Math.max(sky(ex,ey,ez)*U.skyMul.value,bl(ex,ey,ez))));handItem.material.color.setScalar(matHand.uniforms.bright.value);
   const head=get(Math.floor(camera.position.x),Math.floor(camera.position.y),Math.floor(camera.position.z));
-  if(head===WATER){U.fogColor.value.setHex(0x1d4c8a).multiplyScalar(Math.max(0.2,U.skyMul.value));U.fogNear.value=1;U.fogFar.value=24;renderer.setClearColor(U.fogColor.value);tint.style.display='block';tint.style.background='rgba(24,70,170,.3)';}
+  if(isWetId(head)){U.fogColor.value.setHex(0x1d4c8a).multiplyScalar(Math.max(0.2,U.skyMul.value));U.fogNear.value=1;U.fogFar.value=24;renderer.setClearColor(U.fogColor.value);tint.style.display='block';tint.style.background='rgba(24,70,170,.3)';}
   else if(head===LAVA){U.fogColor.value.setHex(0xc84a10);U.fogNear.value=0;U.fogFar.value=4;renderer.setClearColor(0xc84a10);tint.style.display='block';tint.style.background='rgba(220,90,20,.4)';}
   else{
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
@@ -104,7 +104,7 @@ function frame(now){
   sun.position.copy(camera.position).addScaledVector(sunDir,420);sun.lookAt(camera.position);
   halo.position.copy(camera.position).addScaledVector(sunDir,410);halo.lookAt(camera.position);
   // deep in a cave the sky is hidden, so the far edge of the loaded area shows cave darkness, not the sky (M3b)
-  const skyOn=caveF<0.6;dome.position.copy(camera.position);dome.visible=head!==WATER&&head!==LAVA&&skyOn;sun.visible=sun.visible&&skyOn;halo.visible=halo.visible&&skyOn;stars.visible=skyOn;clouds.visible=skyOn;
+  const skyOn=caveF<0.6;dome.position.copy(camera.position);dome.visible=!isWetId(head)&&head!==LAVA&&skyOn;sun.visible=sun.visible&&skyOn;halo.visible=halo.visible&&skyOn;stars.visible=skyOn;clouds.visible=skyOn;
   moon.visible=moon.visible&&skyOn;moon.position.copy(camera.position).addScaledVector(sunDir,-420);moon.lookAt(camera.position);
   stars.position.copy(camera.position);stars.rotation.y=curT()*Math.PI*2;
   waypoints.forEach(m=>{m.material.opacity=0.28+0.1*Math.sin(now*0.003+m.position.x);});

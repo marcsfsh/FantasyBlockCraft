@@ -72,11 +72,12 @@ const sigC=new Map(),TSG={},TSG2={};
 function sigOf(c){
   const key=landKey(c.i,c.j);if(sigC.has(key))return sigC.get(key);if(sigC.size>4000)sigC.clear();
   let s=null;const L=LANDS[cellLand(c)],S=SIGS[L.k],q=hsh(c.i,8141,c.j);
-  if(S&&q>=0.4){const [kind,name,R]=S[q<0.7?0:1];
-    if(kind==='sinkhole'){const t=sinkholeSite(c,L,R);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
+  if(S&&q>=0.4){const [kind,name,R,mode]=S[q<0.7?0:1];
+    if(mode){const t=coastSite(c,L,R,mode);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
+    else if(kind==='sinkhole'){const t=sinkholeSite(c,L,R);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else
     for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?12+k*3:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
-      const low=L.k==='willow'; // the vales' pools and stilt house stand on the low wet ground itself
+      const low=L.k==='willow'||L.k==='bog'; // the vales' pools and stilt house stand on the low wet ground itself
       if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=SEA+(low?0:2))continue;
       let ok=true,lo=TSG.h;for(let m=0;m<8&&ok;m++){const e=colInfo(X+Math.round(Math.cos(m*0.785)*R),Z+Math.round(Math.sin(m*0.785)*R),TSG2);if(Math.abs(e.h-TSG.h)>3||(e.wet&&!low)||e.h<SEA||e.lake||e.river||e.rvBot<999)ok=false;lo=Math.min(lo,e.h);}
       if(ok&&!surfTaken(X,Z,R+4))s={kind:kind,name:name,land:L.k,X:X,Z:Z,g:TSG.h,lo:lo,R:R,seed:hsh(c.i,8143,c.j)};}}
@@ -104,12 +105,12 @@ function sigPond(X,Z,R,L,depth,r,bank){
 }
 // The ponds a signature digs, [X, Z, radius], filled to one below the lowest ground at its rim (s.lo - 1)
 function sigPonds(s){
-  if(s.kind==='glade')return[[s.X,s.Z,5]];if(s.kind==='stilt')return[[s.X,s.Z,7]];if(s.kind==='spring')return[[s.X,s.Z,3]];if(s.kind==='tarn')return[[s.X,s.Z,6]];if(s.kind==='mossfall')return[[s.X+3,s.Z,3]];
+  if(s.kind==='glade')return[[s.X,s.Z,5]];if(s.kind==='stilt')return[[s.X,s.Z,7]];if(s.kind==='spring')return[[s.X,s.Z,3]];if(s.kind==='tarn')return[[s.X,s.Z,6]];if(s.kind==='mossfall')return[[s.X+3,s.Z,3]];if(s.kind==='dome')return[[s.X,s.Z,3],[s.X+4,s.Z-3,2]];
   if(s.kind==='pools'){const l=[[s.X,s.Z,6]];for(let k=1;k<3;k++){const a=k*2.1+hsh(s.X,8177+k,s.Z);l.push([Math.round(s.X+Math.cos(a)*7),Math.round(s.Z+Math.sin(a)*7),4]);}return l;}
   return[];
 }
 // Water a signature's pond holds: trusted by the underground water check at a chunk edge (it is held by the pond's own banks)
-function sigWaterAt(X,y,Z){for(const s of sigsNear(Math.floor(X/CS),Math.floor(Z/CS)))if(y<=s.lo-1)for(const [px,pz,R] of sigPonds(s))if(Math.hypot(X-px,Z-pz)<R+1.5)return true;return false;}
+function sigWaterAt(X,y,Z){for(const s of sigsNear(Math.floor(X/CS),Math.floor(Z/CS)))if(y<=(s.pl||s.lo-1))for(const [px,pz,R] of sigPonds(s))if(Math.hypot(X-px,Z-pz)<R+1.5)return true;return false;}
 function sigBuild(s){
   const r=mkRng(1+Math.floor(s.seed*2147483000)),X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){

@@ -90,6 +90,10 @@
       "about": "Highlands and cold (M6c): alpine meadows, glaciers, cloud forest, karst and tundra looks, their signatures (with sinkholes to the caves), and waterfalls"
     },
     {
+      "path": "world/coasts.js",
+      "about": "Coasts and waters (M6d): coast lands' beaches, rock and plants, water plants, driftwood, and their signatures above and under the sea"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },

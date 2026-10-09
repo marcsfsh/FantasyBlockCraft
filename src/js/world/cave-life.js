@@ -46,6 +46,7 @@ function caveLife(X0,Z0,r2){
 }
 function topBlock(o){
   const b=o.b,h=o.h,F=forestOf(o);
+  if(F&&F.shore&&(b===1||(b===0&&h>=SEA-12)))return F.shore(o); // the coasts' own beaches and shallows (M6d)
   if(F&&F.top&&b!==0&&b!==1&&!(o.bank&&h<=SEA+3))return F.top(o); // the forests' floors (M6b)
   if(o.bank&&h<=SEA+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
   if(b===0)return o.hill>0.08?GRAVEL:(h>SEA-5?SAND:DIRT);
@@ -64,9 +65,9 @@ const hCache=new Map();
 function hAt(X,Z){const k=X*1048576+Z;let h=hCache.get(k);if(h===undefined){if(hCache.size>400000)hCache.clear();h=colInfo(X,Z,TN).h;hCache.set(k,h);}return h;}
 function slopeAt(X,Z,h){return Math.max(Math.abs(hAt(X+1,Z)-h),Math.abs(hAt(X-1,Z)-h),Math.abs(hAt(X,Z+1)-h),Math.abs(hAt(X,Z-1)-h));}
 function fillCol(x,z,X,Z,o){
-  const h=o.h,b=o.b,ci=x+W*z;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3);
+  const h=o.h,b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3);
   if(b!==0&&b!==1){const sl=slopeAt(X,Z,h);
-    if(sl>=4){top=STONE;soil=0;}
+    if(sl>=4){top=rock||STONE;soil=0;}
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6)&&!forestOf(o))top=SNOWG; // lands with their own floors decide their snow
   biome[ci]=o.lake?9:b;ground[ci]=h;entCol[ci]=o.ent?1:0;
@@ -77,8 +78,8 @@ function fillCol(x,z,X,Z,o){
       if(y===0||(y<3&&hsh(X,y,Z)<0.5))id=BEDROCK;
       else{
         if(y===h)id=top;
-        else if(y>h-1-soil)id=b===1?SAND:(b===0?(h>SEA-5?SAND:DIRT):DIRT);
-        else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:STONE;}
+        else if(y>h-1-soil)id=shoreS||(b===1?SAND:(b===0?(h>SEA-5?SAND:DIRT):F&&F.soil||DIRT));
+        else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:(rock&&y>SEA-30?rock:STONE);}
         if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;
       }
     }else if(y<=Math.max(SEA,o.lake))id=(y===Math.max(SEA,o.lake)&&o.cold)?ICE:WATER;

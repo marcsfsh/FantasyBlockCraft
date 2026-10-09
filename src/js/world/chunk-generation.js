@@ -52,6 +52,7 @@ function features(WCX,WCZ,self,noLife){
       // groves and clearings (Q95): trees gather where the grove field is high, thicker in valleys and by water, thinner on steep slopes
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(b===3||b===8?0.55+0.8*G:0.15+1.7*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012)*grv)spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
+      else if(b===1&&hv<0.0025)driftP(X,h+1,Z,tr2); // driftwood on the shore (M6d)
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
       else if(top===GRASS&&hv<0.06){const td=((b===2||b===3)?(0.003+0.037*T2.fwd)*(1-T2.pw)*(1-T2.dw*0.8):b===10?0.0011+0.006*(1-T2.pw):b===4?0.0008+0.004*(1-T2.dw):b===7?0.001:b===11?0.004:0)*grv;
         if(hv<td){if(T2.sw>0.25&&hsh(X,3,Z)<T2.sw)jungleP(X,h+1,Z,tr2);else if(b===11)willowP(X,h+1,Z,tr2);else if(b===3&&hsh(X,2,Z)<0.15)treeP(X,h+1,Z,BIRCH,BLEAVES,5,tr2);else if((b===3&&hsh(X,4,Z)<0.35)||(b===10&&hsh(X,4,Z)<0.4))bigOakP(X,h+1,Z,tr2);else treeP(X,h+1,Z,LOG,LEAVES,4,tr2);}
@@ -74,6 +75,7 @@ function features(WCX,WCZ,self,noLife){
 function plants(WCX,WCZ){let F0=null;
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=WCX*CS+lx,Z=WCZ*CS+lz,x=X-OX,z=Z-OZ,ci=x+W*z,g=ground[ci],b=biome[ci];
+    if(g+12<H&&world[I(x,g+1,z)]===WATER)waterPlants(x,z,X,Z,g,b); // the sea floor, lakes and pools (M6d)
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
       if((top===GRASS||FLOORS.has(top))&&!sigNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);const F=forestOf(TP); // mountains and fells only where their land has its own plants
