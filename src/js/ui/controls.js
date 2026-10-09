@@ -20,7 +20,7 @@ function ctl(a){
   const k=keysOf(a);return k.length?keyName(k[0]):'the pause menu';
 }
 // ---- Help (Q38): what each control does in this mode, on this device
-const HELP={inventory:['inventory and crafting','block menu'],mapZoom:['map zoom'],waypoint:['travel to the next waystone, from beside one','travel to the next waystone'],
+const HELP={inventory:['inventory and crafting','block menu'],worldMap:['world map: places, waystones and your markers'],mapZoom:['minimap zoom'],waypoint:['travel to the next waystone, from beside one','travel to the next waystone'],
   photo:['hide the HUD for screenshots'],hud:['readout on or off'],pick:['select the block you look at in the hotbar','pick the block you look at'],pause:['pause and settings'],
   hotbarPrev:['previous slot'],hotbarNext:['next slot'],fly:[null,'fly on or off'],noclip:[null,'noclip: fly through blocks'],respawn:[null,'back to spawn'],brush:[null,'brush size'],
   swap:[null,'replace mode: placing replaces blocks'],undo:[null,'undo'],bpRotate:[null,'turn the blueprint'],bpClear:[null,'clear the blueprint'],
@@ -47,7 +47,7 @@ function helpRows(){
     const seen=new Set();for(const c of Object.keys(BINDS.keys)){const a=BINDS.keys[c];if(a.startsWith('slot')||seen.has(a))continue;const t=helpText(a);if(!t)continue;seen.add(a);rows.push([keysOf(a).map(keyName).join(' or '),t]);}
     rows.push(['Esc','pause and settings']);
   }
-  if(s)rows.push(...TIPS_SURV);
+  if(s)rows.push(...TIPS_SURV);else rows.push(['Fill Tool','break sets one corner, place the other; then fill, replace or clear the box'],['Pause menu','time of day, rain, go to coordinates, test structures']);
   return rows;
 }
 const escH=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
@@ -57,7 +57,7 @@ function setHud(on){settings.hud=on;lsSet(SET_KEY,settings);$('info').style.disp
 // ---- Rebinding (Q37): every remappable action with its keyboard keys and controller button; tap a cell, then press the new one
 const BIND_ROWS=[['held','forward','Move forward'],['held','back','Move back'],['held','left','Move left'],['held','right','Move right'],['held','jump','Jump, swim up, climb'],
   ['held','sprint','Sprint, climb down'],['act','inventory','Inventory'],['act','pick','Pick block'],['act','hotbarPrev','Previous slot'],['act','hotbarNext','Next slot'],
-  ['act','mapZoom','Map zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
+  ['act','worldMap','World map'],['act','mapZoom','Minimap zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
   ['act','fly','Fly (creative)'],['act','noclip','Noclip (creative)'],['act','brush','Brush size (creative)'],['act','swap','Replace mode (creative)'],['act','undo','Undo (creative)'],
   ['act','undoOrClear','Undo or clear blueprint (creative)'],['act','brushOrRotate','Brush or turn blueprint (creative)'],['act','respawn','Back to spawn (creative)'],
   ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];

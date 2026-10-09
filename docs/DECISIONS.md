@@ -229,3 +229,16 @@ M5 is split in two: M5a is controls and interface (rebinding, hints, help, the r
 - **Worlds (Q30):** the world list gains Rename (names stay unique) and the date each world was last played.
 - No change to the world or saves; the settings gain `hud`, `hints` and `seen`.
 Constrains: new actions go in `ACTIONS` (with `crea:1` if creative only), `HELP` and `BIND_ROWS`; new hints go in `HINTS` and fire through `hint(id)`.
+
+### D-037 M5b: maps and creative tools (2026-10-09)
+- **The world map (Q40):** M (or D-pad up) opens a full-screen map of every chunk you have explored, drawn from the terrain plan (`colInfo`) at one sample per 4 blocks: lands in their colours, sea, lakes and rivers in blue, high mountains and fells white. It shows the places you have been, attuned and carved waystones, your markers and you. Drag, the arrows or the wheel (LB and RB on the controller, the right stick to pan) move and zoom it; tapping places a marker (named, or numbered) or picks one to remove; in creative it also offers to travel there. In survival it needs a map, like the minimap. The minimap's zoom moved to J.
+- **What is saved:** explored chunks as one 256-bit mask per region of 16 x 16 chunks (`ex`, a few hundred characters for a well-travelled area, capped at 40000 chunks), places (`pl`, up to 2000) and markers (`mk`, up to 200). The map is redrawn from the terrain plan, so player edits do not show on it.
+- **Places:** a name the readout shows (a site, a hold, a point of interest, remains, a dungeon, a ruined stairway) is kept the first time you are there; lands, the general cave layer names, roads and unattuned waystones are not.
+- **The layer view (Q40):** underground (more than 4 blocks under the ground with the cave look on), the near minimap shows a slice at your feet: open floor light, open air over a drop darker, water blue, lava orange, rock in its own dark colour; it notes the height.
+- **Creative (Q76):**
+  - The block menu has a search box.
+  - Brushes go up to 13 blocks wide (seven sizes).
+  - The Fill Tool marks a box (break for one corner, place for the other, up to 64 a side and 131072 blocks): fill it with a hotbar block, change only one kind of block, or clear it. Each fill is one undo step.
+  - The pause menu sets the time of day, calls rain or clears it, goes to coordinates (X and Z, Y optional), and builds a test structure where you look: a watchtower, a ruined keep, castle ruins, a barrow, a stone ring, an ancient waystone or a dungeon room below the spot with a tunnel up beside it. The builder runs per chunk as generation does and every block it changes becomes an ordinary edit, so it saves and undoes.
+- **Saves:** the save data gained `ex`, `pl` and `mk`: `SAVE_KEY` is `fantasy-blockcraft-save-v9`, world data version 9. Generation is unchanged.
+Constrains: anything that writes the world outside generation goes through `setBlock` (as `stampAt` does after running a builder); new map layers draw from data that is cheap to recompute or small to save.

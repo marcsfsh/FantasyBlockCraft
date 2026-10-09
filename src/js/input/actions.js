@@ -18,6 +18,7 @@ const ACTIONS={
   undoOrClear:{name:'Undo, or clear the blueprint',crea:1,run:()=>{if(BP.sel>=0||BP.a)ACTIONS.bpClear.run();else undo();}},
   brushOrRotate:{name:'Brush size, or turn the blueprint',crea:1,run:()=>{if(BP.sel>=0)ACTIONS.bpRotate.run();else cycleBrush();}},
   mapZoom:{name:'Map zoom',run:()=>{mmZoom=(mmZoom+1)%3;}},
+  worldMap:{name:'World map',run:()=>{WM.open?closeWorldMap():openWorldMap();}},
   pick:{name:'Pick the block you look at',run:()=>act(1)},
   pause:{name:'Pause',run:()=>{playing=false;hold=-1;showPause();}},
   hotbarPrev:{name:'Previous slot',run:()=>{sel=(sel+8)%9;drawBar();}},
@@ -26,12 +27,12 @@ const ACTIONS={
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',KeyI:'hud',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyJ:'mapZoom',KeyI:'hud',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
   // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code (PAD_FIXED).
-  // Travel sits on D-pad down since M5 (Q37): D-pad up, easy to press by accident, opens the map.
-  pad:{2:'fly',3:'inventory',4:'hotbarPrev',5:'hotbarNext',8:'swap',9:'pause',11:'pick',12:'mapZoom',13:'waypoint',14:'undoOrClear',15:'brushOrRotate'}
+  // Travel sits on D-pad down since M5 (Q37): D-pad up, easy to press by accident, opens the world map (M5b).
+  pad:{2:'fly',3:'inventory',4:'hotbarPrev',5:'hotbarNext',8:'swap',9:'pause',11:'pick',12:'worldMap',13:'waypoint',14:'undoOrClear',15:'brushOrRotate'}
 };
 const BINDS={};
 const PAD_FIXED={0:'jump',1:'down',6:'place',7:'break',10:'sprint'};

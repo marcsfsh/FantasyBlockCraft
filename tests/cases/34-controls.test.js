@@ -4,7 +4,7 @@ while(genQ.length)processGenQ();
 const store={};localStorage.setItem=(k,v)=>{store[k]=v;};
 settings.binds={};loadBinds();
 // ---- better defaults (Q37): travel is off D-pad up
-assert(BINDS.pad[12]==='mapZoom'&&BINDS.pad[13]==='waypoint','D-pad up opens the map; travel moved to D-pad down');
+assert(BINDS.pad[12]==='worldMap'&&BINDS.pad[13]==='waypoint'&&BINDS.keys.KeyM==='worldMap','D-pad up and M open the world map; travel moved to D-pad down');
 assert(BINDS.keys.KeyI==='hud','I turns the readout on and off');
 // ---- rebinding a key takes it from whatever had it, and the action keeps only the new key
 assert(rebind('keys','inventory','KeyR'),'a key can be bound');

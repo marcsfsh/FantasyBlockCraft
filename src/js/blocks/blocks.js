@@ -123,4 +123,5 @@ BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1
 const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Fens'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
 // Tools drawn as a block in the hand. The grappling hook (100) and fireworks (101) gave way to the grapnel and signal flares (M4, Q45).
-const BPTOOL=102,isTool=id=>id===BPTOOL,TOOLS={102:['Blueprint Tool',87,87]};
+// The Fill Tool (M5b) marks a box to fill, replace or clear (creative)
+const BPTOOL=102,FILLTOOL=103,isTool=id=>id===BPTOOL||id===FILLTOOL,TOOLS={102:['Blueprint Tool',87,87],103:['Fill Tool',85,85]};

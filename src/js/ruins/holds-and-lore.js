@@ -41,7 +41,7 @@ function loreText(X,Y,Z){
 function openLore(X,Y,Z){
   const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
   invOpen=true;hold=-1;
-  ['invgrid','invname','sinv','bplist'].forEach(id=>{$(id).style.display='none';});
+  ['invgrid','invname','sinv','bplist','invsearch'].forEach(id=>{$(id).style.display='none';});
   $('invtitle').textContent='A page from '+h.name;$('lore').style.display='block';$('lore').textContent=loreText(X+OX,Y,Z+OZ);
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
   tone(500,420,0.25,0.06);

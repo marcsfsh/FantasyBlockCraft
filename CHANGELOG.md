@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.14.0 (2026-10-09): M5b, maps and creative tools
+
+Old saves do not load: the save format gained the explored map, places and markers, and the save key is now `fantasy-blockcraft-save-v9`. The world itself is unchanged.
+
+### Game
+- **World map:** press M (D-pad up on the controller) for a map of everywhere you have explored, with the places you have found, your waystones and your own markers. Drag to move it, zoom with the wheel or the buttons; tap to place a marker or remove one. It is saved with the world. In survival it needs a map. The minimap zoom moved to J.
+- **Layer view:** underground, the minimap shows the passages and rooms at your depth instead of the land far above.
+- **Creative:**
+  - Search the block menu.
+  - Brushes up to 13 blocks wide.
+  - The Fill Tool: break for one corner, place for the other, then fill the box with a hotbar block, replace one kind of block, or clear it.
+  - In the pause menu: set the time of day, bring rain or clear skies, go to coordinates, and build a test structure (watchtower, keep, castle, barrow, stone ring, waystone, dungeon room) where you look. Undo takes it away.
+  - On the world map, tap a spot and travel there.
+
+### Tooling
+- New test 35-maps-creative; 33-survival-systems and 34-controls adjusted (D-037).
+
 ## 0.13.0 (2026-10-09): M5a, controls and interface
 
 No change to the world or the save format: 0.12 worlds keep working.

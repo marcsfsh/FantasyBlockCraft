@@ -14,7 +14,7 @@ openBox(x0,y0+1,z0);assert(box&&boxes.has(wkey(x0+OX,y0+1,z0+OZ)),'opening a che
 boxGive(0);boxGive(1);const a=boxes.get(box.k);
 assert(!inv[0]&&!inv[1]&&a.some(q=>q&&q.id===COBBLE&&q.c===40)&&a.some(q=>q&&q.id===241&&q.d===30),'stacks move into the chest, tools with their wear');
 assert(boxBusy(x0,y0+1,z0),'a chest holding something cannot be broken');
-const sv=saveData();assert(sv&&sv.v===8&&Array.isArray(sv.cs)&&sv.cs.some(([k,sl])=>k===box.k&&sl.length===2),'the chest and its contents are saved with the world');
+const sv=saveData();assert(sv&&sv.v>=8&&Array.isArray(sv.cs)&&sv.cs.some(([k,sl])=>k===box.k&&sl.length===2),'the chest and its contents are saved with the world');
 boxTakeAll();assert(inv.some(q=>q&&q.id===COBBLE&&q.c===40)&&inv.some(q=>q&&q.id===241&&q.d===30)&&!boxBusy(x0,y0+1,z0),'taking everything empties the chest, and then it can be broken');
 closeInv();assert(box===null,'closing the inventory closes the chest');
 setBlock(x0,y0+1,z0,AIR);assert(!boxes.has(wkey(x0+OX,y0+1,z0+OZ)),'a broken container forgets its contents');
