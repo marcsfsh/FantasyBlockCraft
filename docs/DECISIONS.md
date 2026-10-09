@@ -284,3 +284,10 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **New blocks:** limestone, glacier ice, packed snow, tundra moss, mistwood log, leaves and planks, gentian, edelweiss (ids 1049 to 1057).
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v12`, world data version 12.
 
+### D-042 M6d: coasts and waters (2026-10-09)
+- **Six lands built** (`world/coasts.js`): Chalk Cliffs, Rocky Isles, Fjords, Black Sand Shores, Kelp Shallows, Raised Bogs. The land look table gains `shore` (a land's own beach and shallows, used for the shore band and sea floors down to 12 below the sea), `rock` (the stone of its cliffs above SEA-30) and `soil`.
+- **Coast shapes** in `colInfoBase` from new land weights (`wKelp`, `wIsle` of the whole; `wChalk`, `wFjord` of the land): chalk downs stand 14 higher; fjords cut inlets (a noise line) down to 14 under the sea; the kelp shallows' floor lies 4 to 9 under the sea; the rocky isles rise out of the sea as islands up to 22 above it; and chalk and fjord coasts keep their height to the water's edge, dropping sheer where the sea weight passes a wavering half (cliffs of 30 or more).
+- **Water plants (wet):** kelp and seagrass are cross plants drawn inside a water cell; the mesher draws the water around them and treats them as water for the surface, and swimming and drowning count them as water (`isWetId`). Lily pads are flat quads (pad). They grow in the plants pass, on the column's own floor.
+- **Signatures** may stand in the sea (on a floor 3 to 14 under it) or on a coast (land of the land with the sea, or a fjord's inlet, within 6 to 28 blocks; low coast: no more than 10 above the water; cliff sea: a few blocks out from a cliff 12 or more high). The Western Sea gains its own (a wreck, sea stacks).
+- **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v13`, world data version 13.
+

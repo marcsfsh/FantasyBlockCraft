@@ -37,12 +37,12 @@ land('glacier','Glacier Fields','high',2,[0,0],[0,2],4,5,'dwarf',['a tower bound
 land('cloud','Cloud Forest Heights','high',2,[2,4],[1,2],4,5,'woodelf',['a mist shrine on a crag','mossy falls into the cloud'],{gorge:0.8,built:true,col:[84,140,110]});
 land('karst','Karst Crags','high',2,[1,3],[0,1],6,4,'gnome',['a hermitage in a cliff','a great sinkhole into the caves'],{gorge:1,built:true,col:[188,184,166]});
 // coasts and waters (M6d)
-land('chalk','Chalk Cliffs','coast',2,[1,3],[0,2],3,2,'human',['a beacon tower on the cliff top','a chalk sea arch'],{coast:true,gorge:0.3});
-land('isles','Rocky Isles','coast',2,[0,4],[0,2],7,0,'human',['a ruined chapel on an isle','sea arches and stacks'],{sea:true,coast:true,gorge:0});
-land('fjord','Fjords','coast',2,[0,1],[0,2],6,5,'dwarf',['a boathouse at a fjord\'s head','a fall from the fjord wall'],{coast:true,gorge:0.8});
-land('blacksand','Black Sand Shores','coast',2,[2,4],[0,2],1,10,'human',['a black-stone harbour wall','basalt columns on the shore'],{coast:true,gorge:0});
-land('kelp','Kelp Shallows','coast',2,[2,4],[0,2],7,0,'human',['a sunken causeway','kelp forests'],{sea:true,coast:true,gorge:0});
-land('bog','Raised Bogs','coast',2,[0,2],[2,2],1,11,'halfling',['an old plank trackway across the bog','a domed bog with pools and cotton grass'],{gorge:0});
+land('chalk','Chalk Cliffs','coast',2,[1,3],[0,2],3,2,'human',['a beacon tower on the cliff top','a chalk sea arch'],{coast:true,gorge:0.3,built:true,col:[214,210,180]});
+land('isles','Rocky Isles','coast',2,[0,4],[0,2],7,0,'human',['a ruined chapel on an isle','sea arches and stacks'],{sea:true,coast:true,gorge:0,built:true,col:[96,120,128]});
+land('fjord','Fjords','coast',2,[0,1],[0,2],6,5,'dwarf',['a boathouse at a fjord\'s head','a fall from the fjord wall'],{coast:true,gorge:0.8,built:true,col:[70,96,110]});
+land('blacksand','Black Sand Shores','coast',2,[2,4],[0,2],1,10,'human',['a black-stone harbour wall','basalt columns on the shore'],{coast:true,gorge:0,built:true,col:[84,80,76]});
+land('kelp','Kelp Shallows','coast',2,[2,4],[0,2],7,0,'human',['a sunken causeway','kelp forests'],{sea:true,coast:true,gorge:0,built:true,col:[44,110,116]});
+land('bog','Raised Bogs','coast',2,[0,2],[2,2],1,11,'halfling',['an old plank trackway across the bog','a domed bog with pools and cotton grass'],{gorge:0,built:true,col:[132,96,64]});
 // dry and fiery (M6e)
 land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple half buried in sand','a dry wadi with an old well'],{gorge:0.6});
 land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8});
@@ -127,6 +127,7 @@ function landsAt(X,Z,o){
     LW[L.i]+=w;wall+=w;if(L.sea)wsea+=w;else{LWL[lk]+=w;wland+=w;}}
   o.wS=wsea/wall;for(let k=0;k<12;k++)LWL[k]=wland>0?LWL[k]/wland:0;
   o.w2=LWL[2];o.w3=LWL[3];o.w4=LWL[4];o.w5=LWL[5];o.w6=LWL[6];o.w7=LWL[7];o.w8=LWL[8];o.w10=LWL[10];o.w11=LWL[11];
+  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0; // coast shapes (M6d)
   o.area=c1.L; // the land of the cell the column lies in: the layout before border mixing (maps, sizes, the transition map)
   o.mdep=dm<Infinity?(dn-dm)/2:-999; // how far inside a mountain land (blocks), for the high peaks at its heart
   // the column's land: the heaviest, or the second against a patchy threshold

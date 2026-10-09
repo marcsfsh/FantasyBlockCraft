@@ -110,6 +110,7 @@ function hiBuild(s,r){
       for(let k=0;k<5;k++){const a=k*1.37+hsh(X,8213+k,Z),d=k?6+k:0,mx=Math.round(X+Math.cos(a)*d),mz=Math.round(Z+Math.sin(a)*d),R=2.5+hsh(X,8221+k,Z)*2.5,Hh=Math.round(R*0.9),mg=hAt(mx,mz);
         for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){const dd=Math.hypot(dx,dz);if(dd>R)continue;const hh=Math.round(Hh*Math.sqrt(1-dd*dd/(R*R)));
           for(let y=mg;y<=mg+hh;y++){const open=k===0&&dx>0&&dd<R-1;PW(mx+dx,y,mz+dz,y===mg+hh?(open?GLACIER:SNOWG):open&&dd<R-1.6?GLACIER:DIRT,MODE_SET);}}}break;}
+    default:coastBuild(s,r);break; // the coasts' signatures (M6d)
     case 'passgate':{ // a ruined gatehouse across a high pass: two towers and the arch that joined them
       for(const side of [-1,1]){const tx=X+side*4;sigFloor(tx-1,Z-1,tx+1,Z+1,g,SBRICK,10);
         for(let y=g+1;y<=g+9;y++)for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(!dx&&!dz)continue;if(y>g+6&&r()<0.35)continue;PW(tx+dx,y,Z+dz,r()<0.25?MOSSY:SBRICK,MODE_SET);}}

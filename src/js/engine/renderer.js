@@ -138,4 +138,4 @@ class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}
   view(){return this.a.subarray(0,this.n);}}
 function newM(){return{p:new FB(Float32Array),u:new FB(Float32Array),l:new FB(Float32Array),b:new FB(Float32Array),a:new FB(Float32Array),i:new FB(Uint32Array)};}
 function mkGeo(m){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(m.p.view().slice(),3));g.setAttribute('uv',new THREE.BufferAttribute(m.u.view().slice(),2));g.setAttribute('light',new THREE.BufferAttribute(m.l.view().slice(),1));g.setAttribute('blk',new THREE.BufferAttribute(m.b.view().slice(),1));g.setAttribute('aov',new THREE.BufferAttribute(m.a.view().slice(),1));g.setIndex(new THREE.BufferAttribute(m.i.view().slice(),1));g.computeBoundingSphere();return g;}
-function wDrop(x,y,z){if(get(x,y+1,z)===WATER)return 0;return 0.12+lvl[I(x,y,z)]*0.1;}
+function wDrop(x,y,z){if(isWetId(get(x,y+1,z)))return 0;return 0.12+lvl[I(x,y,z)]*0.1;}

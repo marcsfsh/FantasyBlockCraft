@@ -18,7 +18,7 @@ function moveAxis(a,d){
   if(collide())PL[a]=old;
   return true;
 }
-function liquidAt(x,y,z){return BL[get(Math.floor(x),Math.floor(y),Math.floor(z))].liquid;}
+function liquidAt(x,y,z){const b=BL[get(Math.floor(x),Math.floor(y),Math.floor(z))];return b.liquid||(b.wet?1:0);} // water plants count as water
 function hitsPlayer(x,y,z){return x+1>PL.x-HW&&x<PL.x+HW&&y+1>PL.y&&y<PL.y+PH&&z+1>PL.z-HW&&z<PL.z+HW;}
 
 // Held block in view

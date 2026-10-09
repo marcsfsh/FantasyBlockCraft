@@ -66,7 +66,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   if(liquidAt(PL.x,PL.y+0.2,PL.z)===2||liquidAt(PL.x,PL.y+1.2,PL.z)===2)hurt(4,'lava');
   if(cactusNear())hurt(1,'cactus');
   // air
-  if(get(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))===WATER){air-=dt;if(air<=0){air=0;drownT+=dt;if(drownT>=1){drownT=0;hurt(2,'drowned');}}}
+  if(isWetId(get(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z)))){air-=dt;if(air<=0){air=0;drownT+=dt;if(drownT>=1){drownT=0;hurt(2,'drowned');}}}
   else{air=Math.min(10,air+dt*5);drownT=0;}
   // hunger
   exh+=moved*(sprinting?0.1:0.01)+dt*0.003;

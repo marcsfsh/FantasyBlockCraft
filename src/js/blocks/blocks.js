@@ -131,6 +131,15 @@ def(TMOSS,'Tundra Moss',[184,2,185],{snd:'soft'});def(MISTW,'Mistwood Log',[187,
 def(GENTIAN,'Gentian',[190,190,190],PLANT);def(EDELW,'Edelweiss',[191,191,191],PLANT);
 NEW_LOGS.push(MISTW);NEW_PLANKS.push(MISTP);NEW_LEAVES.push(MISTL);
 setH([LIMESTONE],3,'stone',1);setH([GLACIER],0.6,'misc');setH([PSNOW,TMOSS],0.6,'soft');setH([MISTW,MISTP],2.2,'wood');setH([MISTL],0.3,'soft');setH([GENTIAN,EDELW],0,'soft');
+// Coasts and waters (M6d, D-042): chalk, black sand, basalt, peat, bog moss; water plants drawn inside the water (wet: the cell
+// counts as water for swimming and the water's surface) and lily pads lying on it (pad)
+const CHALK=1058,BLACKSAND=1059,BASALT=1060,PEAT=1061,BOGMOSS=1062,KELP=1063,SEAGRASS=1064,LILYPAD=1065,COTTONG=1066;
+def(CHALK,'Chalk',[210,210,210]);def(BLACKSAND,'Black Sand',[211,211,211],{snd:'soft'});def(BASALT,'Basalt',[212,212,213]);def(PEAT,'Peat',[214,214,214],{snd:'soft'});
+def(BOGMOSS,'Bog Moss',[215,214,216],{snd:'soft'});
+def(KELP,'Kelp',[217,217,217],Object.assign({},PLANT,{wet:true}));def(SEAGRASS,'Seagrass',[218,218,218],Object.assign({},PLANT,{wet:true}));
+def(LILYPAD,'Lily Pad',[219,219,219],{solid:false,opq:false,occ:false,pad:true,snd:'soft'});def(COTTONG,'Cotton Grass',[220,220,220],PLANT);
+setH([CHALK],2,'stone',1);setH([BASALT],4,'stone',1);setH([BLACKSAND,PEAT,BOGMOSS],0.6,'soft');setH([KELP,SEAGRASS,LILYPAD,COTTONG],0,'soft');
+const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore

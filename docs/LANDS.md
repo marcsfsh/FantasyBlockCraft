@@ -52,12 +52,12 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 18 | Glacier Fields | Highlands and cold (M6c) | uncommon | cold | dry to wet | high | built | a tower bound in the ice | crevasses and ice caves | 0.0% | 0 (0) |
 | 19 | Cloud Forest Heights | Highlands and cold (M6c) | uncommon | temperate to hot | middling to wet | high | built | a mist shrine on a crag | mossy falls into the cloud | 4.9% | 26 (332) |
 | 20 | Karst Crags | Highlands and cold (M6c) | uncommon | cool to warm | dry to middling | hills, high | built | a hermitage in a cliff | a great sinkhole into the caves | 2.8% | 28 (341) |
-| 21 | Chalk Cliffs | Coasts and waters (M6d) | uncommon | cool to warm | dry to wet | low, hills, beside the sea | Green Hills | a beacon tower on the cliff top | a chalk sea arch | 1.8% | 25 (326) |
-| 22 | Rocky Isles | Coasts and waters (M6d) | uncommon | cold to hot | sea | sea by the coast | The Western Sea | a ruined chapel on an isle | sea arches and stacks | 2.2% | 32 (347) |
-| 23 | Fjords | Coasts and waters (M6d) | uncommon | cold to cool | dry to wet | hills, high, beside the sea | High Mountains | a boathouse at a fjord's head | a fall from the fjord wall | 0.4% | 8 (318) |
-| 24 | Black Sand Shores | Coasts and waters (M6d) | uncommon | temperate to hot | dry to wet | low, beside the sea | Windswept Plains | a black-stone harbour wall | basalt columns on the shore | 1.7% | 20 (330) |
-| 25 | Kelp Shallows | Coasts and waters (M6d) | uncommon | temperate to hot | sea | sea by the coast | The Western Sea | a sunken causeway | kelp forests | 1.3% | 24 (336) |
-| 26 | Raised Bogs | Coasts and waters (M6d) | uncommon | cold to temperate | wet | low | Willow Vales | an old plank trackway across the bog | a domed bog with pools and cotton grass | 1.5% | 5 (707) |
+| 21 | Chalk Cliffs | Coasts and waters (M6d) | uncommon | cool to warm | dry to wet | low, hills, beside the sea | built | a beacon tower on the cliff top | a chalk sea arch | 1.8% | 25 (326) |
+| 22 | Rocky Isles | Coasts and waters (M6d) | uncommon | cold to hot | sea | sea by the coast | built | a ruined chapel on an isle | sea arches and stacks | 2.2% | 32 (347) |
+| 23 | Fjords | Coasts and waters (M6d) | uncommon | cold to cool | dry to wet | hills, high, beside the sea | built | a boathouse at a fjord's head | a fall from the fjord wall | 0.4% | 8 (318) |
+| 24 | Black Sand Shores | Coasts and waters (M6d) | uncommon | temperate to hot | dry to wet | low, beside the sea | built | a black-stone harbour wall | basalt columns on the shore | 1.7% | 20 (330) |
+| 25 | Kelp Shallows | Coasts and waters (M6d) | uncommon | temperate to hot | sea | sea by the coast | built | a sunken causeway | kelp forests | 1.3% | 24 (336) |
+| 26 | Raised Bogs | Coasts and waters (M6d) | uncommon | cold to temperate | wet | low | built | an old plank trackway across the bog | a domed bog with pools and cotton grass | 1.5% | 5 (707) |
 | 27 | Southern Drylands | Dry and fiery (M6e) | common | hot | dry | low, hills | Windswept Plains | a temple half buried in sand | a dry wadi with an old well | 1.8% | 11 (525) |
 | 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | Heath Moors | a ruined fire shrine | a smoking cone with a lava lake held in rock | 1.3% | 10 (451) |
 | 29 | Blighted Lands | Dry and fiery (M6e) | uncommon | cool to warm | dry to middling | low, hills | Heath Moors | a dead lord's ruined hall | grey dead trees and ash pools | 2.1% | 25 (311) |

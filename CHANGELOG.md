@@ -5,6 +5,26 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.18.0 (2026-10-09): M6d, coasts and waters
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v13`.
+
+### Game
+- **Six coast and water lands:**
+  - **Chalk Cliffs:** green downs that end in white chalk cliffs dropping sheer to the sea, flint gravel at their foot.
+  - **Rocky Isles:** islands of rock and turf rising out of the sea, gravel shallows round them.
+  - **Fjords:** mountains cut by deep sea inlets with steep walls, spruces on their sides.
+  - **Black Sand Shores:** low dark grassland with basalt outcrops and beaches of black sand.
+  - **Kelp Shallows:** shallow sandy sea floors under swaying kelp and seagrass.
+  - **Raised Bogs:** peat, red and green bog moss, cotton grass, dark pools.
+- **Landmarks and features:** a wreck on the shoals or sea stacks (the Western Sea); an isle chapel or a sea arch; a sunken causeway or a kelp forest; a beacon tower on the cliffs or a chalk arch in the sea; a fjord boathouse or a fall from the fjord wall; a harbour wall or basalt columns; an old trackway across the bog or a domed bog with pools on its crown.
+- **Water plants:** kelp and seagrass grow inside the water (you swim through them), in the Western Sea too; lily pads float on lakes and on the pools of the vales and bogs.
+- **The Grey Shore** gains driftwood.
+- **New blocks:** chalk, black sand, basalt, peat, bog moss, kelp, seagrass, lily pad, cotton grass.
+
+### Tooling
+- New test `39-coasts`; the world-hash snapshot is updated on purpose.
+
 ## 0.17.0 (2026-10-09): M6c, highlands and cold
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v12`.

@@ -211,6 +211,15 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   leaf(188,[60,120,84],0.16,101,[[150,190,150],0.1]);plank(189,[150,140,104],102);
   clear(190);for(let f=0;f<3;f++){const ox=3+f*5;for(let k=0;k<7;k++)P(190,ox,15-k,[62,120,52]);for(let dy=0;dy<3;dy++)for(let dx=-1;dx<=1;dx++)P(190,ox+dx,7-dy+Math.abs(dx),[44,74,200]);}
   clear(191);for(let f=0;f<3;f++){const ox=3+f*5;for(let k=0;k<6;k++)P(191,ox,15-k,[140,150,130]);for(let a=0;a<5;a++){P(191,ox+Math.round(Math.cos(a*1.26)*2),8+Math.round(Math.sin(a*1.26)*2),[236,236,226]);}P(191,ox,8,[226,206,90]);}
+  // coasts and waters (M6d): chalk, black sand, basalt (top and side), peat, bog moss, kelp, seagrass, lily pad, cotton grass
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(210,x,y,sh([236,234,224],(hn(x,y,111)-.5)*12+(hn(x>>1,y,112)<.05?-60:0)));P(211,x,y,sh([46,44,48],(hn(x,y,113)-.5)*26+(hn(x,y,114)<.06?40:0)));
+    const e=x===0||x===15||y===0||y===15||((x+y*3)%11===0&&hn(x,y,115)<.5);P(212,x,y,sh([70,70,76],(hn(x,y,116)-.5)*14+(e?-26:0)));P(213,x,y,sh([66,66,72],(hn(x,y,117)-.5)*14+(x%5===0?-24:0)));
+    P(214,x,y,sh([74,52,36],(hn(x,y,118)-.5)*22+(hn(x,y>>1,119)<.15?16:0)));const q=hn(x,y,120);P(215,x,y,sh(q<.35?[204,92,84]:q<.7?[222,150,72]:[150,178,72],(hn(x,y,121)-.5)*20));}
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=2+Math.floor(hn(x,0,122)*2);P(216,x,y,y<d?sh([160,90,56],(hn(x,y,123)-.5)*20):sh([74,52,36],(hn(x,y,124)-.5)*22));}
+  clear(217);for(let f=0;f<3;f++){const ox=3+f*5;for(let y=0;y<16;y++){const x=ox+Math.round(Math.sin(y*0.6+f)*1.2);P(217,x,y,[64,110,40]);P(217,x+1,y,[86,132,52]);if(y%4===f)P(217,x+2,y,[100,148,60]);}}
+  clear(218);for(let f=0;f<7;f++){const ox=1+f*2,h=6+Math.floor(hn(f,2,125)*9);for(let k=0;k<h;k++)P(218,ox+(k>h/2?(f%2?1:-1):0),15-k,sh([60,140,70],(hn(f,k,126)-.5)*30));}
+  clear(219);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5),a=Math.atan2(y-7.5,x-7.5);if(d<7&&!(a>-0.25&&a<0.25&&d>1.5))P(219,x,y,sh([62,130,48],(hn(x,y,127)-.5)*24+(d>6?-20:0)));}P(219,5,5,[236,206,226]);P(219,6,5,[250,230,240]);P(219,5,6,[226,190,214]);
+  clear(220);for(let f=0;f<4;f++){const ox=2+f*4,h=8+Math.floor(hn(f,3,128)*6);for(let k=0;k<h;k++)P(220,ox,15-k,[96,130,64]);for(let dy=0;dy<3;dy++)for(let dx=-1;dx<=1;dx++)P(220,ox+dx,16-h-dy,[244,244,236]);}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

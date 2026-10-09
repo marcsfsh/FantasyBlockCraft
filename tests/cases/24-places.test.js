@@ -6,10 +6,10 @@ function walkFrom(sx,sy,sz,lim){const key=(x,y,z)=>x+W*(z+D*y),seen=new Set([key
   for(let i=0;i<q.length&&q.length<lim;i++){const [x,y,z]=q[i];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+a,nz=z+b;
     for(const dy of [1,0,-1,-2,-3]){const ny=y+dy;if(dy===1&&S(world[I(x,y+2,z)]))continue;if(standable(nx,ny,nz)){const k=key(nx,ny,nz);if(!seen.has(k)){seen.add(k);q.push([nx,ny,nz]);}break;}if(dy<=0&&S(world[I(nx,ny,nz)]))break;}}}
   return {seen,key};}
-// how common
+// how common (the floor moved from 1% to 0.8% in M6d, D-042: more of seed 4242 is sea)
 let nd=0,np=0,n=0;const kinds={};for(let a=-50;a<50;a++)for(let b=-50;b<50;b++){n++;const d=dungeonAt(a,b);if(d){nd++;kinds[d.kind]=(kinds[d.kind]||0)+1;}if(poiFor(a,b))np++;}
 info('per 100 chunks: dungeon rooms',(100*nd/n).toFixed(1),JSON.stringify(kinds),'; points of interest',(100*np/n).toFixed(1));
-assert(nd/n<0.06&&nd/n>0.01,'dungeon rooms are rare (was 20% of chunks before M2b)');
+assert(nd/n<0.06&&nd/n>0.008,'dungeon rooms are rare (was 20% of chunks before M2b)');
 assert(np/n<0.16&&np/n>0.04,'points of interest are rarer (was 32% of chunks)');
 assert(Object.keys(kinds).length===4,'all four kinds of dungeon room occur');
 // every room in the loaded window opens onto its cave
