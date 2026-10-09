@@ -20,6 +20,7 @@ function lavaSea(lcx,lcz){
     for(let y=3;y<=ceil;y++){const i=col+WD*y;if(world[i]===BEDROCK)continue;
       if(seaPl.length&&seaRock(seaPl,y,ceil))continue;
       if(y<=FIRE_LV){if(isl)continue;world[i]=LAVA;}else if(!(isl&&y===FIRE_LV+1))world[i]=AIR;lvl[i]=0;}
+    hotDeep(lcx*CS+x,lcz*CS+z,X,Z,ceil); // magma stone over the sea under the Volcanic Wastes (M6e)
   }
 }
 const DEEP_NAMES={lush:'The Mossy Deeps',crystal:'The Crystal Deeps',drip:'The Dripstone Deeps',fungal:'The Fungal Deeps',plain:'The Deep Caverns'};

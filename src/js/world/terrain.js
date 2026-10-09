@@ -40,6 +40,8 @@ function colInfoBase(X,Z,o){
   h+=pw*fbm2(X/140,Z/140,1,4619.7)*3;           // windswept plains: long low waves
   // Coast shapes (M6d): chalk downs stand higher; fjords cut sea inlets into their mountains
   if(o.wChalk>0)h+=o.wChalk*14;
+  if(o.wDry>0)h+=o.wDry*Math.abs(fbm2(X/34,Z/22,2,8501.1))*7; // dunes in the drylands (M6e)
+  if(o.wVolc>0)h+=o.wVolc*fbm2(X/60,Z/60,2,8503.3)*8; // broken volcanic ground
   if(o.wFjord>0){const q=Math.abs(fbm2(X/240,Z/240,2,8311.3)),ch=sstep(0.075,0.03,q)*o.wFjord;if(ch>0)h=h*(1-ch)+(SEA-14+fbm2(X/40,Z/40,1,8313.1)*3)*ch;}
   // the sea: lands fall away to its floor across the coast blend; the kelp shallows are shallow, the rocky isles rise out of it,
   // and chalk and fjord coasts keep their height to the water's edge and drop sheer

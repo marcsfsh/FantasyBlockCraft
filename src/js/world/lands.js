@@ -21,7 +21,7 @@ land('mtn','High Mountains','kept',1,[0,3],[0,2],4,5,'dwarf',['a gatehouse in a 
 land('barrow','Barrow Hills','kept',2,[1,2],[0,1],3,7,'human',['a great chambered barrow','long rows of standing stones'],{built:true,gorge:0.3});
 land('shadow','Shadowed Forest','kept',2,[2,4],[2,2],3,8,'drow',['a temple sunk among the roots','a fallen giant spanning a hollow'],{built:true,gorge:0.5});
 // old lands reworked into new ones (Q119): until their family is built they keep the old look and name
-land('steppe','Golden Steppe','dry',1,[2,4],[0,0],3,10,'beastfolk',['a ring of horse stones','a lone rock outcrop over the grass'],{was:'Windswept Plains',gorge:0.3});
+land('steppe','Golden Steppe','dry',1,[2,4],[0,0],3,10,'beastfolk',['a ring of horse stones','a lone rock outcrop over the grass'],{was:'Windswept Plains',gorge:0.3,built:true,col:[206,176,88]});
 land('willow','Willow Vales','forest',1,[2,3],[2,2],1,11,'halfling',['a stilt house over the water','willow-ringed pools with islets'],{was:'Fens',gorge:0,built:true,col:[104,150,96]});
 land('tundra','Frozen Tundra','high',1,[0,0],[0,1],3,6,'dwarf',['a frozen longhouse','frost mounds and ice wedges'],{was:'Northern Fells',gorge:0.6,built:true,col:[214,222,226]});
 // forests (M6b)
@@ -44,9 +44,9 @@ land('blacksand','Black Sand Shores','coast',2,[2,4],[0,2],1,10,'human',['a blac
 land('kelp','Kelp Shallows','coast',2,[2,4],[0,2],7,0,'human',['a sunken causeway','kelp forests'],{sea:true,coast:true,gorge:0,built:true,col:[44,110,116]});
 land('bog','Raised Bogs','coast',2,[0,2],[2,2],1,11,'halfling',['an old plank trackway across the bog','a domed bog with pools and cotton grass'],{gorge:0,built:true,col:[132,96,64]});
 // dry and fiery (M6e)
-land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple half buried in sand','a dry wadi with an old well'],{gorge:0.6});
-land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8});
-land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver']});
+land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple half buried in sand','a dry wadi with an old well'],{gorge:0.6,built:true,col:[226,198,132]});
+land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8,built:true,col:[78,70,70]});
+land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver'],built:true,col:[128,120,100]});
 // strange lands (M6f)
 land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires']);
 land('glowcap','Glowcap Hollows','strange',3,[2,3],[2,2],3,8,'gnome',['a mushroom dwelling','giant glowing mushrooms in a hollow']);
@@ -127,7 +127,7 @@ function landsAt(X,Z,o){
     LW[L.i]+=w;wall+=w;if(L.sea)wsea+=w;else{LWL[lk]+=w;wland+=w;}}
   o.wS=wsea/wall;for(let k=0;k<12;k++)LWL[k]=wland>0?LWL[k]/wland:0;
   o.w2=LWL[2];o.w3=LWL[3];o.w4=LWL[4];o.w5=LWL[5];o.w6=LWL[6];o.w7=LWL[7];o.w8=LWL[8];o.w10=LWL[10];o.w11=LWL[11];
-  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0; // coast shapes (M6d)
+  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0;o.wDry=wland>0?lw('dry')/wland:0;o.wVolc=wland>0?lw('volcanic')/wland:0; // coast shapes (M6d)
   o.area=c1.L; // the land of the cell the column lies in: the layout before border mixing (maps, sizes, the transition map)
   o.mdep=dm<Infinity?(dn-dm)/2:-999; // how far inside a mountain land (blocks), for the high peaks at its heart
   // the column's land: the heaviest, or the second against a patchy threshold

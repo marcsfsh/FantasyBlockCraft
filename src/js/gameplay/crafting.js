@@ -1,5 +1,5 @@
 // Recipes: [output, count, [[ingredient or list, count]...], station]
-const LOGS=[LOG,BIRCH,SPRUCE,JLOG],PLANKSET=[PLANKS,...NEW_PLANKS]; // any planks make sticks, chests and wooden tools
+const LOGS=[LOG,BIRCH,SPRUCE,JLOG,DEADWOOD],PLANKSET=[PLANKS,...NEW_PLANKS]; // any planks make sticks, chests and wooden tools
 const RECIPES=[
   [PLANKS,4,[[LOGS,1]]],[201,4,[[PLANKSET,2]]],
   ...NEW_LOGS.map((l,i)=>[NEW_PLANKS[i],4,[[l,1]]]), // the forests' woods (M6b)

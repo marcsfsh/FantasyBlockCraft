@@ -94,6 +94,10 @@
       "about": "Coasts and waters (M6d): coast lands' beaches, rock and plants, water plants, driftwood, and their signatures above and under the sea"
     },
     {
+      "path": "world/dry.js",
+      "about": "Dry and fiery (M6e): drylands, golden steppe, volcanic wastes and blighted lands, their signatures, and the hotter deep under the wastes"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },
