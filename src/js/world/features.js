@@ -33,15 +33,37 @@ function bigOakP(X,y,Z,r){
 }
 function leafBushP(X,y,Z,r){PW(X,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X+1,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X,y,Z+1,LEAVES,MODE_AIR);if(r()<0.4)PW(X,y+1,Z,LEAVES,MODE_AIR);}
 // ---- Ancient things on the old hills: barrows and rings of standing stones
-function barrowP(X,h,Z,r){
-  for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){const d=Math.hypot(dx,dz*1.2);if(d>=6)continue;const hh=Math.round(3.4*(1-(d/6)*(d/6)));for(let y=h+1;y<=h+hh;y++)PW(X+dx,y,Z+dz,y===h+hh?GRASS:DIRT,MODE_SET);}
-  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=1;dz++){const edge=Math.abs(dx)===2||dz===-2||dz===1;for(let y=h;y<=h+2;y++)PW(X+dx,y,Z+dz,y===h?STONE:edge?(r()<0.4?MOSSY:COBBLE):AIR,MODE_SET);}
-  for(let dz=1;dz<=6;dz++)for(let dx=-1;dx<=1;dx++){if(dz===1&&dx!==0)continue;for(let y=h+1;y<=h+2;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);PW(X+dx,h,Z+dz,STONE,MODE_SET);}
-  for(const dx of [-2,2])for(let y=h+1;y<=h+3;y++)PW(X+dx,y,Z+6,MOSSY,MODE_SET);for(let dx=-2;dx<=2;dx++)PW(X+dx,h+3,Z+6,STONE,MODE_SET);
-  PW(X,h+1,Z-1,CALCITE,MODE_SET);PW(X+1,h+1,Z-1,CALCITE,MODE_SET);PW(X-1,h+1,Z,DWCHEST,MODE_SET);PW(X+1,h+1,Z,BONES,MODE_SET);
+// Where a barrow or ring stands, if any, for chunk (WCX,WCZ): only on the Barrow Hills (and the downs blending into them), mostly in
+// clusters (old burial grounds, and beside the old roads), on the highest of a few spots, facing its own way, in varied sizes;
+// some long, some broken open (Q94). Pure, so neighbouring chunks agree.
+const barrowC=new Map(),TB={};
+function barrowAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(barrowC.has(key))return barrowC.get(key);if(barrowC.size>8000)barrowC.clear();
+  let best=null;
+  for(let k=0;k<3;k++){const X=WCX*CS+4+Math.floor(hsh(WCX*3+k,6003,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX*3+k,6004,WCZ)*8);colInfo(X,Z,TB);
+    if(!(TB.b===7||(TB.bw>0.35&&TB.dw>0.35))||TB.wet||carved(X,TB.h,Z,TB)||surfTaken(X,Z,9))continue;if(!best||TB.h>best.h)best={X:X,Z:Z,h:TB.h};}
+  let s=null;
+  if(best){const zone=fbm2(best.X/220,best.Z/220,1,6011.3)>0.05,road=oldRoadAt(best.X+12,best.Z)||oldRoadAt(best.X-12,best.Z)||oldRoadAt(best.X,best.Z+12)||oldRoadAt(best.X,best.Z-12);
+    if(hsh(WCX,6001,WCZ)<(zone?0.42:0.05)+(road?0.2:0)){const q=hsh(WCX,6005,WCZ);
+      s={X:best.X,Z:best.Z,h:best.h,ring:q<0.3,rot:Math.floor(hsh(WCX,6006,WCZ)*4),sz:0.7+hsh(WCX,6007,WCZ)*0.7,long:hsh(WCX,6008,WCZ)<0.35,broken:hsh(WCX,6009,WCZ)<0.3};}}
+  barrowC.set(key,s);return s;
 }
-function stoneRingP(X,h,Z,r){
-  const n=7+(r()*3|0),R=5+r()*1.5;
+function barrowP(X,h,Z,r,o){
+  const ca=[1,0,-1,0][o.rot],sa=[0,1,0,-1][o.rot],L=Math.max(4,Math.round(6*o.sz*(o.long?1.6:1))),Wd=Math.max(4,Math.round(6*o.sz)),Hm=Math.max(3,Math.round(3.4*o.sz+(o.long?0.5:0)));
+  const P=(u,v)=>[X+u*ca-v*sa,Z+u*sa+v*ca]; // u along the barrow (its entrance at +u), v across
+  // the mound, resting on the ground under every column of it
+  const tops={};for(let u=-L;u<=L;u++)for(let v=-Wd;v<=Wd;v++){const d=Math.hypot(u/L,v/Wd);if(d>=1)continue;const [x,z]=P(u,v),gl=colInfo(x,z,T3).h,top=h+Math.round(Hm*(1-d*d));tops[u+','+v]=top;
+    for(let y=Math.min(gl+1,h+1);y<=top;y++)PW(x,y,z,y===top?GRASS:DIRT,MODE_SET);}
+  // the chamber, and the passage to the entrance
+  for(let v=-2;v<=2;v++)for(let u=-2;u<=1;u++){const edge=Math.abs(v)===2||u===-2||u===1,[x,z]=P(u,v);for(let y=h;y<=h+2;y++)PW(x,y,z,y===h?STONE:edge?(r()<0.4?MOSSY:COBBLE):AIR,MODE_SET);
+    if(o.broken&&!edge)for(let y=h+3;y<=(tops[u+','+v]||h+3);y++)PW(x,y,z,AIR,MODE_SET);} // the roof has fallen in
+  for(let u=1;u<=L;u++)for(let v=-1;v<=1;v++){if(u===1&&v!==0)continue;const [x,z]=P(u,v);for(let y=h+1;y<=h+2;y++)PW(x,y,z,AIR,MODE_SET);PW(x,h,z,STONE,MODE_SET);}
+  for(const v of [-2,2]){const [x,z]=P(L,v);for(let y=h+1;y<=h+3;y++)PW(x,y,z,MOSSY,MODE_SET);}for(let v=-2;v<=2;v++){const [x,z]=P(L,v);PW(x,h+3,z,STONE,MODE_SET);}
+  {let [x,z]=P(-1,0);PW(x,h+1,z,CALCITE,MODE_SET);[x,z]=P(-1,1);PW(x,h+1,z,CALCITE,MODE_SET);[x,z]=P(0,-1);PW(x,h+1,z,DWCHEST,MODE_SET);[x,z]=P(0,1);PW(x,h+1,z,BONES,MODE_SET);}
+  if(o.broken)for(let k=0;k<3;k++){const [x,z]=P(-1+(r()*2|0),(r()*3|0)-1);PW(x,h+1,z,COBBLE,MODE_AIR);}
+}
+function stoneRingP(X,h,Z,r,sz){
+  const n=7+(r()*3|0),R=(5+r()*1.5)*(sz||1);
   for(let k=0;k<n;k++){const a=k/n*6.283+r()*0.2,sx=X+Math.round(Math.cos(a)*R),sz=Z+Math.round(Math.sin(a)*R);colInfo(sx,sz,T3);const g=T3.h;
     if(r()<0.25){const dx=Math.round(Math.cos(a+1.57)),dz=Math.round(Math.sin(a+1.57));PW(sx,g+1,sz,MOSSY,MODE_SET);PW(sx+dx,g+1,sz+dz,STONE,MODE_SET);}
     else{const hg=2+(r()*3|0);for(let y=g;y<=g+hg;y++)PW(sx,y,sz,y===g?STONE:(r()<0.35?MOSSY:STONE),MODE_SET);}}
@@ -73,27 +95,6 @@ function jungleP(X,y,Z,r){
   for(let k=0;k<4;k++){const dx=k<2?(k?1:-1):0,dz=k>=2?(k===3?1:-1):0;if(r()<0.5)for(let dy=1;dy<=2;dy++)PW(X+dx*3,top-2-dy,Z+dz*3,JLEAVES,MODE_AIR);}
 }
 function bushP(X,y,Z){PW(X,y,Z,JLOG,MODE_SET);for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx||dz)PW(X+dx,y,Z+dz,JLEAVES,MODE_AIR);}PW(X,y+1,Z,JLEAVES,MODE_AIR);}
-function towerP(X,Z,g,r){
-  const h=7+(r()*7|0);
-  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){
-    const d=Math.hypot(dx,dz);if(d>3.4)continue;
-    for(let y=g-1;y>g-7;y--)PW(X+dx,y,Z+dz,COBBLE,MODE_FILL);
-    PW(X+dx,g,Z+dz,d<2.5?(r()<.3?MOSSY:COBBLE):SBRICK,MODE_SET);
-    for(let y=g+1;y<g+h+3;y++){
-      if(d<2.5||y>=g+h){PW(X+dx,y,Z+dz,AIR,MODE_SET);continue;}
-      const gap=r()<0.08+(y-g)/h*0.4,pick=r(),pick2=r();
-      if(gap||((y-g)%4===2&&(dx===0||dz===0))){PW(X+dx,y,Z+dz,AIR,MODE_SET);continue;}
-      PW(X+dx,y,Z+dz,pick<.35?MOSSY:pick2<.5?SBRICK:COBBLE,MODE_SET);
-    }
-  }
-  PW(X,g+1,Z,TORCH,MODE_SET);
-}
-function wellP(X,Z,g,m,post){
-  m=m||SANDSTONE;post=post||m;
-  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){for(let y=g-1;y>g-5;y--)PW(X+dx,y,Z+dz,m,MODE_FILL);PW(X+dx,g,Z+dz,m,MODE_SET);for(let y=g+1;y<=g+4;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);}
-  PW(X,g,Z,WATER,MODE_SET);PW(X,g-1,Z,WATER,MODE_SET);
-  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx||dz)PW(X+dx,g+1,Z+dz,m,MODE_SET);PW(X+dx,g+4,Z+dz,m,MODE_SET);if(dx&&dz){PW(X+dx,g+2,Z+dz,post,MODE_SET);PW(X+dx,g+3,Z+dz,post,MODE_SET);}}
-}
 // Ice spikes of the fells, old sealed rooms deep down, and a flatness check for surface structures
 function spikeP(X,Z,g,r){
   const h=8+(r()*10|0),r0=1+r()*1.4;
@@ -104,8 +105,9 @@ const stairwayC=new Map();
 function stairwayAt(WCX,WCZ){
   const key=ckey(WCX,WCZ);if(stairwayC.has(key))return stairwayC.get(key);if(stairwayC.size>8000)stairwayC.clear();
   let s=null;
-  if(hsh(WCX,6301,WCZ)<0.009){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
-    if(!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+  if(hsh(WCX,6301,WCZ)<0.15){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
+    let rise=0;for(let k=0;k<8;k++){const a=k*0.785;rise=Math.max(rise,hAt(Math.round(X+Math.cos(a)*9),Math.round(Z+Math.sin(a)*9))-o.h);} // at the foot of a slope
+    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
       const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
   stairwayC.set(key,s);return s;
 }

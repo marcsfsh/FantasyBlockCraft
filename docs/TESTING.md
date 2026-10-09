@@ -40,6 +40,7 @@
 | 28-meshing | The surface floor trims the band and spawn stays under 1.3 million vertices (D-029); the floor never cuts above 24 blocks under open ground; cave mode and its band switch with some give |
 | 29-view | Auto is the default view; it grows while smooth, shrinks when frames slow, on 60 Hz and 120 Hz screens |
 | 30-noclip | Creative noclip: N is bound, the player passes through rock, turning it off inside rock lifts them out, survival refuses it and turns it off, fly during noclip leaves flying on |
+| 31-natural-surface | Rivers lie in valleys (under 3% of river columns with land 8 above the water within 5 blocks); gentle lands are smooth; the ranges still have high peaks and few sheer steps; barrows only on the Barrow Hills, clustered, facing several ways, sized and some broken open; no site in a hollow and towers and castles on high ground; trees gather in groves |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

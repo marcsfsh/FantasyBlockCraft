@@ -106,3 +106,14 @@ Same VM, `npm run bench`, one run per seed. The caves are planned systems (D-029
 | 4242 | 1857 | 10.01 / 9.75 / 12.19 / 17.27 | 17.1 / 15.31 / 26.33 / 32.66 | 0.89 / 0.61 / 3.2 / 9.25 | 3.6 / 1.84 / 11.35 / 21.3 | 222 |
 
 Generating a chunk is about a third cheaper than in 0.8.0 (median 9.6 to 9.8 ms against 13.7 to 14.7): carving planned capsules and chambers costs less than walking hundreds of worm points and sampling cavern noise. Planning a region (its cave systems) happens once per 160 x 160 blocks and is spread over streaming steps one region at a time; the worst single step stays under 10 ms. Startup is about 400 ms faster.
+
+## After M3.5b (2026-10-09, 0.10.0)
+
+Same VM, `npm run bench`, one run per seed.
+
+| Seed | Startup | genChunk | Stream 1 chunk | Stream step (one frame) | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 123456789 | 2148 | 9.88 / 9.64 / 11.6 / 18.46 | 14.62 / 13.81 / 20.04 / 35.99 | 0.63 / 0.46 / 1.98 / 4.4 | 3.88 / 2.23 / 9.62 / 13.23 | 210 |
+| 4242 | 2073 | 11.02 / 10.62 / 15.26 / 18.3 | 16.52 / 15.28 / 25.42 / 33.41 | 0.77 / 0.57 / 2.85 / 6.43 | 3.68 / 2.37 / 10.88 / 21.89 | 222 |
+
+Within the noise of 0.9.0. The surface work adds a few hash and noise lookups per column and per placed feature; meshing at the surface is a little cheaper with smoother ground.

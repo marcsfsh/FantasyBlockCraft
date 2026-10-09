@@ -31,25 +31,26 @@ function features(WCX,WCZ,self,noLife){
   const r4=rngAt(WCX,17,WCZ);
   for(let v=0;v<14;v++){const x=X0+(r4()*CS|0),y=8+(r4()*(SEA-30)|0),z=Z0+(r4()*CS|0),t=r4()<0.5?DIRT:GRAVEL;veinP(x,y,z,t,22,r4,true);}
   if(mineZone(WCX,WCZ)){const r5=rngAt(WCX,18,WCZ);for(let v=0;v<14;v++){const x=X0+(r5()*CS|0),y=14+(r5()*44|0),z=Z0+(r5()*CS|0),t0=r5(),t=t0<0.3?IRON:t0<0.55?GOLD:t0<0.7?PLATO:t0<0.85?TITO:t0<0.93?DIAMOND:COPO;veinP(x,y,z,t,6+(r5()*5|0),r5,true);}}
-  // the odd mossy boulder on open ground
+  // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
-  // barrows and standing stones, long forgotten
-  {const q=hsh(WCX,6001,WCZ);if(q<0.3){const cx=X0+8,cz=Z0+8;colInfo(cx,cz,T2);
-    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)&&!surfTaken(cx,cz,7)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
+  // barrows and standing stones, long forgotten: on the Barrow Hills, in clusters (Q94)
+  {const bw=barrowAt(WCX,WCZ);if(bw){const rr=rngAt(WCX,6002,WCZ);if(bw.ring)stoneRingP(bw.X,bw.h,bw.Z,rr,bw.sz);else barrowP(bw.X,bw.h,bw.Z,rr,bw);}}
   // Trees on the ground and on sky islands
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
     const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3),top=topBlock(T2);
     if(clear){
-      if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012))spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
+      // groves and clearings (Q95): trees gather where the grove field is high, thicker in valleys and by water, thinner on steep slopes
+      const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(b===3||b===8?0.55+0.8*G:0.15+1.7*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
+      if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012)*grv)spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
-      else if(top===GRASS&&hv<0.04){const td=(b===2||b===3)?(0.003+0.037*T2.fwd)*(1-T2.pw)*(1-T2.dw*0.8):b===10?0.0011+0.006*(1-T2.pw):b===4?0.0008+0.004*(1-T2.dw):b===7?0.001:b===11?0.004:0;
+      else if(top===GRASS&&hv<0.06){const td=((b===2||b===3)?(0.003+0.037*T2.fwd)*(1-T2.pw)*(1-T2.dw*0.8):b===10?0.0011+0.006*(1-T2.pw):b===4?0.0008+0.004*(1-T2.dw):b===7?0.001:b===11?0.004:0)*grv;
         if(hv<td){if(T2.sw>0.25&&hsh(X,3,Z)<T2.sw)jungleP(X,h+1,Z,tr2);else if(b===11)willowP(X,h+1,Z,tr2);else if(b===3&&hsh(X,2,Z)<0.15)treeP(X,h+1,Z,BIRCH,BLEAVES,5,tr2);else if((b===3&&hsh(X,4,Z)<0.35)||(b===10&&hsh(X,4,Z)<0.4))bigOakP(X,h+1,Z,tr2);else treeP(X,h+1,Z,LOG,LEAVES,4,tr2);}
         else if((b===2||b===3)&&hv<td+0.004)leafBushP(X,h+1,Z,tr2);}
     }
@@ -58,9 +59,7 @@ function features(WCX,WCZ,self,noLife){
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
   if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)){
-    if((b===2||b===3)&&sr<0.05&&flatOK(sx,sz,g))towerP(sx,sz,g,rngAt(sx,12,sz));
-    else if(b===4&&sr<0.06&&flatOK(sx,sz,g))wellP(sx,sz,g);
-    else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
+    if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz)); // the stray little towers and wells are gone (Q93): ruins on the surface are the named sites
   }
   {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
   {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was

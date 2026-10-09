@@ -5,6 +5,24 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.10.0 (2026-10-09): M3.5b, a natural surface
+
+Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v7`.
+
+### Game
+- **Rivers in valleys.** Rivers rise in the hills and run to the sea or a lake in valleys that widen with the land around them, shelving into sandy or gravel banks. River ravines with 20 to 30 block walls are gone.
+- **Mountain ranges** with ridgelines, valleys between them, saddles to cross, and peaks along the ridges. Far fewer sheer drops.
+- **Smoother ground:** gentle lands are about half as bumpy. Moors, mountains, the Shadowed Forest and the fens keep their character.
+- **Lands blend** over a wide border: trees, ground cover and snow mix in patches instead of stopping on a line.
+- **Barrows** only on the Barrow Hills, in clusters (burial grounds and beside old roads), facing every way, round or long, small to large, some with the roof fallen in.
+- **Trees in groves** with clearings between, thicker in valleys and by water.
+- **Boulders** on the moors, in the mountains and on slopes; rare on gentle ground. The stray little stone towers and wells are gone.
+- **Ruined towers, keeps and castles** stand on commanding ground (towers and castles on high ground, keeps by rivers), on an earth bank that slopes down to the land instead of a stone plinth.
+- Ruined stairways stand at the foot of a slope.
+
+### Tooling
+- New test 31-natural-surface; 06-biomes, 07-gamepad and 16-worlds adjusted (D-031). New world-hash snapshot.
+
 ## 0.9.1 (2026-10-09): M3.5a.2, noclip
 
 No change to the world or the save format: 0.9.0 worlds keep working.

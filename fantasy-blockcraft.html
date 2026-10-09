@@ -188,7 +188,7 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v6',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v7',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -201,7 +201,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===6&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const saved=(d=>d&&d.v===7&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -613,15 +613,19 @@ function hsh(a,b,c){let h=(Math.imul(a|0,374761393)+Math.imul(b|0,668265263)+Mat
 function rngAt(a,b,c){return mkRng(1+Math.floor(hsh(a,b,c)*2147483640));}
 const T={},T2={},T3={},TTP={},TP={};
 function colInfoBase(X,Z,o){
-  const jit=fbm2(X/48,Z/48,2,977.1)*0.03+fbm2(X/9,Z/9,1,979.3)*0.005; // ragged, organic edges between lands
-  const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/90,Z/90,3,37.7),mtn=fbm2(X/360,Z/360,2,73.1)+jit*0.6,rid=fbm2(X/40,Z/40,2,91.4);
+  const jit=fbm2(X/48,Z/48,2,977.1)*0.03; // organic edges between lands
+  const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),mtn=fbm2(X/360,Z/360,2,73.1)+jit*0.6,rid=fbm2(X/40,Z/40,2,91.4);
   const temp=fbm2(X/1100,Z/1100,2,151.9)+jit,hum=fbm2(X/900,Z/900,2,701.9)+jit;
   // Most land is gentle: rolling hills only where the "hilliness" field allows them
   const rough=sstep(-0.05,0.22,fbm2(X/420,Z/420,2,881.3));
-  let h=SEA+6+cont*34+hill*(4+10*rough);
+  let h=SEA+6+cont*34+hill*(3+9*rough); // smooth: no fine bumps outside the lands that call for them (Q91)
   const mf=sstep(0.08,0.32,mtn);
-  h+=mf*mf*(32+18*(0.5-Math.abs(rid)));
-  const pk=sstep(0.22,0.5,mtn);if(pk>0)h+=pk*pk*(70+40*fbm2(X/150,Z/150,2,7301.3)); // the high peaks at the hearts of the ranges (the world is 512 tall, D-023)
+  // Mountain ranges (Q90): long ridgelines with valleys between, saddles where a range can be crossed, and the high peaks only
+  // on the ridges at the hearts of the ranges (the world is 512 tall, D-023)
+  let ridge=0;
+  if(mf>0){const rg=1-Math.abs(fbm2(X/230,Z/230,3,91.7)),pass=0.5+0.5*sstep(-0.3,0.3,fbm2(X/420,Z/420,1,93.1));ridge=rg*rg*rg*pass;
+    h+=mf*mf*(24+46*ridge)+mf*fbm2(X/34,Z/34,2,95.3)*2.5;
+    const pk=sstep(0.22,0.5,mtn)*sstep(0.35,0.8,ridge);if(pk>0)h+=pk*pk*(60+40*fbm2(X/170,Z/170,1,7301.3));}
   const warmF=sstep(-0.26,-0.14,temp),sw=sstep(0.04,0.2,hum)*sstep(-0.08,0.04,temp)*(1-mf); // sw: damp, mild shadowed forest
   const dw=sstep(0.02,0.26,temp)*(1-mf)*(1-sw);
   h=h*(1-dw)+(SEA+14+hill*9+Math.abs(rid)*6)*dw; // heath moors: open uplands
@@ -633,19 +637,26 @@ function colInfoBase(X,Z,o){
   if(fen>0.01){const pool=fbm2(X/13,Z/13,2,4107.9)>0.1;h=h*(1-fen)+(pool&&fen>0.6?SEA-1:SEA+1+hill*1.5)*fen;}
   const fwd=sstep(-0.1,0.14,fbm2(X/520,Z/520,2,201.3)+jit); // elder wood against green hills
   const open=(1-mf)*(1-dw)*(1-pw)*(1-fen)*(1-sw)*warmF;
-  h+=open*(1-fwd)*fbm2(X/60,Z/60,2,4601.3)*7;   // green hills: soft rolling swells
-  h+=open*fwd*fbm2(X/48,Z/48,2,4613.1)*4;       // elder wood: uneven old ground
+  h+=open*(1-fwd)*fbm2(X/80,Z/80,2,4601.3)*7;   // green hills: soft rolling swells
+  h+=open*fwd*fbm2(X/56,Z/56,1,4613.1)*3.5;     // elder wood: uneven old ground
   h+=sw*fbm2(X/22,Z/22,2,4607.9)*3;             // shadowed forest: hummocks and hollows
   h+=pw*fbm2(X/140,Z/140,1,4619.7)*3;           // windswept plains: long low waves
-  const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022;
+  // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
+  // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
+  const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SEA-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief)),vw=rw+Math.min(0.24,relief*0.0075);
   o.river=false;o.bank=false;
-  if(rv2<rw&&h>SEA-3){const c=1-rv2/rw,f=sstep(0,0.6,c)*(1-mf*0.85),bed=SEA-2-Math.round(3*c);h=h+(bed-h)*f;o.river=f>0.5;o.bank=f>0.08&&f<=0.5;}
+  if(on>0&&rv2<vw&&h>SEA-3){
+    // the channel shelves up into its bank, and the bank slopes up to the land
+    const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
+    h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
   h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
-  const cold=temp<-0.2;
+  // Lands meet in a wide blend (Q92): heights blend through the weights, and which land a column belongs to is decided
+  // against a patchy threshold, so trees, ground and snow mix over a band instead of stopping on a line.
+  const dth=fbm2(X/16,Z/16,1,2711.3)*0.4,tw=0.5+dth,cold=temp<-0.2+dth*0.1;
   let b;
-  if(fen>0.5&&h>=SEA-2&&!cold)b=11;else if(h<SEA)b=0;else if(dw>0.5)b=bw>0.5?7:4;else if(mf>0.8&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;else if(cold)b=6;else if(sw>0.5)b=8;else if(pw>0.5)b=10;else b=fwd>0.5?3:2;
+  if(fen>tw&&h>=SEA-2&&!cold)b=11;else if(h<SEA)b=0;else if(dw>tw)b=bw>tw?7:4;else if(mf>0.8&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;else if(cold)b=6;else if(sw>tw)b=8;else if(pw>tw)b=10;else b=fwd>tw?3:2;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
-  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=rid;o.wet=h<SEA+3;
+  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SEA+3;o.mf=mf;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   const rv=Math.abs(fbm2(X/70,Z/70,2,401.1));
   const rf=rv<0.008&&!o.wet?fbm2(X/180,Z/180,2,433.7):0; // ravines: deep enough to cut into the crawlways, sloping in at their ends (Q22)
@@ -2379,15 +2390,37 @@ function bigOakP(X,y,Z,r){
 }
 function leafBushP(X,y,Z,r){PW(X,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X+1,y,Z,LEAVES,MODE_AIR);if(r()<0.6)PW(X,y,Z+1,LEAVES,MODE_AIR);if(r()<0.4)PW(X,y+1,Z,LEAVES,MODE_AIR);}
 // ---- Ancient things on the old hills: barrows and rings of standing stones
-function barrowP(X,h,Z,r){
-  for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){const d=Math.hypot(dx,dz*1.2);if(d>=6)continue;const hh=Math.round(3.4*(1-(d/6)*(d/6)));for(let y=h+1;y<=h+hh;y++)PW(X+dx,y,Z+dz,y===h+hh?GRASS:DIRT,MODE_SET);}
-  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=1;dz++){const edge=Math.abs(dx)===2||dz===-2||dz===1;for(let y=h;y<=h+2;y++)PW(X+dx,y,Z+dz,y===h?STONE:edge?(r()<0.4?MOSSY:COBBLE):AIR,MODE_SET);}
-  for(let dz=1;dz<=6;dz++)for(let dx=-1;dx<=1;dx++){if(dz===1&&dx!==0)continue;for(let y=h+1;y<=h+2;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);PW(X+dx,h,Z+dz,STONE,MODE_SET);}
-  for(const dx of [-2,2])for(let y=h+1;y<=h+3;y++)PW(X+dx,y,Z+6,MOSSY,MODE_SET);for(let dx=-2;dx<=2;dx++)PW(X+dx,h+3,Z+6,STONE,MODE_SET);
-  PW(X,h+1,Z-1,CALCITE,MODE_SET);PW(X+1,h+1,Z-1,CALCITE,MODE_SET);PW(X-1,h+1,Z,DWCHEST,MODE_SET);PW(X+1,h+1,Z,BONES,MODE_SET);
+// Where a barrow or ring stands, if any, for chunk (WCX,WCZ): only on the Barrow Hills (and the downs blending into them), mostly in
+// clusters (old burial grounds, and beside the old roads), on the highest of a few spots, facing its own way, in varied sizes;
+// some long, some broken open (Q94). Pure, so neighbouring chunks agree.
+const barrowC=new Map(),TB={};
+function barrowAt(WCX,WCZ){
+  const key=ckey(WCX,WCZ);if(barrowC.has(key))return barrowC.get(key);if(barrowC.size>8000)barrowC.clear();
+  let best=null;
+  for(let k=0;k<3;k++){const X=WCX*CS+4+Math.floor(hsh(WCX*3+k,6003,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX*3+k,6004,WCZ)*8);colInfo(X,Z,TB);
+    if(!(TB.b===7||(TB.bw>0.35&&TB.dw>0.35))||TB.wet||carved(X,TB.h,Z,TB)||surfTaken(X,Z,9))continue;if(!best||TB.h>best.h)best={X:X,Z:Z,h:TB.h};}
+  let s=null;
+  if(best){const zone=fbm2(best.X/220,best.Z/220,1,6011.3)>0.05,road=oldRoadAt(best.X+12,best.Z)||oldRoadAt(best.X-12,best.Z)||oldRoadAt(best.X,best.Z+12)||oldRoadAt(best.X,best.Z-12);
+    if(hsh(WCX,6001,WCZ)<(zone?0.42:0.05)+(road?0.2:0)){const q=hsh(WCX,6005,WCZ);
+      s={X:best.X,Z:best.Z,h:best.h,ring:q<0.3,rot:Math.floor(hsh(WCX,6006,WCZ)*4),sz:0.7+hsh(WCX,6007,WCZ)*0.7,long:hsh(WCX,6008,WCZ)<0.35,broken:hsh(WCX,6009,WCZ)<0.3};}}
+  barrowC.set(key,s);return s;
 }
-function stoneRingP(X,h,Z,r){
-  const n=7+(r()*3|0),R=5+r()*1.5;
+function barrowP(X,h,Z,r,o){
+  const ca=[1,0,-1,0][o.rot],sa=[0,1,0,-1][o.rot],L=Math.max(4,Math.round(6*o.sz*(o.long?1.6:1))),Wd=Math.max(4,Math.round(6*o.sz)),Hm=Math.max(3,Math.round(3.4*o.sz+(o.long?0.5:0)));
+  const P=(u,v)=>[X+u*ca-v*sa,Z+u*sa+v*ca]; // u along the barrow (its entrance at +u), v across
+  // the mound, resting on the ground under every column of it
+  const tops={};for(let u=-L;u<=L;u++)for(let v=-Wd;v<=Wd;v++){const d=Math.hypot(u/L,v/Wd);if(d>=1)continue;const [x,z]=P(u,v),gl=colInfo(x,z,T3).h,top=h+Math.round(Hm*(1-d*d));tops[u+','+v]=top;
+    for(let y=Math.min(gl+1,h+1);y<=top;y++)PW(x,y,z,y===top?GRASS:DIRT,MODE_SET);}
+  // the chamber, and the passage to the entrance
+  for(let v=-2;v<=2;v++)for(let u=-2;u<=1;u++){const edge=Math.abs(v)===2||u===-2||u===1,[x,z]=P(u,v);for(let y=h;y<=h+2;y++)PW(x,y,z,y===h?STONE:edge?(r()<0.4?MOSSY:COBBLE):AIR,MODE_SET);
+    if(o.broken&&!edge)for(let y=h+3;y<=(tops[u+','+v]||h+3);y++)PW(x,y,z,AIR,MODE_SET);} // the roof has fallen in
+  for(let u=1;u<=L;u++)for(let v=-1;v<=1;v++){if(u===1&&v!==0)continue;const [x,z]=P(u,v);for(let y=h+1;y<=h+2;y++)PW(x,y,z,AIR,MODE_SET);PW(x,h,z,STONE,MODE_SET);}
+  for(const v of [-2,2]){const [x,z]=P(L,v);for(let y=h+1;y<=h+3;y++)PW(x,y,z,MOSSY,MODE_SET);}for(let v=-2;v<=2;v++){const [x,z]=P(L,v);PW(x,h+3,z,STONE,MODE_SET);}
+  {let [x,z]=P(-1,0);PW(x,h+1,z,CALCITE,MODE_SET);[x,z]=P(-1,1);PW(x,h+1,z,CALCITE,MODE_SET);[x,z]=P(0,-1);PW(x,h+1,z,DWCHEST,MODE_SET);[x,z]=P(0,1);PW(x,h+1,z,BONES,MODE_SET);}
+  if(o.broken)for(let k=0;k<3;k++){const [x,z]=P(-1+(r()*2|0),(r()*3|0)-1);PW(x,h+1,z,COBBLE,MODE_AIR);}
+}
+function stoneRingP(X,h,Z,r,sz){
+  const n=7+(r()*3|0),R=(5+r()*1.5)*(sz||1);
   for(let k=0;k<n;k++){const a=k/n*6.283+r()*0.2,sx=X+Math.round(Math.cos(a)*R),sz=Z+Math.round(Math.sin(a)*R);colInfo(sx,sz,T3);const g=T3.h;
     if(r()<0.25){const dx=Math.round(Math.cos(a+1.57)),dz=Math.round(Math.sin(a+1.57));PW(sx,g+1,sz,MOSSY,MODE_SET);PW(sx+dx,g+1,sz+dz,STONE,MODE_SET);}
     else{const hg=2+(r()*3|0);for(let y=g;y<=g+hg;y++)PW(sx,y,sz,y===g?STONE:(r()<0.35?MOSSY:STONE),MODE_SET);}}
@@ -2419,27 +2452,6 @@ function jungleP(X,y,Z,r){
   for(let k=0;k<4;k++){const dx=k<2?(k?1:-1):0,dz=k>=2?(k===3?1:-1):0;if(r()<0.5)for(let dy=1;dy<=2;dy++)PW(X+dx*3,top-2-dy,Z+dz*3,JLEAVES,MODE_AIR);}
 }
 function bushP(X,y,Z){PW(X,y,Z,JLOG,MODE_SET);for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx||dz)PW(X+dx,y,Z+dz,JLEAVES,MODE_AIR);}PW(X,y+1,Z,JLEAVES,MODE_AIR);}
-function towerP(X,Z,g,r){
-  const h=7+(r()*7|0);
-  for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){
-    const d=Math.hypot(dx,dz);if(d>3.4)continue;
-    for(let y=g-1;y>g-7;y--)PW(X+dx,y,Z+dz,COBBLE,MODE_FILL);
-    PW(X+dx,g,Z+dz,d<2.5?(r()<.3?MOSSY:COBBLE):SBRICK,MODE_SET);
-    for(let y=g+1;y<g+h+3;y++){
-      if(d<2.5||y>=g+h){PW(X+dx,y,Z+dz,AIR,MODE_SET);continue;}
-      const gap=r()<0.08+(y-g)/h*0.4,pick=r(),pick2=r();
-      if(gap||((y-g)%4===2&&(dx===0||dz===0))){PW(X+dx,y,Z+dz,AIR,MODE_SET);continue;}
-      PW(X+dx,y,Z+dz,pick<.35?MOSSY:pick2<.5?SBRICK:COBBLE,MODE_SET);
-    }
-  }
-  PW(X,g+1,Z,TORCH,MODE_SET);
-}
-function wellP(X,Z,g,m,post){
-  m=m||SANDSTONE;post=post||m;
-  for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){for(let y=g-1;y>g-5;y--)PW(X+dx,y,Z+dz,m,MODE_FILL);PW(X+dx,g,Z+dz,m,MODE_SET);for(let y=g+1;y<=g+4;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);}
-  PW(X,g,Z,WATER,MODE_SET);PW(X,g-1,Z,WATER,MODE_SET);
-  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){if(dx||dz)PW(X+dx,g+1,Z+dz,m,MODE_SET);PW(X+dx,g+4,Z+dz,m,MODE_SET);if(dx&&dz){PW(X+dx,g+2,Z+dz,post,MODE_SET);PW(X+dx,g+3,Z+dz,post,MODE_SET);}}
-}
 // Ice spikes of the fells, old sealed rooms deep down, and a flatness check for surface structures
 function spikeP(X,Z,g,r){
   const h=8+(r()*10|0),r0=1+r()*1.4;
@@ -2450,8 +2462,9 @@ const stairwayC=new Map();
 function stairwayAt(WCX,WCZ){
   const key=ckey(WCX,WCZ);if(stairwayC.has(key))return stairwayC.get(key);if(stairwayC.size>8000)stairwayC.clear();
   let s=null;
-  if(hsh(WCX,6301,WCZ)<0.009){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
-    if(!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+  if(hsh(WCX,6301,WCZ)<0.15){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
+    let rise=0;for(let k=0;k<8;k++){const a=k*0.785;rise=Math.max(rise,hAt(Math.round(X+Math.cos(a)*9),Math.round(Z+Math.sin(a)*9))-o.h);} // at the foot of a slope
+    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
       const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
   stairwayC.set(key,s);return s;
 }
@@ -2522,12 +2535,19 @@ function siteAt(rx,rz){
   if(r()<0.7){
     let tot=0;for(const k of SITE_KINDS)tot+=k[1];let v=r()*tot,kind=SITE_KINDS[0][0];for(const k of SITE_KINDS){v-=k[1];if(v<=0){kind=k[0];break;}}
     const R=kind==='tower'?3+(r()*3|0):kind==='keep'?5+(r()*3|0):13+(r()*5|0),H=kind==='tower'?9+(r()*8|0):kind==='keep'?7+(r()*5|0):6+(r()*3|0),seed=r(),way=r()<0.45;
-    for(let t=0;t<8&&!s;t++){
+    // a strategic spot (Q96): towers and castles on the highest, most commanding ground of the candidates, keeps by a river or in a
+    // pass; never in a hollow
+    let best=-1e9;
+    for(let t=0;t<14;t++){
       const X=rx*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0),Z=rz*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0);
       let lo=1e9,hi=-1e9,bad=false;
       for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=SEA+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
       if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4))continue;
-      s={kind:kind,X:X,Z:Z,R:R,H:H,g:hi,seed:seed,way:way};
+      let ring=0,river=0;for(let k=0;k<8;k++){const a=k*0.785;ring+=hAt(Math.round(X+Math.cos(a)*36),Math.round(Z+Math.sin(a)*36));
+        for(const d of [20,40]){colInfo(Math.round(X+Math.cos(a)*d),Math.round(Z+Math.sin(a)*d),TS2);if(TS2.river||TS2.bank)river=1;}}
+      const prom=hi-ring/8;if(prom<-1)continue;
+      const score=kind==='keep'?river*12+prom*0.4:prom;
+      if(score>best){best=score;s={kind:kind,X:X,Z:Z,R:R,H:H,g:hi,seed:seed,way:way};}
     }
     if(s){const rr=mkRng(Math.floor(s.seed*1e9)+5),nm=fullName('human',rr,false);
       s.name=s.kind==='tower'?'The Watchtower of '+nm:s.kind==='keep'?'The Ruined Keep of '+nm:'The Ruins of Castle '+nm;}
@@ -2590,8 +2610,14 @@ function waystoneP(X,Z,g){
 }
 function buildSite(s){
   const r=mkRng(Math.floor(s.seed*1e9)+9),X=s.X,Z=s.Z,R=s.R,g=s.g,H=s.H,stone=()=>{const q=r();return q<0.45?SBRICK:q<0.75?COBBLE:MOSSY;};
-  // level ground: a stone plinth up to the floor wherever the ground is lower (never floating), and open air above
-  const pad=(x,z,floorId)=>{for(let y=g-1;y>g-12;y--){const c=GW(x,y,z);if(c<0||(SOLID[c]&&c!==LEAVES&&!BL[c].leaf))break;PW(x,y,z,COBBLE,MODE_SET);}PW(x,g,z,floorId,MODE_SET);for(let y=g+1;y<=g+H+6;y++)PW(x,y,z,AIR,MODE_SET);};
+  // level ground: earth built up to the floor wherever the ground is lower (never floating), and open air above
+  const pad=(x,z,floorId)=>{for(let y=g-1;y>g-12;y--){const c=GW(x,y,z);if(c<0||(SOLID[c]&&c!==LEAVES&&!BL[c].leaf))break;PW(x,y,z,DIRT,MODE_SET);}PW(x,g,z,floorId,MODE_SET);for(let y=g+1;y<=g+H+6;y++)PW(x,y,z,AIR,MODE_SET);};
+  // the ground shaped around the site (Q96): an earth bank sloping down from the footprint, one block per block, instead of a plinth
+  {const F=s.kind==='tower'?R+1.5:R+3.5;
+    for(let dx=-Math.ceil(F)-8;dx<=Math.ceil(F)+8;dx++)for(let dz=-Math.ceil(F)-8;dz<=Math.ceil(F)+8;dz++){const x=X+dx,z=Z+dz;if(x<gx0||x>=gx0+CS||z<gz0||z>=gz0+CS)continue;
+      const d=s.kind==='tower'?Math.hypot(dx,dz):Math.max(Math.abs(dx),Math.abs(dz)),out=d-F;if(out<=0||out>8)continue;
+      colInfo(x,z,TS2);const gl=TS2.h,tgt=g-Math.ceil(out);if(tgt<=gl||TS2.wet)continue;const top=topBlock(TS2),cap=top===SNOWG||top===SAND||top===GRAVEL?top:GRASS;
+      for(let y=gl;y<=tgt;y++)PW(x,y,z,y===tgt?cap:DIRT,y===gl?MODE_SET:MODE_FILL);}} // around tree trunks, never through them
   const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*5)-(hsh(x,6604,z)<0.15?h:0)); // broken wall tops and a few gaps
   if(s.kind==='tower'){
     for(let dx=-R-1;dx<=R+1;dx++)for(let dz=-R-1;dz<=R+1;dz++){const d=Math.hypot(dx,dz);if(d>R+0.5)continue;pad(X+dx,Z+dz,d>R-0.6?stone():COBBLE);
@@ -2659,25 +2685,26 @@ function features(WCX,WCZ,self,noLife){
   const r4=rngAt(WCX,17,WCZ);
   for(let v=0;v<14;v++){const x=X0+(r4()*CS|0),y=8+(r4()*(SEA-30)|0),z=Z0+(r4()*CS|0),t=r4()<0.5?DIRT:GRAVEL;veinP(x,y,z,t,22,r4,true);}
   if(mineZone(WCX,WCZ)){const r5=rngAt(WCX,18,WCZ);for(let v=0;v<14;v++){const x=X0+(r5()*CS|0),y=14+(r5()*44|0),z=Z0+(r5()*CS|0),t0=r5(),t=t0<0.3?IRON:t0<0.55?GOLD:t0<0.7?PLATO:t0<0.85?TITO:t0<0.93?DIAMOND:COPO;veinP(x,y,z,t,6+(r5()*5|0),r5,true);}}
-  // the odd mossy boulder on open ground
+  // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===7?0.004:0.0022))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
-  // barrows and standing stones, long forgotten
-  {const q=hsh(WCX,6001,WCZ);if(q<0.3){const cx=X0+8,cz=Z0+8;colInfo(cx,cz,T2);
-    if((T2.b===7||(T2.b===4&&q<0.1)||(T2.b===10&&q<0.05))&&!T2.wet&&!carved(cx,T2.h,cz,T2)&&!surfTaken(cx,cz,7)){const rr=rngAt(WCX,6002,WCZ),hh=T2.h;if(q<0.14&&T2.b===7)barrowP(cx,hh,cz,rr);else stoneRingP(cx,hh,cz,rr);}}}
+  // barrows and standing stones, long forgotten: on the Barrow Hills, in clusters (Q94)
+  {const bw=barrowAt(WCX,WCZ);if(bw){const rr=rngAt(WCX,6002,WCZ);if(bw.ring)stoneRingP(bw.X,bw.h,bw.Z,rr,bw.sz);else barrowP(bw.X,bw.h,bw.Z,rr,bw);}}
   // Trees on the ground and on sky islands
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
     const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3),top=topBlock(T2);
     if(clear){
-      if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012))spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
+      // groves and clearings (Q95): trees gather where the grove field is high, thicker in valleys and by water, thinner on steep slopes
+      const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(b===3||b===8?0.55+0.8*G:0.15+1.7*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
+      if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012)*grv)spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
       else if(top===GRASS&&b===8){if(hv<0.012+0.043*T2.sw){jungleP(X,h+1,Z,tr2);for(let k=0;k<3;k++){const a=tr2()*6.28,d=1+tr2()*2;PW(X+Math.round(Math.cos(a)*d),h+4+(tr2()*5|0),Z+Math.round(Math.sin(a)*d),COBWEB,MODE_AIR);}}else bushP(X,h+1,Z);}
-      else if(top===GRASS&&hv<0.04){const td=(b===2||b===3)?(0.003+0.037*T2.fwd)*(1-T2.pw)*(1-T2.dw*0.8):b===10?0.0011+0.006*(1-T2.pw):b===4?0.0008+0.004*(1-T2.dw):b===7?0.001:b===11?0.004:0;
+      else if(top===GRASS&&hv<0.06){const td=((b===2||b===3)?(0.003+0.037*T2.fwd)*(1-T2.pw)*(1-T2.dw*0.8):b===10?0.0011+0.006*(1-T2.pw):b===4?0.0008+0.004*(1-T2.dw):b===7?0.001:b===11?0.004:0)*grv;
         if(hv<td){if(T2.sw>0.25&&hsh(X,3,Z)<T2.sw)jungleP(X,h+1,Z,tr2);else if(b===11)willowP(X,h+1,Z,tr2);else if(b===3&&hsh(X,2,Z)<0.15)treeP(X,h+1,Z,BIRCH,BLEAVES,5,tr2);else if((b===3&&hsh(X,4,Z)<0.35)||(b===10&&hsh(X,4,Z)<0.4))bigOakP(X,h+1,Z,tr2);else treeP(X,h+1,Z,LOG,LEAVES,4,tr2);}
         else if((b===2||b===3)&&hv<td+0.004)leafBushP(X,h+1,Z,tr2);}
     }
@@ -2686,9 +2713,7 @@ function features(WCX,WCZ,self,noLife){
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
   if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)){
-    if((b===2||b===3)&&sr<0.05&&flatOK(sx,sz,g))towerP(sx,sz,g,rngAt(sx,12,sz));
-    else if(b===4&&sr<0.06&&flatOK(sx,sz,g))wellP(sx,sz,g);
-    else if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz));
+    if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz)); // the stray little towers and wells are gone (Q93): ruins on the surface are the named sites
   }
   {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
   {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was
@@ -4262,7 +4287,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:6,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:7,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }

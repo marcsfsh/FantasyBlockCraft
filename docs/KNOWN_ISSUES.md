@@ -23,3 +23,5 @@
 - **Some cave systems have no entrance.** Secondary systems get an entrance only about one time in seven, and a main system gets none where its region has no dry land; they are reached by digging, from ravines, or through deep links.
 - **Lava falls are rare.** A fall needs a deep hall wall that fits its slot and pool; there are only a few per hundred regions.
 - **Streams are pools, not flowing water.** Each step of a stream is a still pool sunk into the passage floor; water does not run between them.
+- **Rivers can end where the land rises.** A river fades out where the land beside it is high or turns into a range, so a river may begin as a shallow dry channel in the hills (D-031). Rivers that should cross high ground do so in a short valley rather than a gorge.
+- **The new surface is judged from headless screenshots and maps only.** Ranges, valleys, blends and the new placement are for the owner to judge in play.

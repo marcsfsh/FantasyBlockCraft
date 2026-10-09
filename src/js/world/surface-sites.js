@@ -10,12 +10,19 @@ function siteAt(rx,rz){
   if(r()<0.7){
     let tot=0;for(const k of SITE_KINDS)tot+=k[1];let v=r()*tot,kind=SITE_KINDS[0][0];for(const k of SITE_KINDS){v-=k[1];if(v<=0){kind=k[0];break;}}
     const R=kind==='tower'?3+(r()*3|0):kind==='keep'?5+(r()*3|0):13+(r()*5|0),H=kind==='tower'?9+(r()*8|0):kind==='keep'?7+(r()*5|0):6+(r()*3|0),seed=r(),way=r()<0.45;
-    for(let t=0;t<8&&!s;t++){
+    // a strategic spot (Q96): towers and castles on the highest, most commanding ground of the candidates, keeps by a river or in a
+    // pass; never in a hollow
+    let best=-1e9;
+    for(let t=0;t<14;t++){
       const X=rx*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0),Z=rz*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0);
       let lo=1e9,hi=-1e9,bad=false;
       for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=SEA+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
       if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4))continue;
-      s={kind:kind,X:X,Z:Z,R:R,H:H,g:hi,seed:seed,way:way};
+      let ring=0,river=0;for(let k=0;k<8;k++){const a=k*0.785;ring+=hAt(Math.round(X+Math.cos(a)*36),Math.round(Z+Math.sin(a)*36));
+        for(const d of [20,40]){colInfo(Math.round(X+Math.cos(a)*d),Math.round(Z+Math.sin(a)*d),TS2);if(TS2.river||TS2.bank)river=1;}}
+      const prom=hi-ring/8;if(prom<-1)continue;
+      const score=kind==='keep'?river*12+prom*0.4:prom;
+      if(score>best){best=score;s={kind:kind,X:X,Z:Z,R:R,H:H,g:hi,seed:seed,way:way};}
     }
     if(s){const rr=mkRng(Math.floor(s.seed*1e9)+5),nm=fullName('human',rr,false);
       s.name=s.kind==='tower'?'The Watchtower of '+nm:s.kind==='keep'?'The Ruined Keep of '+nm:'The Ruins of Castle '+nm;}
@@ -78,8 +85,14 @@ function waystoneP(X,Z,g){
 }
 function buildSite(s){
   const r=mkRng(Math.floor(s.seed*1e9)+9),X=s.X,Z=s.Z,R=s.R,g=s.g,H=s.H,stone=()=>{const q=r();return q<0.45?SBRICK:q<0.75?COBBLE:MOSSY;};
-  // level ground: a stone plinth up to the floor wherever the ground is lower (never floating), and open air above
-  const pad=(x,z,floorId)=>{for(let y=g-1;y>g-12;y--){const c=GW(x,y,z);if(c<0||(SOLID[c]&&c!==LEAVES&&!BL[c].leaf))break;PW(x,y,z,COBBLE,MODE_SET);}PW(x,g,z,floorId,MODE_SET);for(let y=g+1;y<=g+H+6;y++)PW(x,y,z,AIR,MODE_SET);};
+  // level ground: earth built up to the floor wherever the ground is lower (never floating), and open air above
+  const pad=(x,z,floorId)=>{for(let y=g-1;y>g-12;y--){const c=GW(x,y,z);if(c<0||(SOLID[c]&&c!==LEAVES&&!BL[c].leaf))break;PW(x,y,z,DIRT,MODE_SET);}PW(x,g,z,floorId,MODE_SET);for(let y=g+1;y<=g+H+6;y++)PW(x,y,z,AIR,MODE_SET);};
+  // the ground shaped around the site (Q96): an earth bank sloping down from the footprint, one block per block, instead of a plinth
+  {const F=s.kind==='tower'?R+1.5:R+3.5;
+    for(let dx=-Math.ceil(F)-8;dx<=Math.ceil(F)+8;dx++)for(let dz=-Math.ceil(F)-8;dz<=Math.ceil(F)+8;dz++){const x=X+dx,z=Z+dz;if(x<gx0||x>=gx0+CS||z<gz0||z>=gz0+CS)continue;
+      const d=s.kind==='tower'?Math.hypot(dx,dz):Math.max(Math.abs(dx),Math.abs(dz)),out=d-F;if(out<=0||out>8)continue;
+      colInfo(x,z,TS2);const gl=TS2.h,tgt=g-Math.ceil(out);if(tgt<=gl||TS2.wet)continue;const top=topBlock(TS2),cap=top===SNOWG||top===SAND||top===GRAVEL?top:GRASS;
+      for(let y=gl;y<=tgt;y++)PW(x,y,z,y===tgt?cap:DIRT,y===gl?MODE_SET:MODE_FILL);}} // around tree trunks, never through them
   const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*5)-(hsh(x,6604,z)<0.15?h:0)); // broken wall tops and a few gaps
   if(s.kind==='tower'){
     for(let dx=-R-1;dx<=R+1;dx++)for(let dz=-R-1;dz<=R+1;dz++){const d=Math.hypot(dx,dz);if(d>R+0.5)continue;pad(X+dx,Z+dz,d>R-0.6?stone():COBBLE);
