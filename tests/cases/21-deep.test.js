@@ -25,13 +25,14 @@ for(let rx=-2;rx<2;rx++)for(let rz=-2;rz<2;rz++){const B=caveBase(rx,rz),cs=B.ca
 info('passage pieces from unjoined edges checked',pairs,'closer than three blocks of rock',close);
 assert(close===0,'passages never cut through each other');
 // the spawn window: open rock by depth, the lava sea, sound water and lava
+const TSv={};
 function survey(){while(genQ.length)processGenQ();const r={sea:0,n:W*D,band:[0,0,0,0],cells:[0,0,0,0],deco:0};
-  for(let z=0;z<D;z++)for(let x=0;x<W;x++){if(world[I(x,FIRE_LV,z)]===LAVA&&world[I(x,FIRE_LV+1,z)]===AIR)r.sea++;const g=ground[x+W*z];
-    for(let y=25;y<g-3;y++){const b=y>240?0:y>150?1:y>60?2:3,v=world[I(x,y,z)];r.cells[b]++;if(v===AIR)r.band[b]++;else if(y<102&&(v===CRYSTAL||v===GLOWCAP||v===AMETH||v===DRIPU||v===GLOWSHROOM||v===CALCITE))r.deco++;}}
+  for(let z=0;z<D;z++)for(let x=0;x<W;x++){if(world[I(x,FIRE_LV,z)]===LAVA&&world[I(x,FIRE_LV+1,z)]===AIR)r.sea++;const g=ground[x+W*z],top=Math.min(g-3,colInfo(x+OX,z+OZ,TSv).rvBot); // a gorge's open air is not cave
+    for(let y=25;y<top;y++){const b=y>240?0:y>150?1:y>60?2:3,v=world[I(x,y,z)];r.cells[b]++;if(v===AIR)r.band[b]++;else if(y<102&&(v===CRYSTAL||v===GLOWCAP||v===AMETH||v===DRIPU||v===GLOWSHROOM||v===CALCITE))r.deco++;}}
   r.share=r.band.map((v,i)=>v/Math.max(1,r.cells[i]));r.all=r.band.reduce((a,b)=>a+b,0)/r.cells.reduce((a,b)=>a+b,0);return r;}
 const o=survey();
 info('spawn window: open rock',(100*o.all).toFixed(2)+'% (the old noise caves: about 28%); by band y241+, 151-240, 61-150, 25-60:',o.share.map(v=>(100*v).toFixed(2)+'%').join(' '),'; lava sea open over',(100*o.sea/o.n).toFixed(0)+'%; cave life in the deep',o.deco);
-assert(o.all>0.008&&o.all<0.06,'far less open rock than the old caves, but still caves');
+assert(o.all>0.005&&o.all<0.06,'far less open rock than the old caves, but still caves'); // floor 0.5% since M6a (D-039): gorges no longer count, and the start windows moved
 assert(Math.max(o.share[2],o.share[3])>o.share[0],'the caves are roomier in the deep than near the surface');
 assert(o.sea/o.n>0.5,'the lava sea lies open under most of the land');
 assert(o.deco>100,'the deep halls have cave life');
