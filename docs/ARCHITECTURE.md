@@ -34,7 +34,7 @@ Consequences:
 | `src/js/world/features.js` | Chunk clipping, trees, barrows, standing stones, willows, ice spikes, ruined stairways, dungeon rooms, surface claims |
 | `src/js/world/surface-sites.js` | Ruined watchtowers, keeps and castles, old roads between them and to hold gates, ancient waystones |
 | `src/js/world/chunk-generation.js` | Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline |
-| `src/js/engine/lighting.js` | Block light flood fill and sky light |
+| `src/js/engine/lighting.js` | Block light and sideways sky light flood fills, relighting after edits |
 | `src/js/engine/renderer.js` | three.js setup, sun, clouds, shadow, selection, mesh buffers |
 | `src/js/engine/entities.js` | Entity registry: moving things register once; shifted with the window, cleared on rebuild, updated while playing |
 | `src/js/world/mines.js` | Dwarven mines: galleries, inclines, junctions, great pits, descents |
@@ -80,14 +80,16 @@ Column fill (terrain, soil, water, deepstone) -> `deepCaves` (lava sea, natural 
 
 ## Lighting
 
-- Sky light comes from the per-column height map; block light (`BLK`) is a flood fill from emitting blocks.
-- Block light never enters chunks that are not generated yet (`genDone`). Because of that, lighting a newly streamed chunk with `lightChunk` gives exactly the same result as relighting the whole window. The lighting test checks this and it must stay exact.
+- Sky light is the larger of two values: the per-column height map (full above the column's roof, fading below it) and `SKL`, a flood fill from every open cell above its roof into covered cells, so it spreads sideways into overhangs and cave mouths (D-027). Block light (`BLK`) is a flood fill from emitting blocks. Both use the same queue and `propagate`.
+- Neither light enters chunks that are not generated yet (`genDone`). Because of that, lighting a newly streamed chunk with `lightChunk` gives exactly the same result as relighting the whole window. The lighting tests check this for both stores, also after edits, and it must stay exact.
+- Edits relight a box (`lbox`, `relight`) 15 blocks around them; when a column's roof moves, the box also covers the cells between the old and new roof.
 
 ## Meshing and rendering
 
 - Each chunk builds an opaque and a water mesh with smooth light and ambient occlusion. Chunks wait for all their neighbours to exist before meshing, so each is built once.
 - Only a vertical band around the player is meshed (`MB`, `meshBand`). Above ground (`MB.surf`) it reaches the top of the world, and each chunk stops `MESH_DEEP` blocks under the lowest sky-exposed ground in and around it (`meshFloor`), with a dark quad there; underground the band follows the cave fog setting. Changing band or mode rebuilds the chunks, nearest first, within a per-frame budget.
-- Chunks beyond the fog are hidden; the texture atlas is a power-of-two with mipmaps.
+- Chunks beyond the fog are hidden. The painted atlas is copied to the GPU with each tile in a 32-pixel cell with 8 pixels of repeated edge, so mipmaps do not bleed between tiles (D-027).
+- The chunk shader animates water (shimmer, glints), the lava sea (rolling crests) and plant tops (sway), and lets light-giving blocks show through fog. Clouds are a mesh of flat boxes placed by world position (`placeClouds`); the moon shows the phase of the day counter. Sky, sun, moon, stars and clouds are hidden well underground.
 
 ## Saves
 

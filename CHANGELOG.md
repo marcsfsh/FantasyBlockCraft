@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.8.0 (2026-10-09): M3b sky light and a livelier look
+
+No change to the world or the save format: 0.7.0 worlds keep working (the moon phase starts from the first day in an older save).
+
+### Game
+- **Sky light spreads sideways** under overhangs and into cave mouths, fading over about 15 blocks, instead of stopping at the edge of the roof above.
+- **Animated water and lava.** Water is a deeper blue, shimmers slowly and catches glints of sun; the lava sea rolls, with brighter crests.
+- **Lamps and glowing blocks show through fog** from further away and pulse slightly. **Plants sway.**
+- **Blocky clouds** that stay put in the world and drift slowly, coloured at sunset and dark at night.
+- **Moon phases:** eight, one per day; the day count is saved with the world.
+- Fixed: distant water and leaves showed grid lines (texture edges bleeding into each other).
+- Fixed: the sky showed at the far edge of the lava sea and other big caverns.
+
+### Tooling
+- `npm run shots` (`tools/shot.mjs`): screenshots of set views in headless Chromium, failing on shader errors (D-026).
+- 02-lighting and 27-streaming require exact sky light too; 02-lighting also relights after about 800 edits. D-027.
+
 ## 0.7.0 (2026-10-08): M3a performance
 
 No change to the world or the save format: 0.6.0 worlds keep working.

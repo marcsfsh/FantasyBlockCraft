@@ -83,6 +83,10 @@ The old peoples' lamps went out long ago. Lanterns, sconces, torches and glowsto
 - **Mines are tied to holds** (Q12): galleries and pits run under the whole hold and thin out to nothing by about twice its radius. Stairwells on lower-floor avenues lead down into them.
 - **Hold gates** (up to three per hold) stand on the highest ground over the hold's outer ring: a terrace with pillars and braziers over a spiral stair that climbs from the upper floor (y82). Waymarkers in the plazas point to the nearest gate. The first gate has an Ancient Waystone.
 
+## Look of the world (D-027)
+
+Sky light reaches sideways under overhangs and into cave mouths, fading over about 15 blocks. Water shimmers and catches the sun, the lava sea rolls, plants sway, and lamps and glowing blocks show through fog. Clouds are flat blocky shapes that stay in place in the world and drift slowly, coloured by sunset and dark at night. The moon goes through eight phases, one per day.
+
 ## Controls
 
 Keyboard and mouse, touch, and Xbox-layout controllers (including the ROG Ally X in gamepad mode). The help panel on the pause screen switches to whichever is in use.
