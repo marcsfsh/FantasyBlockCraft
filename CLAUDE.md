@@ -12,7 +12,7 @@ A Minecraft-style game in a medieval fantasy world, for one player (the owner). 
 - **Deep and layered underground.** Going down feels like going back in time. Dwarven holds are rare, vast discoveries, not a layer under everything (from M2).
 - **Saves yield to updates.** Breaking saves is always acceptable; bump `SAVE_KEY` and move on.
 
-Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast with gates, the deep is natural caves over a lava sea, and there are ways down, other peoples' remains, surface ruins, roads and waystones. Underground water must sit in sound rock (owner's rule). Since 0.7.0 (M3a, D-025) streaming is spread over frames (`GEN_STEPS`), so generation code must stay in steps that touch only their own chunk. Since 0.8.0 (M3b, D-027) sky light also spreads sideways (`SKL`, exact under streaming like block light) and water, lava, plants and clouds are animated; M3.5 (natural generation, D-028: caves rewritten as connected systems, then a natural surface) is next, before M4. `docs/DESIGN.md` describes what is built.
+Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast with gates, the deep is natural caves over a lava sea, and there are ways down, other peoples' remains, surface ruins, roads and waystones. Underground water must sit in sound rock (owner's rule). Since 0.7.0 (M3a, D-025) streaming is spread over frames (`GEN_STEPS`), so generation code must stay in steps that touch only their own chunk. Since 0.8.0 (M3b, D-027) sky light also spreads sideways (`SKL`, exact under streaming like block light) and water, lava, plants and clouds are animated; Since 0.9.0 (M3.5a, D-029) the underground is planned cave systems (`caveBase`/`cavePlan` in `world/caves.js`): new underground features plan there and keep water and lava sound. M3.5b (the surface: rivers, mountains, blends, placement) is next, before M4. `docs/DESIGN.md` describes what is built.
 
 ## How sessions run
 
@@ -29,6 +29,7 @@ Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast
 | `npm run test:quick` | Smoke and lighting only |
 | `npm run test:update-snapshots` | Rewrite the world-hash snapshot; only for a deliberate generation change (`docs/TESTING.md`) |
 | `npm run bench` | CPU benchmark, not part of `npm test`; compare against `docs/PERF.md` |
+| `npm run map` | Height, cave and section maps of generated windows in `tests/.tmp/maps/` (`--seed=`, `--x=`, `--z=`, `--tiles=`, `--label=`) |
 | `npm run shots` | Screenshots of the real game in headless Chromium (`--seed=`, `--view=name:X,Y,Z,yaw,pitch,time`); fails on shader errors |
 | `npm run build` | Both targets: `dist/single/fantasy-blockcraft.html` and `dist/web/`, and refreshes the committed `fantasy-blockcraft.html` at the root |
 | `npm run build:single` / `build:web` | One target. The game folder uses `vendor/three.min.js`; the single file loads three.js r128 from the CDN |

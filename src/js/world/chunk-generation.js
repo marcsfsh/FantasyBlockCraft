@@ -92,7 +92,7 @@ const GEN_STEPS=[
   ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
   (lcx,lcz)=>lavaSea(lcx,lcz),
   (lcx,lcz,WCX,WCZ)=>{const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);let n=0; // cave plans of the regions around, one region at a time
-    for(let a=-1;a<=2;a++)for(let b=-1;b<=2;b++){if(caveBaseC.has(ckey(rx+a,rz+b)))continue;if(++n>1)return false;caveBase(rx+a,rz+b);}},
+    for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){if(caveBaseC.has(ckey(rx+a,rz+b)))continue;if(++n>1)return false;caveBase(rx+a,rz+b);}},
   ...[0,1,2,3].map(p=>(lcx,lcz,WCX,WCZ)=>carveCaves(WCX,WCZ,p,4)),
   (lcx,lcz,WCX,WCZ)=>caveFormations(WCX,WCZ),
   (lcx,lcz,WCX,WCZ)=>{applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);},
@@ -130,8 +130,8 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER&&((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ)));
-    const b=i-WD,ok=!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j)));
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))):plannedLava(x+OX,y,z+OZ);
+    const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
     // what may have relied on it: fluid above, beside, above-beside, and two above

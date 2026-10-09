@@ -30,14 +30,14 @@
 | 18-actions | Every binding names a real action; held controls read through `keyHeld`; a rebound key, held control and controller button take effect |
 | 19-equipment | Equip, swap and unequip; equipment is saved with the world and goes into the grave on death |
 | 20-holds | Holds are 1000+ blocks apart and a few thousand on average, several hundred across, inside their own region, never under spawn; one name each; some inhabited; mines fade with distance from the hold |
-| 21-deep | The lava sea is open under most land and under holds; both cavern tiers are open; deep water stands at one level and in sound rock, in open country and in a hold; deep caverns have cave life; no lava hangs over the sea |
+| 21-deep | Cave systems (D-028): every region has one, most reach the deep, some reach the lava sea and link to the next region, all three chamber shapes occur; passages of unjoined edges never come within three blocks of each other; open rock under spawn is between 0.8% and 6% and roomier deep than near the surface; the lava sea is open under most land and under holds; water and lava are held in sound rock in three windows; no lava hangs over the sea |
 | 22-old-lights | An abandoned hold has only cold lamps and still has eerie lights; an inhabited hold keeps its lamps lit; coal relights lamps |
-| 23-entrances | Hold gates can be climbed from y82 to the terrace and the first has a waystone; plaza waymarkers name the nearest gate; cave mouths, ruined stairways and deep ravines are common enough, a way down is usually within 250 blocks, and the nearest stairways and mouths can be walked down to their caves |
-| 24-places | Dungeon rooms and points of interest are rarer, all four dungeon kinds occur, and every room in two windows opens onto its cave |
+| 23-entrances | Hold gates can be climbed from y82 to the terrace and the first has a waystone; plaza waymarkers name the nearest gate; cave entrances, ruined stairways and deep ravines are common enough, a way down is usually within about a hundred blocks, the nearest stairways can be walked down to their caves, most entrances lead on foot at least 60 blocks down, and a link from a cave system can be walked into a hold's mines |
+| 24-places | Dungeon rooms and points of interest are rare, all four dungeon kinds occur, and every room in eight windows opens onto its cave |
 | 25-remains | All four kinds of remains occur, whole and as leftovers, about one region in four; the nearest of each stands built in an open cavern |
 | 26-surface | Most regions have a ruined site of each kind; roads link nearly every site and are laid near them; the nearest of each kind stands, rests on the ground and has its waystone |
 | 27-streaming | Streaming one step per frame (with window slides mid-chunk) equals whole-chunk generation; streamed block and sky light equal a full recompute; typical step under the 4 ms budget; travel makes only 3 x 3 chunks at once; the explored map is capped |
-| 28-meshing | The surface floor at least halves the vertices at spawn and never cuts above 24 blocks under open ground; cave mode and its band switch with some give |
+| 28-meshing | The surface floor trims the band and spawn stays under 1.3 million vertices (D-029); the floor never cuts above 24 blocks under open ground; cave mode and its band switch with some give |
 | 29-view | Auto is the default view; it grows while smooth, shrinks when frames slow, on 60 Hz and 120 Hz screens |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
@@ -73,3 +73,7 @@ The hashes are identical on Node 20, 21 and 22 (checked on 2026-10-07). If a Nod
 ## Adding a case
 
 Create `tests/cases/NN-name.test.js`. It runs inside the game's scope with the starting world ready but the outer ring of chunks still queued; call `while(genQ.length)processGenQ();` if you need the whole window. Use `assert`, `info` and `snapshot`. Prefer `// @seed` so failures reproduce. `performance.now()` returns 0 in the harness; use `Date.now()` for timings. Add a row to the table above.
+
+## Maps
+
+`npm run map` (`tools/map.mjs`) generates square windows of the real world headlessly and writes three PNGs to `tests/.tmp/maps/`: a shaded height map, open cave space seen from above in four depth bands, and two vertical sections through the middle (D-029). Options: `--seed=`, `--x=` and `--z=` (centre), `--tiles=` (windows per side, 224 blocks each), `--label=`, `--out=`. Three by three windows take under a minute. Use it before and after a generation change, and attach the pictures for the owner.

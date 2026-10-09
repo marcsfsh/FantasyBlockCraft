@@ -64,7 +64,7 @@ function poiBase(WCX,WCZ){
     const x=WCX*CS+4+(r()*8|0),z=WCZ*CS+4+(r()*8|0),gh=colInfo(x,z,{}).h,top=gh-14;
     {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
       // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
-      if(hsh(WCX,6411,WCZ)>=0.4)p=null;
+      if(hsh(WCX,6411,WCZ)>=0.6)p=null;
       else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
         if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
           if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}

@@ -9,7 +9,7 @@ function walkFrom(sx,sy,sz,lim){const key=(x,y,z)=>x+W*(z+D*y),seen=new Set([key
 // how common
 let nd=0,np=0,n=0;const kinds={};for(let a=-50;a<50;a++)for(let b=-50;b<50;b++){n++;const d=dungeonAt(a,b);if(d){nd++;kinds[d.kind]=(kinds[d.kind]||0)+1;}if(poiFor(a,b))np++;}
 info('per 100 chunks: dungeon rooms',(100*nd/n).toFixed(1),JSON.stringify(kinds),'; points of interest',(100*np/n).toFixed(1));
-assert(nd/n<0.06&&nd/n>0.01,'dungeon rooms are rarer (was 20% of chunks)');
+assert(nd/n<0.06&&nd/n>0.01,'dungeon rooms are rare (was 20% of chunks before M2b)');
 assert(np/n<0.16&&np/n>0.04,'points of interest are rarer (was 32% of chunks)');
 assert(Object.keys(kinds).length===4,'all four kinds of dungeon room occur');
 // every room in the loaded window opens onto its cave
@@ -25,6 +25,10 @@ function survey(){for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const WX=cx
   const p=poiFor(WX,WZ);if(p&&p.a)room(p,p.x-OX,p.y+1,p.z-OZ,p.a.x-OX,p.a.y,p.a.z-OZ,POI_NAMES[p.tp]);}}
 while(genQ.length)processGenQ();survey();
 regenerateAll(1500,-900);while(genQ.length)processGenQ();survey();
+regenerateAll(-1400,2200);while(genQ.length)processGenQ();survey();
+regenerateAll(2600,1400);while(genQ.length)processGenQ();survey();
+// built places are rarer since the caves are (D-029), so more windows keep the check meaningful
+for(const [X,Z] of [[-2400,-1800],[900,2900],[-3100,600],[3300,-2600]]){regenerateAll(X,Z);while(genQ.length)processGenQ();survey();}
 info('rooms checked',checked,'opening onto their cave',ok,bad.length?'; not: '+bad.join(', '):'');
 assert(checked>=8,'enough rooms were checked');
 assert(ok===checked,'every dungeon room and built point of interest opens onto a cave');

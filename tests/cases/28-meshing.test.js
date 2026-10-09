@@ -8,7 +8,8 @@ PL.x=cx0+0.5;PL.z=cz0+0.5;PL.y=g+2;MB.c=-999;meshBand();
 assert(MB.surf,'standing on the ground is surface mode');
 MB.surf=false;const whole=meshAll();MB.surf=true;const floored=meshAll();
 info('spawn window, band y'+MB.lo+'-'+MB.hi+': whole band',whole,'vertices; with the surface floor',floored,'(',(100*(1-floored/whole)).toFixed(0)+'% fewer)');
-assert(floored<whole*0.5,'the surface floor at least halves the vertices at spawn');
+// Since M3.5a (D-028) there is far less cave to skip, so the floor saves less; what matters is the total stays low
+assert(floored<whole&&floored<1300000,'the surface floor trims the band, and spawn stays under 1.3 million vertices (1.2 million in 0.7.0)');
 // the floor never cuts into anything the sky can see: it lies MESH_DEEP under the lowest open-to-sky ground of the chunk and its ring
 let bad=0;for(let cz=1;cz<NCZ-1;cz++)for(let cx=1;cx<NCX-1;cx++){const f=meshFloor(cx*CS,cz*CS);for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++)if(hm[x+W*z]>=0&&hm[x+W*z]-MESH_DEEP<f)bad++;}
 assert(bad===0,'no column is cut above '+MESH_DEEP+' blocks under its open ground');

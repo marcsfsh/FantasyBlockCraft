@@ -172,7 +172,7 @@ Split (D-025) into **M3a**, done in 0.7.0 (staged streaming, lighter meshing, tr
 
 Added after the owner played 0.8.0: generation feels disjointed and random, the caves most of all. M3.5 comes after M3 and before M4; the number only marks its place. Two PRs, underground first, each ending in a checkpoint.
 
-**M3.5a: the underground, rewritten (Q78 to Q88, Q97, Q99)**
+**M3.5a: the underground, rewritten (Q78 to Q88, Q97, Q99).** Done in 0.9.0 (D-029).
 - **A planned cave-system generator** replaces the worm caves and the deep cavern noise. Each system is a trunk you can follow downward, with side branches and some loops back into the trunk (Q81). Passages meet only at real junctions and never cut through each other or partly through a chamber (Q82).
 - **Much less open space, in fewer and bigger systems (Q80).** Digging through solid rock matters again.
 - **Size grows with depth (Q79, Q84, Q86):** near the surface, passages mostly 3 to 6 wide, sometimes 2 to 4; deeper, grander and more open, down to vast halls, chasms and river gorges in the deep. No hard layer bands; each depth keeps its own stone, decoration and finds.

@@ -709,7 +709,7 @@ function caveCheckPath(B,pts,a,b,o){
   for(let k=0;k<pts.length;k+=4){const x=pts[k],y=pts[k+1],z=pts[k+2],rr=pts[k+3];
     if(!o.link&&(x-rr<x0||x+rr>x1||z-rr<z0||z+rr>z1))return false;
     if(y<FIRE_LV+2||y+rr*2.4>H-8)return false;
-    if(!caveHoldFree(x,y,z))return false;
+    if(o.hold?(y>52&&ruinZone(Math.floor(x/CS),Math.floor(z/CS))):!caveHoldFree(x,y,z))return false;
     if(!o.open&&y>SEA-140&&k%8===0&&y+rr*2.4+7>hAt(Math.floor(x),Math.floor(z)))return false;}
   // keep clear of everything not joined to this path (near a shared node, the path may meet its other edges)
   const near=(x,y,z,n,m)=>n&&Math.hypot(x-n.x,y-n.y,z-n.z)<m;
@@ -797,12 +797,12 @@ function caveEntrance(B,r,mx){
   for(let k=0;k<28;k++){const X=B.x0+mx+Math.floor(r()*(CRB-2*mx)),Z=B.z0+mx+Math.floor(r()*(CRB-2*mx)),h=hAt(X,Z);
     if(h<SEA+3)continue;colInfo(X,Z,o);if(o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,ux=Math.cos(a),uz=Math.sin(a),rise=hAt(Math.round(X+ux*7),Math.round(Z+uz*7))-h;sl=Math.max(sl,Math.abs(rise));
-      if(rise>=5&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
+      if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
   return best||flat;
 }
 function caveSystem(B,r,kind){
-  const main=kind===0,mx=main?16:22,ent=caveEntrance(B,r,mx);
+  const main=kind===0,mx=main?16:22,ent=(main||r()<0.15)?caveEntrance(B,r,mx):null;
   const s0=B.nodes.length;let cur=-1;
   if(ent&&!ent.flat){ // a mouth at the foot of a slope, then into the hill, gently down
     const e=caveNode(B,ent.X+0.5-Math.cos(ent.a)*2,ent.h+1,ent.Z+0.5-Math.sin(ent.a)*2);
@@ -827,7 +827,9 @@ function caveSystem(B,r,kind){
     trunk.push(nx);cur=nx;
     const yy=B.nodes[nx].y;if(r()<(yy>240?0.3:yy>150?0.45:0.6))caveChamber(B,nx,r,dir,false);
   }
-  if(main&&B.nodes[cur].y<bottom+12){B.deep=cur;if(B.nodes[cur].ch<0)caveChamber(B,cur,r,dir,true);caveToFire(B,cur,r);}
+  if(main&&B.nodes[cur].y<bottom+12){B.deep=cur;if(B.nodes[cur].ch<0)caveChamber(B,cur,r,dir,true);if(r()<0.5)caveGorge(B,cur,r);caveToFire(B,cur,r);}
+  // a stream: pools stepping down a run of the trunk, to follow down (Q83)
+  if(r()<0.6){const i0=1+Math.floor(r()*Math.max(1,trunk.length-4));for(let i=i0;i<i0+4&&i<trunk.length;i++){const e=B.edges.find(q=>q.b===trunk[i]&&q.a===trunk[i-1]);if(e&&e.pts.length>12&&B.nodes[trunk[i]].y>70)e.stream=true;}}
   // branches: a short way off the trunk, ending in a chamber, a loop back into the trunk, or a drop down a shaft
   for(let i=1;i<trunk.length;i++){
     const ti=trunk[i],y=B.nodes[ti].y;if(r()>(y>240?0.45:0.6))continue;
@@ -850,6 +852,34 @@ function caveSystem(B,r,kind){
     if(caveCheckPath(B,pts,from,tgt,{skipCh:ci}))caveAddEdge(B,from,tgt,pts,{});else B.nodes.pop();
   }
 }
+// A gorge beside the deepest hall: a rift that drops from a crack in the hall's floor to the lava sea, so a river of lava
+// runs along its bottom (Q87). Kept clear of everything but its hall.
+function caveGorge(B,ni,r){
+  const n=B.nodes[ni],hc=B.ch[n.ch];if(!hc||hc.t===1)return;
+  const dir=r()*6.283,L=18+r()*12,f=FIRE_LV+1,h=Math.min(80,(hc.f-f+8)/0.9);
+  const c={t:1,L:L,w:2.5+r()*1.8,h:h,ang:dir,x:hc.x+Math.cos(dir)*L*0.35,z:hc.z+Math.sin(dir)*L*0.35,f:f,seed:Math.floor(r()*1e6),gorge:true};
+  if(c.x-L<B.x0+5||c.x+L>B.x0+CRB-5||c.z-L<B.z0+5||c.z+L>B.z0+CRB-5)return;
+  const ex=Math.cos(dir)*L,ez=Math.sin(dir)*L;
+  for(const [a,b] of [[c.x-ex,c.z-ez],[c.x,c.z],[c.x+ex,c.z+ez]])if(!caveHoldFree(a,f,b))return;
+  for(const cap of B.caps){if(cap.na===ni||cap.nb===ni)continue;
+    for(const fr of [0.2,0.5,0.8]){const y=f+h*fr;if(segDist(c.x-ex,y,c.z-ez,c.x+ex,y,c.z+ez,cap.ax,cap.ay+cap.r,cap.az,cap.bx,cap.by+cap.r,cap.bz)<c.w+cap.r+6)return;}}
+  for(const o of B.ch){if(o===hc)continue;const t=chSphere(o);if(ptSegDist(t.x,t.y,t.z,c.x-ex,f+h*0.5,c.z-ez,c.x+ex,f+h*0.5,c.z+ez)<t.r+c.w+h*0.5)return;}
+  B.ch.push(c);hc.gorge=B.ch.length-1;
+}
+// A lava fall in the wall of a deep hall: lava wells from a slot in the rock and pours into a small pool sunk in the floor,
+// rimmed with stone. The slot's open face is the only one; source and pool are held in rock (Q87).
+function caveFall(c,r){
+  const th=r()*6.283,ux=Math.cos(th),uz=Math.sin(th),ax=Math.abs(ux)>=Math.abs(uz),dx=ax?Math.sign(ux):0,dz=ax?0:Math.sign(uz),sx=ax?0:1,sz=ax?1:0;
+  let E=null;for(let s=0;s<Math.max(c.a,c.b)*1.4;s+=0.5){const X=Math.floor(c.x+ux*s),Z=Math.floor(c.z+uz*s),q=chCol(c,X,Z);if(!q)break;E=[X,Z,q];}
+  if(!E||E[2][1]-E[2][0]<4)return null;
+  const fe=E[2][0],WX=E[0]+dx,WZ=E[1]+dz,S=chSphere(c);
+  for(const [a,b] of [[WX,WZ],[WX+sx,WZ+sz],[WX-sx,WZ-sz],[WX+dx,WZ+dz]])if(chCol(c,a,b))return null;
+  if(Math.hypot(WX+dx+0.5-S.x,WZ+dz+0.5-S.z)>S.r-1)return null;
+  for(const [a,b] of [[E[0]+sx,E[1]+sz],[E[0]-sx,E[1]-sz]]){const q=chCol(c,a,b);if(!q||q[0]<fe||q[0]>fe+1)return null;}
+  // the rim: where the floor beside the pool is open at the pool's level, a stone lip holds it (resting on rock)
+  const rim=[];for(const [a,b] of [[E[0]-dx,E[1]-dz],[E[0]-dx+sx,E[1]-dz+sz],[E[0]-dx-sx,E[1]-dz-sz],[E[0]+2*sx,E[1]+2*sz],[E[0]-2*sx,E[1]-2*sz]]){const q=chCol(c,a,b);if(!q)continue;if(q[0]<fe-1)return null;if(q[0]<=fe-1)rim.push(a,b);}
+  return {t:3,wx:WX,wz:WZ,ex:E[0],ez:E[1],sx:sx,sz:sz,fe:fe,hs:Math.max(5,Math.min(10,E[2][1]-fe-1)),rim:rim};
+}
 // The last way down: from the deepest hall to an island of the lava sea, on a causeway of fallen rock where it crosses the sea
 function caveToFire(B,ni,r){
   const n=B.nodes[ni];let best=null;
@@ -869,10 +899,33 @@ function caveBase(rx,rz){
   B.cx=B.x0+CRB/2+(r()-0.5)*70;B.cz=B.z0+CRB/2+(r()-0.5)*70; // the systems wander around a point off the middle, so regions do not show as a grid
   caveSystem(B,r,0);if(r()<0.85)caveSystem(B,r,1);if(r()<0.5)caveSystem(B,r,2);
   // other peoples' remains stand in some of the great halls away from the holds (D-024)
-  const rr=rngAt(rx,6501,rz);if(rr()<0.42){const halls=B.ch.filter(c=>c.t===0&&c.a>=11&&c.b>=11&&c.f<104&&c.h>=10);if(halls.length)halls[Math.floor(rr()*halls.length)].rem=rr();}
-  for(let ni=0;ni<B.nodes.length;ni++){const c=B.ch[B.nodes[ni].ch];if(!c||c.t!==2)continue;const L=caveLake(c);
-    for(const e of B.edges){if(e.a!==ni&&e.b!==ni)continue;for(let k=0;k<e.pts.length;k+=4){const s=chCol(c,Math.floor(e.pts[k]),Math.floor(e.pts[k+2]));if(s&&s[2]>=c.a*0.05&&e.pts[k+1]<L+2)c.dry=true;}}}
+  const rr=rngAt(rx,6501,rz);if(rr()<0.42){const halls=B.ch.filter(c=>c.t===0&&c.a>=11&&c.b>=11&&c.f<104&&c.h>=10&&c.gorge===undefined);if(halls.length)halls[Math.floor(rr()*halls.length)].rem=rr();}
+  // a stepped hall stays dry when one of its own passages runs low beside the water (anything else keeps its distance)
+  for(let ni=0;ni<B.nodes.length;ni++){const c=B.ch[B.nodes[ni].ch];if(!c||c.t!==2)continue;const L=caveLake(c),R=Math.max(c.a,c.b)*1.25+2,wet=[];
+    for(let X=Math.floor(c.x-R);X<=c.x+R;X++)for(let Z=Math.floor(c.z-R);Z<=c.z+R;Z++){const q=chCol(c,X,Z);if(q&&q[0]<L)wet.push(X+0.5,Z+0.5);}
+    for(const e of B.edges){if(c.dry||(e.a!==ni&&e.b!==ni))continue;for(let k=0;k<e.pts.length&&!c.dry;k+=4){if(e.pts[k+1]>=L+2)continue;const rr=e.pts[k+3]+2.5;
+      for(let w=0;w<wet.length;w+=2)if(Math.hypot(wet[w]-e.pts[k],wet[w+1]-e.pts[k+2])<rr){c.dry=true;break;}}}}
+  B.falls=[];const rf=rngAt(rx,7161,rz);for(const c of B.ch){if(c.t!==0||c.f>=80||c.rem!==undefined||rf()>0.45)continue;const fl=caveFall(c,rf);if(fl)B.falls.push(fl);}
   caveBaseC.set(key,B);return B;
+}
+// A link from a system down into the upper gallery (y44) of a hold's mines nearby, so a hold can be found from below (Q99)
+function caveHoldLink(rx,rz){
+  const key=ckey(rx,rz)+'h';if(caveLinkC.has(key))return caveLinkC.get(key);if(caveLinkC.size>1200)caveLinkC.clear();
+  let L=null;const r=rngAt(rx,7171,rz),B=caveBase(rx,rz),ccx=rx*CR+CR/2,ccz=rz*CR+CR/2,h=holdNear(ccx,ccz);
+  if(r()<0.7&&holdReach(h,ccx,ccz)<3.6){
+    const cand=[];
+    for(let cx=rx*CR-CR+1;cx<rx*CR+2*CR-1;cx++)for(let cz=rz*CR-CR+1;cz<rz*CR+2*CR-1;cz++){if(!galRow(cz,2)||!mineZone(cx,cz)||ruinZone(cx,cz))continue;
+      const tx=cx*CS+8,tz=cz*CS+8;
+      for(let ni=0;ni<B.nodes.length;ni++){const n=B.nodes[ni];if(n.y<52||n.y>130||!caveHoldFree(n.x,n.y,n.z))continue;const hd=Math.hypot(tx-n.x,tz-n.z),dy=n.y-44;
+        if(hd>20&&hd<120&&dy<hd*0.8)cand.push({ni:ni,tx:tx,tz:tz,hd:hd});}}
+    cand.sort((a,b)=>a.hd-b.hd);const others=[];for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)others.push(caveBase(rx+a,rz+b));
+    for(let k=0;k<Math.min(6,cand.length)&&!L;k++){const c=cand[k],n=B.nodes[c.ni],ux=(c.tx+0.5-n.x)/c.hd,uz=(c.tz+0.5-n.z)/c.hd;
+      // down to the gallery's level a little short of it, then level into the gallery
+      const pts=cavePath(n,{x:c.tx+0.5-ux*12,y:44,z:c.tz+0.5-uz*12},caveRad(n.y,r),2.2,r,'ramp');for(let t=1;t<=4;t++)pts.push(c.tx+0.5-ux*(12-3*t),44,c.tz+0.5-uz*(12-3*t),2.2);
+      // keep out of the mines' great pits, which would leave the way down without a floor
+      let pit=false;for(let q=0;q<pts.length&&!pit;q+=4)if(pts[q+1]<60)for(const dy of [0,-2,-5])if(inPit(Math.floor(pts[q]),Math.floor(pts[q+1])+dy,Math.floor(pts[q+2]))){pit=true;break;}
+      if(!pit&&caveCheckPath(B,pts,c.ni,-1,{link:true,hold:true,others:others}))L={pts:pts};}}
+  caveLinkC.set(key,L);return L;
 }
 // A deep way between the deepest halls of neighbouring regions (east: dx 1, south: dz 1), kept clear of both plans
 function caveLink(rx,rz,dx,dz){
@@ -896,11 +949,25 @@ function cavePlan(rx,rz){
   for(const e of B.edges)addPath(e.pts,e.open,e.fill);
   for(const c of B.ch){const R=(c.t===1?c.L:Math.max(c.a,c.b))*1.25+3;index(c,c.x-R,c.x+R,c.z-R,c.z+R);}
   for(const [dx,dz] of [[1,0],[0,1]]){const L=caveLink(rx,rz,dx,dz);if(L)addPath(L.pts,false,false);}
+  {const L=caveHoldLink(rx,rz);if(L)addPath(L.pts,false,false);}
+  for(const f of B.falls)index(f,Math.min(f.wx,f.ex)-3,Math.max(f.wx,f.ex)+3,Math.min(f.wz,f.ez)-3,Math.max(f.wz,f.ez)+3);
+  // pools down a stream: each sunk two deep below the lowest floor around it, so rock holds it on every side
+  for(const e of B.edges){if(!e.stream)continue;const p=e.pts;
+    const floorAt=(X,Z)=>edgeFloor(p,X,Z);
+    for(let k=12;k+12<p.length;k+=16){const cx=Math.floor(p[k]),cz=Math.floor(p[k+2]);let Lw=1e9;
+      for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)if(a*a+b*b<=7)Lw=Math.min(Lw,floorAt(cx+a,cz+b));
+      if(Lw>=1e9)continue;const cells=[];for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(a*a+b*b<=2.6&&floorAt(cx+a,cz+b)<1e9)for(let y=Lw-2;y<Lw;y++)cells.push(cx+a,y,cz+b);
+      if(cells.length)index({t:4,cells:cells,x:cx,z:cz},cx-3,cx+3,cz-3,cz+3);}}
   // where to stand in a passage: points every few blocks, for places that open onto a cave (caveAnchor)
   const anchors=new Map();
-  for(const e of B.edges){if(e.open||e.fill)continue;for(let k=0;k<e.pts.length;k+=8){const x=Math.floor(e.pts[k]),z=Math.floor(e.pts[k+2]),y=Math.ceil(e.pts[k+1]-0.5)+1,ck=ckey(Math.floor(x/CS),Math.floor(z/CS));let l=anchors.get(ck);if(!l)anchors.set(ck,l=[]);l.push(x,y,z);}}
+  for(const e of B.edges){if(e.open||e.fill)continue;for(let k=0;k<e.pts.length;k+=8){const x=Math.floor(e.pts[k]),z=Math.floor(e.pts[k+2]),f=edgeFloor(e.pts,x,z);if(f>=1e9||B.ch.some(c=>chCol(c,x,z)))continue;const y=f+1,ck=ckey(Math.floor(x/CS),Math.floor(z/CS));let l=anchors.get(ck);if(!l)anchors.set(ck,l=[]);l.push(x,y,z);}}
   P={B:B,els:els,byChunk:byChunk,anchors:anchors};cavePlanC.set(key,P);return P;
 }
+// The real floor of a passage at a column: the lowest cell its capsules open (the same test as carveCap), or 1e9 if none.
+// On a slope it lies a block or two under the floor line.
+function edgeFloor(p,X,Z){let lo=1e9;for(let k=0;k+4<p.length;k+=4){const e={ax:p[k],ay:p[k+1],az:p[k+2],bx:p[k+4],by:p[k+5],bz:p[k+6],ra:p[k+3],rb:p[k+7]},R=Math.max(e.ra,e.rb)+1;
+  if(X+0.5<Math.min(e.ax,e.bx)-R||X+0.5>Math.max(e.ax,e.bx)+R||Z+0.5<Math.min(e.az,e.bz)-R||Z+0.5>Math.max(e.az,e.bz)+R)continue;
+  for(let Y=Math.floor(Math.min(e.ay,e.by))-3;Y<=Math.ceil(Math.max(e.ay,e.by))+3&&Y<lo;Y++)if(capOpens(e,X,Y,Z)){lo=Y;break;}}return lo;}
 // Is (X,Z) at or near the opening of a cave entrance (a mouth or sinkhole)? Surface features keep off it (surfTaken).
 function caveMouthNear(X,Z,m){
   const rx=Math.floor(X/CRB),rz=Math.floor(Z/CRB);
@@ -930,6 +997,15 @@ function caveCut(X,Y,Z,gh,open){
   if(Y+1<H&&world[i+W*D]===WATER)return;if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))return;
   world[i]=AIR;lvl[i]=0;
 }
+// Is a cell inside capsule e: 0 outside, 1 inside below the floor line, 2 open. The floor line runs through the floor points; the
+// passage is an ellipse above it, flat at the bottom. Sets capH (horizontal distance squared, in radii) and capFy (floor height).
+let capH=0,capFy=0;
+function capTest(e,X,Y,Z,dx,dy,dz,L2,RV){
+  const px=X+0.5,pz=Z+0.5;let t=((px-e.ax)*dx+(Y+0.5-e.ay-RV*0.6)*dy+(pz-e.az)*dz)/L2;t=t<0?0:t>1?1:t;
+  const r=e.ra+(e.rb-e.ra)*t,rv=Math.max(1.7,r*1.05),fy=e.ay+dy*t,cy=fy+rv*0.62,hx=(px-e.ax-dx*t)/r,hz=(pz-e.az-dz*t)/r,vy=(Y+0.5-cy)/rv;
+  capH=hx*hx+hz*hz;capFy=fy;if(capH+vy*vy>=1)return 0;return Y+0.5<fy?1:2;
+}
+function capOpens(e,X,Y,Z){const dx=e.bx-e.ax,dy=e.by-e.ay,dz=e.bz-e.az,L2=dx*dx+dy*dy+dz*dz||1e-6,RV=Math.max(1.7,Math.max(e.ra,e.rb))*1.05;return capTest(e,X,Y,Z,dx,dy,dz,L2,RV)===2;}
 function carveCap(e){
   const xa=gx0,xb=gx0+CS-1,za=gz0,zb=gz0+CS-1,R=Math.max(e.ra,e.rb),RV=Math.max(1.7,R)*1.05;
   const X0=Math.max(xa,Math.floor(Math.min(e.ax,e.bx)-R)),X1=Math.min(xb,Math.ceil(Math.max(e.ax,e.bx)+R)),Z0=Math.max(za,Math.floor(Math.min(e.az,e.bz)-R)),Z1=Math.min(zb,Math.ceil(Math.max(e.az,e.bz)+R));
@@ -937,13 +1013,10 @@ function carveCap(e){
   const dx=e.bx-e.ax,dy=e.by-e.ay,dz=e.bz-e.az,L2=dx*dx+dy*dy+dz*dz||1e-6,Y0=Math.floor(Math.min(e.ay,e.by)-1),Y1=Math.ceil(Math.max(e.ay,e.by)+RV*2+1);
   for(let X=X0;X<=X1;X++)for(let Z=Z0;Z<=Z1;Z++){const gh=ground[(X-OX)+W*(Z-OZ)];let fillTop=-1;
     for(let Y=Y0;Y<=Y1;Y++){
-      // the floor line runs through the floor points; the passage is an ellipse above it, flat at the bottom
-      const px=X+0.5,pz=Z+0.5;let t=((px-e.ax)*dx+(Y+0.5-e.ay-RV*0.6)*dy+(pz-e.az)*dz)/L2;t=t<0?0:t>1?1:t;
-      const r=e.ra+(e.rb-e.ra)*t,rv=Math.max(1.7,r*1.05),fy=e.ay+dy*t,cy=fy+rv*0.62,hx=(px-e.ax-dx*t)/r,hz=(pz-e.az-dz*t)/r,vy=(Y+0.5-cy)/rv;
-      if(hx*hx+hz*hz+vy*vy>=1)continue;
-      if(Y+0.5<fy){if(e.fill&&hx*hx+hz*hz<0.8)fillTop=Math.max(fillTop,Y);continue;}
+      const v=capTest(e,X,Y,Z,dx,dy,dz,L2,RV);if(!v)continue;
+      if(v===1){if(e.fill&&capH<0.8)fillTop=Math.max(fillTop,Y);continue;}
       caveCut(X,Y,Z,gh,e.open);
-      if(e.fill&&Y===Math.ceil(fy-0.5)&&hx*hx+hz*hz<0.8)fillTop=Y-1;}
+      if(e.fill&&Y===Math.ceil(capFy-0.5)&&capH<0.8)fillTop=Y-1;}
     // a causeway of fallen rock under the last way down, where it crosses the open sea
     if(fillTop>=0)for(let Y=fillTop;Y>FIRE_LV&&Y>fillTop-16;Y--){const i=I(X-OX,Y,Z-OZ);if(world[i]===AIR){world[i]=Y>fillTop-2?GRAVEL:STONE;lvl[i]=0;}else if(world[i]!==LAVA)break;}
   }
@@ -979,17 +1052,60 @@ function carveCh(c){
       caveCut(X,Y,Z,gh,false);}}
 }
 // lakes on the low terraces of stepped halls (Q85): level two above the lowest floor, held by the hall's own rock
-function caveLake(c){if(c.t!==2||c.dry)return -1;return c.f0-c.drop+2;}
+function caveLake(c){if(c.t!==2||c.dry||c.gorge!==undefined)return -1;return c.f0-c.drop+2;}
 function fillLakes(els){
-  for(const c of els){if(c.t!==2)continue;const L=caveLake(c);if(L<0)continue;
+  const own=(X,Z)=>X>=gx0&&X<gx0+CS&&Z>=gz0&&Z<gz0+CS;
+  for(const e of els){
+    if(e.t===4){if(!poolOK(e))continue;for(let k=0;k<e.cells.length;k+=3){const X=e.cells[k],Y=e.cells[k+1],Z=e.cells[k+2];if(own(X,Z)){const i=I(X-OX,Y,Z-OZ);if(world[i]!==BEDROCK&&world[i]!==AIR){world[i]=WATER;lvl[i]=0;}}}}
+    else if(e.t===3){const fe=e.fe;
+      for(let k=0;k<e.rim.length;k+=2)PW(e.rim[k],fe-1,e.rim[k+1],STONE,MODE_AIR);
+      for(const s of [-1,0,1])PW(e.ex+e.sx*s,fe-1,e.ez+e.sz*s,LAVA,MODE_SET);
+      for(let Y=fe;Y<fe+e.hs;Y++)PW(e.ex,Y,e.ez,AIR,MODE_SET);
+      for(let Y=fe-1;Y<fe+e.hs;Y++)PW(e.wx,Y,e.wz,LAVA,MODE_SET);}}
+  for(const c of els){if(c.t!==2||!lakeOK(c))continue;const L=caveLake(c);
     const R=Math.max(c.a,c.b)+2,X0=Math.max(gx0,Math.floor(c.x-R)),X1=Math.min(gx0+CS-1,Math.ceil(c.x+R)),Z0=Math.max(gz0,Math.floor(c.z-R)),Z1=Math.min(gz0+CS-1,Math.ceil(c.z+R));
-    for(let X=X0;X<=X1;X++)for(let Z=Z0;Z<=Z1;Z++){const s=chCol(c,X,Z);if(!s||s[2]<c.a*0.15)continue;for(let Y=s[0];Y<L;Y++){const i=I(X-OX,Y,Z-OZ);if(world[i]===AIR){world[i]=WATER;lvl[i]=0;}}}}
+    for(let X=X0;X<=X1;X++)for(let Z=Z0;Z<=Z1;Z++){const s=chCol(c,X,Z);if(!s)continue;for(let Y=s[0];Y<L;Y++){const i=I(X-OX,Y,Z-OZ);if(world[i]===AIR){world[i]=WATER;lvl[i]=0;}}}}
 }
+// Does any place built after the caves (a point of interest, dungeon room, ruined stairway, mineshaft or remains, with the passage
+// to its cave) reach into this box? Pools and lakes there are left dry, so no later digging opens them at a chunk edge. Pure.
+function placesTouch(x0,x1,y0,y1,z0,z1){
+  const hit=(a0,a1,b0,b1,c0,c1)=>a0<=x1&&a1>=x0&&b0<=y1&&b1>=y0&&c0<=z1&&c1>=z0,cx=Math.floor((x0+x1)/2/CS),cz=Math.floor((z0+z1)/2/CS);
+  const tun=(ax,ay,az,bx,by,bz,m)=>hit(Math.min(ax,bx)-m,Math.max(ax,bx)+m,Math.min(ay,by)-m,Math.max(ay,by)+3+m,Math.min(az,bz)-m,Math.max(az,bz)+m);
+  for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){
+    const p=poiFor(cx+a,cz+b);if(p&&(hit(p.x-13,p.x+13,p.y-3,p.y+10,p.z-13,p.z+13)||(p.a&&tun(p.x,p.y,p.z,p.a.x,p.a.y,p.a.z,2))))return true;
+    const d=dungeonAt(cx+a,cz+b);if(d&&(hit(d.X-d.hw-1,d.X+d.hw+1,d.y-1,d.y+d.hh+1,d.Z-d.hw-1,d.Z+d.hw+1)||tun(d.X,d.y,d.Z,d.a.x,d.a.y,d.a.z,2)))return true;
+    const w=stairwayAt(cx+a,cz+b);if(w&&(hit(w.X-3,w.X+3,w.a.y-3,w.g+5,w.Z-3,w.Z+3)||tun(w.X,w.a.y,w.Z,w.a.x,w.a.y,w.a.z,3)))return true;}
+  for(let a=-5;a<=5;a++)for(let b=-5;b<=5;b++)for(const [ax,sx,sz,L,y] of shaftsFor(cx+a,cz+b)){const ex=ax==='x'?sx+L:sx,ez=ax==='z'?sz+L:sz;if(hit(Math.min(sx,ex)-2,Math.max(sx,ex)+2,y-2,y+3,Math.min(sz,ez)-2,Math.max(sz,ez)+2))return true;}
+  const rx=Math.floor((x0+x1)/2/CRB),rz=Math.floor((z0+z1)/2/CRB);
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const m=remainsAt(rx+a,rz+b);if(m&&hit(m.X-24,m.X+24,m.y-10,m.y+12,m.Z-24,m.Z+24))return true;}
+  return false;
+}
+// ...or a ravine cut down from the surface (the river ravines of the terrain)
+function ravineIn(x0,x1,z0,z1,y,step){const o={};for(let X=Math.floor(x0);X<=x1;X+=step)for(let Z=Math.floor(z0);Z<=z1;Z+=step){colInfo(X,Z,o);if(o.rvBot<=y)return true;}return false;}
+function poolOK(e){if(e.ok===undefined){let y0=1e9,y1=-1e9;for(let k=1;k<e.cells.length;k+=3){y0=Math.min(y0,e.cells[k]);y1=Math.max(y1,e.cells[k]);}
+  e.ok=!placesTouch(e.x-4,e.x+4,y0-2,y1+2,e.z-4,e.z+4)&&!ravineIn(e.x-3,e.x+3,e.z-3,e.z+3,y1+4,1)&&!caveOpensNear(e.x,e.z,3,y0-1,y1,e);}return e.ok;}
+// Does any passage or chamber open a cell within r columns of (X,Z) between y0 and y1 (other than the pool's own disc)?
+// Rock holding a pool must be whole, with rock under it too.
+function caveOpensNear(X,Z,r,y0,y1,pool){
+  const inDisc=(x,z)=>{for(let k=0;k<pool.cells.length;k+=3)if(pool.cells[k]===x&&pool.cells[k+2]===z)return true;return false;};
+  for(let x=X-r;x<=X+r;x++)for(let z=Z-r;z<=Z+r;z++){if((x-X)*(x-X)+(z-Z)*(z-Z)>7)continue;const l=caveEls(Math.floor(x/CS),Math.floor(z/CS));
+    for(const e of l){if(e.t===9){for(let y=y0;y<=y1;y++)if(capOpens(e,x,y,z)&&!(inDisc(x,z)&&y===y1+1))return true;}
+      else if(e.t<3){const q=chCol(e,x,z);if(q&&q[0]<=y1&&q[1]>y0)return true;}}}
+  return false;
+}
+function lakeOK(c){if(c.lok===undefined){const R=Math.max(c.a,c.b)*1.25+3,L=caveLake(c);c.lok=L>=0&&!placesTouch(c.x-R,c.x+R,c.f0-c.drop-3,L+2,c.z-R,c.z+R)&&!ravineIn(c.x-R,c.x+R,c.z-R,c.z+R,L+4,2);}return c.lok;}
 // Is (X,Y,Z) water that a plan put there on purpose (a lake held by its hall), so the drain pass can trust it at a chunk edge?
 function plannedWater(X,Y,Z){
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS),rx=Math.floor(cx/CR),rz=Math.floor(cz/CR),k=ckey(cx,cz);
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=cavePlan(rx+a,rz+b).byChunk.get(k);if(!l)continue;
-    for(const c of l){if(c.t!==2)continue;const L=caveLake(c);if(L<0||Y>=L)continue;const s=chCol(c,X,Z);if(s&&s[2]>=c.a*0.15&&Y>=s[0])return true;}}
+    for(const c of l){if(c.t===4){if(!poolOK(c))continue;for(let k=0;k<c.cells.length;k+=3)if(c.cells[k]===X&&c.cells[k+1]===Y&&c.cells[k+2]===Z)return true;continue;}
+      if(c.t!==2||!lakeOK(c))continue;const L=caveLake(c);if(Y>=L)continue;const s=chCol(c,X,Z);if(s&&Y>=s[0])return true;}}
+  return false;
+}
+// Is (X,Y,Z) the open face of a lava fall (its slot faces the hall)? The drain pass leaves it.
+function plannedLava(X,Y,Z){
+  const cx=Math.floor(X/CS),cz=Math.floor(Z/CS),rx=Math.floor(cx/CR),rz=Math.floor(cz/CR),k=ckey(cx,cz);
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=cavePlan(rx+a,rz+b).byChunk.get(k);if(!l)continue;for(const e of l)if(e.t===3&&e.wx===X&&e.wz===Z&&Y>=e.fe-1&&Y<e.fe+e.hs)return true;}
   return false;
 }
 // In parts, for streaming (part 0 to parts-1, in order): each carves a share of the elements; the last also fills the lakes
@@ -997,12 +1113,12 @@ let caveElList=[];
 function carveCaves(WCX,WCZ,part,parts){
   if(part===0)caveElList=caveEls(WCX,WCZ);
   const els=caveElList;
-  for(let k=part;k<els.length;k+=parts){const e=els[k];if(e.t===9)carveCap(e);else carveCh(e);}
+  for(let k=part;k<els.length;k+=parts){const e=els[k];if(e.t===9)carveCap(e);else if(e.t<3)carveCh(e);}
   if(part===parts-1)fillLakes(els);
 }
 // Natural formations in the halls and rifts: stalagmites, stalactites and the odd column, placed by position (pure)
 function caveFormations(WCX,WCZ){
-  for(const c of caveEls(WCX,WCZ)){if(c.t===9)continue;const R=(c.t===1?c.L:Math.max(c.a,c.b))+2;
+  for(const c of caveEls(WCX,WCZ)){if(c.t>2)continue;const R=(c.t===1?c.L:Math.max(c.a,c.b))+2;
     const gx0c=Math.floor((c.x-R)/5),gx1c=Math.floor((c.x+R)/5),gz0c=Math.floor((c.z-R)/5),gz1c=Math.floor((c.z+R)/5);
     for(let gx=gx0c;gx<=gx1c;gx++)for(let gz=gz0c;gz<=gz1c;gz++){const q=hsh(gx,7351,gz);if(q>0.3)continue;
       const X=gx*5+Math.floor(hsh(gx,7352,gz)*5),Z=gz*5+Math.floor(hsh(gx,7353,gz)*5);if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS)continue;
@@ -1104,7 +1220,7 @@ function poiBase(WCX,WCZ){
     const x=WCX*CS+4+(r()*8|0),z=WCZ*CS+4+(r()*8|0),gh=colInfo(x,z,{}).h,top=gh-14;
     {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
       // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
-      if(hsh(WCX,6411,WCZ)>=0.4)p=null;
+      if(hsh(WCX,6411,WCZ)>=0.6)p=null;
       else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
         if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
           if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}
@@ -2373,7 +2489,7 @@ const dungC=new Map();
 function dungeonAt(WCX,WCZ){
   const key=ckey(WCX,WCZ);if(dungC.has(key))return dungC.get(key);if(dungC.size>8000)dungC.clear();
   let d=null;
-  if(hsh(WCX,6401,WCZ)<0.05){const a=caveAnchor(WCX,WCZ,106,196,6402);
+  if(hsh(WCX,6401,WCZ)<0.14){const a=caveAnchor(WCX,WCZ,106,196,6402);
     if(a){const ang=hsh(WCX,6403,WCZ)*6.283,X=a.x+Math.round(Math.cos(ang)*9),Z=a.z+Math.round(Math.sin(ang)*9),y=a.y-2;
       let clash=false;for(let c=-2;c<=2&&!clash;c++)for(let e=-2;e<=2&&!clash;e++){const q=poiFor(WCX+c,WCZ+e);if(q&&Math.abs(q.x-X)<20&&Math.abs(q.z-Z)<20&&Math.abs(q.y-y)<16)clash=true;} // places come first
       if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
@@ -2602,7 +2718,7 @@ const GEN_STEPS=[
   ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
   (lcx,lcz)=>lavaSea(lcx,lcz),
   (lcx,lcz,WCX,WCZ)=>{const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);let n=0; // cave plans of the regions around, one region at a time
-    for(let a=-1;a<=2;a++)for(let b=-1;b<=2;b++){if(caveBaseC.has(ckey(rx+a,rz+b)))continue;if(++n>1)return false;caveBase(rx+a,rz+b);}},
+    for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){if(caveBaseC.has(ckey(rx+a,rz+b)))continue;if(++n>1)return false;caveBase(rx+a,rz+b);}},
   ...[0,1,2,3].map(p=>(lcx,lcz,WCX,WCZ)=>carveCaves(WCX,WCZ,p,4)),
   (lcx,lcz,WCX,WCZ)=>caveFormations(WCX,WCZ),
   (lcx,lcz,WCX,WCZ)=>{applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);},
@@ -2640,8 +2756,8 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER&&((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ)));
-    const b=i-WD,ok=!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j)));
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))):plannedLava(x+OX,y,z+OZ);
+    const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
     // what may have relied on it: fluid above, beside, above-beside, and two above
