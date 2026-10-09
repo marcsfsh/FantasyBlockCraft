@@ -62,6 +62,9 @@ function torchFx(dt){
 // Grass slowly spreads onto exposed dirt near the player
 // ---- Farming: hoe, farmland, seeds and crops that grow over time
 const CROP_NEXT={};CROP_NEXT[WHEAT0]=WHEAT1;CROP_NEXT[WHEAT1]=WHEAT2;CROP_NEXT[WHEAT2]=WHEAT;CROP_NEXT[POT0]=POT1;CROP_NEXT[POT1]=POT2;CROP_NEXT[POT2]=POT3;
+CROP_NEXT[TURN0]=TURN1;CROP_NEXT[TURN1]=TURN2;CROP_NEXT[BEAN0]=BEAN1;CROP_NEXT[BEAN1]=BEAN2;
+// What each seed or crop item plants (M4b adds turnips and beans, planted as they are)
+const PLANT_OF={208:WHEAT0,209:POT0,330:TURN0,331:BEAN0};
 function waterNear(x,y,z){for(let dz=-4;dz<=4;dz++)for(let dx=-4;dx<=4;dx++)if(get(x+dx,y,z+dz)===WATER||get(x+dx,y+1,z+dz)===WATER)return true;return false;}
 function farmUse(hit,held){
   const top=hit.py===hit.y+1,above=get(hit.x,hit.y+1,hit.z);
@@ -71,7 +74,7 @@ function farmUse(hit,held){
     setBlock(hit.x,hit.y,hit.z,waterNear(hit.x,hit.y,hit.z)?FARM_W:FARM_D,true);wearHeld(1);swing=1;sfxBlock(DIRT,false);breakFx(hit.x,hit.y+0.4,hit.z,DIRT,5);return true;
   }
   if((hit.id===FARM_D||hit.id===FARM_W)&&top&&above===AIR){
-    setBlock(hit.x,hit.y+1,hit.z,held===208?WHEAT0:POT0,true);
+    setBlock(hit.x,hit.y+1,hit.z,PLANT_OF[held],true);
     if(SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
     swing=1;sfxBlock(TGRASS,true);return true;
   }

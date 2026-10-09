@@ -142,6 +142,10 @@
       "about": "Health, hunger, air, damage, death, graves, the survival HUD, climbing gear and signal flares"
     },
     {
+      "path": "gameplay/storage.js",
+      "about": "Chests, crates and barrels that keep items by world position (M4b), and the container screen"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

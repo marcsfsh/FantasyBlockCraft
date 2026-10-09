@@ -111,6 +111,14 @@ Sky light reaches sideways under overhangs and into cave mouths, fading over abo
 - **The Blasting Keg** is the dwarves' mining charge. **The Blueprint Tool** is for creative mode only.
 - **Starting kit** for a new survival world: wooden pickaxe and axe, a map, 8 torches, 4 bread.
 
+## Survival systems (D-033)
+
+- **Containers:** Oak Chests you build, and the supply crates, dwarven chests and barrels of the old world, keep items by place. World containers roll their loot the first time they are opened and keep what is left. A container must be empty to be broken.
+- **Room:** 36 slots; a Woven Pack (+9) or Sturdy Pack (+18) in the pack slot and a Satchel (+9) in the bag slot.
+- **Light:** in survival the only light around you is a Miner's Lantern in the belt slot (burns lamp oil or pitch candles, only in the dark) or a light in your hand. The caves grow darker with depth. Darkness is atmosphere, never damage (Q13).
+- **Travel:** waystone to waystone in survival. Attune Ancient Waystones by touch; build Carved Waystones at a high cost. Creative travels freely.
+- **Food:** wheat, potatoes, turnips and beans to farm; bilberries, brown mushrooms, wild turnips and apples to forage; bread, baked potatoes, roast turnips, pottage, bilberry tart and roast mushrooms to cook.
+
 ## Controls
 
 Keyboard and mouse, touch, and Xbox-layout controllers (including the ROG Ally X in gamepad mode). The help panel on the pause screen switches to whichever is in use. Creative mode has flying and noclip (fly through blocks: N, the Clip button, or the pause menu).

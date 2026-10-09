@@ -94,7 +94,7 @@ function frame(now){
   else if(head===LAVA){U.fogColor.value.setHex(0xc84a10);U.fogNear.value=0;U.fogFar.value=4;renderer.setClearColor(0xc84a10);tint.style.display='block';tint.style.background='rgba(220,90,20,.4)';}
   else{
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
-    U.caveMin.value=CV[0]*caveF;U.lamp.value=CV[1];U.lampR.value=CV[2];
+    const lmp=lampLevel();U.caveMin.value=CV[0]*caveF*(SURV()?depthDim(PL.y):1);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
     U.fogNear.value=lerp(FOGN*(1-0.3*rainAmt),CV[3]*0.35,caveF);U.fogFar.value=lerp(FOGF*(1-0.25*rainAmt),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';}
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;
@@ -132,7 +132,8 @@ function infoExtra(){
   const t=curT()*24,hh=Math.floor(t),mi=Math.floor((t-hh)*60);
   let s='\n'+(hh<10?'0':'')+hh+':'+(mi<10?'0':'')+mi+(rainAmt>0.3?(snowing?', snow':', rain'):'');
   let best=1e9;waypoints.forEach(m=>{const d=Math.hypot(m.position.x-PL.x,m.position.z-PL.z);if(d<best)best=d;});
-  if(best<1e9)s+='\nWaypoint '+Math.round(best)+' blocks';
+  if(best<1e9)s+='\nWaystone '+Math.round(best)+' blocks';
+  if(SURV()&&equip.belt&&ITEMS[equip.belt.id].lamp)s+='\nLantern: '+lampFuelText();
   return s;
 }
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});

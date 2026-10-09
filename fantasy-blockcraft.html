@@ -47,6 +47,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
 .rec .t{flex:1;font-size:19px;line-height:1}
 .rec .t small{display:block;color:var(--dim);font-size:16px;margin-top:2px}
 .rec button{font:inherit;font-size:18px;background:#5f8a35;color:var(--ink);border:2px solid #2b3a1a;padding:0 10px;cursor:pointer}
+.scol button.wide,.recipes button.wide,#lore button.wide{font:inherit;font-size:18px;background:#5f8a35;color:var(--ink);border:2px solid #2b3a1a;padding:2px 12px;margin-top:8px;cursor:pointer}
 .rec button:disabled{background:#3a3326;border-color:#463a28;cursor:default}
 #hurt{position:absolute;inset:0;background:radial-gradient(circle,rgba(200,0,0,0) 40%,rgba(200,0,0,.6));opacity:0;transition:opacity .25s}
 #stats{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));width:min(480px,94vw);display:none;justify-content:space-between;align-items:flex-end}
@@ -166,7 +167,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
     <div class="seg" id="clipseg">Noclip <button data-v="0">Off</button><button data-v="1">On</button></div>
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
-    <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Lantern</button><button data-v="2">Bright</button></div>
+    <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Normal</button><button data-v="2">Bright</button></div>
     <div class="seg" id="wxseg">Weather <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="touchseg">Touch <button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div>
     <button id="sndbtn">Sound on</button>
@@ -188,7 +189,7 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v7',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v8',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -201,7 +202,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===7&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const saved=(d=>d&&d.v===8&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -322,7 +323,7 @@ def(FLOWY,'Dandelion',[28,28,28],PLANT);
 def(DBUSH,'Bracken',[29,29,29],PLANT);
 const TORCH=43,WAYPT=44;
 def(TORCH,'Torch',[53,53,53],{solid:false,opq:false,occ:false,torch:true,lum:14,emit:true,snd:'wood'});
-def(WAYPT,'Waypoint',[54,54,54],{emit:true,lum:12,snd:'glass'});
+def(WAYPT,'Carved Waystone',[54,54,54],{emit:true,lum:12,snd:'glass'});
 const SPONGE=45,CRYSTAL=46;
 def(SPONGE,'Sponge',[55,55,55],{snd:'soft'});
 def(CRYSTAL,'Cave Crystal',[56,56,56],{solid:false,opq:false,occ:false,cross:true,emit:true,lum:10,snd:'glass'});
@@ -379,11 +380,17 @@ const LADDER=84,ROPE=85,PITON=86,GRAPNEL=87;
 const CLIMB={solid:false,opq:false,occ:false,climb:true,snd:'wood'};
 def(LADDER,'Ladder',[196,196,196],Object.assign({wall:true},CLIMB));def(PITON,'Iron Piton',[198,198,198],Object.assign({wall:true},CLIMB,{snd:'stone'}));
 def(ROPE,'Rope',[197,197,197],Object.assign({cross:true},CLIMB,{snd:'soft'}));def(GRAPNEL,'Grapnel Hook',[199,199,199],Object.assign({wall:true,place:false},CLIMB,{snd:'stone'}));
+// Storage and food (M4b): a chest you can build, two crops (turnips, beans) and wild plants to forage
+const CHEST=88,BERRYB=89,MUSHB=90,WTURN=91,TURN0=108,TURN1=109,TURN2=125,BEAN0=126,BEAN1=128,BEAN2=129;
+def(CHEST,'Oak Chest',[200,200,201],{snd:'wood'});
+def(BERRYB,'Bilberry Bush',[202,202,202],PLANT);def(MUSHB,'Brown Mushroom',[203,203,203],PLANT);def(WTURN,'Wild Turnip',[206,206,206],PLANT);
+[[TURN0,'Turnip Sprouts',204],[TURN1,'Young Turnips',205],[TURN2,'Turnips',206],[BEAN0,'Bean Sprouts',207],[BEAN1,'Young Beans',208],[BEAN2,'Bean Plants',209]]
+  .forEach(([id,n,t])=>def(id,n,[t,t,t],Object.assign({},PLANT,{place:false})));
 const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
 setH([COAL],5,'ore',1);setH([COPO,ZINO],5,'ore',2);setH([TINO,GOLD],5,'ore',3);setH([IRON],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
+setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([CHEST],2,'wood');setH([BERRYB,MUSHB,WTURN,TURN0,TURN1,TURN2,BEAN0,BEAN1,BEAN2],0,'soft');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
@@ -418,6 +425,13 @@ item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});it
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
 item(322,'Grapnel','grapnel',[150,154,164],{once:true});item(323,'Compass','compass',[214,120,68],{one:true});item(324,'Depth Gauge','gauge',[226,188,86],{one:true});
 item(325,'Map','map',[222,204,156],{one:true});item(326,'Signal Flare','flare',[214,60,40],{once:true});item(327,'Parchment','parchment',[226,214,180]);item(328,'Plant Fibre','fibre',[140,166,80]);
+// Food (M4b, Q52): two crops planted as they are, foraged bilberries and mushrooms, and dishes cooked at a furnace
+item(330,'Turnip','turnip',[176,110,176]);item(331,'Beans','beans',[150,196,92]);item(332,'Bilberries','berries',[70,84,170]);item(333,'Brown Mushroom','tile',null,{tile:203});
+item(334,'Roast Turnip','turnip',[206,140,90]);item(335,'Pottage','bowl',[170,130,70]);item(336,'Bilberry Tart','tart',[196,150,90]);item(337,'Roast Mushrooms','tile',null,{tile:203});
+// The worn lamp (M4b, Q36, Q65): a lantern for the belt slot that burns lamp oil or pitch candles (fuel: seconds of light)
+item(338,'Lamp Oil','oil',[214,180,70],{fuel:1200});item(339,'Pitch Candle','candle',[60,52,46],{fuel:480});item(340,"Miner's Lantern",'lantern',[214,120,68],{equip:'belt',lamp:true,one:true});
+// More room (M4b, Q67): a pack for the pack slot (woven, then sturdy) and a satchel for the bag slot add inventory rows
+item(341,'Woven Pack','pack',[150,170,96],{equip:'pack',slots:9,one:true});item(342,'Sturdy Pack','pack',[150,110,60],{equip:'pack',slots:18,one:true});item(343,'Satchel','satchel',[170,140,90],{equip:'bag',slots:9,one:true});
 const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
 // Held to use once per press: holding the button does not repeat it
 const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
@@ -472,6 +486,16 @@ function itemIcon(id){
   else if(it.kind==='parchment'){for(let y=2;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===2?18:x===12||y===13?-28:0)+((x*7+y*3)%11===0?-14:0));
     g.fillStyle='#8a7a5a';for(const y of [5,7,9,11])g.fillRect(5,y,6,1);}
   else if(it.kind==='fibre'){for(let k=0;k<5;k++)for(let y=2;y<14;y++){const x=3+k*2+Math.round(Math.sin((y+k*3)/2.2));px(x,y,(k%2?-20:16)+(y%3?0:-14));}}
+  else if(it.kind==='turnip'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-9.5)*1.1);if(d<5)px(x,y,(y<8?0:40)+(d>4.2?-36:0)+(x<6?16:0));}g.fillStyle='#4f8f36';g.fillRect(6,1,1,4);g.fillRect(8,0,1,5);g.fillRect(10,2,1,3);}
+  else if(it.kind==='beans'){for(const [cx,cy] of [[5,6],[10,7],[7,11]])for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-cx)/2.2,(y-cy)/1.6);if(d<1)px(x,y,d>0.75?-36:(x<cx?20:0));}}
+  else if(it.kind==='berries'){for(const [cx,cy] of [[5,6],[10,6],[7,10],[11,11],[4,11]])for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-cx,y-cy);if(d<2.3)px(x,y,d>1.6?-36:(x<cx&&y<cy?40:0));}}
+  else if(it.kind==='bowl'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-7.5)/7,(y-8)/3);if(y>=8&&Math.hypot((x-7.5)/7,(y-8)/6)<1)g.fillStyle='#8a5a30',g.fillRect(x,y,1,1);else if(d<1&&y<9)px(x,y,(x*3+y)%5?0:-30);}}
+  else if(it.kind==='tart'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-7.5)/7,(y-9)/4.5);if(d<1)px(x,y,d>0.8?-20:0);}g.fillStyle='#3a3c88';for(const [x,y] of [[5,8],[8,7],[10,9],[7,10],[4,10],[9,11]])g.fillRect(x,y,2,1);}
+  else if(it.kind==='oil'){for(let y=4;y<15;y++){const w=y<7?1:y<9?3:4;for(let x=8-w;x<8+w;x++)px(x,y,(x<8?20:-10)+(y>11?-20:0));}g.fillStyle='#6a4a2a';g.fillRect(7,2,2,2);}
+  else if(it.kind==='candle'){for(let y=6;y<15;y++)for(let x=6;x<10;x++)px(x,y,x===6?24:x===9?-20:0);g.fillStyle='#2a2420';g.fillRect(7,4,1,2);g.fillStyle='#ffc850';g.fillRect(7,2,2,2);g.fillStyle='#fff2b0';g.fillRect(7,3,1,1);}
+  else if(it.kind==='lantern'){for(let y=3;y<14;y++)for(let x=4;x<12;x++){const e=x===4||x===11||y===3||y===13;px(x,y,e?-10:0);}g.fillStyle='#ffd27a';g.fillRect(6,5,4,7);g.fillStyle='#fff3c4';g.fillRect(7,7,2,3);g.fillStyle='#3a2a1a';g.fillRect(7,1,2,2);}
+  else if(it.kind==='pack'||it.kind==='satchel'){const sat=it.kind==='satchel';for(let y=sat?6:3;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===(sat?6:3)?20:x===12||y===13?-30:0)+((x+y)%4===0?-10:0));
+    g.fillStyle='#4a3420';g.fillRect(3,sat?8:6,10,1);g.fillRect(7,sat?8:6,2,3);if(sat){g.fillRect(4,2,1,4);g.fillRect(11,2,1,4);g.fillRect(4,2,8,1);}}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
@@ -653,6 +677,17 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(199);for(let y=8;y<16;y++){const o=(y>>1)%2;P(199,7,y,sh([170,136,86],o?18:-6));P(199,8,y,sh([140,108,64],o?-10:10));}
   for(let y=0;y<9;y++){P(199,7,y,[170,174,184]);P(199,8,y,[110,114,124]);}
   for(const s2 of [-1,1])for(let k=0;k<5;k++){const x=s2<0?6-k:9+k,y=k<3?1+k:5-(k-3)*2;P(199,x,y,s2<0?[190,194,204]:[120,124,134]);P(199,x,y+1,[90,94,104]);}
+  // storage and food (M4b): oak chest top and side, bilberry bush, brown mushroom, turnip and bean stages; no shared random draws
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const e=x===0||y===0||x===15||y===15,pl=y%5===4;
+    P(200,x,y,e?[92,62,34]:sh([168,124,72],nz(x,y,4)*2+(pl?-30:0)));P(201,x,y,e||y===6?[84,58,32]:sh([160,118,68],nz(x,y,5)*2+(y%5===2?-24:0)));}
+  for(let y=5;y<9;y++)for(let x=6;x<10;x++)P(201,x,y,(x===6||x===9||y===8)?[70,70,78]:[176,178,186]);
+  clear(202);for(let y=6;y<16;y++)for(let x=1;x<15;x++){const d=Math.hypot((x-7.5)/7,(y-11)/5.2);if(d<1&&(x*5+y*3)%7)P(202,x,y,sh([58,104,46],nz(x,y,6)*3-(y>13?16:0)));}
+  for(const [x,y] of [[4,9],[7,8],[10,10],[12,8],[5,12],[9,12],[3,11],[11,13],[7,11]]){P(202,x,y,[70,84,170]);P(202,x+1,y,[46,52,120]);P(202,x,y+1,[40,44,104]);}
+  clear(203);for(let y=10;y<16;y++)for(let x=7;x<9;x++)P(203,x,y,[222,212,190]);for(let y=6;y<11;y++)for(let x=3;x<13;x++){const d=Math.hypot((x-7.5)/5,(y-10)/4);if(d<1)P(203,x,y,y===10?[96,70,48]:sh([150,102,62],nz(x,y,7)*2+(x<7&&y<8?18:0)));}
+  [[204,4,0],[205,8,0],[206,11,1]].forEach(([t,h,root])=>{clear(t);for(const ox of [4,7,10])for(let k=0;k<h;k++){const x=ox+Math.round(Math.sin(k*0.9+ox)*0.8);P(t,x,15-k-(root?2:0),sh([84,146,56],nz(x,k,8)*3+(k>h-3?14:0)));P(t,x+1,15-k-(root?2:0),[64,118,42]);}
+    if(root)for(let y=12;y<16;y++)for(let x=4;x<12;x++){const d=Math.hypot((x-7.5)/4,(y-14.5)/2.6);if(d<1)P(t,x,y,y<14?[160,90,170]:[232,226,214]);}});
+  [[207,5,0],[208,10,0],[209,15,1]].forEach(([t,h,pods])=>{clear(t);for(let k=0;k<h;k++){const x=7+Math.round(Math.sin(k*0.7)*1.5);P(t,x,15-k,[76,132,50]);if(k%3===1){P(t,x-1,15-k,[96,160,62]);P(t,x+1,14-k,[96,160,62]);}}
+    if(pods)for(const [x,y] of [[4,4],[10,6],[5,9],[11,11]]){for(let k=0;k<4;k++)P(t,x,y+k,[150,196,92]);P(t,x+1,y+1,[120,168,70]);}});
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles
@@ -1255,20 +1290,10 @@ function applyShafts(WCX,WCZ){
     }
   }
 }
-// ---- Supply crates hold a random haul, decided by where they sit
-const BARRELLOOT=[[206,1,3,6],[269,2,5,6],[207,2,5,5],[270,2,6,5],[202,3,8,4],[200,2,6,4]];
+// ---- Supply crates hold a random haul, decided by where they sit (rolled by lootOf in gameplay/storage.js)
+const BARRELLOOT=[[206,1,3,6],[269,2,5,6],[207,2,5,5],[270,2,6,5],[202,3,8,4],[200,2,6,4],[331,2,6,4],[330,1,4,3],[338,1,2,2]];
 const LOOT=[[203,8,24,10],[204,1,5,5],[200,4,12,10],[220,1,4,7],[223,1,4,6],[225,1,3,4],[226,1,3,4],[227,1,2,3],[206,1,3,6],[269,2,4,5],[208,3,8,4],[209,2,5,4],
   [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[270,2,5,3],[ROPE,4,12,5],[326,1,2,2],[322,1,1,0.8],[LADDER,3,8,3]];
-function openCrate(X,Y,Z){
-  const dw=world[I(X,Y,Z)]===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(X+OX,Y,Z+OZ)]||DWLOOT):world[I(X,Y,Z)]===BARREL?BARRELLOOT:LOOT,WX=X+OX,WZ=Z+OZ,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0),got=[];let tot=0;for(const l of TBL)tot+=l[3];
-  const loot=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));loot.push([it[0],n]);got.push(n+' '+nameOf(it[0]));}
-  // Creative only looks inside; survival takes everything or nothing (the roll depends only on position, so it is the same next time)
-  if(!SURV()){toast('Inside: '+got.join(', '));return;}
-  if(!fitsAll(loot)){toast('Not enough room to take what is inside');return;}
-  for(const [id,n] of loot)addItem(id,n);
-  setBlock(X,Y,Z,AIR,true);breakFx(X,Y,Z,CRATE,12);sfxBlock(PLANKS,false);tone(900,1500,0.15,0.1);
-  toast('Found '+got.join(', '));drawBar(true);
-}
 // ---- Glow mushroom groves light up the deep caves
 // ---- Points of interest underground: natural formations and lost places
 const POI_TYPES=[['geode',2],['fossil',1.3],['grove',1.6],['camp',1.5],['ruins',1.1],['lab',0.7],['outpost',0.8],['shrine',1.4],['forge',0.9]];
@@ -2312,7 +2337,7 @@ function buildMega(m,L){
   }
 }
 const ARMORY_L=[[227,2,6,8],[223,2,6,6],[245,1,1,3],[305,1,1,2],[244,1,1,4],[246,1,1,0.6],[STEELB,1,1,1.5],[271,1,3,3],[204,2,6,4],[255,1,1,0.15]];
-const FOOD_L=[[206,2,5,8],[269,3,6,7],[207,2,5,5],[270,3,8,5],[202,4,10,4],[208,4,8,3],[209,3,6,3],[203,4,12,3]];
+const FOOD_L=[[206,2,5,8],[269,3,6,7],[207,2,5,5],[270,3,8,5],[202,4,10,4],[208,4,8,3],[209,3,6,3],[203,4,12,3],[331,3,8,4],[335,1,3,3],[338,1,3,3]];
 const SCHOLAR_L=[[273,1,2,8],[203,6,20,6],[204,1,4,4],[LANTERN,1,2,3],[BOOKS,1,3,3],[GLOW,1,3,2],[230,1,1,1],[CRYSTAL,1,3,2],[274,1,1,0.2],[255,1,1,0.12]];
 const SMITH_L=[[220,2,6,6],[221,2,5,5],[222,2,5,5],[223,2,5,6],[225,2,5,4],[226,2,5,4],[227,1,3,4],[228,1,2,1.2],[229,1,2,1],[200,4,12,6],[271,1,4,6],[COPB,1,1,1],[303,1,1,1.5],[313,1,1,1.5],[PITON,4,12,2],[255,1,1,0.12]];
 const TREASURE_L=[[224,3,8,8],[229,1,3,5],[272,1,2,6],[274,1,1,1.2],[205,1,4,6],[204,4,12,6],[230,1,3,4],[GOLDB,1,1,1.5],[PLATB,1,1,0.6],[255,1,1,0.25]];
@@ -2788,7 +2813,10 @@ function plants(WCX,WCZ){
       if(top===GRASS&&b!==5&&b!==6){colInfo(X,Z,TP);
         const heath=b===4?1:Math.max(0,(TP.dw-0.2)*1.6),reed=b===11?1:Math.max(0,(TP.fen-0.25)*1.6),dark=b===8?1:Math.max(0,(TP.sw-0.25)*1.6);
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
-        if(id)world[I(x,g+1,z)]=id;
+        // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
+        const fr=hsh(X,7,Z),fg=(b===3||b===4||b===8)&&fr<0.06&&fbm2(X/28,Z/28,1,4311.3)>0.2?BERRYB:(b===3||b===8)&&fr>0.994?MUSHB:(b===2||b===7||b===10)&&fr>0.994?WTURN:0;
+        if(fg)world[I(x,g+1,z)]=fg;
+        else if(id)world[I(x,g+1,z)]=id;
         else if(b===2&&TP.fwd<0.4&&Math.abs(fbm2(X/46,Z/46,1,4201.1))<0.011){world[I(x,g+1,z)]=LEAVES;if(r<0.7&&g+2<H)world[I(x,g+2,z)]=LEAVES;} // hedgerows
         else if(b!==10&&b!==4&&b!==11&&b!==8){
           const fade=(1-TP.pw)*(1-heath)*(1-reed),thick=0.45+1.1*(0.5+fbm2(X/20,Z/20,1,1907.7)),gr=(b===2?0.16:b===3?0.08:0.07)*thick*fade,meadow=b===2&&fbm2(X/14,Z/14,1,1901.3)>0.2&&r<0.3*fade;
@@ -3393,7 +3421,7 @@ function setBlock(x,y,z,v,force){
   if(OPQ[v]&&y>0){const j=i-WD,bb=world[j];if(bb===GRASS||bb===SNOWG){if(curAct)curAct.push(iToKey(j),bb);put(j,DIRT);}}
   const oh=hm[x+W*z];calcHM(x,z);const nh=hm[x+W*z];mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
-  if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
+  if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);if(isBox(old))boxGone(x+OX,y,z+OZ);
   if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}
   lvl[i]=0;wakeWater(x,y,z);
@@ -3509,11 +3537,11 @@ const ACTIONS={
   jump:{name:'Jump, swim up, double tap to fly',run:()=>jumpPress()},
   fly:{name:'Fly on or off',run:()=>toggleFly()},
   noclip:{name:'Noclip on or off (fly through blocks)',run:()=>toggleNoclip()},
-  respawn:{name:'Back to spawn',run:()=>respawn()},
+  respawn:{name:'Back to spawn (creative)',run:()=>{if(SURV()){toast('In survival you travel from waystone to waystone');return;}respawn();}},
   brush:{name:'Brush size',run:()=>cycleBrush()},
   swap:{name:'Replace mode',run:()=>toggleSwap()},
   photo:{name:'Photo mode',run:()=>setPhoto(!photo)},
-  waypoint:{name:'Travel to the next waypoint',run:()=>nextWaypoint()},
+  waypoint:{name:'Travel to the next waystone',run:()=>nextWaypoint()},
   bpRotate:{name:'Turn blueprint',run:()=>{if(BP.sel>=0){BP.rot=(BP.rot+1)%4;toast('Blueprint turned '+BP.rot*90+' degrees');}}},
   bpClear:{name:'Clear blueprint',run:()=>{if(BP.sel>=0||BP.a){BP.sel=-1;BP.a=BP.b=null;toast('Blueprint cleared');}}},
   undo:{name:'Undo',run:()=>undo()},
@@ -3609,7 +3637,7 @@ function pollPad(dt){
   }
   PAD.prev=now;
 }
-const PAD_HTML='<div><b>Left stick</b> move, click it to sprint</div><div><b>Right stick</b> look, click it to pick a block</div><div><b>A</b> jump, swim up, double tap to fly</div><div><b>B</b> fly down</div><div><b>X</b> fly on or off</div><div><b>Noclip</b> (fly through blocks): in the pause menu, creative only</div><div><b>Y</b> block menu</div><div><b>RT</b> break, hold to mine</div><div><b>LT</b> place or use</div><div><b>LB / RB</b> change slot</div><div><b>D-pad up</b> next waypoint</div><div><b>D-pad down</b> map zoom</div><div><b>D-pad left / right</b> undo, brush size</div><div><b>View</b> replace mode</div><div><b>Menu</b> pause</div><div><b>In menus</b> left stick moves the pointer, A clicks, X right clicks, B goes back, right stick scrolls, d-pad or bumpers adjust sliders</div>';
+const PAD_HTML='<div><b>Left stick</b> move, click it to sprint</div><div><b>Right stick</b> look, click it to pick a block</div><div><b>A</b> jump, swim up, double tap to fly</div><div><b>B</b> fly down</div><div><b>X</b> fly on or off</div><div><b>Noclip</b> (fly through blocks): in the pause menu, creative only</div><div><b>Y</b> block menu</div><div><b>RT</b> break, hold to mine</div><div><b>LT</b> place or use</div><div><b>LB / RB</b> change slot</div><div><b>D-pad up</b> next waystone (in survival, from beside one)</div><div><b>D-pad down</b> map zoom</div><div><b>D-pad left / right</b> undo, brush size</div><div><b>View</b> replace mode</div><div><b>Menu</b> pause</div><div><b>In menus</b> left stick moves the pointer, A clicks, X right clicks, B goes back, right stick scrolls, d-pad or bumpers adjust sliders</div>';
 function updateKeysHelp(){const k=$('keys');if(k)k.innerHTML=PAD.active?PAD_HTML:KEYS_HTML;}
 
 
@@ -3752,8 +3780,9 @@ const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===S
 while(hot.length<9)hot.push(STONE);
 let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
-const inv=new Array(36).fill(null);
-if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
+// The inventory holds 36 slots, and more with a pack and a bag equipped (M4b, Q67): invCap() of the INV_MAX slots are in use
+const INV_MAX=63,inv=new Array(INV_MAX).fill(null);
+if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<INV_MAX&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
 // A new survival world starts with a small kit (M4, Q59): wooden pickaxe and axe, a map, torches and bread
 const START_KIT=[[240,1],[300,1],[325,1],[TORCH,8],[206,4]];
 if(!saved&&mode==='survival')START_KIT.forEach(([id,c],i)=>{inv[i]={id:id,c:c,d:0};});
@@ -3767,26 +3796,31 @@ const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
+function invCap(s,id){let n=36;for(const k of ['pack','bag']){const q=k===s?(id?{id:id}:null):equip[k];if(q&&ITEMS[q.id].slots)n+=ITEMS[q.id].slots;}return n;} // with slot s holding id instead, if given
+const freeSlot=(cap=invCap())=>{for(let i=0;i<cap;i++)if(!inv[i])return i;return -1;};
 const stackMax=id=>ITEMS[id]&&(ITEMS[id].dur||ITEMS[id].one)?1:ITEMS[id]&&ITEMS[id].kind==='grapnel'?8:64;
-function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
+function roomFor(id){let n=0;for(let i=0;i<invCap();i++){const q=inv[i];n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;}return n;}
 function addItem(id,n){
   for(const q of inv)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}
-  for(let i=0;i<36&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
+  for(let i=0,cap=invCap();i<cap&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
   saveDirty=true;return n;
 }
 // Would every [id,count] in the list fit in the inventory? (addItem's rules, on a copy)
-function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<36&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
+function fitsAll(list){const tmp=inv.map(q=>q&&{id:q.id,c:q.c});for(let [id,n] of list){for(const q of tmp)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}for(let i=0;i<invCap()&&n>0;i++)if(!tmp[i]){const k=Math.min(n,stackMax(id));tmp[i]={id:id,c:k};n-=k;}if(n>0)return false;}return true;}
 // Put inventory slot i into its equipment slot (what was there goes back to the inventory); false if it does not fit
+// A smaller pack or bag is refused while the slots it would lose hold anything
+const spareFrom=(cap,skip)=>{for(let j=cap;j<INV_MAX;j++)if(inv[j]&&j!==skip)return false;return true;};
 function equipFrom(i){
-  const q=inv[i],s=q&&equipSlotOf(q.id);if(!s)return false;const old=equip[s];
-  if(q.c>1){if(old&&!inv.some(x=>!x))return false;q.c--;if(old)inv[inv.findIndex(x=>!x)]={id:old.id,c:1,d:old.d};}
+  const q=inv[i],s=q&&equipSlotOf(q.id);if(!s)return false;const old=equip[s],cap=invCap(s,q.id);
+  if(!spareFrom(cap,i)||i>=cap&&q.c===1&&old)return false;
+  if(q.c>1){const f=freeSlot(cap);if(old&&f<0)return false;q.c--;if(old)inv[f]={id:old.id,c:1,d:old.d};}
   else inv[i]=old?{id:old.id,c:1,d:old.d}:null;
   equip[s]={id:q.id,c:1,d:q.d||0};saveDirty=true;return true;
 }
-function unequip(s){const q=equip[s],i=inv.findIndex(x=>!x);if(!q||i<0)return false;inv[i]={id:q.id,c:1,d:q.d};equip[s]=null;saveDirty=true;return true;}
+function unequip(s){const q=equip[s],cap=invCap(s,0),i=freeSlot(cap);if(!q||i<0||!spareFrom(cap,-1))return false;inv[i]={id:q.id,c:1,d:q.d};equip[s]=null;saveDirty=true;return true;}
 const asList=x=>Array.isArray(x)?x:[x];
 function countOf(ids){ids=asList(ids);let n=0;for(const q of inv)if(q&&ids.includes(q.id))n+=q.c;return n;}
-function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}
+function takeItems(ids,n){ids=asList(ids);for(let i=0;i<INV_MAX&&n>0;i++){const q=inv[i];if(q&&ids.includes(q.id)){const k=Math.min(n,q.c);q.c-=k;n-=k;if(!q.c)inv[i]=null;}}saveDirty=true;}
 function curId(){if(SURV()){const q=inv[sel];return q?q.id:0;}return hot[sel];}
 function setMode(m){
   mode=m;settings.newMode=m;lsSet(SET_KEY,settings);
@@ -3801,11 +3835,12 @@ const SHEAR_KEEP=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,COBWEB]);
 function dropsFor(id,tool){
   if(ITEMS[tool]&&ITEMS[tool].tool==='shears'&&(BL[id].leaf||SHEAR_KEEP.has(id)))return[[id,1]];
   switch(id){
-    case DBUSH:return Math.random()<0.5?[[328,1]]:[];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
+    case DBUSH:return Math.random()<0.5?[[328,1]]:[];case BERRYB:return[[332,2+(Math.random()*3|0)]];case MUSHB:return[[333,1]];case WTURN:case TURN0:case TURN1:return[[330,1]];
+    case TURN2:return[[330,2+(Math.random()*2|0)]];case BEAN0:case BEAN1:return[[331,1]];case BEAN2:return[[331,2+(Math.random()*2|0)]];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
-    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.45?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
+    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.17?[[331,1]]:r<0.47?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];
   if(BL[id].leaf){const r=Math.random();return r<0.05?[[207,1]]:r<0.15?[[201,1]]:[];}
@@ -3827,11 +3862,12 @@ function mineInfo(id,tool){
   return{t:b.hard/speed*(ok?1:3.3),drop:ok};
 }
 // The sickle cuts every soft plant within two blocks in one stroke; ripe wheat and potatoes are harvested and replanted
-const SICKLE_CUT=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,WHEAT,POT3]);
+const SICKLE_CUT=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,WHEAT,POT3,TURN2,BEAN2,BERRYB,MUSHB,WTURN]);
+const RIPE={[WHEAT]:[WHEAT0,208],[POT3]:[POT0,209],[TURN2]:[TURN0,330],[BEAN2]:[BEAN0,331]}; // ripe crop: what it is replanted as, and the seed that takes
 function sickleSweep(cx,cy,cz){
   const out=[];
   for(let y=cy-1;y<=cy+1;y++)for(let z=cz-2;z<=cz+2;z++)for(let x=cx-2;x<=cx+2;x++){const id=get(x,y,z);if(!SICKLE_CUT.has(id))continue;
-    const d=dropsFor(id,320);if(id===WHEAT||id===POT3){const seed=id===WHEAT?208:209,q=d.find(e=>e[0]===seed);if(q)q[1]--;setBlock(x,y,z,id===WHEAT?WHEAT0:POT0);}else setBlock(x,y,z,AIR);
+    const d=dropsFor(id,320),rp=RIPE[id];if(rp){const q=d.find(e=>e[0]===rp[1]);if(q)q[1]--;setBlock(x,y,z,rp[0]);}else setBlock(x,y,z,AIR);
     breakFx(x,y,z,id,4);for(const e of d)if(e[1]>0)out.push(e);}
   return out;
 }
@@ -3840,7 +3876,7 @@ function mineTick(dt){
   const hit=raycast(eyePos(),camDir(),5);
   if(!hit){mineI=-1;mineP=0;crack.visible=false;return;}
   if(hit.id===TNT){prime(hit.x,hit.y,hit.z,4);hold=-1;crack.visible=false;return;}
-  if(hit.id===CRATE||hit.id===DWCHEST||hit.id===BARREL){openCrate(hit.x,hit.y,hit.z);hold=-1;crack.visible=false;return;}
+  if(BOX_IDS.has(hit.id)&&boxBusy(hit.x,hit.y,hit.z)){toast(boxes.has(wkey(hit.x+OX,hit.y,hit.z+OZ))||hit.id===CHEST?'Empty it before you break it':'Open it first (place button)');hold=-1;crack.visible=false;return;}
   const i=I(hit.x,hit.y,hit.z);if(i!==mineI){mineI=i;mineP=0;}
   const info=mineInfo(hit.id,curId());if(!info){crack.visible=false;return;}
   mineP+=info.t<=0?1:dt/info.t;
@@ -3871,8 +3907,12 @@ const RECIPES=[
   [LADDER,3,[[201,7]]],[PITON,8,[[223,1]]],[ROPE,2,[[328,3]]],[322,1,[[225,3],[ROPE,1]]],
   [327,4,[[BIRCH,1]]],[325,1,[[327,3],[200,1]]],[323,1,[[220,4],[GLASS,1]]],[324,1,[[226,3],[GLASS,1]]],[326,2,[[201,1],[270,1],[200,1]]],
   [COPB,1,[[220,9]]],[BRONB,1,[[225,9]]],[BRASB,1,[[226,9]]],[STEELB,1,[[227,9]]],[TITB,1,[[228,9]]],[PLATB,1,[[229,9]]],
-  [LANTERN,1,[[226,4],[TORCH,1]]],[LANTERN,1,[[DLANTERN,1],[200,1]]],[SCONCE,1,[[DSCONCE,1],[200,1]]],[TORCH,1,[[DTORCH,1],[200,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,1],[229,2],[GLASS,4]]],
-  [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f']
+  [LANTERN,1,[[226,4],[TORCH,1]]],[LANTERN,1,[[DLANTERN,1],[200,1]]],[SCONCE,1,[[DSCONCE,1],[200,1]]],[TORCH,1,[[DTORCH,1],[200,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,2],[229,4],[SBRICK,6],[RUNE,1]]],
+  [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f'],
+  // storage, the worn lamp and cooking (M4b)
+  [CHEST,1,[[PLANKS,8]]],[341,1,[[328,12],[ROPE,2]]],[342,1,[[341,1],[225,4],[ROPE,4]]],[343,1,[[328,8],[ROPE,1]]],
+  [340,1,[[220,2],[GLASS,1],[201,1]]],[338,1,[[208,6]]],[339,2,[[328,1],[200,1]]],
+  [334,2,[[330,2],[200,1]],'f'],[335,2,[[330,1],[331,2],[333,1],[200,1]],'f'],[336,2,[[332,3],[202,2],[200,1]],'f'],[337,2,[[333,3],[200,1]],'f']
 ];
 // The tool ladder (items.js): pickaxe and axe from three of the material, shovel from one, each with two sticks
 const LADDER_MAT=[PLANKS,COBBLE,220,225,223,227,228];
@@ -3962,7 +4002,7 @@ function renderBlueprints(box){
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5};
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4};
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -3999,7 +4039,8 @@ function revive(){
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
   if(!items){setBlock(X,Y,Z,AIR,true);return;}
-  const left=[];for(const [id,c,d] of items){const before=inv.findIndex(q=>!q);const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&durOf(id)){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
+  const left=[];for(const [id,c,d] of items){const es=equipSlotOf(id);if(es&&!equip[es]){equip[es]={id:id,c:1,d:d||0};continue;} // lanterns, packs and bags go back on first
+    const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&durOf(id)){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
   if(left.length){graves.set(k,left);toast('Inventory full, some things are still in the grave');}
   else{graves.delete(k);setBlock(X,Y,Z,AIR,true);showName('You got your things back');}
   drawBar(true);saveDirty=true;
@@ -4016,6 +4057,7 @@ function cactusNear(){
 }
 function survivalTick(dt,inLiq,moved,sprinting){
   hurtCD=Math.max(0,hurtCD-dt);eatCD=Math.max(0,eatCD-dt);
+  lampTick(dt);
   if(!SURV()||dead){air=10;return;}
   // falling
   if(inLiq||PL.fly||PL.climb)fallTop=PL.y;
@@ -4034,6 +4076,30 @@ function survivalTick(dt,inLiq,moved,sprinting){
   if(food===0){starveT+=dt;if(starveT>=4){starveT=0;if(hp>1)hurt(1,'starved');}}else starveT=0;
   drawStats();
 }
+// ---- The worn lamp (M4b, Q36, Q65). In survival the light around the player comes only from a lantern in the belt slot or a
+// light held in the hand (a torch, a lantern block, glowstone...). The lantern burns its fuel only in the dark, taking lamp oil
+// or pitch candles from the pack as it runs out. Creative keeps the old carried lamp. Returns [strength, reach in blocks].
+const LAMP_ADJ=[-3,0,6]; // the Caves setting (Dark, Normal, Bright) shortens or lengthens the reach
+function lampLevel(){
+  const adj=LAMP_ADJ[settings.cave||0]||0;
+  if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
+  const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
+  const h=curId(),lum=h&&h<200&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];
+  return[0,4];
+}
+const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
+let lampWarned=false;
+function lampTick(dt){
+  const b=equip.belt;if(!SURV()||!b||!ITEMS[b.id].lamp)return;
+  if(b.d<=0||lampDark())b.d-=dt;
+  if(b.d<=0){const f=[338,339].find(id=>countOf(id)>0);
+    if(f){takeItems(f,1);b.d=Math.max(0,b.d)+ITEMS[f].fuel;lampWarned=false;drawBar(true);}
+    else{b.d=0;if(!lampWarned){lampWarned=true;toast('Your lantern has gone out: it needs lamp oil or pitch candles');}}}
+}
+function lampFuelText(){const b=equip.belt;if(!b||!ITEMS[b.id].lamp)return '';const m=Math.ceil(b.d/60),spare=countOf(338)*20+countOf(339)*8;
+  return b.d>0?m+' min of light'+(spare?', '+spare+' min more in the pack':''):'out of fuel';}
+// Ambient light in caves falls with depth (M4b): full above y260, a quarter of it by y60
+const depthDim=y=>Math.max(0.25,Math.min(1,(y-60)/200*0.75+0.25));
 // Hearts, hunger and air above the hotbar
 function iconURL(pat,col,dark){
   const c=document.createElement('canvas');c.width=9;c.height=9;const g=c.getContext('2d');
@@ -4057,12 +4123,13 @@ function drawStats(){
 }
 let heldSlot=-1;
 function renderSInv(){
-  const box=$('sinv');box.innerHTML='';
+  const root=$('sinv');root.innerHTML='';
   const grid=document.createElement('div');grid.className='sgrid';
-  inv.forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
+  inv.slice(0,invCap()).forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
     if(q&&durOf(q.id)&&q.d){const f=1-q.d/durOf(q.id),bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
     if(q){b.appendChild(icon(q.id));if(q.c>1){const n=document.createElement('span');n.className='n';n.textContent=q.c;b.appendChild(n);}b.title=nameOf(q.id);}
     b.addEventListener('click',()=>{
+      if(box){boxGive(i);renderSInv();return;} // a container is open: the stack goes into it
       if(heldSlot<0){if(inv[i])heldSlot=i;}
       else{const a=inv[heldSlot],c=inv[i];
         if(a&&c&&a.id===c.id&&heldSlot!==i){const k=Math.min(a.c,stackMax(c.id)-c.c);c.c+=k;a.c-=k;if(!a.c)inv[heldSlot]=null;}
@@ -4071,14 +4138,15 @@ function renderSInv(){
       renderSInv();});
     grid.appendChild(b);});
   let er=null;if(Object.values(ITEMS).some(it=>it.equip)){er=document.createElement('div');er.className='sgrid eq';
-    for(const s in EQUIP_SLOTS){const q=equip[s],b=document.createElement('button');b.className='sslot';b.title=EQUIP_SLOTS[s]+(q?': '+nameOf(q.id):'');
+    for(const s in EQUIP_SLOTS){const q=equip[s],b=document.createElement('button');b.className='sslot';b.title=EQUIP_SLOTS[s]+(q?': '+nameOf(q.id)+(ITEMS[q.id].lamp?' ('+lampFuelText()+')':''):'');
       if(q)b.appendChild(icon(q.id));else{const t=document.createElement('span');t.className='n';t.textContent=EQUIP_SLOTS[s];b.appendChild(t);}
-      b.addEventListener('click',()=>{if(heldSlot>=0){if(equipSlotOf(inv[heldSlot]&&inv[heldSlot].id)===s&&!equipFrom(heldSlot))toast('No room');heldSlot=-1;}else if(q&&!unequip(s))toast('Inventory full');drawBar(true);renderSInv();});
+      b.addEventListener('click',()=>{if(heldSlot>=0){if(equipSlotOf(inv[heldSlot]&&inv[heldSlot].id)===s&&!equipFrom(heldSlot))toast('No room');heldSlot=-1;}else if(q&&!unequip(s))toast(ITEMS[q.id].slots?'Empty the extra slots first':'Inventory full');drawBar(true);renderSInv();});
       er.appendChild(b);}}
   const left=document.createElement('div');left.className='scol';
-  const h1=document.createElement('div');h1.className='inv-h';h1.textContent='Hotbar is the top row. Tap two slots to swap them.';left.appendChild(h1);left.appendChild(grid);
+  const h1=document.createElement('div');h1.className='inv-h';h1.textContent=box?'Your pack: tap a slot to put it in the '+nameOf(get(box.x,box.y,box.z)).toLowerCase()+'.':'Hotbar is the top row. Tap two slots to swap them.';left.appendChild(h1);left.appendChild(grid);
   if(er){const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Equipment: tap an item, then its slot. Tap a filled slot to take it off.';left.appendChild(h2);left.appendChild(er);}
   const recs=document.createElement('div');recs.className='recipes';
+  if(box){renderBox(recs);root.appendChild(recs);root.appendChild(left);return;} // the container first, above a long pack
   const hf=nearStation('f'),hb=nearStation('b');
   const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Crafting'+(hb?', blast furnace nearby':hf?', furnace nearby':'');recs.appendChild(h2);
   const order=RECIPES.map((r,i)=>[r,i]).sort((a,b)=>(canCraft(b[0])-canCraft(a[0]))||(a[1]-b[1]));
@@ -4091,7 +4159,7 @@ function renderSInv(){
     const btn=document.createElement('button');btn.textContent='Craft';btn.disabled=!ok;btn.addEventListener('click',()=>craft(r));row.appendChild(btn);
     recs.appendChild(row);
   });
-  box.appendChild(left);box.appendChild(recs);
+  root.appendChild(left);root.appendChild(recs);
 }
 let airT=0,lagX=0,lagY=0,lastYaw=0,lastPitch=0,stepD=0,wasLiq=false,sel=0,brushR=0,gliding=false,sprintLatch=false,lastW=0;
 // ---- Climbing gear (M4, Q45, Q66). Rope unrolls downward through open space from where it is placed; taking a rope takes it
@@ -4181,15 +4249,15 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE,z:PL.z};}
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore}[th.id];
-  if(!f)return false;f(th.x,th.y,th.z);return true;
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
   const held=curId();
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}
-  if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
+  if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);
     if(held===BPTOOL){if(creativeOnly())return;if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
@@ -4250,7 +4318,7 @@ addEventListener('keydown',e=>{
   const a=BINDS.keys[e.code];
   if(a&&ACTIONS[a]&&ACTIONS[a].anytime&&!e.repeat){runAction(a);return;}
   // Esc closes the inventory; browsers refuse pointer lock from Esc, so show the pause menu rather than re-locking
-  if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
+  if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;box=null;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
   if(!playing)return;
   if(e.code==='Space')e.preventDefault();
   if(BINDS.held.forward.includes(e.code)&&!e.repeat){const n=performance.now();if(n-lastW<300)sprintLatch=true;lastW=n;} // double tap forward to sprint
@@ -4281,6 +4349,69 @@ function lockOrPlay(){
   else canvas.requestPointerLock();
 }
 
+// ---- Storage (M4b, Q20, Q67): chests you make and the chests, crates and barrels of the old world hold items by world position.
+// A world container rolls its loot from its position the first time it is opened and keeps whatever is left after that; one
+// you build starts empty. Contents are saved with the world (save data `cs`). A container that holds anything (or a world one
+// never opened) cannot be broken: empty it first. In survival the inventory screen shows the container beside the pack;
+// tapping a slot on either side moves that stack across. Creative only looks inside.
+const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL]);
+let box=null; // the open container: {k, x, y, z} in window coordinates
+if(saved&&Array.isArray(saved.cs))saved.cs.forEach(([k,sl])=>{const a=new Array(BOX_SLOTS).fill(null);(sl||[]).forEach(([i,id,c,d])=>{if(i<BOX_SLOTS&&(ITEMS[id]||BL[id]))a[i]={id:id,c:c,d:d||0};});boxes.set(k,a);});
+const boxSave=()=>[...boxes].map(([k,a])=>[k,a.map((q,i)=>q&&[i,q.id,q.c,q.d||0]).filter(Boolean)]);
+// The loot a world container holds when first opened, decided by where it sits (the tables are in underground-sites.js)
+function lootOf(id,WX,Y,WZ){
+  const dw=id===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0);
+  let tot=0;for(const l of TBL)tot+=l[3];
+  const out=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}out.push([it[0],it[1]+Math.floor(r()*(it[2]-it[1]+1))]);}
+  return out;
+}
+// The slots of the container at window position (x,y,z), rolling a world container's loot on first use
+function boxAt(x,y,z,keep){
+  const k=wkey(x+OX,y,z+OZ);let a=boxes.get(k);if(a)return a;
+  a=new Array(BOX_SLOTS).fill(null);const id=get(x,y,z);
+  if(id!==CHEST)for(const [it,n] of lootOf(id,x+OX,y,z+OZ))boxPut(a,it,n,0);
+  if(keep)boxes.set(k,a);return a;
+}
+// Put n of id into slots a (stacking first); returns what did not fit
+function boxPut(a,id,n,d){
+  if(stackMax(id)>1)for(const q of a)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const t=Math.min(n,stackMax(id)-q.c);q.c+=t;n-=t;}
+  for(let i=0;i<a.length&&n>0;i++)if(!a[i]){const t=Math.min(n,stackMax(id));a[i]={id:id,c:t,d:d||0};n-=t;}
+  return n;
+}
+const boxEmpty=a=>a.every(q=>!q);
+// Can the container be broken now? World containers must be opened and emptied; a built chest only emptied
+function boxBusy(x,y,z){const a=boxes.get(wkey(x+OX,y,z+OZ));return a?!boxEmpty(a):get(x,y,z)!==CHEST;}
+function boxGone(X,Y,Z){boxes.delete(wkey(X,Y,Z));} // the block went away (creative or empty)
+function openBox(x,y,z){
+  const id=get(x,y,z);
+  if(!SURV()){const a=boxAt(x,y,z,false),L=a.filter(Boolean).map(q=>q.c+' '+nameOf(q.id));toast(L.length?'Inside: '+L.join(', '):'It is empty');return;}
+  boxAt(x,y,z,true);box={k:wkey(x+OX,y,z+OZ),x:x,y:y,z:z};saveDirty=true;
+  sfxBlock(PLANKS,false);tone(700,900,0.1,0.06);openInv();
+}
+// Move one stack between the open container and the inventory; tools keep their wear
+function boxTake(i){
+  const a=boxes.get(box.k),q=a&&a[i];if(!q)return;
+  if(stackMax(q.id)===1){const f=freeSlot();if(f<0){toast('Inventory full');return;}inv[f]={id:q.id,c:1,d:q.d||0};a[i]=null;}
+  else{const left=addItem(q.id,q.c);if(left===q.c){toast('Inventory full');return;}if(left)q.c=left;else a[i]=null;}
+  saveDirty=true;drawBar(true);
+}
+function boxGive(i){
+  const a=boxes.get(box.k),q=inv[i];if(!a||!q)return;
+  const left=boxPut(a,q.id,q.c,q.d);if(left===q.c){toast('The '+nameOf(get(box.x,box.y,box.z)).toLowerCase()+' is full');return;}
+  if(left)q.c=left;else inv[i]=null;saveDirty=true;drawBar(true);
+}
+function boxTakeAll(){const a=boxes.get(box.k);for(let i=0;i<a.length;i++)if(a[i])boxTake(i);}
+// The container's column on the inventory screen (replaces the crafting list while a container is open)
+function renderBox(col){
+  const a=boxes.get(box.k)||[],h=document.createElement('div');h.className='inv-h';h.textContent=nameOf(get(box.x,box.y,box.z))+': tap a slot to take it, or a pack slot to put it in';col.appendChild(h);
+  const g=document.createElement('div');g.className='sgrid';
+  a.forEach((q,i)=>{const b=document.createElement('button');b.className='sslot';
+    if(q){b.appendChild(icon(q.id));if(q.c>1){const n=document.createElement('span');n.className='n';n.textContent=q.c;b.appendChild(n);}b.title=nameOf(q.id);}
+    b.addEventListener('click',()=>{boxTake(i);renderSInv();});g.appendChild(b);});
+  col.appendChild(g);
+  const all=document.createElement('button');all.className='wide';all.textContent='Take everything';all.addEventListener('click',()=>{boxTakeAll();renderSInv();});col.appendChild(all);
+}
+function isBox(id){return id===CHEST||id===CRATE||id===DWCHEST||id===BARREL;}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -4354,7 +4485,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH]],['Building',[BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -4364,16 +4495,17 @@ function drawBar(quiet){
       el.addEventListener('click',()=>{hot[sel]=id;drawBar();closeInv();});g.appendChild(el);});});
 })();
 function openInv(){invOpen=true;
-  const sv=SURV();$('lore').style.display='none';$('bplist').style.display=sv?'none':'flex';if(!sv)renderBlueprints($('bplist')); // the Blueprint Tool is creative only (Q42)$('invgrid').style.display=sv?'none':'';$('invname').style.display=sv?'none':'';$('sinv').style.display=sv?'flex':'none';
-  $('invtitle').textContent=sv?'Inventory and crafting':'Pick a block for slot '+(sel+1);heldSlot=-1;if(sv)renderSInv();
+  const sv=SURV();$('lore').style.display='none';$('bplist').style.display=sv?'none':'flex';if(!sv)renderBlueprints($('bplist')); // the Blueprint Tool is creative only (Q42)
+  $('invgrid').style.display=sv?'none':'';$('invname').style.display=sv?'none':'';$('sinv').style.display=sv?'flex':'none';
+  $('invtitle').textContent=sv?(box?nameOf(get(box.x,box.y,box.z)):'Inventory and crafting'):'Pick a block for slot '+(sel+1);heldSlot=-1;if(sv)renderSInv();
   $('inv').style.display='grid';hold=-1;if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;}
-function closeInv(){invOpen=false;$('inv').style.display='none';lockOrPlay();}
+function closeInv(){invOpen=false;box=null;$('inv').style.display='none';lockOrPlay();}
 $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 
 // Overlay and settings
 const KEYS_HTML=TOUCH
-  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Grapnel</b> place it at a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> the arrow climbs, the down arrow climbs down</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
-  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Grapnel</b> right click a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> Space climbs, Shift climbs down</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
+  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Grapnel</b> place it at a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> the arrow climbs, the down arrow climbs down</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waystone to travel (in survival, from beside a waystone)</div><div><b>Tap a waystone</b> with place to attune it or choose where to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
+  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn (creative)</div><div><b>Space in midair</b> glide</div><div><b>Grapnel</b> right click a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> Space climbs, Shift climbs down</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to the next waystone (in survival, from beside one)</div><div><b>Right click a waystone</b> to attune it, or to choose where to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
@@ -4421,7 +4553,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:7,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:8,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -4466,18 +4598,49 @@ mmC.addEventListener('pointerdown',e=>{
   e.stopPropagation();
   if(mmZoom&&waypoints.size){const r=mmC.getBoundingClientRect(),mx=mmView.ox+(e.clientX-r.left)/r.width*mmView.span,mz=mmView.oz+(e.clientY-r.top)/r.height*mmView.span;
     let best=null,bd=mmView.span/22;waypoints.forEach(m=>{const d=Math.hypot(m.position.x-mx,m.position.z-mz);if(d<bd){bd=d;best=m;}});
-    if(best){travelTo(best);return;}}
+    if(best){if(canTravel())travelTo(best);return;}}
   mmZoom=(mmZoom+1)%3;
 });
 let wpIdx=-1,mmShown=true;
 function travelTo(m){
   for(let k=0;k<20;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[.6,.95,1],0.6,2);
-  if(m.position.x<40||m.position.z<40||m.position.x>W-40||m.position.z>D-40){toast('Loading the area');const c=keyXYZ(m.userData.k);regenerateAll(c[0],c[2]);}
-  PL.x=m.position.x;PL.z=m.position.z;PL.y=m.userData.y+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
-  gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('Traveled to waypoint');
+  const c=keyXYZ(m.userData.k);let x=c[0]-OX,z=c[2]-OZ;
+  if(x<40||z<40||x>W-40||z>D-40){toast('Loading the area');regenerateAll(c[0],c[2]);x=c[0]-OX;z=c[2]-OZ;}
+  PL.x=x+0.5;PL.z=z+0.5;PL.y=c[1]+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
+  gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('You travel to '+wpName(m.userData.k));
   for(let k=0;k<30;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*5,Math.random()*5,(Math.random()-.5)*5,[.6,.95,1],0.8,2);
 }
-function nextWaypoint(){const L=[...waypoints.values()];if(!L.length){toast('Place a waypoint block to travel to it');return;}wpIdx=(wpIdx+1)%L.length;travelTo(L[wpIdx]);}
+// ---- Earned travel (M4b, Q15, Q71). Touch an Ancient Waystone to attune it; a Carved Waystone you build is yours at once. In
+// survival you travel only from a waystone (standing within 4 blocks of one) to another; creative travels freely, as before.
+// Attuned stones are saved with the world (save data `at`) and show a beam like a carved one.
+const attuned=new Map(); // world key of the stone's top block -> the name of the place
+function wpName(k){if(attuned.has(k))return attuned.get(k);const c=keyXYZ(k);return 'Carved waystone at '+c[0]+', '+c[2];}
+const wpDist=m=>{const c=keyXYZ(m.userData.k);return Math.hypot(c[0]-OX+0.5-PL.x,c[2]-OZ+0.5-PL.z);};
+function wpHere(){let best=null,bd=1e9;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k),dx=c[0]-OX+0.5-PL.x,dz=c[2]-OZ+0.5-PL.z,dy=c[1]-PL.y;if(Math.abs(dy)>6)return;const d=Math.hypot(dx,dz);if(d<4.5&&d<bd){bd=d;best=m;}});return best;}
+function canTravel(){if(!SURV())return true;if(wpHere())return true;toast('Stand by an attuned waystone to travel');return false;}
+function stonePlace(X,Y,Z){const s=siteNear(X,Z,1);if(s)return s.name;if(gateNear(X,Z,0))return 'The Gate of '+holdOf(Math.floor(X/CS),Math.floor(Z/CS)).name;return 'A lone waystone at '+X+', '+Z;}
+// Using a waystone: attune an ancient one the first time, else open the list of places to travel to
+function useWaystone(x,y,z){
+  let t=y;if(get(x,t,z)===WAYSTONE){while(get(x,t+1,z)===WAYSTONE)t++;if(get(x,t+1,z)===CALCITE)t++;}
+  const k=wkey(x+OX,t,z+OZ);
+  if(get(x,y,z)===WAYSTONE&&!attuned.has(k)){
+    attuned.set(k,stonePlace(x+OX,t,z+OZ));addWPk(k);saveDirty=true;
+    for(let n=0;n<30;n++)spawnP(x+.5,t+1,z+.5,(Math.random()-.5)*3,Math.random()*5,(Math.random()-.5)*3,[.5,.85,1],1,1);
+    tone(500,1400,0.5,0.12);tone(750,2100,0.4,0.06,0.1);toast('Attuned: '+attuned.get(k));return;}
+  openTravel(k);
+}
+function openTravel(here){
+  invOpen=true;hold=-1;['invgrid','invname','sinv','bplist'].forEach(id=>{$(id).style.display='none';});
+  const el=$('lore');el.innerHTML='';el.style.display='block';$('invtitle').textContent=wpName(here);
+  const L=[...waypoints.values()].filter(m=>m.userData.k!==here).map(m=>[m,wpDist(m)]).sort((a,b)=>a[1]-b[1]);
+  if(!L.length)el.textContent='No other waystone is attuned yet. Touch another Ancient Waystone, or build a Carved Waystone, to travel between them.';
+  for(const [m,d] of L){const b=document.createElement('button');b.className='wide';b.textContent=wpName(m.userData.k)+' ('+Math.round(d)+' blocks)';
+    b.addEventListener('click',()=>{closeInv();travelTo(m);});el.appendChild(b);el.appendChild(document.createElement('br'));}
+  $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
+}
+function nextWaypoint(){
+  if(!canTravel())return;const here=SURV()?wpHere():null,L=[...waypoints.values()].filter(m=>m!==here);
+  if(!L.length){toast(SURV()?'No other waystone is attuned yet':'Place a waystone to travel to it');return;}wpIdx=(wpIdx+1)%L.length;travelTo(L[wpIdx]);}
 function mmCol(x,z){
   let y=H-1;while(y>0&&world[I(x,y,z)]===AIR)y--;
   const id=world[I(x,y,z)];let r,g,b;
@@ -4590,6 +4753,7 @@ async function generate(){
   $('seedline').textContent=WORLD.name+(resumed?', seed ':', a new endless world, seed ')+SEED+'.';
   if(resumed){
     const e=saved.e;for(let k=0;k+1<e.length;k+=2){storeEdit(e[k],e[k+1]);if(e[k+1]===WAYPT)addWPk(e[k]);}
+    if(Array.isArray(saved.at))saved.at.forEach(([k,n])=>{attuned.set(k,n);addWPk(k);});
     if(typeof saved.t==='number')tod=saved.t;if(typeof saved.dn==='number')dayN=saved.dn;
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}
@@ -4676,6 +4840,9 @@ function torchFx(dt){
 // Grass slowly spreads onto exposed dirt near the player
 // ---- Farming: hoe, farmland, seeds and crops that grow over time
 const CROP_NEXT={};CROP_NEXT[WHEAT0]=WHEAT1;CROP_NEXT[WHEAT1]=WHEAT2;CROP_NEXT[WHEAT2]=WHEAT;CROP_NEXT[POT0]=POT1;CROP_NEXT[POT1]=POT2;CROP_NEXT[POT2]=POT3;
+CROP_NEXT[TURN0]=TURN1;CROP_NEXT[TURN1]=TURN2;CROP_NEXT[BEAN0]=BEAN1;CROP_NEXT[BEAN1]=BEAN2;
+// What each seed or crop item plants (M4b adds turnips and beans, planted as they are)
+const PLANT_OF={208:WHEAT0,209:POT0,330:TURN0,331:BEAN0};
 function waterNear(x,y,z){for(let dz=-4;dz<=4;dz++)for(let dx=-4;dx<=4;dx++)if(get(x+dx,y,z+dz)===WATER||get(x+dx,y+1,z+dz)===WATER)return true;return false;}
 function farmUse(hit,held){
   const top=hit.py===hit.y+1,above=get(hit.x,hit.y+1,hit.z);
@@ -4685,7 +4852,7 @@ function farmUse(hit,held){
     setBlock(hit.x,hit.y,hit.z,waterNear(hit.x,hit.y,hit.z)?FARM_W:FARM_D,true);wearHeld(1);swing=1;sfxBlock(DIRT,false);breakFx(hit.x,hit.y+0.4,hit.z,DIRT,5);return true;
   }
   if((hit.id===FARM_D||hit.id===FARM_W)&&top&&above===AIR){
-    setBlock(hit.x,hit.y+1,hit.z,held===208?WHEAT0:POT0,true);
+    setBlock(hit.x,hit.y+1,hit.z,PLANT_OF[held],true);
     if(SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
     swing=1;sfxBlock(TGRASS,true);return true;
   }
@@ -4812,7 +4979,7 @@ function frame(now){
   else if(head===LAVA){U.fogColor.value.setHex(0xc84a10);U.fogNear.value=0;U.fogFar.value=4;renderer.setClearColor(0xc84a10);tint.style.display='block';tint.style.background='rgba(220,90,20,.4)';}
   else{
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
-    U.caveMin.value=CV[0]*caveF;U.lamp.value=CV[1];U.lampR.value=CV[2];
+    const lmp=lampLevel();U.caveMin.value=CV[0]*caveF*(SURV()?depthDim(PL.y):1);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
     U.fogNear.value=lerp(FOGN*(1-0.3*rainAmt),CV[3]*0.35,caveF);U.fogFar.value=lerp(FOGF*(1-0.25*rainAmt),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';}
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;
@@ -4850,7 +5017,8 @@ function infoExtra(){
   const t=curT()*24,hh=Math.floor(t),mi=Math.floor((t-hh)*60);
   let s='\n'+(hh<10?'0':'')+hh+':'+(mi<10?'0':'')+mi+(rainAmt>0.3?(snowing?', snow':', rain'):'');
   let best=1e9;waypoints.forEach(m=>{const d=Math.hypot(m.position.x-PL.x,m.position.z-PL.z);if(d<best)best=d;});
-  if(best<1e9)s+='\nWaypoint '+Math.round(best)+' blocks';
+  if(best<1e9)s+='\nWaystone '+Math.round(best)+' blocks';
+  if(SURV()&&equip.belt&&ITEMS[equip.belt.id].lamp)s+='\nLantern: '+lampFuelText();
   return s;
 }
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});

@@ -1,7 +1,7 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5};
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4};
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -38,7 +38,8 @@ function revive(){
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
   if(!items){setBlock(X,Y,Z,AIR,true);return;}
-  const left=[];for(const [id,c,d] of items){const before=inv.findIndex(q=>!q);const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&durOf(id)){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
+  const left=[];for(const [id,c,d] of items){const es=equipSlotOf(id);if(es&&!equip[es]){equip[es]={id:id,c:1,d:d||0};continue;} // lanterns, packs and bags go back on first
+    const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&durOf(id)){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
   if(left.length){graves.set(k,left);toast('Inventory full, some things are still in the grave');}
   else{graves.delete(k);setBlock(X,Y,Z,AIR,true);showName('You got your things back');}
   drawBar(true);saveDirty=true;
@@ -55,6 +56,7 @@ function cactusNear(){
 }
 function survivalTick(dt,inLiq,moved,sprinting){
   hurtCD=Math.max(0,hurtCD-dt);eatCD=Math.max(0,eatCD-dt);
+  lampTick(dt);
   if(!SURV()||dead){air=10;return;}
   // falling
   if(inLiq||PL.fly||PL.climb)fallTop=PL.y;
@@ -73,6 +75,30 @@ function survivalTick(dt,inLiq,moved,sprinting){
   if(food===0){starveT+=dt;if(starveT>=4){starveT=0;if(hp>1)hurt(1,'starved');}}else starveT=0;
   drawStats();
 }
+// ---- The worn lamp (M4b, Q36, Q65). In survival the light around the player comes only from a lantern in the belt slot or a
+// light held in the hand (a torch, a lantern block, glowstone...). The lantern burns its fuel only in the dark, taking lamp oil
+// or pitch candles from the pack as it runs out. Creative keeps the old carried lamp. Returns [strength, reach in blocks].
+const LAMP_ADJ=[-3,0,6]; // the Caves setting (Dark, Normal, Bright) shortens or lengthens the reach
+function lampLevel(){
+  const adj=LAMP_ADJ[settings.cave||0]||0;
+  if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
+  const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
+  const h=curId(),lum=h&&h<200&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];
+  return[0,4];
+}
+const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
+let lampWarned=false;
+function lampTick(dt){
+  const b=equip.belt;if(!SURV()||!b||!ITEMS[b.id].lamp)return;
+  if(b.d<=0||lampDark())b.d-=dt;
+  if(b.d<=0){const f=[338,339].find(id=>countOf(id)>0);
+    if(f){takeItems(f,1);b.d=Math.max(0,b.d)+ITEMS[f].fuel;lampWarned=false;drawBar(true);}
+    else{b.d=0;if(!lampWarned){lampWarned=true;toast('Your lantern has gone out: it needs lamp oil or pitch candles');}}}
+}
+function lampFuelText(){const b=equip.belt;if(!b||!ITEMS[b.id].lamp)return '';const m=Math.ceil(b.d/60),spare=countOf(338)*20+countOf(339)*8;
+  return b.d>0?m+' min of light'+(spare?', '+spare+' min more in the pack':''):'out of fuel';}
+// Ambient light in caves falls with depth (M4b): full above y260, a quarter of it by y60
+const depthDim=y=>Math.max(0.25,Math.min(1,(y-60)/200*0.75+0.25));
 // Hearts, hunger and air above the hotbar
 function iconURL(pat,col,dark){
   const c=document.createElement('canvas');c.width=9;c.height=9;const g=c.getContext('2d');
@@ -96,12 +122,13 @@ function drawStats(){
 }
 let heldSlot=-1;
 function renderSInv(){
-  const box=$('sinv');box.innerHTML='';
+  const root=$('sinv');root.innerHTML='';
   const grid=document.createElement('div');grid.className='sgrid';
-  inv.forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
+  inv.slice(0,invCap()).forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
     if(q&&durOf(q.id)&&q.d){const f=1-q.d/durOf(q.id),bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
     if(q){b.appendChild(icon(q.id));if(q.c>1){const n=document.createElement('span');n.className='n';n.textContent=q.c;b.appendChild(n);}b.title=nameOf(q.id);}
     b.addEventListener('click',()=>{
+      if(box){boxGive(i);renderSInv();return;} // a container is open: the stack goes into it
       if(heldSlot<0){if(inv[i])heldSlot=i;}
       else{const a=inv[heldSlot],c=inv[i];
         if(a&&c&&a.id===c.id&&heldSlot!==i){const k=Math.min(a.c,stackMax(c.id)-c.c);c.c+=k;a.c-=k;if(!a.c)inv[heldSlot]=null;}
@@ -110,14 +137,15 @@ function renderSInv(){
       renderSInv();});
     grid.appendChild(b);});
   let er=null;if(Object.values(ITEMS).some(it=>it.equip)){er=document.createElement('div');er.className='sgrid eq';
-    for(const s in EQUIP_SLOTS){const q=equip[s],b=document.createElement('button');b.className='sslot';b.title=EQUIP_SLOTS[s]+(q?': '+nameOf(q.id):'');
+    for(const s in EQUIP_SLOTS){const q=equip[s],b=document.createElement('button');b.className='sslot';b.title=EQUIP_SLOTS[s]+(q?': '+nameOf(q.id)+(ITEMS[q.id].lamp?' ('+lampFuelText()+')':''):'');
       if(q)b.appendChild(icon(q.id));else{const t=document.createElement('span');t.className='n';t.textContent=EQUIP_SLOTS[s];b.appendChild(t);}
-      b.addEventListener('click',()=>{if(heldSlot>=0){if(equipSlotOf(inv[heldSlot]&&inv[heldSlot].id)===s&&!equipFrom(heldSlot))toast('No room');heldSlot=-1;}else if(q&&!unequip(s))toast('Inventory full');drawBar(true);renderSInv();});
+      b.addEventListener('click',()=>{if(heldSlot>=0){if(equipSlotOf(inv[heldSlot]&&inv[heldSlot].id)===s&&!equipFrom(heldSlot))toast('No room');heldSlot=-1;}else if(q&&!unequip(s))toast(ITEMS[q.id].slots?'Empty the extra slots first':'Inventory full');drawBar(true);renderSInv();});
       er.appendChild(b);}}
   const left=document.createElement('div');left.className='scol';
-  const h1=document.createElement('div');h1.className='inv-h';h1.textContent='Hotbar is the top row. Tap two slots to swap them.';left.appendChild(h1);left.appendChild(grid);
+  const h1=document.createElement('div');h1.className='inv-h';h1.textContent=box?'Your pack: tap a slot to put it in the '+nameOf(get(box.x,box.y,box.z)).toLowerCase()+'.':'Hotbar is the top row. Tap two slots to swap them.';left.appendChild(h1);left.appendChild(grid);
   if(er){const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Equipment: tap an item, then its slot. Tap a filled slot to take it off.';left.appendChild(h2);left.appendChild(er);}
   const recs=document.createElement('div');recs.className='recipes';
+  if(box){renderBox(recs);root.appendChild(recs);root.appendChild(left);return;} // the container first, above a long pack
   const hf=nearStation('f'),hb=nearStation('b');
   const h2=document.createElement('div');h2.className='inv-h';h2.textContent='Crafting'+(hb?', blast furnace nearby':hf?', furnace nearby':'');recs.appendChild(h2);
   const order=RECIPES.map((r,i)=>[r,i]).sort((a,b)=>(canCraft(b[0])-canCraft(a[0]))||(a[1]-b[1]));
@@ -130,7 +158,7 @@ function renderSInv(){
     const btn=document.createElement('button');btn.textContent='Craft';btn.disabled=!ok;btn.addEventListener('click',()=>craft(r));row.appendChild(btn);
     recs.appendChild(row);
   });
-  box.appendChild(left);box.appendChild(recs);
+  root.appendChild(left);root.appendChild(recs);
 }
 let airT=0,lagX=0,lagY=0,lastYaw=0,lastPitch=0,stepD=0,wasLiq=false,sel=0,brushR=0,gliding=false,sprintLatch=false,lastW=0;
 // ---- Climbing gear (M4, Q45, Q66). Rope unrolls downward through open space from where it is placed; taking a rope takes it
@@ -220,15 +248,15 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE,z:PL.z};}
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore}[th.id];
-  if(!f)return false;f(th.x,th.y,th.z);return true;
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
   const held=curId();
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}
-  if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
+  if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);
     if(held===BPTOOL){if(creativeOnly())return;if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
@@ -289,7 +317,7 @@ addEventListener('keydown',e=>{
   const a=BINDS.keys[e.code];
   if(a&&ACTIONS[a]&&ACTIONS[a].anytime&&!e.repeat){runAction(a);return;}
   // Esc closes the inventory; browsers refuse pointer lock from Esc, so show the pause menu rather than re-locking
-  if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
+  if(e.code==='Escape'&&invOpen&&!e.repeat){invOpen=false;box=null;$('inv').style.display='none';if(TOUCH||PAD.active)lockOrPlay();else showPause();return;}
   if(!playing)return;
   if(e.code==='Space')e.preventDefault();
   if(BINDS.held.forward.includes(e.code)&&!e.repeat){const n=performance.now();if(n-lastW<300)sprintLatch=true;lastW=n;} // double tap forward to sprint

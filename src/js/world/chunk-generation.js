@@ -76,7 +76,10 @@ function plants(WCX,WCZ){
       if(top===GRASS&&b!==5&&b!==6){colInfo(X,Z,TP);
         const heath=b===4?1:Math.max(0,(TP.dw-0.2)*1.6),reed=b===11?1:Math.max(0,(TP.fen-0.25)*1.6),dark=b===8?1:Math.max(0,(TP.sw-0.25)*1.6);
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
-        if(id)world[I(x,g+1,z)]=id;
+        // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
+        const fr=hsh(X,7,Z),fg=(b===3||b===4||b===8)&&fr<0.06&&fbm2(X/28,Z/28,1,4311.3)>0.2?BERRYB:(b===3||b===8)&&fr>0.994?MUSHB:(b===2||b===7||b===10)&&fr>0.994?WTURN:0;
+        if(fg)world[I(x,g+1,z)]=fg;
+        else if(id)world[I(x,g+1,z)]=id;
         else if(b===2&&TP.fwd<0.4&&Math.abs(fbm2(X/46,Z/46,1,4201.1))<0.011){world[I(x,g+1,z)]=LEAVES;if(r<0.7&&g+2<H)world[I(x,g+2,z)]=LEAVES;} // hedgerows
         else if(b!==10&&b!==4&&b!==11&&b!==8){
           const fade=(1-TP.pw)*(1-heath)*(1-reed),thick=0.45+1.1*(0.5+fbm2(X/20,Z/20,1,1907.7)),gr=(b===2?0.16:b===3?0.08:0.07)*thick*fade,meadow=b===2&&fbm2(X/14,Z/14,1,1901.3)>0.2&&r<0.3*fade;

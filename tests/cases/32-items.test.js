@@ -23,7 +23,7 @@ assert(dropsFor(LEAVES,321)[0][0]===LEAVES&&dropsFor(COBWEB,321)[0][0]===COBWEB&
 assert(fibre>60,'tall grass gives plant fibre by hand ('+fibre+' of 400)');
 // ---- recipes reachable from the starting kit and what the world gives (Q59)
 const have=new Set(START_KIT.map(e=>e[0]));
-const NATURAL=[LOG,BIRCH,SPRUCE,JLOG,SAND,GRAVEL,STONE,COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,OBSID,TGRASS,DBUSH,HEATHER,GLOWSHROOM,DLANTERN,DSCONCE,DTORCH,LEAVES,WHEAT,POT3];
+const NATURAL=[LOG,BIRCH,SPRUCE,JLOG,SAND,GRAVEL,STONE,COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,OBSID,TGRASS,DBUSH,HEATHER,GLOWSHROOM,DLANTERN,DSCONCE,DTORCH,LEAVES,WHEAT,POT3,RUNE,BERRYB,MUSHB,WTURN];
 const pickTier=()=>Math.max(0,...[...have].map(id=>ITEMS[id]&&ITEMS[id].tool==='pick'?ITEMS[id].tier:0));
 let grew=true,rounds=0;
 while(grew&&rounds<60){grew=false;rounds++;const T=pickTier();
