@@ -2,7 +2,7 @@
 // and gameplay updates run only while playing. New creatures (E1) register the same way.
 while(genQ.length)processGenQ();
 const names=ENTITY_KINDS.map(k=>k.name);info('entity kinds',names.join(', '));
-assert(['falling blocks','waypoint beams','lit kegs','blast flashes','particles','rockets','hook','rain'].every(n=>names.includes(n)),'every existing kind of moving thing is registered');
+assert(['falling blocks','waypoint beams','lit kegs','blast flashes','particles','flares','rain'].every(n=>names.includes(n)),'every existing kind of moving thing is registered');
 // A test kind: one entity with a mesh, an update counter
 const probe=[],m={position:{x:0,y:0,z:0}};let ticks=0;
 entityKind({name:'probe',list:probe,update:()=>{ticks++;}});

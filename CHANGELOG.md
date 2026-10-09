@@ -5,6 +5,27 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.11.0 (2026-10-09): M4a, tools, climbing and finding the way
+
+No change to the world or the save format: 0.10.0 worlds keep working.
+
+### Game
+- **The metal ladder:** wood, stone, copper, bronze, iron, steel and moonsilver pickaxes, each faster and longer lasting than the last. Each one is the first that can mine the next metal: a stone pickaxe for copper, copper for tin and gold, bronze for iron, iron for platinum and diamonds, steel for moonsilver, moonsilver for obsidian.
+- **Axes and shovels** in every metal: an axe cuts wood two to ten times faster than bare hands depending on its metal, and a shovel does the same for earth and sand.
+- **Bronze shears** keep leaves, cobwebs, grass and flowers whole. The **gold sickle** cuts every plant within two blocks in one stroke and harvests ripe wheat and potatoes, replanting them. The **platinum pickaxe** is the fastest made pickaxe and soon worn.
+- **Climbing:** ladders (sticks), iron pitons (one iron ingot makes 8), and rope (plant fibre from grass and bracken). Jump climbs, down or sprint climbs down, letting go holds you in place; no fall damage while climbing. Ladders need a wall and ground below; pitons go into rock at any height; rope unrolls down from where you place it as far as you carry.
+- **The grapnel** replaces the grappling hook: throw it at a wall below a ledge (up to 24 blocks away) and it catches the top edge and hangs your rope down to the ground. Break the hook to take it back with all its rope.
+- **Finding the way in survival:** the minimap shows only while you carry a **map**; a **compass** shows X, Z and which way you face; a **depth gauge** shows your height and how far below the surface you are. Creative shows everything as before.
+- **Signal flares** replace fireworks: a flare climbs about 60 blocks, then burns red as it drifts down, visible from far away. Made from a stick, a glow mushroom cap and coal.
+- **The Blasting Keg** looks like a dwarven keg now; its side no longer says TNT.
+- **The Blueprint Tool is creative only.**
+- **A starting kit** for new survival worlds: a wooden pickaxe and axe, a map, 8 torches and 4 bread.
+- Supply crates can hold rope, ladders, flares and a grapnel; smithies and armouries hold axes, shovels and pitons.
+- Fixed: cold sconces, burnt-out torches and dim glowstone could not be broken in survival.
+
+### Tooling
+- New test 32-items (tool ladder, recipes reachable from the starting kit, climbing, rope, grapnel, navigation, sickle, flares). 10-content-tables checks every block has a hardness, material and tier.
+
 ## 0.10.0 (2026-10-09): M3.5b, a natural surface
 
 Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v7`.

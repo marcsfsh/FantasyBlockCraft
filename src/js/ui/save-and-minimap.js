@@ -52,12 +52,12 @@ mmC.addEventListener('pointerdown',e=>{
     if(best){travelTo(best);return;}}
   mmZoom=(mmZoom+1)%3;
 });
-let wpIdx=-1;
+let wpIdx=-1,mmShown=true;
 function travelTo(m){
   for(let k=0;k<20;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[.6,.95,1],0.6,2);
   if(m.position.x<40||m.position.z<40||m.position.x>W-40||m.position.z>D-40){toast('Loading the area');const c=keyXYZ(m.userData.k);regenerateAll(c[0],c[2]);}
   PL.x=m.position.x;PL.z=m.position.z;PL.y=m.userData.y+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
-  G.on=false;gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('Traveled to waypoint');
+  gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('Traveled to waypoint');
   for(let k=0;k<30;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*5,Math.random()*5,(Math.random()-.5)*5,[.6,.95,1],0.8,2);
 }
 function nextWaypoint(){const L=[...waypoints.values()];if(!L.length){toast('Place a waypoint block to travel to it');return;}wpIdx=(wpIdx+1)%L.length;travelTo(L[wpIdx]);}
@@ -70,6 +70,7 @@ function mmCol(x,z){
 }
 function mmAll(){for(let z=0;z<D;z++)for(let x=0;x<W;x++)mmCol(x,z);mmCtx.putImageData(mmImg,0,0);}
 function drawMM(){
+  const show=carries(325);if(show!==mmShown){mmShown=show;mmC.style.display=show?'':'none';}if(!show)return;
   if(mmPut){mmCtx.putImageData(mmImg,0,0);mmPut=false;} // streamed columns since the last draw
   const S=mmC.width,span=mmZoom===2?512:mmZoom?W:64,ox=mmZoom===1?0:PL.x-span/2,oz=mmZoom===1?0:PL.z-span/2,k=S/span;
   mmView.ox=ox;mmView.oz=oz;mmView.span=span;
@@ -78,10 +79,9 @@ function drawMM(){
     for(let cz=r0;cz<=r1;cz++)for(let cx=c0;cx<=c1;cx++){const t=tiles.get(ckey(cx,cz));if(t)mmG.drawImage(t,(cx*CS-OX-ox)*k,(cz*CS-OZ-oz)*k,CS*k+0.6,CS*k+0.6);}}
   mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
   mmG.fillStyle='#ff4030';for(const p of primed)mmG.fillRect((p.x-ox)*k-2,(p.z-oz)*k-2,5,5);
-  if(G.on){mmG.fillStyle='#fff6c8';mmG.fillRect((G.ax-ox)*k-2,(G.az-oz)*k-2,5,5);}
   waypoints.forEach(m=>{let wx=(m.position.x-ox)*k,wz=(m.position.z-oz)*k;wx=Math.max(5,Math.min(S-5,wx));wz=Math.max(5,Math.min(S-5,wz));
     mmG.fillStyle=m.userData.c;mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.beginPath();mmG.moveTo(wx,wz-5);mmG.lineTo(wx+5,wz);mmG.lineTo(wx,wz+5);mmG.lineTo(wx-5,wz);mmG.closePath();mmG.fill();mmG.stroke();});
-  mmG.save();mmG.translate((PL.x-ox)*k,(PL.z-oz)*k);mmG.rotate(-PL.yaw);
+  const cmp=carries(323);mmG.save();mmG.translate((PL.x-ox)*k,(PL.z-oz)*k);if(!cmp){mmG.fillStyle='#fff';mmG.strokeStyle='#000';mmG.lineWidth=2;mmG.beginPath();mmG.arc(0,0,4,0,6.3);mmG.stroke();mmG.fill();mmG.restore();return;}mmG.rotate(-PL.yaw);
   mmG.fillStyle='#fff';mmG.strokeStyle='#000';mmG.lineWidth=2;mmG.beginPath();mmG.moveTo(0,-9);mmG.lineTo(6,7);mmG.lineTo(0,3);mmG.lineTo(-6,7);mmG.closePath();mmG.stroke();mmG.fill();mmG.restore();
   mmG.fillStyle='#f3efe2';mmG.font='18px VT323, monospace';mmG.fillText('N',S/2-4,16);
 }

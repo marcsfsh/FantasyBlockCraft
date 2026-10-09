@@ -1,5 +1,5 @@
 // Player
-const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false};
+const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false,climb:false};
 let spawnW=[0.5,H-5,0.5];
 const HW=0.3,PH=1.8,EYE=1.62;
 function solidAt(x,y,z){if(x<0||z<0||x>=W||z>=D)return true;if(y<0||y>=H)return false;return SOLID[world[I(x,y,z)]]===1;}
@@ -52,18 +52,26 @@ function updateHand(){
 // Input
 const keys={},tch={jump:false,down:false,jx:0,jy:0};
 let playing=false,invOpen=false,ready=false,hold=-1,holdT=0,lastSpace=0;
-const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,HOOK];
+const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,322];
 while(hot.length<9)hot.push(STONE);
 let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
 const inv=new Array(36).fill(null);
 if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
+// A new survival world starts with a small kit (M4, Q59): wooden pickaxe and axe, a map, torches and bread
+const START_KIT=[[240,1],[300,1],[325,1],[TORCH,8],[206,4]];
+if(!saved&&mode==='survival')START_KIT.forEach(([id,c],i)=>{inv[i]={id:id,c:c,d:0};});
+// Finding the way in survival (M4, Q66): the minimap needs a map, X and Z and the heading a compass, the height a depth gauge.
+// Creative always shows everything.
+const carries=id=>!SURV()||inv.some(q=>q&&q.id===id);
+const HEADINGS=['north','north-west','west','south-west','south','south-east','east','north-east'];
+const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 // Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
 // its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
 const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
-const stackMax=id=>id>=240&&id<=255?1:64;
+const stackMax=id=>ITEMS[id]&&(ITEMS[id].dur||ITEMS[id].one)?1:ITEMS[id]&&ITEMS[id].kind==='grapnel'?8:64;
 function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
 function addItem(id,n){
   for(const q of inv)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}
@@ -86,18 +94,22 @@ function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv
 function curId(){if(SURV()){const q=inv[sel];return q?q.id:0;}return hot[sel];}
 function setMode(m){
   mode=m;settings.newMode=m;lsSet(SET_KEY,settings);
-  if(SURV()){if(PL.noclip)toggleNoclip();if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();G.on=false;}
+  if(SURV()){if(PL.noclip)toggleNoclip();if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();}
   ['tUndo','tSwap','tBrush','tFly','tClip'].forEach(id=>{$(id).style.display=SURV()?'none':'';});$('clipseg').style.display=SURV()?'none':'';
   document.body.classList.toggle('surv',SURV());fallTop=null;
   drawMode();drawBar();drawStats();saveDirty=true;
 }
 function creativeOnly(){if(SURV()){toast('That is a creative mode tool');return true;}return false;}
-function dropsFor(id){
+// What breaking a block gives. Shears keep leaves, cobwebs and soft plants whole; by hand grasses and bracken give plant fibre.
+const SHEAR_KEEP=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,COBWEB]);
+function dropsFor(id,tool){
+  if(ITEMS[tool]&&ITEMS[tool].tool==='shears'&&(BL[id].leaf||SHEAR_KEEP.has(id)))return[[id,1]];
   switch(id){
+    case DBUSH:return Math.random()<0.5?[[328,1]]:[];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
-    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
+    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.45?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];
   if(BL[id].leaf){const r=Math.random();return r<0.05?[[207,1]]:r<0.15?[[201,1]]:[];}

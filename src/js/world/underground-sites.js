@@ -31,7 +31,7 @@ function applyShafts(WCX,WCZ){
 // ---- Supply crates hold a random haul, decided by where they sit
 const BARRELLOOT=[[206,1,3,6],[269,2,5,6],[207,2,5,5],[270,2,6,5],[202,3,8,4],[200,2,6,4]];
 const LOOT=[[203,8,24,10],[204,1,5,5],[200,4,12,10],[220,1,4,7],[223,1,4,6],[225,1,3,4],[226,1,3,4],[227,1,2,3],[206,1,3,6],[269,2,4,5],[208,3,8,4],[209,2,5,4],
-  [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[270,2,5,3]];
+  [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[270,2,5,3],[ROPE,4,12,5],[326,1,2,2],[322,1,1,0.8],[LADDER,3,8,3]];
 function openCrate(X,Y,Z){
   const dw=world[I(X,Y,Z)]===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(X+OX,Y,Z+OZ)]||DWLOOT):world[I(X,Y,Z)]===BARREL?BARRELLOOT:LOOT,WX=X+OX,WZ=Z+OZ,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0),got=[];let tot=0;for(const l of TBL)tot+=l[3];
   const loot=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));loot.push([it[0],n]);got.push(n+' '+nameOf(it[0]));}

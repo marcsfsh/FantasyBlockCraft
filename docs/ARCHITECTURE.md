@@ -18,7 +18,7 @@ Consequences:
 | `src/js/core/noise.js` | Seeded random numbers, hashing and fractal noise |
 | `src/js/core/names.js` | Names per people (dwarf first, others drafts) and the Tolkien-name blocklist |
 | `src/js/blocks/blocks.js` | Block ids, block definitions, hardness and sounds |
-| `src/js/blocks/items.js` | Items that are not blocks: fuel, ores, ingots, tools |
+| `src/js/blocks/items.js` | Items that are not blocks: fuel, ores, ingots; the tool ladder (`TOOL_LADDER`, tools as `{tool, tier, speed, dur}`), gear and their icons |
 | `src/js/blocks/atlas.js` | Texture atlas painted pixel by pixel, average tile colours |
 | `src/js/world/terrain.js` | World arrays, column terrain and biomes (ranges, river valleys, blended borders), lakes |
 | `src/js/world/caves.js` | Cave systems (D-028): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes |
@@ -45,10 +45,10 @@ Consequences:
 | `src/js/input/gamepad.js` | Controller support through the Gamepad API |
 | `src/js/engine/particles.js` | Particles and explosives |
 | `src/js/gameplay/player-and-input.js` | Player physics, held item, keyboard and mouse |
-| `src/js/gameplay/mining.js` | Survival mining: hold-to-break timing, pickaxe tiers and drops |
+| `src/js/gameplay/mining.js` | Survival mining: hold-to-break timing by tool and material (`toolFits`), pickaxe tiers, drops, the sickle's sweep |
 | `src/js/gameplay/crafting.js` | Recipes, crafting, and the BANNED set (defined but out of play) |
 | `src/js/gameplay/blueprints.js` | Blueprint capture and placement |
-| `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves and the survival HUD |
+| `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves, the survival HUD; climbing gear (rope, grapnel, `onClimb`), signal flares |
 | `src/js/input/touch.js` | Touch controls |
 | `src/js/ui/menus.js` | Hotbar, block menu, overlay and settings |
 | `src/js/ui/save-and-minimap.js` | Saving, worlds (create, switch, delete, export, import) and the minimap |

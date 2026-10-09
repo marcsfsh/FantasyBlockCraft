@@ -362,7 +362,7 @@ BL.forEach(b=>{if(b){b.hard=1;b.mat='misc';b.tier=0;}});
 function setH(ids,hard,mat,tier){ids.forEach(i=>{BL[i].hard=hard;BL[i].mat=mat;BL[i].tier=tier||0;});}
 setH([GRASS,DIRT,SAND,GRAVEL,SNOWG,RSAND,CACTUS,SPONGE,PATH],0.6,'soft');setH([TGRASS,FLOWR,FLOWY,DBUSH,TORCH,WHEAT,HEATHER],0,'soft');
 setH([LEAVES,BLEAVES,SLEAVES,JLEAVES,SNOWLEAF],0.3,'soft');setH([LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS],2.2,'wood');
-setH([WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK],0.8,'soft');setH([TNT],0.1,'soft');setH([GLASS,GLOW,ICE,CRYSTAL],0.45,'misc');
+setH([WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK],0.8,'cloth');setH([TNT],0.1,'soft');setH([GLASS,GLOW,ICE,CRYSTAL],0.45,'misc');
 // Cold lights: what is left of the old peoples' lamps after the ages (Q8, D-023). Generation writes them in place of lit ones
 // outside inhabited holds (COLD_OF, used by PW); coal relights lanterns, sconces and torches (crafting.js).
 const DLANTERN=69,DSCONCE=70,DTORCH=71,DGLOW=72;
@@ -372,17 +372,25 @@ def(DTORCH,'Burnt-out Torch',[193,193,193],{solid:false,opq:false,occ:false,torc
 def(DGLOW,'Dim Glowstone',[194,194,194],{snd:'glass'});
 // Ancient waystones stand at old sites and hold gates (Q71); attunement comes in M4. Their runes still glow faintly.
 const WAYSTONE=83;def(WAYSTONE,'Ancient Waystone',[195,195,195],{emit:true,lum:6});
+// Climbing gear (M4, Q45, Q66). Climbable blocks (climb) hold the player: jump climbs, down or sprint descends, nothing holds still.
+// A ladder or piton is a panel on the wall beside it (wall); a ladder needs ground or a ladder under it, a piton holds anywhere on
+// rock. Rope hangs straight down through open space; the grapnel is the hook at the top of a rope thrown up to a ledge.
+const LADDER=84,ROPE=85,PITON=86,GRAPNEL=87;
+const CLIMB={solid:false,opq:false,occ:false,climb:true,snd:'wood'};
+def(LADDER,'Ladder',[196,196,196],Object.assign({wall:true},CLIMB));def(PITON,'Iron Piton',[198,198,198],Object.assign({wall:true},CLIMB,{snd:'stone'}));
+def(ROPE,'Rope',[197,197,197],Object.assign({cross:true},CLIMB,{snd:'soft'}));def(GRAPNEL,'Grapnel Hook',[199,199,199],Object.assign({wall:true,place:false},CLIMB,{snd:'stone'}));
 const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
-setH([COAL],5,'ore',1);setH([COPO,TINO,ZINO],5,'ore',2);setH([IRON],5,'ore',3);setH([GOLD],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
+// Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
+setH([COAL],5,'ore',1);setH([COPO,ZINO],5,'ore',2);setH([TINO,GOLD],5,'ore',3);setH([IRON],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
+setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
 const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Fens'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
-const HOOK=100,isTool=id=>id===100||id===101||id===102;
-const FIREWORK=101,BPTOOL=102,TOOLS={100:['Grappling Hook',52,51],101:['Fireworks',57,57],102:['Blueprint Tool',87,87]};
+// Tools drawn as a block in the hand. The grappling hook (100) and fireworks (101) gave way to the grapnel and signal flares (M4, Q45).
+const BPTOOL=102,isTool=id=>id===BPTOOL,TOOLS={102:['Blueprint Tool',87,87]};
 // Items that are not blocks: fuel, raw ores, ingots, gems and pickaxes
 const ITEMS={};
 function item(id,n,kind,col,x){ITEMS[id]=Object.assign({n:n,kind:kind,col:col},x||{});}
@@ -393,8 +401,26 @@ item(230,'Diamond','gem',[96,232,222]);item(202,'Wheat','tile',null,{tile:83});i
 item(208,'Wheat Seeds','seeds',[150,170,70]);item(209,'Potato','lump',[186,144,86]);item(269,'Baked Potato','lump',[222,176,92]);item(271,'Brass Cog','cog',[226,188,86]);item(272,'Gold Goblet','goblet',[246,206,64]);item(273,'Rune Tablet','tablet',[90,86,88]);item(274,'Dwarven Crown','crown',[246,206,64]);
 item(270,'Glow Mushroom Cap','tile',null,{tile:118});
 item(251,'Hoe','hoe',[150,112,62]);item(206,'Bread','bread',[196,140,70]);item(207,'Apple','apple',[210,40,40]);item(204,'Gold Coin','coin',[250,210,70]);item(205,'Platinum Coin','coin',[226,240,248]);
-[['Runeforged',[110,220,250],7,18,255],['Wooden',[150,112,62],1,2],['Stone',[132,132,132],2,4],['Copper',[214,120,68],3,5],['Bronze',[182,128,58],4,6],['Iron',[222,222,218],5,7],['Steel',[124,134,152],6,9],['Moonsilver',[170,176,206],7,12],['Platinum',[226,240,248],4,15]]
-  .forEach((m,i,arr)=>{const id=m[4]||240+i-1;item(id,m[0]+' Pickaxe','pick',m[1],{pick:true,tier:m[2],speed:m[3]});});
+// Tools (M4, Q18, Q19, Q66). The metal ladder: wood, stone, copper, bronze, iron, steel, moonsilver, each faster and longer
+// lasting than the one before, and each pickaxe the first that can mine the next metal's ore (ore tiers in blocks.js). A tool
+// is {tool: kind, tier, speed, dur}: a pickaxe speeds stone, ore and metal, an axe wood, a shovel earth and sand, shears
+// leaves, cloth and plants; dur is how many blocks it breaks before it wears out. Pickaxes keep their old ids 240 to 246.
+const TOOL_LADDER=[['Wooden',[150,112,62],2,60],['Stone',[132,132,132],3,130],['Copper',[214,120,68],4,200],['Bronze',[182,128,58],5,280],
+  ['Iron',[222,222,218],6.5,400],['Steel',[124,134,152],8,700],['Moonsilver',[170,176,206],10,1500]];
+TOOL_LADDER.forEach((m,i)=>{const o={tier:i+1,speed:m[2],dur:m[3]};
+  item(240+i,m[0]+' Pickaxe','pick',m[1],Object.assign({tool:'pick'},o));item(300+i,m[0]+' Axe','axe',m[1],Object.assign({tool:'axe'},o));
+  item(310+i,m[0]+' Shovel','shovel',m[1],Object.assign({tool:'shovel'},o));});
+// Gold and platinum are for special tools (Q68): a platinum pickaxe is very fast but soon worn; the runeforged one is a relic
+item(247,'Platinum Pickaxe','pick',[226,240,248],{tool:'pick',tier:5,speed:14,dur:150});item(255,'Runeforged Pickaxe','pick',[110,220,250],{tool:'pick',tier:7,speed:18,dur:4000});
+ITEMS[251].tool='hoe';ITEMS[251].dur=150;
+item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
+// Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
+// survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
+item(322,'Grapnel','grapnel',[150,154,164],{once:true});item(323,'Compass','compass',[214,120,68],{one:true});item(324,'Depth Gauge','gauge',[226,188,86],{one:true});
+item(325,'Map','map',[222,204,156],{one:true});item(326,'Signal Flare','flare',[214,60,40],{once:true});item(327,'Parchment','parchment',[226,214,180]);item(328,'Plant Fibre','fibre',[140,166,80]);
+const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
+// Held to use once per press: holding the button does not repeat it
+const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
 const isItem=id=>id>=200;
 function nameOf(id){return isItem(id)?ITEMS[id].n:isTool(id)?TOOLS[id][0]:BL[id].n;}
 const iconCache={};
@@ -423,6 +449,29 @@ function itemIcon(id){
   else if(it.kind==='coin'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<6.2)px(x,y,d>5.2?-40:(d<3.4&&((x+y)%3===0))?-22:(x<7&&y<7?26:0));}}
   else if(it.kind==='tile')g.drawImage(atlas,(it.tile%AC)*16,((it.tile/AC)|0)*16,16,16,0,0,16,16);
   else if(it.kind==='stick'){for(let k=0;k<11;k++){g.fillStyle=k%3?'#92683c':'#6e4c2a';g.fillRect(3+k,13-k,2,2);}}
+  else if(it.kind==='axe'||it.kind==='shovel'){
+    for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
+    if(it.kind==='axe'){for(let y=1;y<9;y++)for(let x=7;x<15;x++){const u=x-y;if(u>=3&&u<=8&&x+y>=11&&x+y<=19)px(x,y,u===8?-36:u<=4?28:0);}}
+    else for(let y=0;y<7;y++)for(let x=9;x<16;x++){const d=Math.hypot(x-12.5,y-3);if(d<3.2)px(x,y,d>2.4?-34:(x<12?24:0));}}
+  else if(it.kind==='sickle'){for(let k=0;k<4;k++){g.fillStyle=k%2?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-8.5,y-7);if(d>=4.2&&d<=6&&!(x<8&&y>7))px(x,y,d>5.3?-34:d<4.8?30:0);}}
+  else if(it.kind==='shears'){for(const s of [-1,1])for(let k=0;k<8;k++)px(5+k,8+s*Math.round(k*0.35)-(s<0?1:0)+(k>5?s:0),k<3?-10:24);
+    g.fillStyle='#634422';for(const [x,y] of [[2,5],[2,10]]){g.fillRect(x,y,3,2);g.fillRect(x,y+2,1,1);g.fillRect(x+2,y-1,1,1);}}
+  else if(it.kind==='grapnel'){g.fillStyle='#8a6a3a';for(let y=9;y<16;y++)g.fillRect(7+(y%2),y,1,1);
+    for(let y=2;y<10;y++)px(7,y,y<4?20:0),px(8,y,-20);for(const s of [-1,1])for(let k=0;k<4;k++)px(7.5+s*(2+k*0.6)|0,3+k-(k>2?2:0),s<0?24:-14);}
+  else if(it.kind==='compass'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<6.4)px(x,y,d>5.3?-30:d>4.7?20:0);}
+    g.fillStyle='#e8e2d0';for(let y=4;y<12;y++)for(let x=4;x<12;x++)if(Math.hypot(x-7.5,y-7.5)<4.3)g.fillRect(x,y,1,1);
+    g.fillStyle='#c83228';g.fillRect(7,4,2,4);g.fillStyle='#3a3a44';g.fillRect(7,8,2,4);}
+  else if(it.kind==='gauge'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-8.5);if(d<6)px(x,y,d>5?-30:10);}
+    g.fillStyle='#ece6d4';for(let y=5;y<13;y++)for(let x=4;x<12;x++)if(Math.hypot(x-7.5,y-8.5)<3.9)g.fillRect(x,y,1,1);
+    g.fillStyle='#2a2a30';for(let k=0;k<4;k++)g.fillRect(7+Math.round(k*0.7),8+k,1,1);px(7,1,0);px(8,1,0);px(7,2,-20);px(8,2,-20);}
+  else if(it.kind==='map'){for(let y=2;y<14;y++)for(let x=1;x<15;x++)px(x,y,(x===1||x===14?-30:0)+(((x/4)|0)%2?-12:0));
+    g.fillStyle='#5a8a4a';g.fillRect(3,5,4,3);g.fillRect(9,8,4,3);g.fillStyle='#4a6ab0';g.fillRect(6,9,3,2);g.fillStyle='#b83a2a';g.fillRect(10,4,2,2);}
+  else if(it.kind==='flare'){for(let y=5;y<15;y++)for(let x=6;x<10;x++)px(x,y,(x===6?24:x===9?-26:0)+(y%4===0?-30:0));
+    g.fillStyle='#634422';g.fillRect(7,15,2,1);g.fillStyle='#ffd070';g.fillRect(7,2,2,3);g.fillStyle='#fff4c0';g.fillRect(7,3,2,1);}
+  else if(it.kind==='parchment'){for(let y=2;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===2?18:x===12||y===13?-28:0)+((x*7+y*3)%11===0?-14:0));
+    g.fillStyle='#8a7a5a';for(const y of [5,7,9,11])g.fillRect(5,y,6,1);}
+  else if(it.kind==='fibre'){for(let k=0;k<5;k++)for(let y=2;y<14;y++){const x=3+k*2+Math.round(Math.sin((y+k*3)/2.2));px(x,y,(k%2?-20:16)+(y%3?0:-14));}}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
@@ -486,12 +535,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   flower(27,[214,40,36]);flower(28,[246,218,48]);
   clear(29);for(let b=0;b<6;b++){let x=6+(tr()*4|0),y=15;const dir=tr()<.5?-1:1;for(let k=0;k<9;k++){P(29,x,y,[122,86,40]);y--;if(tr()<.5)x+=dir;if(x<0||x>15)break;}}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const r=y>>3;if(y%8===7||(x+(r?8:0))%16===15)P(30,x,y,sh([84,84,84],(tr()-.5)*10));else P(30,x,y,sh([124,124,124],(tr()-.5)*18+(y%8===0||(x+(r?8:0))%16===0?14:0)));}
-  // TNT side with a white band and lettering
-  const T=[[1,1,1],[0,1,0],[0,1,0],[0,1,0]],N=[[1,0,1],[1,1,1],[1,1,1],[1,0,1]];
-  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const band=y>=5&&y<=10;P(31,x,y,band?sh([232,230,222],(tr()-.5)*10):sh([196,48,36],(tr()-.5)*22+(x%4===0?-26:0)));}
-  [[T,2],[N,6],[T,10]].forEach(([g,ox])=>{for(let r=0;r<4;r++)for(let c=0;c<3;c++)if(g[r][c])P(31,ox+c+1,6+r,[30,24,22]);});
-  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const cx=(x%8)-3.5,cy=(y%8)-3.5,d=Math.hypot(cx,cy);P(32,x,y,d<1.2?[60,56,52]:d<2.6?sh([150,36,28],(tr()-.5)*14):sh([200,52,40],(tr()-.5)*20));}
-  fill(33,[150,38,30],22);
+  // Blasting Keg (Q44): oak staves under iron hoops with a red dwarven rune; the same draws from the shared stream as before
+  const KR=[[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,1],[0,1,1,0]];
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const hoop=y===2||y===3||y===12||y===13;P(31,x,y,hoop?sh([62,60,64],(tr()-.5)*10+(y===2||y===12?16:0)):sh([150,104,58],(tr()-.5)*22+(x%4===0?-26:0)));}
+  for(let r=0;r<5;r++)for(let c=0;c<4;c++)if(KR[r][c])P(31,6+c,5+r,[176,40,30]);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const cx=(x%8)-3.5,cy=(y%8)-3.5,d=Math.hypot(cx,cy);P(32,x,y,d<1.2?[48,40,34]:d<2.6?sh([118,82,46],(tr()-.5)*14):sh([156,112,64],(tr()-.5)*20));}
+  fill(33,[136,96,54],22);
   voronoi(34,[236,196,108],[150,108,48],8);for(let i=0;i<14;i++)P(34,tr()*16|0,tr()*16|0,[255,240,190]);
   wool(35,[232,232,228]);wool(36,[176,46,40]);wool(37,[52,70,168]);wool(38,[236,196,46]);wool(39,[34,32,36]);wool(50,[90,130,40]);
   for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(40,x,y,sh([222,220,210],(tr()-.5)*14));
@@ -595,6 +644,15 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     const g=px(34,x,y),m=(g[0]+g[1]+g[2])/3;P(194,x,y,[m*0.42+30,m*0.4+28,m*0.36+26]);}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=px(3,x,y),rune=(x===7||x===8)&&y>2&&y<13||(y===5||y===10)&&x>4&&x<11;P(195,x,y,rune?[120,190,230]:[c[0]*0.85+10,c[1]*0.85+12,c[2]*0.85+18]);} // waystone: worn stone with a glowing rune
   clear(193);for(let y=6;y<16;y++)for(let x=7;x<=8;x++)P(193,x,y,y<=7?[38,32,30]:y===8?[64,50,40]:sh([112,82,46],x===8?-18:0));
+  // climbing gear (M4): ladder, rope, iron piton, grapnel hook; patterned without the shared random stream
+  const nz=(x,y,k)=>((x*73+y*151+k*29)%13)-6;
+  clear(196);for(let y=0;y<16;y++)for(const x of [2,3,12,13])P(196,x,y,sh([138,98,56],nz(x,y,1)*2+(x===2||x===12?14:-8)));
+  for(const r of [2,7,12])for(let x=4;x<12;x++){P(196,x,r,sh([152,110,64],nz(x,r,2)*2+8));P(196,x,r+1,sh([112,80,44],nz(x,r,3)*2));}
+  clear(197);for(let y=0;y<16;y++){const o=(y>>1)%2;P(197,7,y,sh([170,136,86],o?18:-6));P(197,8,y,sh([140,108,64],o?-10:10));}
+  clear(198);for(let x=3;x<13;x++){P(198,x,7,[150,154,164]);P(198,x,8,[96,100,110]);}for(let y=4;y<12;y++){P(198,11,y,[176,180,190]);P(198,12,y,[110,114,124]);}P(198,3,6,[200,204,212]);
+  clear(199);for(let y=8;y<16;y++){const o=(y>>1)%2;P(199,7,y,sh([170,136,86],o?18:-6));P(199,8,y,sh([140,108,64],o?-10:10));}
+  for(let y=0;y<9;y++){P(199,7,y,[170,174,184]);P(199,8,y,[110,114,124]);}
+  for(const s2 of [-1,1])for(let k=0;k<5;k++){const x=s2<0?6-k:9+k,y=k<3?1+k:5-(k-3)*2;P(199,x,y,s2<0?[190,194,204]:[120,124,134]);P(199,x,y+1,[90,94,104]);}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles
@@ -1200,7 +1258,7 @@ function applyShafts(WCX,WCZ){
 // ---- Supply crates hold a random haul, decided by where they sit
 const BARRELLOOT=[[206,1,3,6],[269,2,5,6],[207,2,5,5],[270,2,6,5],[202,3,8,4],[200,2,6,4]];
 const LOOT=[[203,8,24,10],[204,1,5,5],[200,4,12,10],[220,1,4,7],[223,1,4,6],[225,1,3,4],[226,1,3,4],[227,1,2,3],[206,1,3,6],[269,2,4,5],[208,3,8,4],[209,2,5,4],
-  [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[270,2,5,3]];
+  [TORCH,4,12,8],[TNT,1,2,3],[201,4,8,4],[230,1,1,1.2],[228,1,1,0.6],[244,1,1,1],[245,1,1,0.4],[270,2,5,3],[ROPE,4,12,5],[326,1,2,2],[322,1,1,0.8],[LADDER,3,8,3]];
 function openCrate(X,Y,Z){
   const dw=world[I(X,Y,Z)]===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(X+OX,Y,Z+OZ)]||DWLOOT):world[I(X,Y,Z)]===BARREL?BARRELLOOT:LOOT,WX=X+OX,WZ=Z+OZ,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0),got=[];let tot=0;for(const l of TBL)tot+=l[3];
   const loot=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}const n=it[1]+Math.floor(r()*(it[2]-it[1]+1));loot.push([it[0],n]);got.push(n+' '+nameOf(it[0]));}
@@ -2253,10 +2311,10 @@ function buildMega(m,L){
       for(let y=yb-6;y<yb+7;y++)PW(cx,y,cz,(y-yb)%4===0?STEELB:AIR,MODE_SET);break;}
   }
 }
-const ARMORY_L=[[227,2,6,8],[223,2,6,6],[245,1,1,3],[244,1,1,4],[246,1,1,0.6],[STEELB,1,1,1.5],[271,1,3,3],[204,2,6,4],[255,1,1,0.15]];
+const ARMORY_L=[[227,2,6,8],[223,2,6,6],[245,1,1,3],[305,1,1,2],[244,1,1,4],[246,1,1,0.6],[STEELB,1,1,1.5],[271,1,3,3],[204,2,6,4],[255,1,1,0.15]];
 const FOOD_L=[[206,2,5,8],[269,3,6,7],[207,2,5,5],[270,3,8,5],[202,4,10,4],[208,4,8,3],[209,3,6,3],[203,4,12,3]];
 const SCHOLAR_L=[[273,1,2,8],[203,6,20,6],[204,1,4,4],[LANTERN,1,2,3],[BOOKS,1,3,3],[GLOW,1,3,2],[230,1,1,1],[CRYSTAL,1,3,2],[274,1,1,0.2],[255,1,1,0.12]];
-const SMITH_L=[[220,2,6,6],[221,2,5,5],[222,2,5,5],[223,2,5,6],[225,2,5,4],[226,2,5,4],[227,1,3,4],[228,1,2,1.2],[229,1,2,1],[200,4,12,6],[271,1,4,6],[COPB,1,1,1],[255,1,1,0.12]];
+const SMITH_L=[[220,2,6,6],[221,2,5,5],[222,2,5,5],[223,2,5,6],[225,2,5,4],[226,2,5,4],[227,1,3,4],[228,1,2,1.2],[229,1,2,1],[200,4,12,6],[271,1,4,6],[COPB,1,1,1],[303,1,1,1.5],[313,1,1,1.5],[PITON,4,12,2],[255,1,1,0.12]];
 const TREASURE_L=[[224,3,8,8],[229,1,3,5],[272,1,2,6],[274,1,1,1.2],[205,1,4,6],[204,4,12,6],[230,1,3,4],[GOLDB,1,1,1.5],[PLATB,1,1,0.6],[255,1,1,0.25]];
 const ROOM_LOOT={mine:SMITH_L,armory:ARMORY_L,barracks:ARMORY_L,arena:ARMORY_L,kitchen:FOOD_L,tavern:FOOD_L,storage:FOOD_L,farm:FOOD_L,quarters:FOOD_L,bath:FOOD_L,games:FOOD_L,cistern:FOOD_L,
   archive:SCHOLAR_L,office:SCHOLAR_L,grandlibrary:SCHOLAR_L,statuary:SCHOLAR_L,shrine:SCHOLAR_L,temple:SCHOLAR_L,crypt:SCHOLAR_L,delf:SCHOLAR_L,
@@ -3195,10 +3253,15 @@ function buildChunk(cx,cz){
     if(b.flat){const L=sky(x,y,z),B=bl(x,y,z),t=b.t[0],base=O.p.length/3,f=1/16;
       for(const c of [[0,f,1,1,1],[1,f,1,0,1],[0,f,0,1,0],[1,f,0,0,0]]){O.p.push(x+c[0],y+c[1],z+c[2]);if(b.rot)pushUV(O.u,t,c[4],c[3]);else pushUV(O.u,t,c[3],c[4]);O.l.push(L);O.b.push(B);O.a.push(1);}
       O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);continue;}
+    if(b.wall){ // a panel on the first opaque wall beside it (ladders, pitons, the grapnel); upright in the middle when there is none
+      let ox=0,oz=0;if(OPQ[get(x+1,y,z)])ox=1;else if(OPQ[get(x-1,y,z)])ox=-1;else if(OPQ[get(x,y,z+1)])oz=1;else if(OPQ[get(x,y,z-1)])oz=-1;
+      const L=sky(x,y,z),B=bl(x,y,z),t=b.t[0],base=O.p.length/3,e=1/16;
+      for(let k=0;k<4;k++){const a=CUV[k][0],v=CUV[k][1];if(ox)O.p.push(x+(ox>0?1-e:e),y+v,z+a);else O.p.push(x+a,y+v,z+(oz>0?1-e:oz<0?e:0.5));pushUV(O.u,t,a,v);O.l.push(L);O.b.push(B);O.a.push(0.92);}
+      O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);continue;}
     if(b.cross){
       const L=sky(x,y,z)*0.92,B=b.emit?2:bl(x,y,z)*0.92,t=b.t[0];
       for(let q=0;q<2;q++){const base=O.p.length/3;
-        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(c[1]?0.93:0.92);} // tops sway
+        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*(b.climb?1:0.9),z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(b.climb?0.92:c[1]?0.93:0.92);} // tops sway (rope hangs still)
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
@@ -3325,7 +3388,8 @@ function setBlock(x,y,z,v,force){
   if(old===v)return;
   if(curAct)curAct.push(iToKey(i),old);
   put(i,v);
-  if(!SOLID[v]&&y+1<H&&(BL[world[I(x,y+1,z)]].cross||BL[world[I(x,y+1,z)]].torch)){const j=I(x,y+1,z);if(curAct)curAct.push(iToKey(j),world[j]);put(j,AIR);}
+  // plants and torches above lose their footing; hung rope does not
+  if(!SOLID[v]&&y+1<H&&(BL[world[I(x,y+1,z)]].cross||BL[world[I(x,y+1,z)]].torch)&&!BL[world[I(x,y+1,z)]].climb){const j=I(x,y+1,z);if(curAct)curAct.push(iToKey(j),world[j]);put(j,AIR);}
   if(OPQ[v]&&y>0){const j=i-WD,bb=world[j];if(bb===GRASS||bb===SNOWG){if(curAct)curAct.push(iToKey(j),bb);put(j,DIRT);}}
   const oh=hm[x+W*z];calcHM(x,z);const nh=hm[x+W*z];mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
@@ -3540,7 +3604,7 @@ function pollPad(dt){
     if(ed(10))PAD.sprint=!PAD.sprint;if(Math.hypot(lx,ly)<0.25)PAD.sprint=false;
     const rtOn=PAD.rt?rtv>0.2:rtv>0.4,ltOn=PAD.lt?ltv>0.2:ltv>0.4;
     if(rtOn&&!PAD.rt){act(0);hold=0;holdT=0.28;}if(!rtOn&&PAD.rt&&hold===0)hold=-1;PAD.rt=rtOn;
-    if(ltOn&&!PAD.lt){act(2);if(!isTool(curId())){hold=2;holdT=0.28;}}if(!ltOn&&PAD.lt&&hold===2)hold=-1;PAD.lt=ltOn;
+    if(ltOn&&!PAD.lt){act(2);if(!oneShot(curId())){hold=2;holdT=0.28;}}if(!ltOn&&PAD.lt&&hold===2)hold=-1;PAD.lt=ltOn;
     for(const b in BINDS.pad)if(ed(+b)){const a=BINDS.pad[b];if(a==='pause'){PAD.rt=PAD.lt=false;PAD.cx=innerWidth/2;PAD.cy=innerHeight/2;}runAction(a);}
   }
   PAD.prev=now;
@@ -3631,7 +3695,7 @@ function updTNT(dt){
 }
 
 // Player
-const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false};
+const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false,climb:false};
 let spawnW=[0.5,H-5,0.5];
 const HW=0.3,PH=1.8,EYE=1.62;
 function solidAt(x,y,z){if(x<0||z<0||x>=W||z>=D)return true;if(y<0||y>=H)return false;return SOLID[world[I(x,y,z)]]===1;}
@@ -3684,18 +3748,26 @@ function updateHand(){
 // Input
 const keys={},tch={jump:false,down:false,jx:0,jy:0};
 let playing=false,invOpen=false,ready=false,hold=-1,holdT=0,lastSpace=0;
-const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,HOOK];
+const hot=(saved&&Array.isArray(saved.hot)&&saved.hot.length===9&&saved.seed===SEED)?saved.hot.filter(id=>isTool(id)||ITEMS[id]||(BL[id]&&BL[id].place)):[GRASS,STONE,PLANKS,LOG,GLASS,TORCH,TNT,WAYPT,322];
 while(hot.length<9)hot.push(STONE);
 let mode=saved&&saved.mode?saved.mode:WORLD.mode;
 const SURV=()=>mode==='survival';
 const inv=new Array(36).fill(null);
 if(saved&&Array.isArray(saved.inv))saved.inv.forEach((q,i)=>{if(q&&i<36&&(ITEMS[q[0]]||BL[q[0]]))inv[i]={id:q[0],c:q[1],d:q[2]||0};});
+// A new survival world starts with a small kit (M4, Q59): wooden pickaxe and axe, a map, torches and bread
+const START_KIT=[[240,1],[300,1],[325,1],[TORCH,8],[206,4]];
+if(!saved&&mode==='survival')START_KIT.forEach(([id,c],i)=>{inv[i]={id:id,c:c,d:0};});
+// Finding the way in survival (M4, Q66): the minimap needs a map, X and Z and the heading a compass, the height a depth gauge.
+// Creative always shows everything.
+const carries=id=>!SURV()||inv.some(q=>q&&q.id===id);
+const HEADINGS=['north','north-west','west','south-west','south','south-east','east','north-east'];
+const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 // Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
 // its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
 const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
-const stackMax=id=>id>=240&&id<=255?1:64;
+const stackMax=id=>ITEMS[id]&&(ITEMS[id].dur||ITEMS[id].one)?1:ITEMS[id]&&ITEMS[id].kind==='grapnel'?8:64;
 function roomFor(id){let n=0;for(const q of inv)n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;return n;}
 function addItem(id,n){
   for(const q of inv)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}
@@ -3718,31 +3790,50 @@ function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv
 function curId(){if(SURV()){const q=inv[sel];return q?q.id:0;}return hot[sel];}
 function setMode(m){
   mode=m;settings.newMode=m;lsSet(SET_KEY,settings);
-  if(SURV()){if(PL.noclip)toggleNoclip();if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();G.on=false;}
+  if(SURV()){if(PL.noclip)toggleNoclip();if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();}
   ['tUndo','tSwap','tBrush','tFly','tClip'].forEach(id=>{$(id).style.display=SURV()?'none':'';});$('clipseg').style.display=SURV()?'none':'';
   document.body.classList.toggle('surv',SURV());fallTop=null;
   drawMode();drawBar();drawStats();saveDirty=true;
 }
 function creativeOnly(){if(SURV()){toast('That is a creative mode tool');return true;}return false;}
-function dropsFor(id){
+// What breaking a block gives. Shears keep leaves, cobwebs and soft plants whole; by hand grasses and bracken give plant fibre.
+const SHEAR_KEEP=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,COBWEB]);
+function dropsFor(id,tool){
+  if(ITEMS[tool]&&ITEMS[tool].tool==='shears'&&(BL[id].leaf||SHEAR_KEEP.has(id)))return[[id,1]];
   switch(id){
+    case DBUSH:return Math.random()<0.5?[[328,1]]:[];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
-    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
+    case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.45?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];
   if(BL[id].leaf){const r=Math.random();return r<0.05?[[207,1]]:r<0.15?[[201,1]]:[];}
   if(BL[id].cross)return[];
   return[[id,1]];
 }
-// ---- Survival mining: hold to break, time from hardness and pickaxe tier, drops only with a good enough pickaxe
+// ---- Survival mining: hold to break, time from hardness and the held tool, drops only with a good enough pickaxe
+// A tool speeds the materials it is made for (items.js): pickaxe stone, ore and metal; axe wood; shovel earth and sand; shears
+// leaves, cloth and soft plants. Only a pickaxe's tier lets ore and stone drop.
+function toolFits(it,b){
+  if(!it||!it.tool)return false;
+  switch(it.tool){case 'pick':return b.mat==='stone'||b.mat==='ore'||b.mat==='metal';case 'axe':return b.mat==='wood';
+    case 'shovel':return b.mat==='soft'&&!b.cross&&!b.leaf;case 'shears':return b.leaf||b.mat==='cloth'||(b.cross&&b.mat==='soft');}
+  return false;
+}
 function mineInfo(id,tool){
   const b=BL[id];if(!b||b.hard<0)return null;
-  const it=ITEMS[tool],pick=it&&it.pick,hardMat=b.mat==='stone'||b.mat==='ore'||b.mat==='metal';
-  let speed=pick&&hardMat?it.speed:1,tier=pick?it.tier:0;
-  const ok=b.tier<=tier;
+  const it=ITEMS[tool],speed=toolFits(it,b)?it.speed:1,tier=it&&it.tool==='pick'?it.tier:0,ok=b.tier<=tier;
   return{t:b.hard/speed*(ok?1:3.3),drop:ok};
+}
+// The sickle cuts every soft plant within two blocks in one stroke; ripe wheat and potatoes are harvested and replanted
+const SICKLE_CUT=new Set([TGRASS,FLOWR,FLOWY,DBUSH,HEATHER,WHEAT,POT3]);
+function sickleSweep(cx,cy,cz){
+  const out=[];
+  for(let y=cy-1;y<=cy+1;y++)for(let z=cz-2;z<=cz+2;z++)for(let x=cx-2;x<=cx+2;x++){const id=get(x,y,z);if(!SICKLE_CUT.has(id))continue;
+    const d=dropsFor(id,320);if(id===WHEAT||id===POT3){const seed=id===WHEAT?208:209,q=d.find(e=>e[0]===seed);if(q)q[1]--;setBlock(x,y,z,id===WHEAT?WHEAT0:POT0);}else setBlock(x,y,z,AIR);
+    breakFx(x,y,z,id,4);for(const e of d)if(e[1]>0)out.push(e);}
+  return out;
 }
 let mineI=-1,mineP=0,mineTk=0;
 function mineTick(dt){
@@ -3757,8 +3848,9 @@ function mineTick(dt){
   if(mineTk<=0){mineTk=0.24;swing=1;breakFx(hit.x,hit.y,hit.z,hit.id,2);const sd=SND[BL[hit.id].snd]||SND.stone;burst(0.05,'bandpass',sd[0]*0.8,sd[1],0.12);}
   if(mineP>=1){
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
-    const id=hit.id;setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0)wearHeld(1);
-    if(info.drop){let lost=0;for(const [d,n] of dropsFor(id)){lost+=addItem(d,n);showName('+'+n+' '+nameOf(d));}if(lost)toast('Inventory full');drawBar(true);}
+    const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
+    if(info.drop){let lost=0;const got=sick?sickleSweep(hit.x,hit.y,hit.z):id===ROPE||id===GRAPNEL?ropeTake(id,hit.x,hit.y,hit.z):dropsFor(id,tool);
+      for(const [d,n] of got){lost+=addItem(d,n);showName('+'+n+' '+nameOf(d));}if(lost)toast('Inventory full');drawBar(true);}
     else if(BL[id].tier>0)toast('This needs a better pickaxe');
     mineI=-1;mineP=0;crack.visible=false;return;
   }
@@ -3769,17 +3861,22 @@ function mineTick(dt){
 const LOGS=[LOG,BIRCH,SPRUCE,JLOG];
 const RECIPES=[
   [PLANKS,4,[[LOGS,1]]],[201,4,[[PLANKS,2]]],[TORCH,4,[[200,1],[201,1]]],
-  [240,1,[[PLANKS,3],[201,2]]],[241,1,[[COBBLE,3],[201,2]]],[FURN,1,[[COBBLE,8]]],[SBRICK,4,[[STONE,4]]],
+  [FURN,1,[[COBBLE,8]]],[SBRICK,4,[[STONE,4]]],
   [STONE,2,[[COBBLE,2],[200,1]],'f'],[GLASS,2,[[SAND,2],[200,1]],'f'],
   [220,2,[[210,2],[200,1]],'f'],[221,2,[[211,2],[200,1]],'f'],[222,2,[[212,2],[200,1]],'f'],[223,2,[[213,2],[200,1]],'f'],[224,2,[[214,2],[200,1]],'f'],[229,2,[[215,2],[200,1]],'f'],
   [225,4,[[220,3],[221,1]],'f'],[226,4,[[220,3],[222,1]],'f'],[227,1,[[223,1],[200,2]],'f'],
   [BLAST,1,[[FURN,1],[227,5],[SBRICK,3]]],[228,2,[[216,2],[200,2]],'b'],
-  [242,1,[[220,3],[201,2]]],[243,1,[[225,3],[201,2]]],[244,1,[[223,3],[201,2]]],[245,1,[[227,3],[201,2]]],[246,1,[[228,3],[201,2]]],[247,1,[[229,3],[201,2]]],
+  [247,1,[[229,3],[201,2]]],[320,1,[[224,3],[201,1]]],[321,1,[[225,2]]],[251,1,[[PLANKS,2],[201,2]]],
+  // climbing gear and finding the way (M4)
+  [LADDER,3,[[201,7]]],[PITON,8,[[223,1]]],[ROPE,2,[[328,3]]],[322,1,[[225,3],[ROPE,1]]],
+  [327,4,[[BIRCH,1]]],[325,1,[[327,3],[200,1]]],[323,1,[[220,4],[GLASS,1]]],[324,1,[[226,3],[GLASS,1]]],[326,2,[[201,1],[270,1],[200,1]]],
   [COPB,1,[[220,9]]],[BRONB,1,[[225,9]]],[BRASB,1,[[226,9]]],[STEELB,1,[[227,9]]],[TITB,1,[[228,9]]],[PLATB,1,[[229,9]]],
   [LANTERN,1,[[226,4],[TORCH,1]]],[LANTERN,1,[[DLANTERN,1],[200,1]]],[SCONCE,1,[[DSCONCE,1],[200,1]]],[TORCH,1,[[DTORCH,1],[200,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,1],[229,2],[GLASS,4]]],
-  [BPTOOL,1,[[PLANKS,4],[220,1],[GLASS,1]]],
-  [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f'],[251,1,[[PLANKS,2],[201,2]]]
+  [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f']
 ];
+// The tool ladder (items.js): pickaxe and axe from three of the material, shovel from one, each with two sticks
+const LADDER_MAT=[PLANKS,COBBLE,220,225,223,227,228];
+LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]]));
 function nearStation(kind){
   const px=Math.floor(PL.x),py=Math.floor(PL.y),pz=Math.floor(PL.z);
   for(let y=py-3;y<=py+4;y++)for(let z=pz-4;z<=pz+4;z++)for(let x=px-4;x<=px+4;x++){const id=get(x,y,z);if(id===BLAST||(kind==='f'&&id===FURN))return true;}
@@ -3865,12 +3962,12 @@ function renderBlueprints(box){
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const DUR={255:4000,251:150,240:60,241:132,242:180,243:260,244:250,245:600,246:1600,247:120},FOOD={270:2,206:5,207:4,209:1,269:5};
+const FOOD={270:2,206:5,207:4,209:1,269:5};
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
-  if(!SURV())return;const q=inv[sel];if(!q||!DUR[q.id])return;
-  q.d=(q.d||0)+n;if(q.d>=DUR[q.id]){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
+  if(!SURV())return;const q=inv[sel];if(!q||!durOf(q.id))return;
+  q.d=(q.d||0)+n;if(q.d>=durOf(q.id)){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
   drawBar(true);
 }
 function hurt(n,cause){
@@ -3882,7 +3979,7 @@ function hurt(n,cause){
 }
 const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
 function die(cause){
-  dead=true;hold=-1;G.on=false;
+  dead=true;hold=-1;
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
   for(const s in equip)if(equip[s]){items.push([equip[s].id,1,equip[s].d||0]);equip[s]=null;}
   let msg=DEATH[cause]||'You died';
@@ -3902,7 +3999,7 @@ function revive(){
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
   if(!items){setBlock(X,Y,Z,AIR,true);return;}
-  const left=[];for(const [id,c,d] of items){const before=inv.findIndex(q=>!q);const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&DUR[id]){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
+  const left=[];for(const [id,c,d] of items){const before=inv.findIndex(q=>!q);const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&durOf(id)){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
   if(left.length){graves.set(k,left);toast('Inventory full, some things are still in the grave');}
   else{graves.delete(k);setBlock(X,Y,Z,AIR,true);showName('You got your things back');}
   drawBar(true);saveDirty=true;
@@ -3921,7 +4018,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   hurtCD=Math.max(0,hurtCD-dt);eatCD=Math.max(0,eatCD-dt);
   if(!SURV()||dead){air=10;return;}
   // falling
-  if(inLiq||PL.fly||G.on)fallTop=PL.y;
+  if(inLiq||PL.fly||PL.climb)fallTop=PL.y;
   else if(PL.ground){if(fallTop!==null&&fallTop-PL.y>3.5)hurt(Math.floor(fallTop-PL.y-3),'fell');fallTop=PL.y;}
   else fallTop=fallTop===null?PL.y:Math.max(fallTop,PL.y);
   // lava, cactus
@@ -3963,7 +4060,7 @@ function renderSInv(){
   const box=$('sinv');box.innerHTML='';
   const grid=document.createElement('div');grid.className='sgrid';
   inv.forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
-    if(q&&DUR[q.id]&&q.d){const f=1-q.d/DUR[q.id],bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
+    if(q&&durOf(q.id)&&q.d){const f=1-q.d/durOf(q.id),bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
     if(q){b.appendChild(icon(q.id));if(q.c>1){const n=document.createElement('span');n.className='n';n.textContent=q.c;b.appendChild(n);}b.title=nameOf(q.id);}
     b.addEventListener('click',()=>{
       if(heldSlot<0){if(inv[i])heldSlot=i;}
@@ -3997,42 +4094,77 @@ function renderSInv(){
   box.appendChild(left);box.appendChild(recs);
 }
 let airT=0,lagX=0,lagY=0,lastYaw=0,lastPitch=0,stepD=0,wasLiq=false,sel=0,brushR=0,gliding=false,sprintLatch=false,lastW=0;
-const G={on:false,t:0,ax:0,ay:0,az:0,bx:0,by:0,bz:0,len:1};
-entityKind({name:'hook',list:[],shift:(dx,dz)=>{G.ax-=dx;G.az-=dz;G.bx-=dx;G.bz-=dz;},clear:()=>{G.on=false;}});
-function fireHook(){
-  if(G.on){releaseHook(false);return;}
-  const hit=raycast(eyePos(),camDir(),48);
-  if(!hit||!SOLID[hit.id]){toast('Nothing to hook within 48 blocks');tone(300,200,0.1,0.1);return;}
-  G.on=true;G.t=0;G.bx=hit.x;G.by=hit.y;G.bz=hit.z;
-  G.ax=(hit.x+hit.px)/2+0.5;G.ay=(hit.y+hit.py)/2+0.5;G.az=(hit.z+hit.pz)/2+0.5;
-  const e=eyePos();G.len=Math.hypot(G.ax-e.x,G.ay-e.y,G.az-e.z);
-  tone(1300,300,0.18,0.16);burst(0.12,'highpass',3000,1,0.12);swing=1;gliding=false;buzz(12);
+// ---- Climbing gear (M4, Q45, Q66). Rope unrolls downward through open space from where it is placed; taking a rope takes it
+// and everything hanging below it. The grapnel is thrown at a wall below its top edge: it catches the lip and hangs rope from
+// there, as much as you carry (in creative as much as it needs).
+const ROPE_MAX=48;
+function ropeFits(x,y,z){return get(x,y,z)===AIR&&y>0;}
+// Hang rope from (x,y,z) downward, at most n blocks; returns how many were hung
+function hangRope(x,y,z,n){let k=0;while(k<n&&ropeFits(x,y-k,z)){setBlock(x,y-k,z,ROPE);k++;}return k;}
+function ropeLeft(){return SURV()?countOf(ROPE):ROPE_MAX;}
+// Take down the rope hanging below (x,y,z); returns how many blocks of rope came down
+function ropeBelow(x,y,z){let n=0;for(let yy=y-1;yy>0&&get(x,yy,z)===ROPE;yy--){setBlock(x,yy,z,AIR);n++;}return n;}
+function placeRope(tx,ty,tz){
+  const above=get(tx,ty+1,tz),wall=[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>OPQ[get(tx+a,ty,tz+b)]);
+  if(above===AIR&&!wall){toast('Rope needs something to hang from');return;}
+  const n=hangRope(tx,ty,tz,Math.min(ROPE_MAX,ropeLeft()));if(SURV()&&n)takeItems(ROPE,n);
+  if(n>1)showName(n+' blocks of rope');sfxBlock(ROPE,true);swing=1;buzz(8);drawBar(true);
 }
-function releaseHook(boost){G.on=false;if(boost)PL.vy=Math.max(PL.vy,6.5);}
+// Where a grapnel aimed at this wall would catch: the first top edge up to 10 blocks above the hit with room to stand on it
+function grapnelLip(hit){
+  const fx=hit.px-hit.x,fz=hit.pz-hit.z;if(hit.py!==hit.y||(fx===0&&fz===0))return null;
+  for(let y=hit.y;y<Math.min(H-3,hit.y+10);y++){
+    if(!SOLID[get(hit.x,y,hit.z)]||get(hit.px,y,hit.pz)!==AIR)return null;
+    if(!SOLID[get(hit.x,y+1,hit.z)]&&!SOLID[get(hit.x,y+2,hit.z)])return{x:hit.px,y:y,z:hit.pz};}
+  return null;
+}
+function throwGrapnel(){
+  const hit=raycast(eyePos(),camDir(),24);
+  if(!hit||!SOLID[hit.id]){toast('Nothing for the grapnel to catch within 24 blocks');tone(300,200,0.1,0.1);return;}
+  const lip=grapnelLip(hit);if(!lip){toast('Throw the grapnel at a wall below a ledge');tone(300,200,0.1,0.1);return;}
+  if(ropeLeft()<1){toast('You need rope to hang from the grapnel');return;}
+  beginAct();setBlock(lip.x,lip.y,lip.z,GRAPNEL);const n=hangRope(lip.x,lip.y-1,lip.z,ropeLeft());endAct();
+  if(SURV()){takeItems(322,1);if(n)takeItems(ROPE,n);}
+  const short=ropeFits(lip.x,lip.y-1-n,lip.z);let gap=0;if(short)while(gap<64&&ropeFits(lip.x,lip.y-1-n-gap,lip.z))gap++;
+  tone(1300,300,0.18,0.16);burst(0.12,'highpass',3000,1,0.12);swing=1;buzz(12);drawBar(true);
+  toast(short?'The grapnel caught; the rope ends '+gap+' blocks above the ground':'The grapnel caught the ledge');
+}
+// Breaking a rope or the grapnel also takes down the rope below it; returns what that gives back
+function ropeTake(id,x,y,z){const n=ropeBelow(x,y,z)+(id===ROPE?1:0);const out=[];if(id===GRAPNEL)out.push([322,1]);if(n)out.push([ROPE,n]);return out;}
+// Is the player's body in a climbable block (ladder, piton, rope, grapnel)?
+function onClimb(){
+  const x0=Math.floor(PL.x-HW),x1=Math.floor(PL.x+HW),y0=Math.floor(PL.y),y1=Math.floor(PL.y+PH-0.2),z0=Math.floor(PL.z-HW),z1=Math.floor(PL.z+HW);
+  for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)if(BL[get(x,y,z)].climb)return true;return false;
+}
+// Ladders stand on the ground or on a ladder and lean on a wall; pitons are driven into rock
+function canHang(id,x,y,z){
+  const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>get(x+a,y,z+b));
+  if(id===LADDER)return nb.some(n=>OPQ[n])&&(SOLID[get(x,y-1,z)]||get(x,y-1,z)===LADDER);
+  if(id===PITON)return nb.some(n=>OPQ[n]&&(BL[n].mat==='stone'||BL[n].mat==='ore'));
+  return true;
+}
 let swapMode=false,photo=false;
 function toggleSwap(){if(!swapMode&&creativeOnly())return;swapMode=!swapMode;$('tSwap').classList.toggle('on',swapMode);selBox.material.color.setHex(swapMode?0xffc83a:0x000000);toast(swapMode?'Swap mode: place replaces blocks':'Swap mode off');}
 function setPhoto(on){photo=on;$('hud').style.display=on?'none':'block';updateHand();if(on)toast('');}
-const rockets=[];
-entityKind({name:'rockets',list:rockets,update:dt=>updRockets(dt)});
-const FWC=[[1,.3,.3],[1,.85,.3],[.4,1,.5],[.4,.7,1],[.9,.45,1],[1,1,1]];
-function launchFirework(){
-  const hit=raycast(eyePos(),camDir(),8),d=camDir();
-  const x=hit?hit.px+.5:PL.x+d.x*2,y=hit?hit.py+.2:PL.y+1,z=hit?hit.pz+.5:PL.z+d.z*2;
-  rockets.push({x:x,y:y,z:z,vx:(Math.random()-.5)*1.5,vy:20+Math.random()*6,vz:(Math.random()-.5)*1.5,t:1.0+Math.random()*0.5});
+// ---- Signal flares (M4, Q45): a flare climbs about 60 blocks, then burns red and drifts down slowly, seen from far away
+const flares=[];
+entityKind({name:'flares',list:flares,update:dt=>updFlares(dt)});
+const flareMat=new THREE.MeshBasicMaterial({color:0xff5030,fog:false}),flareGeo=new THREE.SphereGeometry(0.35,8,6);
+function launchFlare(){
+  const d=camDir(),x=PL.x+d.x*0.8,y=PL.y+1.6,z=PL.z+d.z*0.8,m=new THREE.Mesh(flareGeo,flareMat);m.position.set(x,y,z);scene.add(m);
+  flares.push({x:x,y:y,z:z,vx:d.x*2,vy:30,vz:d.z*2,t:2.2,burn:10,m:m});
+  if(SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
   burst(0.6,'bandpass',2600,0.8,0.18);swing=1;buzz(10);
 }
-function updRockets(dt){
-  for(let i=rockets.length-1;i>=0;i--){
-    const r=rockets[i];r.t-=dt;r.vy-=6*dt;r.x+=r.vx*dt;r.y+=r.vy*dt;r.z+=r.vz*dt;
-    spawnP(r.x,r.y,r.z,(Math.random()-.5),-1,(Math.random()-.5),[1,.8,.4],0.4,2);
-    if(r.t<=0||SOLID[get(Math.floor(r.x),Math.floor(r.y),Math.floor(r.z))]){
-      rockets.splice(i,1);
-      const c1=FWC[Math.random()*FWC.length|0],c2=FWC[Math.random()*FWC.length|0],n=110+(Math.random()*60|0),sp=7+Math.random()*5,ring=Math.random()<0.3;
-      for(let k=0;k<n;k++){let ux,uy,uz;if(ring){const a=k/n*6.283;ux=Math.cos(a);uy=(Math.random()-.5)*0.15;uz=Math.sin(a);}else{uy=Math.random()*2-1;const a=Math.random()*6.283,q=Math.sqrt(1-uy*uy);ux=Math.cos(a)*q;uz=Math.sin(a)*q;}
-        const s2=sp*(0.85+Math.random()*0.3);spawnP(r.x,r.y,r.z,ux*s2,uy*s2,uz*s2,k%2?c1:c2,1.2+Math.random()*0.8,3);}
-      const dist=Math.hypot(r.x-PL.x,r.y-PL.y,r.z-PL.z),v=Math.max(0.05,1-dist/120);
-      burst(0.5,'lowpass',900,0.7,0.5*v,dist/340);for(let k=0;k<6;k++)burst(0.05,'highpass',5000,1,0.12*v,dist/340+0.15+k*0.07+Math.random()*0.05);
-    }
+function updFlares(dt){
+  for(let i=flares.length-1;i>=0;i--){
+    const f=flares[i];
+    if(f.t>0){f.t-=dt;f.vy-=6*dt;spawnP(f.x,f.y,f.z,(Math.random()-.5),-1,(Math.random()-.5),[1,.8,.4],0.4,2);
+      if(f.t<=0){f.vx*=0.2;f.vz*=0.2;const dist=Math.hypot(f.x-PL.x,f.y-PL.y,f.z-PL.z);burst(0.5,'lowpass',700,0.7,0.4*Math.max(0.05,1-dist/160),dist/340);}}
+    else{f.burn-=dt;f.vy+=(-1.6-f.vy)*Math.min(1,dt*2);if(Math.random()<dt*30)spawnP(f.x,f.y,f.z,(Math.random()-.5)*1.5,-0.5,(Math.random()-.5)*1.5,[1,.35+Math.random()*.3,.2],1.6,0.4);
+      f.m.scale.setScalar(1.6+0.4*Math.sin(f.burn*23)+Math.min(1,Math.hypot(f.x-PL.x,f.z-PL.z)/80)*3);}
+    f.x+=f.vx*dt;f.y+=f.vy*dt;f.z+=f.vz*dt;f.m.position.set(f.x,f.y,f.z);
+    if(f.burn<=0||(f.t>0&&SOLID[get(Math.floor(f.x),Math.floor(f.y),Math.floor(f.z))])){scene.remove(f.m);flares.splice(i,1);}
   }
 }
 function sphere(cx,cy,cz,r,fn){for(let dy=-r;dy<=r;dy++)for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){if(dx*dx+dy*dy+dz*dz>r*r+r)continue;const x=cx+dx,y=cy+dy,z=cz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;fn(x,y,z,world[I(x,y,z)]);}}
@@ -4042,10 +4174,11 @@ function jumpPress(){
   if(SURV()){lastSpace=n;return;}
   if(n-lastSpace<280){gliding=false;toggleFly();lastSpace=0;return;}
   lastSpace=n;
-  if(!PL.ground&&!PL.fly&&!G.on){gliding=!gliding;if(gliding)toast('Gliding');}
+  if(!PL.ground&&!PL.fly){gliding=!gliding;if(gliding)toast('Gliding');}
 }
-function camDir(){return new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);}
-function eyePos(){return new THREE.Vector3(PL.x,PL.y+EYE,PL.z);}
+// where the player looks and from where, from the player's view angles (the camera follows them every frame)
+function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Math.sin(PL.pitch),z:-Math.cos(PL.yaw)*cp};}
+function eyePos(){return{x:PL.x,y:PL.y+EYE,z:PL.z};}
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
   const f={[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore}[th.id];
@@ -4054,12 +4187,12 @@ function useBlock(th){
 function act(btn){
   const held=curId();
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
-  if(btn===2&&held===HOOK){fireHook();return;}
-  if(btn===2&&held===FIREWORK){launchFirework();return;}
+  if(btn===2&&held===322){throwGrapnel();return;}
+  if(btn===2&&held===326){launchFlare();return;}
   if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);
-    if(held===BPTOOL){if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
+    if(held===BPTOOL){if(creativeOnly())return;if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
   if(btn===0&&SURV())return;
   const hit=raycast(eyePos(),camDir(),6);if(!hit)return;
   if(btn===0){
@@ -4068,7 +4201,7 @@ function act(btn){
     if(hit.id===BEDROCK&&brushR===0)return;
     beginAct();
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
-    if(brushR===0)setBlock(hit.x,hit.y,hit.z,AIR);
+    if(brushR===0){setBlock(hit.x,hit.y,hit.z,AIR);if(hit.id===ROPE||hit.id===GRAPNEL)ropeBelow(hit.x,hit.y,hit.z);}
     else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,id)=>{if(id&&id!==BEDROCK&&!BL[id].liquid){if(Math.random()<0.12)breakFx(x,y,z,id,3);setBlock(x,y,z,AIR);}});
     endAct();
   }else if(btn===2){
@@ -4080,11 +4213,13 @@ function act(btn){
       else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,old)=>{if(ok(old))setBlock(x,y,z,id);});
       endAct();swing=1;sfxBlock(id,true);buzz(8);return;
     }
-    if(BL[hit.id].cross){tx=hit.x;ty=hit.y;tz=hit.z;}
+    if(BL[hit.id].cross&&!BL[hit.id].climb){tx=hit.x;ty=hit.y;tz=hit.z;}
     if(ty<0||ty>=H)return;
+    if(id===ROPE&&brushR===0){if(get(tx,ty,tz)!==AIR)return;beginAct();placeRope(tx,ty,tz);endAct();return;}
+    if((id===LADDER||id===PITON)&&!canHang(id,tx,ty,tz)){toast(id===LADDER?'A ladder needs a wall and the ground or a ladder below':'Pitons go into rock');return;}
     beginAct();
     if(brushR===0){
-      if(((BL[id].cross||BL[id].torch)&&!SOLID[get(tx,ty-1,tz)])||(BL[id].solid&&hitsPlayer(tx,ty,tz))){endAct();return;}
+      if(((BL[id].cross||BL[id].torch)&&!BL[id].climb&&!SOLID[get(tx,ty-1,tz)])||(BL[id].solid&&hitsPlayer(tx,ty,tz))){endAct();return;}
       setBlock(tx,ty,tz,id);
     }else sphere(tx,ty,tz,brushR,(x,y,z,old)=>{if((old===AIR||BL[old].liquid||BL[old].cross)&&!(BL[id].solid&&hitsPlayer(x,y,z))&&!((BL[id].cross||BL[id].torch)&&!SOLID[get(x,y-1,z)]))setBlock(x,y,z,id);});
     if(SURV()&&world[I(tx,ty,tz)]===id){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
@@ -4130,7 +4265,7 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('mousedown',e=>{
   if(document.pointerLockElement!==canvas)return;
-  act(e.button);if(e.button===0||(e.button===2&&!isTool(curId()))){hold=e.button;holdT=0.28;}
+  act(e.button);if(e.button===0||(e.button===2&&!oneShot(curId()))){hold=e.button;holdT=0.28;}
 });
 document.addEventListener('mouseup',()=>{hold=-1;});
 document.addEventListener('contextmenu',e=>e.preventDefault());
@@ -4189,7 +4324,7 @@ if(TOUCH){
   btn('tJump',()=>{tch.jump=true;jumpPress();},()=>{tch.jump=false;});
   btn('tDown',()=>{tch.down=true;},()=>{tch.down=false;});
   btn('tBreak',()=>{act(0);hold=0;holdT=0.3;},()=>{hold=-1;});
-  btn('tPlace',()=>{act(2);if(!isTool(curId())){hold=2;holdT=0.3;}},()=>{hold=-1;});
+  btn('tPlace',()=>{act(2);if(!oneShot(curId())){hold=2;holdT=0.3;}},()=>{hold=-1;});
   btn('tBrush',()=>{runAction('brush');});
   btn('tSwap',()=>{runAction('swap');});
   btn('tUndo',()=>{runAction('undo');});
@@ -4211,14 +4346,14 @@ function drawBar(quiet){
     const sl=document.createElement('div');sl.className='slot'+(i===sel?' on':'');if(id)sl.appendChild(icon(id));
     const n=document.createElement('span');n.textContent=i+1;sl.appendChild(n);
     if(SURV()&&inv[i]&&inv[i].c>1){const c=document.createElement('b');c.className='cnt';c.textContent=inv[i].c;sl.appendChild(c);}
-    if(SURV()&&inv[i]&&DUR[inv[i].id]&&inv[i].d){const f=1-inv[i].d/DUR[inv[i].id],bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';sl.appendChild(bb);}
+    if(SURV()&&inv[i]&&durOf(inv[i].id)&&inv[i].d){const f=1-inv[i].d/durOf(inv[i].id),bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';sl.appendChild(bb);}
     sl.addEventListener('pointerdown',e=>{e.stopPropagation();if(i===sel&&TOUCH){openInv();return;}sel=i;drawBar();});bar.appendChild(sl);
   }
   if(!quiet){const id=curId();if(id)showName(nameOf(id));}
   updateHand();saveDirty=true;
 }
 (function(){
-  const g=$('invgrid'),CATS=[['Tools',[HOOK,FIREWORK,BPTOOL]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
+  const g=$('invgrid'),CATS=[['Tools',[BPTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
     ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH]],['Building',[BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
@@ -4229,8 +4364,7 @@ function drawBar(quiet){
       el.addEventListener('click',()=>{hot[sel]=id;drawBar();closeInv();});g.appendChild(el);});});
 })();
 function openInv(){invOpen=true;
-  $('lore').style.display='none';$('bplist').style.display='flex';renderBlueprints($('bplist'));
-  const sv=SURV();$('invgrid').style.display=sv?'none':'';$('invname').style.display=sv?'none':'';$('sinv').style.display=sv?'flex':'none';
+  const sv=SURV();$('lore').style.display='none';$('bplist').style.display=sv?'none':'flex';if(!sv)renderBlueprints($('bplist')); // the Blueprint Tool is creative only (Q42)$('invgrid').style.display=sv?'none':'';$('invname').style.display=sv?'none':'';$('sinv').style.display=sv?'flex':'none';
   $('invtitle').textContent=sv?'Inventory and crafting':'Pick a block for slot '+(sel+1);heldSlot=-1;if(sv)renderSInv();
   $('inv').style.display='grid';hold=-1;if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;}
 function closeInv(){invOpen=false;$('inv').style.display='none';lockOrPlay();}
@@ -4238,8 +4372,8 @@ $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 
 // Overlay and settings
 const KEYS_HTML=TOUCH
-  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Hook</b> tap to fire, tap again to let go</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
-  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Hook</b> right click to swing, again to let go</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
+  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Grapnel</b> place it at a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> the arrow climbs, the down arrow climbs down</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
+  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Grapnel</b> right click a wall below a ledge to hang rope</div><div><b>Ladders and rope</b> Space climbs, Shift climbs down</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
@@ -4335,12 +4469,12 @@ mmC.addEventListener('pointerdown',e=>{
     if(best){travelTo(best);return;}}
   mmZoom=(mmZoom+1)%3;
 });
-let wpIdx=-1;
+let wpIdx=-1,mmShown=true;
 function travelTo(m){
   for(let k=0;k<20;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[.6,.95,1],0.6,2);
   if(m.position.x<40||m.position.z<40||m.position.x>W-40||m.position.z>D-40){toast('Loading the area');const c=keyXYZ(m.userData.k);regenerateAll(c[0],c[2]);}
   PL.x=m.position.x;PL.z=m.position.z;PL.y=m.userData.y+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
-  G.on=false;gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('Traveled to waypoint');
+  gliding=false;tone(400,1600,0.35,0.15);tone(800,2400,0.3,0.08,0.08);toast('Traveled to waypoint');
   for(let k=0;k<30;k++)spawnP(PL.x,PL.y+1,PL.z,(Math.random()-.5)*5,Math.random()*5,(Math.random()-.5)*5,[.6,.95,1],0.8,2);
 }
 function nextWaypoint(){const L=[...waypoints.values()];if(!L.length){toast('Place a waypoint block to travel to it');return;}wpIdx=(wpIdx+1)%L.length;travelTo(L[wpIdx]);}
@@ -4353,6 +4487,7 @@ function mmCol(x,z){
 }
 function mmAll(){for(let z=0;z<D;z++)for(let x=0;x<W;x++)mmCol(x,z);mmCtx.putImageData(mmImg,0,0);}
 function drawMM(){
+  const show=carries(325);if(show!==mmShown){mmShown=show;mmC.style.display=show?'':'none';}if(!show)return;
   if(mmPut){mmCtx.putImageData(mmImg,0,0);mmPut=false;} // streamed columns since the last draw
   const S=mmC.width,span=mmZoom===2?512:mmZoom?W:64,ox=mmZoom===1?0:PL.x-span/2,oz=mmZoom===1?0:PL.z-span/2,k=S/span;
   mmView.ox=ox;mmView.oz=oz;mmView.span=span;
@@ -4361,10 +4496,9 @@ function drawMM(){
     for(let cz=r0;cz<=r1;cz++)for(let cx=c0;cx<=c1;cx++){const t=tiles.get(ckey(cx,cz));if(t)mmG.drawImage(t,(cx*CS-OX-ox)*k,(cz*CS-OZ-oz)*k,CS*k+0.6,CS*k+0.6);}}
   mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
   mmG.fillStyle='#ff4030';for(const p of primed)mmG.fillRect((p.x-ox)*k-2,(p.z-oz)*k-2,5,5);
-  if(G.on){mmG.fillStyle='#fff6c8';mmG.fillRect((G.ax-ox)*k-2,(G.az-oz)*k-2,5,5);}
   waypoints.forEach(m=>{let wx=(m.position.x-ox)*k,wz=(m.position.z-oz)*k;wx=Math.max(5,Math.min(S-5,wx));wz=Math.max(5,Math.min(S-5,wz));
     mmG.fillStyle=m.userData.c;mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.beginPath();mmG.moveTo(wx,wz-5);mmG.lineTo(wx+5,wz);mmG.lineTo(wx,wz+5);mmG.lineTo(wx-5,wz);mmG.closePath();mmG.fill();mmG.stroke();});
-  mmG.save();mmG.translate((PL.x-ox)*k,(PL.z-oz)*k);mmG.rotate(-PL.yaw);
+  const cmp=carries(323);mmG.save();mmG.translate((PL.x-ox)*k,(PL.z-oz)*k);if(!cmp){mmG.fillStyle='#fff';mmG.strokeStyle='#000';mmG.lineWidth=2;mmG.beginPath();mmG.arc(0,0,4,0,6.3);mmG.stroke();mmG.fill();mmG.restore();return;}mmG.rotate(-PL.yaw);
   mmG.fillStyle='#fff';mmG.strokeStyle='#000';mmG.lineWidth=2;mmG.beginPath();mmG.moveTo(0,-9);mmG.lineTo(6,7);mmG.lineTo(0,3);mmG.lineTo(-6,7);mmG.closePath();mmG.stroke();mmG.fill();mmG.restore();
   mmG.fillStyle='#f3efe2';mmG.font='18px VT323, monospace';mmG.fillText('N',S/2-4,16);
 }
@@ -4583,11 +4717,7 @@ function tickWork(){
 let tickT=0;
 
 // Main loop
-let caveF=0,cullT=0;const caveDark=new THREE.Color(0.035,0.04,0.06),caveFogC=new THREE.Color();
-const ropeV=new THREE.Vector3(),ropeGeo=new THREE.BufferGeometry();
-ropeGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
-const rope=new THREE.Line(ropeGeo,new THREE.LineBasicMaterial({color:0x2a1c10}));rope.frustumCulled=false;rope.visible=false;scene.add(rope);
-const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBasicMaterial({color:0xa8aeb8}));hookTip.visible=false;scene.add(hookTip);
+let caveF=0,cullT=0,wasWall=false;const caveDark=new THREE.Color(0.035,0.04,0.06),caveFogC=new THREE.Color();
 let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
@@ -4603,25 +4733,18 @@ function update(dt){
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;
   if(PL.ground||PL.fly||inLiq)gliding=false;
-  const hooked=G.on&&G.t>=1;
   if(gliding){const gs=9+Math.max(0,-PL.pitch)*10,kk=Math.min(1,1.6*dt);PL.vx+=(-sy*gs+cy*str*3-PL.vx)*kk;PL.vz+=(-cy*gs-sy*str*3-PL.vz)*kk;}
-  else if(!hooked){
+  else{
     const acc=PL.fly?14:onIce?1.5:PL.ground?14:inLiq?6:3.2,k=Math.min(1,acc*dt);
     PL.vx+=(wx*speed*(onIce?1.25:1)-PL.vx)*k;PL.vz+=(wz*speed*(onIce?1.25:1)-PL.vz)*k;
   }
   if(PL.fly){const tv=((jump?1:0)-(down?1:0))*speed;PL.vy+=(tv-PL.vy)*Math.min(1,10*dt);}
   else if(inLiq){PL.vy-=7*dt;if(jump)PL.vy=Math.min(PL.vy+22*dt,3.4);PL.vy*=1-Math.min(1,2.2*dt);if(PL.vy<-3.5)PL.vy=-3.5;}
   else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
-  if(G.on){
-    if(G.t<1)G.t=Math.min(1,G.t+dt*60/Math.max(1,G.len));
-    else if(!SOLID[get(G.bx,G.by,G.bz)])releaseHook(false);
-    else{
-      let dx=G.ax-PL.x,dy=G.ay-(PL.y+1.0),dz=G.az-PL.z;const d=Math.hypot(dx,dy,dz);
-      if(d<1.5)releaseHook(true);
-      else{dx/=d;dy/=d;dz/=d;const a=50*dt;PL.vx+=dx*a+wx*6*dt;PL.vy+=dy*a+21*dt;PL.vz+=dz*a+wz*6*dt;
-        const s=Math.hypot(PL.vx,PL.vy,PL.vz);if(s>22){PL.vx*=22/s;PL.vy*=22/s;PL.vz*=22/s;}}
-    }
-  }
+  // climbing (M4): on a ladder, piton or rope, jump climbs, down or sprint descends, and nothing holds the player still
+  const climb=!PL.fly&&!inLiq&&onClimb();
+  if(climb){gliding=false;PL.vy=jump||(fwd>0.3&&wasWall)?3.2:(shift||tch.down||PAD.down)?-3.6:0;}
+  if(climb!==PL.climb){PL.climb=climb;$('tDown').style.display=PL.fly||climb?'grid':'none';}
   const n=Math.max(1,Math.ceil(Math.max(Math.abs(PL.vx),Math.abs(PL.vy),Math.abs(PL.vz))*dt/0.35)),h=dt/n;
   const wasGround=PL.ground;PL.ground=false;let wallHit=false;
   for(let i=0;i<n;i++){
@@ -4634,9 +4757,10 @@ function update(dt){
   survivalTick(dt,inLiq,Math.hypot(PL.vx,PL.vz)*dt,sprint);
   if(PL.ground)airT=0;else airT+=dt;
   if(inLiq&&wallHit&&jump)PL.vy=Math.max(PL.vy,5.6);
+  wasWall=wallHit;
   if(TOUCH&&look.id!==null&&!look.moved&&!look.breaking&&performance.now()-look.t0>380){look.breaking=true;act(0);hold=0;holdT=0.25;}
   if(SURV()&&hold===0)mineTick(dt);else if(mineI>=0){mineI=-1;mineP=0;crack.visible=false;}
-  if(hold>=0&&!(hold===2&&isTool(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
+  if(hold>=0&&!(hold===2&&oneShot(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
   const mv=Math.hypot(PL.vx,PL.vz);if(PL.ground&&mv>0.5)bob+=mv*dt*1.9;
   if(PL.ground&&mv>1){stepD+=mv*dt;if(stepD>1.9){stepD=0;const under=get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z)),sd=SND[BL[under].snd]||SND.stone;burst(0.07,'bandpass',sd[0]*0.55*(0.9+Math.random()*0.2),sd[1],0.13);}}
   if(inLiq&&!wasLiq&&PL.vy<-3){burst(0.4,'lowpass',1200,0.6,0.3);for(let k=0;k<26;k++)spawnP(PL.x,PL.y+0.3,PL.z,(Math.random()-.5)*4,2+Math.random()*4,(Math.random()-.5)*4,[.75,.85,1],0.7,14);}
@@ -4671,7 +4795,7 @@ function frame(now){
   camera.rotation.set(PL.pitch,PL.yaw,0);
   {let sy2=-1;const fx=Math.floor(PL.x),fz=Math.floor(PL.z);for(let y=Math.floor(PL.y+0.01);y>=Math.floor(PL.y)-24&&y>=0;y--){if(SOLID[get(fx,y,fz)]){sy2=y+1;break;}}
    if(sy2<0||photo||!ready){pShadow.visible=false;}else{const dd=PL.y-sy2;pShadow.visible=true;pShadow.position.set(PL.x,sy2+0.015,PL.z);pShadow.material.opacity=Math.max(0,0.5-dd*0.025);pShadow.scale.setScalar(1+dd*0.03);}}
-  const F0=settings.fov,tf=gliding||G.on?F0+13:PL.fly||(Math.hypot(PL.vx,PL.vz)>5)?F0+7:F0;
+  const F0=settings.fov,tf=gliding?F0+13:PL.fly||(Math.hypot(PL.vx,PL.vz)>5)?F0+7:F0;
   if(Math.abs(camera.fov-tf)>0.1){camera.fov+=(tf-camera.fov)*Math.min(1,dt*8);camera.updateProjectionMatrix();}
   // held block
   swing=Math.max(0,swing-dt*5);const sw=Math.sin(swing*Math.PI),mv=Math.min(1,Math.hypot(PL.vx,PL.vz)/4);
@@ -4680,12 +4804,6 @@ function frame(now){
   hand.position.set(HAND0.x+Math.cos(bob)*0.025*mv-sw*0.08+lagX,HAND0.y+Math.abs(Math.sin(bob))*0.035*mv-sw*0.14+lagY,HAND0.z+sw*0.1);
   hand.rotation.set(-sw*0.7,-0.62,0.06);hand.scale.setScalar(TOUCH?0.34:0.42);
   handItem.position.set(hand.position.x+0.02,hand.position.y+0.08,hand.position.z);handItem.rotation.set(-sw*0.9-0.1,-0.35,0.25-sw*0.4);handItem.scale.setScalar(TOUCH?0.48:0.56);
-  if(G.on){
-    camera.updateMatrixWorld(true);hand.getWorldPosition(ropeV);
-    const t=G.t,hx=ropeV.x+(G.ax-ropeV.x)*t,hy=ropeV.y+(G.ay-ropeV.y)*t,hz=ropeV.z+(G.az-ropeV.z)*t,ra=rope.geometry.attributes.position.array;
-    ra[0]=ropeV.x;ra[1]=ropeV.y;ra[2]=ropeV.z;ra[3]=hx;ra[4]=hy;ra[5]=hz;rope.geometry.attributes.position.needsUpdate=true;
-    rope.visible=hookTip.visible=true;hookTip.position.set(hx,hy,hz);
-  }else rope.visible=hookTip.visible=false;
   const ex=Math.floor(PL.x),ey=Math.floor(PL.y+EYE),ez=Math.floor(PL.z);
   caveF+=((ready&&sky(ex,ey,ez)<0.3?1:0)-caveF)*Math.min(1,dt*1.5);
   matHand.uniforms.bright.value=Math.max(0.22,Math.min(1,Math.max(sky(ex,ey,ez)*U.skyMul.value,bl(ex,ey,ez))));handItem.material.color.setScalar(matHand.uniforms.bright.value);
@@ -4719,9 +4837,14 @@ function frame(now){
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     const fms=1000/Math.max(1,fps);
-    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
   {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
+function navLine(bx,bz){
+  const yy=Math.floor(PL.y),g=bx>=0&&bz>=0&&bx<W&&bz<D?ground[bx+W*bz]:yy,c=carries(323),d=carries(324);
+  if(!c&&!d)return '';
+  return '\n'+(c?'X '+(bx+OX)+' Z '+(bz+OZ)+', facing '+heading():'')+(c&&d?'  ':'')+(d?'Y '+yy+(yy<g-2?' ('+(g-yy)+' below the surface)':''):'');
+}
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}
 function infoExtra(){
   const t=curT()*24,hh=Math.floor(t),mi=Math.floor((t-hh)*60);
