@@ -164,6 +164,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <label>Look speed <input type="range" id="sens" min="0.3" max="2.5" step="0.1"></label>
     <label>Field of view <input type="range" id="fovr" min="60" max="100" step="1"></label>
     <div class="seg" id="viewseg">View <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
+    <div class="seg" id="resseg">Resolution <button data-v="auto">Auto</button><button data-v="sharp">Sharp</button><button data-v="fast">Fast</button></div>
     <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
     <div class="seg" id="clipseg">Noclip <button data-v="0">Off</button><button data-v="1">On</button></div>
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
@@ -204,7 +205,7 @@ if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWo
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const saved=(d=>d&&d.v===8&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',res:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
 // Auto view distance (view -1, the default; M3, D-025): start from the device, then follow the frame rate.
 // AUTO_VIEW.far moves between 56 and 104 blocks; the near fog is 55% of it.
@@ -2970,8 +2971,18 @@ function relight(b){
 // Three.js setup
 const canvas=$('c');
 const renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:false,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,TOUCH?1.5:1.25));
-renderer.setSize(innerWidth,innerHeight);
+// Render resolution (0.12.1, D-034): how many drawn pixels per CSS pixel. Sharp uses the screen's full density (up to 3), Fast
+// one per CSS pixel; Auto starts at the full density (up to 2 on desktop, 1.5 on touch) and autoView steps it down to no less
+// than 1 when frames are slow, and back up. Drawing below the screen's density blurs the texture pixels when the browser
+// stretches the picture, and makes distant textures blend sooner (smaller mipmaps).
+let DPR=(d=>typeof d==='number'&&d>0?d:1)(window.devicePixelRatio);
+const RES={ratio:0};
+const resFloor=()=>Math.min(DPR,1);
+function resTarget(){const m=settings.res;return m==='fast'?resFloor():m==='sharp'?Math.min(DPR,3):Math.min(DPR,TOUCH?1.5:2);}
+function setRes(r){r=Math.max(resFloor(),Math.min(resTarget(),r));if(r===RES.ratio)return false;RES.ratio=r;renderer.setPixelRatio(r);renderer.setSize(innerWidth,innerHeight);return true;}
+// One step of Auto (d is +0.25 or -0.25); false when there is nothing to change
+function resStep(d){return settings.res==='auto'&&setRes(Math.round((RES.ratio+d)*4)/4);}
+setRes(resTarget());
 renderer.setClearColor(SKY);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);
@@ -4515,6 +4526,7 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('resseg','res',v=>v);$('resseg').addEventListener('click',()=>{setRes(resTarget());}); // Auto restarts from the full density
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
 function drawClip(){[...$('clipseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===(PL.noclip?'1':'0')));}
 $('clipseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&(v==='1')!==PL.noclip)toggleNoclip();});drawClip();
@@ -4941,7 +4953,9 @@ function autoView(raw,work){
   const A=AUTO_VIEW;AV_S.push(raw);A.t+=raw;A.work=Math.max(A.work,work);if(A.t<2)return;
   AV_S.sort((a,b)=>a-b);const med=AV_S[AV_S.length>>1];AV_S.length=0;
   if(med<A.refresh||A.fast)A.refresh=Math.min(A.fast?1:A.refresh,med);A.fast=0;
-  if(med>A.refresh*1.15&&A.far>56)A.far=Math.max(56,A.far-6);else if(med<A.refresh*1.05&&A.work<A.refresh*500&&A.far<104)A.far=Math.min(104,A.far+3);
+  // slow: pull the view in to 72 blocks first, then lower the resolution, then the view to 56; smooth: resolution back first
+  if(med>A.refresh*1.15){if(A.far>72)A.far=Math.max(72,A.far-6);else if(!resStep(-0.25)&&A.far>56)A.far=Math.max(56,A.far-6);}
+  else if(med<A.refresh*1.05&&A.work<A.refresh*500){if(!resStep(0.25)&&A.far<104)A.far=Math.min(104,A.far+3);}
   A.t=A.work=0;if(settings.view<0){FOGF=A.far;FOGN=FOGF*0.55;}
 }
 let fmax=0,fwork=0;
@@ -5004,7 +5018,7 @@ function frame(now){
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     const fms=1000/Math.max(1,fps);
-    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+'  res '+Math.round(RES.ratio/DPR*100)+'%'+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
   {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
 function navLine(bx,bz){
@@ -5021,7 +5035,7 @@ function infoExtra(){
   if(SURV()&&equip.belt&&ITEMS[equip.belt.id].lamp)s+='\nLantern: '+lampFuelText();
   return s;
 }
-addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});
+addEventListener('resize',()=>{DPR=(d=>typeof d==='number'&&d>0?d:1)(window.devicePixelRatio);setRes(RES.ratio);renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});
 setMode(mode);$('name').style.opacity=0;saveDirty=false;
 requestAnimationFrame(frame);
 generate();

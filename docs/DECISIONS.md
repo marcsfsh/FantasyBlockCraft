@@ -206,3 +206,11 @@ Constrains: new tools are `ITEMS` entries with `tool`; new climbable blocks set 
 - **Fixed:** since 0.11.0 a comment swallowed the end of a line in `openInv`, so the survival inventory could show the creative block menu after creative had been used.
 - **Saves:** generation changed (foraging plants) and the save data gained `cs` and `at`: `SAVE_KEY` is `fantasy-blockcraft-save-v8`, world data version 8. The world-hash snapshot changed only in the surface band.
 Constrains: anything that removes a container block goes through `setBlock` (which forgets its contents); light around the player in survival comes from `lampLevel`; travel in survival needs `canTravel`.
+
+### D-034 0.12.1: render resolution follows the screen (2026-10-09)
+The owner saw low-resolution, blended textures on the desktop and not on the phone. The renderer drew at no more than 1.25 pixels per CSS pixel on desktop (1.5 on touch), so on a desktop scaled to 150% or 200% the game drew 83% or 62% of the screen's pixels and the browser stretched the picture, blurring the 16-pixel textures; the lower resolution also made distant textures fall to blended mipmaps sooner. A phone's pixels are small enough that half resolution still looks sharp.
+- **Resolution setting** (`settings.res`, pause menu): Auto (default) starts at the screen's full density, up to 2 on desktop and 1.5 on touch; Sharp uses the full density up to 3; Fast draws one pixel per CSS pixel.
+- **Auto under load** (`autoView`, `resStep`): when frames are slow the view distance comes in to 72 blocks first, then the resolution drops in steps of 0.25 to 1, then the view to 56; when frames are smooth again the resolution comes back first, then the view.
+- The info readout shows the resolution as a percentage of the screen's pixels.
+- No change to the world or saves.
+Constrains: anything that changes the renderer's pixel ratio goes through `setRes`.

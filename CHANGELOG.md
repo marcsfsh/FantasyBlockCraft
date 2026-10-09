@@ -5,6 +5,18 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.12.1 (2026-10-09): sharper textures on desktop
+
+No change to the world or the save format: 0.12.0 worlds keep working.
+
+### Game
+- **Sharp textures on high-resolution desktop screens.** The game now draws at the screen's full pixel density (it was capped at 1.25 times on desktop, which blurred textures on screens scaled to 150% or 200%).
+- **Resolution** in the pause menu: Auto (default; full density, lowered only if frames slow down, after the view distance), Sharp (always full density) and Fast (one pixel per screen point, for slower machines).
+- The readout shows the resolution in use.
+
+### Tooling
+- 29-view checks the resolution choices and how Auto gives way under load and comes back (D-034).
+
 ## 0.12.0 (2026-10-09): M4b, storage, the worn lamp, earned travel and food
 
 Old saves do not load: the world changed (foraging plants) and the save key is now `fantasy-blockcraft-save-v8`.

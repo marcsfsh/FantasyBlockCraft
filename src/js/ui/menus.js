@@ -47,6 +47,7 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('resseg','res',v=>v);$('resseg').addEventListener('click',()=>{setRes(resTarget());}); // Auto restarts from the full density
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
 function drawClip(){[...$('clipseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===(PL.noclip?'1':'0')));}
 $('clipseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&(v==='1')!==PL.noclip)toggleNoclip();});drawClip();
