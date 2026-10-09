@@ -250,7 +250,7 @@ Widened after the round-21 interview: M6 enriches every land and adds 30 new one
 **Parts (Q117, Q133):**
 - **M6a, groundwork (done in 0.15.0, D-039; land list awaiting approval):** two bytes per block in the world (Q120); a land system (registry, transition map, tiers, minimum sizes); land names; a creative land tour; the land list and transition map as a document with a map picture for the owner to approve before any family is built (Q134). Existing lands keep their look, except for the ravines (Q137): the hairline cracks become proper gorges.
 - **M6b, forests (done in 0.16.0, D-040):** Autumn Woods, Birch Glades, Pine Highlands, Ancient Giant Wood, Willow Vales (the Fens rework into them, Q119), Yew Wood, Silverwood. New woods.
-- **M6c, highlands and cold:** Alpine Meadows, Glacier Fields, Cloud Forest Heights, Karst Crags (sinkholes into the caves, Q132), Frozen Tundra (the Northern Fells rework into it); enrich the High Mountains; mountain waterfalls.
+- **M6c, highlands and cold (done in 0.17.0, D-041):** Alpine Meadows, Glacier Fields, Cloud Forest Heights, Karst Crags (sinkholes into the caves, Q132), Frozen Tundra (the Northern Fells rework into it); enrich the High Mountains; mountain waterfalls.
 - **M6d, coasts and waters:** Chalk Cliffs, Rocky Isles, Fjords, Black Sand Shores, Kelp Shallows, Raised Bogs; enrich the Western Sea, Grey Shore and Lake.
 - **M6e, dry and fiery:** Southern Drylands (the kept desert blocks), Golden Steppe (the Windswept Plains rework into it), Volcanic Wastes (a hotter deep below, lava sound), Blighted Lands.
 - **M6f, strange lands:** Crystal Barrens, Glowcap Hollows, Petrified Forest, Starfall Craters (rare finds); rare tier.

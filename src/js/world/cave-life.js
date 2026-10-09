@@ -68,7 +68,7 @@ function fillCol(x,z,X,Z,o){
   if(b!==0&&b!==1){const sl=slopeAt(X,Z,h);
     if(sl>=4){top=STONE;soil=0;}
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
-  if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6))top=SNOWG;
+  if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6)&&!forestOf(o))top=SNOWG; // lands with their own floors decide their snow
   biome[ci]=o.lake?9:b;ground[ci]=h;entCol[ci]=o.ent?1:0;
   let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){

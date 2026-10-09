@@ -23,7 +23,7 @@ land('shadow','Shadowed Forest','kept',2,[2,4],[2,2],3,8,'drow',['a temple sunk 
 // old lands reworked into new ones (Q119): until their family is built they keep the old look and name
 land('steppe','Golden Steppe','dry',1,[2,4],[0,0],3,10,'beastfolk',['a ring of horse stones','a lone rock outcrop over the grass'],{was:'Windswept Plains',gorge:0.3});
 land('willow','Willow Vales','forest',1,[2,3],[2,2],1,11,'halfling',['a stilt house over the water','willow-ringed pools with islets'],{was:'Fens',gorge:0,built:true,col:[104,150,96]});
-land('tundra','Frozen Tundra','high',1,[0,0],[0,1],3,6,'dwarf',['a frozen longhouse','frost mounds and ice wedges'],{was:'Northern Fells',gorge:0.6});
+land('tundra','Frozen Tundra','high',1,[0,0],[0,1],3,6,'dwarf',['a frozen longhouse','frost mounds and ice wedges'],{was:'Northern Fells',gorge:0.6,built:true,col:[214,222,226]});
 // forests (M6b)
 land('autumn','Autumn Woods','forest',1,[1,2],[1,1],3,3,'woodelf',['a woodcutters\' lodge','a red-leaf glade around a still pond'],{built:true,col:[184,100,48]});
 land('birch','Birch Glades','forest',1,[1,2],[1,2],3,2,'woodelf',['a birch-bark shrine','a ring of white birches round a clearing'],{built:true,col:[160,190,112]});
@@ -32,10 +32,10 @@ land('giant','Ancient Giant Wood','forest',3,[2,3],[2,2],1,3,'highelf',['a platf
 land('yew','Yew Wood','forest',2,[1,2],[1,2],3,3,'woodelf',['a ruined archers\' hall','an ancient hollow yew'],{built:true,col:[54,82,52]});
 land('silver','Silverwood','forest',2,[1,2],[1,2],3,2,'highelf',['a moon-gate arch','a silver-leaf grove round a spring'],{never:['blight','volcanic'],built:true,col:[170,194,186]});
 // highlands and cold (M6c)
-land('alpine','Alpine Meadows','high',2,[0,2],[1,2],4,5,'dwarf',['a shepherd\'s hut on the high pasture','a meadow tarn under a peak'],{gorge:0.8});
-land('glacier','Glacier Fields','high',2,[0,0],[0,2],4,5,'dwarf',['a tower bound in the ice','crevasses and ice caves'],{gorge:0.6});
-land('cloud','Cloud Forest Heights','high',2,[2,4],[1,2],4,5,'woodelf',['a mist shrine on a crag','mossy falls into the cloud'],{gorge:0.8});
-land('karst','Karst Crags','high',2,[1,3],[0,1],6,4,'gnome',['a hermitage in a cliff','a great sinkhole into the caves'],{gorge:1});
+land('alpine','Alpine Meadows','high',2,[0,2],[1,2],4,5,'dwarf',['a shepherd\'s hut on the high pasture','a meadow tarn under a peak'],{gorge:0.8,built:true,col:[132,176,104]});
+land('glacier','Glacier Fields','high',2,[0,0],[0,2],4,5,'dwarf',['a tower bound in the ice','crevasses and ice caves'],{gorge:0.6,built:true,col:[206,226,240]});
+land('cloud','Cloud Forest Heights','high',2,[2,4],[1,2],4,5,'woodelf',['a mist shrine on a crag','mossy falls into the cloud'],{gorge:0.8,built:true,col:[84,140,110]});
+land('karst','Karst Crags','high',2,[1,3],[0,1],6,4,'gnome',['a hermitage in a cliff','a great sinkhole into the caves'],{gorge:1,built:true,col:[188,184,166]});
 // coasts and waters (M6d)
 land('chalk','Chalk Cliffs','coast',2,[1,3],[0,2],3,2,'human',['a beacon tower on the cliff top','a chalk sea arch'],{coast:true,gorge:0.3});
 land('isles','Rocky Isles','coast',2,[0,4],[0,2],7,0,'human',['a ruined chapel on an isle','sea arches and stacks'],{sea:true,coast:true,gorge:0});

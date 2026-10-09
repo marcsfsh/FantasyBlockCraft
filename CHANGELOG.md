@@ -5,6 +5,24 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.17.0 (2026-10-09): M6c, highlands and cold
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v12`.
+
+### Game
+- **Five highland and cold lands:**
+  - **Alpine Meadows:** high pastures of grass, gentians and edelweiss, a few spruces, snow only on the highest ground.
+  - **Glacier Fields:** glacier ice and packed snow over the heights.
+  - **Cloud Forest Heights:** gnarled mistwood trees trailing leaves over forest moss and ferns.
+  - **Karst Crags:** bare limestone on the ridges and limestone pillars standing out of the turf.
+  - **Frozen Tundra** (the Northern Fells, reworked): snow with patches of tundra moss and stunted spruces.
+- **Landmarks and features:** a shepherd's hut or a meadow tarn; a tower bound in ice or an ice cave; a mist shrine or mossy falls from a crag; a cliff hermitage (two rooms and a ladder inside a crag) or a great sinkhole whose shaft winds down to a cave passage (Q132); a frozen longhouse or frost mounds. The High Mountains gain a gatehouse in a high pass or a high tarn.
+- **Waterfalls (Q126):** on steep ground in the mountains, alpine meadows, cloud forest and karst, a spring cascades down the slope over a stony bed to a pool. Shaped still water: it never floods (Q129).
+- **New blocks:** limestone, glacier ice, packed snow, tundra moss, mistwood (log, leaves, planks), gentian, edelweiss.
+
+### Tooling
+- New test `38-highlands`; the world-hash snapshot is updated on purpose.
+
 ## 0.16.0 (2026-10-09): M6b, the forests
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v11`.

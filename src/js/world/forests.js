@@ -73,6 +73,8 @@ function sigOf(c){
   const key=landKey(c.i,c.j);if(sigC.has(key))return sigC.get(key);if(sigC.size>4000)sigC.clear();
   let s=null;const L=LANDS[cellLand(c)],S=SIGS[L.k],q=hsh(c.i,8141,c.j);
   if(S&&q>=0.4){const [kind,name,R]=S[q<0.7?0:1];
+    if(kind==='sinkhole'){const t=sinkholeSite(c,L,R);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
+    else
     for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?12+k*3:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
       const low=L.k==='willow'; // the vales' pools and stilt house stand on the low wet ground itself
       if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=SEA+(low?0:2))continue;
@@ -102,7 +104,7 @@ function sigPond(X,Z,R,L,depth,r,bank){
 }
 // The ponds a signature digs, [X, Z, radius], filled to one below the lowest ground at its rim (s.lo - 1)
 function sigPonds(s){
-  if(s.kind==='glade')return[[s.X,s.Z,5]];if(s.kind==='stilt')return[[s.X,s.Z,7]];if(s.kind==='spring')return[[s.X,s.Z,3]];
+  if(s.kind==='glade')return[[s.X,s.Z,5]];if(s.kind==='stilt')return[[s.X,s.Z,7]];if(s.kind==='spring')return[[s.X,s.Z,3]];if(s.kind==='tarn')return[[s.X,s.Z,6]];if(s.kind==='mossfall')return[[s.X+3,s.Z,3]];
   if(s.kind==='pools'){const l=[[s.X,s.Z,6]];for(let k=1;k<3;k++){const a=k*2.1+hsh(s.X,8177+k,s.Z);l.push([Math.round(s.X+Math.cos(a)*7),Math.round(s.Z+Math.sin(a)*7),4]);}return l;}
   return[];
 }
@@ -173,6 +175,7 @@ function sigBuild(s){
       sigFloor(X-4,Z-1,X+4,Z+1,g,SBRICK,10);
       for(let a=0;a<64;a++){const t=a/64*6.283,x=Math.round(X+Math.cos(t)*4.2),y=Math.round(g+5+Math.sin(t)*4.2);for(let dz=-1;dz<=1;dz++)if(y>g)PW(x,y,Z+dz,SBRICK,MODE_SET);if(Math.sin(t)>0.3&&r()<0.25)PW(x,y-1,Z+(r()<0.5?-1:1),SILVL,MODE_AIR);}
       for(let k=0;k<8;k++){const x=X-4+k,z=Z+(k%2?2:-2);PW(x,hAt(x,z)+1,z,MOONP,MODE_AIR);}break;}
+    default:hiBuild(s,r);break; // the highlands' signatures (M6c)
     case 'spring':{ // a spring in a kerb of mossy stone, silver trees round it, moonpetals in the grass
       const L=s.lo-1;for(const [px,pz,R] of sigPonds(s))sigPond(px,pz,R,L,1,r,MOSSY);
       for(let k=0;k<6;k++){const a=k/6*6.283+0.3,x=Math.round(X+Math.cos(a)*8),z=Math.round(Z+Math.sin(a)*8);silverP(x,hAt(x,z)+1,z,r);}

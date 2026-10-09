@@ -14,7 +14,7 @@ for(const k of FOREST_LANDS){const c=nearestLand(LAND_I[k],0,0,48),t0=Date.now()
 info('forest windows generated at',(genMs/chunks).toFixed(1),'ms a chunk (headless, whole window at once)');
 // ---- signatures (Q124): landmark, feature or neither in each stretch
 {const st={none:0,landmark:0,feature:0,missed:0},kinds=new Set(),roots=new Set();
-  for(let i=-40;i<40;i++)for(let j=-40;j<40;j++){const c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];if(!SIGS[L.k])continue;const key=landKey(c.i,c.j);if(roots.has(key))continue;roots.add(key);
+  for(let i=-40;i<40;i++)for(let j=-40;j<40;j++){const c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];if(!FOREST_LANDS.includes(L.k))continue;const key=landKey(c.i,c.j);if(roots.has(key))continue;roots.add(key);
     const q=hsh(c.i,8141,c.j),s=sigOf(c);if(q<0.4)st.none++;else if(!s)st.missed++;else{st[q<0.7?'landmark':'feature']++;kinds.add(s.kind);}}
   const n=roots.size;info('forest stretches',n,JSON.stringify(st),'; kinds built',kinds.size);
   assert(Math.abs(st.none/n-0.4)<0.1,'about four stretches in ten have neither landmark nor feature');

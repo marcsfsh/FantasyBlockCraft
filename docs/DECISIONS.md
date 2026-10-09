@@ -276,3 +276,11 @@ Constrains: a new land goes into `LANDS` with all its fields and the doc is rege
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v11`, world data version 11.
 Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant) and `SIGS` builders; their looks never move the layout.
 
+### D-041 M6c: highlands and cold (2026-10-09)
+- **Five lands built** (`world/highlands.js`), joining `FOREST` (the land look table) and `SIGS`: Alpine Meadows, Glacier Fields and Cloud Forest Heights on the mountains' heights, Karst Crags on the moors' uplands, Frozen Tundra (the Northern Fells reworked, Q119) on the fells'. A land with its own floor decides its own snow (the mountains' snow line no longer applies to it), and plants grow on mountain looks where the land has its own plants.
+- **Signatures** as in D-040, plus the High Mountains' own (gatehouse in a high pass, high tarn). The great sinkhole is placed where `caveAnchor` finds a passage 25 to 95 blocks under the stretch, so its shaft always reaches the caves (Q132).
+- **Waterfalls (Q126, Q129):** one chunk in about thirty in the mountains, alpine meadows, cloud forest and karst tries a spring; it follows the steepest way down for up to 48 blocks and is kept only if it falls 10 or more. Water lies on a stone and gravel bed one block above the ground and ends in a pool; it is surface water, so the underground water check leaves it alone. Planned from the spring (`fallAt`) and drawn by every chunk within three chunks.
+- **Old features keep off signatures:** ice spikes now check `sigNear` too.
+- **New blocks:** limestone, glacier ice, packed snow, tundra moss, mistwood log, leaves and planks, gentian, edelweiss (ids 1049 to 1057).
+- **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v12`, world data version 12.
+
