@@ -9,7 +9,7 @@ const o={},q={};
   info('river columns',rv,'; with land more than 8 above the water within 5 blocks',(100*cliff/rv).toFixed(1)+'% (34% before M3.5b)');
   assert(rv>500,'rivers still run through the land');assert(cliff/rv<0.03,'rivers lie in valleys, not ravines');}
 // smoothness: height against the mean of a 9 x 9 neighbourhood, by land
-{const sq={},cnt={};for(let X=-2400;X<2400;X+=32)for(let Z=-2400;Z<2400;Z+=32){colInfo(X,Z,o);if(o.river||o.bank||o.lake||o.b===0||['chalk','isles','fjord'].includes(LANDS[o.land].k))continue;let m=0,n=0; // the cliff coasts (M6d) are steep on purpose
+{const sq={},cnt={};for(let X=-2400;X<2400;X+=32)for(let Z=-2400;Z<2400;Z+=32){colInfo(X,Z,o);if(o.river||o.bank||o.lake||o.b===0||['chalk','isles','fjord','terrace'].includes(LANDS[o.land].k))continue;let m=0,n=0; // the cliff coasts (M6d) and the old terraces (M6g) are stepped on purpose
     for(let a=-4;a<=4;a+=2)for(let b=-4;b<=4;b+=2){m+=colInfo(X+a,Z+b,q).h;n++;}m/=n;sq[o.b]=(sq[o.b]||0)+(o.h-m)*(o.h-m);cnt[o.b]=(cnt[o.b]||0)+1;}
   const rms=b=>Math.sqrt((sq[b]||0)/Math.max(1,cnt[b]||0));
   info('roughness by land:',Object.keys(sq).map(b=>BIOMES[b]+' '+rms(b).toFixed(2)).join(', '));

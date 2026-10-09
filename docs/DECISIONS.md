@@ -311,5 +311,6 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Dry-stone walls** follow a noise line across farmland, green hills, orchards and terraces, one or two blocks high, in the plants pass.
 - **Places:** the readout names signatures (M6b to M6g) and small structures, so they are noted as places on the world map.
 - **Orchard leaves** drop an apple three times in ten.
+- **Tests:** the smoothness survey in `31-natural-surface` leaves out the Old Terraces, which are stepped on purpose, as it does the cliff coasts.
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v16`, world data version 16.
 
