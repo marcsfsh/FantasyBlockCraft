@@ -148,6 +148,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <button class="tb sq" id="tSwap" aria-label="Replace mode">Swap</button>
     <button class="tb sq" id="tBrush" aria-label="Brush size">1x</button>
     <button class="tb sq" id="tFly">Fly</button>
+    <button class="tb sq" id="tClip" aria-label="Noclip">Clip</button>
     <button class="tb sq" id="tInv" aria-label="Block menu"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></button>
     </div>
   </div>
@@ -163,6 +164,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <label>Field of view <input type="range" id="fovr" min="60" max="100" step="1"></label>
     <div class="seg" id="viewseg">View <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
     <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
+    <div class="seg" id="clipseg">Noclip <button data-v="0">Off</button><button data-v="1">On</button></div>
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
     <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Lantern</button><button data-v="2">Bright</button></div>
     <div class="seg" id="wxseg">Weather <button data-v="1">On</button><button data-v="0">Off</button></div>
@@ -3417,6 +3419,7 @@ const ACTIONS={
   inventory:{name:'Inventory',run:()=>{invOpen?closeInv():openInv();},anytime:true},
   jump:{name:'Jump, swim up, double tap to fly',run:()=>jumpPress()},
   fly:{name:'Fly on or off',run:()=>toggleFly()},
+  noclip:{name:'Noclip on or off (fly through blocks)',run:()=>toggleNoclip()},
   respawn:{name:'Back to spawn',run:()=>respawn()},
   brush:{name:'Brush size',run:()=>cycleBrush()},
   swap:{name:'Replace mode',run:()=>toggleSwap()},
@@ -3436,7 +3439,7 @@ const ACTIONS={
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
   // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code
@@ -3517,7 +3520,7 @@ function pollPad(dt){
   }
   PAD.prev=now;
 }
-const PAD_HTML='<div><b>Left stick</b> move, click it to sprint</div><div><b>Right stick</b> look, click it to pick a block</div><div><b>A</b> jump, swim up, double tap to fly</div><div><b>B</b> fly down</div><div><b>X</b> fly on or off</div><div><b>Y</b> block menu</div><div><b>RT</b> break, hold to mine</div><div><b>LT</b> place or use</div><div><b>LB / RB</b> change slot</div><div><b>D-pad up</b> next waypoint</div><div><b>D-pad down</b> map zoom</div><div><b>D-pad left / right</b> undo, brush size</div><div><b>View</b> replace mode</div><div><b>Menu</b> pause</div><div><b>In menus</b> left stick moves the pointer, A clicks, X right clicks, B goes back, right stick scrolls, d-pad or bumpers adjust sliders</div>';
+const PAD_HTML='<div><b>Left stick</b> move, click it to sprint</div><div><b>Right stick</b> look, click it to pick a block</div><div><b>A</b> jump, swim up, double tap to fly</div><div><b>B</b> fly down</div><div><b>X</b> fly on or off</div><div><b>Noclip</b> (fly through blocks): in the pause menu, creative only</div><div><b>Y</b> block menu</div><div><b>RT</b> break, hold to mine</div><div><b>LT</b> place or use</div><div><b>LB / RB</b> change slot</div><div><b>D-pad up</b> next waypoint</div><div><b>D-pad down</b> map zoom</div><div><b>D-pad left / right</b> undo, brush size</div><div><b>View</b> replace mode</div><div><b>Menu</b> pause</div><div><b>In menus</b> left stick moves the pointer, A clicks, X right clicks, B goes back, right stick scrolls, d-pad or bumpers adjust sliders</div>';
 function updateKeysHelp(){const k=$('keys');if(k)k.innerHTML=PAD.active?PAD_HTML:KEYS_HTML;}
 
 
@@ -3603,11 +3606,12 @@ function updTNT(dt){
 }
 
 // Player
-const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false};
+const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false};
 let spawnW=[0.5,H-5,0.5];
 const HW=0.3,PH=1.8,EYE=1.62;
 function solidAt(x,y,z){if(x<0||z<0||x>=W||z>=D)return true;if(y<0||y>=H)return false;return SOLID[world[I(x,y,z)]]===1;}
 function collide(){
+  if(PL.noclip)return false; // noclip (creative): the player passes through blocks
   const x0=Math.floor(PL.x-HW),x1=Math.floor(PL.x+HW),y0=Math.floor(PL.y),y1=Math.floor(PL.y+PH),z0=Math.floor(PL.z-HW),z1=Math.floor(PL.z+HW);
   for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)if(solidAt(x,y,z))return true;
   return false;
@@ -3689,8 +3693,8 @@ function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv
 function curId(){if(SURV()){const q=inv[sel];return q?q.id:0;}return hot[sel];}
 function setMode(m){
   mode=m;settings.newMode=m;lsSet(SET_KEY,settings);
-  if(SURV()){if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();G.on=false;}
-  ['tUndo','tSwap','tBrush','tFly'].forEach(id=>{$(id).style.display=SURV()?'none':'';});
+  if(SURV()){if(PL.noclip)toggleNoclip();if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();G.on=false;}
+  ['tUndo','tSwap','tBrush','tFly','tClip'].forEach(id=>{$(id).style.display=SURV()?'none':'';});$('clipseg').style.display=SURV()?'none':'';
   document.body.classList.toggle('surv',SURV());fallTop=null;
   drawMode();drawBar();drawStats();saveDirty=true;
 }
@@ -4068,7 +4072,15 @@ function act(btn){
     drawBar();
   }
 }
-function toggleFly(){if(SURV()&&!PL.fly){toast('Flying is a creative mode ability');return;}PL.fly=!PL.fly;PL.vy=0;$('tFly').classList.toggle('on',PL.fly);$('tDown').style.display=PL.fly?'grid':'none';toast(PL.fly?'Flying':'Walking');}
+function toggleFly(){if(SURV()&&!PL.fly){toast('Flying is a creative mode ability');return;}if(PL.fly&&PL.noclip){toggleNoclip();return;}PL.fly=!PL.fly;PL.vy=0;$('tFly').classList.toggle('on',PL.fly);$('tDown').style.display=PL.fly?'grid':'none';toast(PL.fly?'Flying':'Walking');}
+// Noclip (creative, M3.5a.2): fly through blocks. Turning it on also turns flying on; turning it off inside rock lifts the
+// player up to the first place they fit, as respawning does, and leaves them flying.
+function toggleNoclip(){
+  if(SURV()&&!PL.noclip){toast('Noclip is a creative mode ability');return;}
+  PL.noclip=!PL.noclip;if(PL.noclip&&!PL.fly)toggleFly();
+  if(!PL.noclip){while(collide()&&PL.y<H)PL.y++;}
+  $('tClip').classList.toggle('on',PL.noclip);drawClip();toast(PL.noclip?'Noclip: flying through blocks':'Noclip off');
+}
 let toastT=0;
 function toast(s){const t=$('toast');if(!s){t.style.display='none';return;}t.textContent=s;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{t.style.display='none';},1300);}
 addEventListener('keydown',e=>{
@@ -4147,8 +4159,8 @@ if(TOUCH){
     }
   }};
   canvas.addEventListener('touchend',end);canvas.addEventListener('touchcancel',end);
-  const btn=(id,down,up)=>{const el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();audioInit();if(id!=='tFly'&&id!=='tSwap')el.classList.add('on');down();});
-    const u=()=>{if(id!=='tFly'&&id!=='tSwap')el.classList.remove('on');if(up)up();};el.addEventListener('pointerup',u);el.addEventListener('pointercancel',u);el.addEventListener('pointerleave',u);};
+  const btn=(id,down,up)=>{const el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();audioInit();if(id!=='tFly'&&id!=='tSwap'&&id!=='tClip')el.classList.add('on');down();});
+    const u=()=>{if(id!=='tFly'&&id!=='tSwap'&&id!=='tClip')el.classList.remove('on');if(up)up();};el.addEventListener('pointerup',u);el.addEventListener('pointercancel',u);el.addEventListener('pointerleave',u);};
   btn('tJump',()=>{tch.jump=true;jumpPress();},()=>{tch.jump=false;});
   btn('tDown',()=>{tch.down=true;},()=>{tch.down=false;});
   btn('tBreak',()=>{act(0);hold=0;holdT=0.3;},()=>{hold=-1;});
@@ -4157,6 +4169,7 @@ if(TOUCH){
   btn('tSwap',()=>{runAction('swap');});
   btn('tUndo',()=>{runAction('undo');});
   btn('tFly',()=>{runAction('fly');});
+  btn('tClip',()=>{runAction('noclip');});
   btn('tInv',()=>{runAction('inventory');});
   btn('tPause',()=>{runAction('pause');});
   addEventListener('resize',joyRest);
@@ -4200,8 +4213,8 @@ $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 
 // Overlay and settings
 const KEYS_HTML=TOUCH
-  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Hook</b> tap to fire, tap again to let go</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
-  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Hook</b> right click to swing, again to let go</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
+  ?'<div><b>Left side</b> drag to walk, push to the edge to run</div><div><b>Right side</b> drag to look</div><div><b>Tap</b> the view to place</div><div><b>Hold still</b> on the view to break</div><div><b>Arrow</b> jumps, double tap to fly</div><div><b>Clip</b> noclip: fly through blocks (creative)</div><div><b>Tap a Blasting Keg</b> with break to light it</div><div><b>Tap the selected slot</b> to swap its block</div><div><b>Arrow in midair</b> opens the glider</div><div><b>Hook</b> tap to fire, tap again to let go</div><div><b>Size</b> sets the brush, <b>Undo</b> rolls back</div><div><b>Swap</b> makes placing replace blocks</div><div><b>Photo mode</b> hides controls, tap to bring them back</div><div><b>Tap the map</b> to zoom out, then tap a waypoint to travel</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>'
+  :'<div><b>WASD</b> move</div><div><b>Space</b> jump, swim up</div><div><b>Shift</b> sprint, or descend in flight</div><div><b>F</b> or double Space to fly</div><div><b>N</b> noclip: fly through blocks (creative)</div><div><b>Left click</b> break, or light a Blasting Keg</div><div><b>Right click</b> place</div><div><b>Middle click</b> pick block</div><div><b>1 to 9</b> or wheel to select</div><div><b>E</b> block menu</div><div><b>R</b> back to spawn</div><div><b>Space in midair</b> glide</div><div><b>Hook</b> right click to swing, again to let go</div><div><b>B</b> brush size</div><div><b>Z</b> undo</div><div><b>M</b> zoomed-out map</div><div><b>Double tap W</b> sprint</div><div><b>V</b> swap mode, placing replaces blocks</div><div><b>H</b> hide the HUD for screenshots</div><div><b>T</b> travel to your next waypoint</div><div><b>Waypoints</b> shine a beam you can see from anywhere</div>';
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
@@ -4212,6 +4225,8 @@ function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
+function drawClip(){[...$('clipseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===(PL.noclip?'1':'0')));}
+$('clipseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&(v==='1')!==PL.noclip)toggleNoclip();});drawClip();
 function drawMode(){[...$('modeseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===mode));}
 $('modeseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&v!==mode){setMode(v);toast(v==='survival'?'Survival mode':'Creative mode');}});segBind('caveseg','cave',v=>+v);segBind('wxseg','weather',v=>v==='1');
 const sndBtn=$('sndbtn');function drawSnd(){sndBtn.textContent=settings.sound?'Sound on':'Sound off';}drawSnd();
@@ -4247,7 +4262,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:6,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:6,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -4431,7 +4446,7 @@ async function generate(){
   if(!(resumed&&Array.isArray(saved.spawn))){const sp=findSpawn();spawnW=[sp[0]+OX,sp[1],sp[2]+OZ];}
   respawn();
   PL.yaw=Math.atan2(PL.x-W/2,PL.z-D/2);
-  if(resumed&&Array.isArray(saved.p)&&saved.p.length>=5){PL.x=saved.p[0]-OX;PL.y=saved.p[1];PL.z=saved.p[2]-OZ;PL.yaw=saved.p[3];PL.pitch=saved.p[4];if(saved.p[5])toggleFly();}
+  if(resumed&&Array.isArray(saved.p)&&saved.p.length>=5){PL.x=saved.p[0]-OX;PL.y=saved.p[1];PL.z=saved.p[2]-OZ;PL.yaw=saved.p[3];PL.pitch=saved.p[4];if(saved.p[5])toggleFly();if(saved.p[6]&&!SURV())toggleNoclip();}
   progress(1,TOUCH?'Ready. Tap Play.':'Ready. Click Play.');
   $('play').textContent=resumed?'Continue':'Play';
   ready=true;/*@test-hook*/$('play').disabled=false;$('play').focus();
@@ -4679,7 +4694,7 @@ function frame(now){
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     const fms=1000/Math.max(1,fps);
-    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
   {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}

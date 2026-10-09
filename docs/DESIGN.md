@@ -91,4 +91,4 @@ Sky light reaches sideways under overhangs and into cave mouths, fading over abo
 
 ## Controls
 
-Keyboard and mouse, touch, and Xbox-layout controllers (including the ROG Ally X in gamepad mode). The help panel on the pause screen switches to whichever is in use.
+Keyboard and mouse, touch, and Xbox-layout controllers (including the ROG Ally X in gamepad mode). The help panel on the pause screen switches to whichever is in use. Creative mode has flying and noclip (fly through blocks: N, the Clip button, or the pause menu).

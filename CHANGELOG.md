@@ -5,6 +5,16 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.9.1 (2026-10-09): M3.5a.2, noclip
+
+No change to the world or the save format: 0.9.0 worlds keep working.
+
+### Game
+- **Noclip in creative mode:** fly straight through blocks. **N** on the keyboard, the **Clip** button on touch, or **Noclip** in the pause menu (for the controller). Turning it on also turns flying on; turning it off inside rock lifts you up to the first place you fit. Survival mode refuses it and switching to survival turns it off. The info panel shows "Noclip" while it is on.
+
+### Tooling
+- New test 30-noclip.
+
 ## 0.9.0 (2026-10-09): M3.5a, the underground rewritten
 
 Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v6`.

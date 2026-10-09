@@ -39,6 +39,7 @@
 | 27-streaming | Streaming one step per frame (with window slides mid-chunk) equals whole-chunk generation; streamed block and sky light equal a full recompute; typical step under the 4 ms budget; travel makes only 3 x 3 chunks at once; the explored map is capped |
 | 28-meshing | The surface floor trims the band and spawn stays under 1.3 million vertices (D-029); the floor never cuts above 24 blocks under open ground; cave mode and its band switch with some give |
 | 29-view | Auto is the default view; it grows while smooth, shrinks when frames slow, on 60 Hz and 120 Hz screens |
+| 30-noclip | Creative noclip: N is bound, the player passes through rock, turning it off inside rock lifts them out, survival refuses it and turns it off, fly during noclip leaves flying on |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

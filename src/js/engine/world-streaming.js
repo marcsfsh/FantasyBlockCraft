@@ -100,7 +100,7 @@ async function generate(){
   if(!(resumed&&Array.isArray(saved.spawn))){const sp=findSpawn();spawnW=[sp[0]+OX,sp[1],sp[2]+OZ];}
   respawn();
   PL.yaw=Math.atan2(PL.x-W/2,PL.z-D/2);
-  if(resumed&&Array.isArray(saved.p)&&saved.p.length>=5){PL.x=saved.p[0]-OX;PL.y=saved.p[1];PL.z=saved.p[2]-OZ;PL.yaw=saved.p[3];PL.pitch=saved.p[4];if(saved.p[5])toggleFly();}
+  if(resumed&&Array.isArray(saved.p)&&saved.p.length>=5){PL.x=saved.p[0]-OX;PL.y=saved.p[1];PL.z=saved.p[2]-OZ;PL.yaw=saved.p[3];PL.pitch=saved.p[4];if(saved.p[5])toggleFly();if(saved.p[6]&&!SURV())toggleNoclip();}
   progress(1,TOUCH?'Ready. Tap Play.':'Ready. Click Play.');
   $('play').textContent=resumed?'Continue':'Play';
   ready=true;/*@test-hook*/$('play').disabled=false;$('play').focus();

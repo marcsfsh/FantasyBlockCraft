@@ -5,6 +5,7 @@ const ACTIONS={
   inventory:{name:'Inventory',run:()=>{invOpen?closeInv():openInv();},anytime:true},
   jump:{name:'Jump, swim up, double tap to fly',run:()=>jumpPress()},
   fly:{name:'Fly on or off',run:()=>toggleFly()},
+  noclip:{name:'Noclip on or off (fly through blocks)',run:()=>toggleNoclip()},
   respawn:{name:'Back to spawn',run:()=>respawn()},
   brush:{name:'Brush size',run:()=>cycleBrush()},
   swap:{name:'Replace mode',run:()=>toggleSwap()},
@@ -24,7 +25,7 @@ const ACTIONS={
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'mapZoom',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
   // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code

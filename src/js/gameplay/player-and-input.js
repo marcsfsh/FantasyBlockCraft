@@ -1,9 +1,10 @@
 // Player
-const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false};
+const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false};
 let spawnW=[0.5,H-5,0.5];
 const HW=0.3,PH=1.8,EYE=1.62;
 function solidAt(x,y,z){if(x<0||z<0||x>=W||z>=D)return true;if(y<0||y>=H)return false;return SOLID[world[I(x,y,z)]]===1;}
 function collide(){
+  if(PL.noclip)return false; // noclip (creative): the player passes through blocks
   const x0=Math.floor(PL.x-HW),x1=Math.floor(PL.x+HW),y0=Math.floor(PL.y),y1=Math.floor(PL.y+PH),z0=Math.floor(PL.z-HW),z1=Math.floor(PL.z+HW);
   for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)if(solidAt(x,y,z))return true;
   return false;
@@ -85,8 +86,8 @@ function takeItems(ids,n){ids=asList(ids);for(let i=0;i<36&&n>0;i++){const q=inv
 function curId(){if(SURV()){const q=inv[sel];return q?q.id:0;}return hot[sel];}
 function setMode(m){
   mode=m;settings.newMode=m;lsSet(SET_KEY,settings);
-  if(SURV()){if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();G.on=false;}
-  ['tUndo','tSwap','tBrush','tFly'].forEach(id=>{$(id).style.display=SURV()?'none':'';});
+  if(SURV()){if(PL.noclip)toggleNoclip();if(PL.fly)toggleFly();gliding=false;brushR=0;$('tBrush').textContent='1x';if(swapMode)toggleSwap();G.on=false;}
+  ['tUndo','tSwap','tBrush','tFly','tClip'].forEach(id=>{$(id).style.display=SURV()?'none':'';});$('clipseg').style.display=SURV()?'none':'';
   document.body.classList.toggle('surv',SURV());fallTop=null;
   drawMode();drawBar();drawStats();saveDirty=true;
 }
