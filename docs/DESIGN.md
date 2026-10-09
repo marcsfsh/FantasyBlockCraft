@@ -34,7 +34,7 @@ The world is 512 blocks tall and sea level is y310, so the underground keeps its
 
 ## The underground (D-028)
 
-The underground is made of **cave systems**, planned rather than noise: in each area of 160 x 160 blocks, one to three systems. Each has a main passage (the trunk) that starts at an entrance on the surface and winds down through the depths, with side branches that end in a chamber, some loops back into the trunk, and drops down shafts. Passages only meet at junctions and keep at least three blocks of rock from everything else. There is far less hollow rock than before 0.9.0 (about 1.3 to 1.7% of the rock under spawn, against about 28%).
+The underground is made of **cave systems**, planned rather than noise: in each area of 160 x 160 blocks, one to three systems. Each has a main passage (the trunk) that starts at an entrance on the surface and winds down through the depths, with side branches that end in a chamber, some loops back into the trunk, and drops down shafts. Passages only meet at junctions and keep at least three blocks of rock from everything else. There is far less hollow rock than before 0.9.0 (about 1.2 to 1.7% of the rock under spawn, against about 28%).
 
 Size and character change gradually with depth (no hard layers):
 
