@@ -98,7 +98,7 @@ function frame(now){
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
     const lmp=lampLevel();U.caveMin.value=CV[0]*caveF*(SURV()?depthDim(PL.y):1);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
-    U.fogNear.value=lerp(FOGN*(1-0.3*rainAmt),CV[3]*0.35,caveF);U.fogFar.value=lerp(FOGF*(1-0.25*rainAmt),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';}
+    U.fogNear.value=lerp(Math.max(Math.min(6,FOGN),FOGN*(1-0.3*rainAmt)*(1-0.6*LWX.fog)),CV[3]*0.35,caveF);U.fogFar.value=lerp(Math.max(Math.min(38,FOGF),FOGF*(1-0.25*rainAmt)*(1-0.55*LWX.fog)),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';} // mist by land (M6h)
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;
     for(let c=0;c<chunks.length;c++){const ms=chunks[c];if(!ms)continue;const x=(c%NCX)*CS+8-pcx,z=((c/NCX)|0)*CS+8-pcz,v=x*x+z*z<lim;for(const m of ms)m.visible=v;}}
   sun.position.copy(camera.position).addScaledVector(sunDir,420);sun.lookAt(camera.position);

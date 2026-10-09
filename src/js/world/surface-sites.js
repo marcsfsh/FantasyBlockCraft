@@ -95,29 +95,51 @@ function buildSite(s){
       const d=s.kind==='tower'?Math.hypot(dx,dz):Math.max(Math.abs(dx),Math.abs(dz)),out=d-F;if(out<=0||out>8)continue;
       colInfo(x,z,TS2);const gl=TS2.h,tgt=g-Math.ceil(out);if(tgt<=gl||TS2.wet)continue;const top=topBlock(TS2),cap=top===SNOWG||top===SAND||top===GRAVEL?top:GRASS;
       for(let y=gl;y<=tgt;y++)PW(x,y,z,y===tgt?cap:DIRT,y===gl?MODE_SET:MODE_FILL);}} // around tree trunks, never through them
-  const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*5)-(hsh(x,6604,z)<0.15?h:0)); // broken wall tops and a few gaps
+  // Layouts (M6h, Q122): four plans for each kind, turned to face any of four ways, and more or less ruined (decay). The plan, the
+  // facing and the decay come from the site's seed, so the stream above keeps its draws.
+  const sk=Math.floor(s.seed*1e6),layout=Math.floor(hsh(sk,8801,1)*4),face=Math.floor(hsh(sk,8803,2)*4),decay=0.15+hsh(sk,8805,3)*0.6;
+  const rx=(dx,dz)=>face===0?dx:face===1?-dz:face===2?-dx:dz,rz=(dx,dz)=>face===0?dz:face===1?dx:face===2?-dz:-dx;
+  const P=(dx,y,dz,id,m)=>PW(X+rx(dx,dz),y,Z+rz(dx,dz),id,m===undefined?MODE_SET:m),pd=(dx,dz,id)=>pad(X+rx(dx,dz),Z+rz(dx,dz),id);
+  const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*(2+6*decay))-(hsh(x,6604,z)<0.05+0.25*decay?h:0)); // broken wall tops and gaps
+  const ring=(R2,h,gateOK)=>{for(let dx=-R2-1;dx<=R2+1;dx++)for(let dz=-R2-1;dz<=R2+1;dz++){const d=Math.hypot(dx,dz);if(d>R2+0.5||d<=R2-0.6)continue;if(gateOK&&dz>0&&Math.abs(dx)<=1)continue;const hh=ragged(X+dx,Z+dz,h),b0=Math.min(g,hAt(X+rx(dx,dz),Z+rz(dx,dz)));for(let y=b0-1;y<=b0+hh&&y<=g+hh;y++)P(dx,y,dz,stone());}}; // from the ground up, where the land falls away
+  const roundTower=(cx,cz,R2,h,door)=>{for(let dx=-R2-1;dx<=R2+1;dx++)for(let dz=-R2-1;dz<=R2+1;dz++){const d=Math.hypot(dx,dz);if(d>R2+0.5)continue;pd(cx+dx,cz+dz,d>R2-0.6?stone():COBBLE);
+      if(d>R2-0.6){const isDoor=door&&dz>R2-1.5&&dx===0,hh=Math.max(2,Math.round(h*(1-0.5*decay*hsh(X+cx+dx,6605,Z+cz+dz))));for(let y=1;y<=hh;y++)if(!(isDoor&&y<=2)&&hsh(X+cx+dx,g+y,Z+cz+dz)>0.05+0.3*decay*y/h)P(cx+dx,g+y,cz+dz,stone());}}};
   if(s.kind==='tower'){
-    for(let dx=-R-1;dx<=R+1;dx++)for(let dz=-R-1;dz<=R+1;dz++){const d=Math.hypot(dx,dz);if(d>R+0.5)continue;pad(X+dx,Z+dz,d>R-0.6?stone():COBBLE);
-      if(d>R-0.6){const door=dz>R-1.5&&Math.abs(dx)<=0,h=Math.max(2,Math.round(H*(1-0.5*hsh(X+dx,6605,Z+dz))));for(let y=1;y<=h;y++)if(!(door&&y<=2)&&hsh(X+dx,g+y,Z+dz)>0.05+0.25*y/H)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}}
-    for(let y=4;y<H-1;y+=4)for(let dx=-R+1;dx<=R-1;dx++)for(let dz=-R+1;dz<=R-1;dz++)if(Math.hypot(dx,dz)<R-0.6&&hsh(X+dx,g+y,Z+dz)<0.55)PW(X+dx,g+y,Z+dz,PLANKS,MODE_SET); // what is left of the floors
-    PW(X,g+1,Z-R+1,CRATE,MODE_SET);PW(X+1,g+1,Z,DTORCH,MODE_SET);
+    if(layout===1){ // a square tower
+      for(let dx=-R;dx<=R;dx++)for(let dz=-R;dz<=R;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));pd(dx,dz,m===R?stone():COBBLE);
+        if(m===R){const door=dz===R&&dx===0,hh=Math.max(2,Math.round(H*(1-0.5*decay*hsh(X+dx,6605,Z+dz))));for(let y=1;y<=hh;y++)if(!(door&&y<=2)&&hsh(X+dx,g+y,Z+dz)>0.05+0.3*decay*y/H)P(dx,g+y,dz,stone());}}}
+    else roundTower(0,0,R,H,true);
+    if(layout===2)ring(R+4,3,true); // a low ring wall round it
+    if(layout===3){const r2=Math.max(2,R-1);roundTower(R+r2+2,0,r2,H-3,false);for(let t=R;t<=R+2;t++)for(let y=1;y<=3;y++)P(t,g+y,0,stone());} // a lesser tower joined to it
+    for(let y=4;y<H-1;y+=4)for(let dx=-R+1;dx<=R-1;dx++)for(let dz=-R+1;dz<=R-1;dz++)if((layout===1||Math.hypot(dx,dz)<R-0.6)&&hsh(X+dx,g+y,Z+dz)<0.55)P(dx,g+y,dz,PLANKS); // what is left of the floors
+    P(0,g+1,-R+1,CRATE);P(1,g+1,0,DTORCH);
   }else{
-    const wallH=s.kind==='castle'?H:H,inner=s.kind==='castle'?5:0;
-    for(let dx=-R-3;dx<=R+3;dx++)for(let dz=-R-3;dz<=R+3;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz)),cx=Math.abs(dx)>=R-2&&Math.abs(dz)>=R-2;
-      if(m>R+(cx?2:0))continue;
-      const corner=Math.abs(Math.abs(dx)-R)<=2&&Math.abs(Math.abs(dz)-R)<=2,towerWall=corner&&(Math.abs(Math.abs(dx)-R)===2||Math.abs(Math.abs(dz)-R)===2);
-      pad(X+dx,Z+dz,m<R?(s.kind==='castle'?GRASS:hsh(X+dx,g,Z+dz)<0.3?PLANKS:COBBLE):stone());
-      const gate=Math.abs(dx)<=1&&dz===R; // the gateway, on the south wall
-      let h=0;if(towerWall)h=ragged(X+dx,Z+dz,wallH+4);else if(m===R&&!corner)h=gate?0:ragged(X+dx,Z+dz,wallH);
-      for(let y=1;y<=h;y++)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);
-      if(gate)for(let y=4;y<=5&&wallH>5;y++)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}
+    const wallH=H,inner=s.kind==='castle'&&layout!==3?5:0,round=s.kind==='keep'&&layout===1,roundCorners=s.kind==='castle'&&layout===2;
+    for(let dx=-R-3;dx<=R+3;dx++)for(let dz=-R-3;dz<=R+3;dz++){const m=round?Math.hypot(dx,dz):Math.max(Math.abs(dx),Math.abs(dz)),cx=!round&&Math.abs(dx)>=R-2&&Math.abs(dz)>=R-2;
+      if(m>R+(cx?2:0)+(round?0.5:0))continue;
+      const corner=!round&&Math.abs(Math.abs(dx)-R)<=2&&Math.abs(Math.abs(dz)-R)<=2,towerWall=corner&&(roundCorners?Math.abs(Math.hypot(Math.abs(dx)-R,Math.abs(dz)-R)-2)<0.7:(Math.abs(Math.abs(dx)-R)===2||Math.abs(Math.abs(dz)-R)===2));
+      if(roundCorners&&corner&&Math.hypot(Math.abs(dx)-R,Math.abs(dz)-R)>2.5)continue;
+      const wall=round?m>R-0.6:m===R;
+      pd(dx,dz,!wall&&!towerWall?(s.kind==='castle'?GRASS:hsh(X+dx,g,Z+dz)<0.3?PLANKS:COBBLE):stone());
+      const gate=Math.abs(dx)<=1&&dz>0&&wall; // the gateway
+      let h=0;if(towerWall)h=ragged(X+dx,Z+dz,wallH+(roundCorners?6:4));else if(wall&&!corner)h=gate?0:ragged(X+dx,Z+dz,wallH);
+      for(let y=1;y<=h;y++)P(dx,g+y,dz,stone());
+      if(gate)for(let y=4;y<=5&&wallH>5;y++)P(dx,g+y,dz,stone());}
+    if(s.kind==='keep'&&layout===3)for(const side of [-1,1])for(let a=0;a<=2;a++)for(let b=0;b<=2;b++)if(R-1+b>R)pd(side*(2+a),R-1+b,stone()); // standing on levelled ground
+    if(s.kind==='keep'&&layout===3)for(const side of [-1,1])for(let a=0;a<=2;a++)for(let b=0;b<=2;b++)for(let y=1;y<=ragged(X+side*3,Z+R,wallH+3);y++)if(a!==1||b!==1)P(side*(2+a),g+y,R-1+b,stone()); // a gatehouse of two little towers
+    if(s.kind==='keep'&&layout===2){for(let dx=-R+2;dx<=R-2;dx++)for(let dz=-R+1;dz<=-R+5;dz++){const e=Math.abs(dx)===R-2||dz===-R+1||dz===-R+5;P(dx,g,dz,PLANKS);if(e&&!(dz===-R+5&&dx===0))for(let y=1;y<=ragged(X+dx,Z+dz,4);y++)P(dx,g+y,dz,stone());else if(!e&&hsh(X+dx,8807,Z+dz)<0.4)P(dx,g+5,dz,PLANKS);}} // a hall inside the walls
+    if(s.kind==='castle'&&layout===1)ring(R+3,3,true); // an outer ring wall
     if(inner){ // the castle's own keep in the middle, its door facing the gate
-      for(let dx=-inner;dx<=inner;dx++)for(let dz=-inner;dz<=inner;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));PW(X+dx,g,Z+dz,m<inner?PLANKS:stone(),MODE_SET);
-        if(m===inner){const door=Math.abs(dx)<=0&&dz===inner,h=ragged(X+dx,Z+dz,H+5);for(let y=1;y<=h;y++)if(!(door&&y<=3))PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}}
-      PW(X-inner+1,g+1,Z-inner+1,CRATE,MODE_SET);PW(X+inner-1,g+1,Z-inner+1,BARREL,MODE_SET);PW(X,g+1,Z-inner+1,DWCHEST,MODE_SET);
-    }else{PW(X-R+1,g+1,Z-R+1,CRATE,MODE_SET);PW(X+R-1,g+1,Z-R+1,BARREL,MODE_SET);PW(X+R-1,g+1,Z-R+2,BARREL,MODE_SET);
-      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)PW(X+a,g+1,Z+b-2,COBBLE,MODE_SET);PW(X,g+1,Z-2,DTORCH,MODE_SET);} // a cold hearth
-    for(let k=0;k<8;k++){const a=(r()*(2*R-3)|0)-R+2,b=(r()*(2*R-3)|0)-R+2,hh=1+(r()*2|0);for(let y=1;y<=hh;y++)PW(X+a,g+y,Z+b,y===1?GRAVEL:COBBLE,MODE_AIR);} // rubble
+      for(let dx=-inner;dx<=inner;dx++)for(let dz=-inner;dz<=inner;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));P(dx,g,dz,m<inner?PLANKS:stone());
+        if(m===inner){const door=Math.abs(dx)<=0&&dz===inner,h=ragged(X+dx,Z+dz,H+5);for(let y=1;y<=h;y++)if(!(door&&y<=3))P(dx,g+y,dz,stone());}}
+      P(-inner+1,g+1,-inner+1,CRATE);P(inner-1,g+1,-inner+1,BARREL);P(0,g+1,-inner+1,DWCHEST);
+    }else if(s.kind==='castle'){ // a great hall at the back of the courtyard and a dry well before it
+      for(let dx=-5;dx<=5;dx++)for(let dz=-R+2;dz<=-R+8;dz++){const e=Math.abs(dx)===5||dz===-R+2||dz===-R+8;P(dx,g,dz,PLANKS);if(e&&!(dz===-R+8&&Math.abs(dx)<=1))for(let y=1;y<=ragged(X+dx,Z+dz,H+2);y++)P(dx,g+y,dz,stone());}
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b){P(a,g+1,b+2,COBBLE);P(a,g,b+2,COBBLE);}P(0,g,2,AIR);P(0,g-1,2,AIR);P(0,g-2,2,GRAVEL);
+      P(-4,g+1,-R+3,CRATE);P(4,g+1,-R+3,BARREL);P(0,g+1,-R+3,DWCHEST);
+    }else{P(-R+1,g+1,-R+1,CRATE);P(R-1,g+1,-R+1,BARREL);P(R-1,g+1,-R+2,BARREL);
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)P(a,g+1,b-2,COBBLE);P(0,g+1,-2,DTORCH);} // a cold hearth
+    for(let k=0;k<8;k++){const a=(r()*(2*R-3)|0)-R+2,b=(r()*(2*R-3)|0)-R+2,hh=1+(r()*2|0);for(let y=1;y<=hh;y++)P(a,g+y,b,y===1?GRAVEL:COBBLE,MODE_AIR);} // rubble
   }
   if(s.way)waystoneP(X+s.R+4,Z,s.g);
 }

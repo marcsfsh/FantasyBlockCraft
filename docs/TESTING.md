@@ -21,7 +21,7 @@
 | 09-world-hash | Hash snapshot of the starting world for seeds 123456789 and 4242: blocks and water by layer, column data, block light, terrain over 16 000 blocks and the city plan over 81 x 81 cells around the hold of region (0,0) |
 | 10-content-tables | Block ids fit 0 to 255 and avoid 101 to 107 (water levels in saves), items never share a block id, tiles are inside the atlas, recipes and loot tables reference existing, allowed items, and no removed kind of block or item (power, trade, ore processing, rails) exists. Prints free block ids and unreferenced atlas tiles |
 | 11-saves | World keys decode exactly at every height; a surface edit survives a save (under the world's own key) and reload at the same place; undo restores the right block |
-| 12-weather-farming | A lit crop under a roof grows; mountain snow starts at the snow line; farmland tracking survives window shifts |
+| 12-weather-farming | A lit crop under a roof grows; mountain snow starts at the snow line (land weather pinned to a clear land), and the cold lands snow at any height; farmland tracking survives window shifts |
 | 13-survival | Crate loot is never lost with a full pack; creative only looks inside; blasts spare graves; using a block beats the held item |
 | 14-engine | Torches in streamed chunks are registered; lit kegs wait while paused |
 | 15-names | The Tolkien blocklist catches names, near misses and roots; 30 000 generated names across ten peoples, hold names over a wide area, and every fixed place, block and item name pass |
@@ -52,6 +52,7 @@
 | 40-dry | The four dry and fiery lands are built (Windswept Plains now Golden Steppe) and each has its own ground and plants; the volcanic window holds magma stone; nearly every dry stretch gets its signature and all 8 kinds appear; the smoking cone's lava lake is held in rock on every side; dead wood makes planks |
 | 41-strange | The four strange lands are built and rare, and each has its own stuff and rare find; Starfall Craters are pocked with crater floors; nearly every strange stretch gets its signature and all 8 kinds appear; the starmetal heart's crater is open with starmetal under its floor |
 | 42-men | The four old lands of men are built and every land of the registry is built; each has its own stuff (orchard trees stand in rows); all eight kinds of small structure stand across the lands, the nearest chapel has its graveyard and its name, the nearest bridge spans its river; nearly every stretch gets its signature; orchard leaves give apples |
+| 43-ruins-water-weather | Watchtowers, keeps and castles come in at least three layouts each and all four facings, and a castle stands; ponds and springs are common, a pond holds water two deep and no water in its window is unsound; hillside streams run with water; rapids put rocks in a river; weather follows the land (mist on bogs, dust in the drylands, snow on the tundra, clear green hills, a warmed sky (by its amount: the headless colour is a stub)); caves under a wood grow ferns; each of the ten kept-land landmarks and features stands |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

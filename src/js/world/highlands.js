@@ -44,12 +44,13 @@ const FALL_LANDS=new Set(['mtn','alpine','cloud','karst']),fallC=new Map(),TFL={
 function fallAt(WCX,WCZ){
   const key=WCX*65536+WCZ;if(fallC.has(key))return fallC.get(key);if(fallC.size>20000)fallC.clear();
   let f=null;
-  if(hsh(WCX,8201,WCZ)<0.035){const X=WCX*CS+4+Math.floor(hsh(WCX,8203,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX,8205,WCZ)*8);colInfo(X,Z,TFL);
-    if(FALL_LANDS.has(LANDS[TFL.land].k)&&!TFL.wet&&TFL.rvBot===999&&!TFL.river&&!surfTaken(X,Z,4)&&!sigNear(X,Z,4)){
+  const hq=hsh(WCX,8201,WCZ);if(hq<0.06){const X=WCX*CS+4+Math.floor(hsh(WCX,8203,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX,8205,WCZ)*8);colInfo(X,Z,TFL);
+    const lk=LANDS[TFL.land].k,hi=FALL_LANDS.has(lk)&&hq<0.035; // the high lands' falls, or a hillside stream (M6h)
+    if((hi||STREAM_LANDS.has(lk))&&!TFL.wet&&TFL.rvBot===999&&!TFL.river&&!surfTaken(X,Z,4)&&!sigNear(X,Z,4)){
       const path=[[X,Z,TFL.h]];let x=X,z=Z,h=TFL.h,flat=0,drop=0;
       for(let k=0;k<48&&flat<3;k++){let bx=0,bz=0,bh=h;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const hh=hAt(x+dx,z+dz);if(hh<bh){bh=hh;bx=dx;bz=dz;}}
         if(!bx&&!bz)break;x+=bx;z+=bz;drop+=h-bh;flat=h-bh<=0?flat+1:0;h=bh;colInfo(x,z,TFL);if(TFL.wet||TFL.rvBot<999)break;path.push([x,z,h]);}
-      if(drop>=10&&path.length>=6)f={X:X,Z:Z,path:path,end:path[path.length-1]};}}
+      if(drop>=(hi?10:5)&&path.length>=6)f={X:X,Z:Z,path:path,end:path[path.length-1],stream:!hi};}}
   fallC.set(key,f);return f;
 }
 function fallP(f){

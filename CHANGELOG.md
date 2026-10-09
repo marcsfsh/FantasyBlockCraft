@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.22.0 (2026-10-09): M6h, ruins, water and weather
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v17`. This completes M6.
+
+### Game
+- **Ruins in many shapes (Q122):** watchtowers, keeps and castles each come in four layouts, face any of four ways and are more or less ruined. Towers may be square, ringed by a low wall or twinned; keeps may be round shells, have an inner hall or a gatehouse; castles may have an inner keep, an outer ring, round corner towers or a great hall with a dry well.
+- **Ponds and springs** across the green and wooded lands, two blocks deep.
+- **Rapids:** rocks stand up through the water along stretches of the rivers.
+- **Hillside streams** run down the green and wooded hills to small pools, besides the waterfalls of the high lands.
+- **Weather by land:** mist on the bogs, vales and Cloud Forest, storms on the coasts and mountains, snow in the cold lands, blowing dust in the drylands, ash in the volcanic and blighted lands, and skies tinted by the land. Fog never comes nearer than 38 blocks.
+- **Caves near the surface** take on the land above: earthy with ferns under the woods, peaty under the bogs, icy under the cold lands, sandy with bones under the drylands, basalt and magma under the volcanic wastes, cobwebbed under the Shadowed Forest.
+- **The old lands' landmarks:** an earthwork hill fort or the lone oak in the Green Hills; a woodland shrine or a hollow elder in the Elder Wood; a watch cairn or granite tors on the Heath Moors; a great chambered barrow or rows of standing stones in the Barrow Hills; a temple sunk in the roots or a fallen giant in the Shadowed Forest.
+
+### Tooling
+- New test `43-ruins-water-weather`; the world-hash snapshot is updated on purpose.
+
 ## 0.21.0 (2026-10-09): M6g, old lands of men
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v16`. Every land of the registry is now built.

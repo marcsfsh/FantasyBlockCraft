@@ -314,3 +314,13 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Tests:** the smoothness survey in `31-natural-surface` leaves out the Old Terraces, which are stepped on purpose, as it does the cliff coasts.
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v16`, world data version 16.
 
+
+### D-046 M6h: ruins, water and weather (2026-10-09)
+- **Ruin layouts (Q122):** `buildSite` picks one of four plans for each kind (towers: round, square, ringed by a low wall, or twinned with a lesser tower; keeps: square, round shell, inner hall, gatehouse; castles: inner keep, outer ring, round corner towers, great hall with a dry well), a facing of four, and a decay from 0.15 to 0.75. All three come from `hsh` of the site's seed, so the site stream keeps its draws and placement is unchanged.
+- **Ponds and springs** (`world/waters.js`): `pondAt(WCX,WCZ)` places one in about fifteen chunks on level ground outside the dry and frozen lands. Ponds are two blocks deep with banks no lower than the water, so they are held by the ground; springs are three blocks across on gravel with mossy stones round them. Trees and boulders keep off them (`pondNear`).
+- **Rapids:** river columns where a slow noise is high get rocks standing up through the water (the plants pass).
+- **Hillside streams:** `fallAt` also plans streams in the green and wooded hills (`STREAM_LANDS`): a drop of 5 instead of 10, marked `stream`. The high lands keep their old falls exactly.
+- **Weather by land (Q127, Q128)** (`gameplay/land-weather.js`): each land may have mist, storms, snow, dust or ash, and a sky tint (`LAND_WX`). The player's land is sampled twice a second and the weather eases from one land's into the next. Fog never closes in nearer than 38 blocks. Still cosmetic.
+- **Caves near the surface by land (Q132):** `landCaves` decorates cave floors within about fifty blocks of the ground in the land's character: earth and ferns under woods, peat under wet lands, ice under cold ones, sand and bones under dry ones, basalt and magma under fire, cobwebs under the Shadowed Forest, and so on. It uses its own stream, so the older cave life is unchanged.
+- **The old kept lands' signatures (Q121)** (`world/kept.js`): Green Hills (earthwork hill fort, the lone oak), Elder Wood (woodland shrine, hollow elder), Heath Moors (watch cairn, granite tors), Barrow Hills (great chambered barrow, rows of standing stones), Shadowed Forest (temple sunk in the roots, the fallen giant).
+- **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v17`, world data version 17.

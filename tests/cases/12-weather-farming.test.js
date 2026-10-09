@@ -12,8 +12,10 @@ info('crop under the roof is now',BL[world[I(x,g+2,z)]].n);
 assert(world[I(x,g+2,z)]===WHEAT,'a lit crop under a roof grows to full wheat');
 // Snow: High Mountains snow only at or above the snow line; Frozen Tundra (once the Northern Fells) always
 const bx=Math.floor(PL.x),bz=Math.floor(PL.z),ci=bx+W*bz,b0=biome[ci];
+const lk0=LWX.k;LWX.k='green';LWX.t=1e9; // land weather pinned to a clear land, so the look decides (M6h)
 biome[ci]=5;PL.y=SEA+5;updWeather(0.016,0);const low=snowing;PL.y=SEA+40;updWeather(0.016,0);const high=snowing;biome[ci]=6;PL.y=SEA+5;updWeather(0.016,0);const fells=snowing;biome[ci]=b0;
 assert(!low&&high&&fells,'mountain snow starts at the snow line; the fells always snow');
+biome[ci]=5;PL.y=SEA+5;LWX.k='tundra';updWeather(0.016,0);assert(snowing,'the cold lands snow at any height (M6h)');LWX.k=lk0;LWX.t=0;
 // The farm set follows the window when it slides
 const key=wkey(x+OX,g+1,z+OZ);shiftWindow(16,0);
 const i2=keyToI(key);assert(i2>=0&&farms.has(i2)&&world[i2]===FARM_W,'tracked farmland moves with a window shift');

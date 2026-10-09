@@ -118,6 +118,7 @@ function menBuild(s,r){
         for(let ddx=-2;ddx<=2;ddx++)for(let ddz=-2;ddz<=2;ddz++){const e=Math.abs(ddx)===2||Math.abs(ddz)===2;if(!e)continue;for(let y=hg+1;y<=hg+3;y++)if(!(ddz===2&&ddx===0&&y<=hg+2)&&r()<0.9)PW(hx+ddx,y,hz+ddz,COBBLE,MODE_SET);}
         for(let ddx=-2;ddx<=2;ddx++)for(let ddz=-2;ddz<=2;ddz++)if(r()<0.7)PW(hx+ddx,hg+4,hz+ddz,BRICK,MODE_SET);}
       for(let t=0;t<9;t++)PW(X-8+t*2,g+Math.floor(t*0.75),Z+3,COBBLE,MODE_SET);break;}
+    default:keptBuild(s,r);break; // the old kept lands' signatures (M6h)
     case 'tsteps':{ // stone terraces stepping down a hillside, walled and planted
       for(let k=0;k<4;k++)for(let ddx=-10;ddx<=10;ddx++)for(let ddz=-2;ddz<=2;ddz++){const px=X+ddx,pz=Z+k*5+ddz-8,y=g+6-k*2;for(let yy=y-3;yy<=y;yy++)PW(px,yy,pz,ddz===2?COBBLE:DIRT,MODE_SET);PW(px,y,pz,ddz===2?COBBLE:GRASS,MODE_SET);for(let yy=y+1;yy<=y+4;yy++)PW(px,yy,pz,ddz===-2&&yy===y+1&&ddx%3===0?LAVENDER:AIR,MODE_SET);}break;}
   }

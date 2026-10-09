@@ -255,7 +255,7 @@ Widened after the round-21 interview: M6 enriches every land and adds 30 new one
 - **M6e, dry and fiery (done in 0.19.0, D-043):** Southern Drylands (the kept desert blocks), Golden Steppe (the Windswept Plains rework into it), Volcanic Wastes (a hotter deep below, lava sound), Blighted Lands.
 - **M6f, strange lands (done in 0.20.0, D-044):** Crystal Barrens, Glowcap Hollows, Petrified Forest, Starfall Craters (rare finds); rare tier.
 - **M6g, old lands of men (done in 0.21.0, D-045):** Overgrown Farmland, Wild Orchards, Flower Meadows, Old Terraces; small structures (bridges, farmsteads, shrines and cairns, abandoned camps, beacon hills, mills and jetties, chapels and graveyards, dykes and boundary walls).
-- **M6h, ruins, water and weather:** 3 to 5 layouts each for watchtowers, keeps and castles, varied by size, decay and facing (Q122); hillside streams, river falls and rapids, springs and ponds everywhere; weather and skies by land; land-flavoured caves near the surface (Q132); enrichment (plants, landmarks, tree variety, small finds) for any old land not yet reached (Q121).
+- **M6h, ruins, water and weather (done in 0.22.0, D-046):** 3 to 5 layouts each for watchtowers, keeps and castles, varied by size, decay and facing (Q122); hillside streams, river falls and rapids, springs and ponds everywhere; weather and skies by land; land-flavoured caves near the surface (Q132); enrichment (plants, landmarks, tree variety, small finds) for any old land not yet reached (Q121).
 
 **Checkpoint (each part):** take the creative land tour through the part's lands on the Ally X.
 

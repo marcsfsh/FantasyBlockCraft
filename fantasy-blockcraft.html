@@ -210,7 +210,7 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v16',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v17',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -2673,7 +2673,7 @@ const DWLOOT=[[255,1,1,0.18],[271,1,4,10],[272,1,1,4],[273,1,2,5],[274,1,1,0.6],
 function caveRegion(X,Z){const a=fbm2(X/110,Z/110,1,3501.1),b=fbm2(X/110,Z/110,1,3507.3);return a>0.17?'lush':b>0.19?'crystal':a<-0.17?'drip':b<-0.19?'fungal':'plain';}
 const CAVE_NAMES={lush:'Mossy Caves',crystal:'Crystal Caves',drip:'Dripstone Caves',fungal:'Fungal Caves',plain:'Caves',deep:'Deep Caves'};
 function caveLife(X0,Z0,r2){
-  cavernDetail(X0,Z0,r2);
+  cavernDetail(X0,Z0,r2);landCaves(X0,Z0); // caves near the surface by land (M6h)
   const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8),wild=!zone&&!mineZone(Math.floor(X0/CS),Math.floor(Z0/CS));
   // floors
   const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];
@@ -3023,29 +3023,51 @@ function buildSite(s){
       const d=s.kind==='tower'?Math.hypot(dx,dz):Math.max(Math.abs(dx),Math.abs(dz)),out=d-F;if(out<=0||out>8)continue;
       colInfo(x,z,TS2);const gl=TS2.h,tgt=g-Math.ceil(out);if(tgt<=gl||TS2.wet)continue;const top=topBlock(TS2),cap=top===SNOWG||top===SAND||top===GRAVEL?top:GRASS;
       for(let y=gl;y<=tgt;y++)PW(x,y,z,y===tgt?cap:DIRT,y===gl?MODE_SET:MODE_FILL);}} // around tree trunks, never through them
-  const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*5)-(hsh(x,6604,z)<0.15?h:0)); // broken wall tops and a few gaps
+  // Layouts (M6h, Q122): four plans for each kind, turned to face any of four ways, and more or less ruined (decay). The plan, the
+  // facing and the decay come from the site's seed, so the stream above keeps its draws.
+  const sk=Math.floor(s.seed*1e6),layout=Math.floor(hsh(sk,8801,1)*4),face=Math.floor(hsh(sk,8803,2)*4),decay=0.15+hsh(sk,8805,3)*0.6;
+  const rx=(dx,dz)=>face===0?dx:face===1?-dz:face===2?-dx:dz,rz=(dx,dz)=>face===0?dz:face===1?dx:face===2?-dz:-dx;
+  const P=(dx,y,dz,id,m)=>PW(X+rx(dx,dz),y,Z+rz(dx,dz),id,m===undefined?MODE_SET:m),pd=(dx,dz,id)=>pad(X+rx(dx,dz),Z+rz(dx,dz),id);
+  const ragged=(x,z,h)=>Math.max(1,h-Math.floor(hsh(x,6603,z)*(2+6*decay))-(hsh(x,6604,z)<0.05+0.25*decay?h:0)); // broken wall tops and gaps
+  const ring=(R2,h,gateOK)=>{for(let dx=-R2-1;dx<=R2+1;dx++)for(let dz=-R2-1;dz<=R2+1;dz++){const d=Math.hypot(dx,dz);if(d>R2+0.5||d<=R2-0.6)continue;if(gateOK&&dz>0&&Math.abs(dx)<=1)continue;const hh=ragged(X+dx,Z+dz,h),b0=Math.min(g,hAt(X+rx(dx,dz),Z+rz(dx,dz)));for(let y=b0-1;y<=b0+hh&&y<=g+hh;y++)P(dx,y,dz,stone());}}; // from the ground up, where the land falls away
+  const roundTower=(cx,cz,R2,h,door)=>{for(let dx=-R2-1;dx<=R2+1;dx++)for(let dz=-R2-1;dz<=R2+1;dz++){const d=Math.hypot(dx,dz);if(d>R2+0.5)continue;pd(cx+dx,cz+dz,d>R2-0.6?stone():COBBLE);
+      if(d>R2-0.6){const isDoor=door&&dz>R2-1.5&&dx===0,hh=Math.max(2,Math.round(h*(1-0.5*decay*hsh(X+cx+dx,6605,Z+cz+dz))));for(let y=1;y<=hh;y++)if(!(isDoor&&y<=2)&&hsh(X+cx+dx,g+y,Z+cz+dz)>0.05+0.3*decay*y/h)P(cx+dx,g+y,cz+dz,stone());}}};
   if(s.kind==='tower'){
-    for(let dx=-R-1;dx<=R+1;dx++)for(let dz=-R-1;dz<=R+1;dz++){const d=Math.hypot(dx,dz);if(d>R+0.5)continue;pad(X+dx,Z+dz,d>R-0.6?stone():COBBLE);
-      if(d>R-0.6){const door=dz>R-1.5&&Math.abs(dx)<=0,h=Math.max(2,Math.round(H*(1-0.5*hsh(X+dx,6605,Z+dz))));for(let y=1;y<=h;y++)if(!(door&&y<=2)&&hsh(X+dx,g+y,Z+dz)>0.05+0.25*y/H)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}}
-    for(let y=4;y<H-1;y+=4)for(let dx=-R+1;dx<=R-1;dx++)for(let dz=-R+1;dz<=R-1;dz++)if(Math.hypot(dx,dz)<R-0.6&&hsh(X+dx,g+y,Z+dz)<0.55)PW(X+dx,g+y,Z+dz,PLANKS,MODE_SET); // what is left of the floors
-    PW(X,g+1,Z-R+1,CRATE,MODE_SET);PW(X+1,g+1,Z,DTORCH,MODE_SET);
+    if(layout===1){ // a square tower
+      for(let dx=-R;dx<=R;dx++)for(let dz=-R;dz<=R;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));pd(dx,dz,m===R?stone():COBBLE);
+        if(m===R){const door=dz===R&&dx===0,hh=Math.max(2,Math.round(H*(1-0.5*decay*hsh(X+dx,6605,Z+dz))));for(let y=1;y<=hh;y++)if(!(door&&y<=2)&&hsh(X+dx,g+y,Z+dz)>0.05+0.3*decay*y/H)P(dx,g+y,dz,stone());}}}
+    else roundTower(0,0,R,H,true);
+    if(layout===2)ring(R+4,3,true); // a low ring wall round it
+    if(layout===3){const r2=Math.max(2,R-1);roundTower(R+r2+2,0,r2,H-3,false);for(let t=R;t<=R+2;t++)for(let y=1;y<=3;y++)P(t,g+y,0,stone());} // a lesser tower joined to it
+    for(let y=4;y<H-1;y+=4)for(let dx=-R+1;dx<=R-1;dx++)for(let dz=-R+1;dz<=R-1;dz++)if((layout===1||Math.hypot(dx,dz)<R-0.6)&&hsh(X+dx,g+y,Z+dz)<0.55)P(dx,g+y,dz,PLANKS); // what is left of the floors
+    P(0,g+1,-R+1,CRATE);P(1,g+1,0,DTORCH);
   }else{
-    const wallH=s.kind==='castle'?H:H,inner=s.kind==='castle'?5:0;
-    for(let dx=-R-3;dx<=R+3;dx++)for(let dz=-R-3;dz<=R+3;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz)),cx=Math.abs(dx)>=R-2&&Math.abs(dz)>=R-2;
-      if(m>R+(cx?2:0))continue;
-      const corner=Math.abs(Math.abs(dx)-R)<=2&&Math.abs(Math.abs(dz)-R)<=2,towerWall=corner&&(Math.abs(Math.abs(dx)-R)===2||Math.abs(Math.abs(dz)-R)===2);
-      pad(X+dx,Z+dz,m<R?(s.kind==='castle'?GRASS:hsh(X+dx,g,Z+dz)<0.3?PLANKS:COBBLE):stone());
-      const gate=Math.abs(dx)<=1&&dz===R; // the gateway, on the south wall
-      let h=0;if(towerWall)h=ragged(X+dx,Z+dz,wallH+4);else if(m===R&&!corner)h=gate?0:ragged(X+dx,Z+dz,wallH);
-      for(let y=1;y<=h;y++)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);
-      if(gate)for(let y=4;y<=5&&wallH>5;y++)PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}
+    const wallH=H,inner=s.kind==='castle'&&layout!==3?5:0,round=s.kind==='keep'&&layout===1,roundCorners=s.kind==='castle'&&layout===2;
+    for(let dx=-R-3;dx<=R+3;dx++)for(let dz=-R-3;dz<=R+3;dz++){const m=round?Math.hypot(dx,dz):Math.max(Math.abs(dx),Math.abs(dz)),cx=!round&&Math.abs(dx)>=R-2&&Math.abs(dz)>=R-2;
+      if(m>R+(cx?2:0)+(round?0.5:0))continue;
+      const corner=!round&&Math.abs(Math.abs(dx)-R)<=2&&Math.abs(Math.abs(dz)-R)<=2,towerWall=corner&&(roundCorners?Math.abs(Math.hypot(Math.abs(dx)-R,Math.abs(dz)-R)-2)<0.7:(Math.abs(Math.abs(dx)-R)===2||Math.abs(Math.abs(dz)-R)===2));
+      if(roundCorners&&corner&&Math.hypot(Math.abs(dx)-R,Math.abs(dz)-R)>2.5)continue;
+      const wall=round?m>R-0.6:m===R;
+      pd(dx,dz,!wall&&!towerWall?(s.kind==='castle'?GRASS:hsh(X+dx,g,Z+dz)<0.3?PLANKS:COBBLE):stone());
+      const gate=Math.abs(dx)<=1&&dz>0&&wall; // the gateway
+      let h=0;if(towerWall)h=ragged(X+dx,Z+dz,wallH+(roundCorners?6:4));else if(wall&&!corner)h=gate?0:ragged(X+dx,Z+dz,wallH);
+      for(let y=1;y<=h;y++)P(dx,g+y,dz,stone());
+      if(gate)for(let y=4;y<=5&&wallH>5;y++)P(dx,g+y,dz,stone());}
+    if(s.kind==='keep'&&layout===3)for(const side of [-1,1])for(let a=0;a<=2;a++)for(let b=0;b<=2;b++)if(R-1+b>R)pd(side*(2+a),R-1+b,stone()); // standing on levelled ground
+    if(s.kind==='keep'&&layout===3)for(const side of [-1,1])for(let a=0;a<=2;a++)for(let b=0;b<=2;b++)for(let y=1;y<=ragged(X+side*3,Z+R,wallH+3);y++)if(a!==1||b!==1)P(side*(2+a),g+y,R-1+b,stone()); // a gatehouse of two little towers
+    if(s.kind==='keep'&&layout===2){for(let dx=-R+2;dx<=R-2;dx++)for(let dz=-R+1;dz<=-R+5;dz++){const e=Math.abs(dx)===R-2||dz===-R+1||dz===-R+5;P(dx,g,dz,PLANKS);if(e&&!(dz===-R+5&&dx===0))for(let y=1;y<=ragged(X+dx,Z+dz,4);y++)P(dx,g+y,dz,stone());else if(!e&&hsh(X+dx,8807,Z+dz)<0.4)P(dx,g+5,dz,PLANKS);}} // a hall inside the walls
+    if(s.kind==='castle'&&layout===1)ring(R+3,3,true); // an outer ring wall
     if(inner){ // the castle's own keep in the middle, its door facing the gate
-      for(let dx=-inner;dx<=inner;dx++)for(let dz=-inner;dz<=inner;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));PW(X+dx,g,Z+dz,m<inner?PLANKS:stone(),MODE_SET);
-        if(m===inner){const door=Math.abs(dx)<=0&&dz===inner,h=ragged(X+dx,Z+dz,H+5);for(let y=1;y<=h;y++)if(!(door&&y<=3))PW(X+dx,g+y,Z+dz,stone(),MODE_SET);}}
-      PW(X-inner+1,g+1,Z-inner+1,CRATE,MODE_SET);PW(X+inner-1,g+1,Z-inner+1,BARREL,MODE_SET);PW(X,g+1,Z-inner+1,DWCHEST,MODE_SET);
-    }else{PW(X-R+1,g+1,Z-R+1,CRATE,MODE_SET);PW(X+R-1,g+1,Z-R+1,BARREL,MODE_SET);PW(X+R-1,g+1,Z-R+2,BARREL,MODE_SET);
-      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)PW(X+a,g+1,Z+b-2,COBBLE,MODE_SET);PW(X,g+1,Z-2,DTORCH,MODE_SET);} // a cold hearth
-    for(let k=0;k<8;k++){const a=(r()*(2*R-3)|0)-R+2,b=(r()*(2*R-3)|0)-R+2,hh=1+(r()*2|0);for(let y=1;y<=hh;y++)PW(X+a,g+y,Z+b,y===1?GRAVEL:COBBLE,MODE_AIR);} // rubble
+      for(let dx=-inner;dx<=inner;dx++)for(let dz=-inner;dz<=inner;dz++){const m=Math.max(Math.abs(dx),Math.abs(dz));P(dx,g,dz,m<inner?PLANKS:stone());
+        if(m===inner){const door=Math.abs(dx)<=0&&dz===inner,h=ragged(X+dx,Z+dz,H+5);for(let y=1;y<=h;y++)if(!(door&&y<=3))P(dx,g+y,dz,stone());}}
+      P(-inner+1,g+1,-inner+1,CRATE);P(inner-1,g+1,-inner+1,BARREL);P(0,g+1,-inner+1,DWCHEST);
+    }else if(s.kind==='castle'){ // a great hall at the back of the courtyard and a dry well before it
+      for(let dx=-5;dx<=5;dx++)for(let dz=-R+2;dz<=-R+8;dz++){const e=Math.abs(dx)===5||dz===-R+2||dz===-R+8;P(dx,g,dz,PLANKS);if(e&&!(dz===-R+8&&Math.abs(dx)<=1))for(let y=1;y<=ragged(X+dx,Z+dz,H+2);y++)P(dx,g+y,dz,stone());}
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b){P(a,g+1,b+2,COBBLE);P(a,g,b+2,COBBLE);}P(0,g,2,AIR);P(0,g-1,2,AIR);P(0,g-2,2,GRAVEL);
+      P(-4,g+1,-R+3,CRATE);P(4,g+1,-R+3,BARREL);P(0,g+1,-R+3,DWCHEST);
+    }else{P(-R+1,g+1,-R+1,CRATE);P(R-1,g+1,-R+1,BARREL);P(R-1,g+1,-R+2,BARREL);
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)P(a,g+1,b-2,COBBLE);P(0,g+1,-2,DTORCH);} // a cold hearth
+    for(let k=0;k<8;k++){const a=(r()*(2*R-3)|0)-R+2,b=(r()*(2*R-3)|0)-R+2,hh=1+(r()*2|0);for(let y=1;y<=hh;y++)P(a,g+y,b,y===1?GRAVEL:COBBLE,MODE_AIR);} // rubble
   }
   if(s.way)waystoneP(X+s.R+4,Z,s.g);
 }
@@ -3291,12 +3313,13 @@ const FALL_LANDS=new Set(['mtn','alpine','cloud','karst']),fallC=new Map(),TFL={
 function fallAt(WCX,WCZ){
   const key=WCX*65536+WCZ;if(fallC.has(key))return fallC.get(key);if(fallC.size>20000)fallC.clear();
   let f=null;
-  if(hsh(WCX,8201,WCZ)<0.035){const X=WCX*CS+4+Math.floor(hsh(WCX,8203,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX,8205,WCZ)*8);colInfo(X,Z,TFL);
-    if(FALL_LANDS.has(LANDS[TFL.land].k)&&!TFL.wet&&TFL.rvBot===999&&!TFL.river&&!surfTaken(X,Z,4)&&!sigNear(X,Z,4)){
+  const hq=hsh(WCX,8201,WCZ);if(hq<0.06){const X=WCX*CS+4+Math.floor(hsh(WCX,8203,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX,8205,WCZ)*8);colInfo(X,Z,TFL);
+    const lk=LANDS[TFL.land].k,hi=FALL_LANDS.has(lk)&&hq<0.035; // the high lands' falls, or a hillside stream (M6h)
+    if((hi||STREAM_LANDS.has(lk))&&!TFL.wet&&TFL.rvBot===999&&!TFL.river&&!surfTaken(X,Z,4)&&!sigNear(X,Z,4)){
       const path=[[X,Z,TFL.h]];let x=X,z=Z,h=TFL.h,flat=0,drop=0;
       for(let k=0;k<48&&flat<3;k++){let bx=0,bz=0,bh=h;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const hh=hAt(x+dx,z+dz);if(hh<bh){bh=hh;bx=dx;bz=dz;}}
         if(!bx&&!bz)break;x+=bx;z+=bz;drop+=h-bh;flat=h-bh<=0?flat+1:0;h=bh;colInfo(x,z,TFL);if(TFL.wet||TFL.rvBot<999)break;path.push([x,z,h]);}
-      if(drop>=10&&path.length>=6)f={X:X,Z:Z,path:path,end:path[path.length-1]};}}
+      if(drop>=(hi?10:5)&&path.length>=6)f={X:X,Z:Z,path:path,end:path[path.length-1],stream:!hi};}}
   fallC.set(key,f);return f;
 }
 function fallP(f){
@@ -3408,6 +3431,7 @@ function driftP(X,y,Z,r){const ax=r()<0.5,len=2+(r()*3|0);for(let t=0;t<len;t++)
 // Water plants: kelp and seagrass on sandy, gravelly or muddy floors in the sea; lily pads on shallow lakes and pools
 function waterPlants(x,z,X,Z,g,b){
   const top=world[I(x,g,z)],r=hsh(X,5,Z);
+  if(b===0&&g>=SEA-6&&rapidAt(X,Z)){const t=hsh(X,8949,Z)<0.6?SEA:SEA-1;for(let y=g+1;y<=t;y++)world[I(x,y,z)]=hsh(X,y,Z)<0.3?MOSSY:STONE;return;} // rapids (M6h)
   if(b===0&&(top===SAND||top===GRAVEL||top===DIRT||top===BLACKSAND)){colInfo(X,Z,TP);const F=forestOf(TP),kd=F&&F.kelp||0,sg=F&&F.seagrass!==undefined?F.seagrass:0.015;
     if(r<kd){const hh=2+Math.floor(hsh(X,8401,Z)*(SEA-g-1));for(let y=g+1;y<=Math.min(SEA-2,g+hh);y++){const i=I(x,y,z);if(world[i]!==WATER)break;world[i]=KELP;}}
     else if(r<kd+sg)world[I(x,g+1,z)]=SEAGRASS;return;}
@@ -3737,8 +3761,128 @@ function menBuild(s,r){
         for(let ddx=-2;ddx<=2;ddx++)for(let ddz=-2;ddz<=2;ddz++){const e=Math.abs(ddx)===2||Math.abs(ddz)===2;if(!e)continue;for(let y=hg+1;y<=hg+3;y++)if(!(ddz===2&&ddx===0&&y<=hg+2)&&r()<0.9)PW(hx+ddx,y,hz+ddz,COBBLE,MODE_SET);}
         for(let ddx=-2;ddx<=2;ddx++)for(let ddz=-2;ddz<=2;ddz++)if(r()<0.7)PW(hx+ddx,hg+4,hz+ddz,BRICK,MODE_SET);}
       for(let t=0;t<9;t++)PW(X-8+t*2,g+Math.floor(t*0.75),Z+3,COBBLE,MODE_SET);break;}
+    default:keptBuild(s,r);break; // the old kept lands' signatures (M6h)
     case 'tsteps':{ // stone terraces stepping down a hillside, walled and planted
       for(let k=0;k<4;k++)for(let ddx=-10;ddx<=10;ddx++)for(let ddz=-2;ddz<=2;ddz++){const px=X+ddx,pz=Z+k*5+ddz-8,y=g+6-k*2;for(let yy=y-3;yy<=y;yy++)PW(px,yy,pz,ddz===2?COBBLE:DIRT,MODE_SET);PW(px,y,pz,ddz===2?COBBLE:GRASS,MODE_SET);for(let yy=y+1;yy<=y+4;yy++)PW(px,yy,pz,ddz===-2&&yy===y+1&&ddx%3===0?LAVENDER:AIR,MODE_SET);}break;}
+  }
+}
+// ---- Water and caves by land (M6h, D-046; Q126, Q132): ponds and springs across the green lands, rapids where rocks break a
+// river, hillside streams (planned with the waterfalls in highlands.js), and cave floors near the surface in the character of the
+// land above them.
+const POND_NONE=new Set(['dry','volcanic','petrified','starfall','glacier','blight','crystal','steppe']),pondC=new Map(),TPD={},TPD2={};
+// A pond or spring: about one chunk in fifteen where the ground is level. Two blocks deep, its banks no lower than its water, so
+// it is held by the ground around it. Pure per chunk; it reaches at most six blocks from its middle.
+function pondAt(WCX,WCZ){
+  const key=WCX*65536+WCZ;if(pondC.has(key))return pondC.get(key);if(pondC.size>20000)pondC.clear();let p=null;
+  if(hsh(WCX,8931,WCZ)<0.07){const X=WCX*CS+4+Math.floor(hsh(WCX,8933,WCZ)*8),Z=WCZ*CS+4+Math.floor(hsh(WCX,8935,WCZ)*8);colInfo(X,Z,TPD);const L=LANDS[TPD.land],h=TPD.h;
+    if(!L.sea&&!POND_NONE.has(L.k)&&!TPD.wet&&!TPD.river&&!TPD.bank&&!TPD.lake&&TPD.rvBot===999&&h>SEA+2&&h<SEA+120){
+      const spring=hsh(WCX,8937,WCZ)<0.3,R=spring?1:2+Math.floor(hsh(WCX,8939,WCZ)*3);
+      let ok=!surfTaken(X,Z,R+4)&&!sigNear(X,Z,R+4)&&!smallNear(X,Z,R+4);
+      for(let dx=-R-1;dx<=R+1&&ok;dx++)for(let dz=-R-1;dz<=R+1&&ok;dz++){if(Math.hypot(dx,dz)>R+1.5)continue;const e=colInfo(X+dx,Z+dz,TPD2);if(e.h<h||e.h>h+2||e.rvBot<999||e.wet||e.river||e.lake)ok=false;}
+      if(ok)p={X:X,Z:Z,h:h,R:R,spring:spring};}}
+  pondC.set(key,p);return p;
+}
+function pondNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const p=pondAt(cx+a,cz+b);if(p&&Math.hypot(X-p.X,Z-p.Z)<=p.R+1.5+(m||0))return p;}return null;}
+function pondP(p){
+  const {X,Z,h,R}=p;
+  for(let dx=-R-1;dx<=R+1;dx++)for(let dz=-R-1;dz<=R+1;dz++){const d=Math.hypot(dx,dz),x=X+dx,z=Z+dz;
+    if(d<R+0.5){PW(x,h,z,WATER,MODE_SET);PW(x,h-1,z,WATER,MODE_SET);PW(x,h-2,z,p.spring?GRAVEL:d<R-0.5?DIRT:SAND,MODE_SET);PW(x,h-3,z,DIRT,MODE_FILL);PW(x,h+1,z,AIR,MODE_SET);PW(x,h+2,z,AIR,MODE_SET);}
+    else if(d<R+1.5){for(let y=h-3;y<h;y++)PW(x,y,z,DIRT,MODE_FILL);if(p.spring&&hsh(x,8941,z)<0.6)PW(x,hAt(x,z)+1,z,hsh(x,8943,z)<0.5?MOSSY:COBBLE,MODE_AIR);}}
+}
+function applyPonds(WCX,WCZ){for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const p=pondAt(WCX+a,WCZ+b);if(p)pondP(p);}}
+// Rapids: stretches of a river where rocks stand up through the water
+function rapidAt(X,Z){return hsh(X,8945,Z)<0.09&&fbm2(X/48,Z/48,1,8947.3)>0.25&&colInfo(X,Z,TPD).river;}
+// Hillside streams: the green and wooded hills get falls of their own, smaller than the mountains' (see fallAt)
+const STREAM_LANDS=new Set(['green','moors','elder','barrow','autumn','birch','pine','yew','giant','silver','terrace','shadow']);
+// ---- Caves near the surface take on the land above them (Q132): within about fifty blocks of the ground
+const CAVE_LOOK={autumn:'wood',birch:'wood',pine:'wood',giant:'wood',yew:'wood',silver:'wood',elder:'wood',green:'wood',orchard:'wood',farm:'wood',flower:'wood',terrace:'wood',
+  willow:'wet',bog:'wet',moors:'wet',cloud:'wet',karst:'drip',chalk:'drip',alpine:'cold',glacier:'cold',tundra:'cold',fjord:'cold',mtn:'cold',
+  dry:'sand',steppe:'sand',petrified:'sand',volcanic:'fire',blacksand:'fire',blight:'ash',barrow:'bone',shadow:'web',glowcap:'glow',crystal:'crystal',starfall:'star',sea:'shore',isles:'shore',kelp:'shore'};
+function landCaves(X0,Z0){
+  const cx=Math.floor(X0/CS),cz=Math.floor(Z0/CS);if(ruinZone(cx,cz)||mineZone(cx,cz))return;const r=rngAt(cx,8951,cz),T={};
+  for(let k=0;k<90;k++){const X=X0+(r()*CS|0),Z=Z0+(r()*CS|0),g=ground[(X-OX)+W*(Z-OZ)],kind=r(),q=r();let y=g-6-(r()*44|0);
+    if(y<8||GW(X,y,Z)!==AIR)continue;while(y>g-60&&y>8&&GW(X,y-1,Z)===AIR)y--;const fl=GW(X,y-1,Z);if(fl<=0||!SOLID[fl]||isWetId(GW(X,y,Z)))continue;
+    const lk=CAVE_LOOK[LANDS[colInfo(X,Z,T).land].k];if(!lk)continue;
+    const patch=id=>{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(q<0.6||a===0||b===0)PW(X+a,y-1,Z+b,id,MODE_STONE);},on=id=>{if(GW(X,y,Z)===AIR)PW(X,y,Z,id,MODE_SET);};
+    switch(lk){
+      case 'wood':if(kind<0.4)patch(DIRT);else if(kind<0.6){patch(MOSSY);on(FERN);}else if(kind<0.7)on(MUSHB);break; // roots and earth under the woods
+      case 'wet':if(kind<0.4)patch(PEAT);else if(kind<0.6){patch(MOSSY);on(GLOWSHROOM);}break;
+      case 'drip':if(kind<0.45)on(DRIPU);else if(kind<0.7)patch(CALCITE);break;
+      case 'cold':if(kind<0.45)patch(ICE);else if(kind<0.6)patch(PSNOW);break;
+      case 'sand':if(kind<0.45)patch(RSAND);else if(kind<0.5)on(BONES);else if(kind<0.55)patch(PETRIWOOD);break;
+      case 'fire':if(kind<0.4)patch(BASALT);else if(kind<0.5)patch(OBSID);else if(kind<0.55)patch(MAGMA);break;
+      case 'ash':if(kind<0.5)patch(ASH);else if(kind<0.6)on(BONES);break;
+      case 'bone':if(kind<0.25)on(BONES);else if(kind<0.5)patch(GRAVEL);break;
+      case 'web':if(kind<0.35)on(COBWEB);else if(kind<0.6)patch(MOSSY);break;
+      case 'glow':if(kind<0.5)on(GLOWSHROOM);else if(kind<0.7)patch(MOSSY);break;
+      case 'crystal':if(kind<0.4)on(CRYSTAL);else if(kind<0.6)patch(AMETH);break;
+      case 'star':if(kind<0.06)patch(STARORE);else if(kind<0.4)patch(SCORCH);break;
+      case 'shore':if(kind<0.5)patch(GRAVEL);else if(kind<0.8)patch(SAND);break;}}
+}
+// ---- The old kept lands get their own landmarks and features (M6h, D-046; Q121): the Green Hills, the Elder Wood, the Heath
+// Moors, the Barrow Hills and the Shadowed Forest, the five lands that had none since M6a.
+Object.assign(SIGS,{
+  green:[['hillfort','Earthwork Hill Fort',12],['loneoak','The Lone Oak',8]],
+  elder:[['wshrine','Woodland Shrine',6],['hollowelder','Hollow Elder',7]],
+  moors:[['watchcairn','Watch Cairn',6],['tors','Granite Tors',10]],
+  barrow:[['greatbarrow','Great Chambered Barrow',12],['stonerows','Rows of Standing Stones',13]],
+  shadow:[['sunktemple','Temple Sunk in the Roots',10],['fallen','The Fallen Giant',12]]
+});
+// raise the ground to y over a column (earth below, grass on top), then clear above it
+function keptMound(x,z,y,top){for(let yy=y-1;yy>y-10;yy--){const c=GW(x,yy,z);if(c>0&&SOLID[c]&&!BL[c].leaf)break;PW(x,yy,z,DIRT,MODE_SET);}PW(x,y,z,top||GRASS,MODE_SET);for(let k=1;k<=4;k++)PW(x,y+k,z,AIR,MODE_SET);}
+function keptBuild(s,r){
+  const X=s.X,Z=s.Z,g=s.g,face=Math.floor(s.seed*4),fx=[1,0,-1,0][face],fz=[0,1,0,-1][face];
+  switch(s.kind){
+    case 'hillfort':{ // two rings of earth bank with a ditch between, a gap for the gate, the stones of a hall inside
+      for(let dx=-12;dx<=12;dx++)for(let dz=-12;dz<=12;dz++){const d=Math.hypot(dx,dz),gate=(dx*fx+dz*fz)>d*0.93;if(gate)continue;
+        if(d>=10.5&&d<12)keptMound(X+dx,Z+dz,g+1);else if(d>=7&&d<9)keptMound(X+dx,Z+dz,g+2);else if(d>=9&&d<10.5){PW(X+dx,g,Z+dz,GRASS,MODE_SET);PW(X+dx,g+1,Z+dz,AIR,MODE_SET);}}
+      for(let a=-3;a<=3;a++)for(let b=-2;b<=2;b++)if((Math.abs(a)===3||Math.abs(b)===2)&&r()<0.6)PW(X+a,g+1,Z+b,r()<0.4?MOSSY:COBBLE,MODE_SET);break;}
+    case 'loneoak':{ // a knoll with one wide old oak on it
+      for(let dx=-7;dx<=7;dx++)for(let dz=-7;dz<=7;dz++){const d=Math.hypot(dx,dz);if(d<7)keptMound(X+dx,Z+dz,g+Math.round(3*(1-d/7)));}
+      const b=g+4;for(let y=b;y<b+8;y++)for(let a=0;a<2;a++)for(let c=0;c<2;c++)PW(X+a,y,Z+c,LOG,MODE_SET);
+      for(let k=0;k<4;k++){const ax=[1,0,-1,0][k],az=[0,1,0,-1][k];for(let t=1;t<=4;t++)PW(X+(ax>0?1:0)+ax*t,b+5+(t>>1),Z+(az>0?1:0)+az*t,LOG,MODE_SET);}
+      for(let dx=-7;dx<=8;dx++)for(let dy=-2;dy<=4;dy++)for(let dz=-7;dz<=8;dz++){const d=Math.hypot(dx-0.5,dy*1.5,dz-0.5);if(d<=7&&!(d>6&&r()<0.4))PW(X+dx,b+9+dy,Z+dz,LEAVES,MODE_AIR);}break;}
+    case 'wshrine':{ // a mossy floor, four pillars, a low altar with a cold lantern on it
+      sigFloor(X-3,Z-3,X+3,Z+3,g,MOSSY,6);
+      for(const [a,b] of [[-3,-3],[3,-3],[-3,3],[3,3]]){const t=2+(r()*3|0);for(let y=g+1;y<=g+t;y++)PW(X+a,y,Z+b,r()<0.5?MOSSY:SBRICK,MODE_SET);}
+      PW(X,g+1,Z,SBRICK,MODE_SET);PW(X,g+2,Z,LANTERN,MODE_SET);
+      for(let k=0;k<10;k++){const a=X-3+(r()*7|0),b=Z-3+(r()*7|0);if(a!==X||b!==Z)PW(a,g+1,b,r()<0.6?FERN:MUSHB,MODE_AIR);}break;}
+    case 'hollowelder':{ // an old elder five blocks thick, hollow inside with a way in, under a broad crown
+      const R=2.5;for(let y=g-1;y<=g+9;y++)for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){const d=Math.hypot(dx,dz);if(d>R+0.4)continue;
+        const inside=d<R-0.9&&y>=g+1&&y<=g+6;PW(X+dx,y,Z+dz,inside?AIR:y<g+1?DIRT:LOG,MODE_SET);}
+      PW(X+fx*2,g+1,Z+fz*2,AIR,MODE_SET);PW(X+fx*2,g+2,Z+fz*2,AIR,MODE_SET);PW(X,g,Z,FMOSS,MODE_SET);PW(X-fz,g+1,Z+fx,MUSHB,MODE_SET);
+      for(let dx=-7;dx<=7;dx++)for(let dy=0;dy<=5;dy++)for(let dz=-7;dz<=7;dz++){const d=Math.hypot(dx,(dy-2)*1.6,dz);if(d<=7&&!(d>6.2&&r()<0.4))PW(X+dx,g+9+dy,Z+dz,LEAVES,MODE_AIR);}break;}
+    case 'watchcairn':{ // a granite tor with a cairn of stones on top where a watch fire burned
+      for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){const d=Math.hypot(dx,dz),t=Math.round(4*(1-d/4.6));for(let y=g+1;y<=g+t;y++)PW(X+dx,y,Z+dz,STONE,MODE_SET);}
+      const top=g+4;for(let y=top+1;y<=top+4;y++)for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)if(y<top+3||(!dx&&!dz))PW(X+dx,y,Z+dz,r()<0.4?MOSSY:COBBLE,MODE_SET);
+      PW(X,top+5,Z,GRAVEL,MODE_SET);break;}
+    case 'tors':{ // stacks of weathered granite slabs standing out of the heather
+      for(let k=0;k<4;k++){const a=k*1.7+s.seed*6,d=k?5+r()*3:0,cx=Math.round(X+Math.cos(a)*d),cz=Math.round(Z+Math.sin(a)*d),h=4+(r()*5|0);let w=2;
+        for(let y=g+1-1;y<=g+h;y++){if(y>g+1&&r()<0.35)w=Math.max(1,w-1);for(let dx=-w;dx<=w;dx++)for(let dz=-w;dz<=w;dz++)if(Math.abs(dx)+Math.abs(dz)<=w+1)PW(cx+dx,y,cz+dz,STONE,MODE_SET);}}break;}
+    case 'greatbarrow':{ // a long mound with a stone-lined passage between two standing stones into a chamber of bones
+      const along=(t,c,y,id)=>PW(X+fx*t-fz*c,y,Z+fz*t+fx*c,id,MODE_SET);
+      for(let t=-11;t<=11;t++)for(let c=-6;c<=6;c++){const e=Math.hypot(t/11,c/6);if(e<1){const top=g+Math.round(5*Math.sqrt(1-e*e));for(let y=g+1;y<top;y++)along(t,c,y,DIRT);along(t,c,top,GRASS);}}
+      for(let t=4;t<=11;t++)for(let c=-1;c<=1;c++)for(let y=g;y<=g+3;y++)along(t,c,y,y===g?SBRICK:Math.abs(c)===1||y===g+3?(r()<0.4?MOSSY:SBRICK):AIR);
+      for(let t=-3;t<=3;t++)for(let c=-2;c<=2;c++)for(let y=g;y<=g+4;y++){const wall=Math.abs(t)===3||Math.abs(c)===2||y===g||y===g+4;along(t,c,y,wall?(r()<0.4?MOSSY:SBRICK):AIR);}
+      for(let y=g+1;y<=g+2;y++)along(3,0,y,AIR);
+      along(-2,0,g+1,GRAVE);along(-2,1,g+1,BONES);along(1,-1,g+1,BONES);along(0,1,g+1,CHEST);
+      for(const c of [-2,2])for(let y=g+1;y<=g+4;y++)along(12,c,y,STONE);for(let t=12;t<=13;t++)for(let c=-1;c<=1;c++)for(let y=g+1;y<=g+3;y++)along(t,c,y,AIR);break;}
+    case 'stonerows':{ // two long rows of standing stones running across the hill
+      for(const c of [-3,3])for(let t=-12;t<=12;t+=3){const h=2+(r()*3|0),x=X+fx*t-fz*c,z=Z+fz*t+fx*c,b=hAt(x,z);if(r()<0.15)continue;
+        PW(x,b,z,STONE,MODE_SET);for(let y=b+1;y<=b+h;y++)PW(x,y,z,r()<0.3?MOSSY:STONE,MODE_SET);}break;}
+    case 'sunktemple':{ // a temple floor sunk three blocks among the roots, broken pillars, steps down, cobwebs in the corners
+      const f=g-3;for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){PW(X+dx,f-1,Z+dz,STONE,MODE_SET);PW(X+dx,f,Z+dz,Math.abs(dx)===6||Math.abs(dz)===6?MOSSY:SBRICK,MODE_SET);
+        const wall=Math.abs(dx)===6||Math.abs(dz)===6;for(let y=f+1;y<=g+2;y++)PW(X+dx,y,Z+dz,wall&&y<=g?(r()<0.5?MOSSY:SBRICK):AIR,MODE_SET);}
+      for(let t=0;t<=3;t++)for(let c=-1;c<=1;c++){const x=X+fx*(6-t)-fz*c,z=Z+fz*(6-t)+fx*c;for(let y=f+1;y<=g+2;y++)PW(x,y,z,y<=g-t?SBRICK:AIR,MODE_SET);}
+      for(const [a,b] of [[-3,-3],[3,-3],[-3,3],[3,3]]){const t=2+(r()*4|0);for(let y=f+1;y<=f+t;y++)PW(X+a,y,Z+b,SBRICK,MODE_SET);}
+      for(let k=-6;k<=6;k++)if(r()<0.7)PW(X+k,g+1+(k&1),Z+(k>>1),JLOG,MODE_SET); // a root across the top
+      for(const [a,b] of [[-5,-5],[5,-5],[-5,5],[5,5]])PW(X+a,f+3,Z+b,COBWEB,MODE_AIR);PW(X,f+1,Z,SBRICK,MODE_SET);PW(X,f+2,Z,LANTERN,MODE_SET);break;}
+    case 'fallen':{ // a giant fallen across a hollow, its roots torn up at one end
+      for(let t=-11;t<=11;t++)for(let c=-5;c<=5;c++){const d=Math.abs(c)/5,dep=Math.round(3*(1-d*d)*(1-Math.abs(t)/14));if(dep<1)continue;const x=X+fx*t-fz*c,z=Z+fz*t+fx*c;
+        for(let y=g-dep+1;y<=g+1;y++)PW(x,y,z,AIR,MODE_SET);PW(x,g-dep,z,GRASS,MODE_SET);}
+      for(let t=-11;t<=9;t++)for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(Math.abs(a)+Math.abs(b)<2||t<-8)PW(X+fx*t-fz*a,g+2+b,Z+fz*t+fx*a,JLOG,MODE_SET);
+      for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)if(Math.hypot(a,b)<3.4&&r()<0.75)PW(X+fx*10-fz*a,g+2+b,Z+fz*10+fx*a,r()<0.5?DIRT:JLOG,MODE_SET);
+      for(let k=0;k<12;k++){const t=-10+(r()*20|0);PW(X+fx*t,g+4,Z+fz*t,r()<0.5?FMOSS:MUSHB,MODE_AIR);}break;}
   }
 }
 const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
@@ -3777,7 +3921,7 @@ function features(WCX,WCZ,self,noLife){
   // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -3787,7 +3931,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -3854,7 +3998,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
@@ -5964,7 +6108,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:16,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:17,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -6203,7 +6347,7 @@ function updSky(){
   U.skyMul.value=(0.16+0.84*d)*(1-0.3*rainAmt);
   U.skyTint.value.setRGB(0.6+0.4*d,0.7+0.3*d,1).lerp(tintSet,sunset*0.35*d);
   skyC.copy(cNight).lerp(cDay,d).lerp(cSet,sunset*0.5*Math.max(d,0.3));
-  tmpC.copy(cRain).multiplyScalar(0.25+0.75*d);skyC.lerp(tmpC,rainAmt*0.65);
+  tmpC.copy(cRain).multiplyScalar(0.25+0.75*d);skyC.lerp(tmpC,rainAmt*0.65);tintSky(skyC); // the land's tint (M6h)
   stars.material.opacity=Math.max(0,1-d*1.7)*(1-rainAmt);
   {const v=(0.22+0.78*d)*(1-0.35*rainAmt);clouds.material.color.setRGB(v,v*(1-0.1*sunset*d),v*(1-0.22*sunset*d));} // warmer at sunset
   drawMoon(dayN%8);
@@ -6222,17 +6366,20 @@ const rainMat=new THREE.LineBasicMaterial({color:0xa4b8d4,transparent:true,opaci
 const rainLines=new THREE.LineSegments(rainGeo,rainMat);rainLines.frustumCulled=false;scene.add(rainLines);
 function colTop(x,z){x=Math.floor(x);z=Math.floor(z);if(x<0||z<0||x>=W||z>=D)return -1;return hm[x+W*z]+1;}
 function updWeather(dt,now){
-  rainT-=dt;if(rainT<=0){raining=!raining;rainT=raining?60+Math.random()*90:150+Math.random()*220;}
+  rainT-=dt;if(rainT<=0){raining=!raining;rainT=raining?60+Math.random()*90:(150+Math.random()*220)*(LWX.storm?0.5:1);} // storms come twice as often on the coasts and mountains
   flash=Math.max(0,flash-dt*3.5);
   if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;flash=1;const dl=0.4+Math.random()*2.5;burst(1.5,'lowpass',170,0.5,0.7,dl);burst(0.7,'lowpass',520,0.6,0.35,dl);buzz(30);}}
   rainAmt+=(((settings.weather&&raining)?1:0)-rainAmt)*Math.min(1,dt*0.25);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),bi=(bx>=0&&bz>=0&&bx<W&&bz<D)?biome[bx+W*bz]:2;
   snowing=bi===6||(bi===5&&PL.y>=SEA+33); // High Mountains snow above their snow line (fillCol)
-  const n=Math.floor(NR*rainAmt),len=snowing?0.09:0.75;
-  rainMat.color.setHex(snowing?0xffffff:0xa4b8d4);rainMat.opacity=snowing?0.9:0.5;
+  landWeather(dt);if(LWX.snow>=1||(LWX.snow>0&&PL.y>SEA+60))snowing=true; // the cold lands' snow (M6h)
+  // when it is dry, dust (the drylands) or ash (the volcanic and blighted lands) drifts in the air instead
+  const dustN=rainAmt<0.1?Math.floor(NR*0.35*LWX.dust):0,dusty=rainAmt<0.1&&dustN>0;
+  const n=dusty?dustN:Math.floor(NR*rainAmt),len=dusty?0.05:snowing?0.09:0.75;
+  rainMat.color.setHex(dusty?(LWX.ash>0.5?0x8a8580:0xd8c08a):snowing?0xffffff:0xa4b8d4);rainMat.opacity=dusty?0.7:snowing?0.9:0.5;
   for(let i=0;i<n;i++){
     const p=drops[i];
-    p.y-=(snowing?2.4:17)*dt;if(snowing){p.x+=Math.sin(now*0.001+i)*0.5*dt;p.z+=Math.cos(now*0.0013+i*1.7)*0.5*dt;}
+    p.y-=(dusty?0.4:snowing?2.4:17)*dt;if(snowing||dusty){p.x+=Math.sin(now*0.001+i)*0.5*dt;p.z+=Math.cos(now*0.0013+i*1.7)*0.5*dt;}
     if(p.y<PL.y-10||p.y<colTop(p.x,p.z)||Math.abs(p.x-PL.x)>26||Math.abs(p.z-PL.z)>26){p.x=PL.x+(Math.random()-.5)*48;p.z=PL.z+(Math.random()-.5)*48;p.y=PL.y+8+Math.random()*14;if(p.y<colTop(p.x,p.z))p.y=-999;}
     const o=i*6;rainPos[o]=p.x;rainPos[o+1]=p.y;rainPos[o+2]=p.z;rainPos[o+3]=p.x;rainPos[o+4]=p.y+len;rainPos[o+5]=p.z;
   }
@@ -6298,6 +6445,22 @@ function tickWork(){
 }
 let tickT=0;
 
+// ---- Weather by land (M6h, D-046; Q127, Q128): mist and fog, storms, drifting dust and ash, and tinted skies, by the land the player
+// stands in, easing from one land's weather into the next. Still cosmetic. Fog never closes in nearer than 38 blocks (Q128).
+const LAND_WX={willow:{fog:0.5},bog:{fog:0.6},cloud:{fog:0.8,storm:1},shadow:{fog:0.4},giant:{fog:0.35},yew:{fog:0.3},moors:{fog:0.35},barrow:{fog:0.3},
+  glowcap:{fog:0.5,tint:[0.75,0.95,1],ta:0.25},fjord:{fog:0.35,storm:1,snow:1},sea:{fog:0.15,storm:1},kelp:{fog:0.2,storm:1},isles:{fog:0.3,storm:1},chalk:{storm:1},blacksand:{storm:1,fog:0.2},mtn:{storm:1},
+  blight:{fog:0.5,tint:[0.8,0.85,0.72],ta:0.4,dust:0.4,ash:1},volcanic:{tint:[0.85,0.6,0.5],ta:0.45,dust:0.7,ash:1},dry:{tint:[1,0.88,0.68],ta:0.35,dust:0.6},petrified:{tint:[1,0.86,0.7],ta:0.3,dust:0.4},
+  steppe:{tint:[1,0.95,0.8],ta:0.2,dust:0.15},crystal:{tint:[0.88,0.82,1],ta:0.3,snow:1},starfall:{tint:[0.8,0.76,1],ta:0.25},autumn:{tint:[1,0.9,0.8],ta:0.15},silver:{tint:[0.92,0.95,1],ta:0.2},
+  tundra:{snow:1},glacier:{snow:1,fog:0.3},alpine:{snow:0.5}};
+const LWX={fog:0,ta:0,dust:0,ash:0,storm:0,snow:0,tint:new THREE.Color(1,1,1),k:'',t:0},TLW={},tintTmp=new THREE.Color(),tintMul=new THREE.Color();
+function landWeather(dt){
+  LWX.t-=dt;if(LWX.t<=0){LWX.t=0.5;colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TLW);LWX.k=LANDS[TLW.land].k;}
+  const p=LAND_WX[LWX.k]||{},f=Math.min(1,dt*0.3);
+  LWX.fog+=((p.fog||0)-LWX.fog)*f;LWX.ta+=((p.ta||0)-LWX.ta)*f;LWX.dust+=((p.dust||0)-LWX.dust)*f;LWX.ash+=((p.ash||0)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
+  if(p.tint)LWX.tint.lerp(tintTmp.setRGB(p.tint[0],p.tint[1],p.tint[2]),f);
+}
+// the sky takes on the land's tint
+function tintSky(c){tintMul.copy(c).multiply(LWX.tint);c.lerp(tintMul,LWX.ta);}
 // Main loop
 let caveF=0,cullT=0,wasWall=false;const caveDark=new THREE.Color(0.035,0.04,0.06),caveFogC=new THREE.Color();
 let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;
@@ -6398,7 +6561,7 @@ function frame(now){
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
     const lmp=lampLevel();U.caveMin.value=CV[0]*caveF*(SURV()?depthDim(PL.y):1);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
-    U.fogNear.value=lerp(FOGN*(1-0.3*rainAmt),CV[3]*0.35,caveF);U.fogFar.value=lerp(FOGF*(1-0.25*rainAmt),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';}
+    U.fogNear.value=lerp(Math.max(Math.min(6,FOGN),FOGN*(1-0.3*rainAmt)*(1-0.6*LWX.fog)),CV[3]*0.35,caveF);U.fogFar.value=lerp(Math.max(Math.min(38,FOGF),FOGF*(1-0.25*rainAmt)*(1-0.55*LWX.fog)),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';} // mist by land (M6h)
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;
     for(let c=0;c<chunks.length;c++){const ms=chunks[c];if(!ms)continue;const x=(c%NCX)*CS+8-pcx,z=((c/NCX)|0)*CS+8-pcz,v=x*x+z*z<lim;for(const m of ms)m.visible=v;}}
   sun.position.copy(camera.position).addScaledVector(sunDir,420);sun.lookAt(camera.position);
