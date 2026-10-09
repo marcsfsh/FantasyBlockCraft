@@ -2570,7 +2570,15 @@ renderer.setClearColor(SKY);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);
 camera.rotation.order='YXZ';scene.add(camera);
-const tex=new THREE.CanvasTexture(atlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+// The GPU gets a padded copy of the atlas: each 16-pixel tile sits in a 32-pixel cell whose border repeats the tile's edge
+// pixels, so smaller mipmap levels (distant blocks) no longer blend in the neighbouring tiles as lines (M3b, D-027)
+const ACELL=32,APAD=8,gpuAtlas=document.createElement('canvas');gpuAtlas.width=AC*ACELL;gpuAtlas.height=AR*ACELL;
+(function(){const g=gpuAtlas.getContext('2d'),o=g.createImageData(AC*ACELL,AR*ACELL),od=o.data,GW2=AC*ACELL;
+  for(let t=0;t<AC*AR;t++){const c=t%AC,r=(t/AC)|0;
+    for(let y=0;y<ACELL;y++)for(let x=0;x<ACELL;x++){const sx=Math.min(TS-1,Math.max(0,x-APAD)),sy=Math.min(TS-1,Math.max(0,y-APAD)),si=((r*TS+sy)*AW+c*TS+sx)*4,di=((r*ACELL+y)*GW2+c*ACELL+x)*4;
+      od[di]=dat[si];od[di+1]=dat[si+1];od[di+2]=dat[si+2];od[di+3]=dat[si+3];}}
+  g.putImageData(o,0,0);})();
+const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
 let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
 const VS='attribute float light;attribute float blk;attribute float aov;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
@@ -2639,7 +2647,7 @@ const CROSS=[[[0,0,0],[1,0,1],[0,1,0],[1,1,1]],[[1,0,0],[0,0,1],[1,1,0],[0,1,1]]
 const AOF=[0.42,0.62,0.8,1];
 const occ=(x,y,z)=>{const id=get(x,y,z);return id&&BL[id].occ?1:0;};
 const UE=0.004;
-function pushUV(arr,t,u,v){const c=t%AC,r=(t/AC)|0;arr.push((c+UE+u*(1-2*UE))/AC,1-(r+1)/AR+(UE+v*(1-2*UE))/AR);}
+function pushUV(arr,t,u,v){const c=t%AC,r=(t/AC)|0;u=UE+u*(1-2*UE);v=UE+v*(1-2*UE);arr.push((c*ACELL+APAD+u*TS)/(AC*ACELL),1-(r*ACELL+APAD+(1-v)*TS)/(AR*ACELL));}
 const chunks=new Array(NCX*NCZ);
 // Growable typed buffers: much cheaper than pushing into plain arrays while meshing
 class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}

@@ -16,7 +16,7 @@ Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast
 
 ## How sessions run
 
-- Sessions run in a cloud VM with **no browser and no display**. Verification is headless (`npm test`) plus both builds. Never claim something "looks right"; you cannot see it.
+- Sessions run in a cloud VM with no display. Verification is headless (`npm test`) plus both builds. Headless Chromium with software WebGL is available: `npm run shots` (`tools/shot.mjs`, D-026) saves screenshots of set views to `tests/.tmp/shots/` and fails on shader errors; read the PNGs to see a visual change. Frame rates there mean nothing, and the owner's devices remain the judge of how it looks and runs.
 - The owner playtests the committed **`fantasy-blockcraft.html` at the repository root** (downloaded from GitHub), and through GitHub Pages or CI artifacts when Actions minutes allow (see `README.md`). Every PR description must say **what to look at in-game**: where to go, which seed, what should be different, what should be unchanged.
 
 ## Commands
@@ -29,6 +29,7 @@ Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast
 | `npm run test:quick` | Smoke and lighting only |
 | `npm run test:update-snapshots` | Rewrite the world-hash snapshot; only for a deliberate generation change (`docs/TESTING.md`) |
 | `npm run bench` | CPU benchmark, not part of `npm test`; compare against `docs/PERF.md` |
+| `npm run shots` | Screenshots of the real game in headless Chromium (`--seed=`, `--view=name:X,Y,Z,yaw,pitch,time`); fails on shader errors |
 | `npm run build` | Both targets: `dist/single/fantasy-blockcraft.html` and `dist/web/`, and refreshes the committed `fantasy-blockcraft.html` at the root |
 | `npm run build:single` / `build:web` | One target. The game folder uses `vendor/three.min.js`; the single file loads three.js r128 from the CDN |
 | `npm run check` | Both builds, syntax check, root copy up to date, smoke test: the gate before committing |

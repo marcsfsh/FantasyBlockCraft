@@ -62,6 +62,10 @@ Hashes every loaded chunk (block ids and water levels, all heights) by world chu
 
 The hashes are identical on Node 20, 21 and 22 (checked on 2026-10-07). If a Node upgrade alone changes them, record that in the PR and update the snapshot in its own commit with no source changes.
 
+## Screenshots
+
+`npm run shots` (`tools/shot.mjs`) renders set views of the real game in headless Chromium and saves PNGs to `tests/.tmp/shots/` (D-026). It fails on any page error or WebGL shader error, so run it after any shader or renderer change and read the pictures. It is not part of `npm test` (it takes a few minutes and needs the global Playwright of the cloud VM).
+
 ## Benchmark
 
 `npm run bench` is a separate CPU benchmark (startup, chunk generation, streaming, meshing) that uses the same harness. It is not part of `npm test`. See `docs/PERF.md`.
