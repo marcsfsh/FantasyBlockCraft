@@ -11,7 +11,11 @@ function propagate(){
   }
 }
 const torches=new Set();
-function lightAll(){qh=qt=0;for(let i=0;i<VOL;i++){const L=LUM[world[i]];if(L){BLK[i]=L;qpush(i);if(world[i]===TORCH)torches.add(i);}}propagate();}
+// Full recompute, one chunk's emitters at a time: seeding the whole window at once (the lava sea alone is some 300 000 emitters)
+// overflowed the queue and lost light (D-025). Light spreads to the maximum either way, so the order does not change the result.
+function lightAll(){for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){qh=qt=0;
+  for(let y=0;y<H;y++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS,i=I(x,y,z),e=i+CS;i<e;i++){const L=LUM[world[i]];if(L){if(BLK[i]<L){BLK[i]=L;qpush(i);}if(world[i]===TORCH)torches.add(i);}}
+  propagate();}}
 const dirty=new Set();let lbox=null;
 function lightChunk(x0,z0){
   const x1=x0+CS-1,z1=z0+CS-1;qh=qt=0;

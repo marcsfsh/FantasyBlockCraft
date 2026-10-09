@@ -6,38 +6,44 @@ function respawn(){
   if(x<40||z<40||x>W-40||z>D-40){regenerateAll(spawnW[0],spawnW[2]);x=spawnW[0]-OX;z=spawnW[2]-OZ;}
   PL.x=x;PL.y=spawnW[1];PL.z=z;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
 }
-// Rebuild the whole loaded area around a world position
+// Rebuild the whole loaded area around a world position (travel, respawn far away). Only the 3 x 3 chunks around the arrival
+// are made at once, each lit as streaming lights it; the rest stream in around the player (M3: no long freeze, D-025).
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
-  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
+  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
   BLK.fill(0);world.fill(0);genDone.fill(0);
-  const cm=NCX>>1;
-  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=3&&Math.abs(cz-cm)<=3)genChunk(cx,cz);else genQ.push([cx,cz]);}
+  const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
+  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=1&&Math.abs(cz-cm)<=1)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
-  lightAll();mmAll();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)captureTile(cx,cz);
-  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=3&&Math.abs(z-cm)<=3)dirty.add(c);}
+  for(let cz=cm-1;cz<=cm+1;cz++)for(let cx=cm-1;cx<=cm+1;cx++){lightChunk(cx*CS,cz*CS);for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++)mmCol(x,z);captureTile(cx,cz);}
+  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=1&&Math.abs(z-cm)<=1)dirty.add(c);}
 }
 // Slide the loaded area by one chunk and generate the new strip
 function shiftIdx(S,dx,dz){const out=[];S.forEach(i=>{const x=i%W-dx,t=(i/W)|0,z=t%D-dz;if(x>=0&&z>=0&&x<W&&z<D)out.push(I(x,(t/D)|0,z));});S.clear();out.forEach(v=>S.add(v));}
 function shiftArr(a,delta){if(delta>0)a.copyWithin(0,delta);else a.copyWithin(-delta,0);}
 const genQ=[],genDone=new Uint8Array(NCX*NCZ);
+// Streaming: one chunk at a time, its generation steps, then its light, then its map tile, within a time budget per frame
+// (larger while the queue is long, so flying fast does not outrun it). The chunk under way is genJob.
+let genJob=null,mmPut=false;
 function processGenQ(){
-  const t0=performance.now();
-  while(genQ.length&&performance.now()-t0<5){
-    const [cx,cz]=genQ.shift(),x0=cx*CS,z0=cz*CS;
-    genChunk(cx,cz);
-    lightChunk(x0,z0);
+  const t0=performance.now(),budget=genQ.length>2*NCX?9:4;
+  while(performance.now()-t0<budget){
+    if(!genJob){if(!genQ.length)return;const [cx,cz]=genQ.shift();genJob=newGenJob(cx,cz);}
+    const j=genJob,x0=j.cx*CS,z0=j.cz*CS;
+    if(j.step<GEN_STEPS.length){genStep(j);continue;}
+    if(!j.lit){genDone[j.cx+j.cz*NCX]=1;lightChunk(x0,z0);j.lit=true;continue;}
     for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++)mmCol(x,z);
-    mmCtx.putImageData(mmImg,0,0);captureTile(cx,cz);
-    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=cx+a,nz=cz+b;if(nx>=0&&nz>=0&&nx<NCX&&nz<NCZ)dirty.add(nx+nz*NCX);}
+    mmPut=true;captureTile(j.cx,j.cz);
+    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=j.cx+a,nz=j.cz+b;if(nx>=0&&nz>=0&&nx<NCX&&nz<NCZ)dirty.add(nx+nz*NCX);}
+    genJob=null;
   }
 }
 function shiftWindow(dx,dz){
   { // remember chunks that are about to unload for the explored map
     const cdx=dx/CS,cdz=dz/CS;
-    for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const nx=cx-cdx,nz=cz-cdz;if((nx<0||nz<0||nx>=NCX||nz>=NCZ)&&!genQ.some(q=>q[0]===cx&&q[1]===cz))captureTile(cx,cz);}
+    for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const nx=cx-cdx,nz=cz-cdz;if((nx<0||nz<0||nx>=NCX||nz>=NCZ)&&genDone[cx+cz*NCX])captureTile(cx,cz);}
   }
   const d3=dx+W*dz;
   shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
@@ -56,6 +62,7 @@ function shiftWindow(dx,dz){
   shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
   if(lbox){lbox[0]-=dx;lbox[1]-=dx;lbox[4]-=dz;lbox[5]-=dz;}
   // queue the new strip; it is generated a chunk or two per frame
+  if(genJob){genJob.cx-=cdx;genJob.cz-=cdz;if(genJob.cx<0||genJob.cz<0||genJob.cx>=NCX||genJob.cz>=NCZ)genJob=null;} // the chunk under way moves with the window, or is dropped
   const keep=genQ.filter(c=>(c[0]-=cdx,c[1]-=cdz,c[0]>=0&&c[1]>=0&&c[0]<NCX&&c[1]<NCZ));genQ.length=0;keep.forEach(c=>genQ.push(c));
   if(cdx>0)for(let c=NCX-cdx;c<NCX;c++)for(let z=0;z<NCZ;z++)genQ.push([c,z]);
   if(cdx<0)for(let c=0;c<-cdx;c++)for(let z=0;z<NCZ;z++)genQ.push([c,z]);

@@ -4,7 +4,7 @@ const ropeV=new THREE.Vector3(),ropeGeo=new THREE.BufferGeometry();
 ropeGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
 const rope=new THREE.Line(ropeGeo,new THREE.LineBasicMaterial({color:0x2a1c10}));rope.frustumCulled=false;rope.visible=false;scene.add(rope);
 const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBasicMaterial({color:0xa8aeb8}));hookTip.visible=false;scene.add(hookTip);
-let last=performance.now(),infoT=0,fc=0,fps=0,ft=0;
+let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
   const shift=keyHeld('sprint');
@@ -58,9 +58,22 @@ function update(dt){
   if(inLiq&&!wasLiq&&PL.vy<-3){burst(0.4,'lowpass',1200,0.6,0.3);for(let k=0;k<26;k++)spawnP(PL.x,PL.y+0.3,PL.z,(Math.random()-.5)*4,2+Math.random()*4,(Math.random()-.5)*4,[.75,.85,1],0.7,14);}
   wasLiq=inLiq;
 }
+// Auto view distance: every two seconds take the median frame time. The best median seen stands for the screen's refresh
+// (60 or 120 Hz alike); pull the fog in when frames run 15% slower than that, push it out when they keep pace with time to
+// spare (frame work under half a frame). Medians shrug off single slow or fast frames.
+const AV_S=[];
+function autoView(raw,work){
+  const A=AUTO_VIEW;AV_S.push(raw);A.t+=raw;A.work=Math.max(A.work,work);if(A.t<2)return;
+  AV_S.sort((a,b)=>a-b);const med=AV_S[AV_S.length>>1];AV_S.length=0;
+  if(med<A.refresh||A.fast)A.refresh=Math.min(A.fast?1:A.refresh,med);A.fast=0;
+  if(med>A.refresh*1.15&&A.far>56)A.far=Math.max(56,A.far-6);else if(med<A.refresh*1.05&&A.work<A.refresh*500&&A.far<104)A.far=Math.min(104,A.far+3);
+  A.t=A.work=0;if(settings.view<0){FOGF=A.far;FOGN=FOGF*0.55;}
+}
+let fmax=0,fwork=0;
 function frame(now){
   requestAnimationFrame(frame);
-  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  const raw=(now-last)/1000,dt=Math.min(0.05,raw);last=now;const w0=performance.now();
+  if(raw>fmax)fmax=raw;
   pollPad(dt);
   if(ready)meshBand();
   U.time.value=now/1000;
@@ -112,7 +125,7 @@ function frame(now){
   if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;
-    }else{selBox.visible=false;faceHi.visible=false;}drawMM();}
+    }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
   renderer.render(scene,camera);
   fc++;ft+=dt;infoT-=dt;
   if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
@@ -120,8 +133,9 @@ function frame(now){
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
-    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
-}
+    const fms=1000/Math.max(1,fps);
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+  {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}
 function infoExtra(){

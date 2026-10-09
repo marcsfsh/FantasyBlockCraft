@@ -161,7 +161,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
   <div class="set">
     <label>Look speed <input type="range" id="sens" min="0.3" max="2.5" step="0.1"></label>
     <label>Field of view <input type="range" id="fovr" min="60" max="100" step="1"></label>
-    <div class="seg" id="viewseg">View <button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
+    <div class="seg" id="viewseg">View <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
     <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
     <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Lantern</button><button data-v="2">Bright</button></div>
@@ -201,8 +201,11 @@ if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWo
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const saved=(d=>d&&d.v===5&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:TOUCH?0:1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
+// Auto view distance (view -1, the default; M3, D-025): start from the device, then follow the frame rate.
+// AUTO_VIEW.far moves between 56 and 104 blocks; the near fog is 55% of it.
+const AUTO_VIEW={far:(()=>{const m=navigator.deviceMemory,c=navigator.hardwareConcurrency||4;return TOUCH||(m&&m<4)?64:c>=8?96:84;})(),refresh:1/60,t:0,n:0,sum:0,work:0,fast:1};
 
 // Seeded random and noise
 function mkRng(s){return function(){s=(s*16807)%2147483647;return s/2147483647;};}
@@ -724,7 +727,11 @@ function wormsFor(WCX,WCZ){
   if(r()<0.12)caveMouth(WCX,WCZ,r(),r(),out);
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
-  w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
+  w.bb=[bx0,bx1,bz0,bz1];
+  // index the points by the chunks their spheres reach, so a chunk visits only its own (M3)
+  const idx=new Map();for(let k=0;k<w.length;k+=6){const rh=w[k+3],c0=Math.floor((w[k]-rh)/CS),c1=Math.floor((w[k]+rh)/CS),d0=Math.floor((w[k+2]-rh)/CS),d1=Math.floor((w[k+2]+rh)/CS);
+    for(let a=c0;a<=c1;a++)for(let b=d0;b<=d1;b++){const ck=ckey(a,b);let l=idx.get(ck);if(!l)idx.set(ck,l=[]);l.push(k);}}
+  w.byChunk=idx;wormCache.set(key,w);return w;
 }
 // A point on an ordinary worm cave that starts in chunk (WCX,WCZ), inside the chunk's middle and within a height band, or null.
 // A structure that opens onto it is always connected to the caves (Q22, Q24). Pure: chosen by hash among the candidates.
@@ -757,26 +764,32 @@ function caveMouth(WCX,WCZ,q1,q2,out){
 // Is (X,Y,Z) part of the rock that holds a deep lake or river: beside it, under it, under its floor, or under its side walls?
 function deepRim(X,Y,Z){for(const [a,b,c] of [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,2,0],[1,1,0],[-1,1,0],[0,1,1],[0,1,-1]])if(deepWaterAt(X+a,Y+b,Z+c))return true;return false;}
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
-function applyWorms(WCX,WCZ){
-  const streamCells=[],zoneR=ruinZone(WCX,WCZ);
-  const xa=gx0,xb=gx0+CS,za=gz0,zb=gz0+CS,lakes=[];
-  for(let a=-WORM_R;a<=WORM_R;a++)for(let b=-WORM_R;b<=WORM_R;b++){
+// In parts (part 0 to parts-1, in order, for streaming): each part carves the worms of a band of neighbouring columns of chunks;
+// the last part also floods, settles streams and pools the lakes. Running the parts in order equals running it whole.
+let wormStream=[],wormLakes=[];
+function applyWorms(WCX,WCZ,part,parts){
+  if(parts===undefined){part=0;parts=1;}
+  if(part===0){wormStream=[];wormLakes=[];}
+  const streamCells=wormStream,lakes=wormLakes,xa=gx0,xb=gx0+CS,za=gz0,zb=gz0+CS,n=2*WORM_R+1,a0=-WORM_R+Math.floor(n*part/parts),a1=-WORM_R+Math.floor(n*(part+1)/parts)-1;
+  for(let a=a0;a<=a1;a++)for(let b=-WORM_R;b<=WORM_R;b++){
     const w=wormsFor(WCX+a,WCZ+b);
     if(!w.length||w.bb[1]<xa||w.bb[0]>xb||w.bb[3]<za||w.bb[2]>zb)continue;
-    for(let k=0;k<w.length;k+=6){
+    const mine=w.byChunk.get(ckey(WCX,WCZ));if(!mine)continue;
+    for(const k of mine){
       const x=w[k],y=w[k+1],z=w[k+2],rh=w[k+3],rv=w[k+4];
       if(x+rh<xa||x-rh>xb||z+rh<za||z-rh>zb||y-rv>H-2)continue;
       const kind=w[k+5];if(kind===1||kind===3)lakes.push(k,w);
       const X0=Math.max(xa,Math.floor(x-rh)),X1=Math.min(xb-1,Math.floor(x+rh)),Z0=Math.max(za,Math.floor(z-rh)),Z1=Math.min(zb-1,Math.floor(z+rh));
       const Y0=Math.max(1,Math.floor(y-rv)),Y1=Math.min(H-2,Math.floor(y+rv));
       for(let X=X0;X<=X1;X++){const dx=(X+.5-x)/rh;for(let Z=Z0;Z<=Z1;Z++){
-        const dz=(Z+.5-z)/rh;if(dx*dx+dz*dz>=1)continue;
+        const dz=(Z+.5-z)/rh,dd=dx*dx+dz*dz;if(dd>=1)continue;
         const lx=X-OX,lz=Z-OZ,ci=lx+W*lz,gh=ground[ci];
-        for(let Y=Y0;Y<=Y1;Y++){
-          const dy=(Y+.5-y)/rv;if(dy<=-0.7||dx*dx+dy*dy+dz*dz>=1)continue;
-          if(Y>gh-7&&!entCol[ci]&&kind!==2)continue;
-          if(gh<SEA+2&&Y>gh-5)continue;
-          if(kind===3){const px=Math.floor(X/7),pz=Math.floor(Z/7),ox=px*7+1+hsh(px,3201,pz)*5,oz=pz*7+1+hsh(px,3202,pz)*5;if(hsh(px,3203,pz)<0.3&&Math.hypot(X+.5-ox,Z+.5-oz)<1.3+hsh(px,3204,pz))continue;}
+        if(kind===3){const px=Math.floor(X/7),pz=Math.floor(Z/7),ox=px*7+1+hsh(px,3201,pz)*5,oz=pz*7+1+hsh(px,3202,pz)*5;if(hsh(px,3203,pz)<0.3&&Math.hypot(X+.5-ox,Z+.5-oz)<1.3+hsh(px,3204,pz))continue;} // a pillar left standing
+        // the column's span inside the ellipsoid (one block wider each way; the exact test below decides)
+        const sp=Math.sqrt(1-dd),ya=Math.max(Y0,Math.floor(y-rv*Math.min(0.7,sp)-0.5)-1);let yb=Math.min(Y1,Math.ceil(y+rv*sp-0.5)+1);
+        if(!entCol[ci]&&kind!==2)yb=Math.min(yb,gh-7);if(gh<SEA+2)yb=Math.min(yb,gh-5);
+        for(let Y=ya;Y<=yb;Y++){
+          const dy=(Y+.5-y)/rv;if(dy<=-0.7||dd+dy*dy>=1)continue;
           const i=I(lx,Y,lz),id=world[i];
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
@@ -787,6 +800,7 @@ function applyWorms(WCX,WCZ){
       }}
     }
   }
+  if(part<parts-1)return;
   if(fbm2((xa+8)/180,(za+8)/180,1,3301.7)>0.42){
     for(let Z=za;Z<zb;Z++)for(let X=xa;X<xb;X++){
       const wt=203+Math.round(Math.max(0,Math.min(1,(fbm2(X/180,Z/180,1,3301.7)-0.46)*4))*10);if(wt<=203)continue;
@@ -2359,7 +2373,7 @@ function veinP(x,y,z,t,n,r,ok){
     }
   }
 }
-function features(WCX,WCZ,self){
+function features(WCX,WCZ,self,noLife){
   const X0=WCX*CS,Z0=WCZ*CS,r=rngAt(WCX,11,WCZ);
   // Ore veins
   for(let v=0;v<48;v++){
@@ -2410,7 +2424,7 @@ function features(WCX,WCZ,self){
   }
   {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
   {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was
-  if(!self)return;
+  if(!self||noLife)return;
   // Moss, obsidian and crystals only touch the chunk itself
   const r2=rngAt(WCX,15,WCZ);
   caveLife(X0,Z0,r2);
@@ -2432,25 +2446,35 @@ function plants(WCX,WCZ){
     }
   }
 }
-function genChunk(lcx,lcz){
-  genDone[lcx+lcz*NCX]=1;
-  const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
-  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
-  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
-  applySites(WCX,WCZ);
-  // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
-  if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}
-  drainCaveWater(lcx,lcz);
-  plants(WCX,WCZ);
-  applyRoads(lcx,lcz);
-  const m=editsByChunk.get(ckey(WCX,WCZ));
-  if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
-  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
-    const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
-    for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
-  }
-}
+// Chunk generation is a list of steps, so streaming can spread one chunk over several frames (M3, D-025). Each step works on
+// world chunk (WCX,WCZ) at window chunk (lcx,lcz); gx0 and gz0 are set before every step. A step may return false to be called again.
+const GEN_STEPS=[
+  ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
+  (lcx,lcz)=>deepCaves(lcx,lcz),
+  (lcx,lcz,WCX,WCZ)=>{let n=0;for(let a=-WORM_R;a<=WORM_R;a++)for(let b=-WORM_R;b<=WORM_R;b++){if(wormCache.has(ckey(WCX+a,WCZ+b)))continue;if(++n>2)return false;wormsFor(WCX+a,WCZ+b);}}, // worm lists not built yet, a few at a time
+  ...[0,1,2,3,4,5,6,7].map(p=>(lcx,lcz,WCX,WCZ)=>applyWorms(WCX,WCZ,p,8)),
+  (lcx,lcz,WCX,WCZ)=>{applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);},
+  (lcx,lcz,WCX,WCZ)=>{genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;},
+  (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX-1,WCZ+b,false);},
+  (lcx,lcz,WCX,WCZ)=>{features(WCX,WCZ-1,false);features(WCX,WCZ,true,true);},
+  (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
+  (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
+  (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);
+    // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
+    if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
+  (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
+    const m=editsByChunk.get(ckey(WCX,WCZ));
+    if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
+    for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
+      const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
+      for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
+    }}
+];
+function newGenJob(lcx,lcz){return{cx:lcx,cz:lcz,WCX:OX/CS+lcx,WCZ:OZ/CS+lcz,step:0};}
+function genStep(j){gx0=j.WCX*CS;gz0=j.WCZ*CS;if(GEN_STEPS[j.step](j.cx,j.cz,j.WCX,j.WCZ)!==false)j.step++;}
+// The whole chunk at once (start-up, travel, tests); the chunk counts as generated only when it is complete
+function genChunk(lcx,lcz){const j=newGenJob(lcx,lcz);while(j.step<GEN_STEPS.length)genStep(j);genDone[lcx+lcz*NCX]=1;}
 // Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
 // it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
 // the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk
@@ -2500,7 +2524,11 @@ function propagate(){
   }
 }
 const torches=new Set();
-function lightAll(){qh=qt=0;for(let i=0;i<VOL;i++){const L=LUM[world[i]];if(L){BLK[i]=L;qpush(i);if(world[i]===TORCH)torches.add(i);}}propagate();}
+// Full recompute, one chunk's emitters at a time: seeding the whole window at once (the lava sea alone is some 300 000 emitters)
+// overflowed the queue and lost light (D-025). Light spreads to the maximum either way, so the order does not change the result.
+function lightAll(){for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){qh=qt=0;
+  for(let y=0;y<H;y++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS,i=I(x,y,z),e=i+CS;i<e;i++){const L=LUM[world[i]];if(L){if(BLK[i]<L){BLK[i]=L;qpush(i);}if(world[i]===TORCH)torches.add(i);}}
+  propagate();}}
 const dirty=new Set();let lbox=null;
 function lightChunk(x0,z0){
   const x1=x0+CS-1,z1=z0+CS-1;qh=qt=0;
@@ -2543,7 +2571,7 @@ const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);
 camera.rotation.order='YXZ';scene.add(camera);
 const tex=new THREE.CanvasTexture(atlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
-let FOGN=VIEWS[settings.view][0],FOGF=VIEWS[settings.view][1];
+let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
 const VS='attribute float light;attribute float blk;attribute float aov;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
 const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;uniform float fogFar;uniform float opacity;uniform float alphaTest;uniform float lamp;uniform float time;uniform float wave;uniform float bright;uniform float skyMul;uniform vec3 skyTint;uniform float caveMin;uniform float lampR;uniform vec3 caveTint;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
@@ -2777,18 +2805,31 @@ function layerName(y,X,Z){
   return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
 }
 // Only a band of heights around the player is meshed; from near the surface up, the band reaches the top of the world so peaks stay visible
-const MB={c:SEA,lo:SEA-120,hi:H-1};
-function meshBand(){const c=Math.round(PL.y/16)*16;if(Math.abs(c-MB.c)<48)return;MB.c=c;MB.lo=c-120;MB.hi=c>=SEA-60?H-1:c+120;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);}
+// Above ground (MB.surf) each chunk is also meshed only down to MESH_DEEP blocks under the lowest sky-exposed ground in and around
+// it, so cave interiors nobody can see from the surface are skipped (M3, D-025). Underground the band reaches as far as cave fog
+// lets you see. Surface or underground is judged against the terrain height, with some give so a doorway does not flip it.
+const MESH_DEEP=24,MB={c:SEA,lo:SEA-120,hi:H-1,surf:true};
+function meshBand(){
+  const px=Math.floor(PL.x),pz=Math.floor(PL.z),g=(px>=0&&pz>=0&&px<W&&pz<D)?ground[px+W*pz]:SEA;
+  const surf=MB.surf?PL.y>g-6:PL.y>g-2,half=surf?120:[48,72,118][settings.cave||0],c=Math.round(PL.y/16)*16;
+  if(surf===MB.surf&&Math.abs(c-MB.c)<half*0.4)return;
+  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
+}
+function meshFloor(x0,z0){
+  let lo=MB.lo;if(!MB.surf)return lo;let ms=H;
+  for(let z=Math.max(0,z0-1);z<=Math.min(D-1,z0+CS);z++)for(let x=Math.max(0,x0-1);x<=Math.min(W-1,x0+CS);x++){const h=hm[x+W*z];if(h<ms)ms=h;}
+  return Math.max(lo,ms-MESH_DEEP);
+}
 const MP=CS+2,MID=new Uint8Array(MP*MP*H),MSK=new Float32Array(MP*MP*H),MBL=new Float32Array(MP*MP*H);
 function buildChunk(cx,cz){
   const O=newM(),Wt=newM();
   const x0=cx*CS,z0=cz*CS,s1=[0,0,0],s2=[0,0,0];
   let ymax=0;for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){let y=H-1;while(y>ymax&&!world[x+W*(z+D*y)])y--;if(y>ymax)ymax=y;}
-  const ytop=Math.min(H-1,ymax+1,MB.hi+1),ylo=Math.max(0,MB.lo-1);
+  const yfl=meshFloor(x0,z0),ytop=Math.min(H-1,ymax+1,MB.hi+1),ylo=Math.max(0,yfl-1);
   for(let y=ylo;y<=ytop;y++)for(let z=z0-1;z<=z0+CS;z++)for(let x=x0-1;x<=x0+CS;x++){const k=(y*MP+(z-z0+1))*MP+(x-x0+1);MID[k]=get(x,y,z);MSK[k]=sky(x,y,z);MBL[k]=bl(x,y,z);}
   const mk=(x,y,z)=>(y<ylo||y>ytop)?-1:(y*MP+(z-z0+1))*MP+(x-x0+1);
   const gid=(x,y,z)=>{const k=mk(x,y,z);return k<0?get(x,y,z):MID[k];},gsky=(x,y,z)=>{const k=mk(x,y,z);return k<0?sky(x,y,z):MSK[k];},gbl=(x,y,z)=>{const k=mk(x,y,z);return k<0?bl(x,y,z):MBL[k];};
-  for(let y=Math.max(0,MB.lo);y<=Math.min(ymax,MB.hi);y++)for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){
+  for(let y=Math.max(0,yfl);y<=Math.min(ymax,MB.hi);y++)for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++){
     const ii=x+W*(z+D*y),id=world[ii];if(!id)continue;
     if(OPQ[id]&&x>0&&x<W-1&&z>0&&z<D-1&&y>0&&y<H-1&&OPQ[world[ii+1]]&&OPQ[world[ii-1]]&&OPQ[world[ii+W]]&&OPQ[world[ii-W]]&&OPQ[world[ii+WD]]&&OPQ[world[ii-WD]])continue;
     const b=BL[id];
@@ -2854,6 +2895,10 @@ function buildChunk(cx,cz){
       else M.i.push(base,base+1,base+3,base,base+3,base+2);
     }
   }
+  // above ground, a dark floor across the chunk where meshing stops: a deep shaft or hole shows darkness there, not the sky behind
+  if(MB.surf&&yfl>MB.lo){const t=BL[DEEP].t[0],base=O.p.length/3,F=FACES[3];
+    for(const c of F.c){O.p.push(x0+c[0]*CS,yfl,z0+c[2]*CS);pushUV(O.u,t,c[3],c[4]);O.l.push(0);O.b.push(0);O.a.push(1);}
+    O.i.push(base,base+1,base+2,base+2,base+1,base+3);}
   const ci=cx+cz*NCX,old=chunks[ci];
   if(old){for(const m of old){scene.remove(m);m.geometry.dispose();}}
   const meshes=[];
@@ -3826,7 +3871,7 @@ const KEYS_HTML=TOUCH
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
-function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));FOGN=VIEWS[settings.view][0];FOGF=VIEWS[settings.view][1];}
+function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));if(settings.view<0){FOGF=AUTO_VIEW.far;FOGN=FOGF*0.55;}else{FOGN=VIEWS[settings.view][0];FOGF=VIEWS[settings.view][1];}}
 $('viewseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings.view=+v;lsSet(SET_KEY,settings);drawView();});
 drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
@@ -3872,7 +3917,8 @@ function saveNow(){
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
-setInterval(()=>{if(saveDirty||playing)saveNow();},5000);
+// Autosave: within 5 s of a change, and every 30 s while playing (position and time of day) (M3: no constant rewrites)
+let lastSaveT=0;setInterval(()=>{const now=Date.now();if(saveDirty||(playing&&now-lastSaveT>30000)){saveNow();lastSaveT=now;}},5000);
 // ---- Worlds: create, switch, delete, export and import (one storage entry per world, see core/config.js)
 // A seed typed as a whole number is used exactly; any other text is hashed to a seed
 function parseSeed(sv){sv=String(sv||'').trim();if(!sv)return 0;if(/^\d+$/.test(sv)){const n=Number(sv);return n>=1&&n<=2147483646?n:n%2147483646+1;}let h=0;for(const ch of sv)h=(Math.imul(31,h)+ch.charCodeAt(0))|0;return Math.abs(h)%2147483646+1;}
@@ -3900,9 +3946,12 @@ const mmBase=document.createElement('canvas');mmBase.width=W;mmBase.height=D;
 const mmCtx=mmBase.getContext('2d'),mmImg=mmCtx.createImageData(W,D),mmDirty=new Set();
 const mmC=$('mm'),mmG=mmC.getContext('2d');let mmZoom=0;const mmView={ox:0,oz:0,span:64};
 const tiles=new Map();
+// The explored map keeps at most TILE_CAP chunk tiles (about 16 km² of explored ground); the longest unvisited go first (M3)
+const TILE_CAP=6000;
 function captureTile(lcx,lcz){
   const ck=ckey(OX/CS+lcx,OZ/CS+lcz);let c=tiles.get(ck);
-  if(!c){c=document.createElement('canvas');c.width=c.height=CS;tiles.set(ck,c);}
+  if(c)tiles.delete(ck);else{c=document.createElement('canvas');c.width=c.height=CS;if(tiles.size>=TILE_CAP)tiles.delete(tiles.keys().next().value);}
+  tiles.set(ck,c);
   c.getContext('2d').putImageData(mmImg,-lcx*CS,-lcz*CS,lcx*CS,lcz*CS,CS,CS);
 }
 mmC.addEventListener('pointerdown',e=>{
@@ -3930,6 +3979,7 @@ function mmCol(x,z){
 }
 function mmAll(){for(let z=0;z<D;z++)for(let x=0;x<W;x++)mmCol(x,z);mmCtx.putImageData(mmImg,0,0);}
 function drawMM(){
+  if(mmPut){mmCtx.putImageData(mmImg,0,0);mmPut=false;} // streamed columns since the last draw
   const S=mmC.width,span=mmZoom===2?512:mmZoom?W:64,ox=mmZoom===1?0:PL.x-span/2,oz=mmZoom===1?0:PL.z-span/2,k=S/span;
   mmView.ox=ox;mmView.oz=oz;mmView.span=span;
   mmG.imageSmoothingEnabled=false;mmG.fillStyle='#1c1810';mmG.fillRect(0,0,S,S);
@@ -3953,38 +4003,44 @@ function respawn(){
   if(x<40||z<40||x>W-40||z>D-40){regenerateAll(spawnW[0],spawnW[2]);x=spawnW[0]-OX;z=spawnW[2]-OZ;}
   PL.x=x;PL.y=spawnW[1];PL.z=z;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H)PL.y++;
 }
-// Rebuild the whole loaded area around a world position
+// Rebuild the whole loaded area around a world position (travel, respawn far away). Only the 3 x 3 chunks around the arrival
+// are made at once, each lit as streaming lights it; the rest stream in around the player (M3: no long freeze, D-025).
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
-  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;
+  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
   BLK.fill(0);world.fill(0);genDone.fill(0);
-  const cm=NCX>>1;
-  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=3&&Math.abs(cz-cm)<=3)genChunk(cx,cz);else genQ.push([cx,cz]);}
+  const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
+  for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=1&&Math.abs(cz-cm)<=1)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
-  lightAll();mmAll();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)captureTile(cx,cz);
-  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=3&&Math.abs(z-cm)<=3)dirty.add(c);}
+  for(let cz=cm-1;cz<=cm+1;cz++)for(let cx=cm-1;cx<=cm+1;cx++){lightChunk(cx*CS,cz*CS);for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++)mmCol(x,z);captureTile(cx,cz);}
+  for(let c=0;c<chunks.length;c++){if(chunks[c])for(const m of chunks[c]){scene.remove(m);m.geometry.dispose();}chunks[c]=undefined;const x=c%NCX,z=(c/NCX)|0;if(Math.abs(x-cm)<=1&&Math.abs(z-cm)<=1)dirty.add(c);}
 }
 // Slide the loaded area by one chunk and generate the new strip
 function shiftIdx(S,dx,dz){const out=[];S.forEach(i=>{const x=i%W-dx,t=(i/W)|0,z=t%D-dz;if(x>=0&&z>=0&&x<W&&z<D)out.push(I(x,(t/D)|0,z));});S.clear();out.forEach(v=>S.add(v));}
 function shiftArr(a,delta){if(delta>0)a.copyWithin(0,delta);else a.copyWithin(-delta,0);}
 const genQ=[],genDone=new Uint8Array(NCX*NCZ);
+// Streaming: one chunk at a time, its generation steps, then its light, then its map tile, within a time budget per frame
+// (larger while the queue is long, so flying fast does not outrun it). The chunk under way is genJob.
+let genJob=null,mmPut=false;
 function processGenQ(){
-  const t0=performance.now();
-  while(genQ.length&&performance.now()-t0<5){
-    const [cx,cz]=genQ.shift(),x0=cx*CS,z0=cz*CS;
-    genChunk(cx,cz);
-    lightChunk(x0,z0);
+  const t0=performance.now(),budget=genQ.length>2*NCX?9:4;
+  while(performance.now()-t0<budget){
+    if(!genJob){if(!genQ.length)return;const [cx,cz]=genQ.shift();genJob=newGenJob(cx,cz);}
+    const j=genJob,x0=j.cx*CS,z0=j.cz*CS;
+    if(j.step<GEN_STEPS.length){genStep(j);continue;}
+    if(!j.lit){genDone[j.cx+j.cz*NCX]=1;lightChunk(x0,z0);j.lit=true;continue;}
     for(let z=z0;z<z0+CS;z++)for(let x=x0;x<x0+CS;x++)mmCol(x,z);
-    mmCtx.putImageData(mmImg,0,0);captureTile(cx,cz);
-    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=cx+a,nz=cz+b;if(nx>=0&&nz>=0&&nx<NCX&&nz<NCZ)dirty.add(nx+nz*NCX);}
+    mmPut=true;captureTile(j.cx,j.cz);
+    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const nx=j.cx+a,nz=j.cz+b;if(nx>=0&&nz>=0&&nx<NCX&&nz<NCZ)dirty.add(nx+nz*NCX);}
+    genJob=null;
   }
 }
 function shiftWindow(dx,dz){
   { // remember chunks that are about to unload for the explored map
     const cdx=dx/CS,cdz=dz/CS;
-    for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const nx=cx-cdx,nz=cz-cdz;if((nx<0||nz<0||nx>=NCX||nz>=NCZ)&&!genQ.some(q=>q[0]===cx&&q[1]===cz))captureTile(cx,cz);}
+    for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const nx=cx-cdx,nz=cz-cdz;if((nx<0||nz<0||nx>=NCX||nz>=NCZ)&&genDone[cx+cz*NCX])captureTile(cx,cz);}
   }
   const d3=dx+W*dz;
   shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
@@ -4003,6 +4059,7 @@ function shiftWindow(dx,dz){
   shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
   if(lbox){lbox[0]-=dx;lbox[1]-=dx;lbox[4]-=dz;lbox[5]-=dz;}
   // queue the new strip; it is generated a chunk or two per frame
+  if(genJob){genJob.cx-=cdx;genJob.cz-=cdz;if(genJob.cx<0||genJob.cz<0||genJob.cx>=NCX||genJob.cz>=NCZ)genJob=null;} // the chunk under way moves with the window, or is dropped
   const keep=genQ.filter(c=>(c[0]-=cdx,c[1]-=cdz,c[0]>=0&&c[1]>=0&&c[0]<NCX&&c[1]<NCZ));genQ.length=0;keep.forEach(c=>genQ.push(c));
   if(cdx>0)for(let c=NCX-cdx;c<NCX;c++)for(let z=0;z<NCZ;z++)genQ.push([c,z]);
   if(cdx<0)for(let c=0;c<-cdx;c++)for(let z=0;z<NCZ;z++)genQ.push([c,z]);
@@ -4156,7 +4213,7 @@ const ropeV=new THREE.Vector3(),ropeGeo=new THREE.BufferGeometry();
 ropeGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
 const rope=new THREE.Line(ropeGeo,new THREE.LineBasicMaterial({color:0x2a1c10}));rope.frustumCulled=false;rope.visible=false;scene.add(rope);
 const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBasicMaterial({color:0xa8aeb8}));hookTip.visible=false;scene.add(hookTip);
-let last=performance.now(),infoT=0,fc=0,fps=0,ft=0;
+let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
   const shift=keyHeld('sprint');
@@ -4210,9 +4267,22 @@ function update(dt){
   if(inLiq&&!wasLiq&&PL.vy<-3){burst(0.4,'lowpass',1200,0.6,0.3);for(let k=0;k<26;k++)spawnP(PL.x,PL.y+0.3,PL.z,(Math.random()-.5)*4,2+Math.random()*4,(Math.random()-.5)*4,[.75,.85,1],0.7,14);}
   wasLiq=inLiq;
 }
+// Auto view distance: every two seconds take the median frame time. The best median seen stands for the screen's refresh
+// (60 or 120 Hz alike); pull the fog in when frames run 15% slower than that, push it out when they keep pace with time to
+// spare (frame work under half a frame). Medians shrug off single slow or fast frames.
+const AV_S=[];
+function autoView(raw,work){
+  const A=AUTO_VIEW;AV_S.push(raw);A.t+=raw;A.work=Math.max(A.work,work);if(A.t<2)return;
+  AV_S.sort((a,b)=>a-b);const med=AV_S[AV_S.length>>1];AV_S.length=0;
+  if(med<A.refresh||A.fast)A.refresh=Math.min(A.fast?1:A.refresh,med);A.fast=0;
+  if(med>A.refresh*1.15&&A.far>56)A.far=Math.max(56,A.far-6);else if(med<A.refresh*1.05&&A.work<A.refresh*500&&A.far<104)A.far=Math.min(104,A.far+3);
+  A.t=A.work=0;if(settings.view<0){FOGF=A.far;FOGN=FOGF*0.55;}
+}
+let fmax=0,fwork=0;
 function frame(now){
   requestAnimationFrame(frame);
-  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  const raw=(now-last)/1000,dt=Math.min(0.05,raw);last=now;const w0=performance.now();
+  if(raw>fmax)fmax=raw;
   pollPad(dt);
   if(ready)meshBand();
   U.time.value=now/1000;
@@ -4264,7 +4334,7 @@ function frame(now){
   if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;
-    }else{selBox.visible=false;faceHi.visible=false;}drawMM();}
+    }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
   renderer.render(scene,camera);
   fc++;ft+=dt;infoT-=dt;
   if(infoT<=0&&ready){infoT=0.25;fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
@@ -4272,8 +4342,9 @@ function frame(now){
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
-    $('info').textContent=fps+' fps\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();}
-}
+    const fms=1000/Math.max(1,fps);
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+  {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}
 function infoExtra(){

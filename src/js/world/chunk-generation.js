@@ -13,7 +13,7 @@ function veinP(x,y,z,t,n,r,ok){
     }
   }
 }
-function features(WCX,WCZ,self){
+function features(WCX,WCZ,self,noLife){
   const X0=WCX*CS,Z0=WCZ*CS,r=rngAt(WCX,11,WCZ);
   // Ore veins
   for(let v=0;v<48;v++){
@@ -64,7 +64,7 @@ function features(WCX,WCZ,self){
   }
   {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
   {const d=dungeonAt(WCX,WCZ);if(d)dungeonP(d,rngAt(d.X,14,d.Z));} // dr, dy, dx2, dz2 are still drawn above so the stream stays as it was
-  if(!self)return;
+  if(!self||noLife)return;
   // Moss, obsidian and crystals only touch the chunk itself
   const r2=rngAt(WCX,15,WCZ);
   caveLife(X0,Z0,r2);
@@ -86,25 +86,35 @@ function plants(WCX,WCZ){
     }
   }
 }
-function genChunk(lcx,lcz){
-  genDone[lcx+lcz*NCX]=1;
-  const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;gx0=WCX*CS;gz0=WCZ*CS;
-  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}
-  deepCaves(lcx,lcz);applyWorms(WCX,WCZ);applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;
-  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)features(WCX+a,WCZ+b,a===0&&b===0);
-  applySites(WCX,WCZ);
-  // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
-  if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}
-  drainCaveWater(lcx,lcz);
-  plants(WCX,WCZ);
-  applyRoads(lcx,lcz);
-  const m=editsByChunk.get(ckey(WCX,WCZ));
-  if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
-  for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
-    const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
-    for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
-  }
-}
+// Chunk generation is a list of steps, so streaming can spread one chunk over several frames (M3, D-025). Each step works on
+// world chunk (WCX,WCZ) at window chunk (lcx,lcz); gx0 and gz0 are set before every step. A step may return false to be called again.
+const GEN_STEPS=[
+  ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
+  (lcx,lcz)=>deepCaves(lcx,lcz),
+  (lcx,lcz,WCX,WCZ)=>{let n=0;for(let a=-WORM_R;a<=WORM_R;a++)for(let b=-WORM_R;b<=WORM_R;b++){if(wormCache.has(ckey(WCX+a,WCZ+b)))continue;if(++n>2)return false;wormsFor(WCX+a,WCZ+b);}}, // worm lists not built yet, a few at a time
+  ...[0,1,2,3,4,5,6,7].map(p=>(lcx,lcz,WCX,WCZ)=>applyWorms(WCX,WCZ,p,8)),
+  (lcx,lcz,WCX,WCZ)=>{applyShafts(WCX,WCZ);applyPOIs(WCX,WCZ);applyRemains(WCX,WCZ);},
+  (lcx,lcz,WCX,WCZ)=>{genLit=holdNear(WCX,WCZ).inhabited;applyMines(WCX,WCZ);applyRuins(WCX,WCZ);genLit=false;},
+  (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX-1,WCZ+b,false);},
+  (lcx,lcz,WCX,WCZ)=>{features(WCX,WCZ-1,false);features(WCX,WCZ,true,true);},
+  (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
+  (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
+  (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);
+    // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
+    if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
+  (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
+    const m=editsByChunk.get(ckey(WCX,WCZ));
+    if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
+    for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
+      const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
+      for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
+    }}
+];
+function newGenJob(lcx,lcz){return{cx:lcx,cz:lcz,WCX:OX/CS+lcx,WCZ:OZ/CS+lcz,step:0};}
+function genStep(j){gx0=j.WCX*CS;gz0=j.WCZ*CS;if(GEN_STEPS[j.step](j.cx,j.cz,j.WCX,j.WCZ)!==false)j.step++;}
+// The whole chunk at once (start-up, travel, tests); the chunk counts as generated only when it is complete
+function genChunk(lcx,lcz){const j=newGenJob(lcx,lcz);while(j.step<GEN_STEPS.length)genStep(j);genDone[lcx+lcz*NCX]=1;}
 // Underground standing water must lie in a sound basin (D-024, owner's rule): every water block has water or a solid block under
 // it and on each side, the block under the water rests on another solid block (or water), and every solid block holding water from
 // the side has something under it. Water breaking a rule drains, and the check repeats until nothing changes. The next chunk

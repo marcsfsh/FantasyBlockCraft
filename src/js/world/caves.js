@@ -45,7 +45,11 @@ function wormsFor(WCX,WCZ){
   if(r()<0.12)caveMouth(WCX,WCZ,r(),r(),out);
   w=new Float32Array(out);
   let bx0=1e9,bx1=-1e9,bz0=1e9,bz1=-1e9;for(let k=0;k<w.length;k+=6){const rh=w[k+3];if(w[k]-rh<bx0)bx0=w[k]-rh;if(w[k]+rh>bx1)bx1=w[k]+rh;if(w[k+2]-rh<bz0)bz0=w[k+2]-rh;if(w[k+2]+rh>bz1)bz1=w[k+2]+rh;}
-  w.bb=[bx0,bx1,bz0,bz1];wormCache.set(key,w);return w;
+  w.bb=[bx0,bx1,bz0,bz1];
+  // index the points by the chunks their spheres reach, so a chunk visits only its own (M3)
+  const idx=new Map();for(let k=0;k<w.length;k+=6){const rh=w[k+3],c0=Math.floor((w[k]-rh)/CS),c1=Math.floor((w[k]+rh)/CS),d0=Math.floor((w[k+2]-rh)/CS),d1=Math.floor((w[k+2]+rh)/CS);
+    for(let a=c0;a<=c1;a++)for(let b=d0;b<=d1;b++){const ck=ckey(a,b);let l=idx.get(ck);if(!l)idx.set(ck,l=[]);l.push(k);}}
+  w.byChunk=idx;wormCache.set(key,w);return w;
 }
 // A point on an ordinary worm cave that starts in chunk (WCX,WCZ), inside the chunk's middle and within a height band, or null.
 // A structure that opens onto it is always connected to the caves (Q22, Q24). Pure: chosen by hash among the candidates.
@@ -78,26 +82,32 @@ function caveMouth(WCX,WCZ,q1,q2,out){
 // Is (X,Y,Z) part of the rock that holds a deep lake or river: beside it, under it, under its floor, or under its side walls?
 function deepRim(X,Y,Z){for(const [a,b,c] of [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[0,2,0],[1,1,0],[-1,1,0],[0,1,1],[0,1,-1]])if(deepWaterAt(X+a,Y+b,Z+c))return true;return false;}
 function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const lk=lakeAt(X+d[0],Z+d[1]);if(lk&&lk.L>=Y&&Math.hypot(X+d[0]-lk.cx,Z+d[1]-lk.cz)<lk.R+8)return true;}return false;}
-function applyWorms(WCX,WCZ){
-  const streamCells=[],zoneR=ruinZone(WCX,WCZ);
-  const xa=gx0,xb=gx0+CS,za=gz0,zb=gz0+CS,lakes=[];
-  for(let a=-WORM_R;a<=WORM_R;a++)for(let b=-WORM_R;b<=WORM_R;b++){
+// In parts (part 0 to parts-1, in order, for streaming): each part carves the worms of a band of neighbouring columns of chunks;
+// the last part also floods, settles streams and pools the lakes. Running the parts in order equals running it whole.
+let wormStream=[],wormLakes=[];
+function applyWorms(WCX,WCZ,part,parts){
+  if(parts===undefined){part=0;parts=1;}
+  if(part===0){wormStream=[];wormLakes=[];}
+  const streamCells=wormStream,lakes=wormLakes,xa=gx0,xb=gx0+CS,za=gz0,zb=gz0+CS,n=2*WORM_R+1,a0=-WORM_R+Math.floor(n*part/parts),a1=-WORM_R+Math.floor(n*(part+1)/parts)-1;
+  for(let a=a0;a<=a1;a++)for(let b=-WORM_R;b<=WORM_R;b++){
     const w=wormsFor(WCX+a,WCZ+b);
     if(!w.length||w.bb[1]<xa||w.bb[0]>xb||w.bb[3]<za||w.bb[2]>zb)continue;
-    for(let k=0;k<w.length;k+=6){
+    const mine=w.byChunk.get(ckey(WCX,WCZ));if(!mine)continue;
+    for(const k of mine){
       const x=w[k],y=w[k+1],z=w[k+2],rh=w[k+3],rv=w[k+4];
       if(x+rh<xa||x-rh>xb||z+rh<za||z-rh>zb||y-rv>H-2)continue;
       const kind=w[k+5];if(kind===1||kind===3)lakes.push(k,w);
       const X0=Math.max(xa,Math.floor(x-rh)),X1=Math.min(xb-1,Math.floor(x+rh)),Z0=Math.max(za,Math.floor(z-rh)),Z1=Math.min(zb-1,Math.floor(z+rh));
       const Y0=Math.max(1,Math.floor(y-rv)),Y1=Math.min(H-2,Math.floor(y+rv));
       for(let X=X0;X<=X1;X++){const dx=(X+.5-x)/rh;for(let Z=Z0;Z<=Z1;Z++){
-        const dz=(Z+.5-z)/rh;if(dx*dx+dz*dz>=1)continue;
+        const dz=(Z+.5-z)/rh,dd=dx*dx+dz*dz;if(dd>=1)continue;
         const lx=X-OX,lz=Z-OZ,ci=lx+W*lz,gh=ground[ci];
-        for(let Y=Y0;Y<=Y1;Y++){
-          const dy=(Y+.5-y)/rv;if(dy<=-0.7||dx*dx+dy*dy+dz*dz>=1)continue;
-          if(Y>gh-7&&!entCol[ci]&&kind!==2)continue;
-          if(gh<SEA+2&&Y>gh-5)continue;
-          if(kind===3){const px=Math.floor(X/7),pz=Math.floor(Z/7),ox=px*7+1+hsh(px,3201,pz)*5,oz=pz*7+1+hsh(px,3202,pz)*5;if(hsh(px,3203,pz)<0.3&&Math.hypot(X+.5-ox,Z+.5-oz)<1.3+hsh(px,3204,pz))continue;}
+        if(kind===3){const px=Math.floor(X/7),pz=Math.floor(Z/7),ox=px*7+1+hsh(px,3201,pz)*5,oz=pz*7+1+hsh(px,3202,pz)*5;if(hsh(px,3203,pz)<0.3&&Math.hypot(X+.5-ox,Z+.5-oz)<1.3+hsh(px,3204,pz))continue;} // a pillar left standing
+        // the column's span inside the ellipsoid (one block wider each way; the exact test below decides)
+        const sp=Math.sqrt(1-dd),ya=Math.max(Y0,Math.floor(y-rv*Math.min(0.7,sp)-0.5)-1);let yb=Math.min(Y1,Math.ceil(y+rv*sp-0.5)+1);
+        if(!entCol[ci]&&kind!==2)yb=Math.min(yb,gh-7);if(gh<SEA+2)yb=Math.min(yb,gh-5);
+        for(let Y=ya;Y<=yb;Y++){
+          const dy=(Y+.5-y)/rv;if(dy<=-0.7||dd+dy*dy>=1)continue;
           const i=I(lx,Y,lz),id=world[i];
           if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)continue;
           if(Y+1<H&&world[i+W*D]===WATER)continue;
@@ -108,6 +118,7 @@ function applyWorms(WCX,WCZ){
       }}
     }
   }
+  if(part<parts-1)return;
   if(fbm2((xa+8)/180,(za+8)/180,1,3301.7)>0.42){
     for(let Z=za;Z<zb;Z++)for(let X=xa;X<xb;X++){
       const wt=203+Math.round(Math.max(0,Math.min(1,(fbm2(X/180,Z/180,1,3301.7)-0.46)*4))*10);if(wt<=203)continue;

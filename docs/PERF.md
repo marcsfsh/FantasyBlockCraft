@@ -71,3 +71,16 @@ Same VM as the M2a section, `npm run bench`, one run per seed.
 | 4242 | 2372 | 14.87 / 15.11 / 19.79 / 21.75 | 17.72 / 18.14 / 23.15 / 25.33 | 17.49 / 15.33 / 26.71 / 54.34 | 104 |
 
 Generation medians are about 0 to 20% above 0.5.0 (roads, sites, remains, the water drain), within this VM's noise for some measures. M3 targets streaming.
+
+## After M3a (2026-10-08, 0.7.0)
+
+Same VM, `node tools/bench.mjs --runs=3`, 0.6.0 (`main`) and 0.7.0 back to back. "Stream step" is new: one frame of streaming as the browser runs it (a fake clock gives one step per call). buildChunk is meshed in surface mode (the default above ground).
+
+| Build | Seed | genChunk median | Stream 1 chunk median | Stream step (one frame) mean / median / p95 / max | buildChunk median / p95 | lightAll |
+|---|---|---|---|---|---|---|
+| 0.6.0 | 123456789 | 13.79 / 12.21 / 16.06 | 19.23 / 16.52 / 20.33 | (a whole chunk) | 22.75 / 18.65 / 22.41 (p95 31 to 38) | 90 to 127 |
+| 0.6.0 | 4242 | 12.27 / 14.39 / 16.04 | 17.31 / 22.13 / 20.12 | (a whole chunk) | 17.21 / 23.4 / 17.18 (p95 26 to 29) | 127 to 164 |
+| 0.7.0 | 123456789 | 17.26 / 14.34 / 15.51 | 19.98 / 20.74 / 17.6 | 0.6 to 0.85 / 0.38 to 0.66 / 2.1 to 2.9 / 4.7 to 7.6 | 3.79 / 3.79 / 3.99 (p95 13) | 141 to 163 |
+| 0.7.0 | 4242 | 11.62 / 15.19 / 12.51 | 13.66 / 15.92 / 20 | 0.59 to 0.85 / 0.39 to 0.71 / 2.1 to 3.0 / 5.4 to 6.7 | 2.14 / 2.48 / 3.42 (p95 7 to 9) | 145 to 191 |
+
+Reading it: a chunk costs about the same CPU in total, but streaming now spends well under a millisecond per frame instead of a whole chunk (about 14 to 22 ms) in one frame. Meshing a surface chunk fell from about 17 to 23 ms to about 2 to 4 ms. The full light recompute is a little slower (it seeds one chunk at a time to stay exact) and runs only at start-up.
