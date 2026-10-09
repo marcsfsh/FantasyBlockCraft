@@ -27,7 +27,7 @@ const matO=mat(1,0.5,false,false),matW=mat(0.72,0.0,true,true),matHand=mat(1,0.5
 
 // Sun and clouds
 const sunDir=new THREE.Vector3(0.45,0.75,-0.5).normalize();
-const moon=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshBasicMaterial({color:0xdfe6f2,fog:false,depthWrite:false}));scene.add(moon);
+const moon=new THREE.Mesh(new THREE.PlaneGeometry(44,44),new THREE.MeshBasicMaterial({color:0xffffff,fog:false,depthWrite:false,transparent:true}));scene.add(moon);
 const starGeo=new THREE.BufferGeometry(),sp=new Float32Array(900*3);
 for(let i=0;i<900;i++){const u=tr()*2-1,a=tr()*6.2832,r=Math.sqrt(1-u*u);sp[i*3]=Math.cos(a)*r*380;sp[i*3+1]=Math.abs(u)*380+20;sp[i*3+2]=Math.sin(a)*r*380;}
 starGeo.setAttribute('position',new THREE.BufferAttribute(sp,3));
@@ -59,11 +59,33 @@ const shC=document.createElement('canvas');shC.width=shC.height=32;
 (function(){const g=shC.getContext('2d'),gr=g.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(0,0,0,0.6)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,32,32);})();
 const pShadow=new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shC),transparent:true,depthWrite:false}));
 pShadow.rotation.x=-Math.PI/2;scene.add(pShadow);
-const cc=document.createElement('canvas');cc.width=cc.height=64;
-(function(){const g=cc.getContext('2d');g.fillStyle='#fff';for(let i=0;i<46;i++){const x=tr()*64|0,y=tr()*64|0,w=3+(tr()*9|0),h=2+(tr()*5|0);for(let ox=-64;ox<=0;ox+=64)for(let oy=-64;oy<=0;oy+=64)g.fillRect(x+ox+64,y+oy+64,w,h),g.fillRect(x+ox,y+oy,w,h);}})();
-const ctex=new THREE.CanvasTexture(cc);ctex.magFilter=THREE.NearestFilter;ctex.minFilter=THREE.NearestFilter;ctex.wrapS=ctex.wrapT=THREE.RepeatWrapping;ctex.repeat.set(2,2);
-const clouds=new THREE.Mesh(new THREE.PlaneGeometry(1536,1536),new THREE.MeshBasicMaterial({map:ctex,transparent:true,opacity:0.82,depthWrite:false,side:THREE.DoubleSide}));
-clouds.rotation.x=-Math.PI/2;clouds.position.y=H+22;scene.add(clouds);
+// Clouds (M3b): a world-anchored layer of blocky clouds four blocks thick, from a 64 x 64 pattern of rectangles (drawn from the
+// shared texture stream as before) repeated every CLOUD_P blocks. The mesh covers 3 x 3 repeats and is moved by whole repeats
+// to keep the player over its middle, so its edge stays beyond the far plane. Lighter tops, darker undersides.
+const cloudRects=[];
+for(let i=0;i<46;i++){const x=tr()*64|0,y=tr()*64|0,w=3+(tr()*9|0),h=2+(tr()*5|0);cloudRects.push([x,y,w,h]);}
+const CLOUD_CELL=12,CLOUD_P=64*CLOUD_CELL,CLOUD_Y=SEA+150,cloudGrid=new Uint8Array(64*64);
+for(const [x,y,w,h] of cloudRects)for(let a=0;a<w;a++)for(let b=0;b<h;b++)cloudGrid[((x+a)&63)+64*((y+b)&63)]=1;
+const clouds=(function(){const N=192,T=4,C=CLOUD_CELL,p=[],col=[],idx=[],on=(i,j)=>i>=0&&j>=0&&i<N&&j<N&&cloudGrid[(i&63)+64*(j&63)];
+  const quad=(v,s)=>{const b=p.length/3;for(const q of v)p.push(q[0],q[1],q[2]);for(let k=0;k<4;k++)col.push(s,s,s);idx.push(b,b+1,b+2,b,b+2,b+3);};
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(!on(i,j))continue;const x0=i*C,x1=x0+C,z0=j*C,z1=z0+C;
+    quad([[x0,T,z0],[x0,T,z1],[x1,T,z1],[x1,T,z0]],1);quad([[x0,0,z0],[x1,0,z0],[x1,0,z1],[x0,0,z1]],0.72);
+    if(!on(i-1,j))quad([[x0,0,z0],[x0,0,z1],[x0,T,z1],[x0,T,z0]],0.86);if(!on(i+1,j))quad([[x1,0,z0],[x1,T,z0],[x1,T,z1],[x1,0,z1]],0.86);
+    if(!on(i,j-1))quad([[x0,0,z0],[x0,T,z0],[x1,T,z0],[x1,0,z0]],0.8);if(!on(i,j+1))quad([[x0,0,z1],[x1,0,z1],[x1,T,z1],[x0,T,z1]],0.8);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(p),3));g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(col),3));g.setIndex(idx);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,fog:false}));m.frustumCulled=false;scene.add(m);return m;})();
+// Place the cloud layer for the player at world (WX,WZ): the pattern drifts east by CLOUD_DRIFT blocks a second
+const CLOUD_DRIFT=1.9;
+function placeClouds(WX,WZ,sec){const d=(sec*CLOUD_DRIFT)%CLOUD_P,kx=Math.floor((WX-d)/CLOUD_P)-1,kz=Math.floor(WZ/CLOUD_P)-1;clouds.position.set(kx*CLOUD_P+d-OX,CLOUD_Y,kz*CLOUD_P-OZ);}
+// The moon shows eight phases, one a day (dayN, saved with the world): 0 full, 4 new
+const moonC=document.createElement('canvas');moonC.width=moonC.height=16;const moonTex=new THREE.CanvasTexture(moonC);moonTex.magFilter=moonTex.minFilter=THREE.NearestFilter;
+let moonPhase=-1;
+function drawMoon(ph){if(ph===moonPhase)return;moonPhase=ph;const g=moonC.getContext('2d'),im2=g.createImageData(16,16),c=Math.cos(Math.PI*ph/4),s=ph<=4?1:-1;
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const xr=(x-7.5)/7,yr=(y-7.5)/7,i=(y*16+x)*4;if(xr*xr+yr*yr>1){im2.data[i+3]=0;continue;}
+    const e=Math.sqrt(Math.max(0,1-yr*yr)),lit=xr*s>-e*c,crater=((x*7+y*13)%11===0)||(x>8&&x<11&&y>4&&y<7)||(x>3&&x<6&&y>9&&y<12),v=crater?186:226;
+    im2.data[i]=v;im2.data[i+1]=v+6;im2.data[i+2]=v+16;im2.data[i+3]=lit?255:0;}
+  g.putImageData(im2,0,0);moonTex.needsUpdate=true;}
+drawMoon(0);moon.material.map=moonTex;moon.material.needsUpdate=true;stars.renderOrder=-9;
 
 // Selection outline
 const selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.006,1.006,1.006)),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:0.65}));

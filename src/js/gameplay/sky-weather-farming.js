@@ -1,6 +1,6 @@
 // Day, night and weather
 const tintSet=new THREE.Color(1,0.82,0.66),flashC=new THREE.Color(0xdfe6ff);let flash=0,boltT=12;
-const DAYLEN=1200;let tod=0.3,rainAmt=0,raining=false,rainT=120+Math.random()*120,snowing=false;
+const DAYLEN=1200;let dayN=0,tod=0.3,rainAmt=0,raining=false,rainT=120+Math.random()*120,snowing=false;
 const cDay=new THREE.Color(0xa9d3ff),cNight=new THREE.Color(0x090e22),cSet=new THREE.Color(0xf0975a),cRain=new THREE.Color(0x6f7884),skyC=new THREE.Color(),tmpC=new THREE.Color(),sunC=new THREE.Color();
 function curT(){return settings.time==='day'?0.5:settings.time==='night'?0.0:tod;}
 function updSky(){
@@ -12,7 +12,8 @@ function updSky(){
   skyC.copy(cNight).lerp(cDay,d).lerp(cSet,sunset*0.5*Math.max(d,0.3));
   tmpC.copy(cRain).multiplyScalar(0.25+0.75*d);skyC.lerp(tmpC,rainAmt*0.65);
   stars.material.opacity=Math.max(0,1-d*1.7)*(1-rainAmt);
-  clouds.material.color.setScalar((0.22+0.78*d)*(1-0.35*rainAmt));clouds.material.opacity=0.82+0.15*rainAmt;
+  {const v=(0.22+0.78*d)*(1-0.35*rainAmt);clouds.material.color.setRGB(v,v*(1-0.1*sunset*d),v*(1-0.22*sunset*d));} // warmer at sunset
+  drawMoon(dayN%8);
   sunC.setHex(0xfff4c2).lerp(cSet,sunset*0.7);sun.material.color.copy(sunC);
   sun.visible=elev>-0.15;moon.visible=elev<0.2;
   U.skyMul.value=Math.min(1.2,U.skyMul.value+flash*0.9);skyC.lerp(flashC,flash*0.5);

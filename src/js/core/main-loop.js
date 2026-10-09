@@ -80,7 +80,7 @@ function frame(now){
   if(ready&&playing){update(dt);
     const ex=PL.x-W/2,ez=PL.z-D/2;
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
-  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
+  if(ready){processGenQ();if(playing&&settings.time==='cycle'){tod+=dt/DAYLEN;if(tod>=1){tod-=1;dayN++;}}if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
   camera.position.set(PL.x,PL.y+EYE,PL.z);
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}
@@ -117,11 +117,12 @@ function frame(now){
     for(let c=0;c<chunks.length;c++){const ms=chunks[c];if(!ms)continue;const x=(c%NCX)*CS+8-pcx,z=((c/NCX)|0)*CS+8-pcz,v=x*x+z*z<lim;for(const m of ms)m.visible=v;}}
   sun.position.copy(camera.position).addScaledVector(sunDir,420);sun.lookAt(camera.position);
   halo.position.copy(camera.position).addScaledVector(sunDir,410);halo.lookAt(camera.position);
-  dome.position.copy(camera.position);dome.visible=head!==WATER&&head!==LAVA;
-  moon.position.copy(camera.position).addScaledVector(sunDir,-420);moon.lookAt(camera.position);
+  // deep in a cave the sky is hidden, so the far edge of the loaded area shows cave darkness, not the sky (M3b)
+  const skyOn=caveF<0.6;dome.position.copy(camera.position);dome.visible=head!==WATER&&head!==LAVA&&skyOn;sun.visible=sun.visible&&skyOn;halo.visible=halo.visible&&skyOn;stars.visible=skyOn;clouds.visible=skyOn;
+  moon.visible=moon.visible&&skyOn;moon.position.copy(camera.position).addScaledVector(sunDir,-420);moon.lookAt(camera.position);
   stars.position.copy(camera.position);stars.rotation.y=curT()*Math.PI*2;
   waypoints.forEach(m=>{m.material.opacity=0.28+0.1*Math.sin(now*0.003+m.position.x);});
-  clouds.position.x=PL.x;clouds.position.z=PL.z;ctex.offset.x=PL.x/768+now*0.0000025;ctex.offset.y=-PL.z/768;
+  placeClouds(PL.x+OX,PL.z+OZ,now/1000);
   if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;
