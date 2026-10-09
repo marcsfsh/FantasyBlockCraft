@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.15.0 (2026-10-09): M6a, lands groundwork
+
+Old saves do not load: the world is generated anew, and the save key is now `fantasy-blockcraft-save-v10`.
+
+### Game
+- **A new map of lands.** The world is laid out from a registry of 37 lands in seven families, on a transition map that keeps unlikely neighbours apart (no winter land beside a desert). Common lands now stretch over several hundred blocks, and no land is smaller than 215 x 215 blocks. The old lands keep their looks; lands still to be built (forests in M6b, and so on) show as an old land until their family arrives, so their places will not move. See `docs/LANDS.md`.
+- **Names for every stretch of land,** in the style of a people ("Elder Wood of Lirwen", "The Sea of Randbert"), shown when you arrive and written faintly on the world map.
+- **Gorges in place of the cracks.** The hairline ravines (1 to 3 blocks wide, up to 66 deep) are gone. Gorges are about a third as many, at least 7 blocks wide at the floor, step back in ledges of 5 to a rim 16 to 40 across, and run up to about 60 deep; the deepest still reach the caves. None cut beside water or the sea.
+- **New worlds start on open land** of an old land near the middle of the world (a cell of Green Hills, Elder Wood, the moors or the like), never at sea.
+- **Retired saves are cleared** from browser storage when the game starts (worlds from save keys before v10).
+- **Creative land tour:** a list of every land in the pause menu (planned ones marked); Go takes you to the heart of the nearest stretch.
+
+### Tooling
+- **Two bytes per block:** the world holds block ids above 255 (blocks 0 to 199 and from 1024; items 200 to 1023).
+- **`npm run lands`** (`tools/lands.mjs`) draws the land layout and writes `docs/LANDS.md` from the registry, for the owner's approval.
+- New test `36-lands`; `06-biomes` and others follow the new layout; the world-hash snapshot is updated on purpose.
+
 ## 0.14.0 (2026-10-09): M5b, maps and creative tools
 
 Old saves do not load: the save format gained the explored map, places and markers, and the save key is now `fantasy-blockcraft-save-v9`. The world itself is unchanged.

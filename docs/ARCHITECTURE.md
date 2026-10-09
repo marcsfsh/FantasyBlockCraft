@@ -20,7 +20,8 @@ Consequences:
 | `src/js/blocks/blocks.js` | Block ids, block definitions, hardness and sounds |
 | `src/js/blocks/items.js` | Items that are not blocks: fuel, ores, ingots; the tool ladder (`TOOL_LADDER`, tools as `{tool, tier, speed, dur}`), gear and their icons |
 | `src/js/blocks/atlas.js` | Texture atlas painted pixel by pixel, average tile colours |
-| `src/js/world/terrain.js` | World arrays, column terrain and biomes (ranges, river valleys, blended borders), lakes |
+| `src/js/world/terrain.js` | World arrays (two bytes per block), column terrain from the land weights (ranges, river valleys, blended borders, gorges), lakes |
+| `src/js/world/lands.js` | Lands (M6a, D-039): the registry, the transition map of which lands may border which, the cell layout, blend weights and stretch names |
 | `src/js/world/caves.js` | Cave systems (D-028): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes |
 | `src/js/world/deep-caves.js` | The Fire Below: the lava sea with islands and flared pillars |
 | `src/js/world/underground-sites.js` | Mineshafts, supply crates, points of interest (each opening onto a cave), dripstone |
@@ -67,7 +68,7 @@ Removed in M1 (0.3.0) for the setting: the town and road generator, the power ne
 
 - The world is endless horizontally. A window of `W` x `D` = 224 x 224 columns (14 x 14 chunks of 16) and `H` = 512 blocks (sea level 310, D-023) is kept in memory around the player.
 - World coordinates are `X, Y, Z`. Window coordinates are `x = X - OX`, `z = Z - OZ`. World chunk coordinates are `WCX, WCZ`; window chunk indexes are `cx, cz`.
-- `world` (block ids), `lvl` (water level), `BLK` (block light) are flat typed arrays indexed by `I(x, y, z)`. Per-column arrays include `ground`, `hm`, `biome`.
+- `world` (block ids, a `Uint16Array` since M6a: blocks are 0 to 199 and 1024 up to `NID`, items 200 to 1023, `isItem`), `lvl` (water level), `BLK` (block light) are flat typed arrays indexed by `I(x, y, z)`. Tables indexed by block id (`OPQ`, `LUM`, `SOLID`, `COLD_OF`) are `NID` long. Per-column arrays include `ground`, `hm`, `biome`.
 - Moving more than a chunk from the centre slides the window (`shiftWindow`) and queues the new strip of chunks (`genQ`). `processGenQ` works on one chunk at a time (`genJob`): its generation steps (`GEN_STEPS`), then its light, then its map tile, within a per-frame budget (D-025). Travel (`regenerateAll`) makes the 3 x 3 chunks around the arrival at once and streams the rest.
 
 ## Generation rules (keep these true)
@@ -98,7 +99,7 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 
 ## Saves
 
-- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v9`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:9, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, ex, pl, mk, t, dn}`: `cs` holds container contents and `at` attuned waystones (D-033); `ex`, `pl` and `mk` the explored map, places and markers (D-037)). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
+- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v10`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:10, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, ex, pl, mk, t, dn}`: `cs` holds container contents and `at` attuned waystones (D-033); `ex`, `pl` and `mk` the explored map, places and markers (D-037)). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
 - `createWorld`, `switchWorld` (saves, then reloads into the other world), `deleteWorld`, `exportWorld` and `importWorld` live in `ui/save-and-minimap.js`; the pause menu lists the worlds. An exported file is `{format:'fantasy-blockcraft-world', saveKey, world, data}` and only loads under the same `SAVE_KEY`.
 - **Player changes only.** Automatic systems (`flowStep`, `randomTicks`) set `autoEdit`; their changes are recorded only where the player already changed that block, so crops keep their growth while natural water flow, grass spread and snow never grow the save.
 - A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).
@@ -124,6 +125,16 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 - **Barrows and rings** come from `barrowAt(WCX,WCZ)` (`world/features.js`): the highest of three spots in the chunk, on the Barrow Hills only, with a higher chance inside burial-ground zones and beside old roads; facing, size, length and a broken roof come from hashes of the chunk.
 - **Sites** (`siteAt`) score up to 14 level candidates: towers and castles by how far they rise over a ring of land 36 blocks out, keeps by a river within 40 blocks; a hollow is never chosen. `buildSite` fills under the floor with earth and banks it down one block per block to the land.
 - **Trees** multiply their density by a grove field (`fbm2(X/70)`), a valley bonus and a steep-slope penalty.
+
+## Lands (M6a, D-039)
+
+- **The registry** (`LANDS` in `world/lands.js`): each land has a key, name, family, tier (1 common, 2 uncommon, 3 rare), warmth range (bands 0 to 4), damp range (0 to 2), relief bits (1 low, 2 hills, 4 high), `sea` and `coast` flags, `look` (the old biome id it draws as until built), a people for its names, two signatures, a `never` list and a gorge weight. `LAND_MEET[a][b]` is the transition map.
+- **Layout:** cells of `LS` = 320 blocks with a jittered site each (`landSite`). `cellLand(c)` settles a cell after its higher-priority neighbours (priority is a hash), bridging same-land corners, adopting a neighbour's common land, else drawing by tier from the best climate fits, always keeping lands its settled neighbours may border and avoiding corner pinches. It is a pure function of the seed, memoised per cell.
+- **Per column** (`landsAt`, called by `colInfoBase`): the point is warped (a fold-free warp), the 16 nearest sites weighed by `sstep(blend, 0, d - d1)` with the blend width of each cell's own look, and the weights summed by look into `w2` to `w11` (land only) and `wS` (sea). `area` is the land of the cell the column lies in (the layout, used for maps and sizes); `land` is the land the column wears, chosen against a patchy threshold near borders; `lcell` names its stretch; `tb` its warmth band; `mdep` how far it is inside a mountain land; `gz` the gorge weight.
+- **Terrain:** `colInfoBase` keeps the old height formulas, fed by the look weights in place of the old noise weights; the sea pulls the land down to its floor by `wS`. The column's look comes from its land, with height deciding the sea, shore and mountain tops as before.
+- **Gorges** replace the M2b ravines: the zero line of `fbm2(X/150)`, with distance from the line estimated from the noise slope; depth is read at the nearest point of the centre line, so gorge ends cut straight across. `rvBot` and `carved` work as before.
+- **Names:** `stretchName(lcell)` names a stretch after its highest-priority cell (`stretchCell`); `landPlaceName` is what the readout shows on open land. `nearestLand` and `landTour` (creative) find the nearest cell of a land.
+- **The approval document:** `tools/lands.mjs` (`npm run lands`) draws the layout and writes `docs/LANDS.md` from the registry.
 
 ## Ways down, places and the surface (M2b)
 

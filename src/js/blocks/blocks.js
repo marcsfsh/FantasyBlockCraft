@@ -112,13 +112,13 @@ def(CHEST,'Oak Chest',[200,200,201],{snd:'wood'});
 def(BERRYB,'Bilberry Bush',[202,202,202],PLANT);def(MUSHB,'Brown Mushroom',[203,203,203],PLANT);def(WTURN,'Wild Turnip',[206,206,206],PLANT);
 [[TURN0,'Turnip Sprouts',204],[TURN1,'Young Turnips',205],[TURN2,'Turnips',206],[BEAN0,'Bean Sprouts',207],[BEAN1,'Young Beans',208],[BEAN2,'Bean Plants',209]]
   .forEach(([id,n,t])=>def(id,n,[t,t,t],Object.assign({},PLANT,{place:false})));
-const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
+const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
 setH([COAL],5,'ore',1);setH([COPO,ZINO],5,'ore',2);setH([TINO,GOLD],5,'ore',3);setH([IRON],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
 setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([CHEST],2,'wood');setH([BERRYB,MUSHB,WTURN,TURN0,TURN1,TURN2,BEAN0,BEAN1,BEAN2],0,'soft');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
-const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
+const OPQ=new Uint8Array(NID),LUM=new Uint8Array(NID),SOLID=new Uint8Array(NID);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
 const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Fens'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];

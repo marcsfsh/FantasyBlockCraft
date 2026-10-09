@@ -460,3 +460,154 @@ Options: keep, connect better; keep untouched; revisit them too.
 **Q100. How should the owner check the result?**
 Options (several allowed): screenshots in the PR; seed tour; map images; checkpoint mid-way.
 **Answer:** A seed tour (coordinates for each cave system, river valley and mountain range to visit), top-down height and cave maps of a large area before and after, and a checkpoint mid-way: stop after the cave prototype so the owner can play it before the rest is finished.
+
+## Round 21: surface enrichment and new lands (2026-10-09, after 0.14.0)
+
+Asked before planning M6. The owner widened M6 from enriching the thin lands to adding many new lands, with a transition map so neighbours make sense.
+
+**Q101. Which parts of M6 matter most?**
+Options (several allowed): enrich thin lands; vary structures; streams and waterfalls; weather by land.
+**Answer:** All four, and "New biomes. the current biomes lack variety, uniqueness, and feel stale."
+
+**Q102. How much should the surface change?**
+Options: strong enrichment; light polish; dramatic rework.
+**Answer:** Strong enrichment: every land gets clear features of its own and a walk feels new; the M3.5b terrain shapes stay in spirit, but are brought up to the same standard as the rest of the milestone.
+
+**Q103. What overall look should the surface aim for?**
+Options: natural and muted; storybook; epic and dramatic; mixed by land.
+**Answer:** Mixed by land: gentle lowlands, wild and dramatic highlands and coasts.
+
+**Q104. Should new lands come in M6?**
+Options: later, as planned; one new land; several new lands.
+**Answer:** Several new lands.
+
+**Q105. New lands, first set.**
+Options (several allowed): Southern Drylands; Autumn Woods; Birch Glades; Pine Highlands.
+**Answer:** All four.
+
+**Q106. New lands, second set.**
+Options (several allowed): Blighted Lands; Chalk Cliffs; Rocky Isles; Karst Crags.
+**Answer:** All four.
+
+**Q107. How many new lands in total?**
+Options: 3 to 4; 5 to 6; all picked.
+**Answer:** All picked, and at least two more rounds of options to add.
+
+**Q108. Where should lands sit relative to each other?**
+Options: climate logic; loose mix; themed regions.
+**Answer:** "A 'transition map' needs to be created. I wouldn't expect a winter biome next to a desert one, for example. This transition map will label what each biome can be connected to."
+
+**Q109. More lands, waters and wetlands.**
+Options (several allowed): Saltmarsh Estuary; Misty Glens; Raised Bogs; Tidal Flats.
+**Answer:** Raised Bogs.
+
+**Q110. More lands, high ground.**
+Options (several allowed): Alpine Meadows; Glacier Fields; Red Canyons; Tablelands.
+**Answer:** Alpine Meadows and Glacier Fields, and something else (asked in Q114).
+
+**Q111. More lands, forests.**
+Options (several allowed): Ancient Giant Wood; Willow Vales; Yew Wood; Silverwood.
+**Answer:** All four.
+
+**Q112. More lands, open wilds.**
+Options (several allowed): Golden Steppe; Volcanic Wastes; Frozen Tundra; Boulder Fields.
+**Answer:** Golden Steppe, Volcanic Wastes and Frozen Tundra.
+
+**Q113. More lands, coasts and seas.**
+Options (several allowed): Fjords; Dune Coast; Black Sand Shores; Kelp Shallows.
+**Answer:** Fjords, Black Sand Shores and Kelp Shallows.
+
+**Q114. More lands, other high ground.**
+Options (several allowed): Basalt Highlands; Granite Peaks; Cloud Forest Heights; Scree Slopes.
+**Answer:** Cloud Forest Heights.
+
+**Q115. More lands, strange places.**
+Options (several allowed): Crystal Barrens; Glowcap Hollows; Petrified Forest; Starfall Craters.
+**Answer:** All four.
+
+**Q116. More lands, old lands of men.**
+Options (several allowed): Overgrown Farmland; Wild Orchards; Flower Meadows; Old Terraces.
+**Answer:** All four.
+
+**Q117. How should 30 new lands roll out?**
+Options: families, one PR each; favourites first; all at once.
+**Answer:** Families, one PR each: groundwork first, then one PR per family, each with its own checkpoint.
+
+**Q118. How big and how common should each land be?**
+Options: tiers; all smaller; bigger world, same sizes.
+**Answer:** Tiers, and re-evaluate the sizes of the existing lands. "No land/biome should be smaller than 215x215 blocks (or equivalent area; but not narrower than 115 blocks at any point)."
+
+**Q119. Where new lands overlap old ones (Golden Steppe and Windswept Plains, Willow Vales and Fens, Frozen Tundra and Northern Fells)?**
+Options: rework old into new; keep both and sharpen; case by case.
+**Answer:** Rework the old land into the new one.
+
+**Q120. The world stores each block in one byte with about 130 block types free. How to handle it?**
+Options: two bytes per block; be frugal; tinted blocks.
+**Answer:** Two bytes per block.
+
+**Q121. What should enrichment add to the existing lands that stay?**
+Options (several allowed): plants and ground; landmarks; tree variety; small finds.
+**Answer:** All four.
+
+**Q122. How should the named ruins (watchtowers, keeps, castles) vary?**
+Options: several layouts each; procedural; both.
+**Answer:** Several hand-designed layouts per kind (3 to 5), each also varied by size, decay and facing.
+
+**Q123. Which new small surface structures?**
+Options (several allowed): bridges; farmsteads; shrines and cairns; abandoned camps.
+**Answer:** All four, and "I bet you could think of 3-4 more" (asked in Q125).
+
+**Q124. Should each new land have its own landmark?**
+Options: one signature each; only some lands; none.
+**Answer:** Each land gets both a signature landmark structure and a signature natural feature. In any one stretch of the land, either one of them appears, or, where that is practical and keeps the land's identity, a 40% chance of neither.
+
+**Q125. More small structures.**
+Options (several allowed): beacon hills; mills and jetties; chapels and graveyards; dykes and boundary walls.
+**Answer:** All four.
+
+**Q126. Streams and waterfalls.**
+Options (several allowed): hillside streams; mountain waterfalls; river falls and rapids; springs and ponds.
+**Answer:** All four.
+
+**Q127. Weather by land (still cosmetic).**
+Options (several allowed): fog and mist; storms; dust and ash; land-tinted skies.
+**Answer:** All four.
+
+**Q128. How thick should fog get at its worst?**
+Options: moody but playable (30 to 40 blocks); thick (12 to 20); light (60 or more).
+**Answer:** Moody but playable.
+
+**Q129. Moving water or shaped still water for streams and falls?**
+Options: shaped, looks flowing; truly flowing; both.
+**Answer:** Shaped still water that looks flowing: always sound, never floods or leaks.
+
+**Q130. Should new lands bring new resources?**
+Options (several allowed): new woods; new stones; rare finds; food and dyes.
+**Answer:** All four.
+
+**Q131. How should lands be named in-game?**
+Options: land plus place name; land type only; mixed.
+**Answer:** Land plus place name, in the people's naming style, shown on arrival and on the map.
+
+**Q132. Should new lands reach underground?**
+Options (several allowed): karst and sinkholes; volcanic depth; land-flavoured caves; surface only.
+**Answer:** Karst and sinkholes, volcanic depth, and land-flavoured caves.
+
+**Q133. Which family comes first after the groundwork?**
+Options: forests; highlands and cold; coasts and waters; dry, fiery and strange.
+**Answer:** Forests.
+
+**Q134. Approve the land list and transition map before building?**
+Options: yes, in M6a; draft now; no.
+**Answer:** Yes, in M6a: the transition map and land list (families, sizes, tiers) as a document with a map picture, approved before the families are built.
+
+**Q135. How much speed may richer lands cost on the Ally X?**
+Options: keep 60 fps; some cost; looks first.
+**Answer:** Keep 60 fps, cutting detail or view distance automatically where needed.
+
+**Q136. How should each family be checked?**
+Options (several allowed): land tour in creative; map pictures; screenshot tour; seed and coordinates.
+**Answer:** A land tour in creative: a pause-menu list of lands that takes the player to the nearest of each.
+
+**Q137. (Owner's note after the interview, with a screenshot near X 9, Z -599 in the Barrow Hills.)**
+**Answer:** "Something else to address in M6, I keep seeing these cracks in the landscape." They are the M2b ravines (`terrain.js`, the `rvBot` noise line): on seed 123456789 about 0.28% of land columns, half of them 1 block wide and nine in ten 3 or less, with a median depth of 27 and a deepest of 66. Planned for M6a: fewer, wider gorges with stepped walls and sloping ends, still ways down (D-038).

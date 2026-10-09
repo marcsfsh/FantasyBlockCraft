@@ -57,6 +57,15 @@ function goTo(X,Z,Y){
   PL.x=x+0.5;PL.z=z+0.5;PL.y=Math.max(1,Math.min(H-2,y));PL.vx=PL.vy=PL.vz=0;if(!PL.noclip)while(collide()&&PL.y<H-2)PL.y++;
   fallTop=null;gliding=false;toast('You go to X '+X+' Z '+Z);return true;
 }
+// ---- The land tour (Q136): go to the heart of the nearest stretch of a land. A land not built yet is shown with the look of
+// the land it stands in for, so its place in the layout can be checked before its family is built.
+function landTour(k){
+  if(creativeOnly())return null;const L=LANDS[k],c=nearestLand(k,PL.x+OX,PL.z+OZ,48);if(!c){toast('No '+L.n+' within reach');return null;}
+  let X=c.X,Z=c.Z;const o={};
+  for(let r=0;r<=150&&landsAt(X,Z,o).area!==k;r+=10){let hit=false;for(let a=0;a<16&&!hit;a++){const x=Math.round(c.X+Math.cos(a/16*6.283)*r),z=Math.round(c.Z+Math.sin(a/16*6.283)*r);if(landsAt(x,z,o).area===k){X=x;Z=z;hit=true;}}if(hit)break;}
+  goTo(X,Z,L.sea?SEA+4:undefined);toast(L.n+(L.built?'':' (planned for '+LAND_FAM[L.fam].replace(/.*\(|\)/g,'')+', shown as '+landShown(L)+')')+', '+c.d+' blocks from where you were');
+  return{X:X,Z:Z,d:c.d};
+}
 // ---- Time and weather (creative)
 function setTimeOfDay(h){settings.time='fixed';tod=((+h/24)%1+1)%1;lsSet(SET_KEY,settings);}
 function setWeatherNow(rain){settings.weather=true;raining=!!rain;rainT=rain?240:400;if(!rain)rainAmt=Math.min(rainAmt,0.3);lsSet(SET_KEY,settings);}
@@ -73,7 +82,7 @@ function stampAt(kind,X,g,Z){
   else if(kind==='dungeon'){const d={kind:DUNGEON_KINDS[(seed*4)|0],X:X,Z:Z,y:g-12,hw:4,hh:5,a:{x:X+10,y:g+1,z:Z}};run=()=>dungeonP(d,rs());rad=14;y0=g-14;y1=g+4;} // its tunnel comes up beside the spot
   else return 0;
   const x0=Math.max(0,X-rad-OX),x1=Math.min(W-1,X+rad-OX),z0=Math.max(0,Z-rad-OZ),z1=Math.min(D-1,Z+rad-OZ);y0=Math.max(0,y0);y1=Math.min(H-1,y1);
-  const nx=x1-x0+1,nz=z1-z0+1,ny=y1-y0+1,old=new Uint8Array(nx*ny*nz),K=(x,y,z)=>((y-y0)*nz+(z-z0))*nx+(x-x0);
+  const nx=x1-x0+1,nz=z1-z0+1,ny=y1-y0+1,old=new Uint16Array(nx*ny*nz),K=(x,y,z)=>((y-y0)*nz+(z-z0))*nx+(x-x0);
   for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)old[K(x,y,z)]=world[I(x,y,z)];
   const sx=gx0,sz=gz0;
   try{for(let cz=Math.floor((z0+OZ)/CS);cz<=Math.floor((z1+OZ)/CS);cz++)for(let cx=Math.floor((x0+OX)/CS);cx<=Math.floor((x1+OX)/CS);cx++){gx0=cx*CS;gz0=cz*CS;run();}}
