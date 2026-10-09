@@ -51,6 +51,7 @@
 | 39-coasts | The six coast lands are built and each has its own shore, rock or plants (the Western Sea its kelp and seagrass); the chalk cliffs behind an arch drop 15 or more within three blocks and the arch stands on two legs; nearly every coast and sea stretch gets its signature and all 14 kinds appear; kelp and seagrass count as water; lily pads float on the pools of the vales and bogs |
 | 40-dry | The four dry and fiery lands are built (Windswept Plains now Golden Steppe) and each has its own ground and plants; the volcanic window holds magma stone; nearly every dry stretch gets its signature and all 8 kinds appear; the smoking cone's lava lake is held in rock on every side; dead wood makes planks |
 | 41-strange | The four strange lands are built and rare, and each has its own stuff and rare find; Starfall Craters are pocked with crater floors; nearly every strange stretch gets its signature and all 8 kinds appear; the starmetal heart's crater is open with starmetal under its floor |
+| 42-men | The four old lands of men are built and every land of the registry is built; each has its own stuff (orchard trees stand in rows); all eight kinds of small structure stand across the lands, the nearest chapel has its graveyard and its name, the nearest bridge spans its river; nearly every stretch gets its signature; orchard leaves give apples |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 

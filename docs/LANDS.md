@@ -65,10 +65,10 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 31 | Glowcap Hollows | Strange lands (M6f) | rare | temperate to warm | wet | low, hills | built | a mushroom dwelling | giant glowing mushrooms in a hollow | 0.8% | 12 (342) |
 | 32 | Petrified Forest | Strange lands (M6f) | rare | warm to hot | dry | low, hills | built | a waystation turned to stone | trees of stone | 0.7% | 11 (319) |
 | 33 | Starfall Craters | Strange lands (M6f) | rare | cool to warm | dry to middling | low, hills | built | a ruined star tower | a crater round a starmetal heart | 0.9% | 15 (323) |
-| 34 | Overgrown Farmland | Old lands of men (M6g) | uncommon | cool to warm | middling | low | Green Hills | an abandoned manor farm | wild crops in old furrows | 0.5% | 6 (438) |
-| 35 | Wild Orchards | Old lands of men (M6g) | uncommon | temperate to hot | middling | low | Green Hills | an orchard keeper's cottage | rows of gnarled fruit trees | 4.5% | 23 (450) |
-| 36 | Flower Meadows | Old lands of men (M6g) | uncommon | temperate to warm | middling to wet | low | Green Hills | a shrine wreathed in flowers | bands of wildflowers | 0.9% | 12 (331) |
-| 37 | Old Terraces | Old lands of men (M6g) | uncommon | temperate to hot | dry to middling | hills | Green Hills | a terraced village ruin | stone-walled terraces down a hillside | 3.6% | 32 (330) |
+| 34 | Overgrown Farmland | Old lands of men (M6g) | uncommon | cool to warm | middling | low | built | an abandoned manor farm | wild crops in old furrows | 0.5% | 6 (438) |
+| 35 | Wild Orchards | Old lands of men (M6g) | uncommon | temperate to hot | middling | low | built | an orchard keeper's cottage | rows of gnarled fruit trees | 4.5% | 23 (450) |
+| 36 | Flower Meadows | Old lands of men (M6g) | uncommon | temperate to warm | middling to wet | low | built | a shrine wreathed in flowers | bands of wildflowers | 0.9% | 12 (331) |
+| 37 | Old Terraces | Old lands of men (M6g) | uncommon | temperate to hot | dry to middling | hills | built | a terraced village ruin | stone-walled terraces down a hillside | 3.6% | 32 (330) |
 
 Every land is shown somewhere within 25600 blocks of the middle on this seed (checked by `36-lands`). Lands with no region inside the map above are further out.
 

@@ -233,6 +233,10 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(236,x,y,sh([176,150,206],(hn(x,y,158)-.5)*20+(hn(x>>1,y>>1,159)<.18?40:0)));P(237,x,y,(x%3===0)?[120,240,210]:sh([90,160,170],(hn(x,y,160)-.5)*20));}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(234,x,y,sh([128,128,128],(hn(x,y,163)-.5)*22));for(let i=0;i<5;i++){const x=1+Math.floor(hn(i,0,164)*12),y=1+Math.floor(hn(i,1,164)*12);P(234,x,y,[150,190,255]);P(234,x+1,y,[128,168,233]);P(234,x,y+1,[136,176,241]);P(234,x+1,y+1,[170,210,255]);}
   floorTop(238,[[176,196,160],[190,206,176],[160,182,150],[206,214,196]],161);floorSide(239,[176,196,160],162);
+  // old lands of men (M6g): orchard leaves with apples, blossom, oxeye daisy, lavender
+  leaf(240,[64,132,44],0.16,171,[[200,40,36],0.06]);leaf(241,[236,196,214],0.18,172,[[250,236,244],0.2]);
+  clear(242);for(let f=0;f<3;f++){const ox=3+f*5,h=7+Math.floor(hn(f,5,173)*5);for(let k=0;k<h;k++)P(242,ox,15-k,[70,130,48]);const cy=15-h;for(let a=0;a<8;a++)P(242,ox+Math.round(Math.cos(a*0.785)*2),cy+Math.round(Math.sin(a*0.785)*2),[244,244,236]);P(242,ox,cy,[236,196,60]);}
+  clear(243);for(let f=0;f<5;f++){const ox=2+f*3,h=8+Math.floor(hn(f,6,174)*6);for(let k=0;k<h;k++)P(243,ox,15-k,k>h-5?sh([150,110,210],(hn(f,k,175)-.5)*30):[90,130,80]);}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

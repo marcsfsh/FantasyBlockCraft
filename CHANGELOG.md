@@ -5,6 +5,25 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.21.0 (2026-10-09): M6g, old lands of men
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v16`. Every land of the registry is now built.
+
+### Game
+- **Four old lands of men:**
+  - **Overgrown Farmland:** fields of old furrows run one way or the other, wild wheat, turnips and potatoes in them.
+  - **Wild Orchards:** fruit trees in rows, some in blossom; their leaves give apples often.
+  - **Flower Meadows:** bands of wildflowers, with oxeye daisies and lavender among them.
+  - **Old Terraces:** hillsides stepped every three blocks, held up by stone retaining walls.
+- **Small structures across the lands (Q123, Q125):** old bridges over rivers, mills on their banks, jetties on lakes, deserted farmsteads, cairns on hilltops, abandoned camps, beacon hills, and chapels with their graveyards. About one chunk in 120 has one; each is named in the readout.
+- **Dry-stone walls** run across the farmland, green hills, orchards and terraces.
+- **Landmarks and features:** an abandoned manor farm or old furrows with a scarecrow; an orchard keeper's cottage or old fruit rows; a flower shrine or bands of wildflowers; a terraced village or stone terraces.
+- **Landmarks are places:** the readout names every land's landmark and feature, and they are kept on the world map.
+- **New blocks:** orchard leaves, blossom, oxeye daisy, lavender.
+
+### Tooling
+- New test `42-men`; the world-hash snapshot is updated on purpose.
+
 ## 0.20.0 (2026-10-09): M6f, strange lands
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v15`.

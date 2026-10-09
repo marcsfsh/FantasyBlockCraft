@@ -305,3 +305,12 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Light kept cheap:** giant glowcap caps are dark flesh with glowing gills only on part of their undersides (light 6).
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v15`, world data version 15.
 
+### D-045 M6g: old lands of men and small structures (2026-10-09)
+- **Four lands built** (`world/men.js`), so every land of the registry is built: Overgrown Farmland (field patches of 24 blocks with furrows of farmland and wild crops), Wild Orchards (fruit trees on a seven-block grid: the tree pass now lets every seventh column through), Flower Meadows (flower bands), Old Terraces (heights stepped by three where the terrace weight `wTerr` holds, and cobblestone soil on step faces, `wall`).
+- **Small structures (Q123, Q125):** `smallAt(WCX,WCZ)` picks one chunk in about thirty-five tries; a structure stands if its land and ground suit it (a river gives a bridge or a mill, a lake nearby a jetty, a hilltop a cairn or beacon, level ground a farmstead, camp or chapel), so about one chunk in 120 has one. Built in the sites step, reaching 14 blocks; trees, boulders, plants and ice spikes keep off them (`smallNear`).
+- **Dry-stone walls** follow a noise line across farmland, green hills, orchards and terraces, one or two blocks high, in the plants pass.
+- **Places:** the readout names signatures (M6b to M6g) and small structures, so they are noted as places on the world map.
+- **Orchard leaves** drop an apple three times in ten.
+- **Tests:** the smoothness survey in `31-natural-surface` leaves out the Old Terraces, which are stepped on purpose, as it does the cliff coasts.
+- **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v16`, world data version 16.
+
