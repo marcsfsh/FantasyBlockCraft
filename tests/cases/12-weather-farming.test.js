@@ -10,7 +10,7 @@ PL.x=x+0.5;PL.z=z+0.5;PL.y=g+2;
 for(let k=0;k<4000&&world[I(x,g+2,z)]!==WHEAT;k++)randomTicks();
 info('crop under the roof is now',BL[world[I(x,g+2,z)]].n);
 assert(world[I(x,g+2,z)]===WHEAT,'a lit crop under a roof grows to full wheat');
-// Snow: High Mountains snow only at or above the snow line; Northern Fells always
+// Snow: High Mountains snow only at or above the snow line; Frozen Tundra (once the Northern Fells) always
 const bx=Math.floor(PL.x),bz=Math.floor(PL.z),ci=bx+W*bz,b0=biome[ci];
 biome[ci]=5;PL.y=SEA+5;updWeather(0.016,0);const low=snowing;PL.y=SEA+40;updWeather(0.016,0);const high=snowing;biome[ci]=6;PL.y=SEA+5;updWeather(0.016,0);const fells=snowing;biome[ci]=b0;
 assert(!low&&high&&fells,'mountain snow starts at the snow line; the fells always snow');

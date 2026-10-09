@@ -61,7 +61,7 @@ function features(WCX,WCZ,self,noLife){
   // Structures
   const sr=r(),sx=X0+3+(r()*10|0),sz=Z0+3+(r()*10|0),dr=r(),dy=106+(r()*90|0),dx2=X0+4+(r()*8|0),dz2=Z0+4+(r()*8|0);
   colInfo(sx,sz,T2);const g=T2.h,b=T2.b;
-  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)){
+  if(g>SEA+1&&g+20<H&&!carved(sx,g,sz,T2)&&!surfTaken(sx,sz,4)&&!sigNear(sx,sz,4)){
     if(b===6&&sr<0.25)spikeP(sx,sz,g,rngAt(sx,13,sz)); // the stray little towers and wells are gone (Q93): ruins on the surface are the named sites
   }
   {const sw=stairwayAt(WCX,WCZ);if(sw)stairwayP(sw,rngAt(WCX,6303,WCZ));}
@@ -71,12 +71,12 @@ function features(WCX,WCZ,self,noLife){
   const r2=rngAt(WCX,15,WCZ);
   caveLife(X0,Z0,r2);
 }
-function plants(WCX,WCZ){
+function plants(WCX,WCZ){let F0=null;
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=WCX*CS+lx,Z=WCZ*CS+lz,x=X-OX,z=Z-OZ,ci=x+W*z,g=ground[ci],b=biome[ci];
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
-      if((top===GRASS||FLOORS.has(top))&&b!==5&&b!==6&&!sigNear(X,Z,0)){colInfo(X,Z,TP);const F=forestOf(TP);
+      if((top===GRASS||FLOORS.has(top))&&!sigNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);const F=forestOf(TP); // mountains and fells only where their land has its own plants
         const heath=b===4?1:Math.max(0,(TP.dw-0.2)*1.6),reed=b===11?1:Math.max(0,(TP.fen-0.25)*1.6),dark=b===8?1:Math.max(0,(TP.sw-0.25)*1.6);
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
@@ -108,7 +108,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);

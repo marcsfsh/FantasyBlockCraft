@@ -124,6 +124,13 @@ def(LITTER,'Leaf Litter',[172,2,173],{snd:'soft'});def(NEEDLES,'Pine Needle Floo
 def(FERN,'Fern',[178,178,178],PLANT);def(BLUEB,'Bluebells',[179,179,179],PLANT);def(MOONP,'Moonpetal',[180,180,180],Object.assign({},PLANT,{emit:true,lum:5}));
 const NEW_LOGS=[MAPLE,PINE,GREAT,YEW,SILV,WILLOW],NEW_PLANKS=[MAPLEP,PINEP,GREATP,YEWP,SILVP,WILLOWP],NEW_LEAVES=[MAPLEL,MAPLEG,PINEL,GREATL,YEWL,SILVL,WILLOWL];
 setH(NEW_LOGS,2.2,'wood');setH(NEW_PLANKS,2.2,'wood');setH(NEW_LEAVES,0.3,'soft');setH([LITTER,NEEDLES,FMOSS],0.6,'soft');setH([FERN,BLUEB,MOONP],0,'soft');
+// Highlands and cold (M6c, D-041): limestone, glacier ice, packed snow, tundra moss, mistwood, gentians and edelweiss
+const LIMESTONE=1049,GLACIER=1050,PSNOW=1051,TMOSS=1052,MISTW=1053,MISTL=1054,MISTP=1055,GENTIAN=1056,EDELW=1057;
+def(LIMESTONE,'Limestone',[181,181,181]);def(GLACIER,'Glacier Ice',[182,182,182],{snd:'glass'});def(PSNOW,'Packed Snow',[183,183,183],{snd:'soft'});
+def(TMOSS,'Tundra Moss',[184,2,185],{snd:'soft'});def(MISTW,'Mistwood Log',[187,187,186],{snd:'wood'});def(MISTL,'Mistwood Leaves',[188,188,188],LEAFD);def(MISTP,'Mistwood Planks',[189,189,189],{snd:'wood'});
+def(GENTIAN,'Gentian',[190,190,190],PLANT);def(EDELW,'Edelweiss',[191,191,191],PLANT);
+NEW_LOGS.push(MISTW);NEW_PLANKS.push(MISTP);NEW_LEAVES.push(MISTL);
+setH([LIMESTONE],3,'stone',1);setH([GLACIER],0.6,'misc');setH([PSNOW,TMOSS],0.6,'soft');setH([MISTW,MISTP],2.2,'wood');setH([MISTL],0.3,'soft');setH([GENTIAN,EDELW],0,'soft');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
@@ -132,7 +139,7 @@ setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'me
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(NID),LUM=new Uint8Array(NID),SOLID=new Uint8Array(NID);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
-const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Willow Vales'];
+const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Frozen Tundra','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Willow Vales'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
 // Tools drawn as a block in the hand. The grappling hook (100) and fireworks (101) gave way to the grapnel and signal flares (M4, Q45).
 // The Fill Tool (M5b) marks a box to fill, replace or clear (creative)

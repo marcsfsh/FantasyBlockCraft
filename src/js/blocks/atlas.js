@@ -203,6 +203,14 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(178);for(let f=0;f<5;f++){const ox=2+f*3,h=7+Math.floor(hn(f,0,81)*7),dir=f%2?1:-1;for(let k=0;k<h;k++){const x=ox+Math.round(dir*k*0.25),y=15-k;P(178,x,y,[62,126,44]);if(k>1&&k%2===0){P(178,x-1,y,[84,150,56]);P(178,x+1,y,[84,150,56]);}}}
   clear(179);for(let f=0;f<4;f++){const ox=3+f*3,h=8+Math.floor(hn(f,1,82)*5);for(let k=0;k<h;k++)P(179,ox,15-k,[70,130,48]);for(let k=0;k<4;k++){P(179,ox+1,16-h+k*2,[88,96,206]);P(179,ox+1,17-h+k*2,[60,64,160]);}}
   clear(180);for(let y=8;y<16;y++)P(180,7,y,[86,140,110]);for(let a=0;a<6;a++){const x=7+Math.round(Math.cos(a)*2.5),y=6+Math.round(Math.sin(a)*2.5);P(180,x,y,[232,240,255]);P(180,(x+7)>>1,(y+6)>>1,[200,214,250]);}P(180,7,6,[250,236,150]);
+  // highlands and cold (M6c): limestone, glacier ice, packed snow, tundra moss, mistwood, gentian, edelweiss
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(181,x,y,sh([206,202,186],(hn(x,y,91)-.5)*18+(y%5===0&&hn(x,y,92)<.6?-20:0)+(hn(x>>2,y>>1,93)<.12?-26:0)));
+    P(182,x,y,sh([150,200,236],(hn(x,y,94)-.5)*16+((x+y*2)%9===0?24:0)));P(183,x,y,sh([226,232,240],(hn(x,y,95)-.5)*14));}
+  floorTop(184,[[122,118,70],[104,102,64],[140,128,80],[96,110,72]],96);floorSide(185,[118,114,70],97);
+  bark(186,[70,86,58],98,2);for(let y=0;y<16;y++)for(let x=0;x<16;x++)if(hn(x,y,99)<.3)P(186,x,y,[88,130,62]);ring(187,[176,160,120],[150,136,98],[70,86,58],100);
+  leaf(188,[60,120,84],0.16,101,[[150,190,150],0.1]);plank(189,[150,140,104],102);
+  clear(190);for(let f=0;f<3;f++){const ox=3+f*5;for(let k=0;k<7;k++)P(190,ox,15-k,[62,120,52]);for(let dy=0;dy<3;dy++)for(let dx=-1;dx<=1;dx++)P(190,ox+dx,7-dy+Math.abs(dx),[44,74,200]);}
+  clear(191);for(let f=0;f<3;f++){const ox=3+f*5;for(let k=0;k<6;k++)P(191,ox,15-k,[140,150,130]);for(let a=0;a<5;a++){P(191,ox+Math.round(Math.cos(a*1.26)*2),8+Math.round(Math.sin(a*1.26)*2),[236,236,226]);}P(191,ox,8,[226,206,90]);}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

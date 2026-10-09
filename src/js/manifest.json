@@ -86,6 +86,10 @@
       "about": "The forests (M6b): their trees, floors and plants, and each stretch's signature landmark or natural feature"
     },
     {
+      "path": "world/highlands.js",
+      "about": "Highlands and cold (M6c): alpine meadows, glaciers, cloud forest, karst and tundra looks, their signatures (with sinkholes to the caves), and waterfalls"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },
