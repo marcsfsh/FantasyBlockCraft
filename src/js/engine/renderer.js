@@ -25,7 +25,10 @@ const ACELL=32,APAD=8,gpuAtlas=document.createElement('canvas');gpuAtlas.width=A
     for(let y=0;y<ACELL;y++)for(let x=0;x<ACELL;x++){const sx=Math.min(TS-1,Math.max(0,x-APAD)),sy=Math.min(TS-1,Math.max(0,y-APAD)),si=((r*TS+sy)*AW+c*TS+sx)*4,di=((r*ACELL+y)*GW2+c*ACELL+x)*4;
       od[di]=dat[si];od[di+1]=dat[si+1];od[di+2]=dat[si+2];od[di+3]=dat[si+3];}}
   g.putImageData(o,0,0);})();
-const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;
+// No anisotropic filtering (0.12.2, D-035): on Windows, WebGL runs on Direct3D 11, whose anisotropic filter also smooths textures
+// close up, so the nearest-pixel look was lost on desktops while phones (OpenGL ES) kept it
+tex.anisotropy=1;
 let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
 // Vertex shader. The tops of plants (aov 0.93) sway in the wind (M3b).

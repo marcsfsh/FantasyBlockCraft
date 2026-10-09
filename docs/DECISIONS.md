@@ -214,3 +214,7 @@ The owner saw low-resolution, blended textures on the desktop and not on the pho
 - The info readout shows the resolution as a percentage of the screen's pixels.
 - No change to the world or saves.
 Constrains: anything that changes the renderer's pixel ratio goes through `setRes`.
+
+### D-035 0.12.2: no anisotropic filtering (2026-10-09)
+D-034 did not change the owner's desktop: it runs at 100% scaling, so Auto, Sharp and Fast all drew at the native resolution. The owner's screenshot showed the real cause: close-up textures were smoothed (bilinear) instead of showing square pixels. The atlas texture asked for 4x anisotropic filtering; on Windows, browsers run WebGL on Direct3D 11, whose anisotropic filter also filters magnification, so the nearest-pixel look was lost. The owner also noticed that a lit Blasting Keg stayed sharp: its textures (`tntMats`) never had anisotropic filtering. Phones (OpenGL ES) keep magnification and anisotropy separate, which is why the phone looked right, and headless Chromium (SwiftShader) could not show the fault. The texture now uses no anisotropic filtering (`tex.anisotropy=1`); ground far away at a grazing angle is slightly softer, which headless comparisons showed to be a small change. The Resolution setting from D-034 stays: it matters on screens scaled above 100%.
+Constrains: do not turn anisotropic filtering back on for the block atlas; check filtering changes on a Windows desktop, not only in headless screenshots.
