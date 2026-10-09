@@ -111,7 +111,7 @@ function stairwayAt(WCX,WCZ){
 }
 function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
 // Surface columns that structures have claimed: trees, boulders and other surface features keep off them
-function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z);}
+function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m);}
 const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
 function stairwayP(s,r){
   const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};
@@ -145,7 +145,7 @@ const dungC=new Map();
 function dungeonAt(WCX,WCZ){
   const key=ckey(WCX,WCZ);if(dungC.has(key))return dungC.get(key);if(dungC.size>8000)dungC.clear();
   let d=null;
-  if(hsh(WCX,6401,WCZ)<0.05){const a=caveAnchor(WCX,WCZ,106,196,6402);
+  if(hsh(WCX,6401,WCZ)<0.14){const a=caveAnchor(WCX,WCZ,106,196,6402);
     if(a){const ang=hsh(WCX,6403,WCZ)*6.283,X=a.x+Math.round(Math.cos(ang)*9),Z=a.z+Math.round(Math.sin(ang)*9),y=a.y-2;
       let clash=false;for(let c=-2;c<=2&&!clash;c++)for(let e=-2;e<=2&&!clash;e++){const q=poiFor(WCX+c,WCZ+e);if(q&&Math.abs(q.x-X)<20&&Math.abs(q.z-Z)<20&&Math.abs(q.y-y)<16)clash=true;} // places come first
       if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}

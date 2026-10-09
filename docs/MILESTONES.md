@@ -31,6 +31,7 @@ The plan from the direction interview (`docs/DIRECTION_QA.md`, cited as Q1 to Q7
 | M1 | Foundations | Remove what is leaving, rebuild the save format, add the base systems later milestones need |
 | M2 | World restructure | A 512-tall world: rare vast holds, natural deep caves, other peoples' remains, the lava sea, findable entrances |
 | M3 | Performance and visuals | Smooth on the Ally X at the highest frame rate possible, with view distance scaled by device and a livelier look |
+| M3.5 | Natural generation | Caves rebuilt as connected systems with flow, sound lava; natural rivers, mountains, borders and placement on the surface |
 | M4 | Survival and items | Metal ladder, broader tool kit, storage, the worn lamp, earned fast travel, food |
 | M5 | Controls and interface | Remapping, hints, maps, world management, creative tools |
 | M6 | Surface enrichment | Thin lands, varied structures, rivers, weather |
@@ -167,6 +168,32 @@ Split (D-025) into **M3a**, done in 0.7.0 (staged streaming, lighter meshing, tr
 - Fly in a straight line on the Ally X with no visible hitch.
 - Compare frame rate and view distance before and after.
 
+## M3.5: Natural generation (Q77 to Q100, D-028)
+
+Added after the owner played 0.8.0: generation feels disjointed and random, the caves most of all. M3.5 comes after M3 and before M4; the number only marks its place. Two PRs, underground first, each ending in a checkpoint.
+
+**M3.5a: the underground, rewritten (Q78 to Q88, Q97, Q99).** Done in 0.9.0 (D-029).
+- **A planned cave-system generator** replaces the worm caves and the deep cavern noise. Each system is a trunk you can follow downward, with side branches and some loops back into the trunk (Q81). Passages meet only at real junctions and never cut through each other or partly through a chamber (Q82).
+- **Much less open space, in fewer and bigger systems (Q80).** Digging through solid rock matters again.
+- **Size grows with depth (Q79, Q84, Q86):** near the surface, passages mostly 3 to 6 wide, sometimes 2 to 4; deeper, grander and more open, down to vast halls, chasms and river gorges in the deep. No hard layer bands; each depth keeps its own stone, decoration and finds.
+- **Chambers with shape (Q85):** smooth domed halls, tall rifts with wall ledges, stepped floors that descend toward water or the next exit, and natural pillars, stalactites, stalagmites and flowstone.
+- **Ways between depths (Q83):** natural descents (steep passages, ramps, spiral drops), shafts and chasms, underground rivers that run downhill through the depths, and built ways (old stairs, mine inclines, ruined lifts).
+- **Lava follows the water rule (Q87):** no floating lava; every lava block sits in sound rock. Lava only very deep (the Fire Below and deep vents). Lava falls where source and pool are both sound, and a few slow lava rivers in deep gorges feed the lava sea.
+- **Entrances as often as now, better shaped (Q88):** about one way down within 80 to 90 blocks, mouths fitted to the hillside.
+- **Re-attached to the new systems:** cave mouths, ruined stairways, points of interest, dungeon rooms, remains of other peoples, underground water (still in sound basins, D-024). Holds and their mines stay; natural systems reach their edges at a few places (Q99).
+- **Tests:** connectivity (every chamber reachable from its system's trunk; every entrance reaches a system), no crossings that cut a chamber, open-space share within target by depth, sound water and sound lava (zero unsound blocks), streaming equality and determinism as before.
+- **Mid-way checkpoint (Q100):** after the cave prototype, stop so the owner can play it before the rest of M3.5a is finished.
+
+**M3.5b: the surface (Q77, Q89 to Q96)**
+- **Rivers follow valleys** from the hills to the sea or a lake, with gentle banks; a short gorge with sloped sides only where a river meets high ground (Q89).
+- **High Mountains as ranges:** ridgelines with fewer, grander peaks, valleys between them, walkable passes, cliffs only at crags and gorges (Q90).
+- **Smooth with character:** small-scale roughness only where the land calls for it (moors, mountains, the Shadowed Forest) (Q91).
+- **Wide blends between lands** over 50 to 100 blocks (Q92).
+- **Placement that makes sense:** boulders and tors on moors, mountains and slopes only; fewer ruined stairways, fitted into hillsides; small ruins and walls grouped into places; nothing stray that belongs to no place or land (Q93). Barrows only on the Barrow Hills (and a few on neighbouring downs), in clusters along ridges and old roads, facing varied ways, in varied sizes, some broken open (Q94). Trees in groves and clearings, denser in valleys and by water (Q95). Surface ruins on strategic spots (towers on hilltops and ridges, keeps by rivers or passes, castles on high ground), with the ground shaped around them instead of a plinth (Q96).
+- **Tests:** river bank height (no ravine walls above the water outside gorges), slope and roughness by land, border blend width, placement rules (no boulders outside their lands, barrow facing varies), plus the existing ones.
+
+**Checkpoint (both parts, Q100):** a seed tour with coordinates for each cave system, river valley and mountain range to visit, and top-down height and cave maps of a large area before and after. Saves break (`SAVE_KEY` bump) in each part.
+
 ## M4: Survival and items
 
 - **The metal ladder rebalanced (Q19):** wood, stone, copper, bronze, iron, steel, moonsilver, each strictly better. Gold and platinum become decoration, special tools, and later currency and magic ingredients (Q68).
@@ -200,7 +227,7 @@ Split (D-025) into **M3a**, done in 0.7.0 (staged streaming, lighter meshing, tr
 
 - **Enrich the thin lands (Q23):** Western Sea, Grey Shore, High Mountains (now taller), Northern Fells, Lake and Fens get plants, features and ground variety.
 - **Vary repeated structures:** barrows, towers, wells and stone rings get varied shapes, sizes and orientations.
-- **Rivers and water:** better rivers, streams, waterfalls and valleys.
+- **Rivers and water:** streams and waterfalls (river valleys themselves come in M3.5b).
 - **Weather fixed and enriched, still cosmetic (Q58):** fog, mist and storms by land.
 - New lands (Q23), for example a desert that reuses the kept desert blocks (Q41), are planned as an expansion.
 

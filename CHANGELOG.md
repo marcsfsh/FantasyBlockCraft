@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.9.0 (2026-10-09): M3.5a, the underground rewritten
+
+Old saves do not load: the world changed and the save key is now `fantasy-blockcraft-save-v6`.
+
+### Game
+- **Cave systems instead of noise caves.** Each area of about 160 x 160 blocks has one to three systems: a main passage that winds down from an entrance through the depths, branches that end in chambers, loops back, and shafts. Passages only meet at junctions and never cut through each other or through rooms.
+- **Far less hollow rock** (about 1.5% of the rock under spawn, against about 28%), in fewer, bigger, connected caves that get roomier the deeper you go: passages 3 to 6 wide near the surface, halls up to 38 across in the deep.
+- **Chambers with shape:** domed halls with natural pillars, tall rifts with ledges (some with an opening high in the wall), stepped halls going down to a lake, and stalagmites, stalactites and columns.
+- **Ways down:** cave mouths at the foot of slopes and sinkholes with a ramp spiralling down, walkable descents, shafts, streams of pools stepping down a passage, links between the deepest halls of neighbouring areas, and passages from the caves into the mines of a nearby hold.
+- **The Fire Below:** smooth islands and great pillars that flare at both ends; most areas' caves reach it by a causeway of fallen rock to an island, and some deep halls have a gorge with lava at the bottom or a lava fall pouring into a pool.
+- **No floating lava:** lava follows the same rule as water and lies only in sound rock.
+- Old mineshafts and ruined stairways are much rarer; dungeon rooms and points of interest open onto the new passages.
+
+### Tooling
+- `npm run map` (`tools/map.mjs`): height, cave and section maps of the generated world, for before and after comparisons.
+- Tests 21-deep and 23-entrances rewritten for cave systems (no passage crossings, depth profile, sound water and lava, walkable entrances and hold links); 24-places checks eight windows; 28-meshing's vertex check changed (D-029). New world-hash snapshot.
+
 ## 0.8.0 (2026-10-09): M3b sky light and a livelier look
 
 No change to the world or the save format: 0.7.0 worlds keep working (the moon phase starts from the first day in an older save).

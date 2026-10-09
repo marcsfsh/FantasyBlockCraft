@@ -4,7 +4,7 @@ function shaftsFor(WCX,WCZ){
   const key=ckey(WCX,WCZ);let s=shaftCache.get(key);if(s)return s;
   if(shaftCache.size>8000)shaftCache.clear();
   s=[];const r=rngAt(WCX,71,WCZ);
-  if(r()<0.18){
+  if(r()<0.18&&hsh(WCX,7401,WCZ)<0.08){ // old mineshafts are rare since M3.5a
     const x=WCX*CS+8,z=WCZ*CS+8,y=158+(r()*38|0),ax=r()<0.5?'x':'z',L=20+(r()*30|0);
     s.push([ax,x-(ax==='x'?L:0),z-(ax==='z'?L:0),L*2,y]);
     const nb=2+(r()*3|0);
@@ -64,7 +64,7 @@ function poiBase(WCX,WCZ){
     const x=WCX*CS+4+(r()*8|0),z=WCZ*CS+4+(r()*8|0),gh=colInfo(x,z,{}).h,top=gh-14;
     {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
       // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
-      if(hsh(WCX,6411,WCZ)>=0.4)p=null;
+      if(hsh(WCX,6411,WCZ)>=0.6)p=null;
       else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
         if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
           if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}
@@ -162,7 +162,7 @@ function cavernDetail(X0,Z0,r2){
     if(c!==AIR||inRuin(X,y,Z))continue;
     if(SOLID[Math.max(0,GW(X,y+1,Z))]&&GW(X,y-1,Z)===AIR){
       if(r2()<0.0012&&y>20&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))){} // ceiling springs are gone: underground water only stands in sound basins (D-024); the draw stays so later details keep their places
-      else if(y<48&&r2()<0.06){let f=y;while(f>2&&GW(X,f-1,Z)===AIR)f--;if(y-f>=5&&!(zone2&&inRuin(X,f,Z))){for(let t=f;t<=y;t++)PW(X,t,Z,LAVA,MODE_SET);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){PW(X+a,f-1,Z+b,LAVA,MODE_STONE);PW(X+a,f-2,Z+b,OBSID,MODE_STONE);}}}
+      else if(y<48&&r2()<0.06){} // lava columns hung from the roof are gone: lava only lies in sound rock (Q87); the draw stays
       else{PW(X,y,Z,DRIPD,MODE_SET);if(r2()<0.4&&GW(X,y-1,Z)===AIR&&GW(X,y-2,Z)===AIR)PW(X,y-1,Z,DRIPD,MODE_SET);}
     }else if(SOLID[Math.max(0,GW(X,y-1,Z))]&&GW(X,y+1,Z)===AIR)PW(X,y,Z,DRIPU,MODE_SET);
   }

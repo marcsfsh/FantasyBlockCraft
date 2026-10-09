@@ -95,3 +95,14 @@ Same VM, `npm run bench`, one run per seed. lightAll now also spreads sky light 
 | 4242 | 2468 | 15.68 / 14.73 / 23.1 / 31.86 | 21.39 / 20.47 / 31.72 / 40.79 | 0.75 / 0.55 / 3.31 / 5.41 | 4.12 / 2.96 / 8.93 / 30.69 | 307 |
 
 Streaming and meshing are within the noise of 0.7.0. The full light recompute takes about 100 ms longer (it fills and spreads the sky light store over the whole window) and runs only at start-up. The livelier look is all in the shader and the cloud mesh, which this CPU benchmark does not measure; the owner's devices judge it.
+
+## After M3.5a (2026-10-09, 0.9.0)
+
+Same VM, `npm run bench`, one run per seed. The caves are planned systems (D-029) instead of worm caves and cavern noise.
+
+| Seed | Startup | genChunk | Stream 1 chunk | Stream step (one frame) | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 123456789 | 1902 | 9.93 / 9.6 / 14.7 / 18.25 | 14.3 / 13.95 / 19.53 / 22.94 | 0.64 / 0.46 / 1.72 / 4.39 | 4.69 / 3.55 / 10.42 / 14.13 | 227 |
+| 4242 | 1857 | 10.01 / 9.75 / 12.19 / 17.27 | 17.1 / 15.31 / 26.33 / 32.66 | 0.89 / 0.61 / 3.2 / 9.25 | 3.6 / 1.84 / 11.35 / 21.3 | 222 |
+
+Generating a chunk is about a third cheaper than in 0.8.0 (median 9.6 to 9.8 ms against 13.7 to 14.7): carving planned capsules and chambers costs less than walking hundreds of worm points and sampling cavern noise. Planning a region (its cave systems) happens once per 160 x 160 blocks and is spread over streaming steps one region at a time; the worst single step stays under 10 ms. Startup is about 400 ms faster.

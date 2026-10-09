@@ -1,39 +1,28 @@
 // ---- Remains of other peoples in the deep (Q10, Q70, D-024): goblin warrens, gnome workshops, drow halls and older, nameless
-// ruins, built on the floor of a natural deep cavern away from the holds. Some are only leftovers: a few walls in a cave.
-// One site at most per region of REM_REG x REM_REG chunks; a site is rebuilt from its region by every chunk it touches.
-const REM_REG=10,REM_KINDS=[['warren',3],['workshop',2.5],['drow',2],['nameless',2.5]];
+// ruins, built on the floor of a great hall of a cave system away from the holds. Some are only leftovers: a few walls in a hall.
+// At most one site per cave region (the plan marks its hall); a site is rebuilt from its region by every chunk it touches.
+const REM_KINDS=[['warren',3],['workshop',2.5],['drow',2],['nameless',2.5]];
 const REM_TITLE={warren:'Goblin Warren',workshop:'Gnome Workshop',drow:'Drow Hall',nameless:'Nameless Ruins'};
 const remC=new Map();
 function remainsAt(rx,rz){
   const key=ckey(rx,rz);if(remC.has(key))return remC.get(key);if(remC.size>4000)remC.clear();
-  let s=null;const r=rngAt(rx,6501,rz);
-  if(r()<0.32){
+  let s=null;const c=caveBase(rx,rz).ch.find(c=>c.rem!==undefined);
+  if(c){const r=mkRng(Math.floor(c.rem*1e9)+5);
     let tot=0;for(const k of REM_KINDS)tot+=k[1];let v=r()*tot,kind=REM_KINDS[0][0];for(const k of REM_KINDS){v-=k[1];if(v<=0){kind=k[0];break;}}
-    const left=r()<0.4,seed=r(),span=REM_REG*CS-56;
-    for(let t=0;t<8&&!s;t++){
-      const X=rx*REM_REG*CS+28+(r()*span|0),Z=rz*REM_REG*CS+28+(r()*span|0),lowFirst=r()<0.5;
-      if(holdReach(holdNear(Math.floor(X/CS),Math.floor(Z/CS)),X/CS-0.5,Z/CS-0.5)<1.9)continue;
-      // a cavern floor with room above it: the lower tier (dry) or the upper tier above the lake level
-      for(const [lo,hi] of lowFirst?[[20,50],[DEEP_WL+3,94]]:[[DEEP_WL+3,94],[20,50]]){if(s)break;
-        for(let y=lo;y<=hi;y++){if(!deepOpenAt(X,y,Z)||deepOpenAt(X,y-1,Z)||deepRiverAt(X,y,Z))continue;
-          let room=true;for(let k=1;k<=6&&room;k++)if(!deepOpenAt(X,y+k,Z))room=false;
-          if(room){s={kind:kind,left:left,X:X,Z:Z,y:y,seed:seed};break;}}}
-    }
-    if(s){const rr=mkRng(Math.floor(s.seed*1e9)+7);
-      const n=s.kind==='warren'?'The Warren of '+nameWord('goblin',rr):s.kind==='workshop'?'The Workshop of '+fullName('gnome',rr,false):s.kind==='drow'?'The Hall of House '+nameWord('drow',rr):'Nameless Ruins';
-      s.name=s.left?(s.kind==='nameless'?'Scattered Nameless Ruins':'Remains of a '+REM_TITLE[s.kind]):n;}
-  }
+    s={kind:kind,left:r()<0.4,X:Math.floor(c.x),Z:Math.floor(c.z),y:c.f,seed:r()};
+    const rr=mkRng(Math.floor(s.seed*1e9)+7);
+    const n=s.kind==='warren'?'The Warren of '+nameWord('goblin',rr):s.kind==='workshop'?'The Workshop of '+fullName('gnome',rr,false):s.kind==='drow'?'The Hall of House '+nameWord('drow',rr):'Nameless Ruins';
+    s.name=s.left?(s.kind==='nameless'?'Scattered Nameless Ruins':'Remains of a '+REM_TITLE[s.kind]):n;}
   remC.set(key,s);return s;
 }
 function remainsNear(X,Y,Z){
-  const rx=Math.floor(X/CS/REM_REG),rz=Math.floor(Z/CS/REM_REG);
+  const rx=Math.floor(X/CRB),rz=Math.floor(Z/CRB);
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=remainsAt(rx+a,rz+b);if(s&&Math.abs(X-s.X)<=16&&Math.abs(Z-s.Z)<=16&&Y>=s.y-3&&Y<=s.y+10)return s;}
   return null;
 }
 function applyRemains(WCX,WCZ){
-  const seen=new Set();
-  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const rx=Math.floor((WCX+a)/REM_REG),rz=Math.floor((WCZ+b)/REM_REG),k=rx+','+rz;if(seen.has(k))continue;seen.add(k);
-    const s=remainsAt(rx,rz);if(!s||s.X+20<gx0||s.X-20>gx0+CS||s.Z+20<gz0||s.Z-20>gz0+CS)continue;buildRemains(s);}
+  const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=remainsAt(rx+a,rz+b);if(!s||s.X+20<gx0||s.X-20>gx0+CS||s.Z+20<gz0||s.Z-20>gz0+CS)continue;buildRemains(s);}
 }
 function buildRemains(s){
   const r=mkRng(Math.floor(s.seed*1e9)+11),X=s.X,Z=s.Z,y=s.y,left=s.left;

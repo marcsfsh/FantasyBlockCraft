@@ -31,11 +31,11 @@
     },
     {
       "path": "world/caves.js",
-      "about": "Layered worm caves, caverns, sinkholes, cave mouths, cave anchors, cave lakes"
+      "about": "Cave systems (D-029): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes"
     },
     {
       "path": "world/deep-caves.js",
-      "about": "The deep outside the holds: the lava sea, two tiers of natural caverns, underground rivers and lakes"
+      "about": "The Fire Below: the lava sea with islands and flared pillars"
     },
     {
       "path": "world/underground-sites.js",

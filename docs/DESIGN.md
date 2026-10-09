@@ -32,35 +32,37 @@ Lands are driven by large climate fields (warmth, damp) and region fields, with 
 
 The world is 512 blocks tall and sea level is y310, so the underground keeps its old depth and there are about 200 blocks of sky above the sea. The hearts of the High Mountains rise far above the old limit; snow starts at the snow line (y343 and up).
 
-## The underground
+## The underground (D-028)
 
-| Layer | y | Contents |
+The underground is made of **cave systems**, planned rather than noise: in each area of 160 x 160 blocks, one to three systems. Each has a main passage (the trunk) that starts at an entrance on the surface and winds down through the depths, with side branches that end in a chamber, some loops back into the trunk, and drops down shafts. Passages only meet at junctions and keep at least three blocks of rock from everything else. There is far less hollow rock than before 0.9.0 (about 1.2 to 1.7% of the rock under spawn, against about 28%).
+
+Size and character change gradually with depth (no hard layers):
+
+| Depth | y | What you find |
 |---|---|---|
-| Crawlways | ~240 to ~286 | Narrow twisting tunnels |
-| Old caves | 205 to 258 | Big older caves, rooms, rare cavern lakes; cave regions (mossy, crystal, dripstone, fungal) |
-| Old workings | 155 to 202 | Mineshafts, camps, alchemists' cellars, old smithies, monster-room dungeons |
-| Great caverns | 102 to 150 | Huge pillared caverns, older stone ruins and shrines; deepstone begins here |
-| The deep, upper tier | 58 to 101 | Outside holds: large caverns with lakes and underground rivers at one water level (y64), in their region's character (The Crystal Deeps, The Fungal Deeps, ...). Inside a hold: its city, floors at 64 and 82 |
-| The deep, lower tier | 14 to 57 | Outside holds: large dry caverns and worm caves. Under and around a hold: its mines, galleries at 20, 32 and 44, inclines, great stepped pits |
-| The Fire Below | 3 to ~24 | An open lava sea (lava y3 to y8) under most of the land, with rock pillars and islands; low under the holds' mines |
+| Near the surface | ~240 up | Passages mostly 3 to 6 wide (sometimes 2 to 4), small domed rooms, stream pools; cave regions (mossy, crystal, dripstone, fungal) |
+| The middle depths | ~150 to 240 | Wider passages, halls of 16 to 34 blocks, rifts; rare old mineshafts, camps, alchemists' cellars, old smithies, dungeon rooms |
+| The great caverns | ~60 to 150 | Great domed halls with natural pillars, tall rifts with ledges and high windows, stepped halls going down to lakes; old stone ruins and shrines; deepstone begins about y100 |
+| The deep | ~20 to 60 | The widest passages and largest halls, other peoples' remains, gorges with lava at the bottom, lava falls. Under and around a hold: its city (floors 64 and 82) and mines (galleries at 20, 32 and 44, inclines, great stepped pits) |
+| The Fire Below | 3 to ~24 | An open lava sea (lava y3 to y8) under most of the land, with smooth islands and great pillars flaring at both ends; low under the holds' mines. The main system of most areas reaches it by a causeway of fallen rock to an island |
 
-Targets: underground standing water under about 1% of open cave space (0.2% on seed 4242); cave openings within five blocks of the surface under about 0.6% of land columns.
+Ways between depths: ramps, steeper passages and spirals (all walkable), shafts and chasms to climb or drop, streams of pools stepping down a passage, and old built ways (stairs, mine inclines). The deepest halls of neighbouring areas are often linked, and near a hold a passage leads into the upper gallery of its mines.
 
-**Underground water is always held in sound rock** (owner's rule, D-024): water or solid under and beside every water block, the floor under it resting on more rock, the walls beside it resting on something. Nothing floats. Deep lakes and rivers sit at y64; elsewhere pools are small.
+**Underground water and lava are always held in sound rock** (owner's rule, D-024, Q87): water or solid under and beside every block, the floor under it resting on more rock, the walls beside it resting on something. Lakes lie in stepped halls, pools along streams. Lava lies only in the sea, in gorges that open onto it, in small pools under lava falls, and in the holds' forges; a lava fall pours from a slot in the rock into its pool, the only open face it has.
 
-## Ways down (D-024)
+## Ways down (D-024, D-028)
 
-- **Cave mouths** open in steep slopes and wind down at a walkable slope into the caves.
-- **Ruined stairways** stand on level ground: a broken stone shaft with a stair winding down to a cave.
-- **Ravines** cut up to about 60 blocks deep; about a third reach the crawlways.
+- **Cave entrances**: a mouth at the foot of a slope, or a sinkhole on level ground with a ramp spiralling down its wall, into the trunk of a cave system.
+- **Ruined stairways** stand on level ground: a broken stone shaft with a stair winding down to a cave passage (rarer since 0.9.0).
+- **Ravines** cut up to about 60 blocks deep; about a third reach the upper caves.
 - **Hold gates** lead down into the holds (below).
-A way down is usually within 80 to 90 blocks of any open land.
+A way down is usually within 50 to 70 blocks of open land.
 
 ## Places underground (D-024)
 
-- **Dungeon rooms** (about 1 chunk in 25): Forgotten Crypt, Old Storeroom, Old Cells, Sunken Chapel, each opening onto a cave by a short passage.
-- **Points of interest** (about 1 chunk in 12): miners' camps, alchemists' cellars, deep outposts, lava forges, crystal shrines, ancient ruins and mushroom groves open onto a cave; crystal geodes and fossils are sealed in the rock.
-- **Remains of other peoples** in the natural deep caverns, away from holds (about one per 160 x 160 blocks in four): goblin warrens, gnome workshops, drow halls, and nameless ruins older than the holds. About a third are only leftovers.
+- **Dungeon rooms** (about 1 chunk in 80): Forgotten Crypt, Old Storeroom, Old Cells, Sunken Chapel, each opening onto a cave passage.
+- **Points of interest** (about 1 chunk in 18): miners' camps, alchemists' cellars, deep outposts, lava forges, crystal shrines, ancient ruins and mushroom groves open onto a cave passage; crystal geodes and fossils are sealed in the rock.
+- **Remains of other peoples** stand in great halls away from the holds (about one area of 160 x 160 blocks in three): goblin warrens, gnome workshops, drow halls, and nameless ruins older than the holds. About a third are only leftovers.
 
 ## The surface (D-024)
 
