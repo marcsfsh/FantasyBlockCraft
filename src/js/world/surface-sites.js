@@ -67,7 +67,7 @@ function oldRoadAt(X,Z){
 }
 // Lay the roads on the chunk's own columns: worn dirt path with old stones, off water, steep slopes, sites and gate terraces
 // the ground of the new lands (M6) that a road is laid over, as over grass
-const ROAD_GROUND=new Set([LITTER,NEEDLES,FMOSS,TMOSS,LIMESTONE,PSNOW,CHALK,BLACKSAND,PEAT,BOGMOSS,BASALT,GOLDGRASS,ASH,DEADGRASS,RSAND,CALCITE]);
+const ROAD_GROUND=new Set([LITTER,NEEDLES,FMOSS,TMOSS,LIMESTONE,PSNOW,CHALK,BLACKSAND,PEAT,BOGMOSS,BASALT,GOLDGRASS,ASH,DEADGRASS,RSAND,CALCITE,PALEG,SCORCH]);
 function applyRoads(lcx,lcz){
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;if(!roadSegs(WCX,WCZ).length)return;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){const X=WCX*CS+x,Z=WCZ*CS+z;if(!oldRoadAt(X,Z))continue;

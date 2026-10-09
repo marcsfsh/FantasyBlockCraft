@@ -19,10 +19,11 @@
 - **Sky light costs memory.** The sideways sky light store adds about 25 MB (one byte per cell of the loaded window) (D-027).
 - **The livelier look is checked only in software rendering.** Screenshots from headless Chromium show the clouds, moon, water, lava and sway rendering without shader errors; how they look and run on the Ally X and desktop is for the owner to judge.
 - **The new caves are judged only from headless screenshots and maps.** Whether cave mouths and sinkholes look good from outside, and whether systems feel connected and easy to follow, is for the owner to judge in play (D-029).
-- **Most lands are stand-ins until their family is built.** 8 of the 37 lands wear an old land's look and name (D-039) until M6f and M6g build them, so the world still shows the twelve old looks, in a new layout.
+- **Most lands are stand-ins until their family is built.** 4 of the 37 lands (the old lands of men) wear an old land's look and name (D-039) until M6g builds them, so the world still shows the twelve old looks, in a new layout.
 - **Some forest stretches miss their signature.** About one stretch in fifty that should have a landmark or feature finds no level ground of its own land for it and has neither; in Willow Vales about one in three (rivers and ground below sea level) (D-040).
 - **Broken kelp leaves a gap.** Breaking kelp leaves an air gap in the water until nearby water flows in (D-042).
 - **Some coast stretches miss their signature** (about one in eleven that should have one), most on Black Sand Shores and Chalk Cliffs where no stretch of the coast suits it.
+- **Rare finds have no use yet.** Prism shards, amber and starmetal ore wait for magic (D-044).
 - **Waterfalls are thin.** A cascade is one block wide on the slope; on a sharp ridge it can look like a line of water specks from below (D-041).
 - **The forests are judged from headless screenshots only.** Tree shapes, leaf colours and the glow of moonpetals are for the owner to judge on the Ally X.
 - **A few lands pinch at a corner.** About one land in 150 meets another stretch of the same kind only through a narrow corner, and corner tips where four cells meet can be narrower than 115 blocks for a few blocks (D-039).

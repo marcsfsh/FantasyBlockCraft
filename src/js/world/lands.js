@@ -48,10 +48,10 @@ land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple h
 land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8,built:true,col:[78,70,70]});
 land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver'],built:true,col:[128,120,100]});
 // strange lands (M6f)
-land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires']);
-land('glowcap','Glowcap Hollows','strange',3,[2,3],[2,2],3,8,'gnome',['a mushroom dwelling','giant glowing mushrooms in a hollow']);
-land('petrified','Petrified Forest','strange',3,[3,4],[0,0],3,10,'beastfolk',['a waystation turned to stone','trees of stone']);
-land('starfall','Starfall Craters','strange',3,[1,3],[0,1],3,4,'highelf',['a ruined star tower','a crater round a starmetal heart']);
+land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires'],{built:true,col:[190,176,226]});
+land('glowcap','Glowcap Hollows','strange',3,[2,3],[2,2],3,8,'gnome',['a mushroom dwelling','giant glowing mushrooms in a hollow'],{built:true,col:[110,150,170]});
+land('petrified','Petrified Forest','strange',3,[3,4],[0,0],3,10,'beastfolk',['a waystation turned to stone','trees of stone'],{built:true,col:[196,170,130]});
+land('starfall','Starfall Craters','strange',3,[1,3],[0,1],3,4,'highelf',['a ruined star tower','a crater round a starmetal heart'],{built:true,col:[96,90,100]});
 // old lands of men (M6g)
 land('farm','Overgrown Farmland','men',2,[1,3],[1,1],1,2,'human',['an abandoned manor farm','wild crops in old furrows'],{gorge:0.1});
 land('orchard','Wild Orchards','men',2,[2,4],[1,1],1,2,'halfling',['an orchard keeper\'s cottage','rows of gnarled fruit trees'],{gorge:0.1});
@@ -127,7 +127,7 @@ function landsAt(X,Z,o){
     LW[L.i]+=w;wall+=w;if(L.sea)wsea+=w;else{LWL[lk]+=w;wland+=w;}}
   o.wS=wsea/wall;for(let k=0;k<12;k++)LWL[k]=wland>0?LWL[k]/wland:0;
   o.w2=LWL[2];o.w3=LWL[3];o.w4=LWL[4];o.w5=LWL[5];o.w6=LWL[6];o.w7=LWL[7];o.w8=LWL[8];o.w10=LWL[10];o.w11=LWL[11];
-  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0;o.wDry=wland>0?lw('dry')/wland:0;o.wVolc=wland>0?lw('volcanic')/wland:0; // coast shapes (M6d)
+  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0;o.wDry=wland>0?lw('dry')/wland:0;o.wVolc=wland>0?lw('volcanic')/wland:0;o.wStar=wland>0?lw('starfall')/wland:0; // coast shapes (M6d)
   o.area=c1.L; // the land of the cell the column lies in: the layout before border mixing (maps, sizes, the transition map)
   o.mdep=dm<Infinity?(dn-dm)/2:-999; // how far inside a mountain land (blocks), for the high peaks at its heart
   // the column's land: the heaviest, or the second against a patchy threshold

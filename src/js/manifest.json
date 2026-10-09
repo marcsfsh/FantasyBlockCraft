@@ -98,6 +98,10 @@
       "about": "Dry and fiery (M6e): drylands, golden steppe, volcanic wastes and blighted lands, their signatures, and the hotter deep under the wastes"
     },
     {
+      "path": "world/strange.js",
+      "about": "Strange lands (M6f): crystal barrens, glowcap hollows, petrified forest and starfall craters, their rare finds and signatures"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },

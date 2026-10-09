@@ -36,6 +36,8 @@ These twelve are the looks the world draws today. Since 0.15.0 (M6a, D-039) they
 
 **Dry and fiery (M6e, D-043):** Southern Drylands (dunes, red sand, sandstone, cactus), Golden Steppe (the Windswept Plains reworked; golden grass), Volcanic Wastes (ash and basalt over a deep lit by magma stone) and Blighted Lands (dead grass, grey dead trees). Signatures: sand-buried temple or dry wadi with a well; ring of horse stones or lone outcrop; fire shrine or smoking cone with a lava lake; dead lord's hall or grey grove.
 
+**Strange lands (M6f, D-044, rare):** Crystal Barrens (amethyst spires, prism shards), Glowcap Hollows (giant glowing mushrooms), Petrified Forest (stone trees with amber) and Starfall Craters (a crater field of scorched stone, starmetal in its hearts). Signatures: crystal cutters' ruin or crystal spires; mushroom dwelling or giant glowcaps; waystation of stone or grove of stone trees; star tower or the crater of the starmetal heart.
+
 **Lands and their layout (M6a, D-039):**
 - **Cells:** the world is cut into cells about 320 blocks across, their centres shifted and their borders warped. Each cell takes one land from the climate at its centre: warmth (five bands), damp (three), relief (low, hills, high), and sea or coast. Warmth and damp change over thousands of blocks, so neighbouring cells share a climate.
 - **Tiers (Q118):** common lands spread over several cells (median about 490 blocks on a side); uncommon lands are mostly one or two cells (about 340); rare lands are always one cell (about 330). No land is smaller than 215 x 215 blocks; all but the tips of corners lie within a 115-block circle of their own land.

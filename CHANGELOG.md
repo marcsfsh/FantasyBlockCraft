@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.20.0 (2026-10-09): M6f, strange lands
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v15`.
+
+### Game
+- **Four rare strange lands:**
+  - **Crystal Barrens:** pale ground of calcite and gravel, spires of amethyst, now and then tipped with a glowing prism shard.
+  - **Glowcap Hollows:** giant mushrooms with pale caps and softly glowing gills over moss and glowshrooms.
+  - **Petrified Forest:** trees turned to stone on sand, some with amber in them.
+  - **Starfall Craters:** green land pocked with craters, their floors of scorched stone.
+- **Rare finds (Q130), kept for later magic:** prism shards, amber and starmetal ore.
+- **Landmarks and features:** a crystal cutters' ruin or crystal spires; a mushroom dwelling or giant glowcaps; a waystation of stone or a grove of stone trees; a ruined star tower or the crater of the starmetal heart.
+
+### Tooling
+- New test `41-strange`; the world-hash snapshot is updated on purpose.
+
 ## 0.19.0 (2026-10-09): M6e, dry and fiery
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v14`.

@@ -210,7 +210,7 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v14',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v15',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -223,7 +223,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===14&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const saved=(d=>d&&d.v===15&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -439,6 +439,12 @@ const GOLDGRASS=1067,STEPPEG=1068,ASH=1069,MAGMA=1070,DEADGRASS=1071,DEADWOOD=10
 def(GOLDGRASS,'Golden Grass Block',[221,2,222],{snd:'soft'});def(STEPPEG,'Steppe Grass',[223,223,223],PLANT);def(ASH,'Volcanic Ash',[224,224,224],{snd:'soft'});
 def(MAGMA,'Magma Stone',[225,225,225],{emit:true,lum:7});def(DEADGRASS,'Dead Grass Block',[226,2,227],{snd:'soft'});def(DEADWOOD,'Dead Wood',[229,229,228],{snd:'wood'});
 setH([GOLDGRASS,ASH,DEADGRASS],0.6,'soft');setH([STEPPEG],0,'soft');setH([MAGMA],5,'stone',1);setH([DEADWOOD],2.2,'wood');
+// Strange lands (M6f, D-044): rare finds (Q130) and the stuff of the strange lands
+const PRISM=1073,PETRIWOOD=1074,AMBER=1075,STARORE=1076,SCORCH=1077,CAPB=1078,CAPG=1079,PALEG=1080;
+def(PRISM,'Prism Shard',[230,230,230],{emit:true,lum:9,snd:'glass'});def(PETRIWOOD,'Petrified Wood',[232,232,231]);def(AMBER,'Amber',[233,233,233],{emit:true,lum:4,snd:'glass'});
+def(STARORE,'Starmetal Ore',[234,234,234]);def(SCORCH,'Scorched Stone',[235,235,235]);def(CAPB,'Glowcap Flesh',[236,236,236],{snd:'soft'});def(CAPG,'Glowcap Gills',[237,237,237],{emit:true,lum:6,snd:'soft'});
+def(PALEG,'Pale Grass Block',[238,2,239],{snd:'soft'});
+setH([PRISM,AMBER],0.8,'misc');setH([PETRIWOOD],3,'stone',1);setH([STARORE],7,'ore',5);setH([SCORCH],4,'stone',1);setH([CAPB,CAPG],0.6,'soft');setH([PALEG],0.6,'soft');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
@@ -786,6 +792,13 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(224,x,y,sh([112,108,104],(hn(x,y,135)-.5)*26+(hn(x,y,136)<.05?-30:0)));const m=hn(x>>1,y>>1,137);P(225,x,y,m<.3?sh([250,130,30],(hn(x,y,138)-.5)*40):sh([52,40,36],(hn(x,y,139)-.5)*20));}
   floorTop(226,[[128,122,96],[112,108,88],[140,130,104],[96,94,82]],140);floorSide(227,[124,118,94],141);
   bark(228,[104,100,94],142,1);ring(229,[150,144,132],[130,124,114],[104,100,94],143);
+  // strange lands (M6f): prism shard, petrified wood (side, rings), amber, starmetal ore, scorched stone, glowcap flesh and gills, pale grass
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const f=((x+y)%5===0)||((x-y+16)%7===0);P(230,x,y,f?[250,250,255]:sh([196,214,250],(hn(x,y,151)-.5)*40+(y<8?18:0)));
+    P(231,x,y,sh([150,140,124],(hn(x,y,152)-.5)*20+(x%4===1?-22:0)));const d=Math.hypot(x-7.5,y-7.5);P(232,x,y,sh(((d|0)%2)?[176,164,146]:[156,146,130],(hn(x,y,153)-.5)*14));
+    P(233,x,y,sh([226,150,40],(hn(x,y,154)-.5)*30+(hn(x>>1,y>>1,155)<.2?30:0)));P(235,x,y,sh([58,52,56],(hn(x,y,156)-.5)*24+(hn(x,y,157)<.08?50:0)));
+    P(236,x,y,sh([176,150,206],(hn(x,y,158)-.5)*20+(hn(x>>1,y>>1,159)<.18?40:0)));P(237,x,y,(x%3===0)?[120,240,210]:sh([90,160,170],(hn(x,y,160)-.5)*20));}
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(234,x,y,sh([128,128,128],(hn(x,y,163)-.5)*22));for(let i=0;i<5;i++){const x=1+Math.floor(hn(i,0,164)*12),y=1+Math.floor(hn(i,1,164)*12);P(234,x,y,[150,190,255]);P(234,x+1,y,[128,168,233]);P(234,x,y+1,[136,176,241]);P(234,x+1,y+1,[170,210,255]);}
+  floorTop(238,[[176,196,160],[190,206,176],[160,182,150],[206,214,196]],161);floorSide(239,[176,196,160],162);
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles
@@ -836,6 +849,7 @@ function colInfoBase(X,Z,o){
   if(o.wChalk>0)h+=o.wChalk*14;
   if(o.wDry>0)h+=o.wDry*Math.abs(fbm2(X/34,Z/22,2,8501.1))*7; // dunes in the drylands (M6e)
   if(o.wVolc>0)h+=o.wVolc*fbm2(X/60,Z/60,2,8503.3)*8; // broken volcanic ground
+  o.cr=false;if(o.wStar>0)h+=craterAt(X,Z,o)*o.wStar; // the crater field (M6f)
   if(o.wFjord>0){const q=Math.abs(fbm2(X/240,Z/240,2,8311.3)),ch=sstep(0.075,0.03,q)*o.wFjord;if(ch>0)h=h*(1-ch)+(SEA-14+fbm2(X/40,Z/40,1,8313.1)*3)*ch;}
   // the sea: lands fall away to its floor across the coast blend; the kelp shallows are shallow, the rocky isles rise out of it,
   // and chalk and fjord coasts keep their height to the water's edge and drop sheer
@@ -956,10 +970,10 @@ land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple h
 land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8,built:true,col:[78,70,70]});
 land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver'],built:true,col:[128,120,100]});
 // strange lands (M6f)
-land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires']);
-land('glowcap','Glowcap Hollows','strange',3,[2,3],[2,2],3,8,'gnome',['a mushroom dwelling','giant glowing mushrooms in a hollow']);
-land('petrified','Petrified Forest','strange',3,[3,4],[0,0],3,10,'beastfolk',['a waystation turned to stone','trees of stone']);
-land('starfall','Starfall Craters','strange',3,[1,3],[0,1],3,4,'highelf',['a ruined star tower','a crater round a starmetal heart']);
+land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires'],{built:true,col:[190,176,226]});
+land('glowcap','Glowcap Hollows','strange',3,[2,3],[2,2],3,8,'gnome',['a mushroom dwelling','giant glowing mushrooms in a hollow'],{built:true,col:[110,150,170]});
+land('petrified','Petrified Forest','strange',3,[3,4],[0,0],3,10,'beastfolk',['a waystation turned to stone','trees of stone'],{built:true,col:[196,170,130]});
+land('starfall','Starfall Craters','strange',3,[1,3],[0,1],3,4,'highelf',['a ruined star tower','a crater round a starmetal heart'],{built:true,col:[96,90,100]});
 // old lands of men (M6g)
 land('farm','Overgrown Farmland','men',2,[1,3],[1,1],1,2,'human',['an abandoned manor farm','wild crops in old furrows'],{gorge:0.1});
 land('orchard','Wild Orchards','men',2,[2,4],[1,1],1,2,'halfling',['an orchard keeper\'s cottage','rows of gnarled fruit trees'],{gorge:0.1});
@@ -1035,7 +1049,7 @@ function landsAt(X,Z,o){
     LW[L.i]+=w;wall+=w;if(L.sea)wsea+=w;else{LWL[lk]+=w;wland+=w;}}
   o.wS=wsea/wall;for(let k=0;k<12;k++)LWL[k]=wland>0?LWL[k]/wland:0;
   o.w2=LWL[2];o.w3=LWL[3];o.w4=LWL[4];o.w5=LWL[5];o.w6=LWL[6];o.w7=LWL[7];o.w8=LWL[8];o.w10=LWL[10];o.w11=LWL[11];
-  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0;o.wDry=wland>0?lw('dry')/wland:0;o.wVolc=wland>0?lw('volcanic')/wland:0; // coast shapes (M6d)
+  const lw=k=>LW[LAND_I[k]];o.wKelp=lw('kelp')/wall;o.wIsle=lw('isles')/wall;o.wChalk=wland>0?lw('chalk')/wland:0;o.wFjord=wland>0?lw('fjord')/wland:0;o.wDry=wland>0?lw('dry')/wland:0;o.wVolc=wland>0?lw('volcanic')/wland:0;o.wStar=wland>0?lw('starfall')/wland:0; // coast shapes (M6d)
   o.area=c1.L; // the land of the cell the column lies in: the layout before border mixing (maps, sizes, the transition map)
   o.mdep=dm<Infinity?(dn-dm)/2:-999; // how far inside a mountain land (blocks), for the high peaks at its heart
   // the column's land: the heaviest, or the second against a patchy threshold
@@ -2971,7 +2985,7 @@ function oldRoadAt(X,Z){
 }
 // Lay the roads on the chunk's own columns: worn dirt path with old stones, off water, steep slopes, sites and gate terraces
 // the ground of the new lands (M6) that a road is laid over, as over grass
-const ROAD_GROUND=new Set([LITTER,NEEDLES,FMOSS,TMOSS,LIMESTONE,PSNOW,CHALK,BLACKSAND,PEAT,BOGMOSS,BASALT,GOLDGRASS,ASH,DEADGRASS,RSAND,CALCITE]);
+const ROAD_GROUND=new Set([LITTER,NEEDLES,FMOSS,TMOSS,LIMESTONE,PSNOW,CHALK,BLACKSAND,PEAT,BOGMOSS,BASALT,GOLDGRASS,ASH,DEADGRASS,RSAND,CALCITE,PALEG,SCORCH]);
 function applyRoads(lcx,lcz){
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;if(!roadSegs(WCX,WCZ).length)return;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){const X=WCX*CS+x,Z=WCZ*CS+z;if(!oldRoadAt(X,Z))continue;
@@ -3473,6 +3487,7 @@ function hotDeep(x,z,X,Z,ceil){colInfo(X,Z,TVO);if(TVO.wVolc<0.5)return;const co
 function dryBuild(s,r){
   const X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){
+    default:strangeBuild(s,r);break; // the strange lands' signatures (M6f)
     case 'sandtemple':{ // a temple of sandstone half buried in the sand, its doorway dug clear, a barrel left in its hall
       const f=g-4;for(let dx=-6;dx<=6;dx++)for(let dz=-4;dz<=4;dz++){const edge=Math.abs(dx)===6||Math.abs(dz)===4,col=Math.abs(dx)%3===0&&Math.abs(dz)===2;
         for(let y=f-1;y<=g+3;y++){const id=y===f-1||y===f?SANDSTONE:edge?(y===f+3?TERO:SANDSTONE):col&&y<g+3?SANDSTONE:y===g+3?SANDSTONE:AIR;PW(X+dx,y,Z+dz,id,MODE_SET);}}
@@ -3512,6 +3527,81 @@ function dryBuild(s,r){
       for(let k=0;k<3;k++){const a=k*2.1+hsh(X,8527+k,Z),px=Math.round(X+Math.cos(a)*(k?4:0)),pz=Math.round(Z+Math.sin(a)*(k?4:0));
         for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)if(Math.hypot(dx,dz)<2.3){const pg=hAt(px+dx,pz+dz);PW(px+dx,pg,pz+dz,AIR,MODE_SET);PW(px+dx,pg-1,pz+dz,ASH,MODE_SET);}}
       for(let k=0;k<8;k++){const a=k/8*6.283,x=Math.round(X+Math.cos(a)*10),z=Math.round(Z+Math.sin(a)*10);deadTreeP(x,hAt(x,z)+1,z,r);}break;}
+  }
+}
+// ---- Strange lands (M6f, D-044; Q115, Q118, Q130): Crystal Barrens, Glowcap Hollows, Petrified Forest and Starfall Craters, the
+// rare tier. Each holds a rare find for later magic (Q68, Q130): prism shards on crystal spires, amber in stone trees, starmetal in
+// the hearts of craters; glowcap gills give a soft light.
+function crystalP(X,y,Z,r){ // a crystal spire, sometimes tipped with a prism shard
+  const h=3+(r()*7|0),lean=r()<0.5?1:-1;for(let i=-1;i<h;i++){const x=X+(i>h*0.6?lean:0);PW(x,y+i,Z,AMETH,MODE_SET);if(i<h/3&&r()<0.5)PW(x+(r()<0.5?1:-1),y+i,Z,AMETH,MODE_SET);}
+  if(r()<0.3)PW(X+(h>4?lean:0),y+h,Z,PRISM,MODE_SET);
+}
+function capP(X,y,Z,r,big){ // a giant glowcap: a pale stalk and a broad cap, its gills glowing underneath
+  const th=big?8+(r()*5|0):4+(r()*4|0),R=big?5.5:3.2;if(y+th+4>=H)return;
+  for(let i=-1;i<th;i++){PW(X,y+i,Z,MUSHSTEM,MODE_SET);if(big&&i<3)for(const [a,b] of [[1,0],[0,1]])PW(X+a,y+i,Z+b,MUSHSTEM,MODE_SET);}
+  const ri=Math.ceil(R);for(let dx=-ri;dx<=ri;dx++)for(let dz=-ri;dz<=ri;dz++){const d=Math.hypot(dx,dz);if(d>R)continue;const dome=Math.round(2*(1-d/R));
+    for(let k=0;k<=dome;k++)PW(X+dx,y+th+k,Z+dz,CAPB,MODE_SET);if(d>R*0.45&&d<R-0.6&&((dx+dz)&1))PW(X+dx,y+th-1,Z+dz,CAPG,MODE_AIR);}
+}
+function petriP(X,y,Z,r){ // a tree turned to stone: a trunk and the stumps of its branches, now and then a lump of amber in it
+  const th=4+(r()*5|0);for(let i=-1;i<th;i++)PW(X,y+i,Z,PETRIWOOD,MODE_SET);
+  for(let k=0;k<2+(r()*2|0);k++){const a=r()*6.283,by=y+2+(r()*(th-2)|0),len=1+(r()*2|0);for(let t=1;t<=len;t++)PW(X+Math.round(Math.cos(a)*t),by+(t>1?1:0),Z+Math.round(Math.sin(a)*t),PETRIWOOD,MODE_SET);}
+  if(r()<0.12)PW(X,y+1+(r()*(th-2)|0),Z,AMBER,MODE_SET);
+}
+// The crater field of Starfall Craters: one crater in about two of the cells of 56 blocks, a bowl with a raised rim, its floor of
+// scorched stone; read by colInfoBase (crater depth for the height, o.cr for the floor)
+const CRATER_C=56;
+function craterAt(X,Z,o){
+  const ci=Math.floor(X/CRATER_C),cj=Math.floor(Z/CRATER_C);let dep=0,rim=0;
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const i=ci+a,j=cj+b;if(hsh(i,8601,j)>0.5)continue;const cx=(i+0.25+hsh(i,8603,j)*0.5)*CRATER_C,cz=(j+0.25+hsh(i,8605,j)*0.5)*CRATER_C,R=6+hsh(i,8607,j)*10,d=Math.hypot(X-cx,Z-cz);
+    if(d<R)dep=Math.max(dep,(1-(d/R)*(d/R))*R*0.45);else if(d<R*1.5)rim=Math.max(rim,Math.sin((d-R)/(R*0.5)*Math.PI)*R*0.15);}
+  o.cr=dep>0.8;return rim-dep;
+}
+Object.assign(FOREST,{
+  crystal:{trees:0.006,tree:(X,y,Z,r)=>crystalP(X,y,Z,r),top:o=>o.dn>0.1?CALCITE:o.dn>-0.2?GRAVEL:PALEG,plant:r=>r<0.02?DBUSH:0},
+  glowcap:{trees:0.014,tree:(X,y,Z,r)=>capP(X,y,Z,r,hsh(X,8611,Z)<0.3),top:o=>o.dn>-0.1?FMOSS:GRASS,plant:r=>r<0.04?GLOWSHROOM:r<0.05?MUSHB:r<0.14?FERN:0},
+  petrified:{trees:0.008,tree:(X,y,Z,r)=>petriP(X,y,Z,r),top:o=>o.dn>0.2?RSAND:o.dn>-0.25?SAND:GRAVEL,soil:SAND,plant:r=>r<0.02?DBUSH:0,floors:new Set([SAND,RSAND])},
+  starfall:{trees:0.002,tree:(X,y,Z,r)=>treeP(X,y,Z,LOG,LEAVES,4,r),top:o=>o.cr?SCORCH:o.dn>0.3?GRAVEL:GRASS,plant:r=>r<0.08?TGRASS:r<0.09?FLOWY:0}
+});
+Object.assign(SIGS,{
+  crystal:[['cutters',"Crystal Cutters' Ruin",8],['spires','Crystal Spires',10]],
+  glowcap:[['mushhome','Mushroom Dwelling',7],['giantcaps','Giant Glowcaps',10]],
+  petrified:[['stoneway','Waystation of Stone',7],['stonetrees','Grove of Stone Trees',10]],
+  starfall:[['startower','Star Tower',6],['starheart','Crater of the Starmetal Heart',14]]
+});
+function strangeBuild(s,r){
+  const X=s.X,Z=s.Z,g=s.g;
+  switch(s.kind){
+    case 'cutters':{ // the crystal cutters' ruin: low stone walls, a worktable of calcite, cut shards left on it
+      sigFloor(X-4,Z-3,X+4,Z+3,g,CALCITE,7);
+      for(let dx=-4;dx<=4;dx++)for(let dz=-3;dz<=3;dz++){const edge=Math.abs(dx)===4||Math.abs(dz)===3;if(!edge)continue;const hh=1+(hsh(X+dx,8613,Z+dz)*3|0);for(let y=g+1;y<=g+hh;y++)if(!(dz===3&&Math.abs(dx)<=1))PW(X+dx,y,Z+dz,r()<0.3?MOSSY:COBBLE,MODE_SET);}
+      for(let dx=-1;dx<=1;dx++)PW(X+dx,g+1,Z-1,CALCITE,MODE_SET);PW(X,g+2,Z-1,PRISM,MODE_SET);PW(X-1,g+2,Z-1,AMETH,MODE_SET);PW(X+3,g+1,Z+2,BARREL,MODE_SET);break;}
+    case 'spires':{ // a stand of tall crystal spires, prisms at their tips
+      for(let k=0;k<9;k++){const a=k*0.7+hsh(X,8615+k,Z),d=k?2+k*0.9:0,px=Math.round(X+Math.cos(a)*d),pz=Math.round(Z+Math.sin(a)*d),pg=hAt(px,pz),h=6+Math.floor(hsh(px,8617,pz)*10);
+        for(let y=pg-1;y<=pg+h;y++){PW(px,y,pz,AMETH,MODE_SET);if(y<pg+h*0.4)PW(px+1,y,pz,AMETH,MODE_SET);}PW(px,pg+h+1,pz,PRISM,MODE_SET);}break;}
+    case 'mushhome':{ // a dwelling hollowed in a giant glowcap stalk: a door, a round room, a lamp of glowing gills
+      for(let y=g-1;y<=g+8;y++)for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){const d=Math.hypot(dx,dz);if(d>3.2)continue;const inside=d<2.2&&y>=g+1&&y<=g+3,door=dz===3&&dx===0&&y>=g+1&&y<=g+2;PW(X+dx,y,Z+dz,inside||door?AIR:y===g?PLANKS:MUSHSTEM,MODE_SET);}
+      for(let dx=-6;dx<=6;dx++)for(let dz=-6;dz<=6;dz++){const d=Math.hypot(dx,dz);if(d>6)continue;for(let k=0;k<=Math.round(2*(1-d/6));k++)PW(X+dx,g+9+k,Z+dz,CAPB,MODE_SET);if(d>3.5&&d<5.5&&((dx+dz)&1))PW(X+dx,g+8,Z+dz,CAPG,MODE_AIR);}
+      PW(X,g+3,Z,CAPG,MODE_SET);PW(X-1,g+1,Z-1,BARREL,MODE_SET);break;}
+    case 'giantcaps':{ // a ring of giant glowcaps round a mossy hollow
+      for(let k=0;k<6;k++){const a=k/6*6.283+0.4,x=Math.round(X+Math.cos(a)*8),z=Math.round(Z+Math.sin(a)*8);capP(x,hAt(x,z)+1,z,r,true);}
+      for(let dx=-5;dx<=5;dx++)for(let dz=-5;dz<=5;dz++)if(Math.hypot(dx,dz)<5){const pg=hAt(X+dx,Z+dz);PW(X+dx,pg,Z+dz,FMOSS,MODE_SET);if(hsh(X+dx,8619,Z+dz)<0.2)PW(X+dx,pg+1,Z+dz,GLOWSHROOM,MODE_AIR);}break;}
+    case 'stoneway':{ // a waystation turned to stone: a little shelter of petrified beams, a stone bench, a waymark
+      sigFloor(X-3,Z-3,X+3,Z+3,g,SANDSTONE,7);
+      for(const [a,b] of [[-3,-3],[3,-3],[-3,3],[3,3]])for(let y=g+1;y<=g+4;y++)PW(X+a,y,Z+b,PETRIWOOD,MODE_SET);
+      for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)if((Math.abs(dx)===3||Math.abs(dz)===3)&&r()<0.75)PW(X+dx,g+5,Z+dz,PETRIWOOD,MODE_SET);
+      for(let dx=-1;dx<=1;dx++)PW(X+dx,g+1,Z-2,SANDSTONE,MODE_SET);for(let y=g+1;y<=g+3;y++)PW(X+5,y,Z,y===g+3?SBRICK:SANDSTONE,MODE_SET);PW(X+1,g+1,Z+1,AMBER,MODE_SET);break;}
+    case 'stonetrees':{ // a grove of stone trees, the biggest with amber in its heart
+      for(let k=0;k<10;k++){const a=k*0.63+hsh(X,8621,Z),d=k?3+k*0.8:0,x=Math.round(X+Math.cos(a)*d),z=Math.round(Z+Math.sin(a)*d);petriP(x,hAt(x,z)+1,z,r);}
+      PW(X,g+2,Z,AMBER,MODE_SET);PW(X,g+3,Z,AMBER,MODE_SET);break;}
+    case 'startower':{ // a ruined star tower: a round tower open to the sky, a stair winding up its wall
+      for(let y=g-1;y<=g+14;y++)for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){const d=Math.hypot(dx,dz);if(d>3.3)continue;const wall=d>2.2;
+        if(wall){if(!(dz===3&&dx===0&&y>=g+1&&y<=g+2)&&!(y>g+11&&r()<0.4))PW(X+dx,y,Z+dz,y<=g?COBBLE:SBRICK,MODE_SET);}else PW(X+dx,y,Z+dz,y<=g?COBBLE:AIR,MODE_SET);}
+      for(let y=g+1;y<=g+12;y++){const t=y*1.1,x=Math.round(X+Math.cos(t)*1.5),z=Math.round(Z+Math.sin(t)*1.5);PW(x,y,z,SBRICK,MODE_SET);}PW(X,g+1,Z,STARORE,MODE_SET);break;}
+    case 'starheart':{ // the crater of the starmetal heart: a great bowl of scorched stone, starmetal at its middle
+      for(let dx=-14;dx<=14;dx++)for(let dz=-14;dz<=14;dz++){const d=Math.hypot(dx,dz);if(d>14*1.4)continue;const pg=hAt(X+dx,Z+dz);
+        if(d<14){const dep=Math.round((1-(d/14)*(d/14))*7),fl=g-dep;for(let y=fl+1;y<=pg+3;y++)PW(X+dx,y,Z+dz,AIR,MODE_SET);PW(X+dx,fl,Z+dz,SCORCH,MODE_SET);PW(X+dx,fl-1,Z+dz,SCORCH,MODE_SET);}
+        else{const rh=Math.round(Math.sin((d-14)/7*Math.PI)*2.5);for(let y=pg;y<=g+rh;y++)PW(X+dx,y,Z+dz,y===g+rh?GRAVEL:SCORCH,MODE_SET);}}
+      for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let y=g-8;y<=g-6+((dx||dz)?0:1);y++)PW(X+dx,y,Z+dz,STARORE,MODE_SET);break;}
   }
 }
 const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
@@ -5651,9 +5741,9 @@ function drawBar(quiet){
   updateHand();saveDirty=true;
 }
 (function(){
-  const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
-    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
+  const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
@@ -5735,7 +5825,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:14,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:15,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }

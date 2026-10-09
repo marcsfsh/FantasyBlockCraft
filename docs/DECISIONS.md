@@ -299,3 +299,9 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Roads** are laid over the new lands' ground as over grass (leaf litter, needles, moss, snow, chalk, black sand, peat, ash, golden and dead grass and the rest: `ROAD_GROUND`); before this they stopped at it.
 - **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v14`, world data version 14.
 
+### D-044 M6f: strange lands (2026-10-09)
+- **Four rare lands built** (`world/strange.js`): Crystal Barrens (amethyst spires, prism shards), Glowcap Hollows (giant glowcaps), Petrified Forest (stone trees, amber), Starfall Craters (a crater field from `craterAt`: one crater in about two cells of 56 blocks, bowls with raised rims, scorched floors).
+- **Rare finds (Q130):** prism shard (light 9), amber (light 4), starmetal ore (pickaxe tier 5). They have no use yet; they wait for magic.
+- **Light kept cheap:** giant glowcap caps are dark flesh with glowing gills only on part of their undersides (light 6).
+- **Saves:** `SAVE_KEY` is `fantasy-blockcraft-save-v15`, world data version 15.
+
