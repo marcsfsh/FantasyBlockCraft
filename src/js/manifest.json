@@ -106,6 +106,14 @@
       "about": "Old lands of men (M6g): farmland, orchards, flower meadows, terraces, their signatures; small structures across the lands; dry-stone walls"
     },
     {
+      "path": "world/waters.js",
+      "about": "Ponds and springs, river rapids, hillside streams and land-flavoured caves near the surface (M6h)"
+    },
+    {
+      "path": "world/kept.js",
+      "about": "Landmarks and features of the five old kept lands (M6h)"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },
@@ -208,6 +216,10 @@
     {
       "path": "gameplay/sky-weather-farming.js",
       "about": "Day and night, weather, grass spread, farming"
+    },
+    {
+      "path": "gameplay/land-weather.js",
+      "about": "Weather by land (M6h): mist, storms, dust and ash, tinted skies, eased between lands"
     },
     {
       "path": "core/main-loop.js",

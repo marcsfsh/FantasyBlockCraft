@@ -42,6 +42,7 @@ function driftP(X,y,Z,r){const ax=r()<0.5,len=2+(r()*3|0);for(let t=0;t<len;t++)
 // Water plants: kelp and seagrass on sandy, gravelly or muddy floors in the sea; lily pads on shallow lakes and pools
 function waterPlants(x,z,X,Z,g,b){
   const top=world[I(x,g,z)],r=hsh(X,5,Z);
+  if(b===0&&g>=SEA-6&&rapidAt(X,Z)){const t=hsh(X,8949,Z)<0.6?SEA:SEA-1;for(let y=g+1;y<=t;y++)world[I(x,y,z)]=hsh(X,y,Z)<0.3?MOSSY:STONE;return;} // rapids (M6h)
   if(b===0&&(top===SAND||top===GRAVEL||top===DIRT||top===BLACKSAND)){colInfo(X,Z,TP);const F=forestOf(TP),kd=F&&F.kelp||0,sg=F&&F.seagrass!==undefined?F.seagrass:0.015;
     if(r<kd){const hh=2+Math.floor(hsh(X,8401,Z)*(SEA-g-1));for(let y=g+1;y<=Math.min(SEA-2,g+hh);y++){const i=I(x,y,z);if(world[i]!==WATER)break;world[i]=KELP;}}
     else if(r<kd+sg)world[I(x,g+1,z)]=SEAGRASS;return;}

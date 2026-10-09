@@ -50,3 +50,5 @@
 - **The world map is redrawn a few regions per frame** when first opened over a large explored area; the far parts appear over a moment.
 - **Test structures are built from the builder's own ground level.** A castle on a slope may float at one side or cut into the hill; they are for trying structures out, not for building.
 - **Large fills are slow.** A full 131072-block fill goes through `setBlock` one block at a time and can take a few seconds on the Ally X.
+- **Weather by land is judged only headless (M6h).** Mist, dust, ash and sky tints are tested as values; how they look and whether fog in the bogs is too thick are for the owner to judge on the Ally X (D-046).
+- **Streams cut a channel two blocks deep.** A hillside stream clears the two blocks above its bed, so a tree standing on its path can lose part of its trunk (D-046).

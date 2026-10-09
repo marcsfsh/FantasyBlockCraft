@@ -2,7 +2,7 @@
 function caveRegion(X,Z){const a=fbm2(X/110,Z/110,1,3501.1),b=fbm2(X/110,Z/110,1,3507.3);return a>0.17?'lush':b>0.19?'crystal':a<-0.17?'drip':b<-0.19?'fungal':'plain';}
 const CAVE_NAMES={lush:'Mossy Caves',crystal:'Crystal Caves',drip:'Dripstone Caves',fungal:'Fungal Caves',plain:'Caves',deep:'Deep Caves'};
 function caveLife(X0,Z0,r2){
-  cavernDetail(X0,Z0,r2);
+  cavernDetail(X0,Z0,r2);landCaves(X0,Z0); // caves near the surface by land (M6h)
   const zone=ruinZone(Math.floor(X0/CS),Math.floor(Z0/CS)),reg=caveRegion(X0+8,Z0+8),wild=!zone&&!mineZone(Math.floor(X0/CS),Math.floor(Z0/CS));
   // floors
   const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];

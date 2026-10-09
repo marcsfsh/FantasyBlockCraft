@@ -34,7 +34,7 @@ function features(WCX,WCZ,self,noLife){
   // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -44,7 +44,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -111,7 +111,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);

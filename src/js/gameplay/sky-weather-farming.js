@@ -10,7 +10,7 @@ function updSky(){
   U.skyMul.value=(0.16+0.84*d)*(1-0.3*rainAmt);
   U.skyTint.value.setRGB(0.6+0.4*d,0.7+0.3*d,1).lerp(tintSet,sunset*0.35*d);
   skyC.copy(cNight).lerp(cDay,d).lerp(cSet,sunset*0.5*Math.max(d,0.3));
-  tmpC.copy(cRain).multiplyScalar(0.25+0.75*d);skyC.lerp(tmpC,rainAmt*0.65);
+  tmpC.copy(cRain).multiplyScalar(0.25+0.75*d);skyC.lerp(tmpC,rainAmt*0.65);tintSky(skyC); // the land's tint (M6h)
   stars.material.opacity=Math.max(0,1-d*1.7)*(1-rainAmt);
   {const v=(0.22+0.78*d)*(1-0.35*rainAmt);clouds.material.color.setRGB(v,v*(1-0.1*sunset*d),v*(1-0.22*sunset*d));} // warmer at sunset
   drawMoon(dayN%8);
@@ -29,17 +29,20 @@ const rainMat=new THREE.LineBasicMaterial({color:0xa4b8d4,transparent:true,opaci
 const rainLines=new THREE.LineSegments(rainGeo,rainMat);rainLines.frustumCulled=false;scene.add(rainLines);
 function colTop(x,z){x=Math.floor(x);z=Math.floor(z);if(x<0||z<0||x>=W||z>=D)return -1;return hm[x+W*z]+1;}
 function updWeather(dt,now){
-  rainT-=dt;if(rainT<=0){raining=!raining;rainT=raining?60+Math.random()*90:150+Math.random()*220;}
+  rainT-=dt;if(rainT<=0){raining=!raining;rainT=raining?60+Math.random()*90:(150+Math.random()*220)*(LWX.storm?0.5:1);} // storms come twice as often on the coasts and mountains
   flash=Math.max(0,flash-dt*3.5);
   if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;flash=1;const dl=0.4+Math.random()*2.5;burst(1.5,'lowpass',170,0.5,0.7,dl);burst(0.7,'lowpass',520,0.6,0.35,dl);buzz(30);}}
   rainAmt+=(((settings.weather&&raining)?1:0)-rainAmt)*Math.min(1,dt*0.25);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),bi=(bx>=0&&bz>=0&&bx<W&&bz<D)?biome[bx+W*bz]:2;
   snowing=bi===6||(bi===5&&PL.y>=SEA+33); // High Mountains snow above their snow line (fillCol)
-  const n=Math.floor(NR*rainAmt),len=snowing?0.09:0.75;
-  rainMat.color.setHex(snowing?0xffffff:0xa4b8d4);rainMat.opacity=snowing?0.9:0.5;
+  landWeather(dt);if(LWX.snow>=1||(LWX.snow>0&&PL.y>SEA+60))snowing=true; // the cold lands' snow (M6h)
+  // when it is dry, dust (the drylands) or ash (the volcanic and blighted lands) drifts in the air instead
+  const dustN=rainAmt<0.1?Math.floor(NR*0.35*LWX.dust):0,dusty=rainAmt<0.1&&dustN>0;
+  const n=dusty?dustN:Math.floor(NR*rainAmt),len=dusty?0.05:snowing?0.09:0.75;
+  rainMat.color.setHex(dusty?(LWX.ash>0.5?0x8a8580:0xd8c08a):snowing?0xffffff:0xa4b8d4);rainMat.opacity=dusty?0.7:snowing?0.9:0.5;
   for(let i=0;i<n;i++){
     const p=drops[i];
-    p.y-=(snowing?2.4:17)*dt;if(snowing){p.x+=Math.sin(now*0.001+i)*0.5*dt;p.z+=Math.cos(now*0.0013+i*1.7)*0.5*dt;}
+    p.y-=(dusty?0.4:snowing?2.4:17)*dt;if(snowing||dusty){p.x+=Math.sin(now*0.001+i)*0.5*dt;p.z+=Math.cos(now*0.0013+i*1.7)*0.5*dt;}
     if(p.y<PL.y-10||p.y<colTop(p.x,p.z)||Math.abs(p.x-PL.x)>26||Math.abs(p.z-PL.z)>26){p.x=PL.x+(Math.random()-.5)*48;p.z=PL.z+(Math.random()-.5)*48;p.y=PL.y+8+Math.random()*14;if(p.y<colTop(p.x,p.z))p.y=-999;}
     const o=i*6;rainPos[o]=p.x;rainPos[o+1]=p.y;rainPos[o+2]=p.z;rainPos[o+3]=p.x;rainPos[o+4]=p.y+len;rainPos[o+5]=p.z;
   }

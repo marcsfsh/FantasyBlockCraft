@@ -18,7 +18,7 @@ for(const k of HI){const c=nearestLand(LAND_I[k],0,0,48);regenerateAll(c.X,c.Z);
   regenerateAll(s.X,s.Z);while(genQ.length)processGenQ();let air=0;for(let y=s.a.y+1;y<s.g;y++)if(get(s.X-OX,y,s.Z-OZ)===AIR)air++;
   assert(air===s.g-s.a.y-1&&s.g-s.a.y>=25,'the great sinkhole at X '+s.X+', Z '+s.Z+' is open all '+(s.g-s.a.y)+' blocks down to a cave passage');}
 // waterfalls (Q126): planned down the steepest way, water over a stony bed, a pool at the foot
-{let f=null,n=0;for(let a=-150;a<150;a++)for(let b=-150;b<150;b++){const t=fallAt(a,b);if(t){n++;if(!f)f=t;}}
+{let f=null,n=0;for(let a=-150;a<150;a++)for(let b=-150;b<150;b++){const t=fallAt(a,b);if(t&&!t.stream){n++;if(!f)f=t;}}
   info('waterfalls in 300 x 300 chunks',n);assert(n>=5,'waterfalls are found in the high lands');
   regenerateAll(f.X,f.Z);while(genQ.length)processGenQ();let w=0;for(const [x,z,h] of f.path)if(get(x-OX,h+1,z-OZ)===WATER)w++;
   const drop=f.path[0][2]-f.end[2];
