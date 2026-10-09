@@ -102,6 +102,10 @@
       "about": "Strange lands (M6f): crystal barrens, glowcap hollows, petrified forest and starfall craters, their rare finds and signatures"
     },
     {
+      "path": "world/men.js",
+      "about": "Old lands of men (M6g): farmland, orchards, flower meadows, terraces, their signatures; small structures across the lands; dry-stone walls"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },

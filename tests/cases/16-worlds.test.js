@@ -8,7 +8,7 @@ const a=createWorld('Highland',parseSeed('777'),'survival'),b=createWorld('Highl
 assert(a.seed===777,'a typed whole-number seed is used exactly (777 stays 777)');
 assert(b.name==='Highland 2'&&b.seed>0&&b.mode==='creative','names stay unique and text seeds hash to a valid seed');
 assert(worldIndex().list.length===WIX.list.length&&worldIndex().list.some(w=>w.id===a.id),'the world index is stored');
-lsSet(worldKey(a.id),{v:15,seed:a.seed,e:[wkey(1,320,2),BRICK],inv:[]});
+lsSet(worldKey(a.id),{v:16,seed:a.seed,e:[wkey(1,320,2),BRICK],inv:[]});
 const file=exportWorld(a.id),imp=importWorld(file);
 assert(imp.id!==a.id&&imp.seed===777&&imp.name==='Highland 3','importing an exported world makes a new world with the same seed');
 assert(JSON.stringify(lsGet(worldKey(imp.id)).e)===JSON.stringify([wkey(1,320,2),BRICK]),'an imported world keeps its edits');

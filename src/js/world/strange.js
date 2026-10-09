@@ -40,6 +40,7 @@ Object.assign(SIGS,{
 function strangeBuild(s,r){
   const X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){
+    default:menBuild(s,r);break; // the old lands of men (M6g)
     case 'cutters':{ // the crystal cutters' ruin: low stone walls, a worktable of calcite, cut shards left on it
       sigFloor(X-4,Z-3,X+4,Z+3,g,CALCITE,7);
       for(let dx=-4;dx<=4;dx++)for(let dz=-3;dz<=3;dz++){const edge=Math.abs(dx)===4||Math.abs(dz)===3;if(!edge)continue;const hh=1+(hsh(X+dx,8613,Z+dz)*3|0);for(let y=g+1;y<=g+hh;y++)if(!(dz===3&&Math.abs(dx)<=1))PW(X+dx,y,Z+dz,r()<0.3?MOSSY:COBBLE,MODE_SET);}

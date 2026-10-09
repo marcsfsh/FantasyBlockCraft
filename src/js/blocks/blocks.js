@@ -150,6 +150,10 @@ def(PRISM,'Prism Shard',[230,230,230],{emit:true,lum:9,snd:'glass'});def(PETRIWO
 def(STARORE,'Starmetal Ore',[234,234,234]);def(SCORCH,'Scorched Stone',[235,235,235]);def(CAPB,'Glowcap Flesh',[236,236,236],{snd:'soft'});def(CAPG,'Glowcap Gills',[237,237,237],{emit:true,lum:6,snd:'soft'});
 def(PALEG,'Pale Grass Block',[238,2,239],{snd:'soft'});
 setH([PRISM,AMBER],0.8,'misc');setH([PETRIWOOD],3,'stone',1);setH([STARORE],7,'ore',5);setH([SCORCH],4,'stone',1);setH([CAPB,CAPG],0.6,'soft');setH([PALEG],0.6,'soft');
+// Old lands of men (M6g, D-045): orchard leaves (apples), blossom, oxeye daisies, lavender
+const FRUITL=1081,BLOSSOM=1082,OXEYE=1083,LAVENDER=1084;
+def(FRUITL,'Orchard Leaves',[240,240,240],LEAFD);def(BLOSSOM,'Blossom',[241,241,241],LEAFD);def(OXEYE,'Oxeye Daisy',[242,242,242],PLANT);def(LAVENDER,'Lavender',[243,243,243],PLANT);
+NEW_LEAVES.push(FRUITL,BLOSSOM);setH([FRUITL,BLOSSOM],0.3,'soft');setH([OXEYE,LAVENDER],0,'soft');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);

@@ -12,7 +12,7 @@ const T={},T2={},T3={},TTP={},TP={},TGC={};
 function colInfoBase(X,Z,o){
   // Lands (M6a, D-039) come from the land layout (lands.js): the weights of nearby lands by look shape the ground below, so each
   // old land keeps its look and lands blend across their borders.
-  landsAt(X,Z,o);
+  landsAt(X,Z,o);o.X=X;o.Z=Z;
   const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),rid=fbm2(X/40,Z/40,2,91.4);
   // Most land is gentle: rolling hills only where the "hilliness" field allows them
   const rough=sstep(-0.05,0.22,fbm2(X/420,Z/420,2,881.3));
@@ -42,6 +42,7 @@ function colInfoBase(X,Z,o){
   if(o.wChalk>0)h+=o.wChalk*14;
   if(o.wDry>0)h+=o.wDry*Math.abs(fbm2(X/34,Z/22,2,8501.1))*7; // dunes in the drylands (M6e)
   if(o.wVolc>0)h+=o.wVolc*fbm2(X/60,Z/60,2,8503.3)*8; // broken volcanic ground
+  if(o.wTerr>0)h=h*(1-o.wTerr)+(Math.round((h-SEA)/3)*3+SEA)*o.wTerr; // the old terraces step down their hillsides
   o.cr=false;if(o.wStar>0)h+=craterAt(X,Z,o)*o.wStar; // the crater field (M6f)
   if(o.wFjord>0){const q=Math.abs(fbm2(X/240,Z/240,2,8311.3)),ch=sstep(0.075,0.03,q)*o.wFjord;if(ch>0)h=h*(1-ch)+(SEA-14+fbm2(X/40,Z/40,1,8313.1)*3)*ch;}
   // the sea: lands fall away to its floor across the coast blend; the kelp shallows are shallow, the rocky isles rise out of it,

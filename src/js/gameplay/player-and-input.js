@@ -119,7 +119,8 @@ function dropsFor(id,tool){
     case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.17?[[331,1]]:r<0.47?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];
-  if(BL[id].leaf){const r=Math.random();return r<0.05?[[207,1]]:r<0.15?[[201,1]]:[];}
+  if(BL[id].leaf){const r=Math.random();if(id===FRUITL)return r<0.3?[[207,1]]:r<0.4?[[201,1]]:[]; // orchard leaves give apples
+    return r<0.05?[[207,1]]:r<0.15?[[201,1]]:[];}
   if(BL[id].cross)return[];
   return[[id,1]];
 }

@@ -8,11 +8,11 @@
     "blocks:old-caves:y204-259": "2210ab27",
     "blocks:crawlways:y260-290": "e6c2d28a",
     "blocks:surface:y291-383": "b80f54d0",
-    "columns:ground-biome-heightmap": "5164167f",
+    "columns:ground-biome-heightmap": "2d4deb17",
     "light:block-light": "f9961c39",
-    "plan:terrain-16k": "6bc64101",
+    "plan:terrain-16k": "f9a8d79c",
     "plan:city-81x81-cells": "53527697",
-    "blocks:surface:y291-511": "c9caaba4"
+    "blocks:surface:y291-511": "25baaec8"
   },
   "123456789": {
     "blocks:fire-below:y0-12": "72b9294d",
@@ -23,10 +23,10 @@
     "blocks:old-caves:y204-259": "021d210e",
     "blocks:crawlways:y260-290": "368527e7",
     "blocks:surface:y291-383": "b6ebc871",
-    "columns:ground-biome-heightmap": "694f3533",
+    "columns:ground-biome-heightmap": "1ee003bb",
     "light:block-light": "cf5dd410",
-    "plan:terrain-16k": "dad08a7b",
+    "plan:terrain-16k": "3d8088b4",
     "plan:city-81x81-cells": "15ae469a",
-    "blocks:surface:y291-511": "5afb97b7"
+    "blocks:surface:y291-511": "4f1aed84"
   }
 }
