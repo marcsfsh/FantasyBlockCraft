@@ -12,7 +12,7 @@ A Minecraft-style game in a medieval fantasy world, for one player (the owner). 
 - **Deep and layered underground.** Going down feels like going back in time. Dwarven holds are rare, vast discoveries, not a layer under everything (from M2).
 - **Saves yield to updates.** Breaking saves is always acceptable; bump `SAVE_KEY` and move on.
 
-Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast with gates, the deep is natural caves over a lava sea, and there are ways down, other peoples' remains, surface ruins, roads and waystones. Underground water must sit in sound rock (owner's rule). Since 0.7.0 (M3a, D-025) streaming is spread over frames (`GEN_STEPS`), so generation code must stay in steps that touch only their own chunk. Since 0.8.0 (M3b, D-027) sky light also spreads sideways (`SKL`, exact under streaming like block light) and water, lava, plants and clouds are animated; M4 (survival and items) is next. `docs/DESIGN.md` describes what is built.
+Since 0.6.0 (M2, D-023 and D-024) the world is 512 tall, holds are rare and vast with gates, the deep is natural caves over a lava sea, and there are ways down, other peoples' remains, surface ruins, roads and waystones. Underground water must sit in sound rock (owner's rule). Since 0.7.0 (M3a, D-025) streaming is spread over frames (`GEN_STEPS`), so generation code must stay in steps that touch only their own chunk. Since 0.8.0 (M3b, D-027) sky light also spreads sideways (`SKL`, exact under streaming like block light) and water, lava, plants and clouds are animated; M3.5 (natural generation, D-028: caves rewritten as connected systems, then a natural surface) is next, before M4. `docs/DESIGN.md` describes what is built.
 
 ## How sessions run
 

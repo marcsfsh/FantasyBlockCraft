@@ -360,3 +360,103 @@ Options: keep it working, untested; best effort; full parity.
 **Q76. Should creative mode get its own refinements?**
 Options: light upgrades; keep as is; world-editing tools.
 **Answer:** "world editing tools and light upgrades." Light upgrades: a searchable block menu, larger brushes, fill and replace. World-editing tools: noclip spectator camera, teleport to coordinates, time and weather controls, structure placement for testing.
+
+## Round 20: natural generation (2026-10-09, after playing 0.8.0)
+
+The owner's feedback before the round: the procedural generation "feels disjointed, random, and less like a natural landscape/underground and more like a glitched out computer generation. sometimes there are areas that look nice, but especially underground - cave generation is so chaotic and has absolutely no flow to it." This round planned M3.5, which comes after M3 and before M4.
+
+**Q77. On the surface, what looks most like glitched generation?**
+Options (several allowed): bumpy small-scale noise; odd cliffs and chunks; land borders; placement of things.
+**Answer:** All four, and: "Rivers often cut through tall landscape like a ravine - sometimes 20-30 blocks of a ravine cliff before water level. barrow downs all face the same way. there's weird stone structures all over multiple woodland and grassland biomes. mountainous biomes are way too chaotic."
+
+**Q78. Underground, what makes the caves feel chaotic?**
+Options (several allowed): too many tunnels; no direction; ugly shapes; layers don't connect.
+**Answer:** All four, and: "totally disjointed. lava has the same issue that we addressed earlier with water. cave's are intersected many times, lead to nowhere too often, and it usually just feels like im trying to find the next open area of the cave by going trough a maze of massive rooms with tunnels that partially cut through them. its extremely noisy, they have no flow or structure in practice."
+
+**Q79. Which picture is closest to the underground you want?**
+Options: real cave systems; modern Minecraft caves; mix by depth; fantasy epic.
+**Answer:** Fantasy epic, mixed by depth: tight natural passages near the surface, grander and more open the deeper you go.
+
+**Q80. How much open space should the underground have compared to now?**
+Options: much less, bigger; about the same; less near the surface; more.
+**Answer:** Much less open space, in fewer, bigger and more connected systems.
+
+**Q81. How should one cave system be laid out?**
+Options: trunk and branches; chain of chambers; network with loops.
+**Answer:** Trunk and branches, with some loops: a main passage to follow down, side branches, and passages that rejoin.
+
+**Q82. Should cave tunnels ever cross each other?**
+Options: only real junctions; rarely; never.
+**Answer:** Only at real junctions. Passages never slice through each other or partly through a chamber.
+
+**Q83. How should you travel from one depth to the next?**
+Options (several allowed): natural descents; shafts and chasms; rivers lead down; built ways.
+**Answer:** All four.
+
+**Q84. How tight should the shallow caves be?**
+Options: 2 to 4 wide; 1 to 2 wide; 3 to 6 wide.
+**Answer:** "mostly 3-6 wide, sometimes 2 to 4 wide".
+
+**Q85. What should the big chambers look like?**
+Options (several allowed): smooth domed halls; tall rifts; stepped floors; pillars and formations.
+**Answer:** All four.
+
+**Q86. Should the depth layers stay as distinct bands?**
+Options: blend, keep character; keep distinct bands; fewer layers.
+**Answer:** Blend: cave size and style change gradually with depth, and each depth keeps its own stone, decoration and finds.
+
+**Q87. How should underground lava behave?**
+Options (several allowed): same rule as water; lava only very deep; lava falls allowed; lava rivers.
+**Answer:** All four. No floating lava: every lava block sits in sound rock like underground water. Lava only very deep (the Fire Below and deep vents). Lava falls are allowed where the source and the pool are both sound. A few slow lava rivers in deep gorges feed the lava sea.
+
+**Q88. How often should you find a cave entrance on the surface?**
+Options: rare and obvious; same as now, better looking; common.
+**Answer:** Same as now (about one way down within 80 to 90 blocks), better looking and shaped to fit the land.
+
+**Q89. How should rivers fit the land?**
+Options: follow valleys; shape the valleys; fewer, bigger rivers.
+**Answer:** Follow valleys: rivers run along the low ground from hills to the sea or a lake, with gentle banks. A gorge only where a river meets high ground, short and with sloped sides.
+
+**Q90. What should the High Mountains look like?**
+Options (several allowed): ridges and valleys; fewer, grander peaks; walkable passes; cliffs only in places.
+**Answer:** All four.
+
+**Q91. How strong should the small-scale bumpiness of the ground be?**
+Options: smooth with character; very smooth; keep per land, tone down.
+**Answer:** Smooth with character: mostly smooth slopes, roughness only where the land calls for it (rocky moors, mountains, the hummocky Shadowed Forest).
+
+**Q92. How should neighbouring lands meet?**
+Options: wide gradual blend; natural edges; both.
+**Answer:** A wide gradual blend over 50 to 100 blocks.
+
+**Q93. What should happen to the stray stone structures in woods and grassland?**
+Options (several allowed): boulders and tors; ruined stairways; small ruins and walls; remove the random ones.
+**Answer:** All four. Boulders and tors only on moors, mountains and slopes (rare elsewhere). Ruined stairways rarer and fitted into hillsides. Small ruins and walls fewer and grouped into places that make sense. Anything that does not belong to a named place or a land's character goes.
+
+**Q94. How should barrows and stone rings be placed?**
+Options (several allowed): varied facing; grouped in clusters; varied sizes; only on Barrow Hills.
+**Answer:** All four.
+
+**Q95. How should trees and plants be spread?**
+Options: groves and clearings; even spread; land-specific patterns.
+**Answer:** Groves and clearings: denser in valleys and by water, thinner on ridges and slopes.
+
+**Q96. Should surface ruins be placed with more sense?**
+Options (several allowed): strategic spots; level the site naturally; keep as is.
+**Answer:** Strategic spots (towers on hilltops and ridges, keeps by rivers or passes, castles on high ground, never in a hollow), and the ground shaped around them so they sit in the land rather than on a plinth.
+
+**Q97. How far should M3.5 go with the cave generator?**
+Options: rewrite from scratch; rework in place; rewrite underground, rework surface.
+**Answer:** Rewrite from scratch: a planned cave-system generator (trunks, chambers, junctions, descents), with mouths, places, remains and water re-attached to it.
+
+**Q98. Which half comes first?**
+Options: underground first; surface first; one PR.
+**Answer:** Underground first. M3.5a is the underground, M3.5b the surface.
+
+**Q99. What happens to the dwarven holds and their mines?**
+Options: keep, connect better; keep untouched; revisit them too.
+**Answer:** Keep them, and let natural cave systems reach their edges at a few places so they can be found from below.
+
+**Q100. How should the owner check the result?**
+Options (several allowed): screenshots in the PR; seed tour; map images; checkpoint mid-way.
+**Answer:** A seed tour (coordinates for each cave system, river valley and mountain range to visit), top-down height and cave maps of a large area before and after, and a checkpoint mid-way: stop after the cave prototype so the owner can play it before the rest is finished.
