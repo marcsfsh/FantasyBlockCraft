@@ -34,7 +34,7 @@ function features(WCX,WCZ,self,noLife){
   // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(![GRASS,SNOWG,SAND].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -44,8 +44,11 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08)continue;
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3),top=topBlock(T2);
-    if(clear){
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3),top=topBlock(T2),F=forestOf(T2);
+    if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
+      const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
+      if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top))&&hv<F.trees*grv)F.tree(X,h+1,Z,tr2,T2);}
+    else if(clear){
       // groves and clearings (Q95): trees gather where the grove field is high, thicker in valleys and by water, thinner on steep slopes
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(b===3||b===8?0.55+0.8*G:0.15+1.7*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if(b===5||b===6){if((top===GRASS||top===SNOWG)&&hv<(b===6?0.03:0.012)*grv)spruceP(X,h+1,Z,tr2,b===6||top===SNOWG);}
@@ -73,12 +76,13 @@ function plants(WCX,WCZ){
     const X=WCX*CS+lx,Z=WCZ*CS+lz,x=X-OX,z=Z-OZ,ci=x+W*z,g=ground[ci],b=biome[ci];
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
-      if(top===GRASS&&b!==5&&b!==6){colInfo(X,Z,TP);
+      if((top===GRASS||FLOORS.has(top))&&b!==5&&b!==6&&!sigNear(X,Z,0)){colInfo(X,Z,TP);const F=forestOf(TP);
         const heath=b===4?1:Math.max(0,(TP.dw-0.2)*1.6),reed=b===11?1:Math.max(0,(TP.fen-0.25)*1.6),dark=b===8?1:Math.max(0,(TP.sw-0.25)*1.6);
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
         const fr=hsh(X,7,Z),fg=(b===3||b===4||b===8)&&fr<0.06&&fbm2(X/28,Z/28,1,4311.3)>0.2?BERRYB:(b===3||b===8)&&fr>0.994?MUSHB:(b===2||b===7||b===10)&&fr>0.994?WTURN:0;
         if(fg)world[I(x,g+1,z)]=fg;
+        else if(F&&F.plant){const p=F.plant(r,X,Z,TP);if(p)world[I(x,g+1,z)]=p;}
         else if(id)world[I(x,g+1,z)]=id;
         else if(b===2&&TP.fwd<0.4&&Math.abs(fbm2(X/46,Z/46,1,4201.1))<0.011){world[I(x,g+1,z)]=LEAVES;if(r<0.7&&g+2<H)world[I(x,g+2,z)]=LEAVES;} // hedgerows
         else if(b!==10&&b!==4&&b!==11&&b!==8){
@@ -104,7 +108,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
@@ -132,7 +136,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))):plannedLava(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;

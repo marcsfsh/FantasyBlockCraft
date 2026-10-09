@@ -14,7 +14,7 @@ assert(m1&&m1.n==='Home'&&markers[1].n==='Marker 2'&&markers[0].c!==markers[1].c
 const sv=saveData();
 const ex0=new Set(explored);explored.clear();exUnpack(sv.ex);
 assert(explored.size===ex0.size&&[...ex0].every(k=>explored.has(k)),'explored chunks come back from their packed form ('+sv.ex.length+' regions)');
-assert(sv.v===10&&sv.pl.length===2&&sv.mk.length===2&&sv.mk[0][2]==='Home','explored chunks, places and markers are saved with the world');
+assert(sv.v===11&&sv.pl.length===2&&sv.mk.length===2&&sv.mk[0][2]==='Home','explored chunks, places and markers are saved with the world');
 info('saved map data:',sv.ex.length,'regions,',sv.pl.length,'places,',sv.mk.length,'markers;',JSON.stringify({ex:sv.ex,pl:sv.pl,mk:sv.mk}).length,'characters');
 // the world map's colours come from the terrain plan: sea is blue, land is not
 let sea=null,land=null;for(let X=-3000;X<3000&&(!sea||!land);X+=37){colInfo(X,0,TW);if(!sea&&TW.h<SEA-5)sea=X;if(!land&&TW.h>SEA+10&&!TW.river&&!TW.lake)land=X;}

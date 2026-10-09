@@ -21,6 +21,7 @@ Consequences:
 | `src/js/blocks/items.js` | Items that are not blocks: fuel, ores, ingots; the tool ladder (`TOOL_LADDER`, tools as `{tool, tier, speed, dur}`), gear and their icons |
 | `src/js/blocks/atlas.js` | Texture atlas painted pixel by pixel, average tile colours |
 | `src/js/world/terrain.js` | World arrays (two bytes per block), column terrain from the land weights (ranges, river valleys, blended borders, gorges), lakes |
+| `src/js/world/forests.js` | The forests (M6b): their trees, floors and plants (`FOREST`), and each stretch's signature landmark or natural feature (`SIGS`, `sigOf`, `sigBuild`, `sigNear`) |
 | `src/js/world/lands.js` | Lands (M6a, D-039): the registry, the transition map of which lands may border which, the cell layout, blend weights and stretch names |
 | `src/js/world/caves.js` | Cave systems (D-028): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes |
 | `src/js/world/deep-caves.js` | The Fire Below: the lava sea with islands and flared pillars |
@@ -99,7 +100,7 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 
 ## Saves
 
-- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v10`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:10, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, ex, pl, mk, t, dn}`: `cs` holds container contents and `at` attuned waystones (D-033); `ex`, `pl` and `mk` the explored map, places and markers (D-037)). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
+- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v11`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:11, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, ex, pl, mk, t, dn}`: `cs` holds container contents and `at` attuned waystones (D-033); `ex`, `pl` and `mk` the explored map, places and markers (D-037)). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
 - `createWorld`, `switchWorld` (saves, then reloads into the other world), `deleteWorld`, `exportWorld` and `importWorld` live in `ui/save-and-minimap.js`; the pause menu lists the worlds. An exported file is `{format:'fantasy-blockcraft-world', saveKey, world, data}` and only loads under the same `SAVE_KEY`.
 - **Player changes only.** Automatic systems (`flowStep`, `randomTicks`) set `autoEdit`; their changes are recorded only where the player already changed that block, so crops keep their growth while natural water flow, grass spread and snow never grow the save.
 - A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).
@@ -135,6 +136,11 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 - **Gorges** replace the M2b ravines: the zero line of `fbm2(X/150)`, with distance from the line estimated from the noise slope; depth is read at the nearest point of the centre line, so gorge ends cut straight across. `rvBot` and `carved` work as before.
 - **Names:** `stretchName(lcell)` names a stretch after its highest-priority cell (`stretchCell`); `landPlaceName` is what the readout shows on open land. `nearestLand` and `landTour` (creative) find the nearest cell of a land.
 - **The approval document:** `tools/lands.mjs` (`npm run lands`) draws the layout and writes `docs/LANDS.md` from the registry.
+
+## Forests (M6b, D-040)
+
+- `FOREST[key]` (`world/forests.js`) holds a forest's tree density, `tree(X,y,Z,r,o)`, `top(o)` (its floor, called first by `topBlock`) and `plant(r,X,Z,o)` (called by `plants`); `forestOf(o)` finds it from the column's land. The tree loop in `features` and the plants pass check it before the old looks.
+- **Signatures:** `sigOf(rootCell)` (memoised) decides and places a stretch's landmark or feature; `sigsNear(WCX,WCZ)` lists those that may reach a chunk; `applyForestSigs` runs `sigBuild` for them in the sites step. `sigNear` keeps trees, boulders and plants off them; `sigPonds` and `sigWaterAt` let their ponds pass the underground water check.
 
 ## Ways down, places and the surface (M2b)
 

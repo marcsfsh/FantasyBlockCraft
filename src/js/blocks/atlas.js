@@ -183,6 +183,26 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     if(root)for(let y=12;y<16;y++)for(let x=4;x<12;x++){const d=Math.hypot((x-7.5)/4,(y-14.5)/2.6);if(d<1)P(t,x,y,y<14?[160,90,170]:[232,226,214]);}});
   [[207,5,0],[208,10,0],[209,15,1]].forEach(([t,h,pods])=>{clear(t);for(let k=0;k<h;k++){const x=7+Math.round(Math.sin(k*0.7)*1.5);P(t,x,15-k,[76,132,50]);if(k%3===1){P(t,x-1,15-k,[96,160,62]);P(t,x+1,14-k,[96,160,62]);}}
     if(pods)for(const [x,y] of [[4,4],[10,6],[5,9],[11,11]]){for(let k=0;k<4;k++)P(t,x,y+k,[150,196,92]);P(t,x+1,y+1,[120,168,70]);}});
+  // the forests (M6b): six woods, three forest floors, fern, bluebells and moonpetal; hashed noise, no shared random draws
+  const hn=(x,y,k)=>{let h=(Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(k,1442695041))|0;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296;};
+  const bark=(t,c,k,stripe)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(hn(x,y,k)-.5)*22+(x%4===stripe?-24:0)+(hn(x>>1,y>>2,k+1)<.15?-18:0)));};
+  const ring=(t,a,b,c,k)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);P(t,x,y,d>6.8?sh(c,(hn(x,y,k)-.5)*16):sh(((d|0)%2)?a:b,(hn(x,y,k+1)-.5)*12));}};
+  const leaf=(t,c,hole,k,spark)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const q=hn(x,y,k);if(q<hole)P(t,x,y,[0,0,0],0);else P(t,x,y,spark&&hn(x,y,k+7)<spark[1]?spark[0]:sh(c,(hn(x,y,k+3)-.5)*50));}};
+  const plank=(t,c,k)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const b=y>>2;let v=(hn(x,y,k)-.5)*14;if(y%4===3)v-=30;if(x===((b*7+4)&15))v-=26;P(t,x,y,sh(c,v));}};
+  const floorTop=(t,cs,k)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const q=hn(x,y,k);P(t,x,y,sh(cs[Math.floor(q*cs.length)],(hn(x,y,k+2)-.5)*20));}};
+  const floorSide=(t,top,k)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=2+Math.floor(hn(x,0,k)*3);P(t,x,y,y<d?sh(top,(hn(x,y,k+1)-.5)*24):sh([134,96,67],(hn(x,y,k+2)-.5)*28+(hn(x,y,k+3)<.06?-34:0)));}};
+  bark(147,[96,70,52],11,1);ring(148,[196,150,104],[170,126,84],[96,70,52],12);leaf(149,[192,58,34],0.18,13,[[236,150,40],0.12]);leaf(150,[222,164,40],0.18,14,[[240,206,90],0.1]);plank(151,[186,128,86],15);
+  bark(152,[92,62,40],21,2);ring(153,[204,164,108],[176,138,86],[92,62,40],22);leaf(154,[34,92,52],0.22,23);plank(155,[200,160,106],25);
+  bark(156,[120,64,46],31,0);ring(157,[178,96,66],[150,78,52],[120,64,46],32);leaf(158,[44,96,40],0.14,33);plank(159,[166,92,64],35);
+  bark(160,[110,52,40],41,3);ring(161,[204,120,80],[176,96,62],[110,52,40],42);leaf(162,[28,70,40],0.12,43);plank(163,[184,98,66],45);
+  bark(164,[206,208,206],51,1);ring(165,[226,222,206],[204,198,180],[196,198,196],52);leaf(166,[176,200,196],0.2,53,[[236,244,242],0.15]);plank(167,[226,222,206],55);
+  bark(168,[110,96,70],61,2);ring(169,[196,180,132],[170,154,108],[110,96,70],62);leaf(170,[122,160,62],0.24,63);plank(171,[198,184,136],65);
+  floorTop(172,[[176,70,36],[212,120,40],[150,92,44],[110,72,40]],71);floorSide(173,[176,90,40],72);
+  floorTop(174,[[132,86,46],[112,72,40],[156,104,58]],74);floorSide(175,[132,86,46],75);
+  floorTop(176,[[70,118,44],[58,102,38],[86,134,52]],77);floorSide(177,[70,118,44],78);
+  clear(178);for(let f=0;f<5;f++){const ox=2+f*3,h=7+Math.floor(hn(f,0,81)*7),dir=f%2?1:-1;for(let k=0;k<h;k++){const x=ox+Math.round(dir*k*0.25),y=15-k;P(178,x,y,[62,126,44]);if(k>1&&k%2===0){P(178,x-1,y,[84,150,56]);P(178,x+1,y,[84,150,56]);}}}
+  clear(179);for(let f=0;f<4;f++){const ox=3+f*3,h=8+Math.floor(hn(f,1,82)*5);for(let k=0;k<h;k++)P(179,ox,15-k,[70,130,48]);for(let k=0;k<4;k++){P(179,ox+1,16-h+k*2,[88,96,206]);P(179,ox+1,17-h+k*2,[60,64,160]);}}
+  clear(180);for(let y=8;y<16;y++)P(180,7,y,[86,140,110]);for(let a=0;a<6;a++){const x=7+Math.round(Math.cos(a)*2.5),y=6+Math.round(Math.sin(a)*2.5);P(180,x,y,[232,240,255]);P(180,(x+7)>>1,(y+6)>>1,[200,214,250]);}P(180,7,6,[250,236,150]);
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

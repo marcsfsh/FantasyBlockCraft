@@ -70,10 +70,10 @@ function stoneRingP(X,h,Z,r,sz){
   PW(X,h+1,Z,STONE,MODE_SET);PW(X+1,h+1,Z,STONE,MODE_SET);
 }
 // willows of the fens: a low crown with strands of leaves hanging down
-function willowP(X,y,Z,r){
-  const th=4+(r()*2|0);if(y+th+3>=H)return;PW(X,y-1,Z,DIRT,MODE_SET);for(let i=0;i<th;i++)PW(X,y+i,Z,LOG,MODE_SET);
-  const top=y+th;for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)for(let dy=-1;dy<=1;dy++){const d=Math.hypot(dx,dz,dy*1.6);if(d<=3.1&&!(d>2.6&&r()<0.4))PW(X+dx,top+dy,Z+dz,LEAVES,MODE_AIR);}
-  for(let k=0;k<10;k++){const a=k/10*6.283,sx=X+Math.round(Math.cos(a)*3),sz=Z+Math.round(Math.sin(a)*3),len=2+(r()*3|0);for(let t=1;t<=len;t++)PW(sx,top-t,sz,LEAVES,MODE_AIR);}
+function willowP(X,y,Z,r,log,leaf){
+  log=log||LOG;leaf=leaf||LEAVES;const th=4+(r()*2|0);if(y+th+3>=H)return;PW(X,y-1,Z,DIRT,MODE_SET);for(let i=0;i<th;i++)PW(X,y+i,Z,log,MODE_SET);
+  const top=y+th;for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)for(let dy=-1;dy<=1;dy++){const d=Math.hypot(dx,dz,dy*1.6);if(d<=3.1&&!(d>2.6&&r()<0.4))PW(X+dx,top+dy,Z+dz,leaf,MODE_AIR);}
+  for(let k=0;k<10;k++){const a=k/10*6.283,sx=X+Math.round(Math.cos(a)*3),sz=Z+Math.round(Math.sin(a)*3),len=2+(r()*3|0);for(let t=1;t<=len;t++)PW(sx,top-t,sz,leaf,MODE_AIR);}
 }
 function spruceP(X,y,Z,r,snowy){
   const th=6+(r()*4|0);if(y+th+2>=H)return;const SL=snowy?SNOWLEAF:SLEAVES;

@@ -28,7 +28,7 @@ function wmColor(X,Z){
   colInfo(X,Z,TW);const h=TW.h;
   if(TW.lake||h<SEA||TW.b===0||TW.b===9){const d=Math.min(1,(SEA-h)/30);return[46-20*d,96-40*d,170-50*d];}
   if(TW.river&&h<=SEA+1)return[70,120,200];
-  const c=WM_PAL[TW.b]||[120,140,100],e=Math.max(0,Math.min(1,(h-SEA)/160));
+  const c=(TW.b!==1&&LANDS[TW.land].col)||WM_PAL[TW.b]||[120,140,100],e=Math.max(0,Math.min(1,(h-SEA)/160));
   if(TW.b===5&&h>SEA+110||TW.b===6)return[214+30*e,218+30*e,224+28*e];
   const k=0.8+0.45*e;return[c[0]*k,c[1]*k,c[2]*k];
 }

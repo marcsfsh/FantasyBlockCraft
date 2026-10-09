@@ -82,6 +82,10 @@
       "about": "Ruined watchtowers, keeps and castles, old roads between them and to hold gates, ancient waystones"
     },
     {
+      "path": "world/forests.js",
+      "about": "The forests (M6b): their trees, floors and plants, and each stretch's signature landmark or natural feature"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },

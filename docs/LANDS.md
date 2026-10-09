@@ -40,14 +40,14 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 6 | Barrow Hills | Old lands | uncommon | cool to temperate | dry to middling | low, hills | built | a great chambered barrow | long rows of standing stones | 1.7% | 16 (354) |
 | 7 | Shadowed Forest | Old lands | uncommon | temperate to hot | wet | low, hills | built | a temple sunk among the roots | a fallen giant spanning a hollow | 4.2% | 19 (549) |
 | 8 | Golden Steppe (was Windswept Plains) | Dry and fiery (M6e) | common | temperate to hot | dry | low, hills | Windswept Plains | a ring of horse stones | a lone rock outcrop over the grass | 9.0% | 24 (559) |
-| 9 | Willow Vales (was Fens) | Forests (M6b) | common | temperate to warm | wet | low | Fens | a stilt house over the water | willow-ringed pools with islets | 2.7% | 14 (640) |
+| 9 | Willow Vales (was Fens) | Forests (M6b) | common | temperate to warm | wet | low | built | a stilt house over the water | willow-ringed pools with islets | 2.7% | 14 (640) |
 | 10 | Frozen Tundra (was Northern Fells) | Highlands and cold (M6c) | common | cold | dry to middling | low, hills | Northern Fells | a frozen longhouse | frost mounds and ice wedges | 2.8% | 11 (431) |
-| 11 | Autumn Woods | Forests (M6b) | common | cool to temperate | middling | low, hills | Elder Wood | a woodcutters' lodge | a red-leaf glade around a still pond | 1.7% | 8 (340) |
-| 12 | Birch Glades | Forests (M6b) | common | cool to temperate | middling to wet | low, hills | Elder Wood | a birch-bark shrine | a ring of white birches round a clearing | 8.9% | 26 (479) |
-| 13 | Pine Highlands | Forests (M6b) | common | cold to cool | middling to wet | hills, high | Northern Fells | a timber watch post | a lookout rock above the pines | 4.9% | 7 (693) |
-| 14 | Ancient Giant Wood | Forests (M6b) | rare | temperate to warm | wet | low | Elder Wood | a platform ruin high in a giant tree | a giant tree over forty blocks tall | 0.1% | 2 (340) |
-| 15 | Yew Wood | Forests (M6b) | uncommon | cool to temperate | middling to wet | low, hills | Shadowed Forest | a ruined archers' hall | an ancient hollow yew | 0.8% | 11 (322) |
-| 16 | Silverwood | Forests (M6b) | uncommon | cool to temperate | middling to wet | low, hills | Elder Wood | a moon-gate arch | a silver-leaf grove round a spring | 0.6% | 7 (345) |
+| 11 | Autumn Woods | Forests (M6b) | common | cool to temperate | middling | low, hills | built | a woodcutters' lodge | a red-leaf glade around a still pond | 1.7% | 8 (340) |
+| 12 | Birch Glades | Forests (M6b) | common | cool to temperate | middling to wet | low, hills | built | a birch-bark shrine | a ring of white birches round a clearing | 8.9% | 26 (479) |
+| 13 | Pine Highlands | Forests (M6b) | common | cold to cool | middling to wet | hills, high | built | a timber watch post | a lookout rock above the pines | 4.9% | 7 (693) |
+| 14 | Ancient Giant Wood | Forests (M6b) | rare | temperate to warm | wet | low | built | a platform ruin high in a giant tree | a giant tree over forty blocks tall | 0.1% | 2 (340) |
+| 15 | Yew Wood | Forests (M6b) | uncommon | cool to temperate | middling to wet | low, hills | built | a ruined archers' hall | an ancient hollow yew | 0.8% | 11 (322) |
+| 16 | Silverwood | Forests (M6b) | uncommon | cool to temperate | middling to wet | low, hills | built | a moon-gate arch | a silver-leaf grove round a spring | 0.6% | 7 (345) |
 | 17 | Alpine Meadows | Highlands and cold (M6c) | uncommon | cold to temperate | middling to wet | high | High Mountains | a shepherd's hut on the high pasture | a meadow tarn under a peak | 1.2% | 13 (336) |
 | 18 | Glacier Fields | Highlands and cold (M6c) | uncommon | cold | dry to wet | high | High Mountains | a tower bound in the ice | crevasses and ice caves | 0.0% | 0 (0) |
 | 19 | Cloud Forest Heights | Highlands and cold (M6c) | uncommon | temperate to hot | middling to wet | high | High Mountains | a mist shrine on a crag | mossy falls into the cloud | 4.9% | 26 (332) |
@@ -57,7 +57,7 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 23 | Fjords | Coasts and waters (M6d) | uncommon | cold to cool | dry to wet | hills, high, beside the sea | High Mountains | a boathouse at a fjord's head | a fall from the fjord wall | 0.4% | 8 (318) |
 | 24 | Black Sand Shores | Coasts and waters (M6d) | uncommon | temperate to hot | dry to wet | low, beside the sea | Windswept Plains | a black-stone harbour wall | basalt columns on the shore | 1.7% | 20 (330) |
 | 25 | Kelp Shallows | Coasts and waters (M6d) | uncommon | temperate to hot | sea | sea by the coast | The Western Sea | a sunken causeway | kelp forests | 1.3% | 24 (336) |
-| 26 | Raised Bogs | Coasts and waters (M6d) | uncommon | cold to temperate | wet | low | Fens | an old plank trackway across the bog | a domed bog with pools and cotton grass | 1.5% | 5 (707) |
+| 26 | Raised Bogs | Coasts and waters (M6d) | uncommon | cold to temperate | wet | low | Willow Vales | an old plank trackway across the bog | a domed bog with pools and cotton grass | 1.5% | 5 (707) |
 | 27 | Southern Drylands | Dry and fiery (M6e) | common | hot | dry | low, hills | Windswept Plains | a temple half buried in sand | a dry wadi with an old well | 1.8% | 11 (525) |
 | 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | Heath Moors | a ruined fire shrine | a smoking cone with a lava lake held in rock | 1.3% | 10 (451) |
 | 29 | Blighted Lands | Dry and fiery (M6e) | uncommon | cool to warm | dry to middling | low, hills | Heath Moors | a dead lord's ruined hall | grey dead trees and ash pools | 2.1% | 25 (311) |
