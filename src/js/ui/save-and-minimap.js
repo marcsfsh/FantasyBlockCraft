@@ -4,7 +4,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:8,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:9,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -41,7 +41,7 @@ const tiles=new Map();
 // The explored map keeps at most TILE_CAP chunk tiles (about 16 km² of explored ground); the longest unvisited go first (M3)
 const TILE_CAP=6000;
 function captureTile(lcx,lcz){
-  const ck=ckey(OX/CS+lcx,OZ/CS+lcz);let c=tiles.get(ck);
+  const ck=ckey(OX/CS+lcx,OZ/CS+lcz);let c=tiles.get(ck);exploreChunk(OX/CS+lcx,OZ/CS+lcz);
   if(c)tiles.delete(ck);else{c=document.createElement('canvas');c.width=c.height=CS;if(tiles.size>=TILE_CAP)tiles.delete(tiles.keys().next().value);}
   tiles.set(ck,c);
   c.getContext('2d').putImageData(mmImg,-lcx*CS,-lcz*CS,lcx*CS,lcz*CS,CS,CS);
@@ -82,7 +82,7 @@ function useWaystone(x,y,z){
   openTravel(k);
 }
 function openTravel(here){
-  invOpen=true;hold=-1;['invgrid','invname','sinv','bplist'].forEach(id=>{$(id).style.display='none';});
+  invOpen=true;hold=-1;['invgrid','invname','sinv','bplist','invsearch'].forEach(id=>{$(id).style.display='none';});
   const el=$('lore');el.innerHTML='';el.style.display='block';$('invtitle').textContent=wpName(here);
   const L=[...waypoints.values()].filter(m=>m.userData.k!==here).map(m=>[m,wpDist(m)]).sort((a,b)=>a[1]-b[1]);
   if(!L.length)el.textContent='No other waystone is attuned yet. Touch another Ancient Waystone, or build a Carved Waystone, to travel between them.';
@@ -109,12 +109,14 @@ function drawMM(){
   mmG.imageSmoothingEnabled=false;mmG.fillStyle='#1c1810';mmG.fillRect(0,0,S,S);
   if(mmZoom===2){const c0=Math.floor((ox+OX)/CS),c1=Math.floor((ox+OX+span)/CS),r0=Math.floor((oz+OZ)/CS),r1=Math.floor((oz+OZ+span)/CS);
     for(let cz=r0;cz<=r1;cz++)for(let cx=c0;cx<=c1;cx++){const t=tiles.get(ckey(cx,cz));if(t)mmG.drawImage(t,(cx*CS-OX-ox)*k,(cz*CS-OZ-oz)*k,CS*k+0.6,CS*k+0.6);}}
-  mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
+  // underground the near map shows a slice at the player's feet (M5b, Q40), refreshed four times a second
+  layerOn=layerWanted();if(layerOn){const t=performance.now();if(t-layerT>250||t<layerT){layerT=t;drawLayer();}mmG.drawImage(layerImg,(Math.floor(PL.x)-32-ox)*k,(Math.floor(PL.z)-32-oz)*k,64*k,64*k);}
+  else mmG.drawImage(mmBase,-ox*k,-oz*k,W*k,D*k);
   mmG.fillStyle='#ff4030';for(const p of primed)mmG.fillRect((p.x-ox)*k-2,(p.z-oz)*k-2,5,5);
   waypoints.forEach(m=>{let wx=(m.position.x-ox)*k,wz=(m.position.z-oz)*k;wx=Math.max(5,Math.min(S-5,wx));wz=Math.max(5,Math.min(S-5,wz));
     mmG.fillStyle=m.userData.c;mmG.strokeStyle='#000';mmG.lineWidth=1.5;mmG.beginPath();mmG.moveTo(wx,wz-5);mmG.lineTo(wx+5,wz);mmG.lineTo(wx,wz+5);mmG.lineTo(wx-5,wz);mmG.closePath();mmG.fill();mmG.stroke();});
   const cmp=carries(323);mmG.save();mmG.translate((PL.x-ox)*k,(PL.z-oz)*k);if(!cmp){mmG.fillStyle='#fff';mmG.strokeStyle='#000';mmG.lineWidth=2;mmG.beginPath();mmG.arc(0,0,4,0,6.3);mmG.stroke();mmG.fill();mmG.restore();return;}mmG.rotate(-PL.yaw);
   mmG.fillStyle='#fff';mmG.strokeStyle='#000';mmG.lineWidth=2;mmG.beginPath();mmG.moveTo(0,-9);mmG.lineTo(6,7);mmG.lineTo(0,3);mmG.lineTo(-6,7);mmG.closePath();mmG.stroke();mmG.fill();mmG.restore();
-  mmG.fillStyle='#f3efe2';mmG.font='18px VT323, monospace';mmG.fillText('N',S/2-4,16);
+  mmG.fillStyle='#f3efe2';mmG.font='18px VT323, monospace';mmG.fillText('N',S/2-4,16);if(layerOn)mmG.fillText('y '+Math.floor(PL.y),4,S-6);
 }
 

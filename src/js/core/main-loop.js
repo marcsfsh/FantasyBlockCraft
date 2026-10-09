@@ -109,7 +109,7 @@ function frame(now){
   stars.position.copy(camera.position);stars.rotation.y=curT()*Math.PI*2;
   waypoints.forEach(m=>{m.material.opacity=0.28+0.1*Math.sin(now*0.003+m.position.x);});
   placeClouds(PL.x+OX,PL.z+OZ,now/1000);
-  if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
+  if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();updFillBox();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;
     }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
@@ -119,6 +119,7 @@ function frame(now){
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
+      notePlace(where,bx+OX,bz+OZ);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     const fms=1000/Math.max(1,fps);
     $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+'  res '+Math.round(RES.ratio/DPR*100)+'%'+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}

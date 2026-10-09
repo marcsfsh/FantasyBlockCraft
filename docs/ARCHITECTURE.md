@@ -51,6 +51,8 @@ Consequences:
 | `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves, the survival HUD; climbing gear (rope, grapnel, `onClimb`), signal flares, the worn lamp (`lampLevel`, `lampTick`, `depthDim`) |
 | `src/js/gameplay/storage.js` | Containers that keep items by world position (`boxes`, saved as `cs`), loot rolled on first opening (`lootOf`), the container screen (D-033) |
 | `src/js/input/touch.js` | Touch controls |
+| `src/js/ui/worldmap.js` | Explored chunks (packed per region), places, markers, the world map screen drawn from `colInfo`, the minimap's layer view (D-037) |
+| `src/js/ui/creative.js` | Block search, the Fill Tool, `goTo`, time and weather, test structures (`stampAt`) (D-037) |
 | `src/js/ui/controls.js` | Key and button names, the rebinding panel (`BIND_ROWS`, `captureInput`), help built from the bindings by device and mode (`helpRows`), the readout switch (`setHud`) (D-036) |
 | `src/js/ui/hints.js` | One-time context hints (`HINTS`, `hint`, `hintTick`) (D-036) |
 | `src/js/ui/menus.js` | Hotbar, block menu, overlay and settings |
@@ -96,7 +98,7 @@ Column fill (terrain, soil, water, deepstone) -> `lavaSea` (the Fire Below) -> c
 
 ## Saves
 
-- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v8`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:8, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, t, dn}`: `cs` holds container contents and `at` attuned waystones, D-033). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
+- Worlds (D-021): an index under `SAVE_KEY` (currently `fantasy-blockcraft-save-v9`), `{active, list:[{id,name,seed,mode,created,played}]}`, and each world's data under `SAVE_KEY+':'+id` (`{v:9, seed, e, spawn, p, hot, mode, inv, eq, hp, food, gv, cs, at, ex, pl, mk, t, dn}`: `cs` holds container contents and `at` attuned waystones (D-033); `ex`, `pl` and `mk` the explored map, places and markers (D-037)). Older keys are deleted on load. Settings are under `blockcraft-settings-v1` and blueprints under `blockcraft-blueprints`, shared by all worlds.
 - `createWorld`, `switchWorld` (saves, then reloads into the other world), `deleteWorld`, `exportWorld` and `importWorld` live in `ui/save-and-minimap.js`; the pause menu lists the worlds. An exported file is `{format:'fantasy-blockcraft-world', saveKey, world, data}` and only loads under the same `SAVE_KEY`.
 - **Player changes only.** Automatic systems (`flowStep`, `randomTicks`) set `autoEdit`; their changes are recorded only where the player already changed that block, so crops keep their growth while natural water flow, grass spread and snow never grow the save.
 - A save stores the seed and the player's block edits by world coordinate. Edits are keyed by `wkey(X,y,Z)`: X and Z in 21 bits each and y in 9 bits (heights 0 to 511), decoded by `keyXYZ`; `tests/cases/11-saves.test.js` round-trips them. Saves always yield to updates: bump `SAVE_KEY` on any generation or save-format change (D-019).

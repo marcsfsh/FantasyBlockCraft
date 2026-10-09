@@ -51,10 +51,11 @@ function pollPad(dt){
       if(dp===14||dp===15){if(!padSlider(dp===15?1:-1))PAD.cx=Math.max(0,Math.min(innerWidth-2,PAD.cx+(dp===15?18:-18)));}
       else PAD.cy=Math.max(0,Math.min(innerHeight-2,PAD.cy+(dp===13?18:-18)));}
     if(ed(4))padSlider(-1);if(ed(5))padSlider(1);
-    if(ry)padScroll(ry*1100*dt);
+    if(ry&&!WM.open)padScroll(ry*1100*dt);
     if(ed(0))padClick(0);
     if(ed(2))padClick(2);
-    if(ed(1)||ed(3)||ed(9)){if(invOpen)closeInv();else if(ready&&!dead&&$('overlay').style.display!=='none'&&(ed(1)||ed(9)))lockOrPlay();}
+    if(WM.open){if(ed(4))wmZoom(0.5);if(ed(5))wmZoom(2);if(rx||ry){WM.X+=rx*600*dt/WM.s;WM.Z+=ry*600*dt/WM.s;drawWorldMap();}}
+    if(ed(1)||ed(3)||ed(9)){if(WM.open)closeWorldMap();else if(invOpen)closeInv();else if(ready&&!dead&&$('overlay').style.display!=='none'&&(ed(1)||ed(9)))lockOrPlay();}
     padCur.style.transform='translate('+PAD.cx+'px,'+PAD.cy+'px)';
   }else{
     PAD.lx=lx;PAD.ly=ly;PAD.jump=now[0];PAD.down=now[1];

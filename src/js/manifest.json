@@ -150,6 +150,14 @@
       "about": "Touch controls"
     },
     {
+      "path": "ui/worldmap.js",
+      "about": "The explored world map with places and markers, and the minimap's layer view underground (M5b)"
+    },
+    {
+      "path": "ui/creative.js",
+      "about": "Creative tools: block search, the Fill Tool, teleport, time and weather, test structures (M5b)"
+    },
+    {
       "path": "ui/controls.js",
       "about": "Key and button names, the rebinding panel, help built from the bindings by device and mode, the readout toggle (M5a)"
     },

@@ -235,7 +235,8 @@ function updFlares(dt){
   }
 }
 function sphere(cx,cy,cz,r,fn){for(let dy=-r;dy<=r;dy++)for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){if(dx*dx+dy*dy+dz*dz>r*r+r)continue;const x=cx+dx,y=cy+dy,z=cz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;fn(x,y,z,world[I(x,y,z)]);}}
-function cycleBrush(){if(creativeOnly())return;brushR=(brushR+1)%4;const w=brushR*2+1;toast(brushR?'Brush '+w+' blocks wide':'Brush off');$('tBrush').textContent=w+'x';}
+// brushes from 1 to 13 blocks wide (M5b: larger brushes, Q76)
+function cycleBrush(){if(creativeOnly())return;brushR=(brushR+1)%7;const w=brushR*2+1;toast(brushR?'Brush '+w+' blocks wide':'Brush off');$('tBrush').textContent=w+'x';}
 function jumpPress(){
   const n=performance.now();
   if(SURV()){lastSpace=n;return;}
@@ -253,6 +254,7 @@ function useBlock(th){
 }
 function act(btn){
   const held=curId();
+  if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}

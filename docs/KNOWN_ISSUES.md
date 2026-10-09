@@ -38,3 +38,7 @@
 - **Rebinding on the Ally X is untested on the device.** The controller capture reads the next button press through the Gamepad API (D-036); confirm it on the Ally X.
 - **Hints are per player, not per world.** Once seen they stay seen in every world; turning hints off and on again does not bring them back (clearing the site's storage does).
 - **Touch cannot rebind.** The Controls panel lists bindings on touch, but there are no keys or buttons to press; touch keeps its fixed buttons.
+- **The world map is drawn from the terrain plan, not from what is there.** Your own building, digging and the fine detail of places do not show on it; rivers and lakes are the planned ones (D-037).
+- **The world map is redrawn a few regions per frame** when first opened over a large explored area; the far parts appear over a moment.
+- **Test structures are built from the builder's own ground level.** A castle on a slope may float at one side or cut into the hill; they are for trying structures out, not for building.
+- **Large fills are slow.** A full 131072-block fill goes through `setBlock` one block at a time and can take a few seconds on the Ally X.
