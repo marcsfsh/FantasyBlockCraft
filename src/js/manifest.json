@@ -150,6 +150,14 @@
       "about": "Touch controls"
     },
     {
+      "path": "ui/controls.js",
+      "about": "Key and button names, the rebinding panel, help built from the bindings by device and mode, the readout toggle (M5a)"
+    },
+    {
+      "path": "ui/hints.js",
+      "about": "One-time context hints the first time something happens (M5a)"
+    },
+    {
       "path": "ui/menus.js",
       "about": "Hotbar, block menu, overlay and settings"
     },

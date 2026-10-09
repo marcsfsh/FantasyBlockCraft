@@ -37,8 +37,9 @@ function mineTick(dt){
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
     const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
     if(info.drop){let lost=0;const got=sick?sickleSweep(hit.x,hit.y,hit.z):id===ROPE||id===GRAPNEL?ropeTake(id,hit.x,hit.y,hit.z):dropsFor(id,tool);
+      if(BL[id].mat==='ore')hint('ore');
       for(const [d,n] of got){lost+=addItem(d,n);showName('+'+n+' '+nameOf(d));}if(lost)toast('Inventory full');drawBar(true);}
-    else if(BL[id].tier>0)toast('This needs a better pickaxe');
+    else if(BL[id].tier>0){toast('This needs a better pickaxe');hint('tier');}
     mineI=-1;mineP=0;crack.visible=false;return;
   }
   crack.visible=true;crack.position.set(hit.x+.5,hit.y+.5,hit.z+.5);crack.material.opacity=0.2+mineP*0.65;

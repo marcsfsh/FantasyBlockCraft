@@ -51,6 +51,8 @@ Consequences:
 | `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves, the survival HUD; climbing gear (rope, grapnel, `onClimb`), signal flares, the worn lamp (`lampLevel`, `lampTick`, `depthDim`) |
 | `src/js/gameplay/storage.js` | Containers that keep items by world position (`boxes`, saved as `cs`), loot rolled on first opening (`lootOf`), the container screen (D-033) |
 | `src/js/input/touch.js` | Touch controls |
+| `src/js/ui/controls.js` | Key and button names, the rebinding panel (`BIND_ROWS`, `captureInput`), help built from the bindings by device and mode (`helpRows`), the readout switch (`setHud`) (D-036) |
+| `src/js/ui/hints.js` | One-time context hints (`HINTS`, `hint`, `hintTick`) (D-036) |
 | `src/js/ui/menus.js` | Hotbar, block menu, overlay and settings |
 | `src/js/ui/save-and-minimap.js` | Saving, worlds (create, switch, delete, export, import) and the minimap |
 | `src/js/engine/world-streaming.js` | Initial generation, rebuild on travel, sliding window streaming |

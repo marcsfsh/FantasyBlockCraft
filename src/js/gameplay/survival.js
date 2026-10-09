@@ -33,7 +33,7 @@ function die(cause){
   if(document.pointerLockElement)document.exitPointerLock();playing=false;
 }
 function revive(){
-  hp=20;food=20;exh=0;air=10;fallTop=null;dead=false;$('death').style.display='none';respawn();drawStats();lockOrPlay();
+  const hadGrave=/grave/.test($('deathmsg').textContent);hp=20;food=20;exh=0;air=10;fallTop=null;dead=false;$('death').style.display='none';respawn();drawStats();lockOrPlay();if(hadGrave)hint('grave');
 }
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
