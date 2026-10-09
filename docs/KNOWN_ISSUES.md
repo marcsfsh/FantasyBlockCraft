@@ -19,6 +19,7 @@
 - **Sky light costs memory.** The sideways sky light store adds about 25 MB (one byte per cell of the loaded window) (D-027).
 - **The livelier look is checked only in software rendering.** Screenshots from headless Chromium show the clouds, moon, water, lava and sway rendering without shader errors; how they look and run on the Ally X and desktop is for the owner to judge.
 - **The new caves are judged only from headless screenshots and maps.** Whether cave mouths and sinkholes look good from outside, and whether systems feel connected and easy to follow, is for the owner to judge in play (D-029).
+- **Ravines look like cracks.** They are 1 to 3 blocks wide and up to 66 deep, cut along a noise line across any land, including lowlands next to lakes (Q137). M6a replaces them with gorges.
 - **Some cave systems have no entrance.** Secondary systems get an entrance only about one time in seven, and a main system gets none where its region has no dry land; they are reached by digging, from ravines, or through deep links.
 - **Lava falls are rare.** A fall needs a deep hall wall that fits its slot and pool; there are only a few per hundred regions.
 - **Streams are pools, not flowing water.** Each step of a stream is a still pool sunk into the passage floor; water does not run between them.

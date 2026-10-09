@@ -5,6 +5,9 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+### Tooling
+- M6 plan: the ravines, which read as cracks across the land, become wider gorges in M6a (Q137, D-038).
+
 ## 0.14.0 (2026-10-09): M5b, maps and creative tools
 
 Old saves do not load: the save format gained the explored map, places and markers, and the save key is now `fantasy-blockcraft-save-v9`. The world itself is unchanged.

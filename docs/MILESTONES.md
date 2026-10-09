@@ -245,9 +245,10 @@ Widened after the round-21 interview: M6 enriches every land and adds 30 new one
 - **Resources (Q130):** new woods, new stones, rare finds (useful later for magic), and wild food and dyes, by land.
 - **Water (Q126, Q129):** streams, falls, rapids, springs and ponds are shaped still water that looks flowing: always sound, never floods or leaks.
 - **Weather (Q127, Q128):** fog and mist, storms, dust and ash, and land-tinted skies, by land; still cosmetic; fog never closer than about 30 to 40 blocks.
+- **No cracks (Q137):** a cut into the land is a gorge you can see into and climb down: at least 5 blocks across at the floor and 12 or more at the top, walls stepping back in ledges, ends sloping out. Gorges are fewer than today's ravines and keep their job as ways down (about a third reach the caves). Lands may have more (Karst Crags, Fjords) or none (meadows, farmland). Tested: no ravine column narrower than 7 blocks at the surface.
 
 **Parts (Q117, Q133):**
-- **M6a, groundwork:** two bytes per block in the world (Q120); a land system (registry, transition map, tiers, minimum sizes); land names; a creative land tour; the land list and transition map as a document with a map picture for the owner to approve before any family is built (Q134). Existing lands keep their look.
+- **M6a, groundwork:** two bytes per block in the world (Q120); a land system (registry, transition map, tiers, minimum sizes); land names; a creative land tour; the land list and transition map as a document with a map picture for the owner to approve before any family is built (Q134). Existing lands keep their look, except for the ravines (Q137): the hairline cracks become proper gorges.
 - **M6b, forests:** Autumn Woods, Birch Glades, Pine Highlands, Ancient Giant Wood, Willow Vales (the Fens rework into them, Q119), Yew Wood, Silverwood. New woods.
 - **M6c, highlands and cold:** Alpine Meadows, Glacier Fields, Cloud Forest Heights, Karst Crags (sinkholes into the caves, Q132), Frozen Tundra (the Northern Fells rework into it); enrich the High Mountains; mountain waterfalls.
 - **M6d, coasts and waters:** Chalk Cliffs, Rocky Isles, Fjords, Black Sand Shores, Kelp Shallows, Raised Bogs; enrich the Western Sea, Grey Shore and Lake.

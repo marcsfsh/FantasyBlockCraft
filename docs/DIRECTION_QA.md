@@ -608,3 +608,6 @@ Options: keep 60 fps; some cost; looks first.
 **Q136. How should each family be checked?**
 Options (several allowed): land tour in creative; map pictures; screenshot tour; seed and coordinates.
 **Answer:** A land tour in creative: a pause-menu list of lands that takes the player to the nearest of each.
+
+**Q137. (Owner's note after the interview, with a screenshot near X 9, Z -599 in the Barrow Hills.)**
+**Answer:** "Something else to address in M6, I keep seeing these cracks in the landscape." They are the M2b ravines (`terrain.js`, the `rvBot` noise line): on seed 123456789 about 0.28% of land columns, half of them 1 block wide and nine in ten 3 or less, with a median depth of 27 and a deepest of 66. Planned for M6a: fewer, wider gorges with stepped walls and sloping ends, still ways down (D-038).
