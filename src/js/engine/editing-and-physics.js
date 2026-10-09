@@ -19,7 +19,7 @@ function undo(){
   for(let k=a.length-2;k>=0;k-=2){const i=keyToI(a[k]);if(i<0)continue;const t=(i/W)|0;setBlock(i%W,(t/D)|0,t%D,a[k+1],true);}
   toast('Undid '+(a.length/2)+' block'+(a.length>2?'s':''));tone(500,700,0.12,0.15);
 }
-function nbLight(x,y,z){let m=0;for(const F of FACES){const X=x+F.d[0],Y=y+F.d[1],Z=z+F.d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const L=BLK[I(X,Y,Z)];if(L>m)m=L;}return m;}
+function nbLight(x,y,z,A=BLK){let m=0;for(const F of FACES){const X=x+F.d[0],Y=y+F.d[1],Z=z+F.d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const L=A[I(X,Y,Z)];if(L>m)m=L;}return m;}
 // Water flows: sources (level 0) spread up to 7 blocks sideways and fall without limit
 const lvl=new Uint8Array(VOL),flowQ=new Set();let flowT=0;
 const WD=W*D,flowInto=id=>id===AIR||BL[id].cross||BL[id].torch;
@@ -60,15 +60,17 @@ function setBlock(x,y,z,v,force){
   put(i,v);
   if(!SOLID[v]&&y+1<H&&(BL[world[I(x,y+1,z)]].cross||BL[world[I(x,y+1,z)]].torch)){const j=I(x,y+1,z);if(curAct)curAct.push(iToKey(j),world[j]);put(j,AIR);}
   if(OPQ[v]&&y>0){const j=i-WD,bb=world[j];if(bb===GRASS||bb===SNOWG){if(curAct)curAct.push(iToKey(j),bb);put(j,DIRT);}}
-  calcHM(x,z);mmDirty.add(x+W*z);
+  const oh=hm[x+W*z];calcHM(x,z);const nh=hm[x+W*z];mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
   if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
   if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}
   lvl[i]=0;wakeWater(x,y,z);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const X=x+dx,Z=z+dz;if(X<0||Z<0||X>=W||Z>=D)continue;dirty.add(((X/CS)|0)+((Z/CS)|0)*NCX);}
-  if(LUM[old]||LUM[v]||(OPQ[old]!==OPQ[v]&&(BLK[i]>0||nbLight(x,y,z)>0))){
-    if(!lbox)lbox=[x,x,y,y,z,z];else{lbox[0]=Math.min(lbox[0],x);lbox[1]=Math.max(lbox[1],x);lbox[2]=Math.min(lbox[2],y);lbox[3]=Math.max(lbox[3],y);lbox[4]=Math.min(lbox[4],z);lbox[5]=Math.max(lbox[5],z);}
+  // relight around the edit; when the column's roof moved, the cells between the old and new roof changed between open and covered
+  if(LUM[old]||LUM[v]||oh!==nh||(OPQ[old]!==OPQ[v]&&(BLK[i]>0||SKL[i]>0||nbLight(x,y,z)>0||nbLight(x,y,z,SKL)>0))){
+    const ya=oh!==nh?Math.min(y,Math.min(oh,nh)+1):y,yb=oh!==nh?Math.max(y,Math.max(oh,nh)):y;
+    if(!lbox)lbox=[x,x,ya,yb,z,z];else{lbox[0]=Math.min(lbox[0],x);lbox[1]=Math.max(lbox[1],x);lbox[2]=Math.min(lbox[2],ya);lbox[3]=Math.max(lbox[3],yb);lbox[4]=Math.min(lbox[4],z);lbox[5]=Math.max(lbox[5],z);}
   }
 }
 // Sand and gravel fall when nothing holds them up

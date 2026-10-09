@@ -13,7 +13,7 @@ function regenerateAll(X,Z){
   OX=nOX;OZ=nOZ;
   torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
-  BLK.fill(0);world.fill(0);genDone.fill(0);
+  BLK.fill(0);SKL.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=1&&Math.abs(cz-cm)<=1)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
@@ -46,7 +46,7 @@ function shiftWindow(dx,dz){
     for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const nx=cx-cdx,nz=cz-cdz;if((nx<0||nz<0||nx>=NCX||nz>=NCZ)&&genDone[cx+cz*NCX])captureTile(cx,cz);}
   }
   const d3=dx+W*dz;
-  shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
+  shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(SKL,d3);shiftArr(lvl,d3);
   for(const a of [hm,hb,hg,ground,biome,entCol])shiftArr(a,d3);
   shiftArr(mmImg.data,d3*4);
   OX+=dx;OZ+=dz;
