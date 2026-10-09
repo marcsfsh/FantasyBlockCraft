@@ -11,7 +11,7 @@ while(genQ.length||genJob){processGenQ();frames++;
   if(frames===40||frames===300){shiftWindow(CS,0);shifts++;}if(frames===500){shiftWindow(0,-CS);shifts++;}}
 performance.now=realNow;
 const streamed=new Map();for(const [cx,cz] of ALL)streamed.set(key(cx,cz),chunkHash(cx,cz));
-const lightStreamed=BLK.slice();
+const lightStreamed=BLK.slice(),skyStreamed=SKL.slice();
 info('frames to stream the window one step per frame',frames,'(window slid',shifts,'times while streaming), steps per chunk',GEN_STEPS.length+2);
 assert(frames>=(NCX*NCZ-49)*(GEN_STEPS.length+2)/3,'each streamed chunk took several frames (up to three steps a frame while the queue is long)');
 // generate every chunk at once in a fresh window at the same place, and compare
@@ -20,9 +20,9 @@ genDone.fill(0);for(const [cx,cz] of ALL)genChunk(cx,cz);
 let same=0,diff=0;for(const [cx,cz] of ALL){if(streamed.get(key(cx,cz))===chunkHash(cx,cz))same++;else diff++;}
 info('streamed chunks equal to whole-chunk generation',same,'different',diff);
 assert(diff===0,'streaming step by step gives the same world, also across window slides');
-lightAll();let ld=0;for(let i=0;i<VOL;i++)if(lightStreamed[i]!==BLK[i])ld++;
-info('block light cells differing from a full recompute',ld);
-assert(ld===0,'light streamed step by step equals a full recompute');
+BLK.fill(0);lightAll();let ld=0,sd=0;for(let i=0;i<VOL;i++){if(lightStreamed[i]!==BLK[i])ld++;if(skyStreamed[i]!==SKL[i])sd++;}
+info('light cells differing from a full recompute: block',ld,'sky',sd);
+assert(ld===0&&sd===0,'light streamed step by step equals a full recompute');
 // how long the steps take on this machine (process time; the browser budget is 4 ms a frame)
 const times=[];regenerateAll(-2600,4100);
 {const job=()=>genJob;let t=process.hrtime.bigint();performance.now=()=>(fake+=3);

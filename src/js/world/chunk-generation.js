@@ -145,8 +145,9 @@ function sky(x,y,z){
   if(x<0||z<0||x>=W||z>=D)return 1;
   const ci=x+W*z,h=hm[ci];if(y>h)return 1;
   const g=hg[ci];
-  if(g>=0&&y<hb[ci]){if(y>g)return 0.74;const v=(1-(g-y)*0.13)*0.74;return v<0.08?0.08:v;}
-  const v=1-(h-y)*0.13;return v<0.08?0.08:v;
+  const s=y>=0?LCURVE[SKL[ci+W*D*y]]:0;
+  if(g>=0&&y<hb[ci]){if(y>g)return Math.max(0.74,s);const v=(1-(g-y)*0.13)*0.74;return Math.max(v<0.08?0.08:v,s);}
+  const v=1-(h-y)*0.13;return Math.max(v<0.08?0.08:v,s);
 }
 const LCURVE=new Float32Array(16);for(let i=1;i<16;i++)LCURVE[i]=Math.pow(0.84,15-i);
 function bl(x,y,z){if(x<0||z<0||y<0||x>=W||z>=D||y>=H)return 0;return LCURVE[BLK[x+W*(z+D*y)]];}

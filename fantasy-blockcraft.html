@@ -2505,62 +2505,85 @@ function sky(x,y,z){
   if(x<0||z<0||x>=W||z>=D)return 1;
   const ci=x+W*z,h=hm[ci];if(y>h)return 1;
   const g=hg[ci];
-  if(g>=0&&y<hb[ci]){if(y>g)return 0.74;const v=(1-(g-y)*0.13)*0.74;return v<0.08?0.08:v;}
-  const v=1-(h-y)*0.13;return v<0.08?0.08:v;
+  const s=y>=0?LCURVE[SKL[ci+W*D*y]]:0;
+  if(g>=0&&y<hb[ci]){if(y>g)return Math.max(0.74,s);const v=(1-(g-y)*0.13)*0.74;return Math.max(v<0.08?0.08:v,s);}
+  const v=1-(h-y)*0.13;return Math.max(v<0.08?0.08:v,s);
 }
 const LCURVE=new Float32Array(16);for(let i=1;i<16;i++)LCURVE[i]=Math.pow(0.84,15-i);
 function bl(x,y,z){if(x<0||z<0||y<0||x>=W||z>=D||y>=H)return 0;return LCURVE[BLK[x+W*(z+D*y)]];}
 
-// Block light flood fill (glowstone, lava)
+// Light flood fill: block light (glowstone, lava) in BLK, and sky light that spreads sideways in SKL (Q36, D-027).
+// Every open cell above its column's roof (hm) holds sky level 15 and spreads into covered cells like a light source, so
+// overhangs and cave mouths are lit from the side. Both stores never enter chunks that are not generated (genDone), so streamed
+// light equals a full recompute.
 const QS=1<<21,QM=QS-1,Q=new Int32Array(QS);let qh=0,qt=0;
+const SKL=new Uint8Array(VOL);
 function qpush(i){Q[qt]=i;qt=(qt+1)&QM;}
-function tryL(j,L){if(BLK[j]>=L||OPQ[world[j]])return;const x=j%W,z=((j/W)|0)%D;if(!genDone[(x>>4)+(z>>4)*NCX])return;BLK[j]=L;qpush(j);}
-function propagate(){
+function tryL(A,j,L){if(A[j]>=L||OPQ[world[j]])return;const x=j%W,z=((j/W)|0)%D;if(!genDone[(x>>4)+(z>>4)*NCX])return;A[j]=L;qpush(j);}
+function propagate(A){
   const WD=W*D;
   while(qh!==qt){
-    const i=Q[qh];qh=(qh+1)&QM;const L=BLK[i]-1;if(L<=0)continue;
+    const i=Q[qh];qh=(qh+1)&QM;const L=A[i]-1;if(L<=0)continue;
     const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;
-    if(x>0)tryL(i-1,L);if(x<W-1)tryL(i+1,L);if(z>0)tryL(i-W,L);if(z<D-1)tryL(i+W,L);if(y>0)tryL(i-WD,L);if(y<H-1)tryL(i+WD,L);
+    if(x>0)tryL(A,i-1,L);if(x<W-1)tryL(A,i+1,L);if(z>0)tryL(A,i-W,L);if(z<D-1)tryL(A,i+W,L);if(y>0)tryL(A,i-WD,L);if(y<H-1)tryL(A,i+WD,L);
   }
+}
+const blkSrc=(i,x,y,z)=>LUM[world[i]],skySrc=(i,x,y,z)=>y>hm[x+W*z]&&!OPQ[world[i]]?15:0;
+// Sets the sky level of a column's open cells (cells below are left alone) and queues the open cells that can light a covered
+// neighbour: only sideways ones, from the roof up to the highest roof beside it (below an open cell is open or the roof).
+function skyCol(x,z){
+  const h=hm[x+W*z];let top=h;
+  for(let y=h+1;y<H;y++){const i=I(x,y,z);if(!OPQ[world[i]])SKL[i]=15;}
+  if(x>0)top=Math.max(top,hm[x-1+W*z]);if(x<W-1)top=Math.max(top,hm[x+1+W*z]);if(z>0)top=Math.max(top,hm[x+W*(z-1)]);if(z<D-1)top=Math.max(top,hm[x+W*(z+1)]);
+  for(let y=h+1;y<=top&&y<H;y++){const i=I(x,y,z);if(SKL[i]===15)qpush(i);}
 }
 const torches=new Set();
-// Full recompute, one chunk's emitters at a time: seeding the whole window at once (the lava sea alone is some 300 000 emitters)
+// Full recompute, one chunk's sources at a time: seeding the whole window at once (the lava sea alone is some 300 000 emitters)
 // overflowed the queue and lost light (D-025). Light spreads to the maximum either way, so the order does not change the result.
-function lightAll(){for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){qh=qt=0;
+// Block light only rises (callers clear BLK first); sky light is cleared here.
+function lightAll(){SKL.fill(0);for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(!genDone[cx+cz*NCX])continue;qh=qt=0;
   for(let y=0;y<H;y++)for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS,i=I(x,y,z),e=i+CS;i<e;i++){const L=LUM[world[i]];if(L){if(BLK[i]<L){BLK[i]=L;qpush(i);}if(world[i]===TORCH)torches.add(i);}}
-  propagate();}}
+  propagate(BLK);qh=qt=0;
+  for(let z=cz*CS;z<cz*CS+CS;z++)for(let x=cx*CS;x<cx*CS+CS;x++)skyCol(x,z);
+  propagate(SKL);}}
 const dirty=new Set();let lbox=null;
 function lightChunk(x0,z0){
-  const x1=x0+CS-1,z1=z0+CS-1;qh=qt=0;
-  for(let y=0;y<H;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){const i=I(x,y,z),L=LUM[world[i]];BLK[i]=L;if(L)qpush(i);}
-  const cx=x0/CS,cz=z0/CS,dn=(a,b)=>a>=0&&b>=0&&a<NCX&&b<NCZ&&genDone[a+b*NCX];
+  const x1=x0+CS-1,z1=z0+CS-1,cx=x0/CS,cz=z0/CS,dn=(a,b)=>a>=0&&b>=0&&a<NCX&&b<NCZ&&genDone[a+b*NCX];
   const wE=dn(cx-1,cz),eE=dn(cx+1,cz),nE=dn(cx,cz-1),sE=dn(cx,cz+1);
-  for(let y=0;y<H;y++){
-    for(let z=z0;z<=z1;z++){if(wE){const i=I(x0-1,y,z);if(BLK[i]>1)qpush(i);}if(eE){const i=I(x1+1,y,z);if(BLK[i]>1)qpush(i);}}
-    for(let x=x0;x<=x1;x++){if(nE){const i=I(x,y,z0-1);if(BLK[i]>1)qpush(i);}if(sE){const i=I(x,y,z1+1);if(BLK[i]>1)qpush(i);}}
-  }
-  propagate();
+  // the light already in the generated neighbours, at the chunk's border
+  const border=A=>{for(let y=0;y<H;y++){
+    for(let z=z0;z<=z1;z++){if(wE){const i=I(x0-1,y,z);if(A[i]>1)qpush(i);}if(eE){const i=I(x1+1,y,z);if(A[i]>1)qpush(i);}}
+    for(let x=x0;x<=x1;x++){if(nE){const i=I(x,y,z0-1);if(A[i]>1)qpush(i);}if(sE){const i=I(x,y,z1+1);if(A[i]>1)qpush(i);}}}};
+  qh=qt=0;
+  for(let y=0;y<H;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){const i=I(x,y,z),L=LUM[world[i]];BLK[i]=L;SKL[i]=0;if(L)qpush(i);}
+  border(BLK);propagate(BLK);
+  qh=qt=0;for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)skyCol(x,z);
+  border(SKL);propagate(SKL);
 }
+// Recompute light in a box around edits: everything within 15 of a changed cell. For sky light the box also holds the cells
+// that changed from open to covered or back (setBlock widens it when a column's roof moves).
 function relight(b){
   const x0=Math.max(0,b[0]-15),x1=Math.min(W-1,b[1]+15),y0=Math.max(0,b[2]-15),y1=Math.min(H-1,b[3]+15),z0=Math.max(0,b[4]-15),z1=Math.min(D-1,b[5]+15);
-  const old=new Uint8Array((x1-x0+1)*(y1-y0+1)*(z1-z0+1));let k=0;
-  for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){const i=I(x,y,z);old[k++]=BLK[i];BLK[i]=0;}
-  qh=qt=0;
-  for(let y=y0-1;y<=y1+1;y++)for(let z=z0-1;z<=z1+1;z++)for(let x=x0-1;x<=x1+1;x++){
-    if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;
-    const i=I(x,y,z),inside=x>=x0&&x<=x1&&y>=y0&&y<=y1&&z>=z0&&z<=z1;
-    if(inside){const L=LUM[world[i]];if(L){BLK[i]=L;qpush(i);}}
-    else if(BLK[i]>1)qpush(i);
+  let mx0=1e9,mx1=-1,mz0=1e9,mz1=-1;
+  for(const [A,src] of [[BLK,blkSrc],[SKL,skySrc]]){
+    const old=new Uint8Array((x1-x0+1)*(y1-y0+1)*(z1-z0+1));let k=0;
+    for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){const i=I(x,y,z);old[k++]=A[i];A[i]=0;}
+    qh=qt=0;
+    for(let y=y0-1;y<=y1+1;y++)for(let z=z0-1;z<=z1+1;z++)for(let x=x0-1;x<=x1+1;x++){
+      if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;
+      const i=I(x,y,z),inside=x>=x0&&x<=x1&&y>=y0&&y<=y1&&z>=z0&&z<=z1;
+      if(inside){const L=genDone[(x>>4)+(z>>4)*NCX]?src(i,x,y,z):0;if(L){A[i]=L;qpush(i);}}
+      else if(A[i]>1)qpush(i);
+    }
+    propagate(A);
+    k=0;
+    for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){if(A[I(x,y,z)]!==old[k]){if(x<mx0)mx0=x;if(x>mx1)mx1=x;if(z<mz0)mz0=z;if(z>mz1)mz1=z;}k++;}
   }
-  propagate();
-  let mx0=1e9,mx1=-1,mz0=1e9,mz1=-1;k=0;
-  for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++){if(BLK[I(x,y,z)]!==old[k]){if(x<mx0)mx0=x;if(x>mx1)mx1=x;if(z<mz0)mz0=z;if(z>mz1)mz1=z;}k++;}
   if(mx1>=0){
     for(let cz=Math.max(0,((mz0-1)/CS)|0);cz<=Math.min(NCZ-1,((mz1+1)/CS)|0);cz++)
       for(let cx=Math.max(0,((mx0-1)/CS)|0);cx<=Math.min(NCX-1,((mx1+1)/CS)|0);cx++)dirty.add(cx+cz*NCX);
   }
 }
-
 // Three.js setup
 const canvas=$('c');
 const renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:false,powerPreference:'high-performance'});
@@ -2570,19 +2593,36 @@ renderer.setClearColor(SKY);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);
 camera.rotation.order='YXZ';scene.add(camera);
-const tex=new THREE.CanvasTexture(atlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+// The GPU gets a padded copy of the atlas: each 16-pixel tile sits in a 32-pixel cell whose border repeats the tile's edge
+// pixels, so smaller mipmap levels (distant blocks) no longer blend in the neighbouring tiles as lines (M3b, D-027)
+const ACELL=32,APAD=8,gpuAtlas=document.createElement('canvas');gpuAtlas.width=AC*ACELL;gpuAtlas.height=AR*ACELL;
+(function(){const g=gpuAtlas.getContext('2d'),o=g.createImageData(AC*ACELL,AR*ACELL),od=o.data,GW2=AC*ACELL;
+  for(let t=0;t<AC*AR;t++){const c=t%AC,r=(t/AC)|0;
+    for(let y=0;y<ACELL;y++)for(let x=0;x<ACELL;x++){const sx=Math.min(TS-1,Math.max(0,x-APAD)),sy=Math.min(TS-1,Math.max(0,y-APAD)),si=((r*TS+sy)*AW+c*TS+sx)*4,di=((r*ACELL+y)*GW2+c*ACELL+x)*4;
+      od[di]=dat[si];od[di+1]=dat[si+1];od[di+2]=dat[si+2];od[di+3]=dat[si+3];}}
+  g.putImageData(o,0,0);})();
+const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
 let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
-const VS='attribute float light;attribute float blk;attribute float aov;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
+// Vertex shader. The tops of plants (aov 0.93) sway in the wind (M3b).
+const VS='attribute float light;attribute float blk;attribute float aov;uniform float time;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
+  'void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec3 p=position;'+
+  'if(aov>0.925&&aov<0.935){p.x+=0.07*sin(time*1.6+position.x*0.8+position.z*0.6);p.z+=0.05*sin(time*1.3+position.z*0.9+position.x*0.4);}'+
+  'vec4 mv=modelViewMatrix*vec4(p,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
 const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;uniform float fogFar;uniform float opacity;uniform float alphaTest;uniform float lamp;uniform float time;uniform float wave;uniform float bright;uniform float skyMul;uniform vec3 skyTint;uniform float caveMin;uniform float lampR;uniform vec3 caveTint;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
   'void main(){vec4 t=texture2D(map,vUv);if(t.a<alphaTest)discard;float lm=lamp*vA*(1.0-smoothstep(3.0,lampR,vD));vec3 l=vB>1.5?vec3(1.0):max(max(max(vL*skyMul*skyTint,vec3(lm)*vec3(1.0,0.93,0.82)),vec3(1.0,0.8,0.55)*vB),caveTint*caveMin*vA)*bright;vec3 c=t.rgb*l;'+
-  'if(wave>0.5){c*=0.95+0.07*sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.05*sin(time*2.3-vW.x*0.5+vW.z*1.3);}float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
+  // water: a deeper blue with moving shimmer and glints in daylight; lava (blk 3): slow bright crests; emitters (blk 2 and up) pulse
+  // a little and glow through fog (M3b)
+  'if(wave>0.5){float s=sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.7*sin(time*2.3-vW.x*0.5+vW.z*1.3)+0.5*sin(time*0.9+(vW.x-vW.z)*0.35);c*=vec3(0.6,0.76,0.96)*(0.97+0.045*s);c+=vec3(0.07,0.09,0.11)*smoothstep(1.55,2.1,s)*vL*skyMul;}'+
+  'if(vB>2.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
+  'else if(vB>1.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
+  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
 function mat(op,at,transp,wave,overlay){return new THREE.ShaderMaterial({uniforms:Object.assign({},U,{opacity:{value:op},alphaTest:{value:at},wave:{value:wave?1:0},bright:{value:1}},overlay?{skyMul:{value:1}}:{}),vertexShader:VS,fragmentShader:FS,transparent:transp,depthWrite:!transp&&!overlay,depthTest:!overlay,side:transp?THREE.DoubleSide:THREE.FrontSide});}
-const matO=mat(1,0.5,false,false),matW=mat(0.72,0.0,true,true),matHand=mat(1,0.5,false,false,true);
+const matO=mat(1,0.5,false,false),matW=mat(0.8,0.0,true,true),matHand=mat(1,0.5,false,false,true);
 
 // Sun and clouds
 const sunDir=new THREE.Vector3(0.45,0.75,-0.5).normalize();
-const moon=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshBasicMaterial({color:0xdfe6f2,fog:false,depthWrite:false}));scene.add(moon);
+const moon=new THREE.Mesh(new THREE.PlaneGeometry(44,44),new THREE.MeshBasicMaterial({color:0xffffff,fog:false,depthWrite:false,transparent:true}));scene.add(moon);
 const starGeo=new THREE.BufferGeometry(),sp=new Float32Array(900*3);
 for(let i=0;i<900;i++){const u=tr()*2-1,a=tr()*6.2832,r=Math.sqrt(1-u*u);sp[i*3]=Math.cos(a)*r*380;sp[i*3+1]=Math.abs(u)*380+20;sp[i*3+2]=Math.sin(a)*r*380;}
 starGeo.setAttribute('position',new THREE.BufferAttribute(sp,3));
@@ -2614,11 +2654,33 @@ const shC=document.createElement('canvas');shC.width=shC.height=32;
 (function(){const g=shC.getContext('2d'),gr=g.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(0,0,0,0.6)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,32,32);})();
 const pShadow=new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shC),transparent:true,depthWrite:false}));
 pShadow.rotation.x=-Math.PI/2;scene.add(pShadow);
-const cc=document.createElement('canvas');cc.width=cc.height=64;
-(function(){const g=cc.getContext('2d');g.fillStyle='#fff';for(let i=0;i<46;i++){const x=tr()*64|0,y=tr()*64|0,w=3+(tr()*9|0),h=2+(tr()*5|0);for(let ox=-64;ox<=0;ox+=64)for(let oy=-64;oy<=0;oy+=64)g.fillRect(x+ox+64,y+oy+64,w,h),g.fillRect(x+ox,y+oy,w,h);}})();
-const ctex=new THREE.CanvasTexture(cc);ctex.magFilter=THREE.NearestFilter;ctex.minFilter=THREE.NearestFilter;ctex.wrapS=ctex.wrapT=THREE.RepeatWrapping;ctex.repeat.set(2,2);
-const clouds=new THREE.Mesh(new THREE.PlaneGeometry(1536,1536),new THREE.MeshBasicMaterial({map:ctex,transparent:true,opacity:0.82,depthWrite:false,side:THREE.DoubleSide}));
-clouds.rotation.x=-Math.PI/2;clouds.position.y=H+22;scene.add(clouds);
+// Clouds (M3b): a world-anchored layer of blocky clouds four blocks thick, from a 64 x 64 pattern of rectangles (drawn from the
+// shared texture stream as before) repeated every CLOUD_P blocks. The mesh covers 3 x 3 repeats and is moved by whole repeats
+// to keep the player over its middle, so its edge stays beyond the far plane. Lighter tops, darker undersides.
+const cloudRects=[];
+for(let i=0;i<46;i++){const x=tr()*64|0,y=tr()*64|0,w=3+(tr()*9|0),h=2+(tr()*5|0);cloudRects.push([x,y,w,h]);}
+const CLOUD_CELL=12,CLOUD_P=64*CLOUD_CELL,CLOUD_Y=SEA+150,cloudGrid=new Uint8Array(64*64);
+for(const [x,y,w,h] of cloudRects)for(let a=0;a<w;a++)for(let b=0;b<h;b++)cloudGrid[((x+a)&63)+64*((y+b)&63)]=1;
+const clouds=(function(){const N=192,T=4,C=CLOUD_CELL,p=[],col=[],idx=[],on=(i,j)=>i>=0&&j>=0&&i<N&&j<N&&cloudGrid[(i&63)+64*(j&63)];
+  const quad=(v,s)=>{const b=p.length/3;for(const q of v)p.push(q[0],q[1],q[2]);for(let k=0;k<4;k++)col.push(s,s,s);idx.push(b,b+1,b+2,b,b+2,b+3);};
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(!on(i,j))continue;const x0=i*C,x1=x0+C,z0=j*C,z1=z0+C;
+    quad([[x0,T,z0],[x0,T,z1],[x1,T,z1],[x1,T,z0]],1);quad([[x0,0,z0],[x1,0,z0],[x1,0,z1],[x0,0,z1]],0.72);
+    if(!on(i-1,j))quad([[x0,0,z0],[x0,0,z1],[x0,T,z1],[x0,T,z0]],0.86);if(!on(i+1,j))quad([[x1,0,z0],[x1,T,z0],[x1,T,z1],[x1,0,z1]],0.86);
+    if(!on(i,j-1))quad([[x0,0,z0],[x0,T,z0],[x1,T,z0],[x1,0,z0]],0.8);if(!on(i,j+1))quad([[x0,0,z1],[x1,0,z1],[x1,T,z1],[x0,T,z1]],0.8);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(p),3));g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(col),3));g.setIndex(idx);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,fog:false}));m.frustumCulled=false;scene.add(m);return m;})();
+// Place the cloud layer for the player at world (WX,WZ): the pattern drifts east by CLOUD_DRIFT blocks a second
+const CLOUD_DRIFT=1.9;
+function placeClouds(WX,WZ,sec){const d=(sec*CLOUD_DRIFT)%CLOUD_P,kx=Math.floor((WX-d)/CLOUD_P)-1,kz=Math.floor(WZ/CLOUD_P)-1;clouds.position.set(kx*CLOUD_P+d-OX,CLOUD_Y,kz*CLOUD_P-OZ);}
+// The moon shows eight phases, one a day (dayN, saved with the world): 0 full, 4 new
+const moonC=document.createElement('canvas');moonC.width=moonC.height=16;const moonTex=new THREE.CanvasTexture(moonC);moonTex.magFilter=moonTex.minFilter=THREE.NearestFilter;
+let moonPhase=-1;
+function drawMoon(ph){if(ph===moonPhase)return;moonPhase=ph;const g=moonC.getContext('2d'),im2=g.createImageData(16,16),c=Math.cos(Math.PI*ph/4),s=ph<=4?1:-1;
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const xr=(x-7.5)/7,yr=(y-7.5)/7,i=(y*16+x)*4;if(xr*xr+yr*yr>1){im2.data[i+3]=0;continue;}
+    const e=Math.sqrt(Math.max(0,1-yr*yr)),lit=xr*s>-e*c,crater=((x*7+y*13)%11===0)||(x>8&&x<11&&y>4&&y<7)||(x>3&&x<6&&y>9&&y<12),v=crater?186:226;
+    im2.data[i]=v;im2.data[i+1]=v+6;im2.data[i+2]=v+16;im2.data[i+3]=lit?255:0;}
+  g.putImageData(im2,0,0);moonTex.needsUpdate=true;}
+drawMoon(0);moon.material.map=moonTex;moon.material.needsUpdate=true;stars.renderOrder=-9;
 
 // Selection outline
 const selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.006,1.006,1.006)),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:0.65}));
@@ -2639,7 +2701,7 @@ const CROSS=[[[0,0,0],[1,0,1],[0,1,0],[1,1,1]],[[1,0,0],[0,0,1],[1,1,0],[0,1,1]]
 const AOF=[0.42,0.62,0.8,1];
 const occ=(x,y,z)=>{const id=get(x,y,z);return id&&BL[id].occ?1:0;};
 const UE=0.004;
-function pushUV(arr,t,u,v){const c=t%AC,r=(t/AC)|0;arr.push((c+UE+u*(1-2*UE))/AC,1-(r+1)/AR+(UE+v*(1-2*UE))/AR);}
+function pushUV(arr,t,u,v){const c=t%AC,r=(t/AC)|0;u=UE+u*(1-2*UE);v=UE+v*(1-2*UE);arr.push((c*ACELL+APAD+u*TS)/(AC*ACELL),1-(r*ACELL+APAD+(1-v)*TS)/(AR*ACELL));}
 const chunks=new Array(NCX*NCZ);
 // Growable typed buffers: much cheaper than pushing into plain arrays while meshing
 class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}
@@ -2839,7 +2901,7 @@ function buildChunk(cx,cz){
     if(b.cross){
       const L=sky(x,y,z)*0.92,B=b.emit?2:bl(x,y,z)*0.92,t=b.t[0];
       for(let q=0;q<2;q++){const base=O.p.length/3;
-        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(0.92);}
+        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(c[1]?0.93:0.92);} // tops sway
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }
@@ -2889,7 +2951,7 @@ function buildChunk(cx,cz){
           vl=sl/n;vb=sb/n;
           a=(A&&B)?0:3-A-B-C;
         }
-        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?2:vb*v);M.a.push(v);
+        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:2):vb*v);M.a.push(v);
       }
       if(ao[0]+ao[3]>ao[1]+ao[2])M.i.push(base,base+1,base+2,base+2,base+1,base+3);
       else M.i.push(base,base+1,base+3,base,base+3,base+2);
@@ -2927,7 +2989,7 @@ function undo(){
   for(let k=a.length-2;k>=0;k-=2){const i=keyToI(a[k]);if(i<0)continue;const t=(i/W)|0;setBlock(i%W,(t/D)|0,t%D,a[k+1],true);}
   toast('Undid '+(a.length/2)+' block'+(a.length>2?'s':''));tone(500,700,0.12,0.15);
 }
-function nbLight(x,y,z){let m=0;for(const F of FACES){const X=x+F.d[0],Y=y+F.d[1],Z=z+F.d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const L=BLK[I(X,Y,Z)];if(L>m)m=L;}return m;}
+function nbLight(x,y,z,A=BLK){let m=0;for(const F of FACES){const X=x+F.d[0],Y=y+F.d[1],Z=z+F.d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const L=A[I(X,Y,Z)];if(L>m)m=L;}return m;}
 // Water flows: sources (level 0) spread up to 7 blocks sideways and fall without limit
 const lvl=new Uint8Array(VOL),flowQ=new Set();let flowT=0;
 const WD=W*D,flowInto=id=>id===AIR||BL[id].cross||BL[id].torch;
@@ -2968,15 +3030,17 @@ function setBlock(x,y,z,v,force){
   put(i,v);
   if(!SOLID[v]&&y+1<H&&(BL[world[I(x,y+1,z)]].cross||BL[world[I(x,y+1,z)]].torch)){const j=I(x,y+1,z);if(curAct)curAct.push(iToKey(j),world[j]);put(j,AIR);}
   if(OPQ[v]&&y>0){const j=i-WD,bb=world[j];if(bb===GRASS||bb===SNOWG){if(curAct)curAct.push(iToKey(j),bb);put(j,DIRT);}}
-  calcHM(x,z);mmDirty.add(x+W*z);
+  const oh=hm[x+W*z];calcHM(x,z);const nh=hm[x+W*z];mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));
   if(old===WAYPT)delWP(i);if(v===WAYPT)addWP(i);
   if(old===TORCH)torches.delete(i);if(v===TORCH)torches.add(i);if(isFarm(old))farms.delete(i);if(isFarm(v))farms.add(i);
   if(old===GRAVE&&v!==GRAVE){const k=iToKey(i),items=graves.get(k);if(items&&SURV()){for(const q of items)addItem(q[0],q[1]);graves.delete(k);toast('You got your things back');}}
   lvl[i]=0;wakeWater(x,y,z);
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const X=x+dx,Z=z+dz;if(X<0||Z<0||X>=W||Z>=D)continue;dirty.add(((X/CS)|0)+((Z/CS)|0)*NCX);}
-  if(LUM[old]||LUM[v]||(OPQ[old]!==OPQ[v]&&(BLK[i]>0||nbLight(x,y,z)>0))){
-    if(!lbox)lbox=[x,x,y,y,z,z];else{lbox[0]=Math.min(lbox[0],x);lbox[1]=Math.max(lbox[1],x);lbox[2]=Math.min(lbox[2],y);lbox[3]=Math.max(lbox[3],y);lbox[4]=Math.min(lbox[4],z);lbox[5]=Math.max(lbox[5],z);}
+  // relight around the edit; when the column's roof moved, the cells between the old and new roof changed between open and covered
+  if(LUM[old]||LUM[v]||oh!==nh||(OPQ[old]!==OPQ[v]&&(BLK[i]>0||SKL[i]>0||nbLight(x,y,z)>0||nbLight(x,y,z,SKL)>0))){
+    const ya=oh!==nh?Math.min(y,Math.min(oh,nh)+1):y,yb=oh!==nh?Math.max(y,Math.max(oh,nh)):y;
+    if(!lbox)lbox=[x,x,ya,yb,z,z];else{lbox[0]=Math.min(lbox[0],x);lbox[1]=Math.max(lbox[1],x);lbox[2]=Math.min(lbox[2],ya);lbox[3]=Math.max(lbox[3],yb);lbox[4]=Math.min(lbox[4],z);lbox[5]=Math.max(lbox[5],z);}
   }
 }
 // Sand and gravel fall when nothing holds them up
@@ -3913,7 +3977,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:5,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4)});
+  const ok=lsSet(worldKey(WORLD.id),{v:5,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -4010,7 +4074,7 @@ function regenerateAll(X,Z){
   OX=nOX;OZ=nOZ;
   torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
-  BLK.fill(0);world.fill(0);genDone.fill(0);
+  BLK.fill(0);SKL.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
   for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){if(Math.abs(cx-cm)<=1&&Math.abs(cz-cm)<=1)genChunk(cx,cz);else genQ.push([cx,cz]);}
   genQ.sort((a,b)=>Math.hypot(a[0]-cm,a[1]-cm)-Math.hypot(b[0]-cm,b[1]-cm));
@@ -4043,7 +4107,7 @@ function shiftWindow(dx,dz){
     for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++){const nx=cx-cdx,nz=cz-cdz;if((nx<0||nz<0||nx>=NCX||nz>=NCZ)&&genDone[cx+cz*NCX])captureTile(cx,cz);}
   }
   const d3=dx+W*dz;
-  shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(lvl,d3);
+  shiftArr(world,d3);shiftArr(BLK,d3);shiftArr(SKL,d3);shiftArr(lvl,d3);
   for(const a of [hm,hb,hg,ground,biome,entCol])shiftArr(a,d3);
   shiftArr(mmImg.data,d3*4);
   OX+=dx;OZ+=dz;
@@ -4082,7 +4146,7 @@ async function generate(){
   $('seedline').textContent=WORLD.name+(resumed?', seed ':', a new endless world, seed ')+SEED+'.';
   if(resumed){
     const e=saved.e;for(let k=0;k+1<e.length;k+=2){storeEdit(e[k],e[k+1]);if(e[k+1]===WAYPT)addWPk(e[k]);}
-    if(typeof saved.t==='number')tod=saved.t;
+    if(typeof saved.t==='number')tod=saved.t;if(typeof saved.dn==='number')dayN=saved.dn;
     if(Array.isArray(saved.spawn))spawnW=saved.spawn;
     if(Array.isArray(saved.p)){OX=Math.floor(saved.p[0]/CS)*CS-W/2;OZ=Math.floor(saved.p[2]/CS)*CS-D/2;waypoints.forEach(m=>{const c=keyXYZ(m.userData.k);m.position.x=c[0]-OX+.5;m.position.z=c[2]-OZ+.5;});}
   }
@@ -4106,7 +4170,7 @@ async function generate(){
 
 // Day, night and weather
 const tintSet=new THREE.Color(1,0.82,0.66),flashC=new THREE.Color(0xdfe6ff);let flash=0,boltT=12;
-const DAYLEN=1200;let tod=0.3,rainAmt=0,raining=false,rainT=120+Math.random()*120,snowing=false;
+const DAYLEN=1200;let dayN=0,tod=0.3,rainAmt=0,raining=false,rainT=120+Math.random()*120,snowing=false;
 const cDay=new THREE.Color(0xa9d3ff),cNight=new THREE.Color(0x090e22),cSet=new THREE.Color(0xf0975a),cRain=new THREE.Color(0x6f7884),skyC=new THREE.Color(),tmpC=new THREE.Color(),sunC=new THREE.Color();
 function curT(){return settings.time==='day'?0.5:settings.time==='night'?0.0:tod;}
 function updSky(){
@@ -4118,7 +4182,8 @@ function updSky(){
   skyC.copy(cNight).lerp(cDay,d).lerp(cSet,sunset*0.5*Math.max(d,0.3));
   tmpC.copy(cRain).multiplyScalar(0.25+0.75*d);skyC.lerp(tmpC,rainAmt*0.65);
   stars.material.opacity=Math.max(0,1-d*1.7)*(1-rainAmt);
-  clouds.material.color.setScalar((0.22+0.78*d)*(1-0.35*rainAmt));clouds.material.opacity=0.82+0.15*rainAmt;
+  {const v=(0.22+0.78*d)*(1-0.35*rainAmt);clouds.material.color.setRGB(v,v*(1-0.1*sunset*d),v*(1-0.22*sunset*d));} // warmer at sunset
+  drawMoon(dayN%8);
   sunC.setHex(0xfff4c2).lerp(cSet,sunset*0.7);sun.material.color.copy(sunC);
   sun.visible=elev>-0.15;moon.visible=elev<0.2;
   U.skyMul.value=Math.min(1.2,U.skyMul.value+flash*0.9);skyC.lerp(flashC,flash*0.5);
@@ -4289,7 +4354,7 @@ function frame(now){
   if(ready&&playing){update(dt);
     const ex=PL.x-W/2,ez=PL.z-D/2;
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
-  if(ready){processGenQ();if(playing&&settings.time==='cycle')tod=(tod+dt/DAYLEN)%1;if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
+  if(ready){processGenQ();if(playing&&settings.time==='cycle'){tod+=dt/DAYLEN;if(tod>=1){tod-=1;dayN++;}}if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
   camera.position.set(PL.x,PL.y+EYE,PL.z);
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}
@@ -4326,11 +4391,12 @@ function frame(now){
     for(let c=0;c<chunks.length;c++){const ms=chunks[c];if(!ms)continue;const x=(c%NCX)*CS+8-pcx,z=((c/NCX)|0)*CS+8-pcz,v=x*x+z*z<lim;for(const m of ms)m.visible=v;}}
   sun.position.copy(camera.position).addScaledVector(sunDir,420);sun.lookAt(camera.position);
   halo.position.copy(camera.position).addScaledVector(sunDir,410);halo.lookAt(camera.position);
-  dome.position.copy(camera.position);dome.visible=head!==WATER&&head!==LAVA;
-  moon.position.copy(camera.position).addScaledVector(sunDir,-420);moon.lookAt(camera.position);
+  // deep in a cave the sky is hidden, so the far edge of the loaded area shows cave darkness, not the sky (M3b)
+  const skyOn=caveF<0.6;dome.position.copy(camera.position);dome.visible=head!==WATER&&head!==LAVA&&skyOn;sun.visible=sun.visible&&skyOn;halo.visible=halo.visible&&skyOn;stars.visible=skyOn;clouds.visible=skyOn;
+  moon.visible=moon.visible&&skyOn;moon.position.copy(camera.position).addScaledVector(sunDir,-420);moon.lookAt(camera.position);
   stars.position.copy(camera.position);stars.rotation.y=curT()*Math.PI*2;
   waypoints.forEach(m=>{m.material.opacity=0.28+0.1*Math.sin(now*0.003+m.position.x);});
-  clouds.position.x=PL.x;clouds.position.z=PL.z;ctex.offset.x=PL.x/768+now*0.0000025;ctex.offset.y=-PL.z/768;
+  placeClouds(PL.x+OX,PL.z+OZ,now/1000);
   if(ready){const hit=raycast(eyePos(),camDir(),6);updBpPreview();if(hit&&!isTool(curId())&&!photo){selBox.visible=true;selBox.position.set(hit.x+.5,hit.y+.5,hit.z+.5);selBox.scale.setScalar(brushR*2+1);
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;

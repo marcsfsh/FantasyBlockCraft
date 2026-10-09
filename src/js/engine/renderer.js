@@ -7,19 +7,36 @@ renderer.setClearColor(SKY);
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.05,600);
 camera.rotation.order='YXZ';scene.add(camera);
-const tex=new THREE.CanvasTexture(atlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+// The GPU gets a padded copy of the atlas: each 16-pixel tile sits in a 32-pixel cell whose border repeats the tile's edge
+// pixels, so smaller mipmap levels (distant blocks) no longer blend in the neighbouring tiles as lines (M3b, D-027)
+const ACELL=32,APAD=8,gpuAtlas=document.createElement('canvas');gpuAtlas.width=AC*ACELL;gpuAtlas.height=AR*ACELL;
+(function(){const g=gpuAtlas.getContext('2d'),o=g.createImageData(AC*ACELL,AR*ACELL),od=o.data,GW2=AC*ACELL;
+  for(let t=0;t<AC*AR;t++){const c=t%AC,r=(t/AC)|0;
+    for(let y=0;y<ACELL;y++)for(let x=0;x<ACELL;x++){const sx=Math.min(TS-1,Math.max(0,x-APAD)),sy=Math.min(TS-1,Math.max(0,y-APAD)),si=((r*TS+sy)*AW+c*TS+sx)*4,di=((r*ACELL+y)*GW2+c*ACELL+x)*4;
+      od[di]=dat[si];od[di+1]=dat[si+1];od[di+2]=dat[si+2];od[di+3]=dat[si+3];}}
+  g.putImageData(o,0,0);})();
+const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestMipmapLinearFilter;tex.generateMipmaps=true;tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
 let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
-const VS='attribute float light;attribute float blk;attribute float aov;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec4 mv=modelViewMatrix*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
+// Vertex shader. The tops of plants (aov 0.93) sway in the wind (M3b).
+const VS='attribute float light;attribute float blk;attribute float aov;uniform float time;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
+  'void main(){vUv=uv;vL=light;vB=blk;vA=aov;vW=position;vec3 p=position;'+
+  'if(aov>0.925&&aov<0.935){p.x+=0.07*sin(time*1.6+position.x*0.8+position.z*0.6);p.z+=0.05*sin(time*1.3+position.z*0.9+position.x*0.4);}'+
+  'vec4 mv=modelViewMatrix*vec4(p,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
 const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;uniform float fogFar;uniform float opacity;uniform float alphaTest;uniform float lamp;uniform float time;uniform float wave;uniform float bright;uniform float skyMul;uniform vec3 skyTint;uniform float caveMin;uniform float lampR;uniform vec3 caveTint;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
   'void main(){vec4 t=texture2D(map,vUv);if(t.a<alphaTest)discard;float lm=lamp*vA*(1.0-smoothstep(3.0,lampR,vD));vec3 l=vB>1.5?vec3(1.0):max(max(max(vL*skyMul*skyTint,vec3(lm)*vec3(1.0,0.93,0.82)),vec3(1.0,0.8,0.55)*vB),caveTint*caveMin*vA)*bright;vec3 c=t.rgb*l;'+
-  'if(wave>0.5){c*=0.95+0.07*sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.05*sin(time*2.3-vW.x*0.5+vW.z*1.3);}float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
+  // water: a deeper blue with moving shimmer and glints in daylight; lava (blk 3): slow bright crests; emitters (blk 2 and up) pulse
+  // a little and glow through fog (M3b)
+  'if(wave>0.5){float s=sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.7*sin(time*2.3-vW.x*0.5+vW.z*1.3)+0.5*sin(time*0.9+(vW.x-vW.z)*0.35);c*=vec3(0.6,0.76,0.96)*(0.97+0.045*s);c+=vec3(0.07,0.09,0.11)*smoothstep(1.55,2.1,s)*vL*skyMul;}'+
+  'if(vB>2.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
+  'else if(vB>1.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
+  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
 function mat(op,at,transp,wave,overlay){return new THREE.ShaderMaterial({uniforms:Object.assign({},U,{opacity:{value:op},alphaTest:{value:at},wave:{value:wave?1:0},bright:{value:1}},overlay?{skyMul:{value:1}}:{}),vertexShader:VS,fragmentShader:FS,transparent:transp,depthWrite:!transp&&!overlay,depthTest:!overlay,side:transp?THREE.DoubleSide:THREE.FrontSide});}
-const matO=mat(1,0.5,false,false),matW=mat(0.72,0.0,true,true),matHand=mat(1,0.5,false,false,true);
+const matO=mat(1,0.5,false,false),matW=mat(0.8,0.0,true,true),matHand=mat(1,0.5,false,false,true);
 
 // Sun and clouds
 const sunDir=new THREE.Vector3(0.45,0.75,-0.5).normalize();
-const moon=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshBasicMaterial({color:0xdfe6f2,fog:false,depthWrite:false}));scene.add(moon);
+const moon=new THREE.Mesh(new THREE.PlaneGeometry(44,44),new THREE.MeshBasicMaterial({color:0xffffff,fog:false,depthWrite:false,transparent:true}));scene.add(moon);
 const starGeo=new THREE.BufferGeometry(),sp=new Float32Array(900*3);
 for(let i=0;i<900;i++){const u=tr()*2-1,a=tr()*6.2832,r=Math.sqrt(1-u*u);sp[i*3]=Math.cos(a)*r*380;sp[i*3+1]=Math.abs(u)*380+20;sp[i*3+2]=Math.sin(a)*r*380;}
 starGeo.setAttribute('position',new THREE.BufferAttribute(sp,3));
@@ -51,11 +68,33 @@ const shC=document.createElement('canvas');shC.width=shC.height=32;
 (function(){const g=shC.getContext('2d'),gr=g.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(0,0,0,0.6)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,32,32);})();
 const pShadow=new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shC),transparent:true,depthWrite:false}));
 pShadow.rotation.x=-Math.PI/2;scene.add(pShadow);
-const cc=document.createElement('canvas');cc.width=cc.height=64;
-(function(){const g=cc.getContext('2d');g.fillStyle='#fff';for(let i=0;i<46;i++){const x=tr()*64|0,y=tr()*64|0,w=3+(tr()*9|0),h=2+(tr()*5|0);for(let ox=-64;ox<=0;ox+=64)for(let oy=-64;oy<=0;oy+=64)g.fillRect(x+ox+64,y+oy+64,w,h),g.fillRect(x+ox,y+oy,w,h);}})();
-const ctex=new THREE.CanvasTexture(cc);ctex.magFilter=THREE.NearestFilter;ctex.minFilter=THREE.NearestFilter;ctex.wrapS=ctex.wrapT=THREE.RepeatWrapping;ctex.repeat.set(2,2);
-const clouds=new THREE.Mesh(new THREE.PlaneGeometry(1536,1536),new THREE.MeshBasicMaterial({map:ctex,transparent:true,opacity:0.82,depthWrite:false,side:THREE.DoubleSide}));
-clouds.rotation.x=-Math.PI/2;clouds.position.y=H+22;scene.add(clouds);
+// Clouds (M3b): a world-anchored layer of blocky clouds four blocks thick, from a 64 x 64 pattern of rectangles (drawn from the
+// shared texture stream as before) repeated every CLOUD_P blocks. The mesh covers 3 x 3 repeats and is moved by whole repeats
+// to keep the player over its middle, so its edge stays beyond the far plane. Lighter tops, darker undersides.
+const cloudRects=[];
+for(let i=0;i<46;i++){const x=tr()*64|0,y=tr()*64|0,w=3+(tr()*9|0),h=2+(tr()*5|0);cloudRects.push([x,y,w,h]);}
+const CLOUD_CELL=12,CLOUD_P=64*CLOUD_CELL,CLOUD_Y=SEA+150,cloudGrid=new Uint8Array(64*64);
+for(const [x,y,w,h] of cloudRects)for(let a=0;a<w;a++)for(let b=0;b<h;b++)cloudGrid[((x+a)&63)+64*((y+b)&63)]=1;
+const clouds=(function(){const N=192,T=4,C=CLOUD_CELL,p=[],col=[],idx=[],on=(i,j)=>i>=0&&j>=0&&i<N&&j<N&&cloudGrid[(i&63)+64*(j&63)];
+  const quad=(v,s)=>{const b=p.length/3;for(const q of v)p.push(q[0],q[1],q[2]);for(let k=0;k<4;k++)col.push(s,s,s);idx.push(b,b+1,b+2,b,b+2,b+3);};
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){if(!on(i,j))continue;const x0=i*C,x1=x0+C,z0=j*C,z1=z0+C;
+    quad([[x0,T,z0],[x0,T,z1],[x1,T,z1],[x1,T,z0]],1);quad([[x0,0,z0],[x1,0,z0],[x1,0,z1],[x0,0,z1]],0.72);
+    if(!on(i-1,j))quad([[x0,0,z0],[x0,0,z1],[x0,T,z1],[x0,T,z0]],0.86);if(!on(i+1,j))quad([[x1,0,z0],[x1,T,z0],[x1,T,z1],[x1,0,z1]],0.86);
+    if(!on(i,j-1))quad([[x0,0,z0],[x0,T,z0],[x1,T,z0],[x1,0,z0]],0.8);if(!on(i,j+1))quad([[x0,0,z1],[x1,0,z1],[x1,T,z1],[x0,T,z1]],0.8);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(p),3));g.setAttribute('color',new THREE.BufferAttribute(new Float32Array(col),3));g.setIndex(idx);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,fog:false}));m.frustumCulled=false;scene.add(m);return m;})();
+// Place the cloud layer for the player at world (WX,WZ): the pattern drifts east by CLOUD_DRIFT blocks a second
+const CLOUD_DRIFT=1.9;
+function placeClouds(WX,WZ,sec){const d=(sec*CLOUD_DRIFT)%CLOUD_P,kx=Math.floor((WX-d)/CLOUD_P)-1,kz=Math.floor(WZ/CLOUD_P)-1;clouds.position.set(kx*CLOUD_P+d-OX,CLOUD_Y,kz*CLOUD_P-OZ);}
+// The moon shows eight phases, one a day (dayN, saved with the world): 0 full, 4 new
+const moonC=document.createElement('canvas');moonC.width=moonC.height=16;const moonTex=new THREE.CanvasTexture(moonC);moonTex.magFilter=moonTex.minFilter=THREE.NearestFilter;
+let moonPhase=-1;
+function drawMoon(ph){if(ph===moonPhase)return;moonPhase=ph;const g=moonC.getContext('2d'),im2=g.createImageData(16,16),c=Math.cos(Math.PI*ph/4),s=ph<=4?1:-1;
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const xr=(x-7.5)/7,yr=(y-7.5)/7,i=(y*16+x)*4;if(xr*xr+yr*yr>1){im2.data[i+3]=0;continue;}
+    const e=Math.sqrt(Math.max(0,1-yr*yr)),lit=xr*s>-e*c,crater=((x*7+y*13)%11===0)||(x>8&&x<11&&y>4&&y<7)||(x>3&&x<6&&y>9&&y<12),v=crater?186:226;
+    im2.data[i]=v;im2.data[i+1]=v+6;im2.data[i+2]=v+16;im2.data[i+3]=lit?255:0;}
+  g.putImageData(im2,0,0);moonTex.needsUpdate=true;}
+drawMoon(0);moon.material.map=moonTex;moon.material.needsUpdate=true;stars.renderOrder=-9;
 
 // Selection outline
 const selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.006,1.006,1.006)),new THREE.LineBasicMaterial({color:0x000000,transparent:true,opacity:0.65}));
@@ -76,7 +115,7 @@ const CROSS=[[[0,0,0],[1,0,1],[0,1,0],[1,1,1]],[[1,0,0],[0,0,1],[1,1,0],[0,1,1]]
 const AOF=[0.42,0.62,0.8,1];
 const occ=(x,y,z)=>{const id=get(x,y,z);return id&&BL[id].occ?1:0;};
 const UE=0.004;
-function pushUV(arr,t,u,v){const c=t%AC,r=(t/AC)|0;arr.push((c+UE+u*(1-2*UE))/AC,1-(r+1)/AR+(UE+v*(1-2*UE))/AR);}
+function pushUV(arr,t,u,v){const c=t%AC,r=(t/AC)|0;u=UE+u*(1-2*UE);v=UE+v*(1-2*UE);arr.push((c*ACELL+APAD+u*TS)/(AC*ACELL),1-(r*ACELL+APAD+(1-v)*TS)/(AR*ACELL));}
 const chunks=new Array(NCX*NCZ);
 // Growable typed buffers: much cheaper than pushing into plain arrays while meshing
 class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}
