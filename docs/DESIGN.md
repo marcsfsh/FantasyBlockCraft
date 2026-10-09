@@ -100,6 +100,17 @@ The old peoples' lamps went out long ago. Lanterns, sconces, torches and glowsto
 
 Sky light reaches sideways under overhangs and into cave mouths, fading over about 15 blocks. Water shimmers and catches the sun, the lava sea rolls, plants sway, and lamps and glowing blocks show through fog. Clouds are flat blocky shapes that stay in place in the world and drift slowly, coloured by sunset and dark at night. The moon goes through eight phases, one per day.
 
+## Tools and gear (D-032)
+
+- **The metal ladder:** wood, stone, copper, bronze, iron, steel, moonsilver. Each metal makes a pickaxe, an axe and a shovel, each faster and longer lasting than the metal before. Each pickaxe is the first that can mine the next metal's ore (stone for copper and zinc, copper for tin and gold, bronze for iron, iron for platinum and diamonds, steel for moonsilver, moonsilver for obsidian). Bronze is copper and tin; brass is copper and zinc; steel is iron and coal; moonsilver needs the blast furnace.
+- **Gold and platinum** are for special things: blocks to build with, the gold sickle (cuts all plants within two blocks, harvests and replants ripe crops), the platinum pickaxe (fastest made, soon worn). Later currency and magic (Q68).
+- **Bronze shears** keep leaves, cobwebs and plants whole.
+- **Climbing:** ladders lean on a wall and stand on the ground or a ladder; iron pitons go into rock at any height; rope unrolls down from where it is placed; the grapnel, thrown at a wall below a ledge, catches the top edge and hangs rope to the ground. On any of them jump climbs, down or sprint climbs down, and letting go holds still.
+- **Finding the way:** in survival a map shows the minimap, a compass gives X, Z and the heading, a depth gauge the height. Creative shows all of it.
+- **Signal flares** climb about 60 blocks and burn red as they drift down.
+- **The Blasting Keg** is the dwarves' mining charge. **The Blueprint Tool** is for creative mode only.
+- **Starting kit** for a new survival world: wooden pickaxe and axe, a map, 8 torches, 4 bread.
+
 ## Controls
 
 Keyboard and mouse, touch, and Xbox-layout controllers (including the ROG Ally X in gamepad mode). The help panel on the pause screen switches to whichever is in use. Creative mode has flying and noclip (fly through blocks: N, the Clip button, or the pause menu).

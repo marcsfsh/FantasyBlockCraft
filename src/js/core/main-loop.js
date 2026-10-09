@@ -1,9 +1,5 @@
 // Main loop
-let caveF=0,cullT=0;const caveDark=new THREE.Color(0.035,0.04,0.06),caveFogC=new THREE.Color();
-const ropeV=new THREE.Vector3(),ropeGeo=new THREE.BufferGeometry();
-ropeGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
-const rope=new THREE.Line(ropeGeo,new THREE.LineBasicMaterial({color:0x2a1c10}));rope.frustumCulled=false;rope.visible=false;scene.add(rope);
-const hookTip=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,0.2),new THREE.MeshBasicMaterial({color:0xa8aeb8}));hookTip.visible=false;scene.add(hookTip);
+let caveF=0,cullT=0,wasWall=false;const caveDark=new THREE.Color(0.035,0.04,0.06),caveFogC=new THREE.Color();
 let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;
 const tint=$('tint'),HAND0=TOUCH?new THREE.Vector3(0.5,-0.62,-1.05):new THREE.Vector3(0.56,-0.5,-0.95);
 function update(dt){
@@ -19,25 +15,18 @@ function update(dt){
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;
   if(PL.ground||PL.fly||inLiq)gliding=false;
-  const hooked=G.on&&G.t>=1;
   if(gliding){const gs=9+Math.max(0,-PL.pitch)*10,kk=Math.min(1,1.6*dt);PL.vx+=(-sy*gs+cy*str*3-PL.vx)*kk;PL.vz+=(-cy*gs-sy*str*3-PL.vz)*kk;}
-  else if(!hooked){
+  else{
     const acc=PL.fly?14:onIce?1.5:PL.ground?14:inLiq?6:3.2,k=Math.min(1,acc*dt);
     PL.vx+=(wx*speed*(onIce?1.25:1)-PL.vx)*k;PL.vz+=(wz*speed*(onIce?1.25:1)-PL.vz)*k;
   }
   if(PL.fly){const tv=((jump?1:0)-(down?1:0))*speed;PL.vy+=(tv-PL.vy)*Math.min(1,10*dt);}
   else if(inLiq){PL.vy-=7*dt;if(jump)PL.vy=Math.min(PL.vy+22*dt,3.4);PL.vy*=1-Math.min(1,2.2*dt);if(PL.vy<-3.5)PL.vy=-3.5;}
   else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
-  if(G.on){
-    if(G.t<1)G.t=Math.min(1,G.t+dt*60/Math.max(1,G.len));
-    else if(!SOLID[get(G.bx,G.by,G.bz)])releaseHook(false);
-    else{
-      let dx=G.ax-PL.x,dy=G.ay-(PL.y+1.0),dz=G.az-PL.z;const d=Math.hypot(dx,dy,dz);
-      if(d<1.5)releaseHook(true);
-      else{dx/=d;dy/=d;dz/=d;const a=50*dt;PL.vx+=dx*a+wx*6*dt;PL.vy+=dy*a+21*dt;PL.vz+=dz*a+wz*6*dt;
-        const s=Math.hypot(PL.vx,PL.vy,PL.vz);if(s>22){PL.vx*=22/s;PL.vy*=22/s;PL.vz*=22/s;}}
-    }
-  }
+  // climbing (M4): on a ladder, piton or rope, jump climbs, down or sprint descends, and nothing holds the player still
+  const climb=!PL.fly&&!inLiq&&onClimb();
+  if(climb){gliding=false;PL.vy=jump||(fwd>0.3&&wasWall)?3.2:(shift||tch.down||PAD.down)?-3.6:0;}
+  if(climb!==PL.climb){PL.climb=climb;$('tDown').style.display=PL.fly||climb?'grid':'none';}
   const n=Math.max(1,Math.ceil(Math.max(Math.abs(PL.vx),Math.abs(PL.vy),Math.abs(PL.vz))*dt/0.35)),h=dt/n;
   const wasGround=PL.ground;PL.ground=false;let wallHit=false;
   for(let i=0;i<n;i++){
@@ -50,9 +39,10 @@ function update(dt){
   survivalTick(dt,inLiq,Math.hypot(PL.vx,PL.vz)*dt,sprint);
   if(PL.ground)airT=0;else airT+=dt;
   if(inLiq&&wallHit&&jump)PL.vy=Math.max(PL.vy,5.6);
+  wasWall=wallHit;
   if(TOUCH&&look.id!==null&&!look.moved&&!look.breaking&&performance.now()-look.t0>380){look.breaking=true;act(0);hold=0;holdT=0.25;}
   if(SURV()&&hold===0)mineTick(dt);else if(mineI>=0){mineI=-1;mineP=0;crack.visible=false;}
-  if(hold>=0&&!(hold===2&&isTool(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
+  if(hold>=0&&!(hold===2&&oneShot(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
   const mv=Math.hypot(PL.vx,PL.vz);if(PL.ground&&mv>0.5)bob+=mv*dt*1.9;
   if(PL.ground&&mv>1){stepD+=mv*dt;if(stepD>1.9){stepD=0;const under=get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z)),sd=SND[BL[under].snd]||SND.stone;burst(0.07,'bandpass',sd[0]*0.55*(0.9+Math.random()*0.2),sd[1],0.13);}}
   if(inLiq&&!wasLiq&&PL.vy<-3){burst(0.4,'lowpass',1200,0.6,0.3);for(let k=0;k<26;k++)spawnP(PL.x,PL.y+0.3,PL.z,(Math.random()-.5)*4,2+Math.random()*4,(Math.random()-.5)*4,[.75,.85,1],0.7,14);}
@@ -87,7 +77,7 @@ function frame(now){
   camera.rotation.set(PL.pitch,PL.yaw,0);
   {let sy2=-1;const fx=Math.floor(PL.x),fz=Math.floor(PL.z);for(let y=Math.floor(PL.y+0.01);y>=Math.floor(PL.y)-24&&y>=0;y--){if(SOLID[get(fx,y,fz)]){sy2=y+1;break;}}
    if(sy2<0||photo||!ready){pShadow.visible=false;}else{const dd=PL.y-sy2;pShadow.visible=true;pShadow.position.set(PL.x,sy2+0.015,PL.z);pShadow.material.opacity=Math.max(0,0.5-dd*0.025);pShadow.scale.setScalar(1+dd*0.03);}}
-  const F0=settings.fov,tf=gliding||G.on?F0+13:PL.fly||(Math.hypot(PL.vx,PL.vz)>5)?F0+7:F0;
+  const F0=settings.fov,tf=gliding?F0+13:PL.fly||(Math.hypot(PL.vx,PL.vz)>5)?F0+7:F0;
   if(Math.abs(camera.fov-tf)>0.1){camera.fov+=(tf-camera.fov)*Math.min(1,dt*8);camera.updateProjectionMatrix();}
   // held block
   swing=Math.max(0,swing-dt*5);const sw=Math.sin(swing*Math.PI),mv=Math.min(1,Math.hypot(PL.vx,PL.vz)/4);
@@ -96,12 +86,6 @@ function frame(now){
   hand.position.set(HAND0.x+Math.cos(bob)*0.025*mv-sw*0.08+lagX,HAND0.y+Math.abs(Math.sin(bob))*0.035*mv-sw*0.14+lagY,HAND0.z+sw*0.1);
   hand.rotation.set(-sw*0.7,-0.62,0.06);hand.scale.setScalar(TOUCH?0.34:0.42);
   handItem.position.set(hand.position.x+0.02,hand.position.y+0.08,hand.position.z);handItem.rotation.set(-sw*0.9-0.1,-0.35,0.25-sw*0.4);handItem.scale.setScalar(TOUCH?0.48:0.56);
-  if(G.on){
-    camera.updateMatrixWorld(true);hand.getWorldPosition(ropeV);
-    const t=G.t,hx=ropeV.x+(G.ax-ropeV.x)*t,hy=ropeV.y+(G.ay-ropeV.y)*t,hz=ropeV.z+(G.az-ropeV.z)*t,ra=rope.geometry.attributes.position.array;
-    ra[0]=ropeV.x;ra[1]=ropeV.y;ra[2]=ropeV.z;ra[3]=hx;ra[4]=hy;ra[5]=hz;rope.geometry.attributes.position.needsUpdate=true;
-    rope.visible=hookTip.visible=true;hookTip.position.set(hx,hy,hz);
-  }else rope.visible=hookTip.visible=false;
   const ex=Math.floor(PL.x),ey=Math.floor(PL.y+EYE),ez=Math.floor(PL.z);
   caveF+=((ready&&sky(ex,ey,ez)<0.3?1:0)-caveF)*Math.min(1,dt*1.5);
   matHand.uniforms.bright.value=Math.max(0.22,Math.min(1,Math.max(sky(ex,ey,ez)*U.skyMul.value,bl(ex,ey,ez))));handItem.material.color.setScalar(matHand.uniforms.bright.value);
@@ -135,9 +119,14 @@ function frame(now){
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):(surfaceName(bx+OX,yy,bz+OZ)||BIOMES[biome[ci]]);
       if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
     const fms=1000/Math.max(1,fps);
-    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+'\nXYZ '+(bx+OX)+' '+Math.floor(PL.y)+' '+(bz+OZ)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(G.on?'\nHooked':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
   {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
 let lastWhere='',lastWhereT=0;
+function navLine(bx,bz){
+  const yy=Math.floor(PL.y),g=bx>=0&&bz>=0&&bx<W&&bz<D?ground[bx+W*bz]:yy,c=carries(323),d=carries(324);
+  if(!c&&!d)return '';
+  return '\n'+(c?'X '+(bx+OX)+' Z '+(bz+OZ)+', facing '+heading():'')+(c&&d?'  ':'')+(d?'Y '+yy+(yy<g-2?' ('+(g-yy)+' below the surface)':''):'');
+}
 function showBiome(n){const el=$('name');el.textContent=n;el.style.opacity=1;clearTimeout(nameTimer);nameTimer=setTimeout(()=>{el.style.opacity=0;},2200);}
 function infoExtra(){
   const t=curT()*24,hh=Math.floor(t),mi=Math.floor((t-hh)*60);

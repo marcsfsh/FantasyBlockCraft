@@ -19,7 +19,7 @@
     },
     {
       "path": "blocks/items.js",
-      "about": "Items that are not blocks: fuel, ores, ingots, tools"
+      "about": "Items that are not blocks: fuel, ores, ingots, the tool ladder and gear, and their icons"
     },
     {
       "path": "blocks/atlas.js",
@@ -127,7 +127,7 @@
     },
     {
       "path": "gameplay/mining.js",
-      "about": "Survival mining: hold-to-break timing, pickaxe tiers and drops"
+      "about": "Survival mining: hold-to-break timing by tool and material, pickaxe tiers, drops, the sickle's sweep"
     },
     {
       "path": "gameplay/crafting.js",
@@ -139,7 +139,7 @@
     },
     {
       "path": "gameplay/survival.js",
-      "about": "Health, hunger, air, damage, death, graves and the survival HUD"
+      "about": "Health, hunger, air, damage, death, graves, the survival HUD, climbing gear and signal flares"
     },
     {
       "path": "input/touch.js",

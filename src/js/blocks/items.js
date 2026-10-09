@@ -8,8 +8,26 @@ item(230,'Diamond','gem',[96,232,222]);item(202,'Wheat','tile',null,{tile:83});i
 item(208,'Wheat Seeds','seeds',[150,170,70]);item(209,'Potato','lump',[186,144,86]);item(269,'Baked Potato','lump',[222,176,92]);item(271,'Brass Cog','cog',[226,188,86]);item(272,'Gold Goblet','goblet',[246,206,64]);item(273,'Rune Tablet','tablet',[90,86,88]);item(274,'Dwarven Crown','crown',[246,206,64]);
 item(270,'Glow Mushroom Cap','tile',null,{tile:118});
 item(251,'Hoe','hoe',[150,112,62]);item(206,'Bread','bread',[196,140,70]);item(207,'Apple','apple',[210,40,40]);item(204,'Gold Coin','coin',[250,210,70]);item(205,'Platinum Coin','coin',[226,240,248]);
-[['Runeforged',[110,220,250],7,18,255],['Wooden',[150,112,62],1,2],['Stone',[132,132,132],2,4],['Copper',[214,120,68],3,5],['Bronze',[182,128,58],4,6],['Iron',[222,222,218],5,7],['Steel',[124,134,152],6,9],['Moonsilver',[170,176,206],7,12],['Platinum',[226,240,248],4,15]]
-  .forEach((m,i,arr)=>{const id=m[4]||240+i-1;item(id,m[0]+' Pickaxe','pick',m[1],{pick:true,tier:m[2],speed:m[3]});});
+// Tools (M4, Q18, Q19, Q66). The metal ladder: wood, stone, copper, bronze, iron, steel, moonsilver, each faster and longer
+// lasting than the one before, and each pickaxe the first that can mine the next metal's ore (ore tiers in blocks.js). A tool
+// is {tool: kind, tier, speed, dur}: a pickaxe speeds stone, ore and metal, an axe wood, a shovel earth and sand, shears
+// leaves, cloth and plants; dur is how many blocks it breaks before it wears out. Pickaxes keep their old ids 240 to 246.
+const TOOL_LADDER=[['Wooden',[150,112,62],2,60],['Stone',[132,132,132],3,130],['Copper',[214,120,68],4,200],['Bronze',[182,128,58],5,280],
+  ['Iron',[222,222,218],6.5,400],['Steel',[124,134,152],8,700],['Moonsilver',[170,176,206],10,1500]];
+TOOL_LADDER.forEach((m,i)=>{const o={tier:i+1,speed:m[2],dur:m[3]};
+  item(240+i,m[0]+' Pickaxe','pick',m[1],Object.assign({tool:'pick'},o));item(300+i,m[0]+' Axe','axe',m[1],Object.assign({tool:'axe'},o));
+  item(310+i,m[0]+' Shovel','shovel',m[1],Object.assign({tool:'shovel'},o));});
+// Gold and platinum are for special tools (Q68): a platinum pickaxe is very fast but soon worn; the runeforged one is a relic
+item(247,'Platinum Pickaxe','pick',[226,240,248],{tool:'pick',tier:5,speed:14,dur:150});item(255,'Runeforged Pickaxe','pick',[110,220,250],{tool:'pick',tier:7,speed:18,dur:4000});
+ITEMS[251].tool='hoe';ITEMS[251].dur=150;
+item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
+// Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
+// survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
+item(322,'Grapnel','grapnel',[150,154,164],{once:true});item(323,'Compass','compass',[214,120,68],{one:true});item(324,'Depth Gauge','gauge',[226,188,86],{one:true});
+item(325,'Map','map',[222,204,156],{one:true});item(326,'Signal Flare','flare',[214,60,40],{once:true});item(327,'Parchment','parchment',[226,214,180]);item(328,'Plant Fibre','fibre',[140,166,80]);
+const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
+// Held to use once per press: holding the button does not repeat it
+const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
 const isItem=id=>id>=200;
 function nameOf(id){return isItem(id)?ITEMS[id].n:isTool(id)?TOOLS[id][0]:BL[id].n;}
 const iconCache={};
@@ -38,6 +56,29 @@ function itemIcon(id){
   else if(it.kind==='coin'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<6.2)px(x,y,d>5.2?-40:(d<3.4&&((x+y)%3===0))?-22:(x<7&&y<7?26:0));}}
   else if(it.kind==='tile')g.drawImage(atlas,(it.tile%AC)*16,((it.tile/AC)|0)*16,16,16,0,0,16,16);
   else if(it.kind==='stick'){for(let k=0;k<11;k++){g.fillStyle=k%3?'#92683c':'#6e4c2a';g.fillRect(3+k,13-k,2,2);}}
+  else if(it.kind==='axe'||it.kind==='shovel'){
+    for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
+    if(it.kind==='axe'){for(let y=1;y<9;y++)for(let x=7;x<15;x++){const u=x-y;if(u>=3&&u<=8&&x+y>=11&&x+y<=19)px(x,y,u===8?-36:u<=4?28:0);}}
+    else for(let y=0;y<7;y++)for(let x=9;x<16;x++){const d=Math.hypot(x-12.5,y-3);if(d<3.2)px(x,y,d>2.4?-34:(x<12?24:0));}}
+  else if(it.kind==='sickle'){for(let k=0;k<4;k++){g.fillStyle=k%2?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-8.5,y-7);if(d>=4.2&&d<=6&&!(x<8&&y>7))px(x,y,d>5.3?-34:d<4.8?30:0);}}
+  else if(it.kind==='shears'){for(const s of [-1,1])for(let k=0;k<8;k++)px(5+k,8+s*Math.round(k*0.35)-(s<0?1:0)+(k>5?s:0),k<3?-10:24);
+    g.fillStyle='#634422';for(const [x,y] of [[2,5],[2,10]]){g.fillRect(x,y,3,2);g.fillRect(x,y+2,1,1);g.fillRect(x+2,y-1,1,1);}}
+  else if(it.kind==='grapnel'){g.fillStyle='#8a6a3a';for(let y=9;y<16;y++)g.fillRect(7+(y%2),y,1,1);
+    for(let y=2;y<10;y++)px(7,y,y<4?20:0),px(8,y,-20);for(const s of [-1,1])for(let k=0;k<4;k++)px(7.5+s*(2+k*0.6)|0,3+k-(k>2?2:0),s<0?24:-14);}
+  else if(it.kind==='compass'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<6.4)px(x,y,d>5.3?-30:d>4.7?20:0);}
+    g.fillStyle='#e8e2d0';for(let y=4;y<12;y++)for(let x=4;x<12;x++)if(Math.hypot(x-7.5,y-7.5)<4.3)g.fillRect(x,y,1,1);
+    g.fillStyle='#c83228';g.fillRect(7,4,2,4);g.fillStyle='#3a3a44';g.fillRect(7,8,2,4);}
+  else if(it.kind==='gauge'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-8.5);if(d<6)px(x,y,d>5?-30:10);}
+    g.fillStyle='#ece6d4';for(let y=5;y<13;y++)for(let x=4;x<12;x++)if(Math.hypot(x-7.5,y-8.5)<3.9)g.fillRect(x,y,1,1);
+    g.fillStyle='#2a2a30';for(let k=0;k<4;k++)g.fillRect(7+Math.round(k*0.7),8+k,1,1);px(7,1,0);px(8,1,0);px(7,2,-20);px(8,2,-20);}
+  else if(it.kind==='map'){for(let y=2;y<14;y++)for(let x=1;x<15;x++)px(x,y,(x===1||x===14?-30:0)+(((x/4)|0)%2?-12:0));
+    g.fillStyle='#5a8a4a';g.fillRect(3,5,4,3);g.fillRect(9,8,4,3);g.fillStyle='#4a6ab0';g.fillRect(6,9,3,2);g.fillStyle='#b83a2a';g.fillRect(10,4,2,2);}
+  else if(it.kind==='flare'){for(let y=5;y<15;y++)for(let x=6;x<10;x++)px(x,y,(x===6?24:x===9?-26:0)+(y%4===0?-30:0));
+    g.fillStyle='#634422';g.fillRect(7,15,2,1);g.fillStyle='#ffd070';g.fillRect(7,2,2,3);g.fillStyle='#fff4c0';g.fillRect(7,3,2,1);}
+  else if(it.kind==='parchment'){for(let y=2;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===2?18:x===12||y===13?-28:0)+((x*7+y*3)%11===0?-14:0));
+    g.fillStyle='#8a7a5a';for(const y of [5,7,9,11])g.fillRect(5,y,6,1);}
+  else if(it.kind==='fibre'){for(let k=0;k<5;k++)for(let y=2;y<14;y++){const x=3+k*2+Math.round(Math.sin((y+k*3)/2.2));px(x,y,(k%2?-20:16)+(y%3?0:-14));}}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}

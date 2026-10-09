@@ -5,10 +5,10 @@
 - **Mesh geometry:** with far less cave since 0.9.0 (D-029), the whole band at spawn is about 1.25 million vertices and the surface floor trims it to about 1.1 million (headless count). Unchecked in a browser: looking into a deep shaft or a cave mouth from the surface should show darkness below 24 blocks under the lowest ground around it; if it shows sky colour or holes, report it (D-025). Smaller vertex formats were left out of M3b (D-027); they wait on the owner's frame-rate check.
 - **Some lakes and pools stay dry.** A planned lake or stream pool is left dry wherever a passage, gorge, ravine or later place could open it on one side of a chunk edge and not the other (D-029): about three pools in four and one stepped hall in three or four keep their water.
 - **Single file needs the network.** The single-file build still loads three.js r128 from the CDN (see D-015), and both builds load the VT323 font from Google Fonts (the game falls back to a system font offline). The game folder uses the vendored three.js and otherwise runs offline.
-- **Free teleports in survival:** R returns to spawn and waypoints teleport anywhere. Replaced by earned fast travel in M4.
+- **Free teleports in survival:** R returns to spawn and waypoints teleport anywhere. Replaced by earned fast travel in M4b.
 - **ROG Ally X input detection is unverified on the device.** Since 0.2.0 the touch layout is chosen automatically only when no precise pointer exists, and the pause menu has Touch: Auto / On / Off to force it (D-020). Confirm on the Ally which Auto picks.
 - **Headless tests stub the browser.** `performance.now()` returns 0 in tests, so time budgets do not apply there; nothing is rendered, and DOM event handlers (keys, pointer lock, menus) cannot be exercised.
-- **Mining drops can be lost when the pack is full** (`mineTick` ignores what does not fit, with a toast). M4 storage.
+- **Mining drops can be lost when the pack is full** (`mineTick` ignores what does not fit, with a toast). M4b storage.
 - **Sand that falls on its own** after a save is not tracked as a player change, so it can reappear at its old height after a reload (D-021). Rare: falling sand is almost always player-caused.
 - **Holds are far away and the climb is long.** The nearest hold is usually 1500 to 2500 blocks from spawn. Its gates stand on the highest ground over its outer ring, often a mountainside, so the spiral stair can climb 250 to 350 blocks; old roads lead to them from the nearest ruined site.
 - **Generated names are drafts.** Human, goblin, gnome and drow names on sites and remains come from the draft styles in `core/names.js`, waiting for the owner's approval (Q28).
@@ -25,3 +25,7 @@
 - **Streams are pools, not flowing water.** Each step of a stream is a still pool sunk into the passage floor; water does not run between them.
 - **Rivers can end where the land rises.** A river fades out where the land beside it is high or turns into a range, so a river may begin as a shallow dry channel in the hills (D-031). Rivers that should cross high ground do so in a short valley rather than a gorge.
 - **The new surface is judged from headless screenshots and maps only.** Ranges, valleys, blends and the new placement are for the owner to judge in play.
+- **Climbing has no mid-air grab limit.** Falling past a rope or ladder stops the fall at once, which also saves a player who drops beside one (D-032). Gentle on purpose; revisit if it feels wrong.
+- **A rope stays up when what it hangs from is broken.** Rope is hung, not physical: breaking the block above a rope leaves the rope in place.
+- **The grapnel only catches walls.** Aiming at the top face of a ledge does nothing; aim at the wall below its edge. It catches the first edge within 10 blocks above where it hits.
+- **New item icons and climbing panels are judged from headless screenshots only** (16-pixel icons drawn in code). How they read on the Ally X is for the owner to judge.

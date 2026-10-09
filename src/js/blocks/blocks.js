@@ -89,7 +89,7 @@ BL.forEach(b=>{if(b){b.hard=1;b.mat='misc';b.tier=0;}});
 function setH(ids,hard,mat,tier){ids.forEach(i=>{BL[i].hard=hard;BL[i].mat=mat;BL[i].tier=tier||0;});}
 setH([GRASS,DIRT,SAND,GRAVEL,SNOWG,RSAND,CACTUS,SPONGE,PATH],0.6,'soft');setH([TGRASS,FLOWR,FLOWY,DBUSH,TORCH,WHEAT,HEATHER],0,'soft');
 setH([LEAVES,BLEAVES,SLEAVES,JLEAVES,SNOWLEAF],0.3,'soft');setH([LOG,BIRCH,SPRUCE,JLOG,PLANKS,BOOKS],2.2,'wood');
-setH([WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK],0.8,'soft');setH([TNT],0.1,'soft');setH([GLASS,GLOW,ICE,CRYSTAL],0.45,'misc');
+setH([WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK],0.8,'cloth');setH([TNT],0.1,'soft');setH([GLASS,GLOW,ICE,CRYSTAL],0.45,'misc');
 // Cold lights: what is left of the old peoples' lamps after the ages (Q8, D-023). Generation writes them in place of lit ones
 // outside inhabited holds (COLD_OF, used by PW); coal relights lanterns, sconces and torches (crafting.js).
 const DLANTERN=69,DSCONCE=70,DTORCH=71,DGLOW=72;
@@ -99,14 +99,22 @@ def(DTORCH,'Burnt-out Torch',[193,193,193],{solid:false,opq:false,occ:false,torc
 def(DGLOW,'Dim Glowstone',[194,194,194],{snd:'glass'});
 // Ancient waystones stand at old sites and hold gates (Q71); attunement comes in M4. Their runes still glow faintly.
 const WAYSTONE=83;def(WAYSTONE,'Ancient Waystone',[195,195,195],{emit:true,lum:6});
+// Climbing gear (M4, Q45, Q66). Climbable blocks (climb) hold the player: jump climbs, down or sprint descends, nothing holds still.
+// A ladder or piton is a panel on the wall beside it (wall); a ladder needs ground or a ladder under it, a piton holds anywhere on
+// rock. Rope hangs straight down through open space; the grapnel is the hook at the top of a rope thrown up to a ledge.
+const LADDER=84,ROPE=85,PITON=86,GRAPNEL=87;
+const CLIMB={solid:false,opq:false,occ:false,climb:true,snd:'wood'};
+def(LADDER,'Ladder',[196,196,196],Object.assign({wall:true},CLIMB));def(PITON,'Iron Piton',[198,198,198],Object.assign({wall:true},CLIMB,{snd:'stone'}));
+def(ROPE,'Rope',[197,197,197],Object.assign({cross:true},CLIMB,{snd:'soft'}));def(GRAPNEL,'Grapnel Hook',[199,199,199],Object.assign({wall:true,place:false},CLIMB,{snd:'stone'}));
 const COLD_OF=new Uint8Array(256);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
-setH([COAL],5,'ore',1);setH([COPO,TINO,ZINO],5,'ore',2);setH([IRON],5,'ore',3);setH([GOLD],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
-setH([OBSID],25,'stone',6);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');
+// Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
+setH([COAL],5,'ore',1);setH([COPO,ZINO],5,'ore',2);setH([TINO,GOLD],5,'ore',3);setH([IRON],5,'ore',4);setH([PLATO,DIAMOND],6,'ore',5);setH([TITO],8,'ore',6);
+setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'metal',2);setH([LANTERN,DLANTERN],1,'misc');setH([WAYSTONE],-1,'stone');setH([FARM_D,FARM_W],0.6,'soft');setH([GLOWSHROOM],0,'soft');setH([CRATE],1.5,'wood');setH([DRIPU,DRIPD],0.6,'stone',1);setH([CALCITE],3,'stone',1);setH([DWBRICK,DWTILE,DWPILLAR,DWCRACK,RUNE],5,'stone',1);setH([GOLDB],6,'metal',2);setH([DWCHEST,BARREL,LECTERN],2,'wood');setH([DWCRACK],2.5,'stone',1);setH([SCONCE],0.2,'misc');setH([BONES,COBWEB],0.3,'soft');setH([AMETH],2,'misc');setH([MUSHSTEM],1.5,'wood');setH([GLOWCAP],0.6,'soft');setH([WHEAT0,WHEAT1,WHEAT2,POT0,POT1,POT2,POT3],0,'soft');setH([GRAVE],0.5,'misc');setH([DSCONCE,DTORCH],0.2,'misc');setH([DGLOW],0.45,'misc');setH([LADDER],0.5,'wood');setH([ROPE],0.2,'soft');setH([PITON,GRAPNEL],0.4,'misc');
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(256),LUM=new Uint8Array(256),SOLID=new Uint8Array(256);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
 const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Fens'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
-const HOOK=100,isTool=id=>id===100||id===101||id===102;
-const FIREWORK=101,BPTOOL=102,TOOLS={100:['Grappling Hook',52,51],101:['Fireworks',57,57],102:['Blueprint Tool',87,87]};
+// Tools drawn as a block in the hand. The grappling hook (100) and fireworks (101) gave way to the grapnel and signal flares (M4, Q45).
+const BPTOOL=102,isTool=id=>id===BPTOOL,TOOLS={102:['Blueprint Tool',87,87]};

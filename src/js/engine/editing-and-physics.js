@@ -58,7 +58,8 @@ function setBlock(x,y,z,v,force){
   if(old===v)return;
   if(curAct)curAct.push(iToKey(i),old);
   put(i,v);
-  if(!SOLID[v]&&y+1<H&&(BL[world[I(x,y+1,z)]].cross||BL[world[I(x,y+1,z)]].torch)){const j=I(x,y+1,z);if(curAct)curAct.push(iToKey(j),world[j]);put(j,AIR);}
+  // plants and torches above lose their footing; hung rope does not
+  if(!SOLID[v]&&y+1<H&&(BL[world[I(x,y+1,z)]].cross||BL[world[I(x,y+1,z)]].torch)&&!BL[world[I(x,y+1,z)]].climb){const j=I(x,y+1,z);if(curAct)curAct.push(iToKey(j),world[j]);put(j,AIR);}
   if(OPQ[v]&&y>0){const j=i-WD,bb=world[j];if(bb===GRASS||bb===SNOWG){if(curAct)curAct.push(iToKey(j),bb);put(j,DIRT);}}
   const oh=hm[x+W*z];calcHM(x,z);const nh=hm[x+W*z];mmDirty.add(x+W*z);
   fallQ.add(i);if(y+1<H)fallQ.add(I(x,y+1,z));

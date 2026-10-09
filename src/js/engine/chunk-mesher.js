@@ -37,10 +37,15 @@ function buildChunk(cx,cz){
     if(b.flat){const L=sky(x,y,z),B=bl(x,y,z),t=b.t[0],base=O.p.length/3,f=1/16;
       for(const c of [[0,f,1,1,1],[1,f,1,0,1],[0,f,0,1,0],[1,f,0,0,0]]){O.p.push(x+c[0],y+c[1],z+c[2]);if(b.rot)pushUV(O.u,t,c[4],c[3]);else pushUV(O.u,t,c[3],c[4]);O.l.push(L);O.b.push(B);O.a.push(1);}
       O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);continue;}
+    if(b.wall){ // a panel on the first opaque wall beside it (ladders, pitons, the grapnel); upright in the middle when there is none
+      let ox=0,oz=0;if(OPQ[get(x+1,y,z)])ox=1;else if(OPQ[get(x-1,y,z)])ox=-1;else if(OPQ[get(x,y,z+1)])oz=1;else if(OPQ[get(x,y,z-1)])oz=-1;
+      const L=sky(x,y,z),B=bl(x,y,z),t=b.t[0],base=O.p.length/3,e=1/16;
+      for(let k=0;k<4;k++){const a=CUV[k][0],v=CUV[k][1];if(ox)O.p.push(x+(ox>0?1-e:e),y+v,z+a);else O.p.push(x+a,y+v,z+(oz>0?1-e:oz<0?e:0.5));pushUV(O.u,t,a,v);O.l.push(L);O.b.push(B);O.a.push(0.92);}
+      O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);continue;}
     if(b.cross){
       const L=sky(x,y,z)*0.92,B=b.emit?2:bl(x,y,z)*0.92,t=b.t[0];
       for(let q=0;q<2;q++){const base=O.p.length/3;
-        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*0.9,z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(c[1]?0.93:0.92);} // tops sway
+        for(let k=0;k<4;k++){const c=CROSS[q][k];O.p.push(x+0.5+(c[0]-0.5)*0.9,y+c[1]*(b.climb?1:0.9),z+0.5+(c[2]-0.5)*0.9);pushUV(O.u,t,CUV[k][0],CUV[k][1]);O.l.push(L);O.b.push(B);O.a.push(b.climb?0.92:c[1]?0.93:0.92);} // tops sway (rope hangs still)
         O.i.push(base,base+1,base+2,base+2,base+1,base+3,base,base+2,base+1,base+2,base+3,base+1);}
       continue;
     }

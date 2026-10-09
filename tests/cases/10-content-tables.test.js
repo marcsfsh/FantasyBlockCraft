@@ -4,6 +4,8 @@ const known=id=>!!(BL[id]||ITEMS[id]||TOOLS[id]);
 assert(blocks.every(i=>i>=0&&i<256),'every block id fits the world array (0 to 255)');
 assert(!blocks.some(i=>i>100&&i<108),'no block uses ids 101 to 107 (saves store water levels there)');
 assert(!Object.keys(ITEMS).some(i=>BL[i])&&!Object.keys(TOOLS).some(i=>BL[i]),'item and tool ids never collide with block ids');
+const noHard=blocks.filter(i=>typeof BL[i].hard!=='number'||typeof BL[i].tier!=='number'||!BL[i].mat);
+assert(noHard.length===0,'every block has a hardness, a material and a pickaxe tier'+(noHard.length?' (missing: '+noHard.map(i=>BL[i].n).join(', ')+')':''));
 assert(blocks.every(i=>BL[i].t.length===3&&BL[i].t.every(t=>Number.isInteger(t)&&t>=0&&t<AC*AR)),'every block has three texture tiles inside the atlas');
 const ingr=r=>r[2].flatMap(([x])=>Array.isArray(x)?x:[x]);
 const badR=RECIPES.filter(r=>!known(r[0])||!ingr(r).every(known));

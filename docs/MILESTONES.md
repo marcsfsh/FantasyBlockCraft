@@ -214,6 +214,10 @@ Added after the owner played 0.8.0: generation feels disjointed and random, the 
 
 **Checkpoint:** start a new survival world on the Ally X and play from the starting kit to a steel pickaxe.
 
+**Split (D-032):**
+- **M4a, items (done in 0.11.0):** the metal ladder with axes and shovels, shears and the gold sickle, climbing gear (ladders, pitons, rope, the grapnel), map, compass and depth gauge, signal flares, the keg's name, the creative-only Blueprint Tool, the starting kit. Its checkpoint is the one above.
+- **M4b, survival systems:** storage (chests, world chests that keep leftovers, pack upgrades, the bag), the worn lamp and darker deeps, earned fast travel at waystones, food (crops, cooking, foraging). Checkpoint: attune two waystones and travel between them; light a deep cave with the worn lamp.
+
 ## M5: Controls and interface
 
 - **Remapping (Q37):** better defaults (for example, teleport moves off D-pad up), and a rebinding screen for keyboard and controller built on the M1 action layer.

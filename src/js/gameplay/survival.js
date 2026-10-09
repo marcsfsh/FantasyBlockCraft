@@ -1,12 +1,12 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const DUR={255:4000,251:150,240:60,241:132,242:180,243:260,244:250,245:600,246:1600,247:120},FOOD={270:2,206:5,207:4,209:1,269:5};
+const FOOD={270:2,206:5,207:4,209:1,269:5};
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
-  if(!SURV())return;const q=inv[sel];if(!q||!DUR[q.id])return;
-  q.d=(q.d||0)+n;if(q.d>=DUR[q.id]){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
+  if(!SURV())return;const q=inv[sel];if(!q||!durOf(q.id))return;
+  q.d=(q.d||0)+n;if(q.d>=durOf(q.id)){inv[sel]=null;toast('Your '+nameOf(q.id)+' broke');burst(0.3,'highpass',3000,1,0.3);}
   drawBar(true);
 }
 function hurt(n,cause){
@@ -18,7 +18,7 @@ function hurt(n,cause){
 }
 const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
 function die(cause){
-  dead=true;hold=-1;G.on=false;
+  dead=true;hold=-1;
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
   for(const s in equip)if(equip[s]){items.push([equip[s].id,1,equip[s].d||0]);equip[s]=null;}
   let msg=DEATH[cause]||'You died';
@@ -38,7 +38,7 @@ function revive(){
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
   if(!items){setBlock(X,Y,Z,AIR,true);return;}
-  const left=[];for(const [id,c,d] of items){const before=inv.findIndex(q=>!q);const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&DUR[id]){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
+  const left=[];for(const [id,c,d] of items){const before=inv.findIndex(q=>!q);const lost=addItem(id,c);if(lost)left.push([id,lost,d]);else if(d&&durOf(id)){const q=inv.find(q=>q&&q.id===id&&!q.d);if(q)q.d=d;}}
   if(left.length){graves.set(k,left);toast('Inventory full, some things are still in the grave');}
   else{graves.delete(k);setBlock(X,Y,Z,AIR,true);showName('You got your things back');}
   drawBar(true);saveDirty=true;
@@ -57,7 +57,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   hurtCD=Math.max(0,hurtCD-dt);eatCD=Math.max(0,eatCD-dt);
   if(!SURV()||dead){air=10;return;}
   // falling
-  if(inLiq||PL.fly||G.on)fallTop=PL.y;
+  if(inLiq||PL.fly||PL.climb)fallTop=PL.y;
   else if(PL.ground){if(fallTop!==null&&fallTop-PL.y>3.5)hurt(Math.floor(fallTop-PL.y-3),'fell');fallTop=PL.y;}
   else fallTop=fallTop===null?PL.y:Math.max(fallTop,PL.y);
   // lava, cactus
@@ -99,7 +99,7 @@ function renderSInv(){
   const box=$('sinv');box.innerHTML='';
   const grid=document.createElement('div');grid.className='sgrid';
   inv.forEach((q,i)=>{const b=document.createElement('button');b.className='sslot'+(i<9?' hb':'')+(i===heldSlot?' held':'');
-    if(q&&DUR[q.id]&&q.d){const f=1-q.d/DUR[q.id],bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
+    if(q&&durOf(q.id)&&q.d){const f=1-q.d/durOf(q.id),bb=document.createElement('i');bb.className='dur';bb.style.width=(f*80)+'%';bb.style.background='hsl('+(f*120|0)+',80%,50%)';b.appendChild(bb);}
     if(q){b.appendChild(icon(q.id));if(q.c>1){const n=document.createElement('span');n.className='n';n.textContent=q.c;b.appendChild(n);}b.title=nameOf(q.id);}
     b.addEventListener('click',()=>{
       if(heldSlot<0){if(inv[i])heldSlot=i;}
@@ -133,42 +133,77 @@ function renderSInv(){
   box.appendChild(left);box.appendChild(recs);
 }
 let airT=0,lagX=0,lagY=0,lastYaw=0,lastPitch=0,stepD=0,wasLiq=false,sel=0,brushR=0,gliding=false,sprintLatch=false,lastW=0;
-const G={on:false,t:0,ax:0,ay:0,az:0,bx:0,by:0,bz:0,len:1};
-entityKind({name:'hook',list:[],shift:(dx,dz)=>{G.ax-=dx;G.az-=dz;G.bx-=dx;G.bz-=dz;},clear:()=>{G.on=false;}});
-function fireHook(){
-  if(G.on){releaseHook(false);return;}
-  const hit=raycast(eyePos(),camDir(),48);
-  if(!hit||!SOLID[hit.id]){toast('Nothing to hook within 48 blocks');tone(300,200,0.1,0.1);return;}
-  G.on=true;G.t=0;G.bx=hit.x;G.by=hit.y;G.bz=hit.z;
-  G.ax=(hit.x+hit.px)/2+0.5;G.ay=(hit.y+hit.py)/2+0.5;G.az=(hit.z+hit.pz)/2+0.5;
-  const e=eyePos();G.len=Math.hypot(G.ax-e.x,G.ay-e.y,G.az-e.z);
-  tone(1300,300,0.18,0.16);burst(0.12,'highpass',3000,1,0.12);swing=1;gliding=false;buzz(12);
+// ---- Climbing gear (M4, Q45, Q66). Rope unrolls downward through open space from where it is placed; taking a rope takes it
+// and everything hanging below it. The grapnel is thrown at a wall below its top edge: it catches the lip and hangs rope from
+// there, as much as you carry (in creative as much as it needs).
+const ROPE_MAX=48;
+function ropeFits(x,y,z){return get(x,y,z)===AIR&&y>0;}
+// Hang rope from (x,y,z) downward, at most n blocks; returns how many were hung
+function hangRope(x,y,z,n){let k=0;while(k<n&&ropeFits(x,y-k,z)){setBlock(x,y-k,z,ROPE);k++;}return k;}
+function ropeLeft(){return SURV()?countOf(ROPE):ROPE_MAX;}
+// Take down the rope hanging below (x,y,z); returns how many blocks of rope came down
+function ropeBelow(x,y,z){let n=0;for(let yy=y-1;yy>0&&get(x,yy,z)===ROPE;yy--){setBlock(x,yy,z,AIR);n++;}return n;}
+function placeRope(tx,ty,tz){
+  const above=get(tx,ty+1,tz),wall=[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>OPQ[get(tx+a,ty,tz+b)]);
+  if(above===AIR&&!wall){toast('Rope needs something to hang from');return;}
+  const n=hangRope(tx,ty,tz,Math.min(ROPE_MAX,ropeLeft()));if(SURV()&&n)takeItems(ROPE,n);
+  if(n>1)showName(n+' blocks of rope');sfxBlock(ROPE,true);swing=1;buzz(8);drawBar(true);
 }
-function releaseHook(boost){G.on=false;if(boost)PL.vy=Math.max(PL.vy,6.5);}
+// Where a grapnel aimed at this wall would catch: the first top edge up to 10 blocks above the hit with room to stand on it
+function grapnelLip(hit){
+  const fx=hit.px-hit.x,fz=hit.pz-hit.z;if(hit.py!==hit.y||(fx===0&&fz===0))return null;
+  for(let y=hit.y;y<Math.min(H-3,hit.y+10);y++){
+    if(!SOLID[get(hit.x,y,hit.z)]||get(hit.px,y,hit.pz)!==AIR)return null;
+    if(!SOLID[get(hit.x,y+1,hit.z)]&&!SOLID[get(hit.x,y+2,hit.z)])return{x:hit.px,y:y,z:hit.pz};}
+  return null;
+}
+function throwGrapnel(){
+  const hit=raycast(eyePos(),camDir(),24);
+  if(!hit||!SOLID[hit.id]){toast('Nothing for the grapnel to catch within 24 blocks');tone(300,200,0.1,0.1);return;}
+  const lip=grapnelLip(hit);if(!lip){toast('Throw the grapnel at a wall below a ledge');tone(300,200,0.1,0.1);return;}
+  if(ropeLeft()<1){toast('You need rope to hang from the grapnel');return;}
+  beginAct();setBlock(lip.x,lip.y,lip.z,GRAPNEL);const n=hangRope(lip.x,lip.y-1,lip.z,ropeLeft());endAct();
+  if(SURV()){takeItems(322,1);if(n)takeItems(ROPE,n);}
+  const short=ropeFits(lip.x,lip.y-1-n,lip.z);let gap=0;if(short)while(gap<64&&ropeFits(lip.x,lip.y-1-n-gap,lip.z))gap++;
+  tone(1300,300,0.18,0.16);burst(0.12,'highpass',3000,1,0.12);swing=1;buzz(12);drawBar(true);
+  toast(short?'The grapnel caught; the rope ends '+gap+' blocks above the ground':'The grapnel caught the ledge');
+}
+// Breaking a rope or the grapnel also takes down the rope below it; returns what that gives back
+function ropeTake(id,x,y,z){const n=ropeBelow(x,y,z)+(id===ROPE?1:0);const out=[];if(id===GRAPNEL)out.push([322,1]);if(n)out.push([ROPE,n]);return out;}
+// Is the player's body in a climbable block (ladder, piton, rope, grapnel)?
+function onClimb(){
+  const x0=Math.floor(PL.x-HW),x1=Math.floor(PL.x+HW),y0=Math.floor(PL.y),y1=Math.floor(PL.y+PH-0.2),z0=Math.floor(PL.z-HW),z1=Math.floor(PL.z+HW);
+  for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)if(BL[get(x,y,z)].climb)return true;return false;
+}
+// Ladders stand on the ground or on a ladder and lean on a wall; pitons are driven into rock
+function canHang(id,x,y,z){
+  const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([a,b])=>get(x+a,y,z+b));
+  if(id===LADDER)return nb.some(n=>OPQ[n])&&(SOLID[get(x,y-1,z)]||get(x,y-1,z)===LADDER);
+  if(id===PITON)return nb.some(n=>OPQ[n]&&(BL[n].mat==='stone'||BL[n].mat==='ore'));
+  return true;
+}
 let swapMode=false,photo=false;
 function toggleSwap(){if(!swapMode&&creativeOnly())return;swapMode=!swapMode;$('tSwap').classList.toggle('on',swapMode);selBox.material.color.setHex(swapMode?0xffc83a:0x000000);toast(swapMode?'Swap mode: place replaces blocks':'Swap mode off');}
 function setPhoto(on){photo=on;$('hud').style.display=on?'none':'block';updateHand();if(on)toast('');}
-const rockets=[];
-entityKind({name:'rockets',list:rockets,update:dt=>updRockets(dt)});
-const FWC=[[1,.3,.3],[1,.85,.3],[.4,1,.5],[.4,.7,1],[.9,.45,1],[1,1,1]];
-function launchFirework(){
-  const hit=raycast(eyePos(),camDir(),8),d=camDir();
-  const x=hit?hit.px+.5:PL.x+d.x*2,y=hit?hit.py+.2:PL.y+1,z=hit?hit.pz+.5:PL.z+d.z*2;
-  rockets.push({x:x,y:y,z:z,vx:(Math.random()-.5)*1.5,vy:20+Math.random()*6,vz:(Math.random()-.5)*1.5,t:1.0+Math.random()*0.5});
+// ---- Signal flares (M4, Q45): a flare climbs about 60 blocks, then burns red and drifts down slowly, seen from far away
+const flares=[];
+entityKind({name:'flares',list:flares,update:dt=>updFlares(dt)});
+const flareMat=new THREE.MeshBasicMaterial({color:0xff5030,fog:false}),flareGeo=new THREE.SphereGeometry(0.35,8,6);
+function launchFlare(){
+  const d=camDir(),x=PL.x+d.x*0.8,y=PL.y+1.6,z=PL.z+d.z*0.8,m=new THREE.Mesh(flareGeo,flareMat);m.position.set(x,y,z);scene.add(m);
+  flares.push({x:x,y:y,z:z,vx:d.x*2,vy:30,vz:d.z*2,t:2.2,burn:10,m:m});
+  if(SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
   burst(0.6,'bandpass',2600,0.8,0.18);swing=1;buzz(10);
 }
-function updRockets(dt){
-  for(let i=rockets.length-1;i>=0;i--){
-    const r=rockets[i];r.t-=dt;r.vy-=6*dt;r.x+=r.vx*dt;r.y+=r.vy*dt;r.z+=r.vz*dt;
-    spawnP(r.x,r.y,r.z,(Math.random()-.5),-1,(Math.random()-.5),[1,.8,.4],0.4,2);
-    if(r.t<=0||SOLID[get(Math.floor(r.x),Math.floor(r.y),Math.floor(r.z))]){
-      rockets.splice(i,1);
-      const c1=FWC[Math.random()*FWC.length|0],c2=FWC[Math.random()*FWC.length|0],n=110+(Math.random()*60|0),sp=7+Math.random()*5,ring=Math.random()<0.3;
-      for(let k=0;k<n;k++){let ux,uy,uz;if(ring){const a=k/n*6.283;ux=Math.cos(a);uy=(Math.random()-.5)*0.15;uz=Math.sin(a);}else{uy=Math.random()*2-1;const a=Math.random()*6.283,q=Math.sqrt(1-uy*uy);ux=Math.cos(a)*q;uz=Math.sin(a)*q;}
-        const s2=sp*(0.85+Math.random()*0.3);spawnP(r.x,r.y,r.z,ux*s2,uy*s2,uz*s2,k%2?c1:c2,1.2+Math.random()*0.8,3);}
-      const dist=Math.hypot(r.x-PL.x,r.y-PL.y,r.z-PL.z),v=Math.max(0.05,1-dist/120);
-      burst(0.5,'lowpass',900,0.7,0.5*v,dist/340);for(let k=0;k<6;k++)burst(0.05,'highpass',5000,1,0.12*v,dist/340+0.15+k*0.07+Math.random()*0.05);
-    }
+function updFlares(dt){
+  for(let i=flares.length-1;i>=0;i--){
+    const f=flares[i];
+    if(f.t>0){f.t-=dt;f.vy-=6*dt;spawnP(f.x,f.y,f.z,(Math.random()-.5),-1,(Math.random()-.5),[1,.8,.4],0.4,2);
+      if(f.t<=0){f.vx*=0.2;f.vz*=0.2;const dist=Math.hypot(f.x-PL.x,f.y-PL.y,f.z-PL.z);burst(0.5,'lowpass',700,0.7,0.4*Math.max(0.05,1-dist/160),dist/340);}}
+    else{f.burn-=dt;f.vy+=(-1.6-f.vy)*Math.min(1,dt*2);if(Math.random()<dt*30)spawnP(f.x,f.y,f.z,(Math.random()-.5)*1.5,-0.5,(Math.random()-.5)*1.5,[1,.35+Math.random()*.3,.2],1.6,0.4);
+      f.m.scale.setScalar(1.6+0.4*Math.sin(f.burn*23)+Math.min(1,Math.hypot(f.x-PL.x,f.z-PL.z)/80)*3);}
+    f.x+=f.vx*dt;f.y+=f.vy*dt;f.z+=f.vz*dt;f.m.position.set(f.x,f.y,f.z);
+    if(f.burn<=0||(f.t>0&&SOLID[get(Math.floor(f.x),Math.floor(f.y),Math.floor(f.z))])){scene.remove(f.m);flares.splice(i,1);}
   }
 }
 function sphere(cx,cy,cz,r,fn){for(let dy=-r;dy<=r;dy++)for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){if(dx*dx+dy*dy+dz*dz>r*r+r)continue;const x=cx+dx,y=cy+dy,z=cz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;fn(x,y,z,world[I(x,y,z)]);}}
@@ -178,10 +213,11 @@ function jumpPress(){
   if(SURV()){lastSpace=n;return;}
   if(n-lastSpace<280){gliding=false;toggleFly();lastSpace=0;return;}
   lastSpace=n;
-  if(!PL.ground&&!PL.fly&&!G.on){gliding=!gliding;if(gliding)toast('Gliding');}
+  if(!PL.ground&&!PL.fly){gliding=!gliding;if(gliding)toast('Gliding');}
 }
-function camDir(){return new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);}
-function eyePos(){return new THREE.Vector3(PL.x,PL.y+EYE,PL.z);}
+// where the player looks and from where, from the player's view angles (the camera follows them every frame)
+function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Math.sin(PL.pitch),z:-Math.cos(PL.yaw)*cp};}
+function eyePos(){return{x:PL.x,y:PL.y+EYE,z:PL.z};}
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
   const f={[GRAVE]:openGrave,[CRATE]:openCrate,[DWCHEST]:openCrate,[BARREL]:openCrate,[LECTERN]:openLore}[th.id];
@@ -190,12 +226,12 @@ function useBlock(th){
 function act(btn){
   const held=curId();
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
-  if(btn===2&&held===HOOK){fireHook();return;}
-  if(btn===2&&held===FIREWORK){launchFirework();return;}
+  if(btn===2&&held===322){throwGrapnel();return;}
+  if(btn===2&&held===326){launchFlare();return;}
   if(btn===2&&(held===208||held===209||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(held!==209)return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);
-    if(held===BPTOOL){if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
+    if(held===BPTOOL){if(creativeOnly())return;if(th)bpTool(th);else if(BP.sel>=0)toast('Aim at the ground to build');return;}}
   if(btn===0&&SURV())return;
   const hit=raycast(eyePos(),camDir(),6);if(!hit)return;
   if(btn===0){
@@ -204,7 +240,7 @@ function act(btn){
     if(hit.id===BEDROCK&&brushR===0)return;
     beginAct();
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
-    if(brushR===0)setBlock(hit.x,hit.y,hit.z,AIR);
+    if(brushR===0){setBlock(hit.x,hit.y,hit.z,AIR);if(hit.id===ROPE||hit.id===GRAPNEL)ropeBelow(hit.x,hit.y,hit.z);}
     else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,id)=>{if(id&&id!==BEDROCK&&!BL[id].liquid){if(Math.random()<0.12)breakFx(x,y,z,id,3);setBlock(x,y,z,AIR);}});
     endAct();
   }else if(btn===2){
@@ -216,11 +252,13 @@ function act(btn){
       else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,old)=>{if(ok(old))setBlock(x,y,z,id);});
       endAct();swing=1;sfxBlock(id,true);buzz(8);return;
     }
-    if(BL[hit.id].cross){tx=hit.x;ty=hit.y;tz=hit.z;}
+    if(BL[hit.id].cross&&!BL[hit.id].climb){tx=hit.x;ty=hit.y;tz=hit.z;}
     if(ty<0||ty>=H)return;
+    if(id===ROPE&&brushR===0){if(get(tx,ty,tz)!==AIR)return;beginAct();placeRope(tx,ty,tz);endAct();return;}
+    if((id===LADDER||id===PITON)&&!canHang(id,tx,ty,tz)){toast(id===LADDER?'A ladder needs a wall and the ground or a ladder below':'Pitons go into rock');return;}
     beginAct();
     if(brushR===0){
-      if(((BL[id].cross||BL[id].torch)&&!SOLID[get(tx,ty-1,tz)])||(BL[id].solid&&hitsPlayer(tx,ty,tz))){endAct();return;}
+      if(((BL[id].cross||BL[id].torch)&&!BL[id].climb&&!SOLID[get(tx,ty-1,tz)])||(BL[id].solid&&hitsPlayer(tx,ty,tz))){endAct();return;}
       setBlock(tx,ty,tz,id);
     }else sphere(tx,ty,tz,brushR,(x,y,z,old)=>{if((old===AIR||BL[old].liquid||BL[old].cross)&&!(BL[id].solid&&hitsPlayer(x,y,z))&&!((BL[id].cross||BL[id].torch)&&!SOLID[get(x,y-1,z)]))setBlock(x,y,z,id);});
     if(SURV()&&world[I(tx,ty,tz)]===id){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
@@ -266,7 +304,7 @@ document.addEventListener('mousemove',e=>{
 });
 document.addEventListener('mousedown',e=>{
   if(document.pointerLockElement!==canvas)return;
-  act(e.button);if(e.button===0||(e.button===2&&!isTool(curId()))){hold=e.button;holdT=0.28;}
+  act(e.button);if(e.button===0||(e.button===2&&!oneShot(curId()))){hold=e.button;holdT=0.28;}
 });
 document.addEventListener('mouseup',()=>{hold=-1;});
 document.addEventListener('contextmenu',e=>e.preventDefault());

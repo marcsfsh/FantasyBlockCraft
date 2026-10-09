@@ -63,7 +63,7 @@ function pollPad(dt){
     if(ed(10))PAD.sprint=!PAD.sprint;if(Math.hypot(lx,ly)<0.25)PAD.sprint=false;
     const rtOn=PAD.rt?rtv>0.2:rtv>0.4,ltOn=PAD.lt?ltv>0.2:ltv>0.4;
     if(rtOn&&!PAD.rt){act(0);hold=0;holdT=0.28;}if(!rtOn&&PAD.rt&&hold===0)hold=-1;PAD.rt=rtOn;
-    if(ltOn&&!PAD.lt){act(2);if(!isTool(curId())){hold=2;holdT=0.28;}}if(!ltOn&&PAD.lt&&hold===2)hold=-1;PAD.lt=ltOn;
+    if(ltOn&&!PAD.lt){act(2);if(!oneShot(curId())){hold=2;holdT=0.28;}}if(!ltOn&&PAD.lt&&hold===2)hold=-1;PAD.lt=ltOn;
     for(const b in BINDS.pad)if(ed(+b)){const a=BINDS.pad[b];if(a==='pause'){PAD.rt=PAD.lt=false;PAD.cx=innerWidth/2;PAD.cy=innerHeight/2;}runAction(a);}
   }
   PAD.prev=now;

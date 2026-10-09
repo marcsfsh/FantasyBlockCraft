@@ -41,7 +41,7 @@ if(TOUCH){
   btn('tJump',()=>{tch.jump=true;jumpPress();},()=>{tch.jump=false;});
   btn('tDown',()=>{tch.down=true;},()=>{tch.down=false;});
   btn('tBreak',()=>{act(0);hold=0;holdT=0.3;},()=>{hold=-1;});
-  btn('tPlace',()=>{act(2);if(!isTool(curId())){hold=2;holdT=0.3;}},()=>{hold=-1;});
+  btn('tPlace',()=>{act(2);if(!oneShot(curId())){hold=2;holdT=0.3;}},()=>{hold=-1;});
   btn('tBrush',()=>{runAction('brush');});
   btn('tSwap',()=>{runAction('swap');});
   btn('tUndo',()=>{runAction('undo');});

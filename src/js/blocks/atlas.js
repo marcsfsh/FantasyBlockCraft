@@ -54,12 +54,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   flower(27,[214,40,36]);flower(28,[246,218,48]);
   clear(29);for(let b=0;b<6;b++){let x=6+(tr()*4|0),y=15;const dir=tr()<.5?-1:1;for(let k=0;k<9;k++){P(29,x,y,[122,86,40]);y--;if(tr()<.5)x+=dir;if(x<0||x>15)break;}}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const r=y>>3;if(y%8===7||(x+(r?8:0))%16===15)P(30,x,y,sh([84,84,84],(tr()-.5)*10));else P(30,x,y,sh([124,124,124],(tr()-.5)*18+(y%8===0||(x+(r?8:0))%16===0?14:0)));}
-  // TNT side with a white band and lettering
-  const T=[[1,1,1],[0,1,0],[0,1,0],[0,1,0]],N=[[1,0,1],[1,1,1],[1,1,1],[1,0,1]];
-  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const band=y>=5&&y<=10;P(31,x,y,band?sh([232,230,222],(tr()-.5)*10):sh([196,48,36],(tr()-.5)*22+(x%4===0?-26:0)));}
-  [[T,2],[N,6],[T,10]].forEach(([g,ox])=>{for(let r=0;r<4;r++)for(let c=0;c<3;c++)if(g[r][c])P(31,ox+c+1,6+r,[30,24,22]);});
-  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const cx=(x%8)-3.5,cy=(y%8)-3.5,d=Math.hypot(cx,cy);P(32,x,y,d<1.2?[60,56,52]:d<2.6?sh([150,36,28],(tr()-.5)*14):sh([200,52,40],(tr()-.5)*20));}
-  fill(33,[150,38,30],22);
+  // Blasting Keg (Q44): oak staves under iron hoops with a red dwarven rune; the same draws from the shared stream as before
+  const KR=[[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,1],[0,1,1,0]];
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const hoop=y===2||y===3||y===12||y===13;P(31,x,y,hoop?sh([62,60,64],(tr()-.5)*10+(y===2||y===12?16:0)):sh([150,104,58],(tr()-.5)*22+(x%4===0?-26:0)));}
+  for(let r=0;r<5;r++)for(let c=0;c<4;c++)if(KR[r][c])P(31,6+c,5+r,[176,40,30]);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const cx=(x%8)-3.5,cy=(y%8)-3.5,d=Math.hypot(cx,cy);P(32,x,y,d<1.2?[48,40,34]:d<2.6?sh([118,82,46],(tr()-.5)*14):sh([156,112,64],(tr()-.5)*20));}
+  fill(33,[136,96,54],22);
   voronoi(34,[236,196,108],[150,108,48],8);for(let i=0;i<14;i++)P(34,tr()*16|0,tr()*16|0,[255,240,190]);
   wool(35,[232,232,228]);wool(36,[176,46,40]);wool(37,[52,70,168]);wool(38,[236,196,46]);wool(39,[34,32,36]);wool(50,[90,130,40]);
   for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(40,x,y,sh([222,220,210],(tr()-.5)*14));
@@ -163,6 +163,15 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     const g=px(34,x,y),m=(g[0]+g[1]+g[2])/3;P(194,x,y,[m*0.42+30,m*0.4+28,m*0.36+26]);}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=px(3,x,y),rune=(x===7||x===8)&&y>2&&y<13||(y===5||y===10)&&x>4&&x<11;P(195,x,y,rune?[120,190,230]:[c[0]*0.85+10,c[1]*0.85+12,c[2]*0.85+18]);} // waystone: worn stone with a glowing rune
   clear(193);for(let y=6;y<16;y++)for(let x=7;x<=8;x++)P(193,x,y,y<=7?[38,32,30]:y===8?[64,50,40]:sh([112,82,46],x===8?-18:0));
+  // climbing gear (M4): ladder, rope, iron piton, grapnel hook; patterned without the shared random stream
+  const nz=(x,y,k)=>((x*73+y*151+k*29)%13)-6;
+  clear(196);for(let y=0;y<16;y++)for(const x of [2,3,12,13])P(196,x,y,sh([138,98,56],nz(x,y,1)*2+(x===2||x===12?14:-8)));
+  for(const r of [2,7,12])for(let x=4;x<12;x++){P(196,x,r,sh([152,110,64],nz(x,r,2)*2+8));P(196,x,r+1,sh([112,80,44],nz(x,r,3)*2));}
+  clear(197);for(let y=0;y<16;y++){const o=(y>>1)%2;P(197,7,y,sh([170,136,86],o?18:-6));P(197,8,y,sh([140,108,64],o?-10:10));}
+  clear(198);for(let x=3;x<13;x++){P(198,x,7,[150,154,164]);P(198,x,8,[96,100,110]);}for(let y=4;y<12;y++){P(198,11,y,[176,180,190]);P(198,12,y,[110,114,124]);}P(198,3,6,[200,204,212]);
+  clear(199);for(let y=8;y<16;y++){const o=(y>>1)%2;P(199,7,y,sh([170,136,86],o?18:-6));P(199,8,y,sh([140,108,64],o?-10:10));}
+  for(let y=0;y<9;y++){P(199,7,y,[170,174,184]);P(199,8,y,[110,114,124]);}
+  for(const s2 of [-1,1])for(let k=0;k<5;k++){const x=s2<0?6-k:9+k,y=k<3?1+k:5-(k-3)*2;P(199,x,y,s2<0?[190,194,204]:[120,124,134]);P(199,x,y+1,[90,94,104]);}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles
