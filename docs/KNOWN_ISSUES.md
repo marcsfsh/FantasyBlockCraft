@@ -19,7 +19,9 @@
 - **Sky light costs memory.** The sideways sky light store adds about 25 MB (one byte per cell of the loaded window) (D-027).
 - **The livelier look is checked only in software rendering.** Screenshots from headless Chromium show the clouds, moon, water, lava and sway rendering without shader errors; how they look and run on the Ally X and desktop is for the owner to judge.
 - **The new caves are judged only from headless screenshots and maps.** Whether cave mouths and sinkholes look good from outside, and whether systems feel connected and easy to follow, is for the owner to judge in play (D-029).
-- **Most lands are stand-ins until their family is built.** 30 of the 37 lands wear an old land's look and name (D-039) until M6b to M6h build them, so the world still shows the twelve old looks, in a new layout.
+- **Most lands are stand-ins until their family is built.** 23 of the 37 lands wear an old land's look and name (D-039) until M6c to M6h build them, so the world still shows the twelve old looks, in a new layout.
+- **Some forest stretches miss their signature.** About one stretch in fifty that should have a landmark or feature finds no level ground of its own land for it and has neither; in Willow Vales about one in three (rivers and ground below sea level) (D-040).
+- **The forests are judged from headless screenshots only.** Tree shapes, leaf colours and the glow of moonpetals are for the owner to judge on the Ally X.
 - **A few lands pinch at a corner.** About one land in 150 meets another stretch of the same kind only through a narrow corner, and corner tips where four cells meet can be narrower than 115 blocks for a few blocks (D-039).
 - **Gorges end in rounded tips.** About 3% of gorge columns lie in the rounded ends, where the gorge narrows below 7 blocks.
 - **Some cave systems have no entrance.** Secondary systems get an entrance only about one time in seven, and a main system gets none where its region has no dry land; they are reached by digging, from ravines, or through deep links.

@@ -5,6 +5,26 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.16.0 (2026-10-09): M6b, the forests
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v11`.
+
+### Game
+- **Seven forests, each its own:**
+  - **Autumn Woods:** red and golden maples over a floor of fallen leaves, ferns and old oaks.
+  - **Birch Glades:** tall white birches in groves, bluebells beneath them, open glades between.
+  - **Pine Highlands:** tall pines on hilly ground over a floor of needles, rocky outcrops, snow on the cold heights.
+  - **Ancient Giant Wood** (rare): greatwood trees 22 to 31 blocks high with buttress roots, over forest moss and ferns.
+  - **Willow Vales** (the Fens, reworked): willows of their own wood leaning over the pools and reeds.
+  - **Yew Wood:** dark, broad yews, some two blocks thick, over moss and ferns.
+  - **Silverwood:** slender white trees with silver leaves, and moonpetals that glow faintly in the grass.
+- **Landmarks and features (Q124):** each stretch of forest has its land's landmark or natural feature, or (four in ten) neither: a woodcutters' lodge or a red-leaf glade round a pond; a birch-bark shrine or a ring of white birches; a timber watch post or a lookout rock; a platform high in a giant or the Great Tree (40 or more high); a stilt house or willow pools with an islet; an archers' hall or a hollow yew you can walk into; a moon gate or a silver spring.
+- **New woods (Q130):** maple, pine, greatwood, yew, silverwood and willow, each with logs, leaves and planks; leaf litter, pine needle floor and forest moss; ferns, bluebells and moonpetals. Any planks make sticks, chests and wooden tools.
+- Forests have their own colours on the world map.
+
+### Tooling
+- New test `37-forests`; the world-hash snapshot is updated on purpose.
+
 ## 0.15.0 (2026-10-09): M6a, lands groundwork
 
 Old saves do not load: the world is generated anew, and the save key is now `fantasy-blockcraft-save-v10`.

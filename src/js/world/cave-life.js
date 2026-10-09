@@ -45,7 +45,8 @@ function caveLife(X0,Z0,r2){
   }
 }
 function topBlock(o){
-  const b=o.b,h=o.h;
+  const b=o.b,h=o.h,F=forestOf(o);
+  if(F&&F.top&&b!==0&&b!==1&&!(o.bank&&h<=SEA+3))return F.top(o); // the forests' floors (M6b)
   if(o.bank&&h<=SEA+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
   if(b===0)return o.hill>0.08?GRAVEL:(h>SEA-5?SAND:DIRT);
   if(b===1)return o.hill>0.12?GRAVEL:SAND;

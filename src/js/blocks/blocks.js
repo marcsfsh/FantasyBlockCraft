@@ -112,6 +112,18 @@ def(CHEST,'Oak Chest',[200,200,201],{snd:'wood'});
 def(BERRYB,'Bilberry Bush',[202,202,202],PLANT);def(MUSHB,'Brown Mushroom',[203,203,203],PLANT);def(WTURN,'Wild Turnip',[206,206,206],PLANT);
 [[TURN0,'Turnip Sprouts',204],[TURN1,'Young Turnips',205],[TURN2,'Turnips',206],[BEAN0,'Bean Sprouts',207],[BEAN1,'Young Beans',208],[BEAN2,'Bean Plants',209]]
   .forEach(([id,n,t])=>def(id,n,[t,t,t],Object.assign({},PLANT,{place:false})));
+// The forests (M6b, D-040; Q130): six new woods (log, leaves, planks), forest floors and plants. The first block ids above 1023.
+const MAPLE=1024,MAPLEL=1025,MAPLEG=1026,MAPLEP=1027,PINE=1028,PINEL=1029,PINEP=1030,GREAT=1031,GREATL=1032,GREATP=1033,YEW=1034,YEWL=1035,YEWP=1036,
+  SILV=1037,SILVL=1038,SILVP=1039,WILLOW=1040,WILLOWL=1041,WILLOWP=1042,LITTER=1043,NEEDLES=1044,FMOSS=1045,FERN=1046,BLUEB=1047,MOONP=1048;
+const LEAFD={opq:false,leaf:true,snd:'soft'};
+[[MAPLE,MAPLEP,'Maple',147,148,151],[PINE,PINEP,'Pine',152,153,155],[GREAT,GREATP,'Greatwood',156,157,159],[YEW,YEWP,'Yew',160,161,163],[SILV,SILVP,'Silverwood',164,165,167],[WILLOW,WILLOWP,'Willow',168,169,171]]
+  .forEach(([log,pl,n,bark,ring,plank])=>{def(log,n+' Log',[ring,ring,bark],{snd:'wood'});def(pl,n+' Planks',[plank,plank,plank],{snd:'wood'});});
+def(MAPLEL,'Red Maple Leaves',[149,149,149],LEAFD);def(MAPLEG,'Golden Maple Leaves',[150,150,150],LEAFD);def(PINEL,'Pine Needles',[154,154,154],LEAFD);
+def(GREATL,'Greatwood Leaves',[158,158,158],LEAFD);def(YEWL,'Yew Leaves',[162,162,162],LEAFD);def(SILVL,'Silverleaf',[166,166,166],LEAFD);def(WILLOWL,'Willow Leaves',[170,170,170],LEAFD);
+def(LITTER,'Leaf Litter',[172,2,173],{snd:'soft'});def(NEEDLES,'Pine Needle Floor',[174,2,175],{snd:'soft'});def(FMOSS,'Forest Moss',[176,2,177],{snd:'soft'});
+def(FERN,'Fern',[178,178,178],PLANT);def(BLUEB,'Bluebells',[179,179,179],PLANT);def(MOONP,'Moonpetal',[180,180,180],Object.assign({},PLANT,{emit:true,lum:5}));
+const NEW_LOGS=[MAPLE,PINE,GREAT,YEW,SILV,WILLOW],NEW_PLANKS=[MAPLEP,PINEP,GREATP,YEWP,SILVP,WILLOWP],NEW_LEAVES=[MAPLEL,MAPLEG,PINEL,GREATL,YEWL,SILVL,WILLOWL];
+setH(NEW_LOGS,2.2,'wood');setH(NEW_PLANKS,2.2,'wood');setH(NEW_LEAVES,0.3,'soft');setH([LITTER,NEEDLES,FMOSS],0.6,'soft');setH([FERN,BLUEB,MOONP],0,'soft');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore
@@ -120,7 +132,7 @@ setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'me
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(NID),LUM=new Uint8Array(NID),SOLID=new Uint8Array(NID);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
-const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Fens'];
+const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Northern Fells','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Willow Vales'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
 // Tools drawn as a block in the hand. The grappling hook (100) and fireworks (101) gave way to the grapnel and signal flares (M4, Q45).
 // The Fill Tool (M5b) marks a box to fill, replace or clear (creative)

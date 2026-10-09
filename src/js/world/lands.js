@@ -22,15 +22,15 @@ land('barrow','Barrow Hills','kept',2,[1,2],[0,1],3,7,'human',['a great chambere
 land('shadow','Shadowed Forest','kept',2,[2,4],[2,2],3,8,'drow',['a temple sunk among the roots','a fallen giant spanning a hollow'],{built:true,gorge:0.5});
 // old lands reworked into new ones (Q119): until their family is built they keep the old look and name
 land('steppe','Golden Steppe','dry',1,[2,4],[0,0],3,10,'beastfolk',['a ring of horse stones','a lone rock outcrop over the grass'],{was:'Windswept Plains',gorge:0.3});
-land('willow','Willow Vales','forest',1,[2,3],[2,2],1,11,'halfling',['a stilt house over the water','willow-ringed pools with islets'],{was:'Fens',gorge:0});
+land('willow','Willow Vales','forest',1,[2,3],[2,2],1,11,'halfling',['a stilt house over the water','willow-ringed pools with islets'],{was:'Fens',gorge:0,built:true,col:[104,150,96]});
 land('tundra','Frozen Tundra','high',1,[0,0],[0,1],3,6,'dwarf',['a frozen longhouse','frost mounds and ice wedges'],{was:'Northern Fells',gorge:0.6});
 // forests (M6b)
-land('autumn','Autumn Woods','forest',1,[1,2],[1,1],3,3,'woodelf',['a woodcutters\' lodge','a red-leaf glade around a still pond']);
-land('birch','Birch Glades','forest',1,[1,2],[1,2],3,3,'woodelf',['a birch-bark shrine','a ring of white birches round a clearing']);
-land('pine','Pine Highlands','forest',1,[0,1],[1,2],6,6,'dwarf',['a timber watch post','a lookout rock above the pines'],{gorge:0.7});
-land('giant','Ancient Giant Wood','forest',3,[2,3],[2,2],1,3,'highelf',['a platform ruin high in a giant tree','a giant tree over forty blocks tall'],{never:['blight']});
-land('yew','Yew Wood','forest',2,[1,2],[1,2],3,8,'woodelf',['a ruined archers\' hall','an ancient hollow yew']);
-land('silver','Silverwood','forest',2,[1,2],[1,2],3,3,'highelf',['a moon-gate arch','a silver-leaf grove round a spring'],{never:['blight','volcanic']});
+land('autumn','Autumn Woods','forest',1,[1,2],[1,1],3,3,'woodelf',['a woodcutters\' lodge','a red-leaf glade around a still pond'],{built:true,col:[184,100,48]});
+land('birch','Birch Glades','forest',1,[1,2],[1,2],3,2,'woodelf',['a birch-bark shrine','a ring of white birches round a clearing'],{built:true,col:[160,190,112]});
+land('pine','Pine Highlands','forest',1,[0,1],[1,2],6,4,'dwarf',['a timber watch post','a lookout rock above the pines'],{gorge:0.7,built:true,col:[44,92,66]});
+land('giant','Ancient Giant Wood','forest',3,[2,3],[2,2],1,3,'highelf',['a platform ruin high in a giant tree','a giant tree over forty blocks tall'],{never:['blight'],built:true,col:[34,76,36]});
+land('yew','Yew Wood','forest',2,[1,2],[1,2],3,3,'woodelf',['a ruined archers\' hall','an ancient hollow yew'],{built:true,col:[54,82,52]});
+land('silver','Silverwood','forest',2,[1,2],[1,2],3,2,'highelf',['a moon-gate arch','a silver-leaf grove round a spring'],{never:['blight','volcanic'],built:true,col:[170,194,186]});
 // highlands and cold (M6c)
 land('alpine','Alpine Meadows','high',2,[0,2],[1,2],4,5,'dwarf',['a shepherd\'s hut on the high pasture','a meadow tarn under a peak'],{gorge:0.8});
 land('glacier','Glacier Fields','high',2,[0,0],[0,2],4,5,'dwarf',['a tower bound in the ice','crevasses and ice caves'],{gorge:0.6});

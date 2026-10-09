@@ -1,7 +1,9 @@
 // Recipes: [output, count, [[ingredient or list, count]...], station]
-const LOGS=[LOG,BIRCH,SPRUCE,JLOG];
+const LOGS=[LOG,BIRCH,SPRUCE,JLOG],PLANKSET=[PLANKS,...NEW_PLANKS]; // any planks make sticks, chests and wooden tools
 const RECIPES=[
-  [PLANKS,4,[[LOGS,1]]],[201,4,[[PLANKS,2]]],[TORCH,4,[[200,1],[201,1]]],
+  [PLANKS,4,[[LOGS,1]]],[201,4,[[PLANKSET,2]]],
+  ...NEW_LOGS.map((l,i)=>[NEW_PLANKS[i],4,[[l,1]]]), // the forests' woods (M6b)
+  [TORCH,4,[[200,1],[201,1]]],
   [FURN,1,[[COBBLE,8]]],[SBRICK,4,[[STONE,4]]],
   [STONE,2,[[COBBLE,2],[200,1]],'f'],[GLASS,2,[[SAND,2],[200,1]],'f'],
   [220,2,[[210,2],[200,1]],'f'],[221,2,[[211,2],[200,1]],'f'],[222,2,[[212,2],[200,1]],'f'],[223,2,[[213,2],[200,1]],'f'],[224,2,[[214,2],[200,1]],'f'],[229,2,[[215,2],[200,1]],'f'],
@@ -15,12 +17,12 @@ const RECIPES=[
   [LANTERN,1,[[226,4],[TORCH,1]]],[LANTERN,1,[[DLANTERN,1],[200,1]]],[SCONCE,1,[[DSCONCE,1],[200,1]]],[TORCH,1,[[DTORCH,1],[200,1]]],[GOLDB,1,[[224,9]]],[224,9,[[GOLDB,1]]],[220,9,[[COPB,1]]],[225,9,[[BRONB,1]]],[226,9,[[BRASB,1]]],[227,9,[[STEELB,1]]],[228,9,[[TITB,1]]],[229,9,[[PLATB,1]]],[TNT,1,[[SAND,4],[200,2]]],[WAYPT,1,[[230,2],[229,4],[SBRICK,6],[RUNE,1]]],
   [206,1,[[202,3]],'f'],[269,4,[[209,4],[200,1]],'f'],
   // storage, the worn lamp and cooking (M4b)
-  [CHEST,1,[[PLANKS,8]]],[341,1,[[328,12],[ROPE,2]]],[342,1,[[341,1],[225,4],[ROPE,4]]],[343,1,[[328,8],[ROPE,1]]],
+  [CHEST,1,[[PLANKSET,8]]],[341,1,[[328,12],[ROPE,2]]],[342,1,[[341,1],[225,4],[ROPE,4]]],[343,1,[[328,8],[ROPE,1]]],
   [340,1,[[220,2],[GLASS,1],[201,1]]],[338,1,[[208,6]]],[339,2,[[328,1],[200,1]]],
   [334,2,[[330,2],[200,1]],'f'],[335,2,[[330,1],[331,2],[333,1],[200,1]],'f'],[336,2,[[332,3],[202,2],[200,1]],'f'],[337,2,[[333,3],[200,1]],'f']
 ];
 // The tool ladder (items.js): pickaxe and axe from three of the material, shovel from one, each with two sticks
-const LADDER_MAT=[PLANKS,COBBLE,220,225,223,227,228];
+const LADDER_MAT=[PLANKSET,COBBLE,220,225,223,227,228];
 LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]]));
 function nearStation(kind){
   const px=Math.floor(PL.x),py=Math.floor(PL.y),pz=Math.floor(PL.z);
