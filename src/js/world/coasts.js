@@ -51,6 +51,7 @@ function waterPlants(x,z,X,Z,g,b){
 function coastBuild(s,r){
   const X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){
+    default:dryBuild(s,r);break; // the dry lands' signatures (M6e)
     case 'wreck':{ // the hull of an old ship sunk in the shallows, her mast broken, a barrel still in her hold
       const ax=hsh(X,8411,Z)<0.5,P2=(t,c,y,id)=>PW(ax?X+t:X+c,y,ax?Z+c:Z+t,id,MODE_SET);
       for(let t=-6;t<=6;t++){const w=Math.max(1,Math.round(2.6*Math.sqrt(1-(t/7)*(t/7))));for(let c=-w;c<=w;c++){P2(t,c,g,PLANKS);if(Math.abs(c)===w)for(let y=g+1;y<=g+2+(Math.abs(t)>4?1:0);y++)if(r()<0.85)P2(t,c,y,PLANKS);}

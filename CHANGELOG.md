@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.19.0 (2026-10-09): M6e, dry and fiery
+
+Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v14`.
+
+### Game
+- **Four dry and fiery lands:**
+  - **Southern Drylands:** dunes of sand and red sand over sandstone, cactus and dead bushes.
+  - **Golden Steppe** (the Windswept Plains, reworked): golden grass and tall steppe grass, a lone oak here and there.
+  - **Volcanic Wastes:** broken ground of ash and basalt with basalt spires; under them the rock over the Fire Below glows with magma stone.
+  - **Blighted Lands:** dead grass and grey dead trees.
+- **Landmarks and features:** a sand-buried temple or a dry wadi with a well that still holds water; a ring of horse stones or a lone outcrop; a fire shrine or a smoking cone with a lava lake held in its crater; a dead lord's hall or a grey grove round pits of ash.
+- **New blocks:** golden grass, steppe grass, volcanic ash, magma stone (glows), dead grass, dead wood (makes planks).
+
+### Tooling
+- New test `40-dry`; the world-hash snapshot is updated on purpose.
+
 ## 0.18.0 (2026-10-09): M6d, coasts and waters
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v13`.

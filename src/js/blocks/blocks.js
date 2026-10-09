@@ -139,6 +139,11 @@ def(BOGMOSS,'Bog Moss',[215,214,216],{snd:'soft'});
 def(KELP,'Kelp',[217,217,217],Object.assign({},PLANT,{wet:true}));def(SEAGRASS,'Seagrass',[218,218,218],Object.assign({},PLANT,{wet:true}));
 def(LILYPAD,'Lily Pad',[219,219,219],{solid:false,opq:false,occ:false,pad:true,snd:'soft'});def(COTTONG,'Cotton Grass',[220,220,220],PLANT);
 setH([CHALK],2,'stone',1);setH([BASALT],4,'stone',1);setH([BLACKSAND,PEAT,BOGMOSS],0.6,'soft');setH([KELP,SEAGRASS,LILYPAD,COTTONG],0,'soft');
+// Dry and fiery (M6e, D-043): golden steppe grass, volcanic ash and magma stone, the blight's dead grass and dead wood
+const GOLDGRASS=1067,STEPPEG=1068,ASH=1069,MAGMA=1070,DEADGRASS=1071,DEADWOOD=1072;
+def(GOLDGRASS,'Golden Grass Block',[221,2,222],{snd:'soft'});def(STEPPEG,'Steppe Grass',[223,223,223],PLANT);def(ASH,'Volcanic Ash',[224,224,224],{snd:'soft'});
+def(MAGMA,'Magma Stone',[225,225,225],{emit:true,lum:7});def(DEADGRASS,'Dead Grass Block',[226,2,227],{snd:'soft'});def(DEADWOOD,'Dead Wood',[229,229,228],{snd:'wood'});
+setH([GOLDGRASS,ASH,DEADGRASS],0.6,'soft');setH([STEPPEG],0,'soft');setH([MAGMA],5,'stone',1);setH([DEADWOOD],2.2,'wood');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
@@ -148,7 +153,7 @@ setH([OBSID],25,'stone',7);setH([COPB,BRONB,BRASB,STEELB,TITB,PLATB,BLAST],6,'me
 BL[BEDROCK].hard=-1;BL[WATER].hard=-1;BL[LAVA].hard=-1;
 const OPQ=new Uint8Array(NID),LUM=new Uint8Array(NID),SOLID=new Uint8Array(NID);
 BL.forEach((b,i)=>{if(!b)return;OPQ[i]=b.opq?1:0;LUM[i]=b.lum;SOLID[i]=b.solid?1:0;});
-const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Frozen Tundra','Barrow Hills','Shadowed Forest','Lake','Windswept Plains','Willow Vales'];
+const BIOMES=['The Western Sea','Grey Shore','Green Hills','Elder Wood','Heath Moors','High Mountains','Frozen Tundra','Barrow Hills','Shadowed Forest','Lake','Golden Steppe','Willow Vales'];
 const BANDS=[TERO,TERT,TERB,TERO,TERO,TERT,TERB,TERB];
 // Tools drawn as a block in the hand. The grappling hook (100) and fireworks (101) gave way to the grapnel and signal flares (M4, Q45).
 // The Fill Tool (M5b) marks a box to fill, replace or clear (creative)

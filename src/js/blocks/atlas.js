@@ -220,6 +220,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(218);for(let f=0;f<7;f++){const ox=1+f*2,h=6+Math.floor(hn(f,2,125)*9);for(let k=0;k<h;k++)P(218,ox+(k>h/2?(f%2?1:-1):0),15-k,sh([60,140,70],(hn(f,k,126)-.5)*30));}
   clear(219);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5),a=Math.atan2(y-7.5,x-7.5);if(d<7&&!(a>-0.25&&a<0.25&&d>1.5))P(219,x,y,sh([62,130,48],(hn(x,y,127)-.5)*24+(d>6?-20:0)));}P(219,5,5,[236,206,226]);P(219,6,5,[250,230,240]);P(219,5,6,[226,190,214]);
   clear(220);for(let f=0;f<4;f++){const ox=2+f*4,h=8+Math.floor(hn(f,3,128)*6);for(let k=0;k<h;k++)P(220,ox,15-k,[96,130,64]);for(let dy=0;dy<3;dy++)for(let dx=-1;dx<=1;dx++)P(220,ox+dx,16-h-dy,[244,244,236]);}
+  // dry and fiery (M6e): golden grass (top, side), steppe grass, ash, magma stone, dead grass (top, side), dead wood (rings, bark)
+  floorTop(221,[[208,176,82],[222,192,96],[190,158,70],[230,204,120]],131);floorSide(222,[208,176,82],132);
+  clear(223);for(let f=0;f<8;f++){const ox=1+f*2,h=6+Math.floor(hn(f,4,133)*9),lean=f%3-1;for(let k=0;k<h;k++)P(223,ox+Math.round(k*lean*0.15),15-k,sh([220,186,96],(hn(f,k,134)-.5)*30+(k>h-3?20:0)));}
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(224,x,y,sh([112,108,104],(hn(x,y,135)-.5)*26+(hn(x,y,136)<.05?-30:0)));const m=hn(x>>1,y>>1,137);P(225,x,y,m<.3?sh([250,130,30],(hn(x,y,138)-.5)*40):sh([52,40,36],(hn(x,y,139)-.5)*20));}
+  floorTop(226,[[128,122,96],[112,108,88],[140,130,104],[96,94,82]],140);floorSide(227,[124,118,94],141);
+  bark(228,[104,100,94],142,1);ring(229,[150,144,132],[130,124,114],[104,100,94],143);
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

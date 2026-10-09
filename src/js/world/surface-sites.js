@@ -66,11 +66,13 @@ function oldRoadAt(X,Z){
   return false;
 }
 // Lay the roads on the chunk's own columns: worn dirt path with old stones, off water, steep slopes, sites and gate terraces
+// the ground of the new lands (M6) that a road is laid over, as over grass
+const ROAD_GROUND=new Set([LITTER,NEEDLES,FMOSS,TMOSS,LIMESTONE,PSNOW,CHALK,BLACKSAND,PEAT,BOGMOSS,BASALT,GOLDGRASS,ASH,DEADGRASS,RSAND,CALCITE]);
 function applyRoads(lcx,lcz){
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;if(!roadSegs(WCX,WCZ).length)return;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){const X=WCX*CS+x,Z=WCZ*CS+z;if(!oldRoadAt(X,Z))continue;
     colInfo(X,Z,TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.h<=SEA)continue;const g=TS2.h;if(slopeAt(X,Z,g)>=3||siteNear(X,Z,0)||gateNear(X,Z,0))continue;
-    const lx=lcx*CS+x,lz=lcz*CS+z,i=I(lx,g,lz),top=world[i];if(![GRASS,DIRT,SNOWG,SAND,GRAVEL,STONE,PATH].includes(top))continue;
+    const lx=lcx*CS+x,lz=lcz*CS+z,i=I(lx,g,lz),top=world[i];if(![GRASS,DIRT,SNOWG,SAND,GRAVEL,STONE,PATH].includes(top)&&!ROAD_GROUND.has(top))continue;
     const q=hsh(X,6702,Z);world[i]=q<0.1?COBBLE:q<0.22?GRAVEL:PATH;lvl[i]=0;
     const up=world[i+W*D];if(up&&BL[up].cross){world[i+W*D]=AIR;}}
 }

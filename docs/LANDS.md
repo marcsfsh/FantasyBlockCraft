@@ -39,7 +39,7 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 5 | High Mountains | Old lands | common | cold to warm | dry to wet | high | built | a gatehouse in a high pass | a high tarn under the peaks | 8.8% | 38 (530) |
 | 6 | Barrow Hills | Old lands | uncommon | cool to temperate | dry to middling | low, hills | built | a great chambered barrow | long rows of standing stones | 1.7% | 16 (354) |
 | 7 | Shadowed Forest | Old lands | uncommon | temperate to hot | wet | low, hills | built | a temple sunk among the roots | a fallen giant spanning a hollow | 4.2% | 19 (549) |
-| 8 | Golden Steppe (was Windswept Plains) | Dry and fiery (M6e) | common | temperate to hot | dry | low, hills | Windswept Plains | a ring of horse stones | a lone rock outcrop over the grass | 9.0% | 24 (559) |
+| 8 | Golden Steppe (was Windswept Plains) | Dry and fiery (M6e) | common | temperate to hot | dry | low, hills | built | a ring of horse stones | a lone rock outcrop over the grass | 9.0% | 24 (559) |
 | 9 | Willow Vales (was Fens) | Forests (M6b) | common | temperate to warm | wet | low | built | a stilt house over the water | willow-ringed pools with islets | 2.7% | 14 (640) |
 | 10 | Frozen Tundra (was Northern Fells) | Highlands and cold (M6c) | common | cold | dry to middling | low, hills | built | a frozen longhouse | frost mounds and ice wedges | 2.8% | 11 (431) |
 | 11 | Autumn Woods | Forests (M6b) | common | cool to temperate | middling | low, hills | built | a woodcutters' lodge | a red-leaf glade around a still pond | 1.7% | 8 (340) |
@@ -58,12 +58,12 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 24 | Black Sand Shores | Coasts and waters (M6d) | uncommon | temperate to hot | dry to wet | low, beside the sea | built | a black-stone harbour wall | basalt columns on the shore | 1.7% | 20 (330) |
 | 25 | Kelp Shallows | Coasts and waters (M6d) | uncommon | temperate to hot | sea | sea by the coast | built | a sunken causeway | kelp forests | 1.3% | 24 (336) |
 | 26 | Raised Bogs | Coasts and waters (M6d) | uncommon | cold to temperate | wet | low | built | an old plank trackway across the bog | a domed bog with pools and cotton grass | 1.5% | 5 (707) |
-| 27 | Southern Drylands | Dry and fiery (M6e) | common | hot | dry | low, hills | Windswept Plains | a temple half buried in sand | a dry wadi with an old well | 1.8% | 11 (525) |
-| 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | Heath Moors | a ruined fire shrine | a smoking cone with a lava lake held in rock | 1.3% | 10 (451) |
-| 29 | Blighted Lands | Dry and fiery (M6e) | uncommon | cool to warm | dry to middling | low, hills | Heath Moors | a dead lord's ruined hall | grey dead trees and ash pools | 2.1% | 25 (311) |
+| 27 | Southern Drylands | Dry and fiery (M6e) | common | hot | dry | low, hills | built | a temple half buried in sand | a dry wadi with an old well | 1.8% | 11 (525) |
+| 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | built | a ruined fire shrine | a smoking cone with a lava lake held in rock | 1.3% | 10 (451) |
+| 29 | Blighted Lands | Dry and fiery (M6e) | uncommon | cool to warm | dry to middling | low, hills | built | a dead lord's ruined hall | grey dead trees and ash pools | 2.1% | 25 (311) |
 | 30 | Crystal Barrens | Strange lands (M6f) | rare | cold to cool | dry | hills, high | Frozen Tundra | a crystal cutters' ruin | crystal spires | 0.3% | 3 (350) |
 | 31 | Glowcap Hollows | Strange lands (M6f) | rare | temperate to warm | wet | low, hills | Shadowed Forest | a mushroom dwelling | giant glowing mushrooms in a hollow | 0.8% | 12 (342) |
-| 32 | Petrified Forest | Strange lands (M6f) | rare | warm to hot | dry | low, hills | Windswept Plains | a waystation turned to stone | trees of stone | 0.7% | 11 (319) |
+| 32 | Petrified Forest | Strange lands (M6f) | rare | warm to hot | dry | low, hills | Golden Steppe | a waystation turned to stone | trees of stone | 0.7% | 11 (319) |
 | 33 | Starfall Craters | Strange lands (M6f) | rare | cool to warm | dry to middling | low, hills | Heath Moors | a ruined star tower | a crater round a starmetal heart | 0.9% | 15 (323) |
 | 34 | Overgrown Farmland | Old lands of men (M6g) | uncommon | cool to warm | middling | low | Green Hills | an abandoned manor farm | wild crops in old furrows | 0.5% | 6 (438) |
 | 35 | Wild Orchards | Old lands of men (M6g) | uncommon | temperate to hot | middling | low | Green Hills | an orchard keeper's cottage | rows of gnarled fruit trees | 4.5% | 23 (450) |
