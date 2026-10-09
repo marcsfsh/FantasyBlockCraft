@@ -34,7 +34,7 @@ The plan from the direction interview (`docs/DIRECTION_QA.md`, cited as Q1 to Q7
 | M3.5 | Natural generation | Caves rebuilt as connected systems with flow, sound lava; natural rivers, mountains, borders and placement on the surface |
 | M4 | Survival and items | Metal ladder, broader tool kit, storage, the worn lamp, earned fast travel, food |
 | M5 | Controls and interface | Remapping, hints, maps, world management, creative tools |
-| M6 | Surface enrichment | Thin lands, varied structures, rivers, weather |
+| M6 | Surface enrichment and new lands | 30 new lands on a transition map, enriched old lands, ruin layouts, small structures, streams and falls, weather by land |
 | M7 | Lore and chronicles | Hold chronicles, the journal, the discovery log |
 | M8 | Audio | Ambient soundscapes, volume controls, positional sound |
 | E1 | Wildlife | Entities in play: animals for atmosphere, resources, hunting, mounts |
@@ -233,15 +233,30 @@ Added after the owner played 0.8.0: generation feels disjointed and random, the 
 - **M5a, controls and interface (done in 0.13.0):** rebinding with better defaults, context hints, help by mode and device, the readout switch, renaming worlds. Checkpoint: rebind a control on the Ally X.
 - **M5b, maps and creative tools (done in 0.14.0):** the underground layer view, the explored world map with markers and place names, and the creative upgrades. Checkpoint: find a marker you placed on the world map after a reload.
 
-## M6: Surface enrichment
+## M6: Surface enrichment and new lands (Q101 to Q136, D-038)
 
-- **Enrich the thin lands (Q23):** Western Sea, Grey Shore, High Mountains (now taller), Northern Fells, Lake and Fens get plants, features and ground variety.
-- **Vary repeated structures:** barrows, towers, wells and stone rings get varied shapes, sizes and orientations.
-- **Rivers and water:** streams and waterfalls (river valleys themselves come in M3.5b).
-- **Weather fixed and enriched, still cosmetic (Q58):** fog, mist and storms by land.
-- New lands (Q23), for example a desert that reuses the kept desert blocks (Q41), are planned as an expansion.
+Widened after the round-21 interview: M6 enriches every land and adds 30 new ones, so the surface stops feeling stale (Q101). Strong enrichment, the look mixed by land (gentle lowlands, wild highlands and coasts), and the M3.5b terrain kept in spirit but held to the same standard (Q102, Q103). One PR per part, each with a checkpoint played through a creative land tour (Q117, Q136). Keep 60 fps on the Ally X (Q135).
 
-**Checkpoint:** a seed tour through each enriched land.
+**Rules for every part:**
+- **Transition map (Q108):** each land lists the lands it may border; no winter land next to a desert. Lands are chosen from climate, height, damp and region fields so the map holds everywhere.
+- **Sizes and tiers (Q118):** common lands large, most new lands uncommon, the strange ones rare. No land smaller than 215 x 215 blocks (or the same area), and never narrower than 115 blocks. Existing land sizes are re-evaluated.
+- **Signatures (Q124):** each land has a signature landmark structure and a signature natural feature; any one stretch of the land shows one of them, or neither in 40% of stretches where that keeps the land's identity.
+- **Names (Q131):** each stretch of a land has its own name in the people's style ("Silverwood of Aelmere"), shown on arrival and on the world map.
+- **Resources (Q130):** new woods, new stones, rare finds (useful later for magic), and wild food and dyes, by land.
+- **Water (Q126, Q129):** streams, falls, rapids, springs and ponds are shaped still water that looks flowing: always sound, never floods or leaks.
+- **Weather (Q127, Q128):** fog and mist, storms, dust and ash, and land-tinted skies, by land; still cosmetic; fog never closer than about 30 to 40 blocks.
+
+**Parts (Q117, Q133):**
+- **M6a, groundwork:** two bytes per block in the world (Q120); a land system (registry, transition map, tiers, minimum sizes); land names; a creative land tour; the land list and transition map as a document with a map picture for the owner to approve before any family is built (Q134). Existing lands keep their look.
+- **M6b, forests:** Autumn Woods, Birch Glades, Pine Highlands, Ancient Giant Wood, Willow Vales (the Fens rework into them, Q119), Yew Wood, Silverwood. New woods.
+- **M6c, highlands and cold:** Alpine Meadows, Glacier Fields, Cloud Forest Heights, Karst Crags (sinkholes into the caves, Q132), Frozen Tundra (the Northern Fells rework into it); enrich the High Mountains; mountain waterfalls.
+- **M6d, coasts and waters:** Chalk Cliffs, Rocky Isles, Fjords, Black Sand Shores, Kelp Shallows, Raised Bogs; enrich the Western Sea, Grey Shore and Lake.
+- **M6e, dry and fiery:** Southern Drylands (the kept desert blocks), Golden Steppe (the Windswept Plains rework into it), Volcanic Wastes (a hotter deep below, lava sound), Blighted Lands.
+- **M6f, strange lands:** Crystal Barrens, Glowcap Hollows, Petrified Forest, Starfall Craters (rare finds); rare tier.
+- **M6g, old lands of men:** Overgrown Farmland, Wild Orchards, Flower Meadows, Old Terraces; small structures (bridges, farmsteads, shrines and cairns, abandoned camps, beacon hills, mills and jetties, chapels and graveyards, dykes and boundary walls).
+- **M6h, ruins, water and weather:** 3 to 5 layouts each for watchtowers, keeps and castles, varied by size, decay and facing (Q122); hillside streams, river falls and rapids, springs and ponds everywhere; weather and skies by land; land-flavoured caves near the surface (Q132); enrichment (plants, landmarks, tree variety, small finds) for any old land not yet reached (Q121).
+
+**Checkpoint (each part):** take the creative land tour through the part's lands on the Ally X.
 
 ## M7: Lore and chronicles
 

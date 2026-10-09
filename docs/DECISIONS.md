@@ -242,3 +242,11 @@ Constrains: new actions go in `ACTIONS` (with `crea:1` if creative only), `HELP`
   - The pause menu sets the time of day, calls rain or clears it, goes to coordinates (X and Z, Y optional), and builds a test structure where you look: a watchtower, a ruined keep, castle ruins, a barrow, a stone ring, an ancient waystone or a dungeon room below the spot with a tunnel up beside it. The builder runs per chunk as generation does and every block it changes becomes an ordinary edit, so it saves and undoes.
 - **Saves:** the save data gained `ex`, `pl` and `mk`: `SAVE_KEY` is `fantasy-blockcraft-save-v9`, world data version 9. Generation is unchanged.
 Constrains: anything that writes the world outside generation goes through `setBlock` (as `stampAt` does after running a builder); new map layers draw from data that is cheap to recompute or small to save.
+
+### D-038 M6 direction: new lands on a transition map (2026-10-09)
+The round-21 interview (Q101 to Q136) widened M6 from enriching the thin lands to adding 30 new lands, plus enrichment, ruin layouts, small structures, water and weather. It runs as eight parts (M6a to M6h, `docs/MILESTONES.md`), groundwork first, then forests.
+- **Two bytes per block (Q120):** the world array grows from one byte to two per block in M6a, lifting the 256 block-type limit; it costs about twice the world memory.
+- **Lands:** chosen on a transition map that lists which lands may border which (Q108), in tiers by rarity, never smaller than 215 x 215 blocks or narrower than 115 (Q118). Windswept Plains, Fens and Northern Fells rework into Golden Steppe, Willow Vales and Frozen Tundra (Q119).
+- **Water stays shaped and sound (Q129)**, and the owner's rule that underground water and lava sit in sound rock still holds.
+- **The owner approves the land list and transition map in M6a before any family is built (Q134).**
+Constrains: every new land names its allowed neighbours, its tier, its signature landmark and feature, and its stretch names.
