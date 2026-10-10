@@ -102,4 +102,4 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE]); // relics for the discovery log (M7)

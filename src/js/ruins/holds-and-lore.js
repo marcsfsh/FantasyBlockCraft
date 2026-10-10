@@ -13,37 +13,62 @@ function findTreasure(X,Z){
   for(let a=-8;a<=8;a++)for(let b=-8;b<=8;b++)for(let L=0;L<2;L++){const t=ruinType(cx+a,cz+b,L);if(t==='vault'||t==='throne'||t==='grandthrone'||t==='temple'){const d=Math.hypot(a,b);if(d>0&&d<bd){bd=d;best={t:t,dx:(cx+a)*CS+8-X,dz:(cz+b)*CS+8-Z,L:L};}}}
   return best;
 }
+// ---- Hold chronicles (M7, Q27, Q28): each hold has eight pages in order, from its founding to its fall, or to the present day
+// for an inhabited hold. The text is a draft for the owner's approval (docs/LORE.md). The chronicle uses its own stream, so the
+// hold's name, king, queen, guild and year stay as they were.
+const CHRON_N=8;
+const CHRON_CAUSE=[ // what turned the hold's fortune: [the warning, the lean years, the leaving]
+  ['The lower shafts grow warm. The fire below rises a hand each season, and the deepest gates weep with heat.','The lowest halls are sealed one by one. The forges are moved up into the rooms where the scribes once worked.','The fire reached the second deep this spring. We carry out what we can lift and leave the rest to the heat.'],
+  ['The veins are thinning. The tin of the eastern drifts is gone, and the copper comes up poorer every month.','Fewer carts go out to the surface markets. The young ones leave to seek work in other holds and few of them return.','There is nothing left to dig that is worth the digging. The council votes to leave, and no one speaks against it.'],
+  ['The roof of the eastern hall cracked in the night. The Stonesingers say the mountain has shifted in its sleep.','Props of oak hold up three of the great halls. No one sleeps under the long gallery any more.','The roof has come down twice in one month. The king says we will return when the stone is quiet again.'],
+  ['A cold spring broke into the cisterns and has not stopped. The lower streets stand ankle deep in water.','The pumps run day and night. The brewers have moved their vats to the upper deep and complain of the stairs.','The water has taken the lower deep. We leave the pumps running for whoever comes after us.'],
+  ['The guilds quarrel over the shares of the brass. Two of them have walled off their own halls and keep their own gates.','The market is half empty. Each guild trades only with its own, and the king cannot make them meet.','The guilds leave one by one, each by its own gate, each saying the others drove them out.']
+];
+function holdChronicle(cx,cz){
+  const H0=holdNear(cx,cz),h=holdOf(cx,cz);if(h.pages)return h.pages;
+  const r=rngAt(H0.rx,1303,H0.rz),cause=CHRON_CAUSE[r()*CHRON_CAUSE.length|0],G=h.guild[0].toUpperCase()+h.guild.slice(1),y=[h.year];
+  for(let k=1;k<CHRON_N;k++)y.push(y[k-1]+8+(r()*60|0));
+  const work=['a cavern of living crystal that hums at night','a library of four hundred shelves cut into the living rock','a throne hall whose pillars are carved with the names of every delver','cisterns deep enough to keep the hold through a hundred dry years'][r()*4|0];
+  const P=[
+    ['The Founding','In the year '+y[0]+' King '+h.king+' led the first delvers into the mountain and named the place '+h.name+'. The first hall was cut in a single winter, and the first lamp was lit in it on the longest night.'],
+    ['The First Deep','Year '+y[1]+'. '+G+' broke through to the first deep and found tin and copper in good seams. The forges were lit, and it was decreed that they should never go out while the hold stood.'],
+    ['The Market Days','Year '+y[2]+'. Brass for wheat, wheat for ale, ale for stories. Traders from the surface come up the gate road every season, and Queen '+h.queen+' buys every lantern in the row.'],
+    ['The Great Work','Year '+y[3]+'. After long years of cutting, the hold has finished '+work+'. The masons who began it did not live to see it done, and their names are cut over its door.'],
+    ['The Warning','Year '+y[4]+'. '+cause[0]],
+    ['The Lean Years','Year '+y[5]+'. '+cause[1]]
+  ];
+  if(H0.inhabited){
+    P.push(['The Holding','Year '+y[6]+'. We did not leave. '+G+' found new work for every hand, and the lamps of '+h.name+' were never let go out.']);
+    P.push(['The Present Day','Year '+y[7]+'. The halls of '+h.name+' still ring with hammers. The gates stand open to anyone who comes in peace, though fewer travellers come up the old roads each year.']);
+  }else{
+    P.push(['The Leaving','Year '+y[6]+'. '+cause[2]]);
+    P.push(['The Last Page','Year '+y[7]+'. Roster of the last watch of '+h.name+': eleven names, then a twelfth in a shaking hand. Below it, the words "the lamps are out", and nothing more.']);
+  }
+  h.pages=P;return P;
+}
+// which page of its hold's chronicle a lectern holds
+const lecternPage=(X,Y,Z)=>Math.floor(hsh(X,1307+Y,Z)*CHRON_N);
 function loreText(X,Y,Z){
-  const cx=Math.floor(X/CS),cz=Math.floor(Z/CS),h=holdOf(cx,cz),r=rngAt(X,Y+500,Z),n=r()*13|0;
+  const cx=Math.floor(X/CS),cz=Math.floor(Z/CS),h=holdOf(cx,cz),k=lecternPage(X,Y,Z);
   const tr=findTreasure(X,Z);
   const hint=tr?' A margin note in another hand: the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+' lies about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+(tr.L?', on the upper deep.':', on the lower deep.'):'';
-  const T=[
-    'Ledger of '+h.name+', year '+h.year+'. Forty carts of tin from the eastern drifts, eleven of zinc. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' demand a larger share of the brass.',
-    'By decree of King '+h.king+': no lamp shall be put out in the Great Hall while the deep fires burn. Let the halls of '+h.name+' never go dark.',
-    'We broke into a cavern of living crystal today. The Rune Masons say it hums at night. Queen '+h.queen+' has forbidden anyone to cut it.',
-    'Third warning from the lower shafts. The lava rises a hand each season. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' have begun to seal the deepest gates.',
-    'Recipe of the Black Vat: mushroom caps, wheat from the surface traders, and patience. Never serve it to a king before noon.',
-    'The moonsilver seams lie below the second deep, near the fire. Only steel bites them. The old picks of '+h.name+' were forged with runes for this.',
-    'We are leaving. The roof of the eastern hall has come down twice this month. King '+h.king+' says we will return to '+h.name+' when the stone is quiet.',
-    'Account of the treasury, year '+(h.year+3)+': gold enough to plate the throne twice over. The rest is kept beneath the floor where only the stewards know.',
-    'To whoever reads this: the cracked tiles are not all damage. Some of us hid our savings under them.',
-    'Roster of the night watch, year '+(h.year+11)+'. Eleven names, then a twelfth in a shaking hand, then nothing.',
-    'The cisterns are full again. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' say the springs above the upper deep will last a thousand years if no one digs too greedily.',
-    'Market day in '+h.name+'. Brass for mushrooms, mushrooms for ale, ale for stories. Queen '+h.queen+' bought every lantern in the row.',
-    'Song of the hammer, verse four: strike once for the stone, once for the king, once for the ones below who never saw the sun.'
-  ];
   const room=roomAt(X,Y,Z);let gate='';
   {const gs=holdGates(holdNear(cx,cz));let bd=1e9,g=null;for(const q of gs){const dx=q.cx*CS+8-X,dz=q.cz*CS+8-Z,d=Math.hypot(dx,dz);if(d<bd){bd=d;g=[dx,dz];}}
     if(g)gate=' Scratched beneath it: the way up to the surface is a gate about '+Math.round(bd/10)*10+' paces to the '+compass(g[0],g[1])+', on the upper deep.';}
   if(room==='plaza')return 'A waymarker of '+h.name+'. '+(tr?'Carved arrows point toward the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+', about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+'.':'Most of the carved arrows have worn away.')+gate;
-  return T[n]+hint+gate;
+  return holdChronicle(cx,cz)[k][1]+hint+gate;
 }
-function openLore(X,Y,Z){
-  const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
+// A text card in the inventory frame: the lectern's page, the journal, a rune tablet
+function showText(title,text){
   invOpen=true;hold=-1;
   ['invgrid','invname','sinv','bplist','invsearch'].forEach(id=>{$(id).style.display='none';});
-  $('invtitle').textContent='A page from '+h.name;$('lore').style.display='block';$('lore').textContent=loreText(X+OX,Y,Z+OZ);
+  $('invtitle').textContent=title;$('lore').style.display='block';$('lore').textContent=text;
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
+}
+function openLore(X,Y,Z){
+  const WX=X+OX,WZ=Z+OZ,cx=Math.floor(WX/CS),cz=Math.floor(WZ/CS),h=holdOf(cx,cz),plaza=roomAt(WX,Y,WZ)==='plaza',k=lecternPage(WX,Y,WZ);
+  showText(plaza?'A waymarker of '+h.name:h.name+', page '+(k+1)+' of '+CHRON_N+': '+holdChronicle(cx,cz)[k][0],loreText(WX,Y,WZ));
+  if(!plaza)journalPage(cx,cz,k);
   tone(500,420,0.25,0.06);
 }
 // ---- Hold gates (Q22, Q72): up to three per hold, on avenues in the hold's outer ring under the highest dry ground, at least

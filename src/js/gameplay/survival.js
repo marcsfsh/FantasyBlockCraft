@@ -256,6 +256,7 @@ function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
+  if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}
   if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}

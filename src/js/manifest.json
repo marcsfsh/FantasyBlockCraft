@@ -190,6 +190,10 @@
       "about": "The explored world map with places and markers, and the minimap's layer view underground (M5b)"
     },
     {
+      "path": "ui/journal.js",
+      "about": "The journal (chronicle pages and rune tablets, in order) and the discovery log (M7)"
+    },
+    {
       "path": "ui/creative.js",
       "about": "Creative tools: block search, the Fill Tool, teleport, time and weather, test structures (M5b)"
     },

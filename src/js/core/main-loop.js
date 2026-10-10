@@ -115,7 +115,7 @@ function frame(now){
     }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
   renderer.render(scene,camera);
   fc++;ft+=dt;infoT-=dt;
-  if(infoT<=0&&ready){infoT=0.25;hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
+  if(infoT<=0&&ready){infoT=0.25;discoverTick(0.25);hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):surfaceName(bx+OX,yy,bz+OZ);

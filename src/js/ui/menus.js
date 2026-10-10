@@ -57,6 +57,7 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
   $('tourbtn').addEventListener('click',()=>{if(landTour(+sel.value))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
+$('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});
 $('ctlbtn').addEventListener('click',()=>{const c=$('ctl'),open=c.style.display==='none';c.style.display=open?'':'none';capture=null;if(open)renderControls();});
 segBind('resseg','res',v=>v);$('resseg').addEventListener('click',()=>{setRes(resTarget());}); // Auto restarts from the full density
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load

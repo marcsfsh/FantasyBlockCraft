@@ -77,6 +77,7 @@ const freeSlot=(cap=invCap())=>{for(let i=0;i<cap;i++)if(!inv[i])return i;return
 const stackMax=id=>ITEMS[id]&&(ITEMS[id].dur||ITEMS[id].one)?1:ITEMS[id]&&ITEMS[id].kind==='grapnel'?8:64;
 function roomFor(id){let n=0;for(let i=0;i<invCap();i++){const q=inv[i];n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;}return n;}
 function addItem(id,n){
+  if(RELICS.has(id)&&ready)discover('q',id); // relics for the discovery log (M7)
   for(const q of inv)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}
   for(let i=0,cap=invCap();i<cap&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
   saveDirty=true;return n;

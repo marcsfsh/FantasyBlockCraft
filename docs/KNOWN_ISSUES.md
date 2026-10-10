@@ -52,3 +52,5 @@
 - **Large fills are slow.** A full 131072-block fill goes through `setBlock` one block at a time and can take a few seconds on the Ally X.
 - **Weather by land is judged only headless (M6h).** Mist, dust, ash and sky tints are tested as values; how they look and whether fog in the bogs is too thick are for the owner to judge on the Ally X (D-046).
 - **Streams cut a channel two blocks deep.** A hillside stream clears the two blocks above its bed, so a tree standing on its path can lose part of its trunk (D-046).
+- **A hold may lack a page.** Each lectern holds a page chosen by its position, so a small hold or a hold with few lecterns standing may not hold all eight pages of its chronicle (D-047).
+- **Lore texts are drafts.** Chronicles, tablet sayings and all names but the dwarves' wait for the owner's approval (`docs/LORE.md`).

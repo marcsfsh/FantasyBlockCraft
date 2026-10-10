@@ -259,7 +259,7 @@ Widened after the round-21 interview: M6 enriches every land and adds 30 new one
 
 **Checkpoint (each part):** take the creative land tour through the part's lands on the Ally X.
 
-## M7: Lore and chronicles
+## M7: Lore and chronicles (done in 0.23.0, D-047)
 
 - **Hold chronicles (Q27):** each hold has an ordered history (founding, prosperity, the fall, or the present day for inhabited holds), drafted for owner approval (Q28).
 - **The journal:** collects pages in order as you read them. Rune Tablets become readable.

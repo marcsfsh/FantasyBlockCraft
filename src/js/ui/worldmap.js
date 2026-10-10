@@ -84,7 +84,7 @@ function wmPanel(){
       const addB=add('Add marker',()=>{addMarker(P.X,P.Z,inp.value);WM.pick=null;wmPanel();drawWorldMap();});}
     if(!SURV())add('Travel here',()=>{closeWorldMap();goTo(P.X,P.Z);});
     add('Cancel',()=>{WM.pick=null;wmPanel();drawWorldMap();});
-  }else{add('+',()=>wmZoom(2));add('-',()=>wmZoom(0.5));add('Up',()=>wmPan(0,-1));add('Down',()=>wmPan(0,1));add('Left',()=>wmPan(-1,0));add('Right',()=>wmPan(1,0));add('Centre',()=>{WM.X=PL.x+OX;WM.Z=PL.z+OZ;drawWorldMap();});add('Close',closeWorldMap);
+  }else{add('+',()=>wmZoom(2));add('-',()=>wmZoom(0.5));add('Up',()=>wmPan(0,-1));add('Down',()=>wmPan(0,1));add('Left',()=>wmPan(-1,0));add('Right',()=>wmPan(1,0));add('Centre',()=>{WM.X=PL.x+OX;WM.Z=PL.z+OZ;drawWorldMap();});add('Journal',openJournal);add('Close',closeWorldMap);
     const t=document.createElement('span');t.textContent=SURV()?'  Tap the map to place a marker':'  Tap the map to place a marker or travel';p.appendChild(t);}
 }
 function wmZoom(f){WM.s=Math.max(0.125,Math.min(8,WM.s*f));drawWorldMap();}

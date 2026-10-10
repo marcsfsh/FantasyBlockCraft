@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.23.0 (2026-10-10): M7, lore and chronicles
+
+Saves from 0.22.0 load again (see the fix below); the world is unchanged.
+
+### Game
+- **Hold chronicles:** every dwarven hold has a chronicle of eight pages, from its founding to its fall, or to the present day for an inhabited hold. Each lectern holds one page.
+- **The journal** (L, or the Journal button in the pause menu and on the world map): pages kept in the order of their chronicle, with the ones not yet found marked; the rune tablets you have read; the discovery log.
+- **Rune tablets are readable:** use one from your hand to read its saying.
+- **The discovery log** records the lands, layers, holds, remains of other peoples and relics you find, with a word on screen the first time.
+
+### Fixed
+- Saved worlds did not come back after a reload in 0.22.0: the loader still expected the old world data version. The saver and the loader now share one version number.
+
+### Tooling
+- New test `44-lore`; `docs/LORE.md` holds the lore drafts for approval.
+
 ## 0.22.0 (2026-10-09): M6h, ruins, water and weather
 
 Old saves do not load: the world changed, and the save key is now `fantasy-blockcraft-save-v17`. This completes M6.

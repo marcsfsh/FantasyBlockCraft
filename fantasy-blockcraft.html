@@ -30,7 +30,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--
 .slot span{position:absolute;left:2px;top:-3px;font-size:14px;color:var(--dim)}
 .dur{position:absolute;left:10%;bottom:3px;height:3px;border-radius:1px}
 .slot .cnt{position:absolute;right:2px;bottom:-4px;font-weight:400;font-size:17px;text-shadow:1px 1px 0 #000}
-#lore{display:none;max-width:min(560px,86vw);font-size:22px;line-height:1.25;background:#e8dfc6;color:#3a2a18;padding:14px 18px;border:3px solid #8a6a40;margin-bottom:8px}
+#lore{display:none;white-space:pre-wrap;max-height:70vh;overflow-y:auto;max-width:min(560px,86vw);font-size:22px;line-height:1.25;background:#e8dfc6;color:#3a2a18;padding:14px 18px;border:3px solid #8a6a40;margin-bottom:8px}
 #trade{display:none;flex-direction:column;gap:4px;width:min(620px,88vw);max-height:66vh;overflow:auto}
 #sinv{display:none;gap:16px;flex-wrap:wrap;width:min(900px,88vw);align-items:flex-start}
 .scol{flex:0 1 auto}
@@ -189,7 +189,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg" id="hudseg">Readout <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="hintseg">Hints <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="touchseg">Touch <button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div>
-    <button id="sndbtn">Sound on</button><button id="ctlbtn">Controls</button>
+    <button id="sndbtn">Sound on</button><button id="ctlbtn">Controls</button><button id="jnbtn">Journal</button>
   </div>
   <div id="ctl" class="worlds" style="display:none"></div>
   <div class="btns"><button class="big go" id="play" disabled>Play</button><button class="big" id="photo">Photo mode</button><input id="worldname" placeholder="New world name" aria-label="Name for the new world" autocomplete="off"><input id="seedin" placeholder="Seed (optional)" aria-label="Seed for the new world" autocomplete="off"><button class="big" id="newworld">New world</button></div>
@@ -223,7 +223,8 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const saved=(d=>d&&d.v===16&&d.seed===WORLD.seed?d:null)(lsGet(worldKey(WORLD.id)));
+const SAVE_V=17,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
 const VIEWS=[[34,70],[50,90],[60,98]];
@@ -567,7 +568,7 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE]); // relics for the discovery log (M7)
 // Texture atlas, drawn pixel by pixel
 const TS=16,AC=8,AR=32,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
@@ -2191,37 +2192,62 @@ function findTreasure(X,Z){
   for(let a=-8;a<=8;a++)for(let b=-8;b<=8;b++)for(let L=0;L<2;L++){const t=ruinType(cx+a,cz+b,L);if(t==='vault'||t==='throne'||t==='grandthrone'||t==='temple'){const d=Math.hypot(a,b);if(d>0&&d<bd){bd=d;best={t:t,dx:(cx+a)*CS+8-X,dz:(cz+b)*CS+8-Z,L:L};}}}
   return best;
 }
+// ---- Hold chronicles (M7, Q27, Q28): each hold has eight pages in order, from its founding to its fall, or to the present day
+// for an inhabited hold. The text is a draft for the owner's approval (docs/LORE.md). The chronicle uses its own stream, so the
+// hold's name, king, queen, guild and year stay as they were.
+const CHRON_N=8;
+const CHRON_CAUSE=[ // what turned the hold's fortune: [the warning, the lean years, the leaving]
+  ['The lower shafts grow warm. The fire below rises a hand each season, and the deepest gates weep with heat.','The lowest halls are sealed one by one. The forges are moved up into the rooms where the scribes once worked.','The fire reached the second deep this spring. We carry out what we can lift and leave the rest to the heat.'],
+  ['The veins are thinning. The tin of the eastern drifts is gone, and the copper comes up poorer every month.','Fewer carts go out to the surface markets. The young ones leave to seek work in other holds and few of them return.','There is nothing left to dig that is worth the digging. The council votes to leave, and no one speaks against it.'],
+  ['The roof of the eastern hall cracked in the night. The Stonesingers say the mountain has shifted in its sleep.','Props of oak hold up three of the great halls. No one sleeps under the long gallery any more.','The roof has come down twice in one month. The king says we will return when the stone is quiet again.'],
+  ['A cold spring broke into the cisterns and has not stopped. The lower streets stand ankle deep in water.','The pumps run day and night. The brewers have moved their vats to the upper deep and complain of the stairs.','The water has taken the lower deep. We leave the pumps running for whoever comes after us.'],
+  ['The guilds quarrel over the shares of the brass. Two of them have walled off their own halls and keep their own gates.','The market is half empty. Each guild trades only with its own, and the king cannot make them meet.','The guilds leave one by one, each by its own gate, each saying the others drove them out.']
+];
+function holdChronicle(cx,cz){
+  const H0=holdNear(cx,cz),h=holdOf(cx,cz);if(h.pages)return h.pages;
+  const r=rngAt(H0.rx,1303,H0.rz),cause=CHRON_CAUSE[r()*CHRON_CAUSE.length|0],G=h.guild[0].toUpperCase()+h.guild.slice(1),y=[h.year];
+  for(let k=1;k<CHRON_N;k++)y.push(y[k-1]+8+(r()*60|0));
+  const work=['a cavern of living crystal that hums at night','a library of four hundred shelves cut into the living rock','a throne hall whose pillars are carved with the names of every delver','cisterns deep enough to keep the hold through a hundred dry years'][r()*4|0];
+  const P=[
+    ['The Founding','In the year '+y[0]+' King '+h.king+' led the first delvers into the mountain and named the place '+h.name+'. The first hall was cut in a single winter, and the first lamp was lit in it on the longest night.'],
+    ['The First Deep','Year '+y[1]+'. '+G+' broke through to the first deep and found tin and copper in good seams. The forges were lit, and it was decreed that they should never go out while the hold stood.'],
+    ['The Market Days','Year '+y[2]+'. Brass for wheat, wheat for ale, ale for stories. Traders from the surface come up the gate road every season, and Queen '+h.queen+' buys every lantern in the row.'],
+    ['The Great Work','Year '+y[3]+'. After long years of cutting, the hold has finished '+work+'. The masons who began it did not live to see it done, and their names are cut over its door.'],
+    ['The Warning','Year '+y[4]+'. '+cause[0]],
+    ['The Lean Years','Year '+y[5]+'. '+cause[1]]
+  ];
+  if(H0.inhabited){
+    P.push(['The Holding','Year '+y[6]+'. We did not leave. '+G+' found new work for every hand, and the lamps of '+h.name+' were never let go out.']);
+    P.push(['The Present Day','Year '+y[7]+'. The halls of '+h.name+' still ring with hammers. The gates stand open to anyone who comes in peace, though fewer travellers come up the old roads each year.']);
+  }else{
+    P.push(['The Leaving','Year '+y[6]+'. '+cause[2]]);
+    P.push(['The Last Page','Year '+y[7]+'. Roster of the last watch of '+h.name+': eleven names, then a twelfth in a shaking hand. Below it, the words "the lamps are out", and nothing more.']);
+  }
+  h.pages=P;return P;
+}
+// which page of its hold's chronicle a lectern holds
+const lecternPage=(X,Y,Z)=>Math.floor(hsh(X,1307+Y,Z)*CHRON_N);
 function loreText(X,Y,Z){
-  const cx=Math.floor(X/CS),cz=Math.floor(Z/CS),h=holdOf(cx,cz),r=rngAt(X,Y+500,Z),n=r()*13|0;
+  const cx=Math.floor(X/CS),cz=Math.floor(Z/CS),h=holdOf(cx,cz),k=lecternPage(X,Y,Z);
   const tr=findTreasure(X,Z);
   const hint=tr?' A margin note in another hand: the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+' lies about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+(tr.L?', on the upper deep.':', on the lower deep.'):'';
-  const T=[
-    'Ledger of '+h.name+', year '+h.year+'. Forty carts of tin from the eastern drifts, eleven of zinc. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' demand a larger share of the brass.',
-    'By decree of King '+h.king+': no lamp shall be put out in the Great Hall while the deep fires burn. Let the halls of '+h.name+' never go dark.',
-    'We broke into a cavern of living crystal today. The Rune Masons say it hums at night. Queen '+h.queen+' has forbidden anyone to cut it.',
-    'Third warning from the lower shafts. The lava rises a hand each season. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' have begun to seal the deepest gates.',
-    'Recipe of the Black Vat: mushroom caps, wheat from the surface traders, and patience. Never serve it to a king before noon.',
-    'The moonsilver seams lie below the second deep, near the fire. Only steel bites them. The old picks of '+h.name+' were forged with runes for this.',
-    'We are leaving. The roof of the eastern hall has come down twice this month. King '+h.king+' says we will return to '+h.name+' when the stone is quiet.',
-    'Account of the treasury, year '+(h.year+3)+': gold enough to plate the throne twice over. The rest is kept beneath the floor where only the stewards know.',
-    'To whoever reads this: the cracked tiles are not all damage. Some of us hid our savings under them.',
-    'Roster of the night watch, year '+(h.year+11)+'. Eleven names, then a twelfth in a shaking hand, then nothing.',
-    'The cisterns are full again. '+h.guild[0].toUpperCase()+h.guild.slice(1)+' say the springs above the upper deep will last a thousand years if no one digs too greedily.',
-    'Market day in '+h.name+'. Brass for mushrooms, mushrooms for ale, ale for stories. Queen '+h.queen+' bought every lantern in the row.',
-    'Song of the hammer, verse four: strike once for the stone, once for the king, once for the ones below who never saw the sun.'
-  ];
   const room=roomAt(X,Y,Z);let gate='';
   {const gs=holdGates(holdNear(cx,cz));let bd=1e9,g=null;for(const q of gs){const dx=q.cx*CS+8-X,dz=q.cz*CS+8-Z,d=Math.hypot(dx,dz);if(d<bd){bd=d;g=[dx,dz];}}
     if(g)gate=' Scratched beneath it: the way up to the surface is a gate about '+Math.round(bd/10)*10+' paces to the '+compass(g[0],g[1])+', on the upper deep.';}
   if(room==='plaza')return 'A waymarker of '+h.name+'. '+(tr?'Carved arrows point toward the '+RUIN_NAMES[tr.t].replace('Dwarven ','').replace('The ','').toLowerCase()+', about '+Math.round(Math.hypot(tr.dx,tr.dz)/10)*10+' paces to the '+compass(tr.dx,tr.dz)+'.':'Most of the carved arrows have worn away.')+gate;
-  return T[n]+hint+gate;
+  return holdChronicle(cx,cz)[k][1]+hint+gate;
 }
-function openLore(X,Y,Z){
-  const h=holdOf(Math.floor((X+OX)/CS),Math.floor((Z+OZ)/CS));
+// A text card in the inventory frame: the lectern's page, the journal, a rune tablet
+function showText(title,text){
   invOpen=true;hold=-1;
   ['invgrid','invname','sinv','bplist','invsearch'].forEach(id=>{$(id).style.display='none';});
-  $('invtitle').textContent='A page from '+h.name;$('lore').style.display='block';$('lore').textContent=loreText(X+OX,Y,Z+OZ);
+  $('invtitle').textContent=title;$('lore').style.display='block';$('lore').textContent=text;
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
+}
+function openLore(X,Y,Z){
+  const WX=X+OX,WZ=Z+OZ,cx=Math.floor(WX/CS),cz=Math.floor(WZ/CS),h=holdOf(cx,cz),plaza=roomAt(WX,Y,WZ)==='plaza',k=lecternPage(WX,Y,WZ);
+  showText(plaza?'A waymarker of '+h.name:h.name+', page '+(k+1)+' of '+CHRON_N+': '+holdChronicle(cx,cz)[k][0],loreText(WX,Y,WZ));
+  if(!plaza)journalPage(cx,cz,k);
   tone(500,420,0.25,0.06);
 }
 // ---- Hold gates (Q22, Q72): up to three per hold, on avenues in the hold's outer ring under the highest dry ground, at least
@@ -4724,6 +4750,7 @@ const ACTIONS={
   brushOrRotate:{name:'Brush size, or turn the blueprint',crea:1,run:()=>{if(BP.sel>=0)ACTIONS.bpRotate.run();else cycleBrush();}},
   mapZoom:{name:'Map zoom',run:()=>{mmZoom=(mmZoom+1)%3;}},
   worldMap:{name:'World map',run:()=>{WM.open?closeWorldMap():openWorldMap();}},
+  journal:{name:'Journal',run:()=>{invOpen?closeInv():openJournal();},anytime:true},
   pick:{name:'Pick the block you look at',run:()=>act(1)},
   pause:{name:'Pause',run:()=>{playing=false;hold=-1;showPause();}},
   hotbarPrev:{name:'Previous slot',run:()=>{sel=(sel+8)%9;drawBar();}},
@@ -4732,7 +4759,7 @@ const ACTIONS={
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyJ:'mapZoom',KeyI:'hud',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyL:'journal',KeyJ:'mapZoom',KeyI:'hud',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
   // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code (PAD_FIXED).
@@ -4999,6 +5026,7 @@ const freeSlot=(cap=invCap())=>{for(let i=0;i<cap;i++)if(!inv[i])return i;return
 const stackMax=id=>ITEMS[id]&&(ITEMS[id].dur||ITEMS[id].one)?1:ITEMS[id]&&ITEMS[id].kind==='grapnel'?8:64;
 function roomFor(id){let n=0;for(let i=0;i<invCap();i++){const q=inv[i];n+=!q?stackMax(id):q.id===id?stackMax(id)-q.c:0;}return n;}
 function addItem(id,n){
+  if(RELICS.has(id)&&ready)discover('q',id); // relics for the discovery log (M7)
   for(const q of inv)if(n>0&&q&&q.id===id&&q.c<stackMax(id)){const k=Math.min(n,stackMax(id)-q.c);q.c+=k;n-=k;}
   for(let i=0,cap=invCap();i<cap&&n>0;i++)if(!inv[i]){const k=Math.min(n,stackMax(id));inv[i]={id:id,c:k};n-=k;}
   saveDirty=true;return n;
@@ -5459,6 +5487,7 @@ function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
+  if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}
   if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}
@@ -5756,7 +5785,7 @@ function wmPanel(){
       const addB=add('Add marker',()=>{addMarker(P.X,P.Z,inp.value);WM.pick=null;wmPanel();drawWorldMap();});}
     if(!SURV())add('Travel here',()=>{closeWorldMap();goTo(P.X,P.Z);});
     add('Cancel',()=>{WM.pick=null;wmPanel();drawWorldMap();});
-  }else{add('+',()=>wmZoom(2));add('-',()=>wmZoom(0.5));add('Up',()=>wmPan(0,-1));add('Down',()=>wmPan(0,1));add('Left',()=>wmPan(-1,0));add('Right',()=>wmPan(1,0));add('Centre',()=>{WM.X=PL.x+OX;WM.Z=PL.z+OZ;drawWorldMap();});add('Close',closeWorldMap);
+  }else{add('+',()=>wmZoom(2));add('-',()=>wmZoom(0.5));add('Up',()=>wmPan(0,-1));add('Down',()=>wmPan(0,1));add('Left',()=>wmPan(-1,0));add('Right',()=>wmPan(1,0));add('Centre',()=>{WM.X=PL.x+OX;WM.Z=PL.z+OZ;drawWorldMap();});add('Journal',openJournal);add('Close',closeWorldMap);
     const t=document.createElement('span');t.textContent=SURV()?'  Tap the map to place a marker':'  Tap the map to place a marker or travel';p.appendChild(t);}
 }
 function wmZoom(f){WM.s=Math.max(0.125,Math.min(8,WM.s*f));drawWorldMap();}
@@ -5784,6 +5813,64 @@ function drawLayer(){
     im.data[i]=r;im.data[i+1]=gg;im.data[i+2]=b;im.data[i+3]=255;}
   g.putImageData(im,0,0);
 }
+// ---- The journal and the discovery log (M7, D-047; Q17, Q27): pages read at lecterns, kept in order by hold; rune tablets read
+// from the pack; the lands, layers, holds, remains and relics found. Saved with the world as jn; a world saved before M7 starts
+// with an empty journal. The game still works with no goal at all: nothing here is required.
+const TABLETS=[ // what the rune tablets say, read in this order (drafts for the owner, docs/LORE.md)
+  'Strike once for the stone, once for the king, once for the ones below who never saw the sun.',
+  'The lamp that is never put out is the hold that is never lost.',
+  'Stone remembers what the delver forgets.',
+  'Whoever cuts the living crystal cuts the song out of the mountain.',
+  'Tin from the east, copper from the west, and brass from the meeting of the two.',
+  'Seal the deep gate behind you. What the fire takes, the fire keeps.',
+  'Seven steps between each landing, and a lamp at every seventh.',
+  'The guest at the gate is fed before the king.',
+  'Under the cracked tile, the savings of the careful.',
+  'Water finds the weak seam. So does greed.',
+  'Every hall was a cave once, and every cave will be a hall.',
+  'When the last lamp is out, leave the door open for the ones who come after.'
+];
+const DISC=[['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
+const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below'];
+const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
+const JN={h:{},t:0,d:{l:[],y:[],h:[],r:[],q:[]}};
+if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
+const journalSave=()=>({jn:JN});
+// A chronicle page read at a lectern: kept once, in the order of the chronicle
+function journalPage(cx,cz,k){
+  const H0=holdNear(cx,cz),key=H0.rx+','+H0.rz,h=holdOf(cx,cz);let e=JN.h[key];if(!e)e=JN.h[key]={n:h.name,p:[]};
+  if(e.p.includes(k))return false;e.p.push(k);e.p.sort((a,b)=>a-b);saveDirty=true;toast('A page of the chronicle of '+h.name+' is in your journal ('+e.p.length+' of '+CHRON_N+')');discover('h',h.name);return true;
+}
+// Reading a rune tablet: the next saying, in order
+function readTablet(){const i=JN.t%TABLETS.length;if(JN.t<TABLETS.length){JN.t++;saveDirty=true;}showText('A rune tablet ('+(i+1)+' of '+TABLETS.length+')',TABLETS[i]+(JN.t<=TABLETS.length?'\n\nThe saying is copied into your journal.':''));tone(380,300,0.3,0.05);}
+// The discovery log: a name recorded once in its category, with a word on screen the first time
+function discover(c,v){const L=JN.d[c];if(!L||v===undefined||v===null||v===''||L.includes(v))return false;L.push(v);saveDirty=true;
+  if(c!=='h'&&ready&&playing)toast('Discovered: '+(c==='l'?LANDS[LAND_I[v]].n:c==='q'?nameOf(v):v));return true;}
+// Once a second: the land, layer, hold and remains around the player
+let discT=0;
+function discoverTick(dt){
+  discT-=dt;if(discT>0||!ready)return;discT=1;
+  if(LWX.k)discover('l',LWX.k);
+  const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;
+  if(yy<ground[bx+W*bz]-3){discover('y',LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
+    if(yy<100&&ruinZone(cx,cz))discover('h',holdOf(cx,cz).name);const m=remainsNear(X,yy,Z);if(m)discover('r',m.name);}
+}
+// The journal: chronicle pages by hold (pages not yet found are marked), the tablets read, and the discovery log
+function journalText(){
+  const out=[],keys=Object.keys(JN.h);
+  out.push('CHRONICLES');
+  if(!keys.length)out.push('No pages yet. Lecterns in the dwarven holds keep the pages of each hold\'s chronicle.');
+  for(const key of keys){const e=JN.h[key],[rx,rz]=key.split(',').map(Number),H0=holdAt(rx,rz),P=holdChronicle(H0.cx,H0.cz);
+    out.push('','The Chronicle of '+e.n+' ('+e.p.length+' of '+CHRON_N+' pages)');
+    for(let k=0;k<CHRON_N;k++)out.push(e.p.includes(k)?(k+1)+'. '+P[k][0]+'. '+P[k][1]:(k+1)+'. (a page not yet found)');}
+  out.push('','RUNE TABLETS ('+Math.min(JN.t,TABLETS.length)+' of '+TABLETS.length+')');
+  if(!JN.t)out.push('None read yet. Rune tablets turn up in the old holds; hold one and use it to read it.');
+  for(let i=0;i<Math.min(JN.t,TABLETS.length);i++)out.push((i+1)+'. '+TABLETS[i]);
+  out.push('','DISCOVERIES');
+  for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
+  return out.join('\n');
+}
+function openJournal(){if(invOpen)closeInv();if(WM.open)closeWorldMap();showText('Journal',journalText());}
 // ---- Creative tools (M5b, Q76): searching the block menu, the Fill Tool, going to coordinates, time and weather, and placing
 // the world's structures to try them out. Everything here is creative only; edits go through setBlock, so they save and undo.
 // Search: the block menu shows only blocks whose name holds the text typed (categories with nothing left are hidden)
@@ -5903,7 +5990,7 @@ function ctl(a){
   const k=keysOf(a);return k.length?keyName(k[0]):'the pause menu';
 }
 // ---- Help (Q38): what each control does in this mode, on this device
-const HELP={inventory:['inventory and crafting','block menu'],worldMap:['world map: places, waystones and your markers'],mapZoom:['minimap zoom'],waypoint:['travel to the next waystone, from beside one','travel to the next waystone'],
+const HELP={inventory:['inventory and crafting','block menu'],worldMap:['world map: places, waystones and your markers'],journal:['journal: chronicle pages, rune tablets and discoveries'],mapZoom:['minimap zoom'],waypoint:['travel to the next waystone, from beside one','travel to the next waystone'],
   photo:['hide the HUD for screenshots'],hud:['readout on or off'],pick:['select the block you look at in the hotbar','pick the block you look at'],pause:['pause and settings'],
   hotbarPrev:['previous slot'],hotbarNext:['next slot'],fly:[null,'fly on or off'],noclip:[null,'noclip: fly through blocks'],respawn:[null,'back to spawn'],brush:[null,'brush size'],
   swap:[null,'replace mode: placing replaces blocks'],undo:[null,'undo'],bpRotate:[null,'turn the blueprint'],bpClear:[null,'clear the blueprint'],
@@ -5940,7 +6027,7 @@ function setHud(on){settings.hud=on;lsSet(SET_KEY,settings);$('info').style.disp
 // ---- Rebinding (Q37): every remappable action with its keyboard keys and controller button; tap a cell, then press the new one
 const BIND_ROWS=[['held','forward','Move forward'],['held','back','Move back'],['held','left','Move left'],['held','right','Move right'],['held','jump','Jump, swim up, climb'],
   ['held','sprint','Sprint, climb down'],['act','inventory','Inventory'],['act','pick','Pick block'],['act','hotbarPrev','Previous slot'],['act','hotbarNext','Next slot'],
-  ['act','worldMap','World map'],['act','mapZoom','Minimap zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
+  ['act','worldMap','World map'],['act','journal','Journal'],['act','mapZoom','Minimap zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
   ['act','fly','Fly (creative)'],['act','noclip','Noclip (creative)'],['act','brush','Brush size (creative)'],['act','swap','Replace mode (creative)'],['act','undo','Undo (creative)'],
   ['act','undoOrClear','Undo or clear blueprint (creative)'],['act','brushOrRotate','Brush or turn blueprint (creative)'],['act','respawn','Back to spawn (creative)'],
   ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];
@@ -5985,7 +6072,7 @@ const HINTS={
   tier:()=>'This needs a better pickaxe. Each pickaxe mines the next metal: stone for copper, copper for tin and gold, bronze for iron, iron for platinum, steel for moonsilver.',
   hunger:()=>'You are getting hungry. Hold food and press '+ctl('place')+' to eat. Cooked food fills you most.',
   dark:()=>"It is dark. Hold a torch, or wear a Miner's Lantern in your belt slot: it burns lamp oil or pitch candles.",
-  lectern:()=>'A lectern. Press '+ctl('place')+" to read a page of the hold's history.",
+  lectern:()=>'A lectern. Press '+ctl('place')+" to read a page of the hold's chronicle; "+ctl('journal')+' opens your journal.',
   waystone:()=>'An Ancient Waystone. Press '+ctl('place')+' to attune it; you can travel between attuned stones.',
   box:()=>'Press '+ctl('place')+' to open it. What you leave inside stays there.',
   climb:()=>'Climbing: '+ctl('jump')+' goes up, '+ctl('sprint')+' goes down, and letting go holds you still.',
@@ -6065,6 +6152,7 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
   $('tourbtn').addEventListener('click',()=>{if(landTour(+sel.value))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
+$('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});
 $('ctlbtn').addEventListener('click',()=>{const c=$('ctl'),open=c.style.display==='none';c.style.display=open?'':'none';capture=null;if(open)renderControls();});
 segBind('resseg','res',v=>v);$('resseg').addEventListener('click',()=>{setRes(resTarget());}); // Auto restarts from the full density
 segBind('touchseg','touch',v=>v);$('touchseg').addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.v){saveNow();location.reload();}}); // the layout is chosen at load
@@ -6108,7 +6196,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:17,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -6578,7 +6666,7 @@ function frame(now){
     }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
   renderer.render(scene,camera);
   fc++;ft+=dt;infoT-=dt;
-  if(infoT<=0&&ready){infoT=0.25;hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
+  if(infoT<=0&&ready){infoT=0.25;discoverTick(0.25);hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):surfaceName(bx+OX,yy,bz+OZ);
