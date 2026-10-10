@@ -66,6 +66,13 @@ function bringAnimal(v){
     const a=addAnimal(k,x,y,z,{young:md==='y'});a.yaw=PL.yaw+Math.PI;a.st='idle';a.t=4;const cn=AM_KINDS[k].coats[a.ci][0].name;toast((md==='y'?'A young ':'A ')+ANIMALS[k].n.toLowerCase()+(cn?', '+cn:''));return a;}
   toast('No open ground in front of you');return null;
 }
+// Bring a foe (D-052): it stands a few blocks in front of you and, in creative, takes no notice of you
+function bringFoe(k){
+  if(creativeOnly()||!FOES[k])return null;const tall=FOES[k].tall||2;
+  for(const d of [5,4,6,3.5,8]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=foeStand(x,PL.y+1,z,tall);if(y<0||foeWet(x,y,z))continue;
+    const f=addFoe(k,x,y,z,{st:'idle',t:4});f.yaw=f.hd=PL.yaw;toast('A'+(/^[AEIOU]/.test(FOES[k].n)?'n ':' ')+FOES[k].n.toLowerCase()+(SURV()?'':', which takes no notice of you in creative'));return f;}
+  toast('No open ground in front of you');return null;
+}
 function landTour(k){
   if(creativeOnly())return null;const L=LANDS[k],c=nearestLand(k,PL.x+OX,PL.z+OZ,48);if(!c){toast('No '+L.n+' within reach');return null;}
   let X=c.X,Z=c.Z;const o={};

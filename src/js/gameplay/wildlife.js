@@ -191,7 +191,7 @@ function animalHit(reach){
   return best;
 }
 // how hard the held thing hits: axes best, then pickaxes and shovels, then a bare hand
-function hitPower(id){const it=ITEMS[id];if(!it||!it.tool)return 1;return (it.tool==='axe'?3:2)+(it.tier||0)*0.5;}
+function hitPower(id){const it=ITEMS[id];if(!it||!it.tool)return 1;if(it.tool==='sword')return id===377?16:4+it.tier*0.8;return (it.tool==='axe'?3:2)+(it.tier||0)*0.5;} // swords since D-052
 // Left button: strike. Right button: shear, milk, gather an egg, feed, ride, open a pack, tell a friend to stay or follow.
 function animalAct(btn){
   const a=animalHit(4.5);if(!a)return false;const A=ANIMALS[a.kind],held=curId();

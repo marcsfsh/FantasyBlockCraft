@@ -11,6 +11,7 @@ const PEOPLES={
   woodelf:{a:['Ael','Cael','Fae','Lir','Syl','Tha','Ver','Ilsa','Nae','Rhi'],b:['lan','wen','ion','dris','rael','thas','vin','mira','sorn']},
   highelf:{a:['Aen','Cal','Ilm','Ith','Nar','Qua','Sel','Tar','Vae','Ys'],b:['adir','enor','idel','oriel','uvar','esse','ander','ithra']},
   drow:{a:['Dra','Ilv','Jhar','Mal','Nhel','Vel','Xun','Zar','Quar','Shy'],b:['aeth','dra','ith','lyn','ryn','vex','zith','nyss','ra']},
+  fiend:{a:['Vor','Kael','Azh','Ghul','Skar','Thra','Ulm','Zhar','Ruuk','Xal'],b:['gath','rax','zul','thar','vex','okk','dun','ash','ruun']}, // the Emberlords (D-052)
   beastfolk:{a:['Arr','Fang','Grr','Hoof','Mar','Rha','Tusk','Whis','Brin','Ska'],b:['ka','mane','rek','tail','th','uun','rro','hide']}
 };
 // Proper names from Tolkien's works (lowercase, letters only). Exact matches, near misses (one letter off) and the roots below are refused.

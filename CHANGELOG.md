@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.28.0 (2026-10-10): foes in the fire
+
+Saves from 0.27.0 do not carry over (save key v19): the Volcanic Wastes have changed underground and in their volcanoes.
+
+### Game
+- **Foes in the Volcanic Wastes, and only there.** Orc warbands roam the wastes and hold the Ashen Citadel: raiders, bowmen who keep their distance, brutes behind shields, and a horned warchief whose war horn brings the band. Ash trolls three blocks tall, lava glowing in the cracks of their hide, swing basalt clubs and throw rocks. In creative they take no notice of you.
+- **Goblin warrens** replace the crawlways and the upper caves under the wastes: halls on two levels cut in black rock seamed with magma, joined by propped tunnels, with hide huts round fire pits, stores, cages, forges, fire shrines, channels of lava and the chief's throne with its hoard. Goblin cutters, slingers and firecallers live there under a chieftain, some asleep in their dens, and keep camp at every way in. A way down leads on to the caves below.
+- **The Emberlords' fortresses** stand in most great volcanoes: a gate between two towers at the mountain's foot, a long hall in through the rock past troughs of lava, and under the summit a throne hall with pillars and rivers of lava, where an Emberlord waits, a horned demon of fire and shadow with a burning blade, a whip of fire and wings of smoke. Orcs keep its gate. Once fallen, it stays fallen. (You asked for balrogs; that name is Tolkien's, so these are the Emberlords.)
+- **Fighting back:** swords from wood to moonsilver, and armour for a new body slot (Hide Jerkin, Iron Mail, Steel Plate, Moonsilver Mail). Foes leave iron, coal, leather, sulphur, troll hide and gold; the Emberlord leaves the Flamebrand and the Emberheart.
+- **Lava flows like water:** break into it and it spreads, slowly, up to four blocks and falls down holes. Where it meets water it hardens into obsidian or basalt.
+- The warrens and fortresses glow red inside, with war drums and goblin chatter in the rock.
+- New blocks: hide canvas, iron grate, basalt bricks, ember bricks, skull totem, war banner.
+
+### Tooling
+- `tools/shot.mjs --foes[=kinds]` lines foes up (winding up, walking or asleep).
+- New tests `48-lava-flow`, `49-warrens` (warrens and fortresses) and `50-foes`.
+
 ## 0.27.0 (2026-10-10): the Volcanic Wastes remade
 
 Saves from 0.26.0 do not carry over (save key v18): the world has changed.

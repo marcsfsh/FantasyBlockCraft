@@ -19,7 +19,18 @@ const HINTS={
   a_boar:()=>'A boar. Strike one to hunt it for pork and a hide. The striped young are let be.',
   a_horse:()=>'A wild horse. Press '+ctl('place')+' to ride it, and again to get off; '+ctl('sprint')+' gallops.',
   a_hound:()=>'A stray hound. Feed it meat and it follows you; press '+ctl('place')+' to have it stay or follow.',
-  a_mule:()=>'A wild mule. Feed it wheat, turnips, beans or an apple and it carries a pack for you.'
+  a_mule:()=>'A wild mule. Feed it wheat, turnips, beans or an apple and it carries a pack for you.',
+  // the foes of the Volcanic Wastes (D-052)
+  f_goblin:()=>'A goblin cutter. Goblins come in packs and flee when hurt. A sword ('+ctl('break')+') is the best answer; armour in the body slot takes part of each blow.',
+  f_gslinger:()=>'A goblin slinger. It keeps its distance and throws stones. Close in fast.',
+  f_gfire:()=>'A goblin firecaller. Its fire flies slowly: step aside, then strike.',
+  f_gchief:()=>'A goblin chieftain, the master of this warren. Its hoard is by its throne.',
+  f_raider:()=>'An orc raider. Orcs roam the Volcanic Wastes in warbands. Fight them one at a time if you can.',
+  f_bowman:()=>'An orc bowman. Its arrows reach far; get behind rock or get close.',
+  f_brute:()=>'An orc brute. Its shield takes most of a blow from the front: strike it from the side or behind.',
+  f_ochief:()=>'An orc warchief. When it sounds its horn the whole warband comes.',
+  f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
+  f_ember:()=>'An Emberlord: a demon of fire and shadow. Its whip reaches far and its fire comes in threes. Few survive it.'
 };
 let hintT=0,darkT=0;
 function hint(id){
@@ -34,6 +45,7 @@ function hintTick(dt,hit){
   if(food<=14)hint('hunger');
   if(PL.climb)hint('climb');
   {const an=animalHit(8);if(an)hint('a_'+an.kind);} // the first time you look at each kind of animal (E1)
+  {const fo=foeHit(14);if(fo)hint('f_'+fo.kind);} // and each kind of foe (D-052)
   if(hit){if(hit.id===LECTERN)hint('lectern');else if(hit.id===WAYSTONE)hint('waystone');else if(isBox(hit.id))hint('box');}
   if(lampLevel()[0]===0&&lampDark()){darkT+=dt;if(darkT>3)hint('dark');}else darkT=0;
 }

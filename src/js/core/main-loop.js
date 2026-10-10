@@ -96,7 +96,7 @@ function frame(now){
   else if(head===LAVA){U.fogColor.value.setHex(0xc84a10);U.fogNear.value=0;U.fogFar.value=4;renderer.setClearColor(0xc84a10);tint.style.display='block';tint.style.background='rgba(220,90,20,.4)';}
   else{
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
-    const lmp=lampLevel();U.caveMin.value=CV[0]*caveF*(SURV()?depthDim(PL.y):1);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
+    const lmp=lampLevel();U.caveMin.value=Math.max(CV[0]*caveF*(SURV()?depthDim(PL.y):1),0.15*warF*caveF);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
     U.fogNear.value=lerp(Math.max(Math.min(6,FOGN),FOGN*(1-0.3*rainAmt)*(1-0.6*LWX.fog)),CV[3]*0.35,caveF);U.fogFar.value=lerp(Math.max(Math.min(38,FOGF),FOGF*(1-0.25*rainAmt)*(1-0.55*LWX.fog)),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';} // mist by land (M6h)
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;

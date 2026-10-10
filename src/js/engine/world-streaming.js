@@ -11,7 +11,7 @@ function respawn(){
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
-  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
+  torches.clear();farms.clear();flowQ.clear();lavaQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
   BLK.fill(0);SKL.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
@@ -59,7 +59,7 @@ function shiftWindow(dx,dz){
   }
   {const g2=new Uint8Array(NCX*NCZ);for(let z=0;z<NCZ;z++)for(let x=0;x<NCX;x++){const ox=x+cdx,oz=z+cdz;if(ox>=0&&oz>=0&&ox<NCX&&oz<NCZ)g2[x+z*NCX]=genDone[ox+oz*NCX];}genDone.set(g2);}
   const nd=[];dirty.forEach(c=>{const x=c%NCX-cdx,z=((c/NCX)|0)-cdz;if(x>=0&&z>=0&&x<NCX&&z<NCZ)nd.push(x+z*NCX);});dirty.clear();nd.forEach(c=>dirty.add(c));
-  shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
+  shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(lavaQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
   if(lbox){lbox[0]-=dx;lbox[1]-=dx;lbox[4]-=dz;lbox[5]-=dz;}
   // queue the new strip; it is generated a chunk or two per frame
   if(genJob){genJob.cx-=cdx;genJob.cz-=cdz;if(genJob.cx<0||genJob.cz<0||genJob.cx>=NCX||genJob.cz>=NCZ)genJob=null;} // the chunk under way moves with the window, or is dropped

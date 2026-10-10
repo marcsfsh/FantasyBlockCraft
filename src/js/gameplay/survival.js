@@ -255,6 +255,7 @@ function useBlock(th){
 function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
+  if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)

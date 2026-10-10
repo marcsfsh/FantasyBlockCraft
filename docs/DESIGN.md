@@ -8,6 +8,7 @@
 - **Original names only.** Places evoke the feel of that kind of setting without using Tolkien's names, which are still under copyright.
 - Everything built by the old peoples is **ancient, decaying and decrepit**: broken walls, rubble, fallen pillars, dead lamps, dust and bones.
 - The underground is deep and layered; going down should feel like going back in time.
+- **Foes only in the fire** (D-052, the owner's revisit of Q46): orcs, trolls, goblins and the Emberlords are hostile, and all of them belong to the Volcanic Wastes and what lies under them. Everywhere else creatures stay peaceful. Death stays forgiving (your things wait in a grave), and in creative the foes take no notice of you.
 
 ## Lands (look index, name, character)
 
@@ -48,6 +49,8 @@ These twelve are the looks the world draws today. Since 0.15.0 (M6a, D-039) they
 
 **Wildlife (E1, D-049):** deer, rabbits, sheep, mountain goats, wild hens, boars, wild horses, stray hounds and wild mules live in the lands that suit them. They wander and graze, and the shy ones flee a running player; none attacks. Hunting gives meat and hides; shears give wool, an empty hand milk and eggs. A wild horse can be ridden. A hound fed meat and a mule fed crops follow you; the mule carries a pack like a chest. Since 0.26.0 (D-050) each kind has a pixel-box model with painted coats (several per kind), young in the herds, a gait, grazing, sleep at night, herd fright, a call of its own and a shadow.
 
+**Foes, warrens and fortresses (D-052):** the wastes are hostile ground. Orc warbands roam them (raiders with cleavers, bowmen who keep their distance, shield-bearing brutes, now and then a horned warchief whose horn brings the band) and hold the Ashen Citadel; ash trolls, three blocks tall with lava in the cracks of their hide, swing basalt clubs and throw rocks. Under the wastes the crawlways and upper caves give way to **goblin warrens**: six to nine halls on two levels cut in black rock seamed with magma, joined by tunnels propped with charred timber, each hall a den of hide huts round a fire pit, a store of crates and barrels, a pen of iron grates, a forge, a fire shrine with an obsidian idol, a hall crossed by a channel of lava, and the chief's hall with an obsidian throne on a dais and its hoard. Goblin cutters, slingers and firecallers live there under their chieftain, some asleep in the dens; a goblin camp of tents, skull poles, banners and stakes stands before each way in. A way down joins the caves below. Most great volcanoes hold an **Emberlord's fortress**: a gate between two towers at the mountain's foot, a long hall in through the rock past troughs of lava, and under the summit a throne hall with pillars, rivers of lava in the floor and the Emberlord (a horned demon of fire and shadow, four blocks tall, with a burning blade, a whip of fire and wings of smoke) before its throne. Orcs keep its gate. A fallen Emberlord stays fallen. The warrens and fortresses glow red inside, with drums and chatter in the rock. Foes see, chase, strike, shoot and throw; goblins flee when badly hurt; a brute's shield takes most of a blow from the front. They leave iron, coal, leather, sulphur, gold and, from the Emberlord, the Flamebrand and the Emberheart.
+
 **The Volcanic Wastes remade (D-051):** a burnt land under a burning sky. The sky goes black with a red glow at the horizon; the sun is a dull ember, the clouds are dark as smoke, and storms throw forked blue lightning, half of it into the plumes over the craters. Volcanoes (about 120 to 200 blocks across the foot and 30 to 70 high, where the wastes are wide enough to hold one) each have a name of their own ("Mount Quarvex"), a crater with a lake of lava held in rock, and two to four flows spilling through breaches in the rim and down the flanks in channels, with crusted older flows beside them. Rivers and lakes in the wastes hold lava and never meet water; nearer the sea they are obsidian. Fissures of lava split the plains. The ground is black ash, cinder rock and grey ash, with fields and seams of glowing lava crust, fumaroles ringed with sulphur that puff smoke, charred trees (some still smouldering), fallen charred logs, basalt spires and obsidian shards. Embers drift on the wind and rise from lava, lava bombs arc from the craters, and the land rumbles, crackles and booms. Signatures: the Ashen Citadel (a black fortress on a moat of lava, six towers with braziers and a spire crowned with fire forty blocks up) and the Rift of Fire (a chasm with a river of lava along its floor, spanned by a basalt arch).
 
 **Lands and their layout (M6a, D-039):**
@@ -86,6 +89,8 @@ Size and character change gradually with depth (no hard layers):
 | The great caverns | ~60 to 150 | Great domed halls with natural pillars, tall rifts with ledges and high windows, stepped halls going down to lakes; old stone ruins and shrines; deepstone begins about y100 |
 | The deep | ~20 to 60 | The widest passages and largest halls, other peoples' remains, gorges with lava at the bottom, lava falls. Under and around a hold: its city (floors 64 and 82) and mines (galleries at 20, 32 and 44, inclines, great stepped pits) |
 | The Fire Below | 3 to ~24 | An open lava sea (lava y3 to y8) under most of the land, with smooth islands and great pillars flaring at both ends; low under the holds' mines. The main system of most areas reaches it by a causeway of fallen rock to an island |
+
+Under the Volcanic Wastes the two upper bands are a goblin warren instead (D-052): its halls and tunnels from about y 212 up to the surface, with a way down to the caves below, which begin under it.
 
 Ways between depths: ramps, steeper passages and spirals (all walkable), shafts and chasms to climb or drop, streams of pools stepping down a passage, and old built ways (stairs, mine inclines). The deepest halls of neighbouring areas are often linked, and near a hold a passage leads into the upper gallery of its mines.
 
@@ -139,6 +144,7 @@ Sky light reaches sideways under overhangs and into cave mouths, fading over abo
 - **Finding the way:** in survival a map shows the minimap, a compass gives X, Z and the heading, a depth gauge the height. Creative shows all of it.
 - **Signal flares** climb about 60 blocks and burn red as they drift down.
 - **The Blasting Keg** is the dwarves' mining charge. **The Blueprint Tool** is for creative mode only.
+- **Swords and armour (D-052):** a sword on every step of the ladder (two of the material and a stick), the best weapon against the foes; axes come next. Armour goes in the new body slot: a Hide Jerkin (leather), Iron Mail, Steel Plate and Moonsilver Mail take 15, 30, 45 and 55 in a hundred of every blow from a foe and wear as they do. A troll's hide cures into three leather. The Emberlord's Flamebrand is the strongest blade.
 - **Starting kit** for a new survival world: wooden pickaxe and axe, a map, 8 torches, 4 bread.
 
 ## Survival systems (D-033)
@@ -147,6 +153,7 @@ Sky light reaches sideways under overhangs and into cave mouths, fading over abo
 - **Room:** 36 slots; a Woven Pack (+9) or Sturdy Pack (+18) in the pack slot and a Satchel (+9) in the bag slot.
 - **Light:** in survival the only light around you is a Miner's Lantern in the belt slot (burns lamp oil or pitch candles, only in the dark) or a light in your hand. The caves grow darker with depth. Darkness is atmosphere, never damage (Q13).
 - **Travel:** waystone to waystone in survival. Attune Ancient Waystones by touch; build Carved Waystones at a high cost. Creative travels freely.
+- **Lava flows like water** (D-053): opened, it spreads up to four blocks across a floor and falls without limit, slower than water, and makes no new sources. Where lava and water meet, the lava hardens: a source into obsidian, flowing lava into basalt.
 - **Food:** wheat, potatoes, turnips and beans to farm; bilberries, brown mushrooms, wild turnips and apples to forage; bread, baked potatoes, roast turnips, pottage, bilberry tart and roast mushrooms to cook.
 
 ## Controls

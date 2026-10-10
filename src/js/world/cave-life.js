@@ -8,7 +8,7 @@ function caveLife(X0,Z0,r2){
   const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];
       let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
       const kind=rr(),q=rr();
-      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))return;
+      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z))||warBand(X,y,Z))return; // the warrens dress their own (D-052)
       if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);return;}
       if(y<100&&!(wild&&y>=26)){ // deep under a hold, its mines and near the lava: sparse life, crystals and scorched rock
         if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
@@ -31,7 +31,7 @@ function caveLife(X0,Z0,r2){
   // walls: moss that glows, amethyst seams, calcite flowstone
   for(let k=0;k<200;k++){
     const X=X0+1+(r2()*(CS-2)|0),Z=Z0+1+(r2()*(CS-2)|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-16)|0),q=r2();
-    if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z)))continue;
+    if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z))||warBand(X,y,Z))continue;
     for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const c=GW(X+a,y,Z+b);if(c!==STONE&&c!==DEEP)continue;
       let id=0;
       if(y<100&&!(wild&&y>=26))id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;

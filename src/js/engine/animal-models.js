@@ -13,14 +13,14 @@ const AM_FACES={L:[-1,0,0],R:[1,0,0],T:[0,1,0],D:[0,-1,0],F:[0,0,1],B:[0,0,-1]};
 // the rectangle of one face of a box w x h x d placed at (u,v) on the texture
 function amRect(f,u,v,w,h,d){return f==='T'?[u+d,v,w,d]:f==='D'?[u+d+w,v,w,d]:f==='L'?[u,v+d,d,h]:f==='F'?[u+d,v+d,w,h]:f==='R'?[u+d+w,v+d,d,h]:[u+2*d+w,v+d,w,h];}
 // a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture)
-function amBoxGeo(b,u,v){
-  const [x0,y0,z0,w,h,d]=b,x1=x0+w,y1=y0+h,z1=z0+d,pos=[],nor=[],uv=[],idx=[];
+function amBoxGeo(b,u,v,TX){
+  TX=TX||AM_TEX;const [x0,y0,z0,w,h,d]=b,x1=x0+w,y1=y0+h,z1=z0+d,pos=[],nor=[],uv=[],idx=[];
   // for each face: four corners in image order (top left, top right, bottom left, bottom right)
   const C={L:[[x0,y1,z0],[x0,y1,z1],[x0,y0,z0],[x0,y0,z1]],F:[[x0,y1,z1],[x1,y1,z1],[x0,y0,z1],[x1,y0,z1]],R:[[x1,y1,z1],[x1,y1,z0],[x1,y0,z1],[x1,y0,z0]],
     B:[[x1,y1,z0],[x0,y1,z0],[x1,y0,z0],[x0,y0,z0]],T:[[x0,y1,z0],[x1,y1,z0],[x0,y1,z1],[x1,y1,z1]],D:[[x0,y0,z1],[x1,y0,z1],[x0,y0,z0],[x1,y0,z0]]};
   for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n=AM_FACES[f],k=pos.length/3;
     const T=[[ru,rv],[ru+rw,rv],[ru,rv+rh],[ru+rw,rv+rh]];
-    C[f].forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/AM_TEX,1-T[i][1]/AM_TEX);});
+    C[f].forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/TX,1-T[i][1]/TX);});
     idx.push(k,k+2,k+1,k+1,k+2,k+3);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeBoundingSphere();return g;
@@ -134,16 +134,16 @@ const AM_KINDS={
 function amLayout(K){
   if(K.uv)return K.uv;const keys=[];for(const p of K.parts){const o=p[5]||{};if(!o.m&&!keys.some(k=>k[0]===p[0]))keys.push([p[0],p[3]]);}
   const sz=keys.map(([n,b])=>[n,2*(b[3]+b[5]),b[5]+b[4],b]).sort((a,b)=>b[2]-a[2]);
-  const uv={};let x=0,y=0,rowH=0;for(const [n,w,h,b] of sz){if(x+w>AM_TEX){x=0;y+=rowH+1;rowH=0;}if(y+h>AM_TEX)throw new Error('animal texture overflow '+n);uv[n]=[x,y,b];x+=w+1;rowH=Math.max(rowH,h);} // a pixel apart
+  const TX=K.tex||AM_TEX,uv={};let x=0,y=0,rowH=0;for(const [n,w,h,b] of sz){if(x+w>TX){x=0;y+=rowH+1;rowH=0;}if(y+h>TX)throw new Error('animal texture overflow '+n);uv[n]=[x,y,b];x+=w+1;rowH=Math.max(rowH,h);} // a pixel apart
   return K.uv=uv;
 }
 const amTexC=new Map();
 function amHash(x,y,s){let h=(x*374761393+y*668265263+s*1442695041)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;}
 function amTexture(kind,ci,flags){
   const key=kind+':'+ci+':'+(flags.young?1:0)+(flags.stag?1:0);if(amTexC.has(key))return amTexC.get(key);
-  const K=AM_KINDS[kind],uv=amLayout(K),c=K.coats[ci][0],cv=document.createElement('canvas');cv.width=cv.height=AM_TEX;
-  const g=cv.getContext('2d'),img=g.createImageData(AM_TEX,AM_TEX),D=img.data;let seed=1+ci*977+kind.length*131,rs=seed;
-  const cl=v=>v<0?0:v>255?255:v|0,set=(x,y,col,a)=>{if(x<0||y<0||x>=AM_TEX||y>=AM_TEX)return;const i=(y*AM_TEX+x)*4;D[i]=cl(col[0]);D[i+1]=cl(col[1]);D[i+2]=cl(col[2]);D[i+3]=a===undefined?255:a;};
+  const K=AM_KINDS[kind],uv=amLayout(K),c=K.coats[ci][0],TX=K.tex||AM_TEX,cv=document.createElement('canvas');cv.width=cv.height=TX;
+  const g=cv.getContext('2d'),img=g.createImageData(TX,TX),D=img.data;let seed=1+ci*977+kind.length*131,rs=seed;
+  const cl=v=>v<0?0:v>255?255:v|0,set=(x,y,col,a)=>{if(x<0||y<0||x>=TX||y>=TX)return;const i=(y*TX+x)*4;D[i]=cl(col[0]);D[i+1]=cl(col[1]);D[i+2]=cl(col[2]);D[i+3]=a===undefined?255:a;};
   const src=n=>{const p=K.parts.find(q=>q[0]===n);const o=p&&p[5]||{};return o.m||n;};
   const rect=(n,f)=>{const u=uv[src(n)];if(!u)return null;const b=u[2];return amRect(f,u[0],u[1],b[3],b[4],b[5]);};
   const noisy=(col,amt,x,y)=>{const v=(amHash(x,y,seed)-0.5)*2*amt;return [col[0]+v,col[1]+v,col[2]+v];};
@@ -153,7 +153,7 @@ function amTexture(kind,ci,flags){
     // every face of these parts in one colour with noise, the sides a little darker toward the bottom
     coat(ns,col,amt){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const k=(f==='T'||f==='D')?0:-(t/Math.max(1,R[3]))*10;set(R[0]+s,R[1]+t,noisy([col[0]+k,col[1]+k,col[2]+k],amt,R[0]+s,R[1]+t));}}},
     // the underside, and the lowest rows of the sides, in the belly colour
-    belly(n,col,rows){P.face(n,'D',col,5);for(const f of ['L','R','F','B']){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const r=rows+(amHash(R[0]+s,R[1],seed+31)<0.5?0:1);for(let t=R[3]-r;t<R[3];t++){const i=((R[1]+t)*AM_TEX+R[0]+s)*4,k=(t-(R[3]-r)+1)/(r+1)*0.8;
+    belly(n,col,rows){P.face(n,'D',col,5);for(const f of ['L','R','F','B']){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const r=rows+(amHash(R[0]+s,R[1],seed+31)<0.5?0:1);for(let t=R[3]-r;t<R[3];t++){const i=((R[1]+t)*TX+R[0]+s)*4,k=(t-(R[3]-r)+1)/(r+1)*0.8;
       set(R[0]+s,R[1]+t,noisy([D[i]+(col[0]-D[i])*k,D[i+1]+(col[1]-D[i+1])*k,D[i+2]+(col[2]-D[i+2])*k],4,R[0]+s,R[1]+t));}}}},
     rows(n,fs,t0,t1,col){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=Math.max(0,t0);t<Math.min(R[3],t1);t++)for(let s=0;s<R[2];s++)set(R[0]+s,R[1]+t,noisy(col,6,R[0]+s,R[1]+t));}},
     rect(n,f,s0,t0,w,h,col){const R=rect(n,f);if(!R)return;for(let t=t0;t<Math.min(R[3],t0+h);t++)for(let s=s0;s<Math.min(R[2],s0+w);s++)set(R[0]+s,R[1]+t,noisy(col,5,R[0]+s,R[1]+t));},
@@ -166,16 +166,25 @@ function amTexture(kind,ci,flags){
     wool(ns,col){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const x=R[0]+s,y=R[1]+t,c1=amHash(x>>1,y>>1,seed+5),c2=amHash(x,y,seed+9);
       const k=(c1<0.3?-16:c1>0.75?10:0)+(c2-0.5)*10-(f==='D'?18:0);set(x,y,[col[0]+k,col[1]+k,col[2]+k]);}}},
     // hair: streaks down the length
-    hair(n){for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const k=(amHash(R[0]+s,0,seed+13)-0.5)*30;for(let t=0;t<R[3];t++){const i=((R[1]+t)*AM_TEX+R[0]+s)*4;D[i]=cl(D[i]+k);D[i+1]=cl(D[i+1]+k);D[i+2]=cl(D[i+2]+k);}}}},
+    hair(n){for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const k=(amHash(R[0]+s,0,seed+13)-0.5)*30;for(let t=0;t<R[3];t++){const i=((R[1]+t)*TX+R[0]+s)*4;D[i]=cl(D[i]+k);D[i+1]=cl(D[i+1]+k);D[i+2]=cl(D[i+2]+k);}}}},
     // a ragged darker fringe along the bottom of the sides (a shaggy coat)
     fringe(n,col){for(const f of ['L','R','F','B']){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const h=1+Math.floor(amHash(R[0]+s,R[1],seed+21)*3);for(let t=R[3]-h;t<R[3];t++)set(R[0]+s,R[1]+t,noisy(col,6,R[0]+s,R[1]+t));}}},
+    // glowing pixels (alpha 200: the shader draws them at full light): eyes in the dark, cracks of fire, flames
+    glow(n,f,s,t,col){const R=rect(n,f);if(R&&s<R[2]&&t<R[3])set(R[0]+s,R[1]+t,col,200);},
+    glowRect(n,f,s0,t0,w,h,col){const R=rect(n,f);if(!R)return;for(let t=t0;t<Math.min(R[3],t0+h);t++)for(let s=s0;s<Math.min(R[2],s0+w);s++)set(R[0]+s,R[1]+t,noisy(col,14,R[0]+s,R[1]+t),200);},
+    glowFaces(ns,col){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++)set(R[0]+s,R[1]+t,noisy(col,22,R[0]+s,R[1]+t),200);}},
+    // cracks of fire across faces: thin wandering lines that glow
+    cracks(ns,col,dens){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const x=R[0]+s,y=R[1]+t;
+      if(Math.abs(Math.sin(x*0.9+amHash(x>>2,y>>2,seed+41)*6)+Math.cos(y*0.7+amHash(x>>3,y>>1,seed+43)*5))<dens)set(x,y,noisy(col,30,x,y),200);}}},
+    // eyes that glow, on the front face of the head: two pixels `row` down, `gap` apart about the middle
+    glowEyes(n,row,gap,col){const R=rect(n,'F');if(!R)return;const m=(R[2]-1)/2;set(R[0]+Math.floor(m-gap/2),R[1]+row,col,200);set(R[0]+Math.ceil(m+gap/2),R[1]+row,col,200);},
     // stripes along the body (wild piglets)
     stripes(n,col,base){for(const f of ['L','R','T']){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++)if(((f==='T'?s:t)>>1)%2===0)set(R[0]+s,R[1]+t,noisy(col,10,R[0]+s,R[1]+t));}}
   };
   K.paint(P,c,flags);
   // fill what the paint left (shared faces never left empty), then a one-pixel darker rim on every face so edges read
   for(const n in uv){for(const f in AM_FACES){const R=amRect(f,uv[n][0],uv[n][1],uv[n][2][3],uv[n][2][4],uv[n][2][5]);
-    for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*AM_TEX+R[0]+s)*4;if(!D[i+3]){D[i]=128;D[i+1]=110;D[i+2]=96;D[i+3]=255;}}}}
+    for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*TX+R[0]+s)*4;if(!D[i+3]){D[i]=128;D[i+1]=110;D[i+2]=96;D[i+3]=255;}}}}
   g.putImageData(img,0,0);const tx=new THREE.CanvasTexture(cv);tx.amData=D;tx.magFilter=THREE.NearestFilter;tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;tx.anisotropy=1; // no mipmaps: a coat never bleeds into the part beside it
   amTexC.set(key,tx);return tx;
 }
@@ -186,7 +195,7 @@ const AM_FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;u
   'uniform float eL;uniform float eB;uniform float hurt;uniform float fade;varying vec2 vUv;varying float vD;varying vec3 vN;'+
   'void main(){vec4 t=texture2D(map,vUv);if(t.a<0.5)discard;float side=0.7+0.16*abs(vN.z);float sh=vN.y>=0.0?mix(side,1.0,vN.y):mix(side,0.52,-vN.y);'+
   'float lm=lamp*(1.0-smoothstep(3.0,lampR,vD));vec3 l=max(max(vec3(eL*skyMul)*skyTint,vec3(lm)*vec3(1.0,0.93,0.82)),max(vec3(1.0,0.8,0.55)*eB,caveTint*caveMin));'+
-  'vec3 c=t.rgb*l*sh;c=mix(c,vec3(0.85,0.12,0.08)*max(0.35,l.r),hurt*0.55);float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),fade);}';
+  'vec3 c=t.rgb*l*sh;c=mix(c,t.rgb*1.15,step(t.a,0.9));c=mix(c,vec3(0.85,0.12,0.08)*max(0.35,l.r),hurt*0.55);float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),fade);}';
 function amMaterial(tex){
   return new THREE.ShaderMaterial({uniforms:{map:{value:tex},fogColor:U.fogColor,fogNear:U.fogNear,fogFar:U.fogFar,lamp:U.lamp,lampR:U.lampR,skyMul:U.skyMul,skyTint:U.skyTint,caveMin:U.caveMin,caveTint:U.caveTint,
     eL:{value:1},eB:{value:0},hurt:{value:0},fade:{value:1}},vertexShader:AM_VS,fragmentShader:AM_FS});
@@ -202,11 +211,11 @@ const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
-    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1]);amGeoC.set(gk,geo);}
+    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex);amGeoC.set(gk,geo);}
     const grp=new THREE.Group();grp.position.x=piv[0]*AM_PX;grp.position.y=piv[1]*AM_PX;grp.position.z=piv[2]*AM_PX;const r=rot||[0,0,0];grp.rotation.x=r[0];grp.rotation.y=r[1];grp.rotation.z=r[2];grp.userData.rest=r.slice();
     const m=new THREE.Mesh(geo,mat);m.frustumCulled=false;grp.add(m);(par&&parts[par]?parts[par]:root).add(grp);parts[n]=grp;if(o.dyn)dyn.push([grp,o.dyn]);}
   // the young: smaller, with a bigger head (the head's own root grows; what hangs from it grows with it)
-  const sc=flags.young?0.58:1;root.scale.setScalar(sc);const big={};
+  const sc=(flags.young?0.58:1)*(K.scale||1);root.scale.setScalar(sc);const big={};
   if(flags.young)for(const p of K.parts){const o=p[5]||{};if(!o.head||!parts[p[0]])continue;const par=K.parts.find(q=>q[0]===p[1]);if(par&&(par[5]||{}).head)continue;parts[p[0]].scale.setScalar(1.3);big[p[0]]=1;}
   const body=new THREE.Group();body.add(root);
   const shadow=new THREE.Mesh(amShadowGeo,amShadowMat());shadow.renderOrder=1;
@@ -220,7 +229,7 @@ function amBounds(K,flags,sc,big){
   const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[0]),s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[2]);s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];return [x,y,z];};
   const chain=n=>{const out=[];let p=K.parts.find(q=>q[0]===n);while(p){out.push(p);p=p[1]?K.parts.find(q=>q[0]===p[1]):null;}return out;};
   const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
-  for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
+  for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||o.nb||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
     const b=p[3],ch=chain(p[0]);
     for(let i=0;i<8;i++){let v=[b[0]+(i&1?b[3]:0),b[1]+(i&2?b[4]:0),b[2]+(i&4?b[5]:0)];
       for(const q of ch){if(big[q[0]])v=v.map(t=>t*1.3);v=rotP(v,q[4]||[0,0,0]);v=[v[0]+q[2][0],v[1]+q[2][1],v[2]+q[2][2]];}

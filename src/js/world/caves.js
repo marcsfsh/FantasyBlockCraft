@@ -120,7 +120,7 @@ function caveEntrance(B,r,mx){
   return best||flat;
 }
 function caveSystem(B,r,kind){
-  const main=kind===0,mx=main?16:22,ent=(main||r()<0.15)?caveEntrance(B,r,mx):null;
+  const main=kind===0,mx=main?16:22,ent=B.war?null:(main||r()<0.15)?caveEntrance(B,r,mx):null; // under a warren the ways in are the warren's (D-052)
   const s0=B.nodes.length;let cur=-1;
   if(ent&&!ent.flat){ // a mouth at the foot of a slope, then into the hill, gently down
     const e=caveNode(B,ent.X+0.5-Math.cos(ent.a)*2,ent.h+1,ent.Z+0.5-Math.sin(ent.a)*2);
@@ -129,8 +129,9 @@ function caveSystem(B,r,kind){
   else if(ent){ // a sinkhole: a round pit with a ramp spiralling down its wall
     const e=caveNode(B,ent.X+0.5,ent.h+1,ent.Z+0.5);for(let t=0;t<3&&cur<0;t++)cur=caveStep(B,e,ent.a+t*2,'spiral',r,{open:true,drop:16+r()*10});
     if(cur>=0)B.ents.push(e);else B.nodes.length=s0;}
-  if(cur<0){ // no way in from here: the system starts in the rock (other ways down may reach it)
-    const X=B.cx+(r()-0.5)*40,Z=B.cz+(r()-0.5)*40,y=Math.min(hAt(Math.floor(X),Math.floor(Z))-30,SEA-20);cur=caveNode(B,X,y,Z);}
+  if(cur<0&&B.war&&main&&B.war.down>=0)cur=B.war.down; // the main system goes on down from the foot of the warren's way down
+  if(cur<0){ // no way in from here: the system starts in the rock (other ways down may reach it), under the warren if there is one
+    const X=B.cx+(r()-0.5)*40,Z=B.cz+(r()-0.5)*40,y=Math.min(hAt(Math.floor(X),Math.floor(Z))-30,SEA-20,B.war?WAR_Y0-14:1e9);cur=caveNode(B,X,y,Z);}
   const ent2=ent||{a:r()*6.283};
   // the trunk winds down; the main one reaches the Fire Below, a smaller one stops in the middle depths
   const bottom=main?30+r()*14:kind===1?40+r()*140:150+r()*90,trunk=[cur];let dir=ent2.a,fails=0;
@@ -215,6 +216,7 @@ function caveBase(rx,rz){
   const key=ckey(rx,rz);let B=caveBaseC.get(key);if(B)return B;if(caveBaseC.size>600)caveBaseC.clear();
   const r=rngAt(rx,7101,rz);B={rx:rx,rz:rz,x0:rx*CRB,z0:rz*CRB,nodes:[],edges:[],caps:[],ch:[],ents:[],deep:-1,fire:-1};
   B.cx=B.x0+CRB/2+(r()-0.5)*70;B.cz=B.z0+CRB/2+(r()-0.5)*70; // the systems wander around a point off the middle, so regions do not show as a grid
+  if(warRegion(rx,rz))warrenPlan(B); // the goblin warrens under the Volcanic Wastes come first (D-052)
   caveSystem(B,r,0);if(r()<0.85)caveSystem(B,r,1);if(r()<0.5)caveSystem(B,r,2);
   // other peoples' remains stand in some of the great halls away from the holds (D-024)
   const rr=rngAt(rx,6501,rz);if(rr()<0.42){const halls=B.ch.filter(c=>c.t===0&&c.a>=11&&c.b>=11&&c.f<104&&c.h>=10&&c.gorge===undefined);if(halls.length)halls[Math.floor(rr()*halls.length)].rem=rr();}
@@ -224,6 +226,7 @@ function caveBase(rx,rz){
     for(const e of B.edges){if(c.dry||(e.a!==ni&&e.b!==ni))continue;for(let k=0;k<e.pts.length&&!c.dry;k+=4){if(e.pts[k+1]>=L+2)continue;const rr=e.pts[k+3]+2.5;
       for(let w=0;w<wet.length;w+=2)if(Math.hypot(wet[w]-e.pts[k],wet[w+1]-e.pts[k+2])<rr){c.dry=true;break;}}}}
   B.falls=[];const rf=rngAt(rx,7161,rz);for(const c of B.ch){if(c.t!==0||c.f>=80||c.rem!==undefined||rf()>0.45)continue;const fl=caveFall(c,rf);if(fl)B.falls.push(fl);}
+  if(B.war)warrenFinish(B);
   caveBaseC.set(key,B);return B;
 }
 // A link from a system down into the upper gallery (y44) of a hold's mines nearby, so a hold can be found from below (Q99)
@@ -278,7 +281,7 @@ function cavePlan(rx,rz){
       if(cells.length)index({t:4,cells:cells,x:cx,z:cz},cx-3,cx+3,cz-3,cz+3);}}
   // where to stand in a passage: points every few blocks, for places that open onto a cave (caveAnchor)
   const anchors=new Map();
-  for(const e of B.edges){if(e.open||e.fill)continue;for(let k=0;k<e.pts.length;k+=8){const x=Math.floor(e.pts[k]),z=Math.floor(e.pts[k+2]),f=edgeFloor(e.pts,x,z);if(f>=1e9||B.ch.some(c=>chCol(c,x,z)))continue;const y=f+1,ck=ckey(Math.floor(x/CS),Math.floor(z/CS));let l=anchors.get(ck);if(!l)anchors.set(ck,l=[]);l.push(x,y,z);}}
+  for(const e of B.edges){if(e.open||e.fill||e.war)continue;for(let k=0;k<e.pts.length;k+=8){const x=Math.floor(e.pts[k]),z=Math.floor(e.pts[k+2]),f=edgeFloor(e.pts,x,z);if(f>=1e9||B.ch.some(c=>chCol(c,x,z)))continue;const y=f+1,ck=ckey(Math.floor(x/CS),Math.floor(z/CS));let l=anchors.get(ck);if(!l)anchors.set(ck,l=[]);l.push(x,y,z);}}
   P={B:B,els:els,byChunk:byChunk,anchors:anchors};cavePlanC.set(key,P);return P;
 }
 // The real floor of a passage at a column: the lowest cell its capsules open (the same test as carveCap), or 1e9 if none.
@@ -436,7 +439,7 @@ function carveCaves(WCX,WCZ,part,parts){
 }
 // Natural formations in the halls and rifts: stalagmites, stalactites and the odd column, placed by position (pure)
 function caveFormations(WCX,WCZ){
-  for(const c of caveEls(WCX,WCZ)){if(c.t>2)continue;const R=(c.t===1?c.L:Math.max(c.a,c.b))+2;
+  for(const c of caveEls(WCX,WCZ)){if(c.t>2||c.war)continue;const R=(c.t===1?c.L:Math.max(c.a,c.b))+2;
     const gx0c=Math.floor((c.x-R)/5),gx1c=Math.floor((c.x+R)/5),gz0c=Math.floor((c.z-R)/5),gz1c=Math.floor((c.z+R)/5);
     for(let gx=gx0c;gx<=gx1c;gx++)for(let gz=gz0c;gz<=gz1c;gz++){const q=hsh(gx,7351,gz);if(q>0.3)continue;
       const X=gx*5+Math.floor(hsh(gx,7352,gz)*5),Z=gz*5+Math.floor(hsh(gx,7353,gz)*5);if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS)continue;

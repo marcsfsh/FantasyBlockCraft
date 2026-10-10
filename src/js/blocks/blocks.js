@@ -161,6 +161,13 @@ def(BLACKASH,'Black Ash',[244,244,244],{snd:'soft'});def(CINDER,'Cinder Rock',[2
 def(CHARWOOD,'Charred Wood',[248,248,247],{snd:'wood'});def(SMOULDER,'Smouldering Wood',[248,248,249],{snd:'wood',emit:true,ember:true,lum:6});
 def(SULFUR,'Sulphur Crust',[250,250,250],{snd:'soft'});def(VENT,'Fumarole',[251,245,245],{emit:true,ember:true,lum:4});
 setH([BLACKASH,SULFUR],0.6,'soft');setH([CINDER,VENT],3,'stone',1);setH([LAVACRUST],4,'stone',1);setH([CHARWOOD,SMOULDER],1.6,'wood');
+// The foes' places (D-052): goblin tents and orc camps of hide, iron grates for pens and gates, the basalt bricks of the fire
+// demons' fortresses (some with mortar that still glows), poles of skulls and the ragged banners of the warbands
+const HIDE=1092,GRATE=1093,BASBRICK=1094,EMBRICK=1095,SKULLS=1096,BANNER=1097;
+def(HIDE,'Hide Canvas',[252,252,252],{snd:'soft'});def(GRATE,'Iron Grate',[253,253,253],{opq:false,occ:false});def(BASBRICK,'Basalt Bricks',[254,254,254]);
+def(EMBRICK,'Ember Bricks',[255,255,255],{emit:true,ember:true,lum:4});def(SKULLS,'Skull Totem',[256,256,256],{solid:false,opq:false,occ:false,cross:true});
+def(BANNER,'War Banner',[257,257,257],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
+setH([HIDE],0.8,'soft');setH([GRATE],6,'metal',3);setH([BASBRICK,EMBRICK],5,'stone',1);setH([SKULLS,BANNER],0,'soft');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);

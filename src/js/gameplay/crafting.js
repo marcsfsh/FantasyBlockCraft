@@ -25,7 +25,9 @@ const RECIPES=[
 ];
 // The tool ladder (items.js): pickaxe and axe from three of the material, shovel from one, each with two sticks
 const LADDER_MAT=[PLANKSET,COBBLE,220,225,223,227,228];
-LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]]));
+LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]],[370+i,1,[[m,2],[201,1]]])); // swords (D-052): two of the material, a stick
+// armour for the body slot (D-052), and a troll's hide cured into leather
+RECIPES.push([380,1,[[362,5]]],[381,1,[[223,6],[362,2]]],[382,1,[[227,8],[362,2]]],[383,1,[[228,6],[362,2]]],[362,3,[[386,1],[200,1]],'f']);
 function nearStation(kind){
   const px=Math.floor(PL.x),py=Math.floor(PL.y),pz=Math.floor(PL.z);
   for(let y=py-3;y<=py+4;y++)for(let z=pz-4;z<=pz+4;z++)for(let x=px-4;x<=px+4;x++){const id=get(x,y,z);if(id===BLAST||(kind==='f'&&id===FURN))return true;}

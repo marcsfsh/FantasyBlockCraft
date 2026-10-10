@@ -141,3 +141,5 @@ class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}
 function newM(){return{p:new FB(Float32Array),u:new FB(Float32Array),l:new FB(Float32Array),b:new FB(Float32Array),a:new FB(Float32Array),i:new FB(Uint32Array)};}
 function mkGeo(m){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(m.p.view().slice(),3));g.setAttribute('uv',new THREE.BufferAttribute(m.u.view().slice(),2));g.setAttribute('light',new THREE.BufferAttribute(m.l.view().slice(),1));g.setAttribute('blk',new THREE.BufferAttribute(m.b.view().slice(),1));g.setAttribute('aov',new THREE.BufferAttribute(m.a.view().slice(),1));g.setIndex(new THREE.BufferAttribute(m.i.view().slice(),1));g.computeBoundingSphere();return g;}
 function wDrop(x,y,z){if(isWetId(get(x,y+1,z)))return 0;return 0.12+lvl[I(x,y,z)]*0.1;}
+// lava's top lies a little low too, and lower the further it has flowed (0.28.0); under a solid block it stays full
+function lDrop(x,y,z){const a=get(x,y+1,z);if(a===LAVA||OPQ[a])return 0;return 0.12+lvl[I(x,y,z)]*0.17;}

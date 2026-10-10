@@ -186,6 +186,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg crea-only" id="gotoseg">Go to <input id="gox" placeholder="X" size="6" autocomplete="off"><input id="goz" placeholder="Z" size="6" autocomplete="off"><input id="goy" placeholder="Y (optional)" size="9" autocomplete="off"><button id="gobtn">Go</button></div>
     <div class="seg crea-only" id="tourseg">Land tour <select id="toursel"></select><button id="tourbtn">Go to the nearest</button></div>
     <div class="seg crea-only" id="animseg">Animal <select id="animsel"></select><button id="animbtn">Bring one here</button></div>
+    <div class="seg crea-only" id="foeseg">Foe <select id="foesel"></select><button id="foebtn">Bring one here</button></div>
     <div class="seg crea-only" id="stampseg">Test structure <select id="stampsel"></select><button id="stampbtn">Build where you look</button></div>
     <div class="seg" id="hudseg">Readout <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="hintseg">Hints <button data-v="1">On</button><button data-v="0">Off</button></div>
@@ -214,7 +215,7 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v18',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v19',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -227,7 +228,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=18,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=19,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
@@ -267,6 +268,7 @@ const PEOPLES={
   woodelf:{a:['Ael','Cael','Fae','Lir','Syl','Tha','Ver','Ilsa','Nae','Rhi'],b:['lan','wen','ion','dris','rael','thas','vin','mira','sorn']},
   highelf:{a:['Aen','Cal','Ilm','Ith','Nar','Qua','Sel','Tar','Vae','Ys'],b:['adir','enor','idel','oriel','uvar','esse','ander','ithra']},
   drow:{a:['Dra','Ilv','Jhar','Mal','Nhel','Vel','Xun','Zar','Quar','Shy'],b:['aeth','dra','ith','lyn','ryn','vex','zith','nyss','ra']},
+  fiend:{a:['Vor','Kael','Azh','Ghul','Skar','Thra','Ulm','Zhar','Ruuk','Xal'],b:['gath','rax','zul','thar','vex','okk','dun','ash','ruun']}, // the Emberlords (D-052)
   beastfolk:{a:['Arr','Fang','Grr','Hoof','Mar','Rha','Tusk','Whis','Brin','Ska'],b:['ka','mane','rek','tail','th','uun','rro','hide']}
 };
 // Proper names from Tolkien's works (lowercase, letters only). Exact matches, near misses (one letter off) and the roots below are refused.
@@ -461,6 +463,13 @@ def(BLACKASH,'Black Ash',[244,244,244],{snd:'soft'});def(CINDER,'Cinder Rock',[2
 def(CHARWOOD,'Charred Wood',[248,248,247],{snd:'wood'});def(SMOULDER,'Smouldering Wood',[248,248,249],{snd:'wood',emit:true,ember:true,lum:6});
 def(SULFUR,'Sulphur Crust',[250,250,250],{snd:'soft'});def(VENT,'Fumarole',[251,245,245],{emit:true,ember:true,lum:4});
 setH([BLACKASH,SULFUR],0.6,'soft');setH([CINDER,VENT],3,'stone',1);setH([LAVACRUST],4,'stone',1);setH([CHARWOOD,SMOULDER],1.6,'wood');
+// The foes' places (D-052): goblin tents and orc camps of hide, iron grates for pens and gates, the basalt bricks of the fire
+// demons' fortresses (some with mortar that still glows), poles of skulls and the ragged banners of the warbands
+const HIDE=1092,GRATE=1093,BASBRICK=1094,EMBRICK=1095,SKULLS=1096,BANNER=1097;
+def(HIDE,'Hide Canvas',[252,252,252],{snd:'soft'});def(GRATE,'Iron Grate',[253,253,253],{opq:false,occ:false});def(BASBRICK,'Basalt Bricks',[254,254,254]);
+def(EMBRICK,'Ember Bricks',[255,255,255],{emit:true,ember:true,lum:4});def(SKULLS,'Skull Totem',[256,256,256],{solid:false,opq:false,occ:false,cross:true});
+def(BANNER,'War Banner',[257,257,257],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
+setH([HIDE],0.8,'soft');setH([GRATE],6,'metal',3);setH([BASBRICK,EMBRICK],5,'stone',1);setH([SKULLS,BANNER],0,'soft');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
@@ -497,6 +506,11 @@ TOOL_LADDER.forEach((m,i)=>{const o={tier:i+1,speed:m[2],dur:m[3]};
 // Gold and platinum are for special tools (Q68): a platinum pickaxe is very fast but soon worn; the runeforged one is a relic
 item(247,'Platinum Pickaxe','pick',[226,240,248],{tool:'pick',tier:5,speed:14,dur:150});item(255,'Runeforged Pickaxe','pick',[110,220,250],{tool:'pick',tier:7,speed:18,dur:4000});
 ITEMS[251].tool='hoe';ITEMS[251].dur=150;
+// Swords and armour (D-052), for the foes of the Volcanic Wastes: a sword on every step of the ladder, coats for the body slot
+TOOL_LADDER.forEach((m,i)=>item(370+i,m[0]+' Sword','sword',m[1],{tool:'sword',tier:i+1,dur:Math.round(m[3]*0.8)}));
+item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(378,'Emberheart','heart',[255,110,40]);item(386,'Troll Hide','hide',[96,90,86]);
+item(380,'Hide Jerkin','mail',[150,108,70],{equip:'body',armor:0.15,dur:120,one:true});item(381,'Iron Mail','mail',[200,200,196],{equip:'body',armor:0.3,dur:260,one:true});
+item(382,'Steel Plate','mail',[124,134,152],{equip:'body',armor:0.45,dur:420,one:true});item(383,'Moonsilver Mail','mail',[170,176,206],{equip:'body',armor:0.55,dur:800,one:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -581,15 +595,19 @@ function itemIcon(id){
   else if(it.kind==='lantern'){for(let y=3;y<14;y++)for(let x=4;x<12;x++){const e=x===4||x===11||y===3||y===13;px(x,y,e?-10:0);}g.fillStyle='#ffd27a';g.fillRect(6,5,4,7);g.fillStyle='#fff3c4';g.fillRect(7,7,2,3);g.fillStyle='#3a2a1a';g.fillRect(7,1,2,2);}
   else if(it.kind==='pack'||it.kind==='satchel'){const sat=it.kind==='satchel';for(let y=sat?6:3;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===(sat?6:3)?20:x===12||y===13?-30:0)+((x+y)%4===0?-10:0));
     g.fillStyle='#4a3420';g.fillRect(3,sat?8:6,10,1);g.fillRect(7,sat?8:6,2,3);if(sat){g.fillRect(4,2,1,4);g.fillRect(11,2,1,4);g.fillRect(4,2,8,1);}}
+  else if(it.kind==='sword'){for(let k=0;k<11;k++)for(let w=0;w<2;w++)px(4+k+w,11-k,k===10?10:w?-30:24);g.fillStyle='#634422';g.fillRect(2,12,2,2);g.fillRect(3,11,2,2);g.fillStyle='#8a6036';g.fillRect(1,13,2,2);
+    g.fillStyle='#4a3a2a';for(let k=-2;k<=2;k++)g.fillRect(4+k,10+k,2,2);if(id===377){g.fillStyle='rgba(255,220,120,0.9)';for(let k=2;k<10;k+=2)g.fillRect(6+k,9-k,1,1);}}
+  else if(it.kind==='mail'){for(let y=2;y<15;y++)for(let x=2;x<14;x++){const sl=y<6&&(x<4||x>11),neck=y<4&&x>5&&x<10;if(sl&&y<3||neck)continue;if(y>6&&(x<4||x>11))continue;px(x,y,(x===2||x===13||y===2?18:y===14?-30:0)+((x+y)%2&&id!==380?-14:0));}}
+  else if(it.kind==='heart'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const a=Math.hypot(x-5.5,y-5.5)<3.2||Math.hypot(x-10.5,y-5.5)<3.2||(y>=6&&Math.abs(x-8)<(14-y)*0.75);if(a)px(x,y,(y<5?40:0)+(r()-.5)*30);}g.fillStyle='rgba(255,240,180,0.9)';g.fillRect(5,4,2,1);}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE]); // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378]); // relics for the discovery log (M7)
 // Texture atlas, drawn pixel by pixel
-const TS=16,AC=8,AR=32,AW=TS*AC,AH=TS*AR;
+const TS=16,AC=8,AR=64,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
 const actx=atlas.getContext('2d'),im=actx.createImageData(AW,AH),dat=im.data;
 const cl=v=>v<0?0:v>255?255:v|0;
@@ -841,6 +859,22 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     // fumarole: cinder round a glowing throat
     const t=Math.hypot(x-7.5,y-7.5);P(251,x,y,t<2.6?sh([255,150,40],(hn(x,y,201)-.5)*40):t<4?sh([200,170,60],(hn(x,y,202)-.5)*30):sh([56,50,50],(hn(x,y,203)-.5)*22));
   }
+  // The foes' places (D-052): hide canvas stitched in panels, an iron grate, basalt bricks, the same with glowing mortar, a pole
+  // of skulls and a ragged war banner (the last two drawn like plants)
+  clear(253);clear(256);clear(257);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const seam=x===7||y===7,stitch=(x===6||x===8)&&y%3===0||(y===6||y===8)&&x%3===0;
+    P(252,x,y,seam?[78,52,32]:stitch?[196,170,128]:sh([150,108,70],(hn(x,y,210)-.5)*18+(hn(x>>2,y>>2,211)<.25?-16:0)+(hn(x,y,212)<.05?-26:0)));
+    const bar=(x%5===1||x%5===2),band=y===3||y===12;if(bar||band)P(253,x,y,sh([66,64,70],(x%5===1&&!band?18:0)+(hn(x,y,213)-.5)*14+(hn(x,y,214)<.1?-20:0)));
+    const row=y>>2,off=row%2?4:0,mort=y%4===3||(x+off)%8===7;
+    P(254,x,y,mort?sh([26,24,26],(hn(x,y,215)-.5)*8):sh([58,55,60],(hn(x,y,216)-.5)*16+(hn((x+off)>>3,row,217)-.5)*18));
+    P(255,x,y,mort?sh([250,(hn(x,y,218)<.5?120:170),34],(hn(x,y,219)-.5)*30):sh([46,42,46],(hn(x,y,220)-.5)*14+(hn((x+off)>>3,row,221)-.5)*16));
+  }
+  for(let y=0;y<16;y++){P(256,7,y,sh([60,44,32],(hn(7,y,222)-.5)*14));P(256,8,y,sh([44,32,24],(hn(8,y,222)-.5)*14));}
+  for(const sy of [1,8])for(let y=0;y<5;y++)for(let x=5;x<11;x++){const eye=y===2&&(x===6||x===9),jaw=y===4&&(x===5||x===10);if(jaw)continue;P(256,x,sy+y,eye?[20,14,12]:sh([222,214,190],(hn(x,y+sy,223)-.5)*24-(y===4?30:0)));}
+  for(let y=0;y<16;y++)P(257,2,y,sh([58,40,28],(hn(2,y,224)-.5)*12));
+  for(let y=1;y<13;y++)for(let x=3;x<14;x++){if(y>9&&hn(x,0,225)<(y-9)/4)continue;const em=Math.abs(x-8)+Math.abs(y-5)*1.3<3.2&&!(Math.abs(x-8)+Math.abs(y-5)*1.3<1.4);
+    P(257,x,y,em?[24,20,20]:sh([148,30,24],(hn(x,y,226)-.5)*22+(x===3?-20:0)));}
   clear(243);for(let f=0;f<5;f++){const ox=2+f*3,h=8+Math.floor(hn(f,6,174)*6);for(let k=0;k<h;k++)P(243,ox,15-k,k>h-5?sh([150,110,210],(hn(f,k,175)-.5)*30):[90,130,80]);}
   actx.putImageData(im,0,0);
 })();
@@ -1260,7 +1294,7 @@ function caveEntrance(B,r,mx){
   return best||flat;
 }
 function caveSystem(B,r,kind){
-  const main=kind===0,mx=main?16:22,ent=(main||r()<0.15)?caveEntrance(B,r,mx):null;
+  const main=kind===0,mx=main?16:22,ent=B.war?null:(main||r()<0.15)?caveEntrance(B,r,mx):null; // under a warren the ways in are the warren's (D-052)
   const s0=B.nodes.length;let cur=-1;
   if(ent&&!ent.flat){ // a mouth at the foot of a slope, then into the hill, gently down
     const e=caveNode(B,ent.X+0.5-Math.cos(ent.a)*2,ent.h+1,ent.Z+0.5-Math.sin(ent.a)*2);
@@ -1269,8 +1303,9 @@ function caveSystem(B,r,kind){
   else if(ent){ // a sinkhole: a round pit with a ramp spiralling down its wall
     const e=caveNode(B,ent.X+0.5,ent.h+1,ent.Z+0.5);for(let t=0;t<3&&cur<0;t++)cur=caveStep(B,e,ent.a+t*2,'spiral',r,{open:true,drop:16+r()*10});
     if(cur>=0)B.ents.push(e);else B.nodes.length=s0;}
-  if(cur<0){ // no way in from here: the system starts in the rock (other ways down may reach it)
-    const X=B.cx+(r()-0.5)*40,Z=B.cz+(r()-0.5)*40,y=Math.min(hAt(Math.floor(X),Math.floor(Z))-30,SEA-20);cur=caveNode(B,X,y,Z);}
+  if(cur<0&&B.war&&main&&B.war.down>=0)cur=B.war.down; // the main system goes on down from the foot of the warren's way down
+  if(cur<0){ // no way in from here: the system starts in the rock (other ways down may reach it), under the warren if there is one
+    const X=B.cx+(r()-0.5)*40,Z=B.cz+(r()-0.5)*40,y=Math.min(hAt(Math.floor(X),Math.floor(Z))-30,SEA-20,B.war?WAR_Y0-14:1e9);cur=caveNode(B,X,y,Z);}
   const ent2=ent||{a:r()*6.283};
   // the trunk winds down; the main one reaches the Fire Below, a smaller one stops in the middle depths
   const bottom=main?30+r()*14:kind===1?40+r()*140:150+r()*90,trunk=[cur];let dir=ent2.a,fails=0;
@@ -1355,6 +1390,7 @@ function caveBase(rx,rz){
   const key=ckey(rx,rz);let B=caveBaseC.get(key);if(B)return B;if(caveBaseC.size>600)caveBaseC.clear();
   const r=rngAt(rx,7101,rz);B={rx:rx,rz:rz,x0:rx*CRB,z0:rz*CRB,nodes:[],edges:[],caps:[],ch:[],ents:[],deep:-1,fire:-1};
   B.cx=B.x0+CRB/2+(r()-0.5)*70;B.cz=B.z0+CRB/2+(r()-0.5)*70; // the systems wander around a point off the middle, so regions do not show as a grid
+  if(warRegion(rx,rz))warrenPlan(B); // the goblin warrens under the Volcanic Wastes come first (D-052)
   caveSystem(B,r,0);if(r()<0.85)caveSystem(B,r,1);if(r()<0.5)caveSystem(B,r,2);
   // other peoples' remains stand in some of the great halls away from the holds (D-024)
   const rr=rngAt(rx,6501,rz);if(rr()<0.42){const halls=B.ch.filter(c=>c.t===0&&c.a>=11&&c.b>=11&&c.f<104&&c.h>=10&&c.gorge===undefined);if(halls.length)halls[Math.floor(rr()*halls.length)].rem=rr();}
@@ -1364,6 +1400,7 @@ function caveBase(rx,rz){
     for(const e of B.edges){if(c.dry||(e.a!==ni&&e.b!==ni))continue;for(let k=0;k<e.pts.length&&!c.dry;k+=4){if(e.pts[k+1]>=L+2)continue;const rr=e.pts[k+3]+2.5;
       for(let w=0;w<wet.length;w+=2)if(Math.hypot(wet[w]-e.pts[k],wet[w+1]-e.pts[k+2])<rr){c.dry=true;break;}}}}
   B.falls=[];const rf=rngAt(rx,7161,rz);for(const c of B.ch){if(c.t!==0||c.f>=80||c.rem!==undefined||rf()>0.45)continue;const fl=caveFall(c,rf);if(fl)B.falls.push(fl);}
+  if(B.war)warrenFinish(B);
   caveBaseC.set(key,B);return B;
 }
 // A link from a system down into the upper gallery (y44) of a hold's mines nearby, so a hold can be found from below (Q99)
@@ -1418,7 +1455,7 @@ function cavePlan(rx,rz){
       if(cells.length)index({t:4,cells:cells,x:cx,z:cz},cx-3,cx+3,cz-3,cz+3);}}
   // where to stand in a passage: points every few blocks, for places that open onto a cave (caveAnchor)
   const anchors=new Map();
-  for(const e of B.edges){if(e.open||e.fill)continue;for(let k=0;k<e.pts.length;k+=8){const x=Math.floor(e.pts[k]),z=Math.floor(e.pts[k+2]),f=edgeFloor(e.pts,x,z);if(f>=1e9||B.ch.some(c=>chCol(c,x,z)))continue;const y=f+1,ck=ckey(Math.floor(x/CS),Math.floor(z/CS));let l=anchors.get(ck);if(!l)anchors.set(ck,l=[]);l.push(x,y,z);}}
+  for(const e of B.edges){if(e.open||e.fill||e.war)continue;for(let k=0;k<e.pts.length;k+=8){const x=Math.floor(e.pts[k]),z=Math.floor(e.pts[k+2]),f=edgeFloor(e.pts,x,z);if(f>=1e9||B.ch.some(c=>chCol(c,x,z)))continue;const y=f+1,ck=ckey(Math.floor(x/CS),Math.floor(z/CS));let l=anchors.get(ck);if(!l)anchors.set(ck,l=[]);l.push(x,y,z);}}
   P={B:B,els:els,byChunk:byChunk,anchors:anchors};cavePlanC.set(key,P);return P;
 }
 // The real floor of a passage at a column: the lowest cell its capsules open (the same test as carveCap), or 1e9 if none.
@@ -1576,7 +1613,7 @@ function carveCaves(WCX,WCZ,part,parts){
 }
 // Natural formations in the halls and rifts: stalagmites, stalactites and the odd column, placed by position (pure)
 function caveFormations(WCX,WCZ){
-  for(const c of caveEls(WCX,WCZ)){if(c.t>2)continue;const R=(c.t===1?c.L:Math.max(c.a,c.b))+2;
+  for(const c of caveEls(WCX,WCZ)){if(c.t>2||c.war)continue;const R=(c.t===1?c.L:Math.max(c.a,c.b))+2;
     const gx0c=Math.floor((c.x-R)/5),gx1c=Math.floor((c.x+R)/5),gz0c=Math.floor((c.z-R)/5),gz1c=Math.floor((c.z+R)/5);
     for(let gx=gx0c;gx<=gx1c;gx++)for(let gz=gz0c;gz<=gz1c;gz++){const q=hsh(gx,7351,gz);if(q>0.3)continue;
       const X=gx*5+Math.floor(hsh(gx,7352,gz)*5),Z=gz*5+Math.floor(hsh(gx,7353,gz)*5);if(X<gx0||X>=gx0+CS||Z<gz0||Z>=gz0+CS)continue;
@@ -1669,7 +1706,7 @@ function poiBase(WCX,WCZ){
     const x=WCX*CS+4+(r()*8|0),z=WCZ*CS+4+(r()*8|0),gh=colInfo(x,z,{}).h,top=gh-14;
     {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
       // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
-      if(hsh(WCX,6411,WCZ)>=0.6)p=null;
+      if(hsh(WCX,6411,WCZ)>=0.6||warBand(x,y,z))p=null; // no sealed geode or fossil in a goblin warren (D-052)
       else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
         if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
           if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}
@@ -2740,7 +2777,7 @@ function caveLife(X0,Z0,r2){
   const floor=(rr,X,Z,y0)=>{const g=ground[(X-OX)+W*(Z-OZ)];
       let y=y0;while(y>4&&GW(X,y,Z)===AIR&&GW(X,y-1,Z)===AIR)y--;
       const kind=rr(),q=rr();
-      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z)))return;
+      if(GW(X,y,Z)!==AIR||!SOLID[Math.max(0,GW(X,y-1,Z))]||y>g-6||(zone&&inRuin(X,y,Z))||warBand(X,y,Z))return; // the warrens dress their own (D-052)
       if(y<=14&&(GW(X+1,y-1,Z)===LAVA||GW(X-1,y-1,Z)===LAVA||GW(X,y-1,Z+1)===LAVA)){PW(X,y-1,Z,OBSID,MODE_SET);return;}
       if(y<100&&!(wild&&y>=26)){ // deep under a hold, its mines and near the lava: sparse life, crystals and scorched rock
         if(kind<0.12)PW(X,y,Z,CRYSTAL,MODE_SET);else if(kind<0.18)PW(X,y,Z,GLOWSHROOM,MODE_SET);else if(kind<0.2&&y<g-12)PW(X,y,Z,CRATE,MODE_SET);else if(kind<0.3)PW(X,y-1,Z,OBSID,MODE_STONE);
@@ -2763,7 +2800,7 @@ function caveLife(X0,Z0,r2){
   // walls: moss that glows, amethyst seams, calcite flowstone
   for(let k=0;k<200;k++){
     const X=X0+1+(r2()*(CS-2)|0),Z=Z0+1+(r2()*(CS-2)|0),g=ground[(X-OX)+W*(Z-OZ)],y=8+(r2()*Math.max(1,g-16)|0),q=r2();
-    if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z)))continue;
+    if(GW(X,y,Z)!==AIR||(zone&&inRuin(X,y,Z))||warBand(X,y,Z))continue;
     for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const c=GW(X+a,y,Z+b);if(c!==STONE&&c!==DEEP)continue;
       let id=0;
       if(y<100&&!(wild&&y>=26))id=q<0.15?OBSID:q<0.22?GLOWMOSS:0;
@@ -3142,6 +3179,7 @@ function surfaceName(X,Y,Z){
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
+  {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
   {const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcCand(ci+a,cj+b)&&volcAt(ci+a,cj+b);if(v&&Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name;}} // the volcanoes (D-051)
   return null;
 }
@@ -4054,6 +4092,341 @@ function volcBuild(s,r){
       break;}
   }
 }
+// ---- The Emberlords' fortresses (D-052). The owner asked for balrogs; the name is Tolkien's, so ours are the Emberlords, great
+// demons of fire and shadow. Some of the great volcanoes hold one in a fortress cut into the mountain: a terrace and a gate
+// between two towers at the foot of the cone, a hall in through the rock over a trough of lava, and under the summit the throne
+// hall with its pillars, rivers of lava in the floor, a dais, the throne and the hoard. Its lord waits there; orcs keep the gate.
+// The fortress faces the quarter of the mountain farthest from its flows. It is built per chunk from the volcano's plan, and
+// every block of its lava lies in a trough it lays itself (rock under and on every side), so it is always held.
+const FORT_C=new Map();
+// The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across (the gate is v -3 to 3).
+function fortOf(v){
+  const key=v.i*65536+v.j;if(FORT_C.has(key))return FORT_C.get(key);let F=null;
+  if(v.Hv>=34&&hsh(v.i,9171,v.j)<0.85){
+    let best=null;for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);if(!best||m>best.m)best={th:th,m:m};}
+    const ox=Math.round(Math.cos(best.th)),oz=Math.round(Math.sin(best.th)),px=-oz,pz=ox; // outward from the mountain's heart, and across
+    let dg=-1;for(let d=Math.round(v.R*1.05);d>v.R*0.35;d--)if(hAt(v.X+ox*d,v.Z+oz*d)>=v.base+6){dg=d;break;}
+    if(dg>0){const GX=v.X+ox*dg,GZ=v.Z+oz*dg,Fy=hAt(GX,GZ);
+      // the throne hall (Lh deep, 33 across) lies under the summit, its far end just past the mountain's heart, under the
+      // crater's floor; the way in steps down (one block in two) if it must, so five blocks of rock at least lie over the hall
+      for(const Lh of [26,22]){const U1=Math.round(dg+4-Lh);if(U1<10)continue;let cov=1e9;
+        for(let u=U1;u<=U1+Lh;u+=3)for(let w=-16;w<=16;w+=4)cov=Math.min(cov,hAt(GX-ox*u+px*w,GZ-oz*u+pz*w));
+        for(let Dd=0;Dd<=Math.min(16,Math.floor((U1-8)/2));Dd+=2){const Fh=Fy-Dd,Hh=Math.min(18,cov-Fh-6);if(Hh<14)continue;
+          const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),xs=[GX+ox*20,GX-ox*(U1+Lh+1)],zs=[GZ+oz*20,GZ-oz*(U1+Lh+1)];for(const w of [-17,17]){xs.push(GX+px*w);zs.push(GZ+pz*w);}
+          F={v:v,GX:GX,GZ:GZ,Fy:Fy,Fh:Fh,Dd:Dd,ox:ox,oz:oz,px:px,pz:pz,U1:U1,Lh:Lh,Hh:Hh,lord:lord,name:'The Ember Throne of '+lord,
+            box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Fh-8,Fy+26],seed:Math.floor(r()*1e6)};break;}
+        if(F)break;}}}
+  FORT_C.set(key,F);return F;
+}
+// the fortresses whose works reach within m of (X,Z)
+function fortsNear(X,Z,m){const out=[];for(const v of volcanoesNear(X,Z,m+40)){const F=fortOf(v);if(F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m)out.push(F);}return out;}
+// Is (X,Y,Z) within m of a fortress's works? (the warrens keep out)
+function fortZone(X,Y,Z,m){for(const F of fortsNear(X,Z,m))if(Y>=F.box[4]-m&&Y<=F.box[5]+m)return true;return false;}
+// local (u,v) of a world column
+const fortUV=(F,X,Z)=>{const dx=X-F.GX,dz=Z-F.GZ;return [-(dx*F.ox+dz*F.oz),dx*F.px+dz*F.pz];};
+// the floor (first open cell) along the way in: level for four blocks, then down a step every two to the hall's floor
+const fortFloor=(F,u)=>u<=F.U1-1?F.Fy-Math.min(F.Dd,Math.max(0,Math.floor((u-4)/2))):F.Fh;
+// Is (u,v) a lava cell of the fortress (one under the floor there)? A trough across the way in where it is level again (with a
+// bridge), and two rivers down the throne hall.
+function fortLavaUV(F,u,v){const U1=F.U1,ut=U1-6;
+  if(ut-4>=2*F.Dd+2&&u>=ut&&u<=ut+2&&Math.abs(v)<=3&&Math.abs(v)>=2)return true;
+  const um=Math.floor((ut+2*F.Dd+6)/2);if(ut-um>=12&&u>=um&&u<=um+2&&Math.abs(v)<=3&&Math.abs(v)>=2)return true;
+  return Math.abs(v)===5&&u>=U1+4&&u<=U1+F.Lh-8;}
+function fortLavaAt(X,Y,Z){for(const F of fortsNear(X,Z,0)){const [u,v]=fortUV(F,X,Z);if(Y===fortFloor(F,u)-1&&fortLavaUV(F,u,v))return true;}return false;}
+// the name of the fortress at (X,y,Z), or null
+function fortName(X,y,Z){for(const F of fortsNear(X,Z,0)){if(y<F.box[4]||y>F.box[5])continue;const [u,v]=fortUV(F,X,Z);if(u>=-13&&u<=F.U1+F.Lh&&Math.abs(v)<=16)return F.name;}return null;}
+// where the lord waits and the guards stand (world coordinates, y the floor)
+function fortSpots(F){const at=(u,v)=>({x:F.GX-F.ox*u+F.px*v+0.5,y:fortFloor(F,u),z:F.GZ-F.oz*u+F.pz*v+0.5});
+  return {lord:at(F.U1+F.Lh-12,0),hall:at(F.U1+F.Lh/2,0),guards:[at(-6,-4),at(-6,4),at(-9,0),at(5,0),at(F.U1-2,2)]};}
+// ---- building, per chunk
+function fortBuild(F){
+  const {Fy,Fh,U1,Hh,Lh}=F,top=Fh+Hh,E=U1+Lh,S=(X,y,Z,id)=>PW(X,y,Z,id,MODE_SET);
+  for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,[u,v]=fortUV(F,X,Z),av=Math.abs(v),h=hsh(X,9175,Z);
+    if(u<-18||u>E||av>16)continue;
+    // the terrace before the gate, with steps down from its outer edge
+    if(u>=-12&&u<=-1&&av<=12){const edge=u===-12||av===12;
+      for(let y=Fy-8;y<Fy-1;y++)S(X,y,Z,BASALT);S(X,Fy-1,Z,(u+v)%4===0?OBSID:BASBRICK);for(let y=Fy;y<=Fy+16;y++)S(X,y,Z,AIR);
+      if(edge&&!(u===-12&&av<=2))S(X,Fy,Z,BASBRICK);if(edge&&!(u===-12&&av<=2)&&(u+v)%2===0)S(X,Fy+1,Z,BASBRICK);}
+    if(u<-12&&u>=-18&&av<=2){const y=Fy-1-(-12-u);for(let k=y-4;k<=y;k++)S(X,k,Z,BASBRICK);for(let k=y+1;k<=Fy+4;k++)S(X,k,Z,AIR);}
+    // the gate towers
+    if(av>=9&&av<=13&&u>=-4&&u<=0){const ring=av===9||av===13||u===-4||u===0;
+      for(let y=Fy-1;y<=Fy+22;y++)S(X,y,Z,(y===Fy+8||y===Fy+16)&&ring?EMBRICK:BASBRICK);
+      if(ring&&(u+v)%2===0)S(X,Fy+23,Z,BASBRICK);if(av===11&&u===-2)S(X,Fy+23,Z,MAGMA);}
+    // the facade: a wall up the mountain's foot with the gate in it, a raised portcullis and two glowing eyes above
+    if(u>=0&&u<=2&&av<=14&&!(av>=9&&av<=13&&u===0)){
+      for(let y=Fy-1;y<=Fy+18;y++){const gate=av<=3&&y>=Fy&&y<=Fy+9;S(X,y,Z,gate?(u===1&&y>=Fy+7?GRATE:AIR):y===Fy+12?EMBRICK:(av===2&&y===Fy+14&&u===0)?MAGMA:BASBRICK);}
+      if(v%2===0&&u===0)S(X,Fy+19,Z,BASBRICK);}
+    // the way in: walls, a floor stepping down, a ceiling, a line of fire in the walls, a trough of lava with a bridge
+    if(u>=3&&u<U1&&av<=4){const fl=fortFloor(F,u);for(let y=fl-3;y<fl-1;y++)S(X,y,Z,BASBRICK);
+      if(av===4){for(let y=fl-1;y<=fl+9;y++)S(X,y,Z,y===fl+6?EMBRICK:BASBRICK);}
+      else{S(X,fl-1,Z,fortLavaUV(F,u,v)?LAVA:(u%6===0?OBSID:BASBRICK));for(let y=fl;y<=fl+8;y++)S(X,y,Z,AIR);S(X,fl+9,Z,BASBRICK);S(X,fl+10,Z,BASBRICK);
+        if(av===3&&u%7===5)S(X,fl,Z,MAGMA);}}
+    // the throne hall
+    if(u>=U1&&u<=E&&av<=16){const wall=av>=15||u<=U1+1||u>=E-1,door=u<=U1+1&&av<=3;
+      if(wall&&!door){for(let y=Fh-3;y<=top+1;y++)S(X,y,Z,(y-Fh)%6===5?EMBRICK:BASBRICK);continue;}
+      S(X,Fh-3,Z,BASBRICK);S(X,Fh-2,Z,BASBRICK);
+      if(door){S(X,Fh-1,Z,BASBRICK);for(let y=Fh;y<=Fh+8;y++)S(X,y,Z,AIR);for(let y=Fh+9;y<=top+1;y++)S(X,y,Z,BASBRICK);continue;}
+      S(X,Fh-1,Z,fortLavaUV(F,u,v)?LAVA:(av<=2||(u-U1)%6===0)?OBSID:BASBRICK);
+      for(let y=Fh;y<top;y++)S(X,y,Z,AIR);S(X,top,Z,(u-U1)%6===0?EMBRICK:BASBRICK);S(X,top+1,Z,BASBRICK);
+      // pillars in two rows
+      const pu=u-U1,pd=E-u;if(av>=8&&av<=10&&pu>=4&&pd>=8&&(pu-4)%6<=2){for(let y=Fh;y<top;y++)S(X,y,Z,(y===Fh+3||y===top-3)?EMBRICK:BASBRICK);continue;}
+      // the dais at the far end, stepping up to the throne
+      if(pd>=2&&pd<=6&&av<=7){const st=pd===6?1:pd===5?2:3;for(let y=Fh;y<Fh+st;y++)S(X,y,Z,y===Fh+st-1?OBSID:BASBRICK);
+        if(pd===5&&av===6){S(X,Fh+2,Z,BASBRICK);S(X,Fh+3,Z,MAGMA);}
+        if(pd===3&&v===0)S(X,Fh+3,Z,OBSID);if(pd===3&&av===1){S(X,Fh+3,Z,EMBRICK);S(X,Fh+4,Z,EMBRICK);}
+        if(pd===2&&v===0)for(let y=Fh+3;y<=Fh+8;y++)S(X,y,Z,y===Fh+8?EMBRICK:OBSID);
+        if(pd===2&&av>=2&&av<=6){const k=(av+(v>0?0:5))%5;S(X,Fh+3,Z,k===0?DWCHEST:k===1?GOLDB:k===2?CRATE:k===3?GOLDB:SKULLS);}
+        continue;}
+      // banners on the side walls, bones and skulls about the floor
+      if(av===14&&pu%5===2){S(X,Fh,Z,BANNER);S(X,Fh+1,Z,BANNER);}
+      else if(h<0.025&&!fortLavaUV(F,u,v))S(X,Fh,Z,h<0.008?SKULLS:BONES);}
+  }
+}
+function applyFortresses(WCX,WCZ){const X=WCX*CS+8,Z=WCZ*CS+8;for(const F of fortsNear(X,Z,12))fortBuild(F);}
+// ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
+// dug in hot black rock. Halls on two levels (the upper among the crawlways, the lower in the upper caves) are joined by low
+// tunnels propped with charred timber and lit by torches, magma seams and channels of lava held in the floor. The halls hold
+// huts of hide, stores, pens, a forge, a fire shrine and the chief's hall with its hoard. Ways in open on the surface, a goblin
+// camp before each; a way down joins the caves below, which begin under the warrens. The warren is planned with the cave
+// systems of its region (caveBase), so everything planned after it keeps clear; it is dressed per chunk from the plan (pure).
+const WAR_Y0=206,warRegC=new Map(),WAR_KINDS=['den','den','den','store','forge','pen','shrine','lava'],TWR={};
+const WAR_ROCK=new Set([STONE,DEEP,DIRT,GRAVEL]);
+// Is cave region (rx,rz) a warren? Most of it lies under the wastes, and no hold is near.
+function warRegion(rx,rz){
+  const k=ckey(rx,rz);if(warRegC.has(k))return warRegC.get(k);if(warRegC.size>4000)warRegC.clear();
+  let n=0;for(let a=0;a<5;a++)for(let b=0;b<5;b++){colInfo(rx*CRB+16+a*32,rz*CRB+16+b*32,TWR);if(TWR.wVolc>0.6)n++;}
+  const ccx=rx*CR+CR/2,ccz=rz*CR+CR/2,ok=n>=10&&holdReach(holdNear(ccx,ccz),ccx,ccz)>=3.6;
+  warRegC.set(k,ok);return ok;
+}
+// the warren of the region holding (X,Z), or null
+function warrenOf(X,Z){const rx=Math.floor(X/CRB),rz=Math.floor(Z/CRB);if(!warRegion(rx,rz))return null;return caveBase(rx,rz).war||null;}
+// ---- planning (called by caveBase before the region's cave systems; its own random stream)
+// a hall's radius toward `dir`, and a door: a node just inside its wall that way, on its floor, belonging to the hall
+function hallR(c,dir){const p=dir-c.ang,ca=Math.cos(p),sa=Math.sin(p);return 1/Math.sqrt((ca/c.a)*(ca/c.a)+(sa/c.b)*(sa/c.b));}
+function warDoor(B,ci,dir){const c=B.ch[ci],d=hallR(c,dir)*0.78,X=c.x+Math.cos(dir)*d,Z=c.z+Math.sin(dir)*d,s=chCol(c,Math.floor(X),Math.floor(Z)),ni=caveNode(B,X,s?s[0]:c.f,Z);B.nodes[ni].ch=ci;return ni;}
+// a tunnel between two nodes, if it keeps clear of everything planned (and of the fire demons' fortresses)
+function warLink(B,a,b,r,rad,o){
+  const A=B.nodes[a],Bn=B.nodes[b],hd=Math.hypot(Bn.x-A.x,Bn.z-A.z);if(Math.abs(Bn.y-A.y)>hd*0.9)return false;
+  const pts=cavePath(A,Bn,rad,rad,r,'ramp');
+  if(!caveCheckPath(B,pts,a,b,o||{}))return false;for(let k=0;k<pts.length;k+=4)if(fortZone(pts[k],pts[k+1],pts[k+2],pts[k+3]+6))return false;
+  const e=caveAddEdge(B,a,b,pts,o||{});B.edges[e].war=1;return true;
+}
+// join halls i and j (chamber indices) through a door in each, trying a few doors; false when no way is clear
+function warJoin(B,ci,cj,r){
+  const A=B.ch[ci],C=B.ch[cj],d0=Math.atan2(C.z-A.z,C.x-A.x);
+  for(const off of [0,0.45,-0.45]){const n0=B.nodes.length,da=warDoor(B,ci,d0+off),db=warDoor(B,cj,d0+Math.PI-off);
+    if(warLink(B,da,db,r,1.6+r()*0.5)){A.doors.push(da);C.doors.push(db);return true;}B.nodes.length=n0;}
+  return false;
+}
+// a way in from the surface: the steepest hot hillside among some spots (a mouth into the hill), or a level spot (a pit with a
+// ramp spiralling down); never by lava, rivers or water, and away from the other ways in
+function warEntrance(B,r){
+  let best=null,flat=null;
+  for(let k=0;k<36;k++){const X=B.x0+24+Math.floor(r()*(CRB-48)),Z=B.z0+24+Math.floor(r()*(CRB-48)),h=hAt(X,Z);
+    if(h<SEA+3)continue;colInfo(X,Z,TWR);if(TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
+    let hot=false;for(let d=0;d<8&&!hot;d++)for(const rr of [5,10,15]){colInfo(X+Math.round(Math.cos(d*0.785)*rr),Z+Math.round(Math.sin(d*0.785)*rr),TWR);if(TWR.vflow||TWR.vfis||TWR.vlake||TWR.river||TWR.lake){hot=true;break;}}
+    if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24))continue;
+    let sl=0;for(let d=0;d<8;d++){const a=d*0.785,rise=hAt(Math.round(X+Math.cos(a)*7),Math.round(Z+Math.sin(a)*7))-h;sl=Math.max(sl,Math.abs(rise));if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
+    if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
+  return best||flat;
+}
+function warrenPlan(B){
+  const r=rngAt(B.rx,7181,B.rz),W0={name:'The Warrens of '+fullName('goblin',r,false),halls:[],ents:[],down:-1};B.war=W0;
+  // halls: the first and every other one on the lower tier; the first lower hall is the chief's
+  const want=6+Math.floor(r()*4);
+  for(let t=0;t<70&&W0.halls.length<want;t++){
+    const lower=W0.halls.length%2===0,chief=W0.halls.length===0;
+    const a=chief?15+r()*3:8+r()*7,b=chief?15+r()*3:8+r()*7,h=chief?12+r()*2:7+r()*4,R=Math.max(a,b);
+    const X=B.x0+R+12+r()*(CRB-2*R-24),Z=B.z0+R+12+r()*(CRB-2*R-24);
+    colInfo(X,Z,TWR);if(TWR.wVolc<0.6)continue;
+    let gmin=1e9;for(const [px,pz] of [[0,0],[R,0],[-R,0],[0,R],[0,-R],[R*0.7,R*0.7],[-R*0.7,R*0.7],[R*0.7,-R*0.7],[-R*0.7,-R*0.7]])gmin=Math.min(gmin,hAt(Math.floor(X+px),Math.floor(Z+pz)));
+    let f=lower?212+Math.floor(r()*24):250+Math.floor(r()*24);const fTop=Math.floor(gmin-h-12);if(f>fTop)f=fTop;if(f<(lower?212:246))continue;
+    if(fortZone(X,f,Z,R+10))continue;
+    const c={t:0,a:a,b:b,h:h,ang:r()*6.283,x:X,z:Z,f:f,seed:Math.floor(r()*1e6),war:1,wk:chief?'chief':WAR_KINDS[Math.floor(r()*WAR_KINDS.length)],doors:[]};
+    const s=chSphere(c);let ok=true;for(const q of B.ch){const t2=chSphere(q);if(Math.hypot(s.x-t2.x,s.y-t2.y,s.z-t2.z)<s.r+t2.r+6){ok=false;break;}}
+    if(!ok)continue;
+    const ni=caveNode(B,X,f,Z);B.ch.push(c);B.nodes[ni].ch=B.ch.length-1;W0.halls.push(ni);
+  }
+  // tunnels: the shortest ways that join every hall, then a loop or two
+  const HC=W0.halls.map(ni=>B.nodes[ni].ch),pairs=[];
+  for(let i=0;i<HC.length;i++)for(let j=i+1;j<HC.length;j++){const p=B.ch[HC[i]],q=B.ch[HC[j]];pairs.push([Math.hypot(p.x-q.x,p.z-q.z)+Math.abs(p.f-q.f)*1.5,i,j]);}
+  pairs.sort((u,v)=>u[0]-v[0]);
+  const par=HC.map((_,i)=>i),find=i=>par[i]===i?i:(par[i]=find(par[i]));let loops=1+Math.floor(r()*2);
+  for(const [d,i,j] of pairs){const join=find(i)!==find(j);if(!join&&(loops<=0||d>110))continue;if(warJoin(B,HC[i],HC[j],r)){if(join)par[find(i)]=find(j);else loops--;}}
+  // ways in: a mouth or a pit, then a tunnel to the nearest hall it can reach (the upper halls first), through a spiral down
+  // when the way is too steep
+  const ne=1+(r()<0.6?1:0)+(r()<0.25?1:0),near=N=>HC.slice().sort((p,q)=>Math.hypot(B.ch[p].x-N.x,B.ch[p].z-N.z)+(B.ch[p].f<246?60:0)-Math.hypot(B.ch[q].x-N.x,B.ch[q].z-N.z)-(B.ch[q].f<246?60:0));
+  const toHall=from=>{const N=B.nodes[from];for(const ci of near(N).slice(0,4)){const c=B.ch[ci],n1=B.nodes.length,dr=warDoor(B,ci,Math.atan2(N.z-c.z,N.x-c.x));if(warLink(B,from,dr,r,1.8)){c.doors.push(dr);return true;}B.nodes.length=n1;}return false;};
+  for(let k=0;k<ne+4&&W0.ents.length<ne&&HC.length;k++){const ent=warEntrance(B,r);if(!ent)continue;
+    const n0=B.nodes.length,e0=B.edges.length,c0=B.caps.length;let inner=-1,en;
+    if(!ent.flat){en=caveNode(B,ent.X+0.5-Math.cos(ent.a)*2,ent.h+1,ent.Z+0.5-Math.sin(ent.a)*2);
+      for(let t=0;t<4&&inner<0;t++){const hd=14+r()*8,a=ent.a+(r()-0.5)*0.6;inner=caveStep(B,en,a,'ramp',r,{open:true,to:{x:ent.X+Math.cos(a)*hd,y:ent.h-4-r()*4,z:ent.Z+Math.sin(a)*hd}});}}
+    else{en=caveNode(B,ent.X+0.5,ent.h+1,ent.Z+0.5);for(let t=0;t<3&&inner<0;t++)inner=caveStep(B,en,ent.a+t*2,'spiral',r,{open:true,drop:16+r()*10});}
+    let ok=false;
+    if(inner>=0){for(let e=e0;e<B.edges.length;e++)B.edges[e].war=1;ok=toHall(inner);
+      for(let t=0;t<3&&!ok;t++){const n1=B.nodes.length,e1=B.edges.length,c1=B.caps.length,N=B.nodes[inner],tg=B.ch[near(N)[0]],drop=Math.max(10,Math.min(46,N.y-tg.f-4));
+        const sp=caveStep(B,inner,ent.a+t*2.1+(r()-0.5)*0.5,'spiral',r,{drop:drop});if(sp>=0){B.edges[B.edges.length-1].war=1;ok=toHall(sp);}
+        if(!ok){B.nodes.length=n1;B.edges.length=e1;B.caps.length=c1;}}}
+    if(ok){const cx=ent.flat?ent.X:ent.X-Math.cos(ent.a)*8,cz=ent.flat?ent.Z:ent.Z-Math.sin(ent.a)*8;W0.ents.push({X:ent.X,Z:ent.Z,h:ent.h,a:ent.a,flat:!!ent.flat,ni:en,cx:cx,cz:cz,cy:hAt(Math.floor(cx),Math.floor(cz))+1});B.ents.push(en);}
+    else{B.nodes.length=n0;B.edges.length=e0;B.caps.length=c0;}
+  }
+  // the way down from the lowest hall, to where the caves below begin
+  if(HC.length){const ci=HC.reduce((p,q)=>B.ch[q].f<B.ch[p].f?q:p),c=B.ch[ci],a0=r()*6.283;
+    for(let t=0;t<10&&W0.down<0;t++){const dir=a0+t*0.63,n0=B.nodes.length,e0=B.edges.length,c0=B.caps.length,dr=warDoor(B,ci,dir),D0=B.nodes[dr];
+      if(t<7){const hd=(D0.y-194)/0.62+4,T=caveNode(B,D0.x+Math.cos(dir)*hd,194,D0.z+Math.sin(dir)*hd);if(warLink(B,dr,T,r,2)){c.doors.push(dr);W0.down=T;break;}}
+      else{const nx=caveStep(B,dr,dir,'spiral',r,{drop:D0.y-194});if(nx>=0){B.edges[B.edges.length-1].war=1;c.doors.push(dr);W0.down=nx;break;}}
+      B.nodes.length=n0;B.edges.length=e0;B.caps.length=c0;}}
+}
+// After the region's cave systems: channels of lava across some halls' floors, and lava falls in their walls. A channel is one
+// block deep in the flat middle of the floor, rock under it and on every side, with a crossing in the middle; no tunnel may cut
+// into the floor anywhere near it, and no gorge come near the hall.
+function warrenFinish(B){
+  const r=rngAt(B.rx,7187,B.rz);
+  for(const ni of B.war.halls){const c=B.ch[B.nodes[ni].ch];if(!['lava','forge','chief'].includes(c.wk)||r()<(c.wk==='lava'?0:0.3))continue;
+    const R=Math.max(c.a,c.b);if(ravineIn(c.x-R-4,c.x+R+4,c.z-R-4,c.z+R+4,c.f+c.h+3,2))continue;
+    const L=Math.min(c.a,c.b)*0.55,w=c.wk==='lava'?1.5:1;
+    for(let t=0;t<6&&!c.chan;t++){const th=c.ang+t*0.5236,ux=Math.cos(th),uz=Math.sin(th);let ok=true;
+      for(const e of B.edges){const p=e.pts;for(let k=0;k+4<p.length&&ok;k+=4){const n=Math.max(1,Math.ceil(Math.hypot(p[k+4]-p[k],p[k+6]-p[k+2])));
+        for(let s=0;s<=n&&ok;s++){const q=s/n,x=p[k]+(p[k+4]-p[k])*q,y=p[k+1]+(p[k+5]-p[k+1])*q,z=p[k+2]+(p[k+6]-p[k+2])*q,rr=p[k+3]+(p[k+7]-p[k+3])*q;
+          if(y>=c.f-0.4||Math.hypot(x-c.x,z-c.z)>R+rr+4)continue;
+          const px=x-c.x,pz=z-c.z,u=Math.max(-L,Math.min(L,px*ux+pz*uz));if(Math.hypot(px-u*ux,pz-u*uz)<rr+w+2.5)ok=false;}}}
+      if(ok)c.chan={th:th,L:L,w:w};}}
+  // lava falls in the walls of the hot halls (the cave plan builds and trusts them)
+  for(const ni of B.war.halls){const c=B.ch[B.nodes[ni].ch];if(!['lava','forge','chief','shrine'].includes(c.wk)||r()<0.4)continue;const R=Math.max(c.a,c.b);
+    if(ravineIn(c.x-R-4,c.x+R+4,c.z-R-4,c.z+R+4,c.f+c.h+3,2))continue;const fl=caveFall(c,r);if(!fl)continue;
+    let ok=true;for(const e of B.edges){const p=e.pts;for(let k=0;k<p.length&&ok;k+=4)if(p[k+1]<fl.fe+0.6&&Math.hypot(p[k]-fl.ex-0.5,p[k+2]-fl.ez-0.5)<p[k+3]+5)ok=false;}
+    if(ok&&c.chan&&Math.hypot(fl.ex+0.5-c.x,fl.ez+0.5-c.z)<c.chan.L+3)ok=false;
+    if(ok)B.falls.push(fl);}
+}
+// ---- queries (pure)
+function warInPil(c,X,Z,m){const p=hallPillars(c);for(let k=0;k<p.length;k+=3)if(Math.hypot(X+0.5-p[k],Z+0.5-p[k+1])<p[k+2]+(m||0))return true;return false;}
+// Is (X,Z) a lava cell of hall c's channel (its lava lies at c.f-1)?
+function warChanCell(c,X,Z){const ch=c.chan;if(!ch)return false;const px=X+0.5-c.x,pz=Z+0.5-c.z,ux=Math.cos(ch.th),uz=Math.sin(ch.th),u=px*ux+pz*uz,v=-px*uz+pz*ux;
+  if(Math.abs(u)>ch.L||Math.abs(u)<1.6||Math.abs(v)>=ch.w)return false;
+  for(const [a,b] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const s=chCol(c,X+a,Z+b);if(!s||s[0]!==c.f)return false;}
+  return !warInPil(c,X,Z,0.5);}
+// Is (X,Y,Z) lava a warren channel holds on purpose (the drain pass trusts it at a chunk edge)?
+function warLavaAt(X,Y,Z){const W0=warrenOf(X,Z);if(!W0)return false;const B=caveBase(Math.floor(X/CRB),Math.floor(Z/CRB));
+  for(const ni of W0.halls){const c=B.ch[B.nodes[ni].ch];if(c.chan&&Y===c.f-1&&Math.abs(X-c.x)<c.a+c.b&&Math.abs(Z-c.z)<c.a+c.b&&warChanCell(c,X,Z))return true;}return false;}
+// the name of the warren at (X,y,Z) underground, or null (the layer's name in the readout and the journal)
+function warrenName(X,y,Z){if(y<WAR_Y0-8)return null;const W0=warrenOf(X,Z);return W0?W0.name:null;}
+// Is (X,y,Z) in the band of a warren (the crawlways and upper caves under the wastes)? Cave life keeps out of it.
+function warBand(X,y,Z){return y>=WAR_Y0-8&&warRegion(Math.floor(X/CRB),Math.floor(Z/CRB));}
+// Where goblins live within `rad` of (X,Z): each hall (by kind) and each camp before a way in
+function warrenSpots(X,Z,rad){const out=[];
+  for(let rx=Math.floor((X-rad)/CRB);rx<=Math.floor((X+rad)/CRB);rx++)for(let rz=Math.floor((Z-rad)/CRB);rz<=Math.floor((Z+rad)/CRB);rz++){if(!warRegion(rx,rz))continue;const B=caveBase(rx,rz);if(!B.war)continue;
+    for(const ni of B.war.halls){const c=B.ch[B.nodes[ni].ch];if(Math.hypot(c.x-X,c.z-Z)<rad)out.push({id:'w'+rx+','+rz+','+ni,x:c.x,y:c.f,z:c.z,R:Math.min(c.a,c.b)*0.6,kind:c.wk,hall:c});}
+    B.war.ents.forEach((e,k)=>{if(Math.hypot(e.cx-X,e.cz-Z)<rad)out.push({id:'c'+rx+','+rz+','+k,x:e.cx,y:e.cy,z:e.cz,R:5,kind:'camp'});});}
+  return out;}
+// ---- dressing, per chunk (a generation step after the sites; lit, since the goblins keep their fires)
+function warPick(X,Y,Z,side){
+  const p=hsh(Math.floor(X/3),Math.floor(Y/3)*7+9203,Math.floor(Z/3)),f=hsh(X,Y*31+9205,Z);
+  if(side===0)return f<0.03?SULFUR:f<0.05?MAGMA:p<0.32?BLACKASH:p<0.58?CINDER:p<0.7?ASH:p<0.86?BASALT:f<0.55?LAVACRUST:CINDER;
+  if(side===1)return f<0.05?MAGMA:p<0.6?BASALT:p<0.9?CINDER:OBSID;
+  return f<0.035?MAGMA:f<0.055?SULFUR:p<0.42?BASALT:p<0.78?CINDER:p<0.9?OBSID:SCORCH;
+}
+function warSkin(X,Y,Z,side){if(WAR_ROCK.has(GW(X,Y,Z)))PW(X,Y,Z,warPick(X,Y,Z,side),MODE_SET);}
+// the floor of hall c at (X,Z): the first open cell, or -1 outside it
+function warFloor(c,X,Z){const s=chCol(c,X,Z);return s&&!warInPil(c,X,Z,0.6)?s[0]:-1;}
+const warNearDoor=(B,c,X,Z,m)=>c.doors.some(d=>Math.hypot(B.nodes[d].x-X,B.nodes[d].z-Z)<m);
+const warInChan=(c,X,Z,m)=>{const ch=c.chan;if(!ch)return false;const px=X+0.5-c.x,pz=Z+0.5-c.z,ux=Math.cos(ch.th),uz=Math.sin(ch.th),u=px*ux+pz*uz,v=-px*uz+pz*ux;return Math.abs(u)<ch.L+m&&Math.abs(v)<ch.w+m;};
+// small pieces, built on a floor at fl (only into air, so pillars and walls are kept)
+function warPost(X,y,Z,top){PW(X,y,Z,CHARWOOD,MODE_AIR);PW(X,y+1,Z,CHARWOOD,MODE_AIR);if(top)PW(X,y+2,Z,top,MODE_AIR);}
+function warHut(X,Z,fl,dx,dz,q){ // a hut of hide on charred posts, its door facing (dx,dz)
+  for(let a=-1;a<=2;a++)for(let b=-1;b<=2;b++){const edge=a===-1||a===2||b===-1||b===2,corner=(a===-1||a===2)&&(b===-1||b===2);
+    const door=dx?(a===(dx>0?2:-1)&&(b===0||b===1)):(b===(dz>0?2:-1)&&(a===0||a===1));
+    if(corner){for(let y=0;y<3;y++)PW(X+a,fl+y,Z+b,CHARWOOD,MODE_AIR);}else if(edge&&!door){PW(X+a,fl,Z+b,HIDE,MODE_AIR);PW(X+a,fl+1,Z+b,HIDE,MODE_AIR);}
+    if(!corner)PW(X+a,fl+2,Z+b,HIDE,MODE_AIR);}
+  PW(X,fl,Z,q<0.5?HIDE:BONES,MODE_AIR);if(q>0.6)PW(X+1,fl,Z+1,CRATE,MODE_AIR);
+}
+function warFirePit(X,Z,fl){PW(X,fl-1,Z,MAGMA,MODE_SET);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)PW(X+a,fl-1,Z+b,BASALT,MODE_SET);PW(X+1,fl,Z+1,BONES,MODE_AIR);PW(X-1,fl,Z,BONES,MODE_AIR);}
+function warCage(X,Z,fl){for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const edge=Math.abs(a)===2||Math.abs(b)===2;if(edge){PW(X+a,fl,Z+b,GRATE,MODE_AIR);PW(X+a,fl+1,Z+b,GRATE,MODE_AIR);}PW(X+a,fl+2,Z+b,GRATE,MODE_AIR);}
+  PW(X,fl,Z,BONES,MODE_AIR);PW(X-1,fl+1,Z+1,COBWEB,MODE_AIR);PW(X+1,fl,Z-1,BONES,MODE_AIR);}
+function warIdol(X,Z,fl){for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)PW(X+a,fl,Z+b,OBSID,MODE_AIR);for(let y=1;y<=5;y++)PW(X,fl+y,Z,OBSID,MODE_AIR);
+  PW(X-1,fl+4,Z,MAGMA,MODE_AIR);PW(X+1,fl+4,Z,MAGMA,MODE_AIR);PW(X-1,fl+5,Z,OBSID,MODE_AIR);PW(X+1,fl+5,Z,OBSID,MODE_AIR);PW(X-1,fl+6,Z,OBSID,MODE_AIR);PW(X+1,fl+6,Z,OBSID,MODE_AIR);
+  for(let k=0;k<8;k++){const a=k*0.785;PW(X+Math.round(Math.cos(a)*3),fl,Z+Math.round(Math.sin(a)*3),k%2?SKULLS:BONES,MODE_AIR);}}
+// Where the chief's throne stands: across the hall from the first door (beside the channel if there is one), on level floor
+// for the whole dais, clear of pillars, doors and lava; the first spot that fits (pure, kept on the hall)
+function warThroneSpot(B,c){
+  if(c.throne!==undefined)return c.throne;c.throne=null;
+  const d=c.doors.length?B.nodes[c.doors[0]]:{x:c.x-1,z:c.z},a1=Math.atan2(c.z-d.z,c.x-d.x),pc=c.chan?c.chan.th+Math.PI/2:a1,a0=c.chan?(Math.cos(pc-a1)>=0?pc:pc+Math.PI):a1;
+  for(const k of [0,1,-1,2,-2,3,-3,4,-4])for(const f of [0.55,0.45,0.62,0.36]){const a=a0+k*0.35,dd=Math.min(c.a,c.b)*f,X=Math.floor(c.x+Math.cos(a)*dd),Z=Math.floor(c.z+Math.sin(a)*dd),fl=warFloor(c,X,Z);if(fl<0)continue;
+    const ix=-Math.cos(a),iz=-Math.sin(a),[dx,dz]=Math.abs(ix)>Math.abs(iz)?[Math.sign(ix),0]:[0,Math.sign(iz)],px=-dz,pz=dx;let ok=true;
+    for(let p=-3;p<=3&&ok;p++)for(let q=-2;q<=2&&ok;q++){const x=X+px*p+dx*q,z=Z+pz*p+dz*q;if(warFloor(c,x,z)!==fl||warInChan(c,x,z,1.5)||warNearDoor(B,c,x,z,4))ok=false;}
+    if(ok){c.throne={X:X,Z:Z,fl:fl,dx:dx,dz:dz};return c.throne;}}
+  return null;
+}
+function warThrone(X,Z,fl,dx,dz){ // a dais of basalt bricks, an obsidian throne facing (dx,dz), braziers and the hoard behind
+  const px=-dz,pz=dx;
+  for(let a=-3;a<=3;a++)for(let b=-2;b<=2;b++){const x=X+px*a+dx*b,z=Z+pz*a+dz*b;PW(x,fl,z,BASBRICK,MODE_AIR);if(Math.abs(a)===3&&Math.abs(b)===2){PW(x,fl+1,z,BASBRICK,MODE_AIR);PW(x,fl+2,z,MAGMA,MODE_AIR);}}
+  PW(X,fl+1,Z,OBSID,MODE_AIR);for(let y=1;y<=4;y++)PW(X-dx,fl+y,Z-dz,y===4?EMBRICK:OBSID,MODE_AIR);PW(X+px,fl+1,Z+pz,GOLDB,MODE_AIR);PW(X-px,fl+1,Z-pz,GOLDB,MODE_AIR);
+  for(const s of [-1,1]){PW(X+px*2*s,fl+1,Z+pz*2*s,BANNER,MODE_AIR);PW(X+px*2*s,fl+2,Z+pz*2*s,BANNER,MODE_AIR);}
+  const bx=X-dx*2,bz=Z-dz*2;PW(bx+px,fl+1,bz+pz,DWCHEST,MODE_AIR);PW(bx-px,fl+1,bz-pz,CRATE,MODE_AIR);PW(bx+px*2,fl+1,bz+pz*2,GOLDB,MODE_AIR);PW(bx-px*2,fl+1,bz-pz*2,SKULLS,MODE_AIR);
+}
+function warrenDress(WCX,WCZ){
+  const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);if(!warRegion(rx,rz))return;const B=caveBase(rx,rz),W0=B.war;if(!W0)return;
+  genLit=true;
+  try{
+    // the rock round every open cell in the band takes on the fire: ash and cinder floors, basalt walls, glowing seams
+    for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,x=X-OX,z=Z-OZ,g=ground[x+W*z];
+      for(let y=WAR_Y0-8;y<g-1;y++){if(world[I(x,y,z)]!==AIR)continue;warSkin(X,y-1,Z,0);warSkin(X,y+1,Z,1);warSkin(X-1,y,Z,2);warSkin(X+1,y,Z,2);warSkin(X,y,Z-1,2);warSkin(X,y,Z+1,2);}}
+    const X0=gx0,X1=gx0+CS-1,Z0=gz0,Z1=gz0+CS-1,touch=(x,z,m)=>x+m>=X0&&x-m<=X1&&z+m>=Z0&&z-m<=Z1;
+    for(const ni of W0.halls){const c=B.ch[B.nodes[ni].ch],R=Math.max(c.a,c.b)+2;if(!touch(c.x,c.z,R))continue;
+      // the channel of lava, with torches at its crossing
+      if(c.chan){for(let X=Math.max(X0,Math.floor(c.x-R));X<=Math.min(X1,Math.ceil(c.x+R));X++)for(let Z=Math.max(Z0,Math.floor(c.z-R));Z<=Math.min(Z1,Math.ceil(c.z+R));Z++)if(warChanCell(c,X,Z))PW(X,c.f-1,Z,LAVA,MODE_SET);
+        const ux=Math.cos(c.chan.th),uz=Math.sin(c.chan.th);for(const s of [-1,1]){const X=Math.floor(c.x-uz*s*(c.chan.w+1.5)),Z=Math.floor(c.z+ux*s*(c.chan.w+1.5)),fl=warFloor(c,X,Z);if(fl>0)warPost(X,fl,Z,TORCH);}}
+      // the pieces on a ring about the middle, by the hall's kind; none by a door, on the channel or in a pillar
+      const n=c.wk==='chief'?7:c.wk==='den'?5:4,ph=hsh(c.seed,9211,ni)*6.283,spot=[];
+      for(let k=0;k<n;k++){const a=ph+k*6.283/n,d=Math.min(c.a,c.b)*(0.5+hsh(c.seed,9213+k,ni)*0.12),X=Math.floor(c.x+Math.cos(a)*d),Z=Math.floor(c.z+Math.sin(a)*d);
+        if(warNearDoor(B,c,X,Z,5)||warInChan(c,X,Z,3))continue;const fl=warFloor(c,X,Z);if(fl<0)continue;spot.push([X,Z,fl,a,hsh(c.seed,9215+k,ni)]);}
+      const inward=a=>{const ix=-Math.cos(a),iz=-Math.sin(a);return Math.abs(ix)>Math.abs(iz)?[Math.sign(ix),0]:[0,Math.sign(iz)];};
+      spot.forEach(([X,Z,fl,a,q],k)=>{if(!touch(X,Z,4))return;const [dx,dz]=inward(a);
+        switch(c.wk){
+          case 'den':if(k<3)warHut(X,Z,fl,dx,dz,q);else warPost(X,fl,Z,q<0.5?TORCH:SKULLS);break;
+          case 'store':for(let b=-1;b<=1;b++)for(let e=-1;e<=1;e++)if(hsh(X+b,9217,Z+e)<0.6){PW(X+b,fl,Z+e,(b+e)%2?BARREL:CRATE,MODE_AIR);if(hsh(X+b,9219,Z+e)<0.3)PW(X+b,fl+1,Z+e,CRATE,MODE_AIR);}break;
+          case 'pen':if(k<2)warCage(X,Z,fl);else warPost(X,fl,Z,TORCH);break;
+          case 'forge':if(k===0){PW(X,fl,Z,FURN,MODE_AIR);PW(X+1,fl,Z,FURN,MODE_AIR);PW(X,fl+1,Z,FURN,MODE_AIR);}else if(k===1){PW(X,fl,Z,STEELB,MODE_AIR);PW(X+1,fl,Z,CRATE,MODE_AIR);}else if(k===2){for(let b=-1;b<=1;b++)PW(X+b,fl,Z,BLACKASH,MODE_AIR);PW(X,fl+1,Z,BLACKASH,MODE_AIR);}else warPost(X,fl,Z,TORCH);break;
+          case 'shrine':warPost(X,fl,Z,k%2?TORCH:SKULLS);break;
+          case 'chief':if(k<4)warPost(X,fl,Z,k%2?TORCH:SKULLS);else{PW(X,fl,Z,BANNER,MODE_AIR);PW(X,fl+1,Z,BANNER,MODE_AIR);}break;
+          default:warPost(X,fl,Z,k%2?TORCH:SKULLS);}});
+      // the middle: a fire for the dens, an idol for the shrine, the throne for the chief (at the far side from the first door)
+      const mfl=warFloor(c,Math.floor(c.x),Math.floor(c.z));
+      if(c.wk==='den'&&mfl>0&&!c.chan)warFirePit(Math.floor(c.x),Math.floor(c.z),mfl);
+      if(c.wk==='shrine'&&mfl>0)warIdol(Math.floor(c.x),Math.floor(c.z),mfl);
+      if(c.wk==='chief'){const t=warThroneSpot(B,c);if(t)warThrone(t.X,t.Z,t.fl,t.dx,t.dz);}
+      // banners by the doors, bones about the floor
+      for(const di of c.doors){const D0=B.nodes[di],a=Math.atan2(D0.z-c.z,D0.x-c.x);for(const s of [-1,1]){const X=Math.floor(D0.x-Math.cos(a)*1.5-Math.sin(a)*s*2.6),Z=Math.floor(D0.z-Math.sin(a)*1.5+Math.cos(a)*s*2.6);
+        if(!touch(X,Z,0))continue;const fl=warFloor(c,X,Z);if(fl>0&&hsh(X,9221,Z)<0.6){PW(X,fl,Z,BANNER,MODE_AIR);PW(X,fl+1,Z,BANNER,MODE_AIR);}}}
+      for(let k=0;k<10;k++){const X=Math.floor(c.x+(hsh(c.seed,9223+k,1)-0.5)*c.a*1.6),Z=Math.floor(c.z+(hsh(c.seed,9225+k,2)-0.5)*c.b*1.6);if(!touch(X,Z,0)||warInChan(c,X,Z,1))continue;const fl=warFloor(c,X,Z);if(fl>0)PW(X,fl,Z,k%3?BONES:SKULLS,MODE_AIR);}
+    }
+    // the tunnels: timber props and torches every few blocks
+    for(const e of B.edges){if(!e.war||e.open)continue;const p=e.pts;let run=0;
+      for(let k=0;k+4<p.length;k+=4){run+=Math.hypot(p[k+4]-p[k],p[k+6]-p[k+2]);if(run<9)continue;run=0;
+        const x=p[k+4],z=p[k+6],rr=p[k+7],dx=p[k+4]-p[k],dz=p[k+6]-p[k+2],dl=Math.hypot(dx,dz)||1,nx=-dz/dl,nz=dx/dl;if(!touch(x,z,rr+2))continue;
+        const lit=hsh(Math.floor(x),9227,Math.floor(z))<0.5;
+        for(const s of [-1,1]){const X=Math.floor(x+nx*s*(rr-0.7)),Z=Math.floor(z+nz*s*(rr-0.7)),f=edgeFloor(p,X,Z);if(f>=1e9)continue;
+          if(lit&&s>0)PW(X,f,Z,TORCH,MODE_AIR);else{PW(X,f,Z,CHARWOOD,MODE_AIR);PW(X,f+1,Z,CHARWOOD,MODE_AIR);}}}}
+    // a camp before each way in: a fire, tents of hide, poles of skulls and banners by the mouth, a ring of stakes
+    for(const en of W0.ents){if(!touch(en.cx,en.cz,16))continue;warCamp(B,en);}
+  }finally{genLit=false;}
+}
+// Is (X,Z) close to the open way of a warren entrance? (the camp keeps its mouth clear)
+function warMouthNear(B,X,Z,m){for(const e of B.edges){if(!e.open||!e.war)continue;const p=e.pts;for(let k=0;k+4<p.length;k+=4)if(ptSegDist(X+0.5,0,Z+0.5,p[k],0,p[k+2],p[k+4],0,p[k+6])<Math.max(p[k+3],p[k+7])+m)return true;}return false;}
+function warCamp(B,en){
+  const gy=(X,Z)=>hAt(X,Z)+1,put=(X,Z,fn)=>{if(warMouthNear(B,X,Z,1.5))return;fn(gy(X,Z));};
+  const ox=en.flat?0:-Math.cos(en.a),oz=en.flat?0:-Math.sin(en.a),px=-Math.sin(en.a),pz=Math.cos(en.a);
+  if(!en.flat){ // a mouth: poles of skulls and banners on both sides of it, the camp out in front
+    for(const s of [-1,1]){const X=Math.floor(en.X+px*s*3.6+ox),Z=Math.floor(en.Z+pz*s*3.6+oz);put(X,Z,y=>warPost(X,y,Z,SKULLS));
+      const X2=Math.floor(en.X+px*s*5.5+ox*2),Z2=Math.floor(en.Z+pz*s*5.5+oz*2);put(X2,Z2,y=>{PW(X2,y,Z2,BANNER,MODE_AIR);PW(X2,y+1,Z2,BANNER,MODE_AIR);});}}
+  const cx=Math.floor(en.cx),cz=Math.floor(en.cz);put(cx,cz,y=>warFirePit(cx,cz,y));
+  for(const s of [-1,1]){const X=Math.floor(en.cx+px*s*5.5+ox*2),Z=Math.floor(en.cz+pz*s*5.5+oz*2),fx=Math.abs(px)>Math.abs(pz)?-Math.sign(px*s):0,fz=fx?0:-Math.sign(pz*s);
+    let ok=true;for(let a=-1;a<=2&&ok;a++)for(let b=-1;b<=2&&ok;b++)if(warMouthNear(B,X+a,Z+b,1.5))ok=false;if(ok){const y=gy(X,Z);warHut(X,Z,y,fx,fz,hsh(X,9229,Z));}}
+  for(let k=0;k<3;k++){const X=Math.floor(en.cx+ox*3+px*(k-1)*2),Z=Math.floor(en.cz+oz*3+pz*(k-1)*2);put(X,Z,y=>PW(X,y,Z,k===1?BARREL:CRATE,MODE_AIR));}
+  // the stakes: a ring round the camp (and the mouth), open toward the mouth and away from it
+  const R=en.flat?9:11,a0=en.flat?0:Math.atan2(oz,ox);
+  for(let k=0;k<44;k++){const a=k/44*6.283,rel=Math.abs(angDiffV(a,a0)),back=Math.abs(angDiffV(a,a0+Math.PI));if(rel<0.3||back<0.35)continue;
+    const X=Math.floor(en.cx+Math.cos(a)*R),Z=Math.floor(en.cz+Math.sin(a)*R);put(X,Z,y=>{PW(X,y,Z,CHARWOOD,MODE_AIR);if(k%2)PW(X,y+1,Z,CHARWOOD,MODE_AIR);});}
+}
 const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
 // Features rooted in world chunk (WCX,WCZ); only the parts landing in the target chunk are written
 function veinP(x,y,z,t,n,r,ok){
@@ -4169,10 +4542,12 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
   (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
+    applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
+  (lcx,lcz,WCX,WCZ)=>warrenDress(WCX,WCZ), // the goblin warrens under the wastes: their rock, halls, tunnels and camps (D-052)
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
     const m=editsByChunk.get(ckey(WCX,WCZ));
-    if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
+    if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(v>LAVA_LV&&v<LAVA_LV+5){world[i]=LAVA;lvl[i]=v-LAVA_LV;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
     for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
       const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
       for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
@@ -4195,7 +4570,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
@@ -4436,6 +4811,8 @@ class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}
 function newM(){return{p:new FB(Float32Array),u:new FB(Float32Array),l:new FB(Float32Array),b:new FB(Float32Array),a:new FB(Float32Array),i:new FB(Uint32Array)};}
 function mkGeo(m){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(m.p.view().slice(),3));g.setAttribute('uv',new THREE.BufferAttribute(m.u.view().slice(),2));g.setAttribute('light',new THREE.BufferAttribute(m.l.view().slice(),1));g.setAttribute('blk',new THREE.BufferAttribute(m.b.view().slice(),1));g.setAttribute('aov',new THREE.BufferAttribute(m.a.view().slice(),1));g.setIndex(new THREE.BufferAttribute(m.i.view().slice(),1));g.computeBoundingSphere();return g;}
 function wDrop(x,y,z){if(isWetId(get(x,y+1,z)))return 0;return 0.12+lvl[I(x,y,z)]*0.1;}
+// lava's top lies a little low too, and lower the further it has flowed (0.28.0); under a solid block it stays full
+function lDrop(x,y,z){const a=get(x,y+1,z);if(a===LAVA||OPQ[a])return 0;return 0.12+lvl[I(x,y,z)]*0.17;}
 // ---- Entities: every kind of moving thing in the loaded window registers its list here once (entityKind).
 // The registry moves them all when the window slides (shiftEntities), clears or keeps them when the area is rebuilt
 // (clearEntities), and runs the gameplay updates while the game is playing (updateEntities).
@@ -4585,7 +4962,7 @@ function dwDescent(cx,cz,yb,axX){
 }
 // ---- what to call a place underground, by depth
 function layerName(y,X,Z){
-  const m=mineName(X,y,Z);if(m)return m;
+  const m=mineName(X,y,Z);if(m)return m;const fn=fortName(X,y,Z)||warrenName(X,y,Z);if(fn)return fn; // the Emberlords' fortresses and the goblin warrens (D-052)
   if(y<12)return 'The Fire Below';
   if(y<100){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(y>=58&&ruinZone(cx,cz))return 'The Deeps of '+holdOf(cx,cz).name;return mineZone(cx,cz)?'The Mines of '+holdOf(cx,cz).name:DEEP_NAMES[caveRegion(X,Z)];}
   return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
@@ -4657,12 +5034,13 @@ function buildChunk(cx,cz){
       continue;
     }
     const isW=id===WATER||!!b.wet,M=isW?Wt:O,bw=b.wet?BL[WATER]:b;
-    const drop=isW?wDrop(x,y,z):0;
+    const drop=isW?wDrop(x,y,z):id===LAVA?lDrop(x,y,z):0;
     for(let f=0;f<6;f++){
       const F=FACES[f],d=F.d,nx=x+d[0],ny=y+d[1],nz=z+d[2],nid=gid(nx,ny,nz);
       let draw;
       if(isW)draw=(!isWetId(nid)&&!OPQ[nid])||(isWetId(nid)&&!d[1]&&wDrop(nx,ny,nz)>drop+0.01);
-      else if(b.opq)draw=!OPQ[nid];
+      else if(id===LAVA)draw=(!OPQ[nid]&&nid!==LAVA)||(nid===LAVA&&!d[1]&&lDrop(nx,ny,nz)>drop+0.01);
+      else if(b.opq)draw=!OPQ[nid]||(nid===LAVA&&lDrop(nx,ny,nz)>0); // a face beside lava shows above its lowered top
       else draw=!OPQ[nid]&&!(nid===id&&id===GLASS);
       if(!draw)continue;
       const L=b.emit?1:gsky(nx,ny,nz),Bk=b.emit?2:gbl(nx,ny,nz),t=bw.t[F.tf],base=M.p.length/3,ao=[3,3,3,3];
@@ -4723,37 +5101,50 @@ function undo(){
   toast('Undid '+(a.length/2)+' block'+(a.length>2?'s':''));tone(500,700,0.12,0.15);
 }
 function nbLight(x,y,z,A=BLK){let m=0;for(const F of FACES){const X=x+F.d[0],Y=y+F.d[1],Z=z+F.d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const L=A[I(X,Y,Z)];if(L>m)m=L;}return m;}
-// Water flows: sources (level 0) spread up to 7 blocks sideways and fall without limit
-const lvl=new Uint8Array(VOL),flowQ=new Set();let flowT=0;
-const WD=W*D,flowInto=id=>id===AIR||BL[id].cross||BL[id].torch;
+// Water and lava flow (lava since 0.28.0, D-053): sources (level 0) spread sideways, water up to 7 blocks and lava up to 4,
+// and fall without limit; lava moves at a third of water's pace and never makes new sources. Where they meet, lava hardens:
+// a source into obsidian, flowing lava into basalt, with a hiss of steam.
+const lvl=new Uint8Array(VOL),flowQ=new Set(),lavaQ=new Set();let flowT=0,lavaN=0;
+const WD=W*D,flowInto=id=>id===AIR||BL[id].cross||BL[id].torch,FLOW_MAX={[WATER]:7,[LAVA]:4},LAVA_LV=900; // saved levels: water 101 to 107, lava 901 to 904
 function wakeWater(x,y,z){
   for(let k=-1;k<6;k++){const X=k<0?x:x+FACES[k].d[0],Y=k<0?y:y+FACES[k].d[1],Z=k<0?z:z+FACES[k].d[2];
-    if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const j=I(X,Y,Z);if(world[j]===WATER)flowQ.add(j);}
+    if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const j=I(X,Y,Z),v=world[j];if(v===WATER)flowQ.add(j);else if(v===LAVA)lavaQ.add(j);}
 }
-function setLvl(i,L){lvl[i]=L;recordEdit(i,L?100+L:WATER);const x=i%W,t=(i/W)|0;dirty.add(((x/CS)|0)+(((t%D)/CS)|0)*NCX);wakeWater(x,(t/D)|0,t%D);}
-function waterAt(x,y,z,L){setBlock(x,y,z,WATER,true);const i=I(x,y,z);if(world[i]===WATER&&L)setLvl(i,L);}
-function flowStep(){autoEdit=true;try{flowWork();}finally{autoEdit=false;}}
-function flowWork(){
-  let n=0;const q=[];for(const i of flowQ){q.push(i);if(++n>=600)break;}
-  for(const i of q)flowQ.delete(i);
+function setLvl(i,L){const F=world[i];lvl[i]=L;recordEdit(i,L?(F===LAVA?LAVA_LV:100)+L:F);const x=i%W,t=(i/W)|0;dirty.add(((x/CS)|0)+(((t%D)/CS)|0)*NCX);wakeWater(x,(t/D)|0,t%D);}
+function fluidAt(x,y,z,F,L){setBlock(x,y,z,F,true);const i=I(x,y,z);if(world[i]===F&&L)setLvl(i,L);}
+function waterAt(x,y,z,L){fluidAt(x,y,z,WATER,L);}
+function flowStep(){autoEdit=true;try{flowWork(flowQ,WATER);if(++lavaN>=3){lavaN=0;flowWork(lavaQ,LAVA);}}finally{autoEdit=false;}}
+function flowWork(Q,F){
+  const MX=FLOW_MAX[F];let n=0;const q=[];for(const i of Q){q.push(i);if(++n>=600)break;}
+  for(const i of q)Q.delete(i);
   for(const i of q){
-    if(world[i]!==WATER)continue;
+    if(world[i]!==F)continue;
     const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;let L=lvl[i];
-    const above=y+1<H&&world[i+WD]===WATER,below=y>0?world[i-WD]:BEDROCK;
+    if(F===LAVA&&lavaQuench(i,x,y,z))continue;
+    const above=y+1<H&&world[i+WD]===F,below=y>0?world[i-WD]:BEDROCK;
     if(L>0){
       let best=99,src=0;
-      for(let k=0;k<6;k++){if(FACES[k].d[1])continue;const X=x+FACES[k].d[0],Z=z+FACES[k].d[2];if(X<0||Z<0||X>=W||Z>=D)continue;const j=I(X,y,Z);if(world[j]===WATER){if(lvl[j]<best)best=lvl[j];if(lvl[j]===0)src++;}}
-      if(src>=2&&(SOLID[below]||(below===WATER&&lvl[i-WD]===0))){setLvl(i,0);L=0;}
-      else{const want=above?1:best+1;if(want>7){setBlock(x,y,z,AIR,true);continue;}if(want!==L){setLvl(i,want);L=want;}}
+      for(let k=0;k<6;k++){if(FACES[k].d[1])continue;const X=x+FACES[k].d[0],Z=z+FACES[k].d[2];if(X<0||Z<0||X>=W||Z>=D)continue;const j=I(X,y,Z);if(world[j]===F){if(lvl[j]<best)best=lvl[j];if(lvl[j]===0)src++;}}
+      if(F===WATER&&src>=2&&(SOLID[below]||(below===WATER&&lvl[i-WD]===0))){setLvl(i,0);L=0;}
+      else{const want=above?1:best+1;if(want>MX){setBlock(x,y,z,AIR,true);continue;}if(want!==L){setLvl(i,want);L=want;}}
     }
-    if(y>0&&flowInto(below)){waterAt(x,y-1,z,1);continue;}
-    if(y>0&&below===WATER&&lvl[i-WD]>0)continue;
-    if(L<7)for(let k=0;k<6;k++){
+    if(y>0&&flowInto(below)){fluidAt(x,y-1,z,F,1);continue;}
+    if(y>0&&below===F&&lvl[i-WD]>0)continue;
+    if(L<MX)for(let k=0;k<6;k++){
       if(FACES[k].d[1])continue;const X=x+FACES[k].d[0],Z=z+FACES[k].d[2];if(X<0||Z<0||X>=W||Z>=D)continue;
       const j=I(X,y,Z),id=world[j];
-      if(flowInto(id))waterAt(X,y,Z,L+1);else if(id===WATER&&lvl[j]>L+1)setLvl(j,L+1);
+      if(flowInto(id))fluidAt(X,y,Z,F,L+1);else if(id===F&&lvl[j]>L+1)setLvl(j,L+1);
     }
   }
+}
+// lava touching water (or a water plant) on any face hardens where it stands
+function lavaQuench(i,x,y,z){
+  for(let k=0;k<6;k++){const X=x+FACES[k].d[0],Y=y+FACES[k].d[1],Z=z+FACES[k].d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;
+    if(!isWetId(world[I(X,Y,Z)]))continue;
+    setBlock(x,y,z,lvl[i]?BASALT:OBSID,true);burst(0.6,'highpass',2400,0.7,0.22,0,[x+0.5,y+0.5,z+0.5]);
+    for(let p=0;p<8;p++)spawnP(x+Math.random(),y+1,z+Math.random(),(Math.random()-.5)*0.6,1.2+Math.random(),(Math.random()-.5)*0.6,[0.85,0.85,0.85],1.2,-0.6);
+    return true;}
+  return false;
 }
 function setBlock(x,y,z,v,force){
   if(x<0||z<0||y<0||x>=W||z>=D||y>=H)return;
@@ -4920,6 +5311,9 @@ const AMB_EV={
   creak:at=>{tone(150,95,0.7,0.035,0,'sawtooth',at);},
   wind:at=>{burst(1.6,'bandpass',300+Math.random()*200,0.8,0.08,0,at);},
   crackle:at=>{for(let i=0;i<2+(Math.random()*3|0);i++)burst(0.03,'highpass',2600+Math.random()*2400,0.7,0.05,i*0.05+Math.random()*0.04,at);},
+  // the goblin warrens (D-052): war drums far off in the rock, and goblin chatter
+  drums:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1],at[2]+(at[2]-PL.z)*2],beat=[0,0.36,0.72,1.44,1.8,2.16,2.88];for(const t of beat){burst(0.16,'lowpass',110,0.9,0.24,t,far);tone(70,52,0.18,0.12,t,null,far);}},
+  chatter:at=>{for(let i=0;i<3+(Math.random()*4|0);i++)voice(560+Math.random()*320,700+Math.random()*200,0.09,0.035,{type:'square',form:1300,q:2.2,delay:i*0.13+Math.random()*0.06},at);},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -4949,6 +5343,8 @@ const ambNight=()=>{const t=curT();return t<0.23||t>0.77;};
 function ambProfile(){
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),yy=Math.floor(PL.y),inside=bx>=0&&bz>=0&&bx<W&&bz<D,g=inside?ground[bx+W*bz]:yy;
   if(yy<g-4){const X=bx+OX,Z=bz+OZ,cx=Math.floor(X/CS),cz=Math.floor(Z/CS),hold=yy<100&&yy>=20&&ruinZone(cx,cz),L=ambLayer(yy,hold,hold&&holdNear(cx,cz).inhabited);
+    if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
+    if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
   const P=ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
@@ -5260,7 +5656,7 @@ const HEADINGS=['north','north-west','west','south-west','south','south-east','e
 const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 // Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
 // its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
-const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
+const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag',body:'Body'},equip={belt:null,pack:null,bag:null,body:null}; // body: armour (D-052)
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
 function invCap(s,id){let n=36;for(const k of ['pack','bag']){const q=k===s?(id?{id:id}:null):equip[k];if(q&&ITEMS[q.id].slots)n+=ITEMS[q.id].slots;}return n;} // with slot s holding id instead, if given
@@ -5391,7 +5787,9 @@ const RECIPES=[
 ];
 // The tool ladder (items.js): pickaxe and axe from three of the material, shovel from one, each with two sticks
 const LADDER_MAT=[PLANKSET,COBBLE,220,225,223,227,228];
-LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]]));
+LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]],[370+i,1,[[m,2],[201,1]]])); // swords (D-052): two of the material, a stick
+// armour for the body slot (D-052), and a troll's hide cured into leather
+RECIPES.push([380,1,[[362,5]]],[381,1,[[223,6],[362,2]]],[382,1,[[227,8],[362,2]]],[383,1,[[228,6],[362,2]]],[362,3,[[386,1],[200,1]],'f']);
 function nearStation(kind){
   const px=Math.floor(PL.x),py=Math.floor(PL.y),pz=Math.floor(PL.z);
   for(let y=py-3;y<=py+4;y++)for(let z=pz-4;z<=pz+4;z++)for(let x=px-4;x<=px+4;x++){const id=get(x,y,z);if(id===BLAST||(kind==='f'&&id===FURN))return true;}
@@ -5731,6 +6129,7 @@ function useBlock(th){
 function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
+  if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
@@ -5906,14 +6305,14 @@ const AM_FACES={L:[-1,0,0],R:[1,0,0],T:[0,1,0],D:[0,-1,0],F:[0,0,1],B:[0,0,-1]};
 // the rectangle of one face of a box w x h x d placed at (u,v) on the texture
 function amRect(f,u,v,w,h,d){return f==='T'?[u+d,v,w,d]:f==='D'?[u+d+w,v,w,d]:f==='L'?[u,v+d,d,h]:f==='F'?[u+d,v+d,w,h]:f==='R'?[u+d+w,v+d,d,h]:[u+2*d+w,v+d,w,h];}
 // a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture)
-function amBoxGeo(b,u,v){
-  const [x0,y0,z0,w,h,d]=b,x1=x0+w,y1=y0+h,z1=z0+d,pos=[],nor=[],uv=[],idx=[];
+function amBoxGeo(b,u,v,TX){
+  TX=TX||AM_TEX;const [x0,y0,z0,w,h,d]=b,x1=x0+w,y1=y0+h,z1=z0+d,pos=[],nor=[],uv=[],idx=[];
   // for each face: four corners in image order (top left, top right, bottom left, bottom right)
   const C={L:[[x0,y1,z0],[x0,y1,z1],[x0,y0,z0],[x0,y0,z1]],F:[[x0,y1,z1],[x1,y1,z1],[x0,y0,z1],[x1,y0,z1]],R:[[x1,y1,z1],[x1,y1,z0],[x1,y0,z1],[x1,y0,z0]],
     B:[[x1,y1,z0],[x0,y1,z0],[x1,y0,z0],[x0,y0,z0]],T:[[x0,y1,z0],[x1,y1,z0],[x0,y1,z1],[x1,y1,z1]],D:[[x0,y0,z1],[x1,y0,z1],[x0,y0,z0],[x1,y0,z0]]};
   for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n=AM_FACES[f],k=pos.length/3;
     const T=[[ru,rv],[ru+rw,rv],[ru,rv+rh],[ru+rw,rv+rh]];
-    C[f].forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/AM_TEX,1-T[i][1]/AM_TEX);});
+    C[f].forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/TX,1-T[i][1]/TX);});
     idx.push(k,k+2,k+1,k+1,k+2,k+3);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeBoundingSphere();return g;
@@ -6027,16 +6426,16 @@ const AM_KINDS={
 function amLayout(K){
   if(K.uv)return K.uv;const keys=[];for(const p of K.parts){const o=p[5]||{};if(!o.m&&!keys.some(k=>k[0]===p[0]))keys.push([p[0],p[3]]);}
   const sz=keys.map(([n,b])=>[n,2*(b[3]+b[5]),b[5]+b[4],b]).sort((a,b)=>b[2]-a[2]);
-  const uv={};let x=0,y=0,rowH=0;for(const [n,w,h,b] of sz){if(x+w>AM_TEX){x=0;y+=rowH+1;rowH=0;}if(y+h>AM_TEX)throw new Error('animal texture overflow '+n);uv[n]=[x,y,b];x+=w+1;rowH=Math.max(rowH,h);} // a pixel apart
+  const TX=K.tex||AM_TEX,uv={};let x=0,y=0,rowH=0;for(const [n,w,h,b] of sz){if(x+w>TX){x=0;y+=rowH+1;rowH=0;}if(y+h>TX)throw new Error('animal texture overflow '+n);uv[n]=[x,y,b];x+=w+1;rowH=Math.max(rowH,h);} // a pixel apart
   return K.uv=uv;
 }
 const amTexC=new Map();
 function amHash(x,y,s){let h=(x*374761393+y*668265263+s*1442695041)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;}
 function amTexture(kind,ci,flags){
   const key=kind+':'+ci+':'+(flags.young?1:0)+(flags.stag?1:0);if(amTexC.has(key))return amTexC.get(key);
-  const K=AM_KINDS[kind],uv=amLayout(K),c=K.coats[ci][0],cv=document.createElement('canvas');cv.width=cv.height=AM_TEX;
-  const g=cv.getContext('2d'),img=g.createImageData(AM_TEX,AM_TEX),D=img.data;let seed=1+ci*977+kind.length*131,rs=seed;
-  const cl=v=>v<0?0:v>255?255:v|0,set=(x,y,col,a)=>{if(x<0||y<0||x>=AM_TEX||y>=AM_TEX)return;const i=(y*AM_TEX+x)*4;D[i]=cl(col[0]);D[i+1]=cl(col[1]);D[i+2]=cl(col[2]);D[i+3]=a===undefined?255:a;};
+  const K=AM_KINDS[kind],uv=amLayout(K),c=K.coats[ci][0],TX=K.tex||AM_TEX,cv=document.createElement('canvas');cv.width=cv.height=TX;
+  const g=cv.getContext('2d'),img=g.createImageData(TX,TX),D=img.data;let seed=1+ci*977+kind.length*131,rs=seed;
+  const cl=v=>v<0?0:v>255?255:v|0,set=(x,y,col,a)=>{if(x<0||y<0||x>=TX||y>=TX)return;const i=(y*TX+x)*4;D[i]=cl(col[0]);D[i+1]=cl(col[1]);D[i+2]=cl(col[2]);D[i+3]=a===undefined?255:a;};
   const src=n=>{const p=K.parts.find(q=>q[0]===n);const o=p&&p[5]||{};return o.m||n;};
   const rect=(n,f)=>{const u=uv[src(n)];if(!u)return null;const b=u[2];return amRect(f,u[0],u[1],b[3],b[4],b[5]);};
   const noisy=(col,amt,x,y)=>{const v=(amHash(x,y,seed)-0.5)*2*amt;return [col[0]+v,col[1]+v,col[2]+v];};
@@ -6046,7 +6445,7 @@ function amTexture(kind,ci,flags){
     // every face of these parts in one colour with noise, the sides a little darker toward the bottom
     coat(ns,col,amt){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const k=(f==='T'||f==='D')?0:-(t/Math.max(1,R[3]))*10;set(R[0]+s,R[1]+t,noisy([col[0]+k,col[1]+k,col[2]+k],amt,R[0]+s,R[1]+t));}}},
     // the underside, and the lowest rows of the sides, in the belly colour
-    belly(n,col,rows){P.face(n,'D',col,5);for(const f of ['L','R','F','B']){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const r=rows+(amHash(R[0]+s,R[1],seed+31)<0.5?0:1);for(let t=R[3]-r;t<R[3];t++){const i=((R[1]+t)*AM_TEX+R[0]+s)*4,k=(t-(R[3]-r)+1)/(r+1)*0.8;
+    belly(n,col,rows){P.face(n,'D',col,5);for(const f of ['L','R','F','B']){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const r=rows+(amHash(R[0]+s,R[1],seed+31)<0.5?0:1);for(let t=R[3]-r;t<R[3];t++){const i=((R[1]+t)*TX+R[0]+s)*4,k=(t-(R[3]-r)+1)/(r+1)*0.8;
       set(R[0]+s,R[1]+t,noisy([D[i]+(col[0]-D[i])*k,D[i+1]+(col[1]-D[i+1])*k,D[i+2]+(col[2]-D[i+2])*k],4,R[0]+s,R[1]+t));}}}},
     rows(n,fs,t0,t1,col){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=Math.max(0,t0);t<Math.min(R[3],t1);t++)for(let s=0;s<R[2];s++)set(R[0]+s,R[1]+t,noisy(col,6,R[0]+s,R[1]+t));}},
     rect(n,f,s0,t0,w,h,col){const R=rect(n,f);if(!R)return;for(let t=t0;t<Math.min(R[3],t0+h);t++)for(let s=s0;s<Math.min(R[2],s0+w);s++)set(R[0]+s,R[1]+t,noisy(col,5,R[0]+s,R[1]+t));},
@@ -6059,16 +6458,25 @@ function amTexture(kind,ci,flags){
     wool(ns,col){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const x=R[0]+s,y=R[1]+t,c1=amHash(x>>1,y>>1,seed+5),c2=amHash(x,y,seed+9);
       const k=(c1<0.3?-16:c1>0.75?10:0)+(c2-0.5)*10-(f==='D'?18:0);set(x,y,[col[0]+k,col[1]+k,col[2]+k]);}}},
     // hair: streaks down the length
-    hair(n){for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const k=(amHash(R[0]+s,0,seed+13)-0.5)*30;for(let t=0;t<R[3];t++){const i=((R[1]+t)*AM_TEX+R[0]+s)*4;D[i]=cl(D[i]+k);D[i+1]=cl(D[i+1]+k);D[i+2]=cl(D[i+2]+k);}}}},
+    hair(n){for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const k=(amHash(R[0]+s,0,seed+13)-0.5)*30;for(let t=0;t<R[3];t++){const i=((R[1]+t)*TX+R[0]+s)*4;D[i]=cl(D[i]+k);D[i+1]=cl(D[i+1]+k);D[i+2]=cl(D[i+2]+k);}}}},
     // a ragged darker fringe along the bottom of the sides (a shaggy coat)
     fringe(n,col){for(const f of ['L','R','F','B']){const R=rect(n,f);if(!R)continue;for(let s=0;s<R[2];s++){const h=1+Math.floor(amHash(R[0]+s,R[1],seed+21)*3);for(let t=R[3]-h;t<R[3];t++)set(R[0]+s,R[1]+t,noisy(col,6,R[0]+s,R[1]+t));}}},
+    // glowing pixels (alpha 200: the shader draws them at full light): eyes in the dark, cracks of fire, flames
+    glow(n,f,s,t,col){const R=rect(n,f);if(R&&s<R[2]&&t<R[3])set(R[0]+s,R[1]+t,col,200);},
+    glowRect(n,f,s0,t0,w,h,col){const R=rect(n,f);if(!R)return;for(let t=t0;t<Math.min(R[3],t0+h);t++)for(let s=s0;s<Math.min(R[2],s0+w);s++)set(R[0]+s,R[1]+t,noisy(col,14,R[0]+s,R[1]+t),200);},
+    glowFaces(ns,col){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++)set(R[0]+s,R[1]+t,noisy(col,22,R[0]+s,R[1]+t),200);}},
+    // cracks of fire across faces: thin wandering lines that glow
+    cracks(ns,col,dens){for(const n of ns)for(const f in AM_FACES){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const x=R[0]+s,y=R[1]+t;
+      if(Math.abs(Math.sin(x*0.9+amHash(x>>2,y>>2,seed+41)*6)+Math.cos(y*0.7+amHash(x>>3,y>>1,seed+43)*5))<dens)set(x,y,noisy(col,30,x,y),200);}}},
+    // eyes that glow, on the front face of the head: two pixels `row` down, `gap` apart about the middle
+    glowEyes(n,row,gap,col){const R=rect(n,'F');if(!R)return;const m=(R[2]-1)/2;set(R[0]+Math.floor(m-gap/2),R[1]+row,col,200);set(R[0]+Math.ceil(m+gap/2),R[1]+row,col,200);},
     // stripes along the body (wild piglets)
     stripes(n,col,base){for(const f of ['L','R','T']){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++)if(((f==='T'?s:t)>>1)%2===0)set(R[0]+s,R[1]+t,noisy(col,10,R[0]+s,R[1]+t));}}
   };
   K.paint(P,c,flags);
   // fill what the paint left (shared faces never left empty), then a one-pixel darker rim on every face so edges read
   for(const n in uv){for(const f in AM_FACES){const R=amRect(f,uv[n][0],uv[n][1],uv[n][2][3],uv[n][2][4],uv[n][2][5]);
-    for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*AM_TEX+R[0]+s)*4;if(!D[i+3]){D[i]=128;D[i+1]=110;D[i+2]=96;D[i+3]=255;}}}}
+    for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*TX+R[0]+s)*4;if(!D[i+3]){D[i]=128;D[i+1]=110;D[i+2]=96;D[i+3]=255;}}}}
   g.putImageData(img,0,0);const tx=new THREE.CanvasTexture(cv);tx.amData=D;tx.magFilter=THREE.NearestFilter;tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;tx.anisotropy=1; // no mipmaps: a coat never bleeds into the part beside it
   amTexC.set(key,tx);return tx;
 }
@@ -6079,7 +6487,7 @@ const AM_FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;u
   'uniform float eL;uniform float eB;uniform float hurt;uniform float fade;varying vec2 vUv;varying float vD;varying vec3 vN;'+
   'void main(){vec4 t=texture2D(map,vUv);if(t.a<0.5)discard;float side=0.7+0.16*abs(vN.z);float sh=vN.y>=0.0?mix(side,1.0,vN.y):mix(side,0.52,-vN.y);'+
   'float lm=lamp*(1.0-smoothstep(3.0,lampR,vD));vec3 l=max(max(vec3(eL*skyMul)*skyTint,vec3(lm)*vec3(1.0,0.93,0.82)),max(vec3(1.0,0.8,0.55)*eB,caveTint*caveMin));'+
-  'vec3 c=t.rgb*l*sh;c=mix(c,vec3(0.85,0.12,0.08)*max(0.35,l.r),hurt*0.55);float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),fade);}';
+  'vec3 c=t.rgb*l*sh;c=mix(c,t.rgb*1.15,step(t.a,0.9));c=mix(c,vec3(0.85,0.12,0.08)*max(0.35,l.r),hurt*0.55);float f=smoothstep(fogNear,fogFar,vD);gl_FragColor=vec4(mix(c,fogColor,f),fade);}';
 function amMaterial(tex){
   return new THREE.ShaderMaterial({uniforms:{map:{value:tex},fogColor:U.fogColor,fogNear:U.fogNear,fogFar:U.fogFar,lamp:U.lamp,lampR:U.lampR,skyMul:U.skyMul,skyTint:U.skyTint,caveMin:U.caveMin,caveTint:U.caveTint,
     eL:{value:1},eB:{value:0},hurt:{value:0},fade:{value:1}},vertexShader:AM_VS,fragmentShader:AM_FS});
@@ -6095,11 +6503,11 @@ const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
-    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1]);amGeoC.set(gk,geo);}
+    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex);amGeoC.set(gk,geo);}
     const grp=new THREE.Group();grp.position.x=piv[0]*AM_PX;grp.position.y=piv[1]*AM_PX;grp.position.z=piv[2]*AM_PX;const r=rot||[0,0,0];grp.rotation.x=r[0];grp.rotation.y=r[1];grp.rotation.z=r[2];grp.userData.rest=r.slice();
     const m=new THREE.Mesh(geo,mat);m.frustumCulled=false;grp.add(m);(par&&parts[par]?parts[par]:root).add(grp);parts[n]=grp;if(o.dyn)dyn.push([grp,o.dyn]);}
   // the young: smaller, with a bigger head (the head's own root grows; what hangs from it grows with it)
-  const sc=flags.young?0.58:1;root.scale.setScalar(sc);const big={};
+  const sc=(flags.young?0.58:1)*(K.scale||1);root.scale.setScalar(sc);const big={};
   if(flags.young)for(const p of K.parts){const o=p[5]||{};if(!o.head||!parts[p[0]])continue;const par=K.parts.find(q=>q[0]===p[1]);if(par&&(par[5]||{}).head)continue;parts[p[0]].scale.setScalar(1.3);big[p[0]]=1;}
   const body=new THREE.Group();body.add(root);
   const shadow=new THREE.Mesh(amShadowGeo,amShadowMat());shadow.renderOrder=1;
@@ -6113,7 +6521,7 @@ function amBounds(K,flags,sc,big){
   const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[0]),s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[2]);s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];return [x,y,z];};
   const chain=n=>{const out=[];let p=K.parts.find(q=>q[0]===n);while(p){out.push(p);p=p[1]?K.parts.find(q=>q[0]===p[1]):null;}return out;};
   const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
-  for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
+  for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||o.nb||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
     const b=p[3],ch=chain(p[0]);
     for(let i=0;i<8;i++){let v=[b[0]+(i&1?b[3]:0),b[1]+(i&2?b[4]:0),b[2]+(i&4?b[5]:0)];
       for(const q of ch){if(big[q[0]])v=v.map(t=>t*1.3);v=rotP(v,q[4]||[0,0,0]);v=[v[0]+q[2][0],v[1]+q[2][1],v[2]+q[2][2]];}
@@ -6122,6 +6530,85 @@ function amBounds(K,flags,sc,big){
 }
 // choose a coat by weight
 function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+=c[1];let v=q*t;for(let i=0;i<C.length;i++){v-=C[i][1];if(v<=0)return i;}return 0;}
+// ---- The foes' models (D-052): goblins, orcs, trolls and the Emberlords, built like the animals (animal-models.js) from boxes
+// measured in pixels with painted coats, but standing on two legs. Eyes, cracks of fire, flames and burning blades are drawn
+// with glowing pixels, so the foes show in the dark of the warrens. Weapons and gear (nb: not counted in the body's bounds)
+// hang from the hands, so the arms carry them through a swing.
+(function(){
+  const legs=(y,w,d,x)=>[['legL',null,[-x,y,0],[-w/2,-y,-d/2,w,y,d]],['legR',null,[x,y,0],[-w/2,-y,-d/2,w,y,d],0,{m:'legL'}]];
+  const arms=(px,py,pz,w,l,d,rot)=>[['armL','body',[-px,py,pz],[-w,-l,-d/2,w,l,d],[rot||0,0,0.08]],['armR','body',[px,py,pz],[0,-l,-d/2,w,l,d],[rot||0,0,-0.08],{m:'armL'}]];
+  // the goblins: small, hunched, big-eared and long-armed
+  const gob=()=>[...legs(6,2,2,1.5),['body',null,[0,6,0],[-3,0,-1.5,6,7,3],[0.3,0,0]],['cloth','body',[0,0,0],[-4,-3,-2,8,4,4]],
+    ['head','body',[0,7,1],[-3,-0.5,-3,6,5,6],[-0.3,0,0],{head:1}],['nose','head',[0,1.5,3],[-0.5,-1,0,1,2,2],[0.2,0,0],{head:1}],
+    ['earL','head',[-3,3,0],[-5,-0.5,-0.5,5,1,2],[0,0.35,-0.35],{head:1}],['earR','head',[3,3,0],[0,-0.5,-0.5,5,1,2],[0,-0.35,0.35],{head:1,m:'earL'}],
+    ...arms(3,6,0.5,2,7,2,0.25)];
+  const gobPaint=(P,c)=>{P.coat(['body','head','nose','earL','legL','armL'],c.skin,14);P.face('earL','F',c.inner,8);P.coat(['cloth'],c.rag,16);P.fringe('cloth',[c.rag[0]-30,c.rag[1]-30,c.rag[2]-30]);
+    P.rows('legL',['L','F','R','B'],5,6,[50,40,30]);P.glowEyes('head',2,2,c.eye);P.rows('head',['F'],3,4,[40,30,26]);P.spots('head',['F','L','R','T'],[c.skin[0]-26,c.skin[1]-26,c.skin[2]-20],0.12);};
+  const gobCoats=[[{skin:[118,136,62],inner:[150,110,100],rag:[96,72,46],eye:[255,214,60]},3],[{skin:[100,120,74],inner:[146,104,96],rag:[84,64,52],eye:[255,190,40]},2],[{skin:[136,132,82],inner:[156,112,98],rag:[110,84,52],eye:[255,120,40]},1]];
+  // the orcs: tall, broad, tusked, in black iron
+  const orc=()=>[...legs(12,3,3,2.2),['body',null,[0,12,0],[-4.5,0,-2.5,9,11,5],[0.12,0,0]],['cloth','body',[0,0,0],[-5,-4,-3,10,5,6]],
+    ['head','body',[0,11,0.6],[-3,0,-3,6,6,6],[-0.12,0,0],{head:1}],['jaw','head',[0,0.5,2],[-2.5,-1.5,-1,5,2,3],0,{head:1}],
+    ['tuskL','jaw',[-2,0.5,1.5],[-0.5,0,-0.5,1,2,1],[0,0,-0.15],{head:1}],['tuskR','jaw',[2,0.5,1.5],[-0.5,0,-0.5,1,2,1],[0,0,0.15],{head:1,m:'tuskL'}],
+    ['earL','head',[-3,4,0],[-2,-0.5,-0.5,2,2,1],[0,0,-0.5],{head:1}],['earR','head',[3,4,0],[0,-0.5,-0.5,2,2,1],[0,0,0.5],{head:1,m:'earL'}],
+    ...arms(4.5,10,0,3,11,3),['shL','armL',[0,0,0],[-4,-2,-2,4,3,4]],['shR','armR',[0,0,0],[0,-2,-2,4,3,4],0,{m:'shL'}]];
+  const orcPaint=(P,c)=>{P.coat(['body','head','jaw','earL','legL','armL'],c.skin,12);P.coat(['tuskL'],[226,216,190],6);P.coat(['shL'],c.iron,10);P.spots('shL',['T','L','R','F','B'],[c.iron[0]+40,c.iron[1]+22,c.iron[2]],0.1);
+    P.coat(['cloth'],c.cloth,12);P.fringe('cloth',[c.cloth[0]-28,c.cloth[1]-26,c.cloth[2]-24]);P.rows('body',['L','F','R','B'],7,11,c.iron);P.rows('body',['F'],5,6,[70,52,36]);
+    P.rows('legL',['L','F','R','B'],9,12,[40,36,34]);P.rows('armL',['L','F','R','B'],8,11,[c.skin[0]-24,c.skin[1]-24,c.skin[2]-24]);P.glowEyes('head',2,2,c.eye);P.rows('head',['F'],4,5,[30,26,24]);
+    P.spots('head',['F','L','R'],[c.skin[0]-30,c.skin[1]-30,c.skin[2]-30],0.1);};
+  const orcCoats=[[{skin:[92,104,78],iron:[52,50,54],cloth:[110,40,30],eye:[255,190,40]},3],[{skin:[78,86,56],iron:[46,44,48],cloth:[70,56,40],eye:[255,150,30]},2],[{skin:[104,96,84],iron:[58,54,56],cloth:[90,30,26],eye:[255,80,40]},2],[{skin:[72,74,70],iron:[40,38,42],cloth:[40,36,34],eye:[255,214,60]},1]];
+  const HAFT=[80,56,34],blade=(P,n,len,metal)=>{P.coat([n],metal,10);P.rect(n,'L',0,0,3,9,HAFT);P.rect(n,'R',len-3,0,3,9,HAFT);P.rect(n,'T',0,0,9,3,HAFT);P.rect(n,'D',0,len-3,9,3,HAFT);P.face(n,'B',HAFT);};
+  Object.assign(AM_KINDS,{
+    goblin:{parts:[...gob(),['wpn','armR',[1,-6.5,0],[-0.5,-0.5,-1,1,1,6],0,{nb:1}]],coats:gobCoats,
+      paint(P,c){gobPaint(P,c);blade(P,'wpn',6,[170,170,176]);}},
+    gslinger:{parts:[...gob(),['cap','head',[0,3,0],[-3.5,0,-3.5,7,2,7],0,{head:1}],['sling','armR',[1,-6.5,0],[-0.5,-4,-0.5,1,4,1],0,{nb:1}],['pouch','body',[2.5,1,1],[-1,-2,-1,2,2,2],0,{nb:1}]],coats:gobCoats,
+      paint(P,c){gobPaint(P,c);P.coat(['cap','pouch'],[110,80,50],12);P.coat(['sling'],[150,120,80],10);P.rows('cap',['L','F','R','B'],1,2,[80,56,34]);}},
+    gfire:{parts:[...gob(),['robe','body',[0,0,0],[-3.5,-5,-2,7,11,4]],['hood','head',[0,0,0],[-3.5,-0.5,-3.5,7,6,6],0,{head:1}],
+      ['staff','armR',[1,-6.5,0],[-0.5,-3,-0.5,1,16,1],[-0.2,0,0],{nb:1}],['gem','staff',[0,13,0],[-1,0,-1,2,2,2],0,{nb:1}]],coats:gobCoats,
+      paint(P,c){gobPaint(P,c);P.coat(['robe','hood'],[60,30,30],14);P.rows('robe',['L','F','R','B'],8,11,[90,40,30]);P.cracks(['robe'],[255,120,30],0.08);
+        P.coat(['staff'],[70,50,36],10);P.glowFaces(['gem'],[255,150,40]);P.glowEyes('head',2,2,[255,90,30]);}},
+    gchief:{scale:1.4,parts:[...gob(),['crown','head',[0,4,0],[-3.5,0,-3.5,7,2,7],0,{head:1}],['cape','body',[0,7,-1.6],[-3.5,-10,-1,7,10,1],[0.15,0,0],{nb:1}],
+      ['shL','armL',[0,0,0],[-3,-2,-1.5,3,2,3]],['shR','armR',[0,0,0],[0,-2,-1.5,3,2,3],0,{m:'shL'}],['wpn','armR',[1,-6.5,0],[-0.5,-2,-1,1,4,9],0,{nb:1}]],coats:gobCoats,
+      paint(P,c){gobPaint(P,c);P.coat(['crown'],[220,180,60],16);for(let s=0;s<7;s+=2)for(const f of ['L','F','R','B'])P.px('crown',f,s,0,[255,226,110]);P.glow('crown','F',3,1,[220,40,40]);
+        P.coat(['cape'],[120,26,24],14);P.coat(['shL'],[226,214,190],12);blade(P,'wpn',9,[150,150,158]);P.glowEyes('head',2,2,[255,60,40]);}},
+    orc:{parts:[...orc(),['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['wpn','armR',[1.5,-10,0],[-0.5,-2,-1,1,4,10],0,{nb:1}]],coats:orcCoats,
+      paint(P,c){orcPaint(P,c);P.coat(['helm'],c.iron,10);P.rows('helm',['F'],2,4,[20,18,20]);blade(P,'wpn',10,[150,146,150]);}},
+    obow:{parts:[...orc(),['hood','head',[0,0,0],[-3.5,-0.5,-3.5,7,7,6],0,{head:1}],['bow','armL',[-1.5,-10,1],[-0.5,-7,-0.5,1,15,1],0,{nb:1}],
+      ['quiver','body',[2,6,-2.5],[-1,-3,-2,2,9,2],[0.3,0,0.2],{nb:1}]],coats:orcCoats,
+      paint(P,c){orcPaint(P,c);P.coat(['hood'],[60,54,46],12);P.coat(['bow'],[90,62,38],10);P.coat(['quiver'],[96,66,40],10);P.rows('quiver',['L','F','R','B'],0,2,[200,190,170]);}},
+    obrute:{scale:1.18,parts:[...orc(),['helm','head',[0,0,0],[-3.5,-0.5,-3.5,7,8,7],0,{head:1}],['shield','armL',[-3,-6,0],[-1,-5,-4,1,10,8],0,{nb:1}],
+      ['haft','armR',[1.5,-10,0],[-0.5,-0.5,-2,1,1,12],0,{nb:1}],['maul','haft',[0,0,9],[-2,-2,0,4,4,5],0,{nb:1}]],coats:orcCoats,
+      paint(P,c){orcPaint(P,c);P.coat(['helm','shield','maul'],c.iron,10);P.rows('helm',['F'],2,3,[20,18,20]);P.glow('helm','F',2,2,c.eye);P.glow('helm','F',4,2,c.eye);
+        P.spots('shield',['L','R'],[110,40,30],0.25);P.rect('shield','L',3,0,2,10,[120,30,26]);P.coat(['haft'],[80,56,34],8);}},
+    ochief:{scale:1.22,parts:[...orc(),['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['hornL','helm',[-3.5,3,0],[-1,0,-1,2,5,2],[0,0,-0.9],{head:1}],['hornR','helm',[3.5,3,0],[-1,0,-1,2,5,2],[0,0,0.9],{head:1,m:'hornL'}],
+      ['pole','body',[0,4,-3],[-0.5,0,-0.5,1,22,1],[-0.1,0,0],{nb:1}],['flag','pole',[0,21,0],[0.5,-9,-0.5,8,9,1],0,{nb:1}],
+      ['haft','armR',[1.5,-10,0],[-0.5,-0.5,-2,1,1,14],0,{nb:1}],['axe','haft',[0,0,10],[-0.5,-4,0,1,8,4],0,{nb:1}]],coats:orcCoats,
+      paint(P,c){orcPaint(P,c);P.coat(['helm'],[36,34,38],10);P.coat(['hornL'],[210,196,170],10);P.coat(['pole','haft'],[70,50,34],8);P.coat(['flag'],[130,24,22],14);P.glowRect('flag','F',3,3,2,3,[255,120,30]);P.glowRect('flag','B',3,3,2,3,[255,120,30]);
+        P.coat(['axe'],[120,116,122],10);P.rows('axe',['L','R'],0,1,[200,200,206]);P.rows('cloth',['F','B'],0,2,[150,30,26]);}},
+    // the ash troll: hulking, hunched, long-armed, grey hide split with glowing cracks, a club of basalt
+    troll:{scale:1.4,parts:[...legs(13,6,6,4),['body',null,[0,13,0],[-8,0,-5,16,15,10],[0.4,0,0]],['head','body',[0,14,4],[-4,-2,-3,8,7,7],[-0.45,0,0],{head:1}],
+      ['jaw','head',[0,-1,3],[-3.5,-2,-2,7,3,5],0,{head:1}],['nose','head',[0,2,4],[-1,-2,0,2,3,2],0,{head:1}],['tuskL','jaw',[-2.5,0.5,2.5],[-0.5,0,-0.5,1,2,1],0,{head:1}],['tuskR','jaw',[2.5,0.5,2.5],[-0.5,0,-0.5,1,2,1],0,{head:1,m:'tuskL'}],
+      ['armL','body',[-8,13,1],[-5,-22,-3,5,22,6],[0.25,0,0.05]],['armR','body',[8,13,1],[0,-22,-3,5,22,6],[0.25,0,-0.05],{m:'armL'}],
+      ['club','armR',[2.5,-21,0],[-2,-2,-2,4,4,16],[1.1,0,0],{nb:1}],['sp1','body',[-3,13,-4],[-1,0,-1,2,4,2],[-0.5,0,0],{nb:1}],['sp2','body',[3,11,-4.5],[-1,0,-1,2,4,2],[-0.6,0,0],{nb:1,m:'sp1'}],['sp3','body',[0,7,-5],[-1,0,-1,2,4,2],[-0.7,0,0],{nb:1,m:'sp1'}]],
+      coats:[[{hide:[70,66,64],crack:[255,130,30]},3],[{hide:[84,72,62],crack:[255,90,26]},2]],
+      paint(P,c){P.coat(['body','head','jaw','nose','legL','armL'],c.hide,18);P.spots('body',['T','L','R','B'],[c.hide[0]+30,c.hide[1]+30,c.hide[2]+28],0.12);P.cracks(['body','armL','legL'],c.crack,0.06);
+        P.coat(['tuskL'],[220,206,176],8);P.coat(['club'],[46,44,48],14);P.cracks(['club'],c.crack,0.05);P.coat(['sp1'],[50,48,50],12);P.glowEyes('head',2,3,[255,170,50]);P.rows('jaw',['F'],0,1,[30,22,20]);}},
+    // the Emberlord: a demon of fire and shadow, horned, maned with flame, on wings of smoke, a burning blade and a whip of fire
+    ember:{scale:1.35,parts:[...legs(20,6,6,4),['body',null,[0,20,0],[-8,0,-5,16,20,10],[0.1,0,0]],['head','body',[0,20,1],[-4,0,-4,8,8,8],[-0.1,0,0],{head:1}],
+      ['jaw','head',[0,1,4],[-3,-1,-1,6,3,4],0,{head:1}],['hornL','head',[-4,6,0],[-1,0,-1,2,6,2],[0.2,0,-1],{head:1}],['tipL','hornL',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,0.6],{head:1}],
+      ['hornR','head',[4,6,0],[-1,0,-1,2,6,2],[0.2,0,1],{head:1,m:'hornL'}],['tipR','hornR',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,-0.6],{head:1,m:'tipL'}],
+      ['mane','head',[0,4,-2],[-6,0,-4,12,10,5],[-0.3,0,0],{head:1,nb:1}],
+      ['armL','body',[-8,19,0],[-6,-20,-3,6,20,6],[0,0,0.1]],['armR','body',[8,19,0],[0,-20,-3,6,20,6],[0,0,-0.1],{m:'armL'}],
+      ['wingL','body',[-5,17,-5],[-28,-16,-0.5,28,26,1],[0,0.6,0.25],{nb:1}],['wingR','body',[5,17,-5],[0,-16,-0.5,28,26,1],[0,-0.6,-0.25],{nb:1,m:'wingL'}],
+      ['wpn','armR',[3,-19,0],[-1,-1,-2,2,3,26],0,{nb:1}],['whip1','armL',[-3,-19,0],[-0.5,-0.5,0,1,1,10],[0.6,0,0],{nb:1}],['whip2','whip1',[0,0,10],[-0.5,-0.5,0,1,1,10],[0.3,0,0],{nb:1,m:'whip1'}],
+      ['whip3','whip2',[0,0,10],[-0.5,-0.5,0,1,1,10],[0.3,0,0],{nb:1,m:'whip1'}],['tail','body',[0,2,-5],[-1,-1,-14,2,2,14],[0.5,0,0],{nb:1}]],
+      coats:[[{hide:[44,24,22],crack:[255,140,30],flame:[255,190,60]},1]],
+      paint(P,c){P.coat(['body','head','jaw','legL','armL','tail'],c.hide,14);P.cracks(['body','armL','legL','head','tail'],c.crack,0.09);P.rows('legL',['L','F','R','B'],17,20,[24,16,16]);
+        P.coat(['hornL','tipL'],[34,26,24],10);P.coat(['mane'],[40,18,14],10);P.cracks(['mane'],[255,120,26],0.55);P.cracks(['mane'],c.flame,0.22);
+        P.coat(['wingL'],[46,26,26],14);for(const f of ['F','B'])for(let k=0;k<4;k++)for(let t=0;t<26;t++)P.px('wingL',f,Math.max(0,Math.min(27,(f==='F'?27-Math.round(t*(0.3+k*0.25)):Math.round(t*(0.3+k*0.25))))),t,[22,14,14]);P.spots('wingL',['F','B'],[255,110,30],0.015);
+        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],[255,250,200],0.2);P.rect('wpn','L',0,0,4,3,[40,30,28]);P.rect('wpn','R',22,0,4,3,[40,30,28]);P.glowFaces(['whip1'],[255,120,30]);
+        P.glowEyes('head',3,3,[255,250,200]);P.glowRect('jaw','F',1,1,4,1,[255,160,40]);}}
+  });
+})();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
 // they give wool, milk and eggs, meat and hides to the hunter; wild horses can be ridden, a stray hound fed meat follows you, and
 // a wild mule fed crops carries a pack. Animals are not part of generation: they come and go around the player (Math.random is
@@ -6315,7 +6802,7 @@ function animalHit(reach){
   return best;
 }
 // how hard the held thing hits: axes best, then pickaxes and shovels, then a bare hand
-function hitPower(id){const it=ITEMS[id];if(!it||!it.tool)return 1;return (it.tool==='axe'?3:2)+(it.tier||0)*0.5;}
+function hitPower(id){const it=ITEMS[id];if(!it||!it.tool)return 1;if(it.tool==='sword')return id===377?16:4+it.tier*0.8;return (it.tool==='axe'?3:2)+(it.tier||0)*0.5;} // swords since D-052
 // Left button: strike. Right button: shear, milk, gather an egg, feed, ride, open a pack, tell a friend to stay or follow.
 function animalAct(btn){
   const a=animalHit(4.5);if(!a)return false;const A=ANIMALS[a.kind],held=curId();
@@ -6351,6 +6838,273 @@ let wildPending=saved&&Array.isArray(saved.an)?saved.an:[];
 function wildRestore(){if(!wildPending.length||!ready)return;const keep=[];for(const r of wildPending){const [k,X,Y,Z,st,uid,ci,yg]=r,x=X-OX,z=Z-OZ;if(!ANIMALS[k])continue;
   if(x<0||z<0||x>=W||z>=D||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX]){keep.push(r);continue;}const y=standY(x,Y,z);
   addAnimal(k,x,y>0?y:Y,z,{tame:true,stay:!!st,uid:String(uid||''),ci:ci|0,young:!!yg,st:'idle',t:1});}wildPending=keep;}
+// ---- Foes (D-052): the first hostile creatures, all of the Volcanic Wastes. Orc warbands (raiders, bowmen, brutes, now and
+// then a warchief) and ash trolls roam its surface and hold the Ashen Citadel; goblins (cutters, slingers, firecallers and a
+// chieftain) live in the warrens below and keep camp at their ways in; an Emberlord waits in each fortress in the great
+// volcanoes, with orcs at its gate. In survival they hunt the player by sight, strike, shoot and throw; in creative they take
+// no notice of the player at all. Like the animals they come and go around the player (Math.random is fine here); only the
+// Emberlords that have fallen are saved (fk), so a fortress once emptied stays empty.
+const FOES={
+  // n name; m model; hp; dmg a blow; reach; walk and run (blocks a second); sight; cd between blows; wind the wind-up of a blow;
+  // shot {dmg, v speed, lo and hi range, cd, k kind, n volley}; keep: the distance a shooter keeps; flee: share of health at
+  // which it runs; block: share of a blow a shield takes from the front; mass: how far blows push it; tall: room it needs;
+  // drops [[id, least, most, chance]]; cause: how the death screen names it
+  goblin:{n:'Goblin Cutter',m:'goblin',hp:8,dmg:2,reach:1.5,walk:1.5,run:4.7,sight:14,cd:0.8,wind:0.3,flee:0.3,mass:0.8,drops:[[200,1,2,0.6],[339,1,2,0.3],[220,1,2,0.25]],cause:'goblin'},
+  gslinger:{n:'Goblin Slinger',m:'gslinger',hp:6,dmg:1,reach:1.5,walk:1.4,run:4.4,sight:18,cd:1,wind:0.3,shot:{dmg:2,v:16,lo:4,hi:17,cd:2.2,k:'stone'},keep:7,flee:0.4,mass:0.8,drops:[[200,1,2,0.5],[221,1,2,0.3],[338,1,1,0.2]],cause:'stone'},
+  gfire:{n:'Goblin Firecaller',m:'gfire',hp:9,dmg:1,reach:1.5,walk:1.3,run:4,sight:18,cd:1.2,wind:0.4,shot:{dmg:3,v:10,lo:4,hi:18,cd:3.2,k:'fire'},keep:9,flee:0.3,mass:0.8,drops:[[SULFUR,1,3,0.6],[338,1,2,0.4],[230,1,1,0.05]],cause:'fire'},
+  gchief:{n:'Goblin Chieftain',m:'gchief',hp:34,dmg:5,reach:2,walk:1.3,run:4,sight:18,cd:1.2,wind:0.45,mass:0.5,boss:1,drops:[[224,2,5,1],[230,1,2,0.5],[372,1,1,0.35]],cause:'goblin'},
+  raider:{n:'Orc Raider',m:'orc',hp:16,dmg:3,reach:2,walk:1.5,run:4.8,sight:22,cd:1.1,wind:0.4,mass:0.6,drops:[[213,1,2,0.5],[200,1,3,0.6],[352,1,1,0.3]],cause:'orc'},
+  bowman:{n:'Orc Bowman',m:'obow',hp:12,dmg:2,reach:2,walk:1.5,run:4.6,sight:26,cd:1.2,wind:0.4,shot:{dmg:3,v:26,lo:5,hi:26,cd:2.4,k:'arrow'},keep:12,mass:0.6,drops:[[201,2,4,0.6],[328,1,3,0.4],[200,1,2,0.4]],cause:'arrow'},
+  brute:{n:'Orc Brute',m:'obrute',hp:32,dmg:6,reach:2.3,walk:1.2,run:3.8,sight:20,cd:1.7,wind:0.6,block:0.6,mass:0.35,drops:[[213,2,4,0.7],[227,1,2,0.3],[362,1,2,0.4]],cause:'orc'},
+  ochief:{n:'Orc Warchief',m:'ochief',hp:48,dmg:7,reach:2.5,walk:1.4,run:4.4,sight:28,cd:1.4,wind:0.55,mass:0.3,boss:1,drops:[[227,2,4,1],[224,1,3,0.6],[374,1,1,0.25]],cause:'orc'},
+  troll:{n:'Ash Troll',m:'troll',hp:70,dmg:8,reach:3.2,walk:1.1,run:3.6,sight:20,cd:2.2,wind:0.8,shot:{dmg:6,v:15,lo:8,hi:22,cd:7,k:'rock'},mass:0.15,tall:3,drops:[[386,1,2,1],[CINDER,2,5,0.6],[230,1,1,0.1]],cause:'troll'},
+  ember:{n:'Emberlord',m:'ember',hp:320,dmg:10,reach:4.5,walk:1.4,run:3.4,sight:30,cd:2,wind:0.7,shot:{dmg:5,v:13,lo:6,hi:28,cd:4,k:'fire',n:3},whip:{dmg:6,lo:3,hi:9,cd:5},mass:0.06,tall:5,boss:1,lord:1,
+    drops:[[377,1,1,1],[378,1,1,1],[229,4,8,1],[228,3,6,1],[224,6,12,1]],cause:'ember'}
+};
+Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
+  troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash'});
+// who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
+const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
+  lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]]};
+const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5]};
+const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
+const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
+entityKind({name:'foes',list:foes,update:dt=>updFoes(dt),persist:true,shift:(dx,dz)=>{for(const f of foes){f.x-=dx;f.z-=dz;f.hx-=dx;f.hz-=dz;if(f.tx!==undefined){f.tx-=dx;f.tz-=dz;}}
+  for(const s of shots){s.x-=dx;s.z-=dz;}}});
+const pickW=L=>{let t=0;for(const l of L)t+=l[1];let v=Math.random()*t;for(const l of L){v-=l[1];if(v<=0)return l[0];}return L[0][0];};
+// the ground a foe of height `tall` stands on near y (like standY, with room for its height), or -1
+function foeStand(x,y,z,tall){const bx=Math.floor(x),bz=Math.floor(z);if(bx<0||bz<0||bx>=W||bz>=D)return -1;
+  for(let yy=Math.floor(y)+1;yy>=Math.floor(y)-3;yy--){if(yy<1||yy>=H-tall)continue;if(!SOLID[get(bx,yy-1,bz)])continue;let ok=true;for(let k=0;k<tall&&ok;k++)if(SOLID[get(bx,yy+k,bz)])ok=false;if(ok)return yy;}return -1;}
+const foeWet=(x,y,z)=>{const id=get(Math.floor(x),y,Math.floor(z));return isWetId(id)||id===LAVA||get(Math.floor(x),y-1,Math.floor(z))===LAVA;};
+function addFoe(kind,x,y,z,o){
+  const F=FOES[kind],K=AM_KINDS[F.m],ci=o&&o.ci!==undefined&&K.coats[o.ci]?o.ci:amCoat(F.m,Math.random()),m=amBuild(F.m,ci,{});scene.add(m.grp);scene.add(m.shadow);
+  const f=Object.assign({id:foeId++,kind:kind,x:x,y:y,z:z,gy:y,vy:0,kvx:0,kvz:0,yaw:Math.random()*6.283,hd:0,sp:0,st:'idle',t:1+Math.random()*2,hp:F.hp,mhp:F.hp,hx:x,hy:y,hz:z,grp:0,
+    ph:Math.random()*6,amp:0,atk:0,atkK:'',atkT:0,shotT:1+Math.random()*2,whipT:3,seen:0,losT:0,vis:false,lk:0,lkT:0,hurt:0,ct:4+Math.random()*10,lt:0,eL:1,eB:0,det:0,detT:0,ci:ci,m:m},o||{});
+  f.hd=f.yaw;if(!f.grp)f.grp=f.id;foes.push(f);placeFoe(f,0);return f;
+}
+function removeFoe(f){scene.remove(f.m.grp);scene.remove(f.m.shadow);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
+// a group of `n` from a place's table around (x,z) near height y, sharing a group and a home; spread within r
+function spawnGroup(table,n,x,y,z,r,o){
+  let lead=null;const out=[];
+  for(let i=0;i<n;i++){const kind=i===0&&o&&o.lead?o.lead:pickW(FOE_HOME[table]),tall=FOES[kind].tall||2;let p=null;
+    for(let k=0;k<14&&!p;k++){const a=Math.random()*6.283,d=Math.random()*r,xx=x+Math.cos(a)*d,zz=z+Math.sin(a)*d,yy=foeStand(xx,y+1,zz,tall);if(yy>0&&!foeWet(xx,yy,zz))p=[xx,yy,zz];}
+    if(!p)continue;const f=addFoe(kind,p[0],p[1],p[2],Object.assign({grp:lead?lead.grp:0,spot:o&&o.spot},o&&o.sleep&&Math.random()<o.sleep?{st:'sleep',t:999}:{}));if(!lead)lead=f;out.push(f);}
+  return out;
+}
+// ---- Where foes come from: the places near the player (warren halls and camps, fortresses, the Ashen Citadel) are peopled
+// once while you are near; out on the wastes warbands and trolls come and go
+const FOE_CAP=16;
+function foePlaces(){
+  const X=PL.x+OX,Z=PL.z+OZ,out=[];
+  // a warren's halls fill while you are underground near them (or right above); the camps at its ways in whenever you are near
+  const bx=Math.floor(PL.x),bz=Math.floor(PL.z),under=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y<ground[bx+W*bz]-6;
+  for(const s of warrenSpots(X,Z,60))if(s.kind==='camp'||(under?Math.hypot(s.x-X,s.z-Z)<52:Math.hypot(s.x-X,s.z-Z)<28))out.push(s);
+  for(const F of fortsNear(X,Z,80)){const S=fortSpots(F),id='f'+F.v.i+','+F.v.j;out.push({id:id+'g',x:S.guards[0].x,y:F.Fy,z:S.guards[0].z,R:6,kind:'gate'});if(!fallenLords.has(id))out.push({id:id,x:S.lord.x,y:S.lord.y,z:S.lord.z,R:1,kind:'lord',F:F});}
+  const sg=sigNear(X,Z,60);if(sg&&sg.kind==='citadel')out.push({id:'s'+sg.X+','+sg.Z,x:sg.X,y:sg.g,z:sg.Z,R:9,kind:'citadel'});
+  return out;
+}
+function foeSpawnTick(){
+  const X=PL.x+OX,Z=PL.z+OZ;
+  // a place is peopled once while the player is near; it may be again after they have gone well away
+  for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>120)foeSpots.delete(id);
+  for(const s of foePlaces()){if(foeSpots.has(s.id)||(foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+    foeSpots.set(s.id,{x:s.x,z:s.z});const o={spot:s.id};
+    if(s.kind==='lord'){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
+    if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
+    const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
+    spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':null,sleep:s.kind==='den'?0.45:0});}
+  // the wastes: a warband (sometimes led by a warchief) or a troll, out of sight, on open ground of the volcanic land
+  const roam=foes.filter(f=>!f.spot&&!f.dead).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
+  const a=PL.yaw+Math.PI+(Math.random()-0.5)*Math.PI*1.4,d=38+Math.random()*28,x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
+  colInfo(bx+OX,bz+OZ,TFO);if(TFO.wVolc<0.55||TFO.vflow||TFO.vfis||TFO.vlake)return;const top=get(bx,g,bz);if(!SOLID[top]||top===LAVA)return;
+  if(Math.random()<0.2)spawnGroup('band',1,x,g,z,2,{lead:'troll'});
+  else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),x,g,z,5,{lead:Math.random()<0.12?'ochief':null});
+}
+// ---- Behaviour
+// can a foe see the player? A ray from its eyes to the player's, through anything but solid opaque blocks
+function foeSees(f){const F=FOES[f.kind],ex=f.x,ey=f.y+f.m.box[4]*0.85,ez=f.z,tx=PL.x,ty=PL.y+EYE,tz=PL.z,d=Math.hypot(tx-ex,ty-ey,tz-ez),n=Math.ceil(d*2);
+  if(d>F.sight*2.6)return false;for(let k=1;k<n;k++){const q=k/n,id=get(Math.floor(ex+(tx-ex)*q),Math.floor(ey+(ty-ey)*q),Math.floor(ez+(tz-ez)*q));if(OPQ[id]&&SOLID[id])return false;}return true;}
+const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
+function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee')continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
+  foeCall(f,'alert');}
+function foeHome(f,r){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=1+Math.random()*r,tx=f.hx+Math.sin(a)*d,tz=f.hz+Math.cos(a)*d,ty=foeStand(tx,f.y,tz,FOES[f.kind].tall||2);
+  if(ty>0&&Math.abs(ty-f.y)<=2&&!foeWet(tx,ty,tz)){f.tx=tx;f.tz=tz;return true;}}return false;}
+function stepFoe(f,dt){
+  const F=FOES[f.kind],dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
+  f.hurt=Math.max(0,f.hurt-dt*3);f.atkT-=dt;f.shotT-=dt;f.whipT-=dt;f.detT-=dt;
+  if(f.dead){f.dead+=dt;f.sp=0;return;}
+  if(f.hold){f.sp=f.holdSp||0;f.hd=f.yaw;if(f.holdAtk!==undefined)f.atk=f.holdAtk;return;}
+  f.t-=dt;
+  // sight: noticed when near and in view (sleepers only close by); lost when long unseen or far
+  f.losT-=dt;if(tg&&f.losT<=0&&dp<F.sight*2.6+4){f.losT=0.35+Math.random()*0.15;f.vis=dp<F.sight*2.6&&Math.abs(dy)<14&&foeSees(f);}
+  if(!tg){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
+  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(f.vis&&dp<rr)foeAlert(f);}
+  else if(f.st==='chase'){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||dp>F.sight*2.5){f.st='return';f.atk=0;}}
+  if(F.flee&&tg&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
+  if(f.st==='flee'&&f.t<=0)f.st='chase';
+  let want=0,face=false;
+  switch(f.st){
+    case 'sleep':break;
+    case 'idle':if(f.t<=0){if(Math.random()<0.5&&foeHome(f,6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
+    case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=1+Math.random()*3;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
+    case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);if(d<2.5||f.t<-30){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
+    case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
+    case 'chase':{
+      const toward=Math.atan2(dx,dz),S=F.shot;face=true;
+      // ranged: shoot when in range and in view, keeping a distance; otherwise close in
+      if(S&&f.vis&&dp>=S.lo&&dp<=S.hi&&f.shotT<=0&&!f.atk){f.atk=0.45;f.atkK='shot';f.shotT=S.cd*(0.8+Math.random()*0.4);}
+      if(F.whip&&f.vis&&dp>=F.whip.lo&&dp<=F.whip.hi&&f.whipT<=0&&!f.atk){f.atk=0.55;f.atkK='whip';f.whipT=F.whip.cd;}
+      if(dp<F.reach+0.2&&Math.abs(dy)<2.4&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
+      if(F.keep&&dp<F.keep&&!f.atk){f.hd=toward+Math.PI+(f.id%2?0.5:-0.5);want=F.walk*1.2;}
+      else if(F.keep&&S&&dp<=S.hi*0.8&&f.vis){f.hd=toward+(Math.floor(foeClock/3+f.id)%2?1.4:-1.4);want=F.walk*0.6;}
+      else if(dp>F.reach*0.8){f.hd=toward;want=dp>6?F.run:F.walk*1.6;}
+      if(f.atk)want*=0.25;
+      // a way round what blocks it
+      if(f.det&&f.detT>0)f.hd+=f.det*1.1;break;}
+  }
+  // the blow, the shot or the lash lands at the end of its wind-up
+  if(f.atk>0){f.atk-=dt;if(f.atk<=0){f.atk=0;foeStrike(f,F);}}
+  // turn and move like the animals: steps of one block up, drops of up to three, never into water or lava
+  const tall=F.tall||2,turn=F.mass<0.2?2.6:F.mass<0.5?4:6;
+  if(face&&!want)f.hd=Math.atan2(dx,dz);
+  const dh=angTo(f.yaw,f.hd);f.yaw+=Math.sign(dh)*Math.min(Math.abs(dh),turn*dt*(f.st==='chase'?1.5:1));
+  if(Math.abs(dh)>1.3)want*=0.3;f.sp+=(want-f.sp)*Math.min(1,dt*6);if(f.sp<0.01)f.sp=0;
+  const mx=Math.sin(f.yaw)*f.sp+f.kvx,mz=Math.cos(f.yaw)*f.sp+f.kvz;f.kvx*=Math.max(0,1-dt*5);f.kvz*=Math.max(0,1-dt*5);
+  if(Math.abs(mx)+Math.abs(mz)>1e-4){const nx=f.x+mx*dt,nz=f.z+mz*dt,ml=Math.hypot(mx,mz),rr=Math.max(0.25,f.m.box[5]*0.8),fx=f.x+mx/ml*rr,fz=f.z+mz/ml*rr;
+    const gn=foeStand(nx,f.y+0.05,nz,tall),gf=foeStand(fx,f.y+0.05,fz,tall),ok=gn>0&&gf>0&&gn-f.y<=1.01&&gf-f.y<=1.01&&f.y-gn<=3&&f.y-gf<=3&&!foeWet(nx,gn,nz)&&!foeWet(fx,gf,fz);
+    if(ok){f.x=nx;f.z=nz;f.gy=gn;f.stuck=0;}else{f.sp*=0.2;f.kvx=f.kvz=0;f.stuck=(f.stuck||0)+dt;if(f.st==='walk'){f.st='idle';f.t=0.5;}else if(f.st==='chase'&&f.detT<=0){f.det=Math.random()<0.5?1:-1;f.detT=0.9;}
+      else if(f.st==='flee'||f.st==='return')f.hd=f.yaw+(f.id%2?1:-1)*(1.4+Math.random());}}
+  const gy=foeStand(f.x,f.y+0.05,f.z,tall);if(gy>0)f.gy=gy;
+  if(f.vy>0||f.y>f.gy+0.001){f.vy-=24*dt;f.y+=f.vy*dt;if(f.y<=f.gy){f.y=f.gy;f.vy=0;}}else if(f.y<f.gy)f.y=Math.min(f.gy,f.y+5*dt);
+  // room from each other and the player
+  const r1=Math.max(f.m.box[3],-f.m.box[0])+0.1;
+  if(dp<r1+0.3&&dp>0.01){f.kvx-=dx/dp*dt*14;f.kvz-=dz/dp*dt*14;}
+  for(const g of foes){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e=Math.hypot(ex,ez),rr=r1+Math.max(g.m.box[3],-g.m.box[0]);if(e<rr&&e>0.01){f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}
+  // the head turns to the player when near; now and then a call
+  if(dp<12&&f.st!=='sleep'){f.lkT=Math.max(-0.8,Math.min(0.8,angTo(f.yaw,Math.atan2(dx,dz))));}else f.lkT*=0.9;
+  f.ct-=dt;if(f.ct<=0){f.ct=(f.st==='chase'?3:8)+Math.random()*10;if(dp<36&&f.st!=='sleep')foeCall(f,f.st==='chase'?'alert':'idle');}
+}
+// a blow, a shot or a lash, as its wind-up ends
+function foeStrike(f,F){
+  const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
+  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<2.6){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
+  else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(tg&&dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtPlayer(F.whip.dmg,F.cause,-dx/(dp||1)*0.6,-dz/(dp||1)*0.6,4);
+    for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
+  else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
+}
+// a hit on the player: the blow, knocked back and up, less through armour
+function foeHurtPlayer(n,cause,ux,uz,kb){if(!foeTarget())return;const before=hp;hurt(armourCut(n),cause);if(hp<before){PL.vx+=ux*kb;PL.vz+=uz*kb;PL.vy=Math.max(PL.vy,3.5);PL.ground=false;}}
+// ---- Shots: arrows, sling stones, goblin fire, a troll's rock and an Emberlord's fire, flying by speed and weight
+const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]}};
+const shotGeo=new THREE.BoxGeometry(1,1,1);
+function foeShoot(f,S,k){
+  const K=SHOT_K[S.k],ex=f.x+Math.sin(f.yaw)*0.6,ey=f.y+f.m.box[4]*0.8,ez=f.z+Math.cos(f.yaw)*0.6;
+  // lead the player a little, and loft a heavy shot so it lands
+  const tx=PL.x,ty=PL.y+1.1,tz=PL.z,d=Math.hypot(tx-ex,tz-ez),t=d/S.v,ax=tx+PL.vx*t*0.6+(k?(Math.random()-0.5)*k*2.5:0),az=tz+PL.vz*t*0.6+(k?(Math.random()-0.5)*k*2.5:0);
+  const vx=(ax-ex)/t,vz=(az-ez)/t,vy=(ty-ey)/t+0.5*K.g*t;
+  const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(K.col[0],K.col[1],K.col[2]),transparent:!!K.glow,opacity:K.glow?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
+  m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}m.frustumCulled=false;scene.add(m);
+  shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
+  if(S.k==='fire')burst(0.5,'lowpass',500,0.8,0.25,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
+}
+function updShots(dt){
+  for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;s.vy-=K.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;
+    let gone=s.life<=0;const id=get(Math.floor(s.x),Math.floor(s.y),Math.floor(s.z));
+    if(!gone&&SOLID[id])gone=true;
+    if(!gone&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
+      const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
+    if(s.k==='fire'&&Math.random()<0.6)spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
+    if(gone){if(s.k==='fire')for(let k=0;k<8;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
+      else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
+      scene.remove(s.m);s.m.material.dispose();shots.splice(i,1);continue;}
+    s.m.position.x=s.x;s.m.position.y=s.y;s.m.position.z=s.z;s.m.rotation.y=Math.atan2(s.vx,s.vz);s.m.rotation.x=-Math.atan2(s.vy,Math.hypot(s.vx,s.vz));}
+}
+// ---- The parts in motion: legs and arms in step, a wind-up and a blow, a bow drawn, a sling whirled, wings that beat,
+// a whip that trails, a fall when slain
+function placeFoe(f,dt){
+  const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
+  f.ph+=sp*dt/(big?1.6:F.walk>1.4?0.9:1.1)*6.2832;f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
+  f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
+  const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
+  if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
+  if(P.armL){P.armL.rotation.x=rest(P.armL)[0]-s1*amp*0.8;P.armR.rotation.x=rest(P.armR)[0]+s1*amp*0.8;P.armL.rotation.z=rest(P.armL)[2];P.armR.rotation.z=rest(P.armR)[2];}
+  // the attack: the right arm (or both, for a shot or a lash) raised through the wind-up, then brought down at once
+  if(f.atk>0){const up=Math.min(1,prog*1.4);
+    if(f.atkK==='blow'){P.armR.rotation.x=rest(P.armR)[0]-2.6*up;if(big)P.armL.rotation.x=rest(P.armL)[0]-1.4*up;}
+    else if(f.atkK==='shot'){if(F.shot.k==='arrow'){P.armL.rotation.x=-1.5;P.armR.rotation.x=-1.5;P.armR.rotation.z=0.6*up;}else{P.armR.rotation.x=rest(P.armR)[0]-2.8*up;}}
+    else if(f.atkK==='whip'){P.armL.rotation.x=-1.2*up;P.armL.rotation.z=0.9*up;}}
+  else if(f.swing>0){f.swing=Math.max(0,f.swing-dt*5);P.armR.rotation.x=rest(P.armR)[0]+0.7*f.swing;} // the follow-through
+  if(f.st==='sleep'&&P.body){root.rotation.x+=(-1.45-root.rotation.x)*Math.min(1,dt*2);root.position.y=0.25;}
+  else if(!f.dead){root.rotation.x*=1-Math.min(1,dt*6);root.position.y=0;}
+  if(P.head){P.head.rotation.y=f.lk*0.7;}
+  if(P.wingL){const b=Math.sin(foeClock*(f.st==='chase'?3.2:1.4))*0.25;P.wingL.rotation.y=rest(P.wingL)[1]+b;P.wingR.rotation.y=rest(P.wingR)[1]-b;}
+  if(P.whip1){const k=f.atkK==='whip'&&f.atk>0?prog:0,wv=Math.sin(foeClock*4+f.id)*0.25;P.whip1.rotation.x=rest(P.whip1)[0]-k*1.4+wv;P.whip2.rotation.x=rest(P.whip2)[0]+wv*1.2;P.whip3.rotation.x=rest(P.whip3)[0]+wv*1.5;}
+  if(P.tail)P.tail.rotation.y=Math.sin(foeClock*1.3+f.id)*0.3;
+  if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;
+  if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
+  if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
+  M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
+  // light where it stands (eased), the struck flash; the shadow
+  f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
+  if(f.eLT!==undefined){f.eL+=(f.eLT-f.eL)*Math.min(1,dt*4);f.eB+=(f.eBT-f.eB)*Math.min(1,dt*4);}
+  const u=M.mat.uniforms;u.eL.value=f.eL;u.eB.value=f.lordOf?Math.max(f.eB,0.55):f.eB;u.hurt.value=f.hurt;
+  const sh=M.shadow,b=M.box,dist=Math.hypot(f.x-PL.x,f.z-PL.z);sh.position.set(f.x,f.gy+0.02,f.z);sh.rotation.y=f.yaw;sh.scale.set((b[3]-b[0])*1.2,1,(b[5]-b[2])*1.1);
+  sh.material.opacity=f.dead>1?0:0.4*Math.max(0,1-(f.y-f.gy)/2)*Math.max(0,1-dist/Math.max(20,U.fogFar.value))*Math.min(1,f.eL*1.3+f.eB);
+  const vis=dist<U.fogFar.value+10;M.grp.visible=vis;sh.visible=vis&&sh.material.opacity>0.01;
+  // an Emberlord sheds embers
+  if(f.kind==='ember'&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
+}
+function updFoes(dt){
+  if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
+  foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover('f',FOES[f.kind].n);}
+  for(let i=foes.length-1;i>=0;i--){const f=foes[i];
+    if(f.dead>2.6){removeFoe(f);continue;}
+    if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(f.spot?130:96)){removeFoe(f);continue;}
+    stepFoe(f,dt);placeFoe(f,dt);}
+}
+// ---- Calls: each kind's own (synthesized like every sound in the game), from where it stands
+function foeCall(f,what){
+  if(!AX||!settings.sound)return;const at=[f.x,f.y+f.m.box[4]*0.85,f.z],k=f.kind,p=what==='hurt'?1.2:what==='alert'?1.1:1;
+  if(k[0]==='g'){if(what==='alert'||what==='hurt')for(let i=0;i<3;i++)voice(700*p+Math.random()*200,900*p,0.12,0.07,{type:'square',form:1400,q:2,delay:i*0.11},at);
+    else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
+  else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
+  else if(k==='ember'){voice(70*p,45,what==='alert'?1.8:1.1,0.16,{form:200,q:0.9,vib:3,vd:0.08},at);burst(1.2,'lowpass',400,0.6,0.22,0,at);}
+  else{if(what==='alert'&&(k==='ochief'||Math.random()<0.25))tone(155,150,1.2,0.12,0,'sawtooth',at); // a war horn
+    voice(180*p,130,what==='alert'?0.5:0.3,0.09,{form:520,q:1.4,vib:6,vd:0.05},at);}
+  if(what==='blow')burst(0.14,'bandpass',900,1.5,0.16,0,at);
+}
+// ---- Striking a foe (first, nearer than any animal): the held weapon's power, a shield taking some from the front, a push
+// back; slain, it falls and leaves what it carried to you
+function foeHit(reach){
+  const e=eyePos(),d=camDir(),o=[e.x,e.y,e.z],v=[d.x,d.y,d.z];let best=null,bt=reach;const bh=raycast(e,d,reach);
+  if(bh){const t=rayBox(o,v,[bh.x,bh.y,bh.z],[bh.x+1,bh.y+1,bh.z+1],reach);if(t>=0)bt=Math.min(bt,t);}
+  for(const f of foes){if(f.dead)continue;const c=Math.cos(f.yaw),s=Math.sin(f.yaw),ox=o[0]-f.x,oz=o[2]-f.z,b=f.m.box;
+    const t=rayBox([ox*c-oz*s,o[1]-f.y,ox*s+oz*c],[v[0]*c-v[2]*s,v[1],v[0]*s+v[2]*c],[b[0],b[1],b[2]],[b[3],b[4],b[5]],bt);if(t>=0&&t<bt){bt=t;best=f;}}
+  if(best){const a=animalHit(reach);if(a&&Math.hypot(a.x-e.x,a.z-e.z)<Math.hypot(best.x-e.x,best.z-e.z))return null;}
+  return best;
+}
+let foeHitCD=0;
+function foeAct(btn){
+  if(btn!==0)return false;const f=foeHit(4.6);if(!f)return false;const F=FOES[f.kind],held=curId(),it=ITEMS[held];
+  if(foeHitCD>0)return true;foeHitCD=it&&it.tool==='sword'?0.32:it&&it.tool==='axe'?0.5:0.4;swing=1;
+  let dmg=hitPower(held);const front=Math.abs(angTo(f.yaw,Math.atan2(PL.x-f.x,PL.z-f.z)))<1.05;
+  if(F.block&&front&&f.st!=='sleep'){dmg*=1-F.block;burst(0.12,'bandpass',2600,4,0.25,0,[f.x,f.y+1.2,f.z]);}
+  f.hp-=dmg;f.hurt=1;const kx=f.x-PL.x,kz=f.z-PL.z,kd=Math.hypot(kx,kz)||1;f.kvx=kx/kd*5*F.mass;f.kvz=kz/kd*5*F.mass;if(F.mass>0.3)f.vy=2.5;
+  wearHeld(1);for(let k=0;k<6;k++)spawnP(f.x,f.y+f.m.box[4]*0.6,f.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,f.kind==='ember'?[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
+  if(f.st!=='chase'&&f.st!=='flee'&&foeTarget())foeAlert(f);if(f.st==='sleep'){f.st='idle';}foeCall(f,'hurt');
+  if(f.hp<=0)foeSlain(f);
+  return true;
+}
+function foeSlain(f){
+  const F=FOES[f.kind],got=[];f.dead=0.001;f.st='dead';f.sp=0;f.atk=0;
+  if(SURV())for(const [id,lo,hi,ch] of F.drops)if(Math.random()<ch){const n=lo+Math.floor(Math.random()*(hi-lo+1)),left=addItem(id,n);if(left)toast('No room for '+nameOf(id));got.push(n+' '+nameOf(id));}
+  drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
+  if(f.lordOf){fallenLords.add(f.lordOf);saveDirty=true;showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
+    burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
+}
+// armour (D-052): a coat in the body slot takes a share of every blow from a foe, and wears
+function armourCut(n){const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[q.id];q.d=(q.d||0)+1;if(q.d>=it.dur){equip.body=null;toast('Your '+it.n+' is worn through');}return Math.max(1,Math.round(n*(1-it.armor)));}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -6536,10 +7290,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
-const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below'];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
+const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below','The Goblin Warrens'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{a:[],l:[],y:[],h:[],r:[],q:[]}};
+const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -6558,7 +7312,7 @@ function discoverTick(dt){
   discT-=dt;if(discT>0||!ready)return;discT=1;
   if(LWX.k)discover('l',LWX.k);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;
-  if(yy<ground[bx+W*bz]-3){discover('y',LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
+  if(yy<ground[bx+W*bz]-3){discover('y',warrenName(X,yy,Z)?LAYER_BANDS[6]:LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
     if(yy<100&&ruinZone(cx,cz))discover('h',holdOf(cx,cz).name);const m=remainsNear(X,yy,Z);if(m)discover('r',m.name);}
 }
 // The journal: chronicle pages by hold (pages not yet found are marked), the tablets read, and the discovery log
@@ -6643,6 +7397,13 @@ function bringAnimal(v){
   if(creativeOnly())return null;const [k,md]=String(v).split('.');if(!ANIMALS[k])return null;
   for(const d of [4,3,5,2.5,6]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=standY(x,PL.y+1,z);if(y<0||isWetId(get(Math.floor(x),y,Math.floor(z))))continue;
     const a=addAnimal(k,x,y,z,{young:md==='y'});a.yaw=PL.yaw+Math.PI;a.st='idle';a.t=4;const cn=AM_KINDS[k].coats[a.ci][0].name;toast((md==='y'?'A young ':'A ')+ANIMALS[k].n.toLowerCase()+(cn?', '+cn:''));return a;}
+  toast('No open ground in front of you');return null;
+}
+// Bring a foe (D-052): it stands a few blocks in front of you and, in creative, takes no notice of you
+function bringFoe(k){
+  if(creativeOnly()||!FOES[k])return null;const tall=FOES[k].tall||2;
+  for(const d of [5,4,6,3.5,8]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=foeStand(x,PL.y+1,z,tall);if(y<0||foeWet(x,y,z))continue;
+    const f=addFoe(k,x,y,z,{st:'idle',t:4});f.yaw=f.hd=PL.yaw;toast('A'+(/^[AEIOU]/.test(FOES[k].n)?'n ':' ')+FOES[k].n.toLowerCase()+(SURV()?'':', which takes no notice of you in creative'));return f;}
   toast('No open ground in front of you');return null;
 }
 function landTour(k){
@@ -6798,7 +7559,18 @@ const HINTS={
   a_boar:()=>'A boar. Strike one to hunt it for pork and a hide. The striped young are let be.',
   a_horse:()=>'A wild horse. Press '+ctl('place')+' to ride it, and again to get off; '+ctl('sprint')+' gallops.',
   a_hound:()=>'A stray hound. Feed it meat and it follows you; press '+ctl('place')+' to have it stay or follow.',
-  a_mule:()=>'A wild mule. Feed it wheat, turnips, beans or an apple and it carries a pack for you.'
+  a_mule:()=>'A wild mule. Feed it wheat, turnips, beans or an apple and it carries a pack for you.',
+  // the foes of the Volcanic Wastes (D-052)
+  f_goblin:()=>'A goblin cutter. Goblins come in packs and flee when hurt. A sword ('+ctl('break')+') is the best answer; armour in the body slot takes part of each blow.',
+  f_gslinger:()=>'A goblin slinger. It keeps its distance and throws stones. Close in fast.',
+  f_gfire:()=>'A goblin firecaller. Its fire flies slowly: step aside, then strike.',
+  f_gchief:()=>'A goblin chieftain, the master of this warren. Its hoard is by its throne.',
+  f_raider:()=>'An orc raider. Orcs roam the Volcanic Wastes in warbands. Fight them one at a time if you can.',
+  f_bowman:()=>'An orc bowman. Its arrows reach far; get behind rock or get close.',
+  f_brute:()=>'An orc brute. Its shield takes most of a blow from the front: strike it from the side or behind.',
+  f_ochief:()=>'An orc warchief. When it sounds its horn the whole warband comes.',
+  f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
+  f_ember:()=>'An Emberlord: a demon of fire and shadow. Its whip reaches far and its fire comes in threes. Few survive it.'
 };
 let hintT=0,darkT=0;
 function hint(id){
@@ -6813,6 +7585,7 @@ function hintTick(dt,hit){
   if(food<=14)hint('hunger');
   if(PL.climb)hint('climb');
   {const an=animalHit(8);if(an)hint('a_'+an.kind);} // the first time you look at each kind of animal (E1)
+  {const fo=foeHit(14);if(fo)hint('f_'+fo.kind);} // and each kind of foe (D-052)
   if(hit){if(hit.id===LECTERN)hint('lectern');else if(hit.id===WAYSTONE)hint('waystone');else if(isBox(hit.id))hint('box');}
   if(lampLevel()[0]===0&&lampDark()){darkT+=dt;if(darkT>3)hint('dark');}else darkT=0;
 }
@@ -6835,8 +7608,8 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
-    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,BASBRICK,EMBRICK,HIDE,GRATE,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
@@ -6870,6 +7643,8 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
 ['gox','goy','goz'].forEach(id=>$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('gobtn').click();}));
 {const sel=$('animsel');for(const k in ANIMALS){for(const yg of [0,1]){if(yg&&!ANIMALS[k].youngP)continue;const o=document.createElement('option');o.value=k+(yg?'.y':'');o.textContent=yg?'  young '+ANIMALS[k].n.toLowerCase():ANIMALS[k].n;sel.appendChild(o);}}
   $('animbtn').addEventListener('click',()=>{if(bringAnimal(sel.value))lockOrPlay();});}
+{const sel=$('foesel');for(const k in FOES){const o=document.createElement('option');o.value=k;o.textContent=FOES[k].n;sel.appendChild(o);}
+  $('foebtn').addEventListener('click',()=>{if(bringFoe(sel.value))lockOrPlay();});}
 {const sel=$('stampsel');for(const k in STAMPS){const o=document.createElement('option');o.value=k;o.textContent=STAMPS[k];sel.appendChild(o);}
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];
@@ -6922,7 +7697,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -7051,7 +7826,7 @@ function respawn(){
 function regenerateAll(X,Z){
   const nOX=Math.floor(X/CS)*CS-W/2,nOZ=Math.floor(Z/CS)*CS-D/2,ddx=nOX-OX,ddz=nOZ-OZ;
   OX=nOX;OZ=nOZ;
-  torches.clear();farms.clear();flowQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
+  torches.clear();farms.clear();flowQ.clear();lavaQ.clear();fallQ.clear();lbox=null;mmDirty.clear();genQ.length=0;genJob=null;
   clearEntities(ddx,ddz);
   BLK.fill(0);SKL.fill(0);world.fill(0);genDone.fill(0);
   const cm=NCX>>1;mmImg.data.fill(0);mmPut=true;
@@ -7099,7 +7874,7 @@ function shiftWindow(dx,dz){
   }
   {const g2=new Uint8Array(NCX*NCZ);for(let z=0;z<NCZ;z++)for(let x=0;x<NCX;x++){const ox=x+cdx,oz=z+cdz;if(ox>=0&&oz>=0&&ox<NCX&&oz<NCZ)g2[x+z*NCX]=genDone[ox+oz*NCX];}genDone.set(g2);}
   const nd=[];dirty.forEach(c=>{const x=c%NCX-cdx,z=((c/NCX)|0)-cdz;if(x>=0&&z>=0&&x<NCX&&z<NCZ)nd.push(x+z*NCX);});dirty.clear();nd.forEach(c=>dirty.add(c));
-  shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
+  shiftIdx(torches,dx,dz);shiftIdx(farms,dx,dz);shiftIdx(flowQ,dx,dz);shiftIdx(lavaQ,dx,dz);shiftIdx(fallQ,dx,dz);mmDirty.clear();
   if(lbox){lbox[0]-=dx;lbox[1]-=dx;lbox[4]-=dz;lbox[5]-=dz;}
   // queue the new strip; it is generated a chunk or two per frame
   if(genJob){genJob.cx-=cdx;genJob.cz-=cdz;if(genJob.cx<0||genJob.cz<0||genJob.cx>=NCX||genJob.cz>=NCZ)genJob=null;} // the chunk under way moves with the window, or is dropped
@@ -7363,8 +8138,17 @@ let fireScanT=0,lavaSpots=[],ventSpots=[],bombT=4;
 function fireScan(){lavaSpots=[];ventSpots=[];const px=Math.floor(PL.x),pz=Math.floor(PL.z);
   for(let dz=-22;dz<=22;dz+=2)for(let dx=-22;dx<=22;dx+=2){const x=px+dx,z=pz+dz;if(x<0||z<0||x>=W||z>=D)continue;const ci=x+W*z,y=hm[ci],id=world[I(x,y,z)];
     if(id===LAVA)lavaSpots.push([x,y,z]);else if(id===VENT||world[I(x,ground[ci],z)]===VENT)ventSpots.push([x,ground[ci],z]);}}
+// Underground in the goblin warrens or an Emberlord's fortress (D-052) the dark glows red: the cave fog and the cave's own dim
+// light warm to fire, and embers drift in the air (warF, eased; main-loop's cave light reads it)
+let warF=0,warT=0,warIn=false;
+function warGlowTick(dt){
+  warT-=dt;if(warT<=0){warT=0.5;const bx=Math.floor(PL.x),bz=Math.floor(PL.z),yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;warIn=bx>=0&&bz>=0&&bx<W&&bz<D&&yy<ground[bx+W*bz]-3&&!!(warrenName(X,yy,Z)||fortName(X,yy,Z));}
+  warF+=((warIn?1:0)-warF)*Math.min(1,dt*0.8);
+  caveDark.setRGB(0.035+0.085*warF,0.04-0.012*warF,0.06-0.038*warF);U.caveTint.value.setRGB(0.55+0.45*warF,0.66-0.18*warF,0.9-0.64*warF);
+  if(warF>0.3&&playing)for(let k=0;k<6*dt*warF;k++)spawnP(PL.x+(Math.random()-0.5)*20,PL.y+Math.random()*5-1,PL.z+(Math.random()-0.5)*20,(Math.random()-0.5)*0.3,0.25+Math.random()*0.4,(Math.random()-0.5)*0.3,[1,0.4,0.1],2.5+Math.random()*2,-0.05);
+}
 function fireTick(dt){
-  if(!ready)return;updBolts(dt);updPlumes(dt);updVentPuffs(dt);
+  if(!ready)return;updBolts(dt);updPlumes(dt);updVentPuffs(dt);warGlowTick(dt);
   const b=LWX.burn;if(b<0.05||!playing)return;
   fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=1.5+Math.random()*5;if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
   fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}
@@ -7473,7 +8257,7 @@ function frame(now){
   else if(head===LAVA){U.fogColor.value.setHex(0xc84a10);U.fogNear.value=0;U.fogFar.value=4;renderer.setClearColor(0xc84a10);tint.style.display='block';tint.style.background='rgba(220,90,20,.4)';}
   else{
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
-    const lmp=lampLevel();U.caveMin.value=CV[0]*caveF*(SURV()?depthDim(PL.y):1);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
+    const lmp=lampLevel();U.caveMin.value=Math.max(CV[0]*caveF*(SURV()?depthDim(PL.y):1),0.15*warF*caveF);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
     U.fogNear.value=lerp(Math.max(Math.min(6,FOGN),FOGN*(1-0.3*rainAmt)*(1-0.6*LWX.fog)),CV[3]*0.35,caveF);U.fogFar.value=lerp(Math.max(Math.min(38,FOGF),FOGF*(1-0.25*rainAmt)*(1-0.55*LWX.fog)),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';} // mist by land (M6h)
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;

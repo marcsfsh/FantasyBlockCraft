@@ -151,6 +151,7 @@ function surfaceName(X,Y,Z){
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
+  {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
   {const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcCand(ci+a,cj+b)&&volcAt(ci+a,cj+b);if(v&&Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name;}} // the volcanoes (D-051)
   return null;
 }
