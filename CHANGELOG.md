@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.26.0 (2026-10-10): E1 refined, animals worth looking at
+
+Saves from 0.25.0 load as they are; the world is unchanged.
+
+### Game
+- **New animal models:** every kind is built from pixel boxes with its own painted coat, lit and fogged like the world, with a shadow beneath. Deer with stags' antlers and pale rumps, sheep in curly wool (white, brown or black), bearded goats with swept horns, speckled hens with red combs, bristly boars with tusks, horses in bay, chestnut, grey, dun or black with manes, socks and blazes, hounds in three coats, mules with long ears and, once befriended, their packs.
+- **Young in the herds:** fawns with spots, lambs, kids, chicks, striped piglets and foals. They cannot be taken, shorn, milked or ridden.
+- **They move like animals:** walking and galloping legs, hopping rabbits, pecking hens, grazing and chewing, turning to look at you, flicking ears and swishing tails, a hound that wags and sits, smooth turns, herds that stay together and bolt together, sleep at night. A struck animal flashes, hops back and calls out; one taken falls on its side.
+- **Calls:** bleats, clucks, whinnies, brays, grunts, barks and a deer's bark, each from where the animal stands; hoofbeats while you ride.
+- **Hints** the first time you see each kind; **creative** can bring any animal or its young to you (pause menu).
+- Black sheep give black wool.
+
+### Tooling
+- `tools/shot.mjs --animals[=kinds]` lines animals up in front of the camera (young, stags, coats, walking, running, grazing or asleep by a suffix).
+- `46-wildlife` covers models, coats, textures, turning, herd fright, gaits, sleep, the young, calls and the window shift.
+
 ## 0.25.0 (2026-10-10): E1, wildlife
 
 Saves from 0.24.0 load as they are; the world is unchanged.

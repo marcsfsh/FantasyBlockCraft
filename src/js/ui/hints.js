@@ -10,7 +10,16 @@ const HINTS={
   waystone:()=>'An Ancient Waystone. Press '+ctl('place')+' to attune it; you can travel between attuned stones.',
   box:()=>'Press '+ctl('place')+' to open it. What you leave inside stays there.',
   climb:()=>'Climbing: '+ctl('jump')+' goes up, '+ctl('sprint')+' goes down, and letting go holds you still.',
-  grave:()=>'Your things are in a grave where you fell. Use it to get them back.'
+  grave:()=>'Your things are in a grave where you fell. Use it to get them back.',
+  a_deer:()=>'A deer. Deer are shy: run at them and the herd bolts. Strike one to hunt it for venison and a hide.',
+  a_rabbit:()=>'A rabbit. Quick to bolt; strike one to hunt it for meat.',
+  a_sheep:()=>'A sheep. Use shears on it for wool (it grows back); strike it for mutton.',
+  a_goat:()=>'A mountain goat. Press '+ctl('place')+' with an empty hand for milk.',
+  a_hen:()=>'A wild hen. Press '+ctl('place')+' with an empty hand to take an egg.',
+  a_boar:()=>'A boar. Strike one to hunt it for pork and a hide. The striped young are let be.',
+  a_horse:()=>'A wild horse. Press '+ctl('place')+' to ride it, and again to get off; '+ctl('sprint')+' gallops.',
+  a_hound:()=>'A stray hound. Feed it meat and it follows you; press '+ctl('place')+' to have it stay or follow.',
+  a_mule:()=>'A wild mule. Feed it wheat, turnips, beans or an apple and it carries a pack for you.'
 };
 let hintT=0,darkT=0;
 function hint(id){
@@ -24,6 +33,7 @@ function hintTick(dt,hit){
   hint('start');
   if(food<=14)hint('hunger');
   if(PL.climb)hint('climb');
+  {const an=animalHit(8);if(an)hint('a_'+an.kind);} // the first time you look at each kind of animal (E1)
   if(hit){if(hit.id===LECTERN)hint('lectern');else if(hit.id===WAYSTONE)hint('waystone');else if(isBox(hit.id))hint('box');}
   if(lampLevel()[0]===0&&lampDark()){darkT+=dt;if(darkT>3)hint('dark');}else darkT=0;
 }
