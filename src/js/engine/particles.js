@@ -40,7 +40,7 @@ function prime(x,y,z,fuse){
 function explode(cx,cy,cz){
   const R=4,bx=Math.floor(cx),by=Math.floor(cy),bz=Math.floor(cz);
   const pdx=PL.x-cx,pdy=PL.y+0.9-cy,pdz=PL.z-cz,pd=Math.hypot(pdx,pdy,pdz)||0.01;
-  sfxBoom(pd);shake=Math.max(shake,Math.min(1.2,1.4*(1-pd/45)));buzz(pd<20?60:20);
+  sfxBoom(pd,[cx,cy,cz]);shake=Math.max(shake,Math.min(1.2,1.4*(1-pd/45)));buzz(pd<20?60:20);
   for(let dy=-R;dy<=R;dy++)for(let dz=-R;dz<=R;dz++)for(let dx=-R;dx<=R;dx++){
     const d=Math.sqrt(dx*dx+dy*dy+dz*dz);if(d>R+0.5-Math.random()*1.4)continue;
     const x=bx+dx,y=by+dy,z=bz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;

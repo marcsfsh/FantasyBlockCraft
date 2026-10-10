@@ -54,3 +54,5 @@
 - **Streams cut a channel two blocks deep.** A hillside stream clears the two blocks above its bed, so a tree standing on its path can lose part of its trunk (D-046).
 - **A hold may lack a page.** Each lectern holds a page chosen by its position, so a small hold or a hold with few lecterns standing may not hold all eight pages of its chronicle (D-047).
 - **Lore texts are drafts.** Chronicles, tablet sayings and all names but the dwarves' wait for the owner's approval (`docs/LORE.md`).
+- **Sound is checked only against a stand-in.** Headless tests record the sound graph but hear nothing; the mix, the levels and how the positional sound feels in headphones are for the owner to judge on the Ally X (D-048).
+- **Running water is sampled, not traced.** The water loop listens at forty points within about fifteen blocks, so a waterfall just out of reach is silent (D-048).

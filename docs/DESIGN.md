@@ -44,6 +44,8 @@ These twelve are the looks the world draws today. Since 0.15.0 (M6a, D-039) they
 
 **Lore and chronicles (M7, D-047):** every dwarven hold has a chronicle of eight pages, one on each lectern, from its founding to its fall or to the present day. The journal (L) keeps the pages in order, marks the missing ones, and holds the sayings of the rune tablets you have read. The discovery log records lands, layers, holds, remains and relics. None of it is a goal: the game still works with no goal at all. The texts are drafts in `docs/LORE.md`.
 
+**Sound (M8, D-048):** all synthesized, no music. Master, effects and ambience volumes in the pause menu. Each land has a soundscape by day and by night (birds, crickets, surf and gulls, frogs, wind, rumble and lava, chimes, creaks), and each layer underground its own (drips, rumble, lava near the fire, hammers in an inhabited hold). Sounds come from where they happen, and running water from its direction.
+
 **Lands and their layout (M6a, D-039):**
 - **Cells:** the world is cut into cells about 320 blocks across, their centres shifted and their borders warped. Each cell takes one land from the climate at its centre: warmth (five bands), damp (three), relief (low, hills, high), and sea or coast. Warmth and damp change over thousands of blocks, so neighbouring cells share a climate.
 - **Tiers (Q118):** common lands spread over several cells (median about 490 blocks on a side); uncommon lands are mostly one or two cells (about 340); rare lands are always one cell (about 330). No land is smaller than 215 x 215 blocks; all but the tips of corners lie within a 115-block circle of their own land.

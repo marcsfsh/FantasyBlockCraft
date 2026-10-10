@@ -66,7 +66,8 @@ $('clipseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dat
 function drawMode(){[...$('modeseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.v===mode));}
 $('modeseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&v!==mode){setMode(v);toast(v==='survival'?'Survival mode':'Creative mode');}});segBind('caveseg','cave',v=>+v);segBind('wxseg','weather',v=>v==='1');
 const sndBtn=$('sndbtn');function drawSnd(){sndBtn.textContent=settings.sound?'Sound on':'Sound off';}drawSnd();
-sndBtn.addEventListener('click',()=>{settings.sound=!settings.sound;lsSet(SET_KEY,settings);drawSnd();if(settings.sound)audioInit();});
+sndBtn.addEventListener('click',()=>{settings.sound=!settings.sound;lsSet(SET_KEY,settings);drawSnd();if(settings.sound)audioInit();applyVol();});
+for(const k of ['m','s','a']){const el=$('vol'+k);el.value=vol(k);el.addEventListener('input',()=>{setVol(k,el.value);audioInit();});} // volume sliders (M8)
 $('play').addEventListener('click',lockOrPlay);
 $('respawnbtn').addEventListener('click',revive);
 $('photo').addEventListener('click',()=>{setPhoto(true);lockOrPlay();toast('');});

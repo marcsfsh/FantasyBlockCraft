@@ -34,7 +34,7 @@ function mineTick(dt){
   mineTk-=dt;
   if(mineTk<=0){mineTk=0.24;swing=1;breakFx(hit.x,hit.y,hit.z,hit.id,2);const sd=SND[BL[hit.id].snd]||SND.stone;burst(0.05,'bandpass',sd[0]*0.8,sd[1],0.12);}
   if(mineP>=1){
-    breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
+    breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false,hit.x,hit.y,hit.z);buzz(10);
     const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
     if(info.drop){let lost=0;const got=sick?sickleSweep(hit.x,hit.y,hit.z):id===ROPE||id===GRAPNEL?ropeTake(id,hit.x,hit.y,hit.z):dropsFor(id,tool);
       if(BL[id].mat==='ore')hint('ore');

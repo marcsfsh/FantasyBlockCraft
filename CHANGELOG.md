@@ -5,6 +5,19 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.24.0 (2026-10-10): M8, audio
+
+Saves from 0.23.0 load as they are; the world is unchanged.
+
+### Game
+- **Volume sliders** in the pause menu: master, effects and ambience.
+- **Soundscapes by land and layer:** birdsong in the woods by day and crickets at night; surf and gulls by the sea; frogs in the bogs and vales; wind on the heights and in the dry lands; a low rumble and bubbling lava in the volcanic wastes; chimes in the crystal and star lands; creaks in the grey lands. Underground: drips in the caves, a deeper rumble lower down, lava near the fire below, far hammers in an inhabited hold. Rain quiets the birds.
+- **Positional sound:** breaking and placing blocks, kegs going off, and every ambient sound are heard from where they happen; running water is heard from its direction. Best with headphones.
+- No music, as planned (Q57).
+
+### Tooling
+- New test `45-audio` (a stand-in AudioContext records the sound graph).
+
 ## 0.23.0 (2026-10-10): M7, lore and chronicles
 
 Saves from 0.22.0 load again (see the fix below); the world is unchanged.

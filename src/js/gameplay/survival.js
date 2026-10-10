@@ -270,7 +270,7 @@ function act(btn){
     if(hit.id===TNT&&brushR===0){beginAct();prime(hit.x,hit.y,hit.z,4);endAct();buzz(15);return;}
     if(hit.id===BEDROCK&&brushR===0)return;
     beginAct();
-    breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false);buzz(10);
+    breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false,hit.x,hit.y,hit.z);buzz(10);
     if(brushR===0){setBlock(hit.x,hit.y,hit.z,AIR);if(hit.id===ROPE||hit.id===GRAPNEL)ropeBelow(hit.x,hit.y,hit.z);}
     else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,id)=>{if(id&&id!==BEDROCK&&!BL[id].liquid){if(Math.random()<0.12)breakFx(x,y,z,id,3);setBlock(x,y,z,AIR);}});
     endAct();
@@ -281,7 +281,7 @@ function act(btn){
       const ok=(old)=>old&&old!==BEDROCK&&old!==id&&!BL[old].liquid&&!BL[old].cross;
       if(brushR===0){if(ok(hit.id))setBlock(hit.x,hit.y,hit.z,id);}
       else sphere(hit.x,hit.y,hit.z,brushR,(x,y,z,old)=>{if(ok(old))setBlock(x,y,z,id);});
-      endAct();swing=1;sfxBlock(id,true);buzz(8);return;
+      endAct();swing=1;sfxBlock(id,true,hit.x,hit.y,hit.z);buzz(8);return;
     }
     if(BL[hit.id].cross&&!BL[hit.id].climb){tx=hit.x;ty=hit.y;tz=hit.z;}
     if(ty<0||ty>=H)return;
@@ -294,7 +294,7 @@ function act(btn){
     }else sphere(tx,ty,tz,brushR,(x,y,z,old)=>{if((old===AIR||BL[old].liquid||BL[old].cross)&&!(BL[id].solid&&hitsPlayer(x,y,z))&&!((BL[id].cross||BL[id].torch)&&!SOLID[get(x,y-1,z)]))setBlock(x,y,z,id);});
     if(SURV()&&world[I(tx,ty,tz)]===id){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
     if(id===SPONGE)sphere(tx,ty,tz,4,(x,y,z,old)=>{if(old===WATER)setBlock(x,y,z,AIR,true);});
-    endAct();swing=1;sfxBlock(id,true);buzz(8);
+    endAct();swing=1;sfxBlock(id,true,tx,ty,tz);buzz(8);
   }else if(btn===1){
     if(SURV()){const k=inv.findIndex((q,j)=>j<9&&q&&q.id===hit.id);if(k>=0){sel=k;drawBar();}return;}
     const k=hot.indexOf(hit.id);

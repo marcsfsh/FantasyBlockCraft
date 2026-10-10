@@ -49,7 +49,7 @@ Consequences:
 | `src/js/world/mines.js` | Dwarven mines: galleries, inclines, junctions, great pits, descents |
 | `src/js/engine/chunk-mesher.js` | Underground naming, mesh band and chunk meshing |
 | `src/js/engine/editing-and-physics.js` | Block editing, water flow, falling blocks, waypoint beams |
-| `src/js/engine/audio.js` | Synthesized sound and haptics |
+| `src/js/engine/audio.js` | Synthesized sound and haptics. Since M8: master, effects and ambience buses (`BUS_M`, `BUS_S`, `BUS_A`, `setVol`), positional sound (`panner`, `audioListen`), soundscapes by land and layer (`AMB_LAND`, `AMB_OF`, `ambLayer`, `ambProfile`, `ambTick`, `AMB_EV`) |
 | `src/js/input/actions.js` | Input actions: named actions with keyboard, controller and touch bindings (settings.binds overrides the defaults) |
 | `src/js/input/gamepad.js` | Controller support through the Gamepad API |
 | `src/js/engine/particles.js` | Particles and explosives |
