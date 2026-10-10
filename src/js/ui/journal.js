@@ -15,10 +15,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
 const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{l:[],y:[],h:[],r:[],q:[]}};
+const JN={h:{},t:0,d:{a:[],l:[],y:[],h:[],r:[],q:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -30,7 +30,7 @@ function journalPage(cx,cz,k){
 function readTablet(){const i=JN.t%TABLETS.length;if(JN.t<TABLETS.length){JN.t++;saveDirty=true;}showText('A rune tablet ('+(i+1)+' of '+TABLETS.length+')',TABLETS[i]+(JN.t<=TABLETS.length?'\n\nThe saying is copied into your journal.':''));tone(380,300,0.3,0.05);}
 // The discovery log: a name recorded once in its category, with a word on screen the first time
 function discover(c,v){const L=JN.d[c];if(!L||v===undefined||v===null||v===''||L.includes(v))return false;L.push(v);saveDirty=true;
-  if(c!=='h'&&ready&&playing)toast('Discovered: '+(c==='l'?LANDS[LAND_I[v]].n:c==='q'?nameOf(v):v));return true;}
+  if(c!=='h'&&ready&&playing)toast('Discovered: '+(c==='l'?LANDS[LAND_I[v]].n:c==='q'?nameOf(v):c==='a'?ANIMALS[v].n:v));return true;}
 // Once a second: the land, layer, hold and remains around the player
 let discT=0;
 function discoverTick(dt){
@@ -52,7 +52,7 @@ function journalText(){
   if(!JN.t)out.push('None read yet. Rune tablets turn up in the old holds; hold one and use it to read it.');
   for(let i=0;i<Math.min(JN.t,TABLETS.length);i++)out.push((i+1)+'. '+TABLETS[i]);
   out.push('','DISCOVERIES');
-  for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
+  for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');
 }
 function openJournal(){if(invOpen)closeInv();if(WM.open)closeWorldMap();showText('Journal',journalText());}

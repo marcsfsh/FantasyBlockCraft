@@ -281,7 +281,7 @@ Widened after the round-21 interview: M6 enriches every land and adds 30 new one
 
 These are planned now so refinements leave room for them.
 
-- **E1 Wildlife (Q47, Q48, Q63).**
+- **E1 Wildlife (Q47, Q48, Q63; done in 0.25.0 as the owner's "M9", D-049).**
   - Built on the M1 entity registry.
   - Animals for atmosphere, resources (wool, milk, eggs, hides), hunting for food, mounts, companions and pack animals (Q67).
 - **E2 Settlements and peoples (Q4, Q5, Q11, Q26, Q46).**

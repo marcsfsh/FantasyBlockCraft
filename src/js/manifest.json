@@ -182,6 +182,10 @@
       "about": "Chests, crates and barrels that keep items by world position (M4b), and the container screen"
     },
     {
+      "path": "gameplay/wildlife.js",
+      "about": "Animals (E1): kinds by land, wandering and fleeing, hunting, wool, milk and eggs, riding, a hound and a pack mule that follow you"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

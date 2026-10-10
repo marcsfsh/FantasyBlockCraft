@@ -501,6 +501,10 @@ item(334,'Roast Turnip','turnip',[206,140,90]);item(335,'Pottage','bowl',[170,13
 item(338,'Lamp Oil','oil',[214,180,70],{fuel:1200});item(339,'Pitch Candle','candle',[60,52,46],{fuel:480});item(340,"Miner's Lantern",'lantern',[214,120,68],{equip:'belt',lamp:true,one:true});
 // More room (M4b, Q67): a pack for the pack slot (woven, then sturdy) and a satchel for the bag slot add inventory rows
 item(341,'Woven Pack','pack',[150,170,96],{equip:'pack',slots:9,one:true});item(342,'Sturdy Pack','pack',[150,110,60],{equip:'pack',slots:18,one:true});item(343,'Satchel','satchel',[170,140,90],{equip:'bag',slots:9,one:true});
+// Wildlife (E1, Q47, Q48): meat, hides, eggs and milk from the animals; roasted at a furnace; hides cured into leather
+item(350,'Raw Venison','meat',[176,70,66]);item(351,'Raw Mutton','meat',[190,84,80]);item(352,'Hide','hide',[150,110,72]);item(353,'Raw Rabbit','meat',[196,120,110]);item(354,'Raw Pork','meat',[210,130,124]);
+item(355,'Egg','egg',[226,214,190]);item(356,'Roast Venison','meat',[130,78,44]);item(357,'Roast Mutton','meat',[146,90,52]);item(358,'Roast Rabbit','meat',[160,104,64]);item(359,'Roast Pork','meat',[168,108,64]);
+item(360,"Goat's Milk",'flask',[236,234,226]);item(361,'Boiled Egg','egg',[240,232,214]);item(362,'Leather','hide',[120,78,44]);
 const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
 // Held to use once per press: holding the button does not repeat it
 const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
@@ -526,6 +530,10 @@ function itemIcon(id){
   else if(it.kind==='jack'){g.fillStyle='#30323a';g.fillRect(3,2,10,2);g.fillStyle='#e0b030';g.fillRect(5,4,6,6);g.fillStyle='#8a8e98';g.fillRect(7,10,2,4);g.fillStyle='#c8ccd4';g.fillRect(7,14,2,2);}
   else if(it.kind==='saw'){g.fillStyle='#e07828';g.fillRect(2,6,6,6);g.fillStyle='#30323a';g.fillRect(3,4,4,2);g.fillStyle='#b8bcc6';g.fillRect(8,8,7,3);g.fillStyle='#50545e';for(let x=8;x<15;x+=2){g.fillRect(x,7,1,1);g.fillRect(x+1,11,1,1);}}
   else if(it.kind==='hoe'){for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}g.fillStyle='#9a9ea8';g.fillRect(8,2,6,2);g.fillRect(12,4,2,2);g.fillStyle='#6a6e78';g.fillRect(8,3,6,1);}
+  else if(it.kind==='meat'){for(let y=3;y<13;y++)for(let x=2;x<12;x++){const d=Math.hypot((x-6.5)/4.6,(y-7.5)/4.2);if(d<1)px(x,y,(d>0.8?-40:0)+(x<6&&y<7?24:0)+(r()-.5)*24);}g.fillStyle='#ece4d0';g.fillRect(11,10,3,2);g.fillRect(13,9,2,1);g.fillRect(13,12,2,1);}
+  else if(it.kind==='egg'){for(let y=2;y<14;y++)for(let x=3;x<13;x++){const d=Math.hypot((x-7.5)/4.6,(y-(y<8?8:8))/(y<8?5.6:5));if(d<1)px(x,y,(d>0.82?-34:0)+(x<7&&y<7?22:0));}}
+  else if(it.kind==='hide'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const e=Math.abs(x-7.5)+Math.abs(y-7.5)*0.8+Math.sin(x*1.3+y)*0.8;if(e<7.5)px(x,y,(e>6.3?-36:0)+(r()-.5)*26);}}
+  else if(it.kind==='flask'){for(let y=6;y<14;y++)for(let x=4;x<12;x++)px(x,y,(x===4||y===13?-30:0)+(x<7?18:0));g.fillStyle='#8a6a40';g.fillRect(6,2,4,4);g.fillStyle='#5a4428';g.fillRect(6,2,4,1);}
   else if(it.kind==='bread'){for(let y=5;y<13;y++)for(let x=2;x<14;x++){const d=Math.hypot((x-7.5)/6,(y-9)/4);if(d<1)px(x,y,(y<8?20:0)+(d>0.8?-40:0)+((x-y)%4===0&&y<9?-30:0));}}
   else if(it.kind==='apple'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-9)*1.1);if(d<5.2)px(x,y,(d>4.4?-40:0)+(x<6&&y<8?40:0));}g.fillStyle='#5a3a1a';g.fillRect(8,2,1,3);g.fillStyle='#4a9a3a';g.fillRect(9,2,3,2);}
   else if(it.kind==='pan'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-7.5)/7,(y-9)/4);if(d<1)px(x,y,d>0.78?-30:d>0.6?10:30);}g.fillStyle='#fad246';g.fillRect(6,9,1,1);g.fillRect(9,8,1,1);}
@@ -5036,7 +5044,7 @@ function updTNT(dt){
 }
 
 // Player
-const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false,climb:false};
+const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false,climb:false,ride:null};
 let spawnW=[0.5,H-5,0.5];
 const HW=0.3,PH=1.8,EYE=1.62;
 function solidAt(x,y,z){if(x<0||z<0||x>=W||z>=D)return true;if(y<0||y>=H)return false;return SOLID[world[I(x,y,z)]]===1;}
@@ -5230,7 +5238,9 @@ const RECIPES=[
   // storage, the worn lamp and cooking (M4b)
   [CHEST,1,[[PLANKSET,8]]],[341,1,[[328,12],[ROPE,2]]],[342,1,[[341,1],[225,4],[ROPE,4]]],[343,1,[[328,8],[ROPE,1]]],
   [340,1,[[220,2],[GLASS,1],[201,1]]],[338,1,[[208,6]]],[339,2,[[328,1],[200,1]]],
-  [334,2,[[330,2],[200,1]],'f'],[335,2,[[330,1],[331,2],[333,1],[200,1]],'f'],[336,2,[[332,3],[202,2],[200,1]],'f'],[337,2,[[333,3],[200,1]],'f']
+  [334,2,[[330,2],[200,1]],'f'],[335,2,[[330,1],[331,2],[333,1],[200,1]],'f'],[336,2,[[332,3],[202,2],[200,1]],'f'],[337,2,[[333,3],[200,1]],'f'],
+  // wildlife (E1): roasts and a boiled egg at a furnace; hides cured into leather; a sturdy pack of leather
+  [356,1,[[350,1],[200,1]],'f'],[357,1,[[351,1],[200,1]],'f'],[358,1,[[353,1],[200,1]],'f'],[359,1,[[354,1],[200,1]],'f'],[361,2,[[355,2],[200,1]],'f'],[362,1,[[352,1],[200,1]],'f'],[342,1,[[362,6],[ROPE,2]]]
 ];
 // The tool ladder (items.js): pickaxe and axe from three of the material, shovel from one, each with two sticks
 const LADDER_MAT=[PLANKSET,COBBLE,220,225,223,227,228];
@@ -5320,7 +5330,7 @@ function renderBlueprints(box){
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4};
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3}; // meat, eggs and milk since E1
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -5565,7 +5575,7 @@ function jumpPress(){
 }
 // where the player looks and from where, from the player's view angles (the camera follows them every frame)
 function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Math.sin(PL.pitch),z:-Math.cos(PL.yaw)*cp};}
-function eyePos(){return{x:PL.x,y:PL.y+EYE,z:PL.z};}
+function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
   const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
@@ -5574,6 +5584,7 @@ function useBlock(th){
 function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
+  if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
@@ -5733,6 +5744,124 @@ function renderBox(col){
   const all=document.createElement('button');all.className='wide';all.textContent='Take everything';all.addEventListener('click',()=>{boxTakeAll();renderSInv();});col.appendChild(all);
 }
 function isBox(id){return id===CHEST||id===CRATE||id===DWCHEST||id===BARREL;}
+// ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
+// they give wool, milk and eggs, meat and hides to the hunter; wild horses can be ridden, a stray hound fed meat follows you, and
+// a wild mule fed crops carries a pack. Animals are not part of generation: they come and go around the player (Math.random is
+// fine here), and only the ones you have befriended are saved with the world (an).
+const ANIMALS={
+  deer:{n:'Deer',col:[150,104,62],head:[124,86,52],sz:[0.6,0.8,1.2],leg:0.7,speed:3.4,shy:9,hp:6,drops:[[350,2],[352,1]],g:['wood','meadow'],herd:[1,3],w:3},
+  rabbit:{n:'Rabbit',col:[150,132,112],head:[160,140,120],sz:[0.3,0.3,0.45],leg:0.12,speed:4,shy:6,hp:2,drops:[[353,1]],g:['wood','meadow','dry'],herd:[1,2],w:4},
+  sheep:{n:'Sheep',col:[226,222,210],head:[70,64,60],sz:[0.8,0.7,1.1],leg:0.45,speed:1.6,hp:6,drops:[[351,2]],g:['meadow','farm'],herd:[2,5],w:4,shear:WOOLW},
+  goat:{n:'Mountain Goat',col:[204,200,190],head:[176,168,156],sz:[0.55,0.65,0.9],leg:0.5,speed:2.6,shy:4,hp:6,drops:[[351,1],[352,1]],g:['high'],herd:[1,3],w:4,milk:true},
+  hen:{n:'Wild Hen',col:[176,120,70],head:[200,64,44],sz:[0.32,0.38,0.42],leg:0.2,speed:1.5,hp:2,drops:[[355,1]],g:['farm','wet'],herd:[2,4],w:3,egg:true},
+  boar:{n:'Boar',col:[92,68,52],head:[80,60,46],sz:[0.65,0.65,1.1],leg:0.35,speed:2.8,shy:7,hp:8,drops:[[354,2],[352,1]],g:['dark','wood'],herd:[1,3],w:2},
+  horse:{n:'Wild Horse',col:[122,86,58],head:[108,76,50],sz:[0.75,1.0,1.6],leg:0.85,speed:2.6,shy:3,hp:10,drops:[],g:['meadow','dry'],herd:[2,4],w:2,mount:true},
+  hound:{n:'Stray Hound',col:[142,122,98],head:[122,102,82],sz:[0.42,0.5,0.85],leg:0.35,speed:3.2,hp:6,drops:[],g:['farm','meadow'],herd:[1,1],w:1,tame:[350,351,353,354,356,357,358,359],follow:true},
+  mule:{n:'Wild Mule',col:[112,102,94],head:[102,92,86],sz:[0.65,0.9,1.3],leg:0.7,speed:2.2,hp:10,drops:[],g:['dry','high','meadow'],herd:[1,2],w:1,tame:[202,330,331,207],follow:true,pack:true}
+};
+// which animals live in a land
+const WILD_OF={autumn:['wood'],birch:['wood'],pine:['wood','high'],giant:['wood'],yew:['dark','wood'],silver:['wood'],elder:['wood'],green:['meadow','farm'],orchard:['farm'],farm:['farm','meadow'],flower:['meadow'],terrace:['farm','high'],
+  moors:['meadow','high'],barrow:['meadow'],shadow:['dark'],willow:['wet','wood'],bog:['wet'],steppe:['dry','meadow'],dry:['dry'],petrified:['dry'],mtn:['high'],alpine:['high','meadow'],karst:['high'],tundra:['high'],glacier:[],fjord:['high'],
+  cloud:['wood','high'],chalk:['meadow'],volcanic:[],blight:[],crystal:[],glowcap:[],starfall:['dry'],sea:[],isles:[],kelp:[],blacksand:[]};
+const WILD_CAP=22,animals=[],TWL={};let wildT=0,wildId=1;
+entityKind({name:'animals',list:animals,update:dt=>updAnimals(dt),clear:()=>{for(let i=animals.length-1;i>=0;i--){const a=animals[i];if(a.tame){continue;}scene.remove(a.m);animals.splice(i,1);}},persist:false});
+// a simple body of boxes: body, head, four legs; one material per animal so its light can be set
+const boxG=new THREE.BoxGeometry(1,1,1);
+function animalMesh(A){
+  const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(A.col[0]/255,A.col[1]/255,A.col[2]/255)}),hmat=new THREE.MeshBasicMaterial({color:new THREE.Color(A.head[0]/255,A.head[1]/255,A.head[2]/255)});
+  const g=new THREE.Group(),[w,h,l]=A.sz,lg=A.leg,body=new THREE.Mesh(boxG,mat);body.scale.set(w,h*0.6,l);body.position.y=lg+h*0.3;g.add(body);
+  const head=new THREE.Mesh(boxG,hmat);const hs=Math.max(0.22,w*0.55);head.scale.set(hs,hs,hs*1.1);head.position.set(0,lg+h*0.55,l*0.5+hs*0.35);g.add(head);
+  const legs=[];for(const [sx,sz] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const k=new THREE.Mesh(boxG,mat);k.scale.set(Math.max(0.08,w*0.18),lg,Math.max(0.08,w*0.18));k.position.set(sx*w*0.32,lg/2,sz*l*0.35);g.add(k);legs.push(k);}
+  g.userData={mats:[mat,hmat],legs:legs,base:[A.col,A.head]};return g;
+}
+function addAnimal(kind,x,y,z,o){
+  const A=ANIMALS[kind],m=animalMesh(A);m.position.set(x,y,z);scene.add(m);
+  const a=Object.assign({id:wildId++,kind:kind,x:x,y:y,z:z,vy:0,yaw:Math.random()*6.283,hp:A.hp,walk:0,t:0,flee:0,m:m,cool:0,ph:0},o||{});animals.push(a);return a;
+}
+function removeAnimal(a){scene.remove(a.m);const i=animals.indexOf(a);if(i>=0)animals.splice(i,1);if(PL.ride===a)dismount();}
+// the ground an animal stands on near height y: the first solid block at or below y+1, with room above
+function standY(x,y,z){const bx=Math.floor(x),bz=Math.floor(z);if(bx<0||bz<0||bx>=W||bz>=D)return -1;for(let yy=Math.floor(y)+1;yy>=Math.floor(y)-3;yy--){if(yy<1||yy>=H-2)continue;if(SOLID[get(bx,yy-1,bz)]&&!SOLID[get(bx,yy,bz)]&&!SOLID[get(bx,yy+1,bz)])return yy;}return -1;}
+// spawn: a herd now and then, out of sight range but in the loaded window, on open ground of a land that has animals
+function spawnTick(){
+  const wild=animals.filter(a=>!a.tame).length;if(wild>=WILD_CAP)return;
+  const a=Math.random()*6.283,d=28+Math.random()*30,x=PL.x+Math.cos(a)*d,z=PL.z+Math.sin(a)*d,bx=Math.floor(x),bz=Math.floor(z);if(bx<2||bz<2||bx>=W-2||bz>=D-2)return;
+  const g=ground[bx+W*bz];if(g<=SEA||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-12)return;const top=get(bx,g,bz);if(!SOLID[top]||BL[top].liquid||isWetId(get(bx,g+1,bz)))return;
+  colInfo(bx+OX,bz+OZ,TWL);const groups=WILD_OF[LANDS[TWL.land].k]||[];if(!groups.length)return;
+  const kinds=Object.keys(ANIMALS).filter(k=>ANIMALS[k].g.some(q=>groups.includes(q)));if(!kinds.length)return;
+  let tot=0;for(const k of kinds)tot+=ANIMALS[k].w;let v=Math.random()*tot,kind=kinds[0];for(const k of kinds){v-=ANIMALS[k].w;if(v<=0){kind=k;break;}}
+  const A=ANIMALS[kind],n=A.herd[0]+Math.floor(Math.random()*(A.herd[1]-A.herd[0]+1));
+  for(let i=0;i<n;i++){const xx=x+(Math.random()-.5)*6,zz=z+(Math.random()-.5)*6,yy=standY(xx,g+1,zz);if(yy>0)addAnimal(kind,xx,yy,zz);}
+}
+// one step of one animal: wander, graze, flee from a running or hunting player, follow a friend; gravity and one-block steps
+function stepAnimal(a,dt){
+  const A=ANIMALS[a.kind],dx=PL.x-a.x,dz=PL.z-a.z,dp=Math.hypot(dx,dz);
+  let sp=0;a.t-=dt;
+  if(PL.ride===a)return;
+  if(a.tame&&A.follow&&!a.stay){if(dp>40){const y=standY(PL.x,PL.y,PL.z);if(y>0){a.x=PL.x-Math.sin(PL.yaw)*-2;a.z=PL.z;a.y=y;}}else if(dp>3.5){a.yaw=Math.atan2(dx,dz);sp=A.speed*(dp>10?1.6:1);}}
+  else if(a.flee>0||(A.shy&&dp<A.shy&&(Math.hypot(PL.vx,PL.vz)>5||a.flee>0))){a.flee=Math.max(a.flee-dt,0);a.yaw=Math.atan2(-dx,-dz)+(Math.random()-.5)*0.4;sp=A.speed*1.8;}
+  else{if(a.t<=0){a.t=2+Math.random()*5;a.walk=Math.random()<0.45?1:0;if(a.walk)a.yaw+=(Math.random()-.5)*2.5;}sp=a.walk?A.speed*0.45:0;}
+  if(sp>0){const nx=a.x+Math.sin(a.yaw)*sp*dt,nz=a.z+Math.cos(a.yaw)*sp*dt,ny=standY(nx,a.y,nz);
+    if(ny>0&&ny-a.y<=1.01&&a.y-ny<=3&&!isWetId(get(Math.floor(nx),ny,Math.floor(nz)))){a.x=nx;a.z=nz;if(ny>a.y)a.y=ny;}else{a.yaw+=1.6+Math.random();a.t=Math.min(a.t,0.5);}
+    a.ph+=sp*dt*3.2;}
+  // gravity
+  const gy=standY(a.x,a.y,a.z);if(gy>0&&gy<a.y){a.vy-=20*dt;a.y=Math.max(gy,a.y+a.vy*dt);if(a.y===gy)a.vy=0;}else a.vy=0;
+  a.cool=Math.max(0,a.cool-dt);if(a.shorn&&a.cool<=0)a.shorn=false; // the fleece grows back
+}
+let wildLT=0;
+function updAnimals(dt){
+  if(!ready)return;
+  wildT-=dt;if(wildT<=0){wildT=1;wildRestore();if(playing)spawnTick();for(const a of animals)if(Math.hypot(a.x-PL.x,a.z-PL.z)<14)discover('a',a.kind);}
+  wildLT-=dt;const relight=wildLT<=0;if(relight)wildLT=0.3;
+  for(let i=animals.length-1;i>=0;i--){const a=animals[i];
+    if(!a.tame&&Math.hypot(a.x-PL.x,a.z-PL.z)>90){removeAnimal(a);continue;}
+    stepAnimal(a,dt);
+    const m=a.m;m.position.set(a.x,a.y,a.z);m.rotation.y=a.yaw;const sw=Math.sin(a.ph)*0.5;m.userData.legs.forEach((k,j)=>{k.rotation.x=(j===0||j===3)?sw:-sw;});
+    if(relight){const L=lightAtCell(Math.floor(a.x),Math.floor(a.y+0.6),Math.floor(a.z));m.userData.mats.forEach((mt,j)=>{const c=m.userData.base[j];mt.color.setRGB(c[0]/255*L,c[1]/255*L,c[2]/255*L);});}}
+  if(PL.ride&&(PL.fly||PL.noclip||!animals.includes(PL.ride)))dismount();
+  if(PL.ride){const a=PL.ride;a.x=PL.x;a.z=PL.z;a.y=PL.y-0.05;a.yaw=PL.yaw+Math.PI;a.ph+=Math.hypot(PL.vx,PL.vz)*dt*1.4;}
+}
+// ---- Aiming at an animal: the nearest box the view ray passes through, within reach and nearer than the block in the way
+// the distance along a ray to where it enters a box, or -1
+function rayBox(o,v,lo,hi,max){let t0=0,t1=max;for(let k=0;k<3;k++){if(Math.abs(v[k])<1e-9){if(o[k]<lo[k]||o[k]>hi[k])return -1;continue;}let ta=(lo[k]-o[k])/v[k],tb=(hi[k]-o[k])/v[k];if(ta>tb){const t=ta;ta=tb;tb=t;}t0=Math.max(t0,ta);t1=Math.min(t1,tb);if(t0>t1)return -1;}return t0;}
+function animalHit(reach){
+  const e=eyePos(),d=camDir(),o=[e.x,e.y,e.z],v=[d.x,d.y,d.z];let best=null,bt=reach;const bh=raycast(e,d,reach);
+  if(bh){const t=rayBox(o,v,[bh.x,bh.y,bh.z],[bh.x+1,bh.y+1,bh.z+1],reach);if(t>=0)bt=Math.min(bt,t);}
+  for(const a of animals){if(a===PL.ride)continue;const A=ANIMALS[a.kind],r=Math.max(A.sz[0],A.sz[2])*0.55,t=rayBox(o,v,[a.x-r,a.y,a.z-r],[a.x+r,a.y+A.leg+A.sz[1],a.z+r],bt);if(t>=0&&t<bt){bt=t;best=a;}}
+  return best;
+}
+// how hard the held thing hits: axes best, then pickaxes and shovels, then a bare hand
+function hitPower(id){const it=ITEMS[id];if(!it||!it.tool)return 1;return (it.tool==='axe'?3:2)+(it.tier||0)*0.5;}
+// Left button: strike. Right button: shear, milk, gather an egg, feed, ride, open a pack, tell a friend to stay or follow.
+function animalAct(btn){
+  const a=animalHit(4.5);if(!a)return false;const A=ANIMALS[a.kind],held=curId();
+  if(btn===0){a.hp-=hitPower(held);a.flee=6;tone(260,180,0.12,0.08,0,'triangle',[a.x,a.y+0.6,a.z]);swing=1;
+    for(let k=0;k<6;k++)spawnP(a.x,a.y+A.leg+A.sz[1]*0.5,a.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,[0.6,0.12,0.1],0.5,8);
+    if(a.hp<=0){if(a.tame&&!confirmHunt(a))return true;const pk=a.uid&&boxes.get('mule:'+a.uid);if(pk){for(const q of pk)if(q)addItem(q.id,q.c);boxes.delete('mule:'+a.uid);} // what the mule carried comes to you
+      for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');removeAnimal(a);}
+    return true;}
+  if(btn!==2)return false;
+  if(A.shear&&held===321){if(a.shorn){toast('Its fleece has not grown back yet');return true;}a.shorn=true;a.cool=300;addItem(A.shear,2);wearHeld(1);drawBar(true);toast('2 '+nameOf(A.shear));sfxBlock(WOOLW,false,a.x,a.y,a.z);swing=1;return true;}
+  if(A.milk&&(!held||!SURV())){if(a.cool>0){toast('The goat has no more milk for now');return true;}a.cool=240;addItem(360,1);drawBar(true);toast("Goat's Milk");return true;}
+  if(A.egg&&(!held||!SURV())){if(a.cool>0){toast('No egg yet');return true;}a.cool=300;addItem(355,1);drawBar(true);toast('An egg');return true;}
+  if(A.mount){if(PL.ride===a)dismount();else mount(a);return true;}
+  if(A.tame&&!a.tame){if(A.tame.includes(held)){const q=inv[sel];if(SURV()){q.c--;if(!q.c)inv[sel]=null;}drawBar(true);a.tame=true;a.uid=a.uid||(Date.now().toString(36)+a.id);a.flee=0;saveDirty=true;toast('The '+A.n.toLowerCase().replace('stray ','').replace('wild ','')+' will follow you now');tone(520,780,0.2,0.06,0,null,[a.x,a.y+0.6,a.z]);}
+    else toast('The '+A.n.toLowerCase()+' sniffs your hand. '+(a.kind==='hound'?'It would like some meat.':'It would like some crops.'));return true;}
+  if(a.tame&&A.pack&&!keyHeld('sprint')){openPack(a);return true;}
+  if(a.tame){a.stay=!a.stay;saveDirty=true;toast(a.stay?'It stays here':'It follows you');return true;}
+  return false;
+}
+function confirmHunt(a){if(a.warned)return true;a.warned=true;a.hp=1;toast('This is your '+ANIMALS[a.kind].n.toLowerCase().replace('stray ','').replace('wild ','')+'. Strike again to part with it.');return false;}
+// ---- Riding (Q67): a wild horse can be ridden at once; it is faster and jumps higher. Use it again to get off.
+function mount(a){PL.ride=a;a.flee=0;toast('Riding. Use the horse again to get off.');}
+function dismount(){const a=PL.ride;PL.ride=null;if(a){a.t=3;a.walk=0;}}
+// ---- The mule's pack: a container like a chest, kept under the mule's own key with the other containers (cs)
+function openPack(a){if(!SURV()){toast('Packs open in survival');return;}const k='mule:'+a.uid;if(!boxes.has(k))boxes.set(k,new Array(BOX_SLOTS).fill(null));box={k:k,x:Math.floor(a.x),y:Math.floor(a.y),z:Math.floor(a.z)};saveDirty=true;openInv();$('invtitle').textContent="The mule's pack";}
+// ---- Saved with the world: the animals you have befriended (world coordinates)
+const wildSave=()=>({an:animals.filter(a=>a.tame).map(a=>[a.kind,+(a.x+OX).toFixed(1),+a.y.toFixed(1),+(a.z+OZ).toFixed(1),a.stay?1:0,a.uid])});
+let wildPending=saved&&Array.isArray(saved.an)?saved.an:[];
+// befriended animals come back once the world around them is loaded
+function wildRestore(){if(!wildPending.length||!ready)return;const keep=[];for(const r of wildPending){const [k,X,Y,Z,st,uid]=r,x=X-OX,z=Z-OZ;if(!ANIMALS[k])continue;if(x<0||z<0||x>=W||z>=D){keep.push(r);continue;}
+  addAnimal(k,x,Y,z,{tame:true,stay:!!st,uid:String(uid||'')});}wildPending=keep;}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -5918,10 +6047,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
 const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{l:[],y:[],h:[],r:[],q:[]}};
+const JN={h:{},t:0,d:{a:[],l:[],y:[],h:[],r:[],q:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -5933,7 +6062,7 @@ function journalPage(cx,cz,k){
 function readTablet(){const i=JN.t%TABLETS.length;if(JN.t<TABLETS.length){JN.t++;saveDirty=true;}showText('A rune tablet ('+(i+1)+' of '+TABLETS.length+')',TABLETS[i]+(JN.t<=TABLETS.length?'\n\nThe saying is copied into your journal.':''));tone(380,300,0.3,0.05);}
 // The discovery log: a name recorded once in its category, with a word on screen the first time
 function discover(c,v){const L=JN.d[c];if(!L||v===undefined||v===null||v===''||L.includes(v))return false;L.push(v);saveDirty=true;
-  if(c!=='h'&&ready&&playing)toast('Discovered: '+(c==='l'?LANDS[LAND_I[v]].n:c==='q'?nameOf(v):v));return true;}
+  if(c!=='h'&&ready&&playing)toast('Discovered: '+(c==='l'?LANDS[LAND_I[v]].n:c==='q'?nameOf(v):c==='a'?ANIMALS[v].n:v));return true;}
 // Once a second: the land, layer, hold and remains around the player
 let discT=0;
 function discoverTick(dt){
@@ -5955,7 +6084,7 @@ function journalText(){
   if(!JN.t)out.push('None read yet. Rune tablets turn up in the old holds; hold one and use it to read it.');
   for(let i=0;i<Math.min(JN.t,TABLETS.length);i++)out.push((i+1)+'. '+TABLETS[i]);
   out.push('','DISCOVERIES');
-  for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
+  for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');
 }
 function openJournal(){if(invOpen)closeInv();if(WM.open)closeWorldMap();showText('Journal',journalText());}
@@ -6285,7 +6414,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -6649,7 +6778,7 @@ function update(dt){
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
-  const speed=PL.fly?(flyFast?20:11):inLiq?2.4:sprint?5.7:4.3;
+  const speed=PL.fly?(flyFast?20:11):inLiq?2.4:PL.ride?(sprint?11:8):sprint?5.7:4.3; // on horseback faster (E1)
   const sy=Math.sin(PL.yaw),cy=Math.cos(PL.yaw);
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;
@@ -6661,7 +6790,7 @@ function update(dt){
   }
   if(PL.fly){const tv=((jump?1:0)-(down?1:0))*speed;PL.vy+=(tv-PL.vy)*Math.min(1,10*dt);}
   else if(inLiq){PL.vy-=7*dt;if(jump)PL.vy=Math.min(PL.vy+22*dt,3.4);PL.vy*=1-Math.min(1,2.2*dt);if(PL.vy<-3.5)PL.vy=-3.5;}
-  else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
+  else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=PL.ride?10.6:8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
   // climbing (M4): on a ladder, piton or rope, jump climbs, down or sprint descends, and nothing holds the player still
   const climb=!PL.fly&&!inLiq&&onClimb();
   if(climb){gliding=false;PL.vy=jump||(fwd>0.3&&wasWall)?3.2:(shift||tch.down||PAD.down)?-3.6:0;}
@@ -6713,7 +6842,7 @@ function frame(now){
     if(ex>CS)shiftWindow(CS,0);else if(ex<-CS)shiftWindow(-CS,0);else if(ez>CS)shiftWindow(0,CS);else if(ez<-CS)shiftWindow(0,-CS);}
   if(ready){processGenQ();if(playing&&settings.time==='cycle'){tod+=dt/DAYLEN;if(tod>=1){tod-=1;dayN++;}}if(playing){updateEntities(dt);flowT-=dt;if(flowT<=0){flowT=0.2;flowStep();}}if(playing){tickT-=dt;if(tickT<=0){tickT=0.3;randomTicks();}}torchFx(dt);flush();updParts(dt);updWeather(dt,now);}
   const dayL=updSky();
-  camera.position.set(PL.x,PL.y+EYE,PL.z);
+  camera.position.set(PL.x,PL.y+EYE+(PL.ride?0.9:0),PL.z); // in the saddle (E1)
   if(shake>0){camera.position.x+=(Math.random()-.5)*shake*0.3;camera.position.y+=(Math.random()-.5)*shake*0.3;camera.position.z+=(Math.random()-.5)*shake*0.3;shake=Math.max(0,shake-dt*2.2);}
   camera.rotation.set(PL.pitch,PL.yaw,0);
   {let sy2=-1;const fx=Math.floor(PL.x),fz=Math.floor(PL.z);for(let y=Math.floor(PL.y+0.01);y>=Math.floor(PL.y)-24&&y>=0;y--){if(SOLID[get(fx,y,fz)]){sy2=y+1;break;}}
