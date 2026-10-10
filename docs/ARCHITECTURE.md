@@ -61,6 +61,7 @@ Consequences:
 | `src/js/gameplay/storage.js` | Containers that keep items by world position (`boxes`, saved as `cs`), loot rolled on first opening (`lootOf`), the container screen (D-033) |
 | `src/js/input/touch.js` | Touch controls |
 | `src/js/ui/worldmap.js` | Explored chunks (packed per region), places, markers, the world map screen drawn from `colInfo`, the minimap's layer view (D-037) |
+| `src/js/ui/journal.js` | The journal and discovery log (M7): `JN` (saved as `jn`), `journalPage`, `readTablet`, `discover`, `discoverTick`, `openJournal`; tablet sayings (`TABLETS`) |
 | `src/js/ui/creative.js` | Block search, the Fill Tool, `goTo`, time and weather, test structures (`stampAt`) (D-037) |
 | `src/js/ui/controls.js` | Key and button names, the rebinding panel (`BIND_ROWS`, `captureInput`), help built from the bindings by device and mode (`helpRows`), the readout switch (`setHud`) (D-036) |
 | `src/js/ui/hints.js` | One-time context hints (`HINTS`, `hint`, `hintTick`) (D-036) |
