@@ -16,8 +16,9 @@ function updSky(){
   drawMoon(dayN%8);
   sunC.setHex(0xfff4c2).lerp(cSet,sunset*0.7);sun.material.color.copy(sunC);
   sun.visible=elev>-0.15;moon.visible=elev<0.2;
+  burnSkyTick(d); // the burning sky of the Volcanic Wastes (D-051)
   U.skyMul.value=Math.min(1.2,U.skyMul.value+flash*0.9);skyC.lerp(flashC,flash*0.5);
-  halo.visible=sun.visible&&rainAmt<0.6;halo.material.opacity=(0.55+0.45*sunset)*(1-rainAmt);
+  halo.visible=sun.visible&&rainAmt<0.6&&LWX.burn<0.5;halo.material.opacity=(0.55+0.45*sunset)*(1-rainAmt);
   paintDome(d,sunset);
   return d;
 }
@@ -31,11 +32,11 @@ function colTop(x,z){x=Math.floor(x);z=Math.floor(z);if(x<0||z<0||x>=W||z>=D)ret
 function updWeather(dt,now){
   rainT-=dt;if(rainT<=0){raining=!raining;rainT=raining?60+Math.random()*90:(150+Math.random()*220)*(LWX.storm?0.5:1);} // storms come twice as often on the coasts and mountains
   flash=Math.max(0,flash-dt*3.5);
-  if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;flash=1;const dl=0.4+Math.random()*2.5;burst(1.5,'lowpass',170,0.5,0.7,dl);burst(0.7,'lowpass',520,0.6,0.35,dl);buzz(30);}}
+  if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;strike(true);}} // a bolt you can see, thunder after it by its distance (D-051)
   rainAmt+=(((settings.weather&&raining)?1:0)-rainAmt)*Math.min(1,dt*0.25);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),bi=(bx>=0&&bz>=0&&bx<W&&bz<D)?biome[bx+W*bz]:2;
   snowing=bi===6||(bi===5&&PL.y>=SEA+33); // High Mountains snow above their snow line (fillCol)
-  landWeather(dt);if(LWX.snow>=1||(LWX.snow>0&&PL.y>SEA+60))snowing=true; // the cold lands' snow (M6h)
+  landWeather(dt);fireTick(dt);if(LWX.snow>=1||(LWX.snow>0&&PL.y>SEA+60))snowing=true; // the cold lands' snow (M6h)
   // when it is dry, dust (the drylands) or ash (the volcanic and blighted lands) drifts in the air instead
   const dustN=rainAmt<0.1?Math.floor(NR*0.35*LWX.dust):0,dusty=rainAmt<0.1&&dustN>0;
   const n=dusty?dustN:Math.floor(NR*rainAmt),len=dusty?0.05:snowing?0.09:0.75;

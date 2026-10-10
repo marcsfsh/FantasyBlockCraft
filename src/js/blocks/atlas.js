@@ -236,6 +236,21 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   // old lands of men (M6g): orchard leaves with apples, blossom, oxeye daisy, lavender
   leaf(240,[64,132,44],0.16,171,[[200,40,36],0.06]);leaf(241,[236,196,214],0.18,172,[[250,236,244],0.2]);
   clear(242);for(let f=0;f<3;f++){const ox=3+f*5,h=7+Math.floor(hn(f,5,173)*5);for(let k=0;k<h;k++)P(242,ox,15-k,[70,130,48]);const cy=15-h;for(let a=0;a<8;a++)P(242,ox+Math.round(Math.cos(a*0.785)*2),cy+Math.round(Math.sin(a*0.785)*2),[244,244,236]);P(242,ox,cy,[236,196,60]);}
+  // the burnt land (D-051)
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    P(244,x,y,sh([40,37,36],(hn(x,y,180)-.5)*16+(hn(x,y,181)<.07?34:0)+(hn(x>>1,y>>1,182)<.2?-8:0))); // black ash: soft, flecked with grey
+    const pit=hn(x,y,183);P(245,x,y,pit<.12?[22,18,18]:pit<.17?sh([96,44,30],(hn(x,y,184)-.5)*20):sh([56,50,50],(hn(x,y,185)-.5)*22+(hn(x>>1,y>>1,186)<.3?-10:0))); // cinder: porous, rusty pits
+    // lava crust: black plates with glowing seams between them
+    {let d1=99,d2=99;for(let k=0;k<5;k++){const px=hn(k,0,187)*16,py=hn(k,1,187)*16;for(const ox of [-16,0,16])for(const oy of [-16,0,16]){const d=Math.hypot(x-px-ox,y-py-oy);if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}}
+      P(246,x,y,d2-d1<0.75?sh([240,(d2-d1<0.35?150:80),24],(hn(x,y,188)-.5)*30):d2-d1<1.3?sh([70,26,18],(hn(x,y,188)-.5)*16):sh([32,28,28],(hn(x,y,189)-.5)*16));}
+    // charred wood: black bark split in grey cracks; its rings; smouldering bark glows in its cracks
+    const crack=hn(x,y>>2,190)<.18||hn(x,(y+2)>>2,191)<.06;P(247,x,y,crack?sh([92,86,82],(hn(x,y,192)-.5)*16):sh([26,22,22],(hn(x,y,193)-.5)*14));
+    P(249,x,y,crack?sh([255,120+hn(x,y,194)*80,30],(hn(x,y,195)-.5)*20):sh([30,22,20],(hn(x,y,196)-.5)*14));
+    const r=Math.hypot(x-7.5,y-7.5);P(248,x,y,r>6.5?[24,20,20]:sh([60,54,50],(Math.floor(r)%2?-14:6)+(hn(x,y,197)-.5)*10));
+    P(250,x,y,sh([176,154,64],(hn(x,y,198)-.5)*30+(hn(x>>1,y>>1,199)<.25?26:0)+(hn(x,y,200)<.08?-50:0))); // sulphur
+    // fumarole: cinder round a glowing throat
+    const t=Math.hypot(x-7.5,y-7.5);P(251,x,y,t<2.6?sh([255,150,40],(hn(x,y,201)-.5)*40):t<4?sh([200,170,60],(hn(x,y,202)-.5)*30):sh([56,50,50],(hn(x,y,203)-.5)*22));
+  }
   clear(243);for(let f=0;f<5;f++){const ox=2+f*3,h=8+Math.floor(hn(f,6,174)*6);for(let k=0;k<h;k++)P(243,ox,15-k,k>h-5?sh([150,110,210],(hn(f,k,175)-.5)*30):[90,130,80]);}
   actx.putImageData(im,0,0);
 })();

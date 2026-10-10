@@ -60,3 +60,5 @@
 
 - **Animals are judged from headless screenshots.** Their shapes, coats, gaits and calls look and sound right in software rendering and tests; how they move and sound on the Ally X is for the owner (D-050).
 - **Animals walk through tall grass and flowers** and can stand with a hoof over a block edge; they keep off water, walls and drops of more than three blocks (D-050).
+- **The burning sky is judged from headless screenshots.** The black and red sky, the lightning, the plumes and the glowing crust render without shader errors in software rendering; how they look on the Ally X is for the owner. The clouds there are the usual block clouds darkened, which read as dark slabs; embers and lava bombs are square points; the sun is a dim red square (D-051).
+- **Volcanoes need wide wastes.** A volcano stands only where the Volcanic Wastes cover its whole foot, so a small stretch of the land has none (eight within 8000 blocks of spawn on the default seed) (D-051).

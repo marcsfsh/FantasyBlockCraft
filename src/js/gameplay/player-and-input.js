@@ -114,6 +114,7 @@ function dropsFor(id,tool){
   switch(id){
     case DBUSH:return Math.random()<0.5?[[328,1]]:[];case BERRYB:return[[332,2+(Math.random()*3|0)]];case MUSHB:return[[333,1]];case WTURN:case TURN0:case TURN1:return[[330,1]];
     case TURN2:return[[330,2+(Math.random()*2|0)]];case BEAN0:case BEAN1:return[[331,1]];case BEAN2:return[[331,2+(Math.random()*2|0)]];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
+    case CHARWOOD:case SMOULDER:return[[200,1+(Math.random()<0.3?1:0)]];case VENT:return[[CINDER,1]];case LAVACRUST:return[[CINDER,1]];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];

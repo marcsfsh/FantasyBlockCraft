@@ -214,7 +214,7 @@ if(TOUCH)document.body.classList.add('touch');
 
 // Settings and save data
 const W=224,D=224,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v17',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v18',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -227,7 +227,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=17,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=18,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
@@ -454,6 +454,13 @@ setH([PRISM,AMBER],0.8,'misc');setH([PETRIWOOD],3,'stone',1);setH([STARORE],7,'o
 const FRUITL=1081,BLOSSOM=1082,OXEYE=1083,LAVENDER=1084;
 def(FRUITL,'Orchard Leaves',[240,240,240],LEAFD);def(BLOSSOM,'Blossom',[241,241,241],LEAFD);def(OXEYE,'Oxeye Daisy',[242,242,242],PLANT);def(LAVENDER,'Lavender',[243,243,243],PLANT);
 NEW_LEAVES.push(FRUITL,BLOSSOM);setH([FRUITL,BLOSSOM],0.3,'soft');setH([OXEYE,LAVENDER],0,'soft');
+// The burnt land (D-051): black ash and cinder over the Volcanic Wastes, crusts of cooling lava that still glow in their cracks,
+// trees charred to the heart (some still smouldering), yellow sulphur round the smoking vents
+const BLACKASH=1085,CINDER=1086,LAVACRUST=1087,CHARWOOD=1088,SMOULDER=1089,SULFUR=1090,VENT=1091;
+def(BLACKASH,'Black Ash',[244,244,244],{snd:'soft'});def(CINDER,'Cinder Rock',[245,245,245]);def(LAVACRUST,'Lava Crust',[246,246,246],{emit:true,ember:true,lum:5});
+def(CHARWOOD,'Charred Wood',[248,248,247],{snd:'wood'});def(SMOULDER,'Smouldering Wood',[248,248,249],{snd:'wood',emit:true,ember:true,lum:6});
+def(SULFUR,'Sulphur Crust',[250,250,250],{snd:'soft'});def(VENT,'Fumarole',[251,245,245],{emit:true,ember:true,lum:4});
+setH([BLACKASH,SULFUR],0.6,'soft');setH([CINDER,VENT],3,'stone',1);setH([LAVACRUST],4,'stone',1);setH([CHARWOOD,SMOULDER],1.6,'wood');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
@@ -819,6 +826,21 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   // old lands of men (M6g): orchard leaves with apples, blossom, oxeye daisy, lavender
   leaf(240,[64,132,44],0.16,171,[[200,40,36],0.06]);leaf(241,[236,196,214],0.18,172,[[250,236,244],0.2]);
   clear(242);for(let f=0;f<3;f++){const ox=3+f*5,h=7+Math.floor(hn(f,5,173)*5);for(let k=0;k<h;k++)P(242,ox,15-k,[70,130,48]);const cy=15-h;for(let a=0;a<8;a++)P(242,ox+Math.round(Math.cos(a*0.785)*2),cy+Math.round(Math.sin(a*0.785)*2),[244,244,236]);P(242,ox,cy,[236,196,60]);}
+  // the burnt land (D-051)
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    P(244,x,y,sh([40,37,36],(hn(x,y,180)-.5)*16+(hn(x,y,181)<.07?34:0)+(hn(x>>1,y>>1,182)<.2?-8:0))); // black ash: soft, flecked with grey
+    const pit=hn(x,y,183);P(245,x,y,pit<.12?[22,18,18]:pit<.17?sh([96,44,30],(hn(x,y,184)-.5)*20):sh([56,50,50],(hn(x,y,185)-.5)*22+(hn(x>>1,y>>1,186)<.3?-10:0))); // cinder: porous, rusty pits
+    // lava crust: black plates with glowing seams between them
+    {let d1=99,d2=99;for(let k=0;k<5;k++){const px=hn(k,0,187)*16,py=hn(k,1,187)*16;for(const ox of [-16,0,16])for(const oy of [-16,0,16]){const d=Math.hypot(x-px-ox,y-py-oy);if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}}
+      P(246,x,y,d2-d1<0.75?sh([240,(d2-d1<0.35?150:80),24],(hn(x,y,188)-.5)*30):d2-d1<1.3?sh([70,26,18],(hn(x,y,188)-.5)*16):sh([32,28,28],(hn(x,y,189)-.5)*16));}
+    // charred wood: black bark split in grey cracks; its rings; smouldering bark glows in its cracks
+    const crack=hn(x,y>>2,190)<.18||hn(x,(y+2)>>2,191)<.06;P(247,x,y,crack?sh([92,86,82],(hn(x,y,192)-.5)*16):sh([26,22,22],(hn(x,y,193)-.5)*14));
+    P(249,x,y,crack?sh([255,120+hn(x,y,194)*80,30],(hn(x,y,195)-.5)*20):sh([30,22,20],(hn(x,y,196)-.5)*14));
+    const r=Math.hypot(x-7.5,y-7.5);P(248,x,y,r>6.5?[24,20,20]:sh([60,54,50],(Math.floor(r)%2?-14:6)+(hn(x,y,197)-.5)*10));
+    P(250,x,y,sh([176,154,64],(hn(x,y,198)-.5)*30+(hn(x>>1,y>>1,199)<.25?26:0)+(hn(x,y,200)<.08?-50:0))); // sulphur
+    // fumarole: cinder round a glowing throat
+    const t=Math.hypot(x-7.5,y-7.5);P(251,x,y,t<2.6?sh([255,150,40],(hn(x,y,201)-.5)*40):t<4?sh([200,170,60],(hn(x,y,202)-.5)*30):sh([56,50,50],(hn(x,y,203)-.5)*22));
+  }
   clear(243);for(let f=0;f<5;f++){const ox=2+f*3,h=8+Math.floor(hn(f,6,174)*6);for(let k=0;k<h;k++)P(243,ox,15-k,k>h-5?sh([150,110,210],(hn(f,k,175)-.5)*30):[90,130,80]);}
   actx.putImageData(im,0,0);
 })();
@@ -888,6 +910,7 @@ function colInfoBase(X,Z,o){
     // the channel shelves up into its bank, and the bank slopes up to the land
     const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
+  o.vflow=o.vcrust=o.vfis=o.vcr=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
   h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
   const cold=o.tb===0,lk=LANDS[o.land].look;
@@ -989,7 +1012,7 @@ land('kelp','Kelp Shallows','coast',2,[2,4],[0,2],7,0,'human',['a sunken causewa
 land('bog','Raised Bogs','coast',2,[0,2],[2,2],1,11,'halfling',['an old plank trackway across the bog','a domed bog with pools and cotton grass'],{gorge:0,built:true,col:[132,96,64]});
 // dry and fiery (M6e)
 land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple half buried in sand','a dry wadi with an old well'],{gorge:0.6,built:true,col:[226,198,132]});
-land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8,built:true,col:[78,70,70]});
+land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['the Ashen Citadel, a black fortress on a moat of lava','the Rift of Fire, a chasm with a river of lava along its floor'],{gorge:0.8,built:true,col:[78,70,70]});
 land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver'],built:true,col:[128,120,100]});
 // strange lands (M6f)
 land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires'],{built:true,col:[190,176,226]});
@@ -2756,7 +2779,7 @@ function caveLife(X0,Z0,r2){
 function topBlock(o){
   const b=o.b,h=o.h,F=forestOf(o);
   if(F&&F.shore&&(b===1||(b===0&&h>=SEA-12)))return F.shore(o); // the coasts' own beaches and shallows (M6d)
-  if(F&&F.top&&b!==0&&b!==1&&!(o.bank&&h<=SEA+3))return F.top(o); // the forests' floors (M6b)
+  if(F&&F.top&&b!==0&&b!==1&&!(o.bank&&h<=SEA+3&&!F.banks))return F.top(o); // the forests' floors (M6b)
   if(o.bank&&h<=SEA+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
   if(b===0)return o.hill>0.08?GRAVEL:(h>SEA-5?SAND:DIRT);
   if(b===1)return o.hill>0.12?GRAVEL:SAND;
@@ -2774,12 +2797,13 @@ const hCache=new Map();
 function hAt(X,Z){const k=X*1048576+Z;let h=hCache.get(k);if(h===undefined){if(hCache.size>400000)hCache.clear();h=colInfo(X,Z,TN).h;hCache.set(k,h);}return h;}
 function slopeAt(X,Z,h){return Math.max(Math.abs(hAt(X+1,Z)-h),Math.abs(hAt(X-1,Z)-h),Math.abs(hAt(X,Z+1)-h),Math.abs(hAt(X,Z-1)-h));}
 function fillCol(x,z,X,Z,o){
-  const h=o.h,b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3),wallS=0;
-  if(b!==0&&b!==1){const sl=slopeAt(X,Z,h);
+  let h=o.h;const b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3),wallS=0;
+  if(b!==0&&b!==1&&!o.vflow&&!o.vfis){const sl=slopeAt(X,Z,h);
     if(sl>=4){top=rock||STONE;soil=0;}
     else if(sl>=2&&F&&F.wall)wallS=F.wall; // the terraces' retaining walls (M6g)
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6)&&!forestOf(o))top=SNOWG; // lands with their own floors decide their snow
+  const wl=Math.max(SEA,o.lake),liq=o.wVolc>0.3&&h<wl?liquidOf(o):WATER;if(liq===OBSID){h=wl;top=OBSID;} // lava rivers and lakes; obsidian where they would meet water (D-051)
   biome[ci]=o.lake?9:b;ground[ci]=h;entCol[ci]=o.ent?1:0;
   let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){
@@ -2790,9 +2814,10 @@ function fillCol(x,z,X,Z,o){
         if(y===h)id=top;
         else if(y>h-1-soil)id=wallS||shoreS||(b===1?SAND:(b===0?(h>SEA-5?SAND:DIRT):F&&F.soil||DIRT));
         else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:(rock&&y>SEA-30?rock:STONE);}
-        if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;
+        if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;else if(y===o.rvBot-1&&o.wVolc>0.5)id=LAVACRUST; // gorge floors in the burnt land glow
       }
-    }else if(y<=Math.max(SEA,o.lake))id=(y===Math.max(SEA,o.lake)&&o.cold)?ICE:WATER;
+    }else if(o.vlake&&y<=o.vlake)id=LAVA; // a crater's lake
+    else if(y<=wl)id=liq===LAVA?LAVA:(y===wl&&o.cold)?ICE:WATER;
     const i=I(x,y,z);world[i]=id;lvl[i]=0;
   }
 }
@@ -3117,6 +3142,7 @@ function surfaceName(X,Y,Z){
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
+  {const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcCand(ci+a,cj+b)&&volcAt(ci+a,cj+b);if(v&&Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name;}} // the volcanoes (D-051)
   return null;
 }
 // ---- The forests (M6b, D-040; Q111, Q124, Q130): the seven forest lands' own trees, floors and plants, and each stretch's
@@ -3544,14 +3570,12 @@ function deadTreeP(X,y,Z,r){ // a dead tree: a grey trunk and a few bare branche
 Object.assign(FOREST,{
   dry:{trees:0.006,tree:(X,y,Z,r)=>cactusP(X,y,Z,r),top:o=>o.dn>0.25?RSAND:SAND,shore:()=>SAND,rock:SANDSTONE,soil:SAND,plant:r=>r<0.02?DBUSH:0},
   steppe:{trees:0.0015,glade:true,tree:(X,y,Z,r)=>bigOakP(X,y,Z,r),top:()=>GOLDGRASS,plant:r=>r<0.3?STEPPEG:r<0.31?FLOWY:0},
-  volcanic:{trees:0.004,tree:(X,y,Z,r)=>spireP(X,y,Z,r,BASALT),top:o=>o.dn>0.2?BASALT:ASH,rock:BASALT,soil:ASH,plant:r=>r<0.01?DBUSH:0},
   blight:{trees:0.01,tree:(X,y,Z,r)=>deadTreeP(X,y,Z,r),top:o=>o.dn>0.3?DIRT:DEADGRASS,plant:r=>r<0.06?DBUSH:0}
 });
 FLOORS.add(GOLDGRASS);FLOORS.add(DEADGRASS);FLOORS.add(ASH);FOREST.dry.floors=new Set([SAND,RSAND]); // sand is a floor only in the drylands
 Object.assign(SIGS,{
   dry:[['sandtemple','Sand-buried Temple',9],['wadi','Dry Wadi with a Well',10]],
   steppe:[['horsestones','Ring of Horse Stones',9],['outcrop','Lone Outcrop',7]],
-  volcanic:[['fireshrine','Fire Shrine',7],['cone','Smoking Cone',13]],
   blight:[['deadhall',"Dead Lord's Hall",10],['deadgrove','Grey Grove',11]]
 });
 // The hotter deep: over the Fire Below under the Volcanic Wastes, the rock of the lava sea's roof is shot through with magma stone
@@ -3581,15 +3605,6 @@ function dryBuild(s,r){
     case 'outcrop':{ // a lone outcrop of grey rock standing over the grass
       for(let y=g-2;y<=g+10;y++){const t=(y-g)/10,R=6*(1-t*0.6)+fbm2(y/3,X/9,1,8517.1)*1.2,ri=Math.ceil(R);
         for(let dx=-ri;dx<=ri;dx++)for(let dz=-ri;dz<=ri;dz++){const d=Math.hypot(dx*1.2,dz)+fbm2((X+dx)/4,(Z+dz)/4,1,8519.3)*1.5;if(d<=R)PW(X+dx,y,Z+dz,y>=g+9&&d<R-1?GRASS:hsh(X+dx,y,Z+dz)<0.25?MOSSY:STONE,MODE_SET);}}break;}
-    case 'fireshrine':{ // a ruined fire shrine: a basalt floor, four obsidian pillars, magma at the heart, a cold brazier
-      sigFloor(X-3,Z-3,X+3,Z+3,g,BASALT,8);
-      for(const [a,b] of [[-3,-3],[3,-3],[-3,3],[3,3]]){const hh=3+(hsh(X+a,8521,Z+b)*3|0);for(let y=g+1;y<=g+hh;y++)PW(X+a,y,Z+b,OBSID,MODE_SET);}
-      PW(X,g,Z,MAGMA,MODE_SET);PW(X+1,g,Z,MAGMA,MODE_SET);PW(X,g+1,Z-2,BASALT,MODE_SET);PW(X,g+2,Z-2,DLANTERN,MODE_SET);break;}
-    case 'cone':{ // a smoking cone of basalt and ash with a lake of lava held in its crater, walled by rock on every side
-      const Hc=12,top=g+Hc;
-      for(let dx=-13;dx<=13;dx++)for(let dz=-13;dz<=13;dz++){const d=Math.hypot(dx,dz)+fbm2((X+dx)/6,(Z+dz)/6,1,8523.7)*1.2;if(d>13)continue;const hh=Math.round(Hc*Math.min(1,(13-d)/8)),pg=hAt(X+dx,Z+dz);
-        for(let y=pg;y<=g+hh;y++)PW(X+dx,y,Z+dz,y===g+hh?(hsh(X+dx,y,Z+dz)<0.6?ASH:BASALT):BASALT,MODE_SET);
-        if(d<4.2){for(let y=top-3;y<=top;y++)PW(X+dx,y,Z+dz,y<=top-2?(d<3.4?LAVA:BASALT):AIR,MODE_SET);PW(X+dx,top-4,Z+dz,MAGMA,MODE_SET);}}break;}
     case 'deadhall':{ // the hall of a dead lord: walls of dark stone, a fallen roof, a broken throne, cobwebs in the corners
       sigFloor(X-7,Z-4,X+7,Z+4,g,MOSSY,9);
       for(let dx=-7;dx<=7;dx++)for(let dz=-4;dz<=4;dz++){const edge=Math.abs(dx)===7||Math.abs(dz)===4;if(!edge)continue;const hh=3+Math.floor(3*Math.abs(fbm2((X+dx)/5,(Z+dz)/5,1,8525.1))*2);
@@ -3717,11 +3732,11 @@ function smallAt(WCX,WCZ){
     if(!surfTaken(X,Z,14)&&!sigNear(X,Z,14)&&TSM.rvBot===999){
       // a river through the middle of the chunk: a bridge across it, or a mill on its bank
       if(TSM.river){for(const [dx,dz] of [[1,0],[0,1]]){let a=0,b=0;for(let t=1;t<14&&!a;t++)if(!colInfo(X+dx*t,Z+dz*t,TSM2).river&&TSM2.h>=SEA)a=t;for(let t=1;t<14&&!b;t++)if(!colInfo(X-dx*t,Z-dz*t,TSM2).river&&TSM2.h>=SEA)b=t;
-        if(a&&b&&a+b<=18){s=q<0.75?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
+        if(a&&b&&a+b<=18){s=q<0.75||L==='volcanic'?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
       else if(TSM.h>SEA+2&&!TSM.wet&&!TSM.lake&&!TSM.bank){
         // a lake within a few blocks: a jetty out over it
         let lake=null;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){colInfo(X+dx*10,Z+dz*10,TSM2);if(TSM2.lake&&!lake)lake=[dx,dz];}
-        if(lake)s={kind:'jetty',X:X,Z:Z,dx:lake[0],dz:lake[1],g:TSM.h};
+        if(lake&&L!=='volcanic')s={kind:'jetty',X:X,Z:Z,dx:lake[0],dz:lake[1],g:TSM.h};
         else{const kinds=Object.keys(SMALL_LANDS).filter(k=>SMALL_LANDS[k]&&SMALL_LANDS[k].includes(L));if(kinds.length){const kind=kinds[Math.floor(q*kinds.length)];
           let ok=flatOK(X,Z,TSM.h);if(kind==='beacon'||kind==='cairn'){ok=true;for(let m=0;m<8&&ok;m++)if(hAt(X+Math.round(Math.cos(m*0.785)*12),Z+Math.round(Math.sin(m*0.785)*12))>TSM.h)ok=false;}
           if(ok)s={kind:kind,X:X,Z:Z,g:TSM.h};}}}}}
@@ -3871,6 +3886,7 @@ function keptMound(x,z,y,top){for(let yy=y-1;yy>y-10;yy--){const c=GW(x,yy,z);if
 function keptBuild(s,r){
   const X=s.X,Z=s.Z,g=s.g,face=Math.floor(s.seed*4),fx=[1,0,-1,0][face],fz=[0,1,0,-1][face];
   switch(s.kind){
+    default:volcBuild(s,r);break; // the Volcanic Wastes (D-051)
     case 'hillfort':{ // two rings of earth bank with a ditch between, a gap for the gate, the stones of a hall inside
       for(let dx=-12;dx<=12;dx++)for(let dz=-12;dz<=12;dz++){const d=Math.hypot(dx,dz),gate=(dx*fx+dz*fz)>d*0.93;if(gate)continue;
         if(d>=10.5&&d<12)keptMound(X+dx,Z+dz,g+1);else if(d>=7&&d<9)keptMound(X+dx,Z+dz,g+2);else if(d>=9&&d<10.5){PW(X+dx,g,Z+dz,GRASS,MODE_SET);PW(X+dx,g+1,Z+dz,AIR,MODE_SET);}}
@@ -3921,6 +3937,121 @@ function keptBuild(s,r){
       for(let t=-11;t<=9;t++)for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(Math.abs(a)+Math.abs(b)<2||t<-8)PW(X+fx*t-fz*a,g+2+b,Z+fz*t+fx*a,JLOG,MODE_SET);
       for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)if(Math.hypot(a,b)<3.4&&r()<0.75)PW(X+fx*10-fz*a,g+2+b,Z+fz*10+fx*a,r()<0.5?DIRT:JLOG,MODE_SET);
       for(let k=0;k<12;k++){const t=-10+(r()*20|0);PW(X+fx*t,g+4,Z+fz*t,r()<0.5?FMOSS:MUSHB,MODE_AIR);}break;}
+  }
+}
+// ---- The Volcanic Wastes remade (D-051): a burnt land under a black and red sky. Volcanoes rise out of the terrain itself, each
+// with a crater holding a lake of lava that spills through a breach in its rim and runs down channels in the flanks; older
+// flows lie cooled to glowing crust across the plains; fissures split the ground to fire; the rivers run with lava, cooled to
+// obsidian where they meet the water of other lands. The ground is black ash and cinder, with charred trees (some still
+// smouldering), basalt spires, obsidian shards and fumaroles ringed with sulphur. All pure functions of the seed.
+const VOLC_C=272,volcCandC=new Map(),volcC=new Map(),TVC={},TVC2={};let volcSkip=false;
+// a candidate: one per grid cell where the land is wholly volcanic for its whole width (no base height yet)
+function volcCand(i,j){
+  const key=i*65536+j;if(volcCandC.has(key))return volcCandC.get(key);let v=null;
+  if(hsh(i,9101,j)<0.85){const X=Math.floor((i+0.3+hsh(i,9103,j)*0.4)*VOLC_C),Z=Math.floor((j+0.3+hsh(i,9105,j)*0.4)*VOLC_C),R=60+Math.floor(hsh(i,9107,j)*42);
+    landsAt(X,Z,TVC);let ok=TVC.wVolc>0.9&&TVC.wS<0.01;
+    for(let k=0;k<8&&ok;k++){const a=k*0.785;landsAt(X+Math.round(Math.cos(a)*R),Z+Math.round(Math.sin(a)*R),TVC2);if(TVC2.wVolc<0.6||TVC2.wS>0.02)ok=false;}
+    if(ok)v={i:i,j:j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
+  volcCandC.set(key,v);return v;
+}
+// a volcano: a candidate not crowded by a stronger neighbour, with its heights fixed from the ground at its heart
+function volcAt(i,j){
+  const key=i*65536+j;if(volcC.has(key))return volcC.get(key);let v=null;const c=volcCand(i,j);
+  if(c){let ok=true;for(let a=-1;a<=1&&ok;a++)for(let b=-1;b<=1&&ok;b++){if(!a&&!b)continue;const n=volcCand(i+a,j+b);if(n&&n.pri>c.pri&&Math.hypot(n.X-c.X,n.Z-c.Z)<(n.R+c.R)*1.3+12)ok=false;}
+    if(ok){volcSkip=true;const o={};colInfoBase(c.X,c.Z,o);volcSkip=false;
+      if(o.h>=SEA+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.5+hsh(i,9109,j)*0.22))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
+        const fl=[],nf=2+Math.floor(r()*3),a0=r()*6.283;for(let k=0;k<nf;k++)fl.push({a:a0+k*6.283/nf+(r()-0.5)*0.9,len:0.8+r()*0.55});
+        const old=[];for(let k=0;k<3;k++)old.push(r()*6.283);
+        v=Object.assign({},c,{base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'Mount '+fullName('drow',r,false)});}}}
+  volcC.set(key,v);return v;
+}
+function volcanoesNear(X,Z,r){const out=[],n=Math.ceil(r/VOLC_C)+1,ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);
+  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const v=volcAt(ci+a,cj+b);if(v&&Math.hypot(v.X-X,v.Z-Z)<r+v.R)out.push(v);}return out;}
+const angDiffV=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d;};
+// The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
+function volcTerrain(X,Z,o,h){
+  if(volcSkip||o.wVolc<0.05)return h;
+  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcAt(ci+a,cj+b);if(!v)continue;const dx=X-v.X,dz=Z-v.Z,d=Math.hypot(dx,dz),reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(d>=reach)continue;
+    // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
+    const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;const th=Math.atan2(dz,dx);if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
+    if(d<v.rc){const q=d/v.rc;hh=v.rimTop-(v.cd+3)+(v.cd+3)*Math.pow(q,4);o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}
+    else if(d<v.R){const s=1-(d-v.rc)/(v.R-v.rc),gul=Math.abs(Math.sin(th*6+fbm2(X/40,Z/40,1,9117.1)*2.5));
+      hh+=Math.pow(s,1.35)*v.Hv-(1-gul)*(1-gul)*s*(1-s)*12+fbm2(X/13,Z/13,1,9119.3)*2.2*Math.min(1,s*2+0.2);o.vs=s;}
+    // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
+    if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
+      const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0);
+      if(lat<w&&d<dmax){hh=Math.min(Math.round(hh)-1,Math.round(v.lake-Math.max(0,d-v.rc)*0.55));o.vflow=true;o.vlake=0;break;}
+      if(lat<w+2.2)o.vcrust=true;}
+    if(!o.vflow&&d>v.rc&&d<v.R*0.95)for(const a0 of v.old)if(Math.abs(angDiffV(th,a0+0.2*Math.sin(d/9)))*d<1.4+d/v.R*1.6)o.vcrust=true; // old flows, cooled
+    return hh;}
+  // fissures across the plains: narrow, a few blocks deep, lava at the bottom
+  if(o.wVolc>0.55&&h>SEA+3){const q=Math.abs(fbm2(X/85,Z/85,2,9121.3));if(q<0.0075+0.006*(o.wVolc-0.55)){o.vfis=true;return h-4-Math.floor(hsh(X>>2,9123,Z>>2)*4);}}
+  return h;
+}
+// Fumaroles: here and there a smoking vent, sulphur round it
+const ventAt=(X,Z)=>hsh(X,9141,Z)<0.0025;
+function ventNear(X,Z){for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if((a||b)&&ventAt(X+a,Z+b))return true;return false;}
+// ---- Charred trees, basalt spires, obsidian shards
+function charP(X,y,Z,r){
+  if(r()<0.2){const ax=r()<0.5,len=3+(r()*3|0);for(let t=0;t<len;t++)PW(ax?X+t:X,y,ax?Z:Z+t,CHARWOOD,MODE_SET);return;} // fallen
+  const th=3+(r()*5|0);if(y+th+2>=H)return;for(let i=0;i<th;i++)PW(X,y+i,Z,i===th-1&&r()<0.35?SMOULDER:CHARWOOD,MODE_SET);
+  for(let k=0;k<1+(r()*3|0);k++){const a=r()*6.283,by=y+th-1-(r()*3|0),len=1+(r()*2|0);for(let t=1;t<=len;t++)PW(X+Math.round(Math.cos(a)*t),by+(t>1?1:0),Z+Math.round(Math.sin(a)*t),r()<0.12?SMOULDER:CHARWOOD,MODE_SET);}
+}
+function shardP(X,y,Z,r){const h=3+(r()*5|0),lx=r()<0.5?1:-1,lz=r()<0.5?1:-1;let x=X,z=Z;for(let i=-1;i<h;i++){if(i>0&&i%2===0){if(r()<0.6)x+=lx;else z+=lz;}PW(x,y+i,z,OBSID,MODE_SET);if(i<1)PW(x+lx,y+i,z,OBSID,MODE_SET);}}
+FLOORS.add(BLACKASH);FLOORS.add(CINDER);
+FOREST.volcanic={trees:0.007,banks:true,
+  tree:(X,y,Z,r)=>{const q=hsh(X,9161,Z);if(q<0.55)charP(X,y,Z,r);else if(q<0.8)spireP(X,y,Z,r,BASALT);else shardP(X,y,Z,r);},
+  top:o=>{if(o.vflow||o.vfis)return LAVA;if(o.vcrust)return LAVACRUST;if(o.vcr)return CINDER;if(ventAt(o.X,o.Z))return VENT;if(ventNear(o.X,o.Z))return SULFUR;
+    if(o.vs>0.6)return o.dn>0.1?CINDER:BLACKASH;{const fld=fbm2(o.X/90,o.Z/90,2,9133.3);if(fld>0.42&&hsh(o.X,9135,o.Z)<0.35+(fld-0.42)*2)return LAVACRUST;if(Math.abs(fbm2(o.X/52,o.Z/52,2,9131.7))<0.009)return LAVACRUST;}return o.dn>0.36?CINDER:o.dn<-0.42?ASH:BLACKASH;},
+  shore:o=>o.dn>0.2?CINDER:BASALT,rock:BASALT,soil:CINDER,floors:new Set([BLACKASH,CINDER,ASH]),
+  plant:r=>r<0.008?DBUSH:0};
+// The rivers and lakes of the volcanic land run with lava; where its weight thins toward another land the channel is cooled to
+// a dry floor of obsidian, so lava never meets water. Read by fillCol.
+function liquidOf(o){if(o.wVolc>0.5&&o.wS<0.04)return LAVA;if(o.wVolc>0.3&&o.wS<0.2)return OBSID;return WATER;}
+// Lava a landmark holds in its own walls (the citadel's moat, the rift's river), trusted by the underground check at a chunk's edge
+function sigLavaAt(X,y,Z){for(const s of sigsNear(Math.floor(X/CS),Math.floor(Z/CS)))if((s.kind==='rift'||s.kind==='citadel')&&y<s.g&&y>=s.g-32&&Math.max(Math.abs(X-s.X),Math.abs(Z-s.Z))<=s.R+2)return true;return false;}
+// ---- Landmark and feature
+SIGS.volcanic=[['citadel','The Ashen Citadel',15],['rift','Rift of Fire',13]];
+function volcBuild(s,r){
+  const X=s.X,Z=s.Z,g=s.g;
+  switch(s.kind){
+    case 'citadel':{ // a ruined black citadel: curtain walls and corner towers round a tall spire crowned with fire, a moat of lava
+      const face=Math.floor(s.seed*4),rx=(a,b)=>face===0?a:face===1?-b:face===2?-a:b,rz=(a,b)=>face===0?b:face===1?a:face===2?-b:-a;
+      const P=(a,y,b,id)=>PW(X+rx(a,b),y,Z+rz(a,b),id,MODE_SET),stone=()=>{const q=r();return q<0.14?OBSID:q<0.36?CINDER:BASALT;},gap=(a,b,y,top)=>hsh(X+a*7,y,Z+b*5)<0.04+0.3*Math.max(0,(y-g)/top-0.6);
+      sigFloor(X-15,Z-15,X+15,Z+15,g,BASALT,14);
+      for(let a=-16;a<=16;a++)for(let b=-16;b<=16;b++){const m=Math.max(Math.abs(a),Math.abs(b));
+        if(m===16){for(let y=g-3;y<g;y++)P(a,y,b,BASALT);continue;} // the moat's outer wall: its lava is held whatever the ground does
+        if(m>=14){if(b>=12&&Math.abs(a)<=1){P(a,g,b,BASALT);continue;} // the causeway over the moat
+          P(a,g-3,b,BASALT);P(a,g-2,b,LAVA);P(a,g-1,b,LAVA);P(a,g,b,AIR);}else if(m<=10&&hsh(X+a,9171,Z+b)<0.12)P(a,g,b,LAVACRUST);}
+      // the curtain wall with its crenels and the gate in the near side
+      for(let a=-12;a<=12;a++)for(let b=-12;b<=12;b++){const m=Math.max(Math.abs(a),Math.abs(b));if(m<11)continue;const wh=7+(hsh(X+a,9173,Z+b)<0.25?-2:0);
+        for(let y=g+1;y<=g+wh;y++){if(b>=11&&Math.abs(a)<=1&&y<=g+5)continue;if(!gap(a,b,y,wh))P(a,y,b,stone());}
+        if(m===12&&(a+b)%2===0)P(a,g+wh+1,b,stone());}
+      // corner and gate towers: hollow, crenelated, a brazier of magma on each
+      for(const [ca,cb,th] of [[-12,-12,15],[12,-12,15],[-12,12,14],[12,12,14],[-3,12,12],[3,12,12]])for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const e=Math.abs(a)===2||Math.abs(b)===2;
+        for(let y=g+1;y<=g+th;y++)if(e&&!gap(ca+a,cb+b,y,th))P(ca+a,y,cb+b,stone());if(e&&(a+b)%2===0)P(ca+a,g+th+1,cb+b,stone());if(!a&&!b){P(ca,g+th-1,cb,BASALT);P(ca,g+th,cb,MAGMA);}}
+      // the spire: stepping in as it rises, slit windows lit from within, a crown of obsidian spikes round a fire at the top
+      const tiers=[[4,12],[3,24],[2,34],[1,40]];let y0=g+1;
+      for(const [hw,top] of tiers){for(let y=y0;y<=g+top;y++)for(let a=-hw;a<=hw;a++)for(let b=-hw;b<=hw;b++){const e=Math.abs(a)===hw||Math.abs(b)===hw;
+          if(!e){P(a,y,b,(y-g)%6===0?BASALT:AIR);continue;}const win=(y-g)%6===3&&(a===0||b===0)&&hw>1;P(a,y,b,win?AIR:stone());if(win)P(Math.sign(a)*(hw-1),y-1,Math.sign(b)*(hw-1),LAVACRUST);}
+        y0=g+top+1;}
+      for(let y=g+1;y<=g+3;y++)P(0,y,4,AIR); // the spire's door, toward the gate
+      for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]])for(let y=g+41;y<=g+45;y++)if(y<g+44||hsh(X+a,y,Z+b)<0.6)P(a,y,b,OBSID);
+      P(0,g+41,0,MAGMA);P(0,g+42,0,LAVACRUST);
+      // rubble below the broken walls
+      for(let k=0;k<40;k++){const a=-11+(r()*23|0),b=-11+(r()*23|0);if(Math.max(Math.abs(a),Math.abs(b))>5)P(a,g+1,b,r()<0.6?CINDER:BASALT);}
+      break;}
+    case 'rift':{ // a rift: walls dropping in ledges to a river of fire twenty and more blocks down, a black arch across it
+      const ang=hsh(X,9151,Z)*Math.PI,ux=Math.cos(ang),uz=Math.sin(ang),dep=20+Math.floor(hsh(X,9153,Z)*8);
+      for(let dx=-14;dx<=14;dx++)for(let dz=-14;dz<=14;dz++){const t=dx*ux+dz*uz,c=-dx*uz+dz*ux;if(Math.abs(t)>13.5)continue;const f=Math.sqrt(Math.max(0,1-(t/13.5)*(t/13.5))),hw=1.5+3.5*f+fbm2((X+dx)/4,(Z+dz)/4,1,9155.1)*0.8;
+        if(Math.abs(c)>hw+2)continue;const x=X+dx,z=Z+dz,bot=g-Math.round(dep*Math.min(1,f*1.6)); // a flat bottom along the middle, so the lava lies level
+        if(Math.abs(c)>hw){PW(x,g,z,hsh(x,9157,z)<0.5?LAVACRUST:CINDER,MODE_SET);continue;}
+        for(let y=g+6;y>bot;y--){const open=Math.abs(c)<=hw-(g-y)/7;if(open)PW(x,y,z,AIR,MODE_SET);}
+        if(bot===g-dep&&Math.abs(c)<=hw-dep/7){PW(x,bot,z,LAVA,MODE_SET);PW(x,bot-1,z,LAVA,MODE_SET);PW(x,bot-2,z,MAGMA,MODE_SET);}}
+      // the arch: a span of basalt across the middle, a little below the rim
+      for(let k=-8;k<=8;k++){const a=-Math.round(k*uz),b=Math.round(k*ux),sag=Math.round(Math.cos(k/8*1.5708)*2);for(let y=g-6+sag;y<=g-4+sag;y++)PW(X+a,y,Z+b,y===g-4+sag?CINDER:BASALT,MODE_SET);}
+      break;}
   }
 }
 const ORE_SPAN=382; // ore veins fall in y 1 to 382, as before the world grew to 512
@@ -4064,7 +4195,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
@@ -4205,9 +4336,11 @@ const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;unif
   // water: a deeper blue with moving shimmer and glints in daylight; lava (blk 3): slow bright crests; emitters (blk 2 and up) pulse
   // a little and glow through fog (M3b)
   'if(wave>0.5){float s=sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.7*sin(time*2.3-vW.x*0.5+vW.z*1.3)+0.5*sin(time*0.9+(vW.x-vW.z)*0.35);c*=vec3(0.6,0.76,0.96)*(0.97+0.045*s);c+=vec3(0.07,0.09,0.11)*smoothstep(1.55,2.1,s)*vL*skyMul;}'+
-  'if(vB>2.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
-  'else if(vB>1.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
-  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
+  'if(vB>2.5&&vB<3.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
+  'else if(vB>1.5&&vB<2.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
+  // embers (blk 4, D-051): glowing crust and smouldering wood shine by their own light but fog like any block
+
+  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5&&vB<3.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
 function mat(op,at,transp,wave,overlay){return new THREE.ShaderMaterial({uniforms:Object.assign({},U,{opacity:{value:op},alphaTest:{value:at},wave:{value:wave?1:0},bright:{value:1}},overlay?{skyMul:{value:1}}:{}),vertexShader:VS,fragmentShader:FS,transparent:transp,depthWrite:!transp&&!overlay,depthTest:!overlay,side:transp?THREE.DoubleSide:THREE.FrontSide});}
 const matO=mat(1,0.5,false,false),matW=mat(0.8,0.0,true,true),matHand=mat(1,0.5,false,false,true);
 
@@ -4236,7 +4369,7 @@ function paintDome(d,sunset){
   for(let i=0;i<pos.count;i++){
     dv.set(pos.getX(i),pos.getY(i),pos.getZ(i)).normalize();
     const t=Math.pow(Math.max(0,Math.min(1,dv.y*1.5)),0.7),sd=Math.max(0,dv.dot(sunDir)),gl=Math.pow(sd,10)*glow;
-    domeCol[i*3]=skyC.r+(zenC.r-skyC.r)*t+glowC.r*gl;domeCol[i*3+1]=skyC.g+(zenC.g-skyC.g)*t+glowC.g*gl;domeCol[i*3+2]=skyC.b+(zenC.b-skyC.b)*t+glowC.b*gl;
+    domeCol[i*3]=skyC.r+(zenC.r-skyC.r)*t+glowC.r*gl;domeCol[i*3+1]=skyC.g+(zenC.g-skyC.g)*t+glowC.g*gl;domeCol[i*3+2]=skyC.b+(zenC.b-skyC.b)*t+glowC.b*gl;burnDome(i,t);
   }
   domeGeo.attributes.color.needsUpdate=true;
 }
@@ -4551,7 +4684,7 @@ function buildChunk(cx,cz){
           vl=sl/n;vb=sb/n;
           a=(A&&B)?0:3-A-B-C;
         }
-        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:2):vb*v);M.a.push(v);
+        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:b.ember?4:2):vb*v);M.a.push(v);
       }
       if(ao[0]+ao[3]>ao[1]+ao[2])M.i.push(base,base+1,base+2,base+2,base+1,base+3);
       else M.i.push(base,base+1,base+3,base,base+3,base+2);
@@ -4785,7 +4918,9 @@ const AMB_EV={
   hammer:at=>{for(let i=0;i<3;i++){burst(0.05,'bandpass',2300,4,0.12,i*0.55,at);tone(880,860,0.25,0.025,i*0.55,null,at);}},
   chime:at=>{const f=[880,990,1175,1320][Math.random()*4|0];tone(f,f,1.4,0.03,0,null,at);tone(f*1.5,f*1.5,1.1,0.015,0.05,null,at);},
   creak:at=>{tone(150,95,0.7,0.035,0,'sawtooth',at);},
-  wind:at=>{burst(1.6,'bandpass',300+Math.random()*200,0.8,0.08,0,at);}
+  wind:at=>{burst(1.6,'bandpass',300+Math.random()*200,0.8,0.08,0,at);},
+  crackle:at=>{for(let i=0;i<2+(Math.random()*3|0);i++)burst(0.03,'highpass',2600+Math.random()*2400,0.7,0.05,i*0.05+Math.random()*0.04,at);},
+  boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
 const AMB_LAND={
@@ -4794,7 +4929,7 @@ const AMB_LAND={
   wet:{day:{bird:8,frog:2},night:{frog:14,cricket:8},wind:0.01},
   high:{wind:0.11,day:{wind:4},night:{wind:4}},
   dry:{wind:0.07,day:{cricket:3,wind:3},night:{cricket:8}},
-  fire:{rumble:0.14,lava:0.06,day:{bubble:6},night:{bubble:6},wind:0.04},
+  fire:{rumble:0.2,lava:0.09,day:{bubble:6,crackle:16,boom:0.8},night:{bubble:6,crackle:16,boom:0.8},wind:0.06}, // the Volcanic Wastes (D-051)
   grey:{wind:0.04,day:{creak:2},night:{creak:3}},
   ring:{wind:0.02,day:{chime:5},night:{chime:7}}
 };
@@ -5170,6 +5305,7 @@ function dropsFor(id,tool){
   switch(id){
     case DBUSH:return Math.random()<0.5?[[328,1]]:[];case BERRYB:return[[332,2+(Math.random()*3|0)]];case MUSHB:return[[333,1]];case WTURN:case TURN0:case TURN1:return[[330,1]];
     case TURN2:return[[330,2+(Math.random()*2|0)]];case BEAN0:case BEAN1:return[[331,1]];case BEAN2:return[[331,2+(Math.random()*2|0)]];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
+    case CHARWOOD:case SMOULDER:return[[200,1+(Math.random()<0.3?1:0)]];case VENT:return[[CINDER,1]];case LAVACRUST:return[[CINDER,1]];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
@@ -6698,8 +6834,8 @@ function drawBar(quiet){
   updateHand();saveDirty=true;
 }
 (function(){
-  const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+  const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -7031,8 +7167,9 @@ function updSky(){
   drawMoon(dayN%8);
   sunC.setHex(0xfff4c2).lerp(cSet,sunset*0.7);sun.material.color.copy(sunC);
   sun.visible=elev>-0.15;moon.visible=elev<0.2;
+  burnSkyTick(d); // the burning sky of the Volcanic Wastes (D-051)
   U.skyMul.value=Math.min(1.2,U.skyMul.value+flash*0.9);skyC.lerp(flashC,flash*0.5);
-  halo.visible=sun.visible&&rainAmt<0.6;halo.material.opacity=(0.55+0.45*sunset)*(1-rainAmt);
+  halo.visible=sun.visible&&rainAmt<0.6&&LWX.burn<0.5;halo.material.opacity=(0.55+0.45*sunset)*(1-rainAmt);
   paintDome(d,sunset);
   return d;
 }
@@ -7046,11 +7183,11 @@ function colTop(x,z){x=Math.floor(x);z=Math.floor(z);if(x<0||z<0||x>=W||z>=D)ret
 function updWeather(dt,now){
   rainT-=dt;if(rainT<=0){raining=!raining;rainT=raining?60+Math.random()*90:(150+Math.random()*220)*(LWX.storm?0.5:1);} // storms come twice as often on the coasts and mountains
   flash=Math.max(0,flash-dt*3.5);
-  if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;flash=1;const dl=0.4+Math.random()*2.5;burst(1.5,'lowpass',170,0.5,0.7,dl);burst(0.7,'lowpass',520,0.6,0.35,dl);buzz(30);}}
+  if(rainAmt>0.75&&!snowing){boltT-=dt;if(boltT<=0){boltT=8+Math.random()*22;strike(true);}} // a bolt you can see, thunder after it by its distance (D-051)
   rainAmt+=(((settings.weather&&raining)?1:0)-rainAmt)*Math.min(1,dt*0.25);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),bi=(bx>=0&&bz>=0&&bx<W&&bz<D)?biome[bx+W*bz]:2;
   snowing=bi===6||(bi===5&&PL.y>=SEA+33); // High Mountains snow above their snow line (fillCol)
-  landWeather(dt);if(LWX.snow>=1||(LWX.snow>0&&PL.y>SEA+60))snowing=true; // the cold lands' snow (M6h)
+  landWeather(dt);fireTick(dt);if(LWX.snow>=1||(LWX.snow>0&&PL.y>SEA+60))snowing=true; // the cold lands' snow (M6h)
   // when it is dry, dust (the drylands) or ash (the volcanic and blighted lands) drifts in the air instead
   const dustN=rainAmt<0.1?Math.floor(NR*0.35*LWX.dust):0,dusty=rainAmt<0.1&&dustN>0;
   const n=dusty?dustN:Math.floor(NR*rainAmt),len=dusty?0.05:snowing?0.09:0.75;
@@ -7126,18 +7263,118 @@ let tickT=0;
 // stands in, easing from one land's weather into the next. Still cosmetic. Fog never closes in nearer than 38 blocks (Q128).
 const LAND_WX={willow:{fog:0.5},bog:{fog:0.6},cloud:{fog:0.8,storm:1},shadow:{fog:0.4},giant:{fog:0.35},yew:{fog:0.3},moors:{fog:0.35},barrow:{fog:0.3},
   glowcap:{fog:0.5,tint:[0.75,0.95,1],ta:0.25},fjord:{fog:0.35,storm:1,snow:1},sea:{fog:0.15,storm:1},kelp:{fog:0.2,storm:1},isles:{fog:0.3,storm:1},chalk:{storm:1},blacksand:{storm:1,fog:0.2},mtn:{storm:1},
-  blight:{fog:0.5,tint:[0.8,0.85,0.72],ta:0.4,dust:0.4,ash:1},volcanic:{tint:[0.85,0.6,0.5],ta:0.45,dust:0.7,ash:1},dry:{tint:[1,0.88,0.68],ta:0.35,dust:0.6},petrified:{tint:[1,0.86,0.7],ta:0.3,dust:0.4},
+  blight:{fog:0.5,tint:[0.8,0.85,0.72],ta:0.4,dust:0.4,ash:1},volcanic:{burn:1,fog:0.3,tint:[1,0.5,0.38],ta:0.55,dust:0.9,ash:1},dry:{tint:[1,0.88,0.68],ta:0.35,dust:0.6},petrified:{tint:[1,0.86,0.7],ta:0.3,dust:0.4},
   steppe:{tint:[1,0.95,0.8],ta:0.2,dust:0.15},crystal:{tint:[0.88,0.82,1],ta:0.3,snow:1},starfall:{tint:[0.8,0.76,1],ta:0.25},autumn:{tint:[1,0.9,0.8],ta:0.15},silver:{tint:[0.92,0.95,1],ta:0.2},
   tundra:{snow:1},glacier:{snow:1,fog:0.3},alpine:{snow:0.5}};
-const LWX={fog:0,ta:0,dust:0,ash:0,storm:0,snow:0,tint:new THREE.Color(1,1,1),k:'',t:0},TLW={},tintTmp=new THREE.Color(),tintMul=new THREE.Color();
+const LWX={fog:0,ta:0,dust:0,ash:0,storm:0,snow:0,burn:0,tint:new THREE.Color(1,1,1),k:'',t:0},TLW={},tintTmp=new THREE.Color(),tintMul=new THREE.Color();
 function landWeather(dt){
   LWX.t-=dt;if(LWX.t<=0){LWX.t=0.5;colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TLW);LWX.k=LANDS[TLW.land].k;}
   const p=LAND_WX[LWX.k]||{},f=Math.min(1,dt*0.3);
-  LWX.fog+=((p.fog||0)-LWX.fog)*f;LWX.ta+=((p.ta||0)-LWX.ta)*f;LWX.dust+=((p.dust||0)-LWX.dust)*f;LWX.ash+=((p.ash||0)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
+  LWX.fog+=((p.fog||0)-LWX.fog)*f;LWX.burn+=((p.burn||0)-LWX.burn)*f;LWX.ta+=((p.ta||0)-LWX.ta)*f;LWX.dust+=((p.dust||0)-LWX.dust)*f;LWX.ash+=((p.ash||0)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
   if(p.tint)LWX.tint.lerp(tintTmp.setRGB(p.tint[0],p.tint[1],p.tint[2]),f);
 }
+// the weather of the land you stand in, at once (travel and screenshots), instead of easing in
+function landWeatherNow(){LWX.t=0;landWeather(0);const p=LAND_WX[LWX.k]||{};LWX.fog=p.fog||0;LWX.ta=p.ta||0;LWX.dust=p.dust||0;LWX.ash=p.ash||0;LWX.burn=p.burn||0;LWX.tint.setRGB(1,1,1);if(p.tint)LWX.tint.setRGB(p.tint[0],p.tint[1],p.tint[2]);}
 // the sky takes on the land's tint
 function tintSky(c){tintMul.copy(c).multiply(LWX.tint);c.lerp(tintMul,LWX.ta);}
+// ---- The sky over the Volcanic Wastes (D-051): smoke-black overhead, a red glow along the horizon, a dull red sun; dry lightning
+// in blue-white bolts that strike the plains and the craters; a plume of smoke over every volcano, lit red from the crater; lava
+// thrown up from the craters; embers rising from the lava and smoke from the vents. All cosmetic, none of it saved. Storms
+// elsewhere get visible bolts too.
+const burnSky=new THREE.Color(),burnTint=new THREE.Color(1,0.52,0.4),burnSun=new THREE.Color(0.5,0.1,0.04),burnCloud=new THREE.Color(),blueFlash=new THREE.Color(0.5,0.6,1);
+// the sky's colours, called from updSky once the day's own colours are set (d: daylight 0 to 1)
+function burnSkyTick(d){
+  const b=LWX.burn;flashC.setHex(0xdfe6ff).lerp(blueFlash,b);if(b<0.002)return;
+  U.skyMul.value*=1-0.42*b;U.skyTint.value.lerp(burnTint,0.75*b);
+  skyC.lerp(burnSky.setRGB(0.17,0.05,0.035).multiplyScalar(0.4+0.6*d),0.9*b);
+  stars.material.opacity*=1-b;clouds.material.color.lerp(burnCloud.setRGB(0.2,0.09,0.07).multiplyScalar(0.5+0.5*d),0.85*b);
+  sun.material.color.lerp(burnSun,0.85*b);if(b>0.5)halo.visible=false;
+}
+// the dome: near black overhead, red low down where the glow of the lava lights the smoke
+const burnZen=[0.05,0.016,0.013];
+function burnDome(i,t){const b=LWX.burn;if(b<0.002)return;const g=Math.pow(1-t,2.6)*b*(0.6+0.4*U.skyMul.value),k=b*Math.min(1,0.35+t*1.2);
+  for(let c=0;c<3;c++)domeCol[i*3+c]=domeCol[i*3+c]*(1-k)+burnZen[c]*k+[0.42,0.07,0.025][c]*g;}
+// ---- Lightning: a jagged bolt with branches, drawn as ribbons turned to face the camera, a core and a wide glow, flickering
+const bolts=[],boltCore=new THREE.MeshBasicMaterial({color:0xeef3ff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),
+  boltGlow=new THREE.MeshBasicMaterial({color:0x4d6cff,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
+const BOLT_FLICK=[1,0.12,0.95,0.08,0.75,0.3,0.6,0];
+function makeBolt(X0,Y0,Z0,X1,Y1,Z1,storm){
+  const segs=[],walk=(x,y,z,tx,ty,tz,n,w,jit)=>{let px=x,py=y,pz=z,ox=0,oz=0;for(let i=1;i<=n;i++){const f=i/n;ox+=(Math.random()-0.5)*jit;oz+=(Math.random()-0.5)*jit;if(i===n){ox*=0;oz*=0;}
+      const nx=x+(tx-x)*f+ox*(1-f*0.6),ny=y+(ty-y)*f+(Math.random()-0.5)*jit*0.3,nz=z+(tz-z)*f+oz*(1-f*0.6);segs.push([px,py,pz,nx,ny,nz,w*(1-f*0.4)]);
+      if(w>0.2&&i>2&&i<n-2&&Math.random()<0.18){const a=Math.random()*6.28,l=(Y0-Y1)*(0.15+Math.random()*0.2);walk(nx,ny,nz,nx+Math.cos(a)*l*0.6,ny-l,nz+Math.sin(a)*l*0.6,5+(Math.random()*3|0),w*0.45,jit*0.7);}
+      px=nx;py=ny;pz=nz;}};
+  walk(X0,Y0,Z0,X1,Y1,Z1,18,0.5,(Y0-Y1)/9);
+  const mk=(mat,k)=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(segs.length*18),3).setUsage(THREE.DynamicDrawUsage));const m=new THREE.Mesh(g,mat.clone());m.frustumCulled=false;m.userData.k=k;scene.add(m);return m;};
+  const b={segs:segs,t:0,core:mk(boltCore,1),glow:mk(boltGlow,5)};if(storm)b.core.material.color.setHex(0xffffff);bolts.push(b);return b;
+}
+function drawBolt(b){
+  const cx=camera.position.x+OX,cy=camera.position.y,cz=camera.position.z+OZ;
+  for(const m of [b.core,b.glow]){const P=m.geometry.attributes.position.array,k=m.userData.k;let o=0;
+    for(const [ax,ay,az,bx,by,bz,w0] of b.segs){const dx=bx-ax,dy=by-ay,dz=bz-az,vx=(ax+bx)/2-cx,vy=(ay+by)/2-cy,vz=(az+bz)/2-cz;
+      let px=dy*vz-dz*vy,py=dz*vx-dx*vz,pz=dx*vy-dy*vx;const l=Math.hypot(px,py,pz)||1,w=Math.max(w0*1.4,Math.hypot(vx,vy,vz)*0.007*w0*2)*k*0.5;px*=w/l;py*=w/l;pz*=w/l; // a few pixels wide however far
+      const q=[[ax-px,ay-py,az-pz],[ax+px,ay+py,az+pz],[bx-px,by-py,bz-pz],[ax+px,ay+py,az+pz],[bx+px,by+py,bz+pz],[bx-px,by-py,bz-pz]];
+      for(const v of q){P[o++]=v[0]-OX;P[o++]=v[1];P[o++]=v[2]-OZ;}}
+    m.geometry.attributes.position.needsUpdate=true;}
+}
+// strike: within a plume over a crater when one is near, otherwise somewhere ahead on the plain; thunder follows by distance
+let fireBoltT=3;
+function strike(storm,ahead){
+  const X=PL.x+OX,Z=PL.z+OZ;let X1,Y1,Z1,top;
+  const vs=storm||ahead?[]:volcanoesNear(X,Z,170);
+  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],a=Math.random()*6.28,r=Math.random()*v.rc;X1=v.X+Math.cos(a)*r;Z1=v.Z+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
+  else{const yaw=PL.yaw+(ahead?0.15:(Math.random()-0.5)*2.6),d=ahead?70:35+Math.random()*110;X1=X-Math.sin(yaw)*d;Z1=Z-Math.cos(yaw)*d;Y1=hAt(Math.round(X1),Math.round(Z1))+1;top=Math.min(H-4,Y1+60+Math.random()*40);}
+  const b=makeBolt(X1+(Math.random()-0.5)*20,top,Z1+(Math.random()-0.5)*20,X1,Y1,Z1,storm);b.at=[X1-OX,Y1,Z1-OZ];
+  const dist=Math.hypot(X1-X,Z1-Z);flash=Math.max(flash,Math.min(1,1.3-dist/180));
+  const v=Math.max(0.15,1-dist/220),dl=dist/343;burst(2.2,'lowpass',150,0.5,0.75*v,dl,b.at);burst(0.8,'lowpass',520,0.6,0.4*v,dl,b.at);if(dist<45)burst(0.18,'highpass',2600,0.7,0.35,dl,b.at);
+  drawBolt(b);buzz(dist<60?30:10);return b;
+}
+function updBolts(dt){
+  for(let i=bolts.length-1;i>=0;i--){const b=bolts[i];if(!b.hold)b.t+=dt; // held: a screenshot catches it
+   const k=Math.floor(b.t/0.06);
+    if(k>=BOLT_FLICK.length){scene.remove(b.core);scene.remove(b.glow);b.core.geometry.dispose();b.glow.geometry.dispose();b.core.material.dispose();b.glow.material.dispose();bolts.splice(i,1);continue;}
+    b.core.material.opacity=BOLT_FLICK[k];b.glow.material.opacity=0.3*BOLT_FLICK[k];drawBolt(b);}
+}
+// ---- Plumes: soft puffs of smoke rising from each crater nearby, lit red where they leave it, drifting on the wind
+let puffTex=null;
+function puffTexture(){if(puffTex)return puffTex;const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d');
+  for(let k=0;k<7;k++){const x=20+Math.random()*24,y=20+Math.random()*24,r=12+Math.random()*12,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);}
+  puffTex=new THREE.CanvasTexture(cv);return puffTex;}
+const plumes=new Map(),PUFFS=34,smokeC=new THREE.Color(0.15,0.12,0.11),fireC=new THREE.Color(0.85,0.3,0.1);
+function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;p.vy=4+Math.random()*2;p.s0=10+Math.random()*6;p.s1=42+Math.random()*24;
+  for(let t=0;t<age;t+=0.5)movePuff(p,0.5);}
+function movePuff(p,dt){p.Y+=p.vy*dt;p.vy=Math.max(1.2,p.vy-dt*0.15);p.X+=1.6*dt;p.Z+=0.6*dt;}
+function updPlumes(dt){
+  const X=PL.x+OX,Z=PL.z+OZ,near=LWX.burn>0.05||plumes.size?volcanoesNear(X,Z,300):[],keep=new Set();
+  for(const v of near){const k=v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
+    if(!pl){pl={v:v,puffs:[]};for(let n=0;n<PUFFS;n++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:smokeC.clone()}));scene.add(s);const p={s:s};newPuff(p,v,Math.random()*50);pl.puffs.push(p);}plumes.set(k,pl);}
+    for(const p of pl.puffs){p.age+=dt;movePuff(p,dt);if(p.age>p.life)newPuff(p,v,0);const f=p.age/p.life,sz=p.s0+(p.s1-p.s0)*Math.sqrt(f),d=Math.hypot(p.X-X,p.Z-Z);
+      p.s.position.set(p.X-OX,p.Y,p.Z-OZ);p.s.scale.set(sz,sz,1);p.s.material.color.copy(smokeC).lerp(fireC,Math.max(0,1-p.age/7)).multiplyScalar(0.55+0.45*U.skyMul.value+0.3*Math.max(0,1-p.age/7));
+      p.s.material.opacity=0.82*Math.min(1,p.age/3)*Math.min(1,(p.life-p.age)/8)*(1-sstep(U.fogFar.value*2.2,U.fogFar.value*3.2,d));}}
+  for(const [k,pl] of plumes)if(!keep.has(k)){for(const p of pl.puffs){scene.remove(p.s);p.s.material.dispose();}plumes.delete(k);}
+}
+// vent smoke: a pool of small soft puffs that rise, spread and fade
+const vpuffs=[];
+function ventPuff(s){let p=vpuffs.find(q=>q.age>=q.life);if(!p){if(vpuffs.length>=60)return;p={s:new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:new THREE.Color(0.5,0.47,0.42)}))};scene.add(p.s);vpuffs.push(p);}
+  p.age=0;p.life=4+Math.random()*3;p.X=s[0]+OX+0.5;p.Y=s[1]+1.2;p.Z=s[2]+OZ+0.5;p.s.visible=true;}
+function updVentPuffs(dt){for(const p of vpuffs){if(p.age>=p.life){p.s.visible=false;continue;}p.age+=dt;p.Y+=1.3*dt;p.X+=0.4*dt;const f=p.age/p.life,sz=0.9+3.2*f;
+  p.s.position.set(p.X-OX,p.Y,p.Z-OZ);p.s.scale.set(sz,sz,1);p.s.material.opacity=0.55*Math.min(1,p.age*2)*(1-f);p.s.material.color.setRGB(0.5,0.47,0.42).multiplyScalar(0.5+0.5*U.skyMul.value);}}
+// ---- Embers over the lava, smoke from the vents, lava thrown from the craters near you
+let fireScanT=0,lavaSpots=[],ventSpots=[],bombT=4;
+function fireScan(){lavaSpots=[];ventSpots=[];const px=Math.floor(PL.x),pz=Math.floor(PL.z);
+  for(let dz=-22;dz<=22;dz+=2)for(let dx=-22;dx<=22;dx+=2){const x=px+dx,z=pz+dz;if(x<0||z<0||x>=W||z>=D)continue;const ci=x+W*z,y=hm[ci],id=world[I(x,y,z)];
+    if(id===LAVA)lavaSpots.push([x,y,z]);else if(id===VENT||world[I(x,ground[ci],z)]===VENT)ventSpots.push([x,ground[ci],z]);}}
+function fireTick(dt){
+  if(!ready)return;updBolts(dt);updPlumes(dt);updVentPuffs(dt);
+  const b=LWX.burn;if(b<0.05||!playing)return;
+  fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=1.5+Math.random()*5;if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
+  fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}
+  for(let k=0;k<lavaSpots.length*dt*0.6;k++){const s=lavaSpots[Math.random()*lavaSpots.length|0];spawnP(s[0]+Math.random(),s[1]+1.05,s[2]+Math.random(),(Math.random()-0.5)*0.8+0.4,1.2+Math.random()*2.2,(Math.random()-0.5)*0.8,[1,0.35+Math.random()*0.35,0.08],1.2+Math.random()*2,-0.5);}
+  for(let k=0;k<12*dt*b;k++)spawnP(PL.x+(Math.random()-0.5)*30,PL.y+Math.random()*8-2,PL.z+(Math.random()-0.5)*30,0.6+Math.random()*0.4,0.4+Math.random()*0.8,(Math.random()-0.5)*0.5,[1,0.42,0.1],2+Math.random()*2,-0.15); // embers on the wind
+  for(const s of ventSpots)if(Math.random()<dt*2.5)ventPuff(s);
+  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const at=[v.X-OX,v.lake+1,v.Z-OZ];
+      for(let k=0;k<14;k++){const a=Math.random()*6.28,s=2+Math.random()*5;spawnP(at[0]+(Math.random()-0.5)*v.rc*0.8,at[1],at[2]+(Math.random()-0.5)*v.rc*0.8,Math.cos(a)*s,12+Math.random()*12,Math.sin(a)*s,[1,0.5+Math.random()*0.3,0.1],3.5,9);}
+      burst(1.2,'lowpass',110,0.6,0.4*Math.max(0.1,1-Math.hypot(v.X-PL.x-OX,v.Z-PL.z-OZ)/200),0,at);}}
+}
 // Main loop
 let caveF=0,cullT=0,wasWall=false;const caveDark=new THREE.Color(0.035,0.04,0.06),caveFogC=new THREE.Color();
 let last=performance.now(),infoT=0,fc=0,fps=0,ft=0,mmT=0;

@@ -45,7 +45,7 @@ land('kelp','Kelp Shallows','coast',2,[2,4],[0,2],7,0,'human',['a sunken causewa
 land('bog','Raised Bogs','coast',2,[0,2],[2,2],1,11,'halfling',['an old plank trackway across the bog','a domed bog with pools and cotton grass'],{gorge:0,built:true,col:[132,96,64]});
 // dry and fiery (M6e)
 land('dry','Southern Drylands','dry',1,[4,4],[0,0],3,10,'beastfolk',['a temple half buried in sand','a dry wadi with an old well'],{gorge:0.6,built:true,col:[226,198,132]});
-land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['a ruined fire shrine','a smoking cone with a lava lake held in rock'],{gorge:0.8,built:true,col:[78,70,70]});
+land('volcanic','Volcanic Wastes','dry',2,[3,4],[0,0],6,4,'drow',['the Ashen Citadel, a black fortress on a moat of lava','the Rift of Fire, a chasm with a river of lava along its floor'],{gorge:0.8,built:true,col:[78,70,70]});
 land('blight','Blighted Lands','dry',2,[1,3],[0,1],3,4,'orc',['a dead lord\'s ruined hall','grey dead trees and ash pools'],{never:['flower','orchard','farm','giant','silver'],built:true,col:[128,120,100]});
 // strange lands (M6f)
 land('crystal','Crystal Barrens','strange',3,[0,1],[0,0],6,6,'gnome',['a crystal cutters\' ruin','crystal spires'],{built:true,col:[190,176,226]});

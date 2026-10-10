@@ -75,7 +75,9 @@ const AMB_EV={
   hammer:at=>{for(let i=0;i<3;i++){burst(0.05,'bandpass',2300,4,0.12,i*0.55,at);tone(880,860,0.25,0.025,i*0.55,null,at);}},
   chime:at=>{const f=[880,990,1175,1320][Math.random()*4|0];tone(f,f,1.4,0.03,0,null,at);tone(f*1.5,f*1.5,1.1,0.015,0.05,null,at);},
   creak:at=>{tone(150,95,0.7,0.035,0,'sawtooth',at);},
-  wind:at=>{burst(1.6,'bandpass',300+Math.random()*200,0.8,0.08,0,at);}
+  wind:at=>{burst(1.6,'bandpass',300+Math.random()*200,0.8,0.08,0,at);},
+  crackle:at=>{for(let i=0;i<2+(Math.random()*3|0);i++)burst(0.03,'highpass',2600+Math.random()*2400,0.7,0.05,i*0.05+Math.random()*0.04,at);},
+  boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
 const AMB_LAND={
@@ -84,7 +86,7 @@ const AMB_LAND={
   wet:{day:{bird:8,frog:2},night:{frog:14,cricket:8},wind:0.01},
   high:{wind:0.11,day:{wind:4},night:{wind:4}},
   dry:{wind:0.07,day:{cricket:3,wind:3},night:{cricket:8}},
-  fire:{rumble:0.14,lava:0.06,day:{bubble:6},night:{bubble:6},wind:0.04},
+  fire:{rumble:0.2,lava:0.09,day:{bubble:6,crackle:16,boom:0.8},night:{bubble:6,crackle:16,boom:0.8},wind:0.06}, // the Volcanic Wastes (D-051)
   grey:{wind:0.04,day:{creak:2},night:{creak:3}},
   ring:{wind:0.02,day:{chime:5},night:{chime:7}}
 };

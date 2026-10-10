@@ -154,6 +154,13 @@ setH([PRISM,AMBER],0.8,'misc');setH([PETRIWOOD],3,'stone',1);setH([STARORE],7,'o
 const FRUITL=1081,BLOSSOM=1082,OXEYE=1083,LAVENDER=1084;
 def(FRUITL,'Orchard Leaves',[240,240,240],LEAFD);def(BLOSSOM,'Blossom',[241,241,241],LEAFD);def(OXEYE,'Oxeye Daisy',[242,242,242],PLANT);def(LAVENDER,'Lavender',[243,243,243],PLANT);
 NEW_LEAVES.push(FRUITL,BLOSSOM);setH([FRUITL,BLOSSOM],0.3,'soft');setH([OXEYE,LAVENDER],0,'soft');
+// The burnt land (D-051): black ash and cinder over the Volcanic Wastes, crusts of cooling lava that still glow in their cracks,
+// trees charred to the heart (some still smouldering), yellow sulphur round the smoking vents
+const BLACKASH=1085,CINDER=1086,LAVACRUST=1087,CHARWOOD=1088,SMOULDER=1089,SULFUR=1090,VENT=1091;
+def(BLACKASH,'Black Ash',[244,244,244],{snd:'soft'});def(CINDER,'Cinder Rock',[245,245,245]);def(LAVACRUST,'Lava Crust',[246,246,246],{emit:true,ember:true,lum:5});
+def(CHARWOOD,'Charred Wood',[248,248,247],{snd:'wood'});def(SMOULDER,'Smouldering Wood',[248,248,249],{snd:'wood',emit:true,ember:true,lum:6});
+def(SULFUR,'Sulphur Crust',[250,250,250],{snd:'soft'});def(VENT,'Fumarole',[251,245,245],{emit:true,ember:true,lum:4});
+setH([BLACKASH,SULFUR],0.6,'soft');setH([CINDER,VENT],3,'stone',1);setH([LAVACRUST],4,'stone',1);setH([CHARWOOD,SMOULDER],1.6,'wood');
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);

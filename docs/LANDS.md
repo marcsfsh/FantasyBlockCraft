@@ -59,7 +59,7 @@ Share: of all land on the map (for sea lands, of the whole map). Regions: lands 
 | 25 | Kelp Shallows | Coasts and waters (M6d) | uncommon | temperate to hot | sea | sea by the coast | built | a sunken causeway | kelp forests | 1.3% | 24 (336) |
 | 26 | Raised Bogs | Coasts and waters (M6d) | uncommon | cold to temperate | wet | low | built | an old plank trackway across the bog | a domed bog with pools and cotton grass | 1.5% | 5 (707) |
 | 27 | Southern Drylands | Dry and fiery (M6e) | common | hot | dry | low, hills | built | a temple half buried in sand | a dry wadi with an old well | 1.8% | 11 (525) |
-| 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | built | a ruined fire shrine | a smoking cone with a lava lake held in rock | 1.3% | 10 (451) |
+| 28 | Volcanic Wastes | Dry and fiery (M6e) | uncommon | warm to hot | dry | hills, high | built | the Ashen Citadel, a black fortress on a moat of lava | the Rift of Fire, a chasm with a river of lava along its floor | 1.3% | 10 (451) |
 | 29 | Blighted Lands | Dry and fiery (M6e) | uncommon | cool to warm | dry to middling | low, hills | built | a dead lord's ruined hall | grey dead trees and ash pools | 2.1% | 25 (311) |
 | 30 | Crystal Barrens | Strange lands (M6f) | rare | cold to cool | dry | hills, high | built | a crystal cutters' ruin | crystal spires | 0.3% | 3 (350) |
 | 31 | Glowcap Hollows | Strange lands (M6f) | rare | temperate to warm | wet | low, hills | built | a mushroom dwelling | giant glowing mushrooms in a hollow | 0.8% | 12 (342) |

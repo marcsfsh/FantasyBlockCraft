@@ -24,11 +24,12 @@ Consequences:
 | `src/js/world/forests.js` | The forests (M6b): their trees, floors and plants (`FOREST`), and each stretch's signature landmark or natural feature (`SIGS`, `sigOf`, `sigBuild`, `sigNear`) |
 | `src/js/world/highlands.js` | Highlands and cold (M6c): alpine, glacier, cloud forest, karst and tundra looks in `FOREST`, their signatures (the sinkhole placed on a cave anchor), waterfalls (`fallAt`, `applyFalls`) |
 | `src/js/world/coasts.js` | Coasts and waters (M6d): the coast lands' shores, rock and plants in `FOREST`, water plants (`waterPlants`), driftwood, coastal and undersea signature places (`coastSite`) and builders |
-| `src/js/world/dry.js` | Dry and fiery (M6e): drylands, golden steppe, volcanic wastes and blighted lands in `FOREST`, their signatures, and magma stone over the lava sea under the wastes (`hotDeep`) |
+| `src/js/world/dry.js` | Dry and fiery (M6e): drylands, golden steppe and blighted lands in `FOREST`, their signatures, and magma stone over the lava sea under the wastes (`hotDeep`); the volcanic wastes moved to `world/volcanic.js` in 0.27.0 |
 | `src/js/world/strange.js` | Strange lands (M6f): crystal barrens, glowcap hollows, petrified forest and starfall craters in `FOREST` (the crater field `craterAt`), their rare finds and signatures |
 | `src/js/world/men.js` | Old lands of men (M6g): farmland, orchards, flower meadows and terraces in `FOREST`, their signatures, small structures across the lands (`smallAt`, `smallBuild`), dry-stone walls |
 | `src/js/world/waters.js` | Water and caves by land (M6h): ponds and springs (`pondAt`, `pondNear`, `applyPonds`), rapids (`rapidAt`), hillside stream lands (`STREAM_LANDS`, planned by `fallAt`), cave floors near the surface by land (`landCaves`) |
 | `src/js/world/kept.js` | Signatures of the five old kept lands (M6h): `SIGS` entries and `keptBuild`, the last builder in the chain |
+| `src/js/world/volcanic.js` | The Volcanic Wastes (D-051): volcanoes planned per 272-block cell (`volcAt`, `volcanoesNear`) and shaped into the terrain (`volcTerrain`: cone, crater lake of lava, flows, crust, fissures), the land's `FOREST` entry (ground, charred trees, spires, shards, vents), the liquid of its rivers and lakes (`liquidOf`), and its signatures (`volcBuild`: the Ashen Citadel and the Rift of Fire; `sigLavaAt` marks their lava as held for `drainCaveWater`) |
 | `src/js/world/lands.js` | Lands (M6a, D-039): the registry, the transition map of which lands may border which, the cell layout, blend weights and stretch names |
 | `src/js/world/caves.js` | Cave systems (D-028): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes |
 | `src/js/world/deep-caves.js` | The Fire Below: the lava sea with islands and flared pillars |
@@ -72,6 +73,7 @@ Consequences:
 | `src/js/engine/world-streaming.js` | Initial generation, rebuild on travel, sliding window streaming |
 | `src/js/gameplay/sky-weather-farming.js` | Day and night, weather, grass spread, farming |
 | `src/js/gameplay/land-weather.js` | Weather and sky tint by land (M6h): `LAND_WX` profiles, `landWeather(dt)` eases mist, storms, snow, dust and ash between lands; `tintSky` |
+| `src/js/gameplay/fire-sky.js` | The burning sky over the Volcanic Wastes (D-051): `burnSkyTick` and `burnDome` darken the sky and dome to black and red, `strike` throws forked lightning (`makeBolt`, `drawBolt`, `updBolts`; any storm uses it), smoke plumes over craters (`updPlumes`), vent puffs, embers, lava bombs; `fireTick(dt)` runs them |
 | `src/js/core/main-loop.js` | Main loop |
 
 Removed in M1 (0.3.0) for the setting: the town and road generator, the power network and power tools, trading counters and mints, ore processing and rails (D-021). Coins stay defined but out of play through the `BANNED` set in `gameplay/crafting.js`, which filters recipes, loot tables and the creative menu; `tests/cases/10-content-tables.test.js` fails if any removed kind of block or item returns.

@@ -5,6 +5,24 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.27.0 (2026-10-10): the Volcanic Wastes remade
+
+Saves from 0.26.0 do not carry over (save key v18): the world has changed.
+
+### Game
+- **A burning sky:** over the Volcanic Wastes the sky turns black with a red glow on the horizon, the sun is a dull ember and the clouds go dark as smoke.
+- **Blue lightning:** storms everywhere now throw forked bolts you can see, with thunder that follows by the distance. In the wastes half of them strike into the plumes over the craters.
+- **Volcanoes:** named mountains up to seventy blocks high with a lake of lava in the crater, flows spilling through breaches down the flanks, older crusted flows, and smoke rising from the top. Lava bombs arc from the nearest.
+- **Rivers and lakes of lava** in the wastes, turning to obsidian toward the sea, and fissures of lava across the plains.
+- **A charred land:** black ash, cinder rock and grey ash; glowing lava crust; fumaroles ringed with sulphur; charred and still smouldering trees, fallen logs, basalt spires and obsidian shards; embers on the wind.
+- **New landmarks:** the Ashen Citadel on its moat of lava, its spire crowned with fire, and the Rift of Fire with a river of lava along its floor. They replace the fire shrine and the smoking cone.
+- **New blocks:** black ash, cinder rock, lava crust, charred wood, smouldering wood, sulphur crust and fumaroles (charred wood gives coal).
+- **Sound:** crackling embers and far booms in the wastes.
+
+### Tooling
+- `tools/shot.mjs --bolt` holds a lightning strike in each view.
+- New test `47-volcanic`; `40-dry` loses the smoking cone check.
+
 ## 0.26.0 (2026-10-10): E1 refined, animals worth looking at
 
 Saves from 0.25.0 load as they are; the world is unchanged.

@@ -41,9 +41,11 @@ const FS='uniform sampler2D map;uniform vec3 fogColor;uniform float fogNear;unif
   // water: a deeper blue with moving shimmer and glints in daylight; lava (blk 3): slow bright crests; emitters (blk 2 and up) pulse
   // a little and glow through fog (M3b)
   'if(wave>0.5){float s=sin(time*1.7+vW.x*0.9+vW.z*0.7)+0.7*sin(time*2.3-vW.x*0.5+vW.z*1.3)+0.5*sin(time*0.9+(vW.x-vW.z)*0.35);c*=vec3(0.6,0.76,0.96)*(0.97+0.045*s);c+=vec3(0.07,0.09,0.11)*smoothstep(1.55,2.1,s)*vL*skyMul;}'+
-  'if(vB>2.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
-  'else if(vB>1.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
-  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
+  'if(vB>2.5&&vB<3.5){float s=sin(vW.x*1.3+time*0.8)*sin(vW.z*1.1-time*0.6)+0.6*sin((vW.x+vW.z)*0.5+time*0.45);c*=0.84+0.3*(0.5+0.5*s);c+=vec3(0.2,0.07,0.0)*smoothstep(0.7,1.4,s);}'+
+  'else if(vB>1.5&&vB<2.5){c*=1.0+0.05*sin(time*2.1+vW.x*1.7+vW.z*1.3);}'+
+  // embers (blk 4, D-051): glowing crust and smouldering wood shine by their own light but fog like any block
+
+  'float f=smoothstep(fogNear,fogFar,vD);if(vB>1.5&&vB<3.5)f*=vB>2.5?0.45:0.6;gl_FragColor=vec4(mix(c,fogColor,f),t.a*opacity);}';
 function mat(op,at,transp,wave,overlay){return new THREE.ShaderMaterial({uniforms:Object.assign({},U,{opacity:{value:op},alphaTest:{value:at},wave:{value:wave?1:0},bright:{value:1}},overlay?{skyMul:{value:1}}:{}),vertexShader:VS,fragmentShader:FS,transparent:transp,depthWrite:!transp&&!overlay,depthTest:!overlay,side:transp?THREE.DoubleSide:THREE.FrontSide});}
 const matO=mat(1,0.5,false,false),matW=mat(0.8,0.0,true,true),matHand=mat(1,0.5,false,false,true);
 
@@ -72,7 +74,7 @@ function paintDome(d,sunset){
   for(let i=0;i<pos.count;i++){
     dv.set(pos.getX(i),pos.getY(i),pos.getZ(i)).normalize();
     const t=Math.pow(Math.max(0,Math.min(1,dv.y*1.5)),0.7),sd=Math.max(0,dv.dot(sunDir)),gl=Math.pow(sd,10)*glow;
-    domeCol[i*3]=skyC.r+(zenC.r-skyC.r)*t+glowC.r*gl;domeCol[i*3+1]=skyC.g+(zenC.g-skyC.g)*t+glowC.g*gl;domeCol[i*3+2]=skyC.b+(zenC.b-skyC.b)*t+glowC.b*gl;
+    domeCol[i*3]=skyC.r+(zenC.r-skyC.r)*t+glowC.r*gl;domeCol[i*3+1]=skyC.g+(zenC.g-skyC.g)*t+glowC.g*gl;domeCol[i*3+2]=skyC.b+(zenC.b-skyC.b)*t+glowC.b*gl;burnDome(i,t);
   }
   domeGeo.attributes.color.needsUpdate=true;
 }
