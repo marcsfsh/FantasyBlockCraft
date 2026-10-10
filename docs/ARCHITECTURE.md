@@ -59,6 +59,7 @@ Consequences:
 | `src/js/gameplay/blueprints.js` | Blueprint capture and placement |
 | `src/js/gameplay/survival.js` | Health, hunger, air, damage, death, graves, the survival HUD; climbing gear (rope, grapnel, `onClimb`), signal flares, the worn lamp (`lampLevel`, `lampTick`, `depthDim`) |
 | `src/js/gameplay/storage.js` | Containers that keep items by world position (`boxes`, saved as `cs`), loot rolled on first opening (`lootOf`), the container screen (D-033) |
+| `src/js/engine/animal-models.js` | Animal models (E1 refined, D-050): `AM_KINDS` (parts in pixels, coats, paint), box unwrap (`amRect`, `amBoxGeo`), coat textures (`amTexture`), the animal shader (`AM_VS`, `AM_FS`, `amMaterial`), `amBuild`, `amBounds`, shadows |
 | `src/js/gameplay/wildlife.js` | Animals (E1): `ANIMALS`, `WILD_OF`, spawning around the player, wandering and fleeing (`stepAnimal`), aiming (`animalHit`, `rayBox`), `animalAct` (hunt, shear, milk, eggs, ride, befriend, pack), riding (`PL.ride`), saved befriended animals (`wildSave`, `wildRestore`) |
 | `src/js/input/touch.js` | Touch controls |
 | `src/js/ui/worldmap.js` | Explored chunks (packed per region), places, markers, the world map screen drawn from `colInfo`, the minimap's layer view (D-037) |

@@ -182,6 +182,10 @@
       "about": "Chests, crates and barrels that keep items by world position (M4b), and the container screen"
     },
     {
+      "path": "engine/animal-models.js",
+      "about": "Animal models (E1 refined): boxes in pixels with their own textures painted per coat, a shader lit like the world, shadows"
+    },
+    {
       "path": "gameplay/wildlife.js",
       "about": "Animals (E1): kinds by land, wandering and fleeing, hunting, wool, milk and eggs, riding, a hound and a pack mule that follow you"
     },

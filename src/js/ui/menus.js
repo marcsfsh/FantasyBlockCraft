@@ -50,6 +50,8 @@ $('todr').addEventListener('input',e=>{setTimeOfDay(e.target.value);[...$('times
 $('wxnow').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v){setWeatherNow(v==='rain');toast(v==='rain'?'Rain is coming':'The sky clears');}});
 $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox').value,$('goz').value,$('goy').value))lockOrPlay();else toast('Type X and Z as numbers');});
 ['gox','goy','goz'].forEach(id=>$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('gobtn').click();}));
+{const sel=$('animsel');for(const k in ANIMALS){for(const yg of [0,1]){if(yg&&!ANIMALS[k].youngP)continue;const o=document.createElement('option');o.value=k+(yg?'.y':'');o.textContent=yg?'  young '+ANIMALS[k].n.toLowerCase():ANIMALS[k].n;sel.appendChild(o);}}
+  $('animbtn').addEventListener('click',()=>{if(bringAnimal(sel.value))lockOrPlay();});}
 {const sel=$('stampsel');for(const k in STAMPS){const o=document.createElement('option');o.value=k;o.textContent=STAMPS[k];sel.appendChild(o);}
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];

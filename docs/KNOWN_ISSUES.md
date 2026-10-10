@@ -56,6 +56,7 @@
 - **Lore texts are drafts.** Chronicles, tablet sayings and all names but the dwarves' wait for the owner's approval (`docs/LORE.md`).
 - **Sound is checked only against a stand-in.** Headless tests record the sound graph but hear nothing; the mix, the levels and how the positional sound feels in headphones are for the owner to judge on the Ally X (D-048).
 - **Running water is sampled, not traced.** The water loop listens at forty points within about fifteen blocks, so a waterfall just out of reach is silent (D-048).
-- **Animals ignore the fog.** They are drawn with plain materials lit by the light where they stand, so far away in fog they stay clear (D-049).
-- **Animals are simple box figures.** Shapes, colours and walking are judged only from tests; the owner checks them on the Ally X (D-049).
 - **Befriended animals left far away wait there.** A hound or mule more than a window's width away is saved where it stood and comes back only when you return to that place (D-049).
+
+- **Animals are judged from headless screenshots.** Their shapes, coats, gaits and calls look and sound right in software rendering and tests; how they move and sound on the Ally X is for the owner (D-050).
+- **Animals walk through tall grass and flowers** and can stand with a hoof over a block edge; they keep off water, walls and drops of more than three blocks (D-050).

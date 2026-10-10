@@ -59,6 +59,13 @@ function goTo(X,Z,Y){
 }
 // ---- The land tour (Q136): go to the heart of the nearest stretch of a land. A land not built yet is shown with the look of
 // the land it stands in for, so its place in the layout can be checked before its family is built.
+// Bring an animal (E1): one of the chosen kind stands a few blocks in front of you, on the ground (creative only)
+function bringAnimal(v){
+  if(creativeOnly())return null;const [k,md]=String(v).split('.');if(!ANIMALS[k])return null;
+  for(const d of [4,3,5,2.5,6]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=standY(x,PL.y+1,z);if(y<0||isWetId(get(Math.floor(x),y,Math.floor(z))))continue;
+    const a=addAnimal(k,x,y,z,{young:md==='y'});a.yaw=PL.yaw+Math.PI;a.st='idle';a.t=4;const cn=AM_KINDS[k].coats[a.ci][0].name;toast((md==='y'?'A young ':'A ')+ANIMALS[k].n.toLowerCase()+(cn?', '+cn:''));return a;}
+  toast('No open ground in front of you');return null;
+}
 function landTour(k){
   if(creativeOnly())return null;const L=LANDS[k],c=nearestLand(k,PL.x+OX,PL.z+OZ,48);if(!c){toast('No '+L.n+' within reach');return null;}
   let X=c.X,Z=c.Z;const o={};

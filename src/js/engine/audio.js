@@ -44,6 +44,16 @@ function tone(f0,f1,dur,vol,delay,type,at){
   g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
   o.connect(g);g.connect(outAt(at));o.start(t);o.stop(t+dur+0.05);
 }
+// A voice: an oscillator with vibrato through a formant filter, swelling in and fading out (the animals' calls, E1)
+function voice(f0,f1,dur,vol,o,at){
+  if(!AX||!settings.sound)return;o=o||{};
+  const t=AX.currentTime+(o.delay||0),osc=AX.createOscillator(),f=AX.createBiquadFilter(),g=AX.createGain();osc.type=o.type||'sawtooth';
+  osc.frequency.setValueAtTime(f0,t);osc.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  if(o.vib){const l=AX.createOscillator(),lg=AX.createGain();l.frequency.value=o.vib;lg.gain.value=f0*(o.vd||0.04);l.connect(lg);lg.connect(osc.frequency);l.start(t);l.stop(t+dur+0.05);}
+  f.type='bandpass';f.frequency.value=o.form||f0*2.5;f.Q.value=o.q||1.2;
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+Math.min(0.05,dur*0.3));g.gain.setValueAtTime(vol,t+dur*0.7);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  osc.connect(f);f.connect(g);g.connect(outAt(at));osc.start(t);osc.stop(t+dur+0.05);
+}
 const SND={soft:[700,1.2],wood:[420,2],stone:[1900,1.5],glass:[3600,3]};
 function sfxBlock(id,place,x,y,z){
   if(!AX||!settings.sound)return;
