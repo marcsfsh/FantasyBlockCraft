@@ -89,7 +89,7 @@ function updFalling(dt){
     if(ny<0){scene.remove(f.m);falling.splice(k,1);continue;}
     if(SOLID[get(f.x,Math.floor(ny),f.z)]){
       const ly=Math.floor(ny)+1,tg=get(f.x,ly,f.z);
-      if(ly<H&&(tg===AIR||BL[tg].liquid||BL[tg].cross)){setBlock(f.x,ly,f.z,f.id,true);sfxBlock(f.id,true);}
+      if(ly<H&&(tg===AIR||BL[tg].liquid||BL[tg].cross)){setBlock(f.x,ly,f.z,f.id,true);sfxBlock(f.id,true,f.x,ly,f.z);}
       else breakFx(f.x,ly,f.z,f.id,8);
       scene.remove(f.m);falling.splice(k,1);continue;
     }

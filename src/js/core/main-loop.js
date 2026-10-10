@@ -113,7 +113,7 @@ function frame(now){
       faceN.set(hit.px-hit.x,hit.py-hit.y,hit.pz-hit.z);
       if(faceN.lengthSq()===1&&!swapMode&&!BL[hit.id].cross){faceHi.visible=true;faceHi.position.set(hit.x+.5+faceN.x*.502,hit.y+.5+faceN.y*.502,hit.z+.5+faceN.z*.502);faceHi.lookAt(faceHi.position.x+faceN.x,faceHi.position.y+faceN.y,faceHi.position.z+faceN.z);}else faceHi.visible=false;
     }else{selBox.visible=false;faceHi.visible=false;}mmT-=dt;if(mmT<=0){mmT=0.1;drawMM();}} // the minimap redraws ten times a second
-  renderer.render(scene,camera);
+  renderer.render(scene,camera);audioListen();
   fc++;ft+=dt;infoT-=dt;
   if(infoT<=0&&ready){infoT=0.25;discoverTick(0.25);hintTick(0.25,playing&&SURV()?raycast(eyePos(),camDir(),6):null);fps=Math.round(fc/Math.max(ft,0.001));fc=0;ft=0;
     const bx=Math.floor(PL.x),bz=Math.floor(PL.z),inside=bx>=0&&bz>=0&&bx<W&&bz<D;

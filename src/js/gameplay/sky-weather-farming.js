@@ -47,9 +47,8 @@ function updWeather(dt,now){
     const o=i*6;rainPos[o]=p.x;rainPos[o+1]=p.y;rainPos[o+2]=p.z;rainPos[o+3]=p.x;rainPos[o+4]=p.y+len;rainPos[o+5]=p.z;
   }
   rainGeo.setDrawRange(0,n*2);rainGeo.attributes.position.needsUpdate=true;rainLines.visible=n>0;
-  if(windGain){const sp=Math.hypot(PL.vx,PL.vy,PL.vz);windGain.gain.value=settings.sound&&playing?Math.max(0,Math.min(1,(sp-7)/18))*0.1:0;}
-  const hx=Math.floor(PL.x),hy=Math.floor(PL.y+EYE),hz=Math.floor(PL.z);
-  if(playing&&sky(hx,hy,hz)<0.35){dripT-=dt;if(dripT<=0){dripT=3+Math.random()*7;const f=1500+Math.random()*900;tone(f,f*0.6,0.09,0.05);tone(f,f*0.6,0.09,0.018,0.22);}}
+  ambTick(dt); // the land's and the layer's soundscape (M8); cave drips are part of it
+  if(windGain){const sp=Math.hypot(PL.vx,PL.vy,PL.vz),lw=AMB.cur?AMB.cur.wind*(1+rainAmt):0;windGain.gain.value=settings.sound&&playing?Math.max(Math.max(0,Math.min(1,(sp-7)/18))*0.1,lw):0;}
   if(rainGain){const cx=Math.floor(PL.x),cz=Math.floor(PL.z),covered=PL.y+1<colTop(cx,cz);rainGain.gain.value=settings.sound&&!snowing?rainAmt*0.06*(covered?0.35:1):0;}
 }
 

@@ -268,7 +268,7 @@ Widened after the round-21 interview: M6 enriches every land and adds 30 new one
 
 **Checkpoint:** read three pages in one hold and see them ordered in the journal.
 
-## M8: Audio (last, Q62)
+## M8: Audio (last, Q62; done in 0.24.0, D-048)
 
 - Ambient soundscapes by land and layer (Q57).
 - Volume sliders: master, effects, ambience.
