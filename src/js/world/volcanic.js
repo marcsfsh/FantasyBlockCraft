@@ -3,14 +3,49 @@
 // flows lie cooled to glowing crust across the plains; fissures split the ground to fire; the rivers run with lava, cooled to
 // obsidian where they meet the water of other lands. The ground is black ash and cinder, with charred trees (some still
 // smouldering), basalt spires, obsidian shards and fumaroles ringed with sulphur. All pure functions of the seed.
-const VOLC_C=272,volcCandC=new Map(),volcC=new Map(),TVC={},TVC2={};let volcSkip=false;
+const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
+// ---- The great volcano (D-054): every stretch of the wastes has one near its middle, far larger than the rest, the seat of an
+// Emberlord's fortress. Placed where the land is wholly volcanic for its whole width (the widest that fits, searched outward from
+// the stretch's middle); the lesser volcanoes keep clear of it.
+function greatOf(c){
+  const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;
+  if(LANDS[cellLand(c)].k==='volcanic'){
+    // the widest cone that fits and still leaves room for two lesser cones about its foot; failing that, the widest that fits
+    for(const R of [118,104,92,80]){const g=greatTry(c,R);if(g&&(!v||g.sats.length>v.sats.length))v=g;if(v&&v.sats.length>=2)break;}}
+  greatC.set(key,v);return v;
+}
+function greatTry(c,R){
+  for(let k=0;k<16;k++){const a=k*2.4,d=k?k*7:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);
+    landsAt(X,Z,TVC);if(TVC.wVolc<0.9||TVC.wS>0.01)continue;let ok=true;
+    for(let m=0;m<12&&ok;m++){const aa=m*0.5236;landsAt(X+Math.round(Math.cos(aa)*R),Z+Math.round(Math.sin(aa)*R),TVC2);if(TVC2.wVolc<0.6||TVC2.wS>0.02)ok=false;}
+    if(!ok)continue;volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<SEA+2||o.river||o.rvBot!==999)continue;
+      const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-50-o.h,Math.round(R*(1.0+r()*0.18))),rc=Math.round(R*0.16)+4,cd=10+Math.floor(r()*5);
+      const fl=[],nf=4+Math.floor(r()*2),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.7,len:0.85+r()*0.45});const old=[];for(let q=0;q<4;q++)old.push(r()*6.283);
+      const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
+      // lesser cones about its foot, where the land holds them, clear of each other
+      const s0=r()*6.283;for(let q=0;q<14&&v.sats.length<4;q++){const sa=s0+q*0.9+(r()-0.5)*0.3,sR=30+Math.floor(r()*26),sd=R*1.12+sR*0.9+8+(q%2)*26+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
+        landsAt(sX,sZ,TVC);if(TVC.wVolc<0.7||TVC.wS>0.01)continue;let sok=true;for(let m=0;m<8&&sok;m++){landsAt(sX+Math.round(Math.cos(m*0.785)*sR),sZ+Math.round(Math.sin(m*0.785)*sR),TVC2);if(TVC2.wVolc<0.45||TVC2.wS>0.02)sok=false;}
+        if(!sok||v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12))continue;const so={};colInfoBase(sX,sZ,so);if(so.h<SEA+2||so.river||so.rvBot!==999)continue;
+        const sHv=Math.min(H-50-so.h,Math.round(sR*(0.58+sh*0.24))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
+        v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
+      return v;}finally{volcSkip=false;}}
+  return null;
+}
+// the great volcanoes whose works may reach within r of (X,Z) (cached by 32-block tile for the terrain)
+function greatNear(X,Z,r){
+  const tk=(X>>5)*65536+(Z>>5)+(r>200?0.5:0);if(r<=200){const c=greatNC.get(tk);if(c)return c;}if(greatNC.size>40000)greatNC.clear();
+  const out=[],seen=new Set(),ci=Math.floor(X/LS),cj=Math.floor(Z/LS),n=r>200?2:1;
+  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);const g=greatOf(c);if(g&&Math.hypot(g.X-X,g.Z-Z)<Math.max(r,200)+g.R*1.4){out.push(g);for(const t of g.sats)out.push(t);}}
+  if(r<=200)greatNC.set(tk,out);return out;
+}
 // a candidate: one per grid cell where the land is wholly volcanic for its whole width (no base height yet)
 function volcCand(i,j){
   const key=i*65536+j;if(volcCandC.has(key))return volcCandC.get(key);let v=null;
-  if(hsh(i,9101,j)<0.85){const X=Math.floor((i+0.3+hsh(i,9103,j)*0.4)*VOLC_C),Z=Math.floor((j+0.3+hsh(i,9105,j)*0.4)*VOLC_C),R=60+Math.floor(hsh(i,9107,j)*42);
-    landsAt(X,Z,TVC);let ok=TVC.wVolc>0.9&&TVC.wS<0.01;
-    for(let k=0;k<8&&ok;k++){const a=k*0.785;landsAt(X+Math.round(Math.cos(a)*R),Z+Math.round(Math.sin(a)*R),TVC2);if(TVC2.wVolc<0.6||TVC2.wS>0.02)ok=false;}
-    if(ok)v={i:i,j:j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
+  if(hsh(i,9101,j)<0.95){const X=Math.floor((i+0.15+hsh(i,9103,j)*0.7)*VOLC_C),Z=Math.floor((j+0.15+hsh(i,9105,j)*0.7)*VOLC_C),R=34+Math.floor(hsh(i,9107,j)*30);
+    landsAt(X,Z,TVC);let ok=TVC.wVolc>0.85&&TVC.wS<0.01;
+    for(let k=0;k<8&&ok;k++){const a=k*0.785;landsAt(X+Math.round(Math.cos(a)*R),Z+Math.round(Math.sin(a)*R),TVC2);if(TVC2.wVolc<0.55||TVC2.wS>0.02)ok=false;}
+    if(ok)for(const g of greatNear(X,Z,200))if(Math.hypot(g.X-X,g.Z-Z)<(g.great?g.R*1.15+R*0.9+8:(g.R+R)*1.3+12))ok=false; // clear of the great volcano
+    if(ok)v={i:i,j:j,key:i+','+j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
   volcCandC.set(key,v);return v;
 }
 // a volcano: a candidate not crowded by a stronger neighbour, with its heights fixed from the ground at its heart
@@ -18,20 +53,21 @@ function volcAt(i,j){
   const key=i*65536+j;if(volcC.has(key))return volcC.get(key);let v=null;const c=volcCand(i,j);
   if(c){let ok=true;for(let a=-1;a<=1&&ok;a++)for(let b=-1;b<=1&&ok;b++){if(!a&&!b)continue;const n=volcCand(i+a,j+b);if(n&&n.pri>c.pri&&Math.hypot(n.X-c.X,n.Z-c.Z)<(n.R+c.R)*1.3+12)ok=false;}
     if(ok){volcSkip=true;const o={};colInfoBase(c.X,c.Z,o);volcSkip=false;
-      if(o.h>=SEA+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.5+hsh(i,9109,j)*0.22))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
+      if(o.h>=SEA+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.58+hsh(i,9109,j)*0.24))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
         const fl=[],nf=2+Math.floor(r()*3),a0=r()*6.283;for(let k=0;k<nf;k++)fl.push({a:a0+k*6.283/nf+(r()-0.5)*0.9,len:0.8+r()*0.55});
         const old=[];for(let k=0;k<3;k++)old.push(r()*6.283);
         v=Object.assign({},c,{base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'Mount '+fullName('drow',r,false)});}}}
   volcC.set(key,v);return v;
 }
 function volcanoesNear(X,Z,r){const out=[],n=Math.ceil(r/VOLC_C)+1,ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);
+  for(const g of greatNear(X,Z,r))if(Math.hypot(g.X-X,g.Z-Z)<r+g.R)out.push(g);
   for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const v=volcAt(ci+a,cj+b);if(v&&Math.hypot(v.X-X,v.Z-Z)<r+v.R)out.push(v);}return out;}
 const angDiffV=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d;};
 // The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
-  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);
-  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcAt(ci+a,cj+b);if(!v)continue;const dx=X-v.X,dz=Z-v.Z,d=Math.hypot(dx,dz),reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(d>=reach)continue;
+  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);
+  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z,d=Math.hypot(dx,dz),reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(d>=reach)continue;
     // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
     const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;const th=Math.atan2(dz,dx);if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
     if(d<v.rc){const q=d/v.rc;hh=v.rimTop-(v.cd+3)+(v.cd+3)*Math.pow(q,4);o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}

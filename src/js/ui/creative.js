@@ -69,7 +69,7 @@ function bringAnimal(v){
 // Bring a foe (D-052): it stands a few blocks in front of you and, in creative, takes no notice of you
 function bringFoe(k){
   if(creativeOnly()||!FOES[k])return null;const tall=FOES[k].tall||2;
-  for(const d of [5,4,6,3.5,8]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=foeStand(x,PL.y+1,z,tall);if(y<0||foeWet(x,y,z))continue;
+  for(const d of tall>6?[16,14,20,24]:[5,4,6,3.5,8]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=foeStand(x,PL.y+1,z,tall);if(y<0||foeWet(x,y,z))continue;
     const f=addFoe(k,x,y,z,{st:'idle',t:4});f.yaw=f.hd=PL.yaw;toast('A'+(/^[AEIOU]/.test(FOES[k].n)?'n ':' ')+FOES[k].n.toLowerCase()+(SURV()?'':', which takes no notice of you in creative'));return f;}
   toast('No open ground in front of you');return null;
 }

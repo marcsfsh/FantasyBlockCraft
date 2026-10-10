@@ -43,7 +43,7 @@ const HOOK=`window.__fbc={
   stageFoes(kinds,sec){
     foeT=999;for(const f of [...foes])removeFoe(f);const ks=kinds.length?kinds:Object.keys(FOES),cols=Math.ceil(ks.length/2);
     const fx=-Math.sin(PL.yaw),fz=-Math.cos(PL.yaw),rx=Math.cos(PL.yaw),rz=-Math.sin(PL.yaw);
-    ks.forEach((k,i)=>{const [kk,md]=k.split('.'),big=FOES[kk].tall>2,row=ks.length<4?0:i%2,col=ks.length<4?i:Math.floor(i/2),n=ks.length<4?ks.length:cols,side=(col-(n-1)/2)*(big?4.2:2.2),d=(big?7:3.6)+row*3;
+    ks.forEach((k,i)=>{const [kk,md]=k.split('.'),big=FOES[kk].tall>2,huge=FOES[kk].tall>6,row=ks.length<4?0:i%2,col=ks.length<4?i:Math.floor(i/2),n=ks.length<4?ks.length:cols,side=(col-(n-1)/2)*(big?4.2:2.2),d=(huge?20:big?7:3.6)+row*3;
       const x=PL.x+fx*d+rx*side,z=PL.z+fz*d+rz*side,g=ground[Math.floor(x)+W*Math.floor(z)],y=foeStand(x,PL.y<g-3?PL.y-1:g+1,z,FOES[kk].tall||2);if(y<0)return; // underground, on the floor near the camera
       const f=addFoe(kk,x,y,z,md==='z'?{st:'sleep',t:999}:{});f.yaw=f.hd=PL.yaw+((i%3)-1)*0.45;f.hold=1;if(md==='w')f.holdSp=FOES[kk].walk;if(md==='a'){f.atkK=FOES[kk].shot&&kk!=='troll'?'shot':'blow';f.holdAtk=(FOES[kk].wind||0.4)*0.35;}});
     for(let i=0;i<Math.round((sec||0.5)/0.02);i++)updFoes(0.02);return foes.length;

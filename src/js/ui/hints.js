@@ -30,7 +30,7 @@ const HINTS={
   f_brute:()=>'An orc brute. Its shield takes most of a blow from the front: strike it from the side or behind.',
   f_ochief:()=>'An orc warchief. When it sounds its horn the whole warband comes.',
   f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
-  f_ember:()=>'An Emberlord: a demon of fire and shadow. Its whip reaches far and its fire comes in threes. Few survive it.'
+  f_ember:()=>'An Emberlord: a towering demon of fire and shadow, lord of the Ember Throne in the great volcano. Its whip reaches far, its fire comes in threes, and it never leaves its fortress. Few survive it.'
 };
 let hintT=0,darkT=0;
 function hint(id){

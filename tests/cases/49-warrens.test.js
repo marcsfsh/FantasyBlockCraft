@@ -41,13 +41,18 @@ assert(!isBlockedName(plans[0].war.name.replace('The Warrens of ','')),'warrens 
   let lava=0;for(let X=Math.floor(c.x-c.a);X<=c.x+c.a;X++)for(let Z=Math.floor(c.z-c.b);Z<=c.z+c.b;Z++)if(get(X-OX,c.f-1,Z-OZ)===LAVA)lava++;const u=unsoundLava();if(u||lava<6)bad++;
   info('channel in',c.wk,'hall at X',Math.round(c.x),'Z',Math.round(c.z),': lava',lava,'; unsound',u);if(hc>=4)break;}
   assert(hc>=2&&bad===0,'channels of lava cross the halls\' floors, held in rock');}
-// ---- the Emberlords' fortresses in the great volcanoes
-{const vs=[];for(let i=-30;i<30;i++)for(let j=-30;j<30;j++){const v=volcAt(i,j);if(v)vs.push(v);}vs.sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z));
-  const fs=vs.map(fortOf).filter(Boolean);info('fortresses in',fs.length,'of',vs.length,'volcanoes:',fs.slice(0,4).map(F=>F.name+' in '+F.v.name+' (gate X '+F.GX+' Z '+F.GZ+', hall '+F.Lh+' deep, '+F.Hh+' high, '+F.Dd+' down)').join('; '));
-  assert(fs.length>=vs.length/2&&fs.every(F=>!isBlockedName(F.lord)),'most great volcanoes hold an Emberlord\'s fortress, its lord named');
-  const F=fs[0],S=fortSpots(F),at=(X,y,Z)=>get(X-OX,y,Z-OZ);gen(Math.round(S.hall.x),Math.round(S.hall.z));let bb=0,eb=0,lava=0;
+// ---- the Emberlord's fortress in each great volcano, warholds of the orcs in some lesser ones (D-054)
+{const gs=new Map();for(let i=-25;i<25;i++)for(let j=-25;j<25;j++){const g=greatOf(stretchCell(landSite(i,j)));if(g)gs.set(g.key,g);}
+  const great=[...gs.values()].sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z)),lesser=[];for(let i=-57;i<57;i++)for(let j=-57;j<57;j++){const v=volcAt(i,j);if(v)lesser.push(v);}for(const g of great)lesser.push(...g.sats);
+  const thrones=great.map(fortOf).filter(Boolean),holds=lesser.map(fortOf).filter(Boolean);
+  info('Ember Thrones in',thrones.length,'of',great.length,'great volcanoes; warholds in',holds.length,'of',lesser.length,'lesser:',thrones.slice(0,3).map(F=>F.name+' in '+F.v.name+' (gate X '+F.GX+' Z '+F.GZ+', hall '+F.Lh+' deep, '+(2*F.P.hw+1)+' wide, '+F.Hh+' high)').join('; '));
+  assert(thrones.length===great.length&&thrones.every(F=>F.great&&F.Hh>=26&&!isBlockedName(F.lord)),'every great volcano holds an Ember Throne, its hall at least 26 high, its lord named');
+  assert(holds.length>=2&&holds.every(F=>!F.great&&/Warhold/.test(F.name)),'some lesser volcanoes hold warholds of the orcs');
+  const F=thrones[0],S=fortSpots(F),at=(X,y,Z)=>get(X-OX,y,Z-OZ);gen(Math.round(S.hall.x),Math.round(S.hall.z));let bb=0,eb=0,lava=0;
   for(let X=F.box[0];X<=F.box[1];X++)for(let Z=F.box[2];Z<=F.box[3];Z++){const [u,v]=fortUV(F,X,Z);for(let y=F.box[4];y<=F.box[5];y++){const id=at(X,y,Z);if(id===BASBRICK)bb++;else if(id===EMBRICK)eb++;else if(id===LAVA&&y===fortFloor(F,u)-1&&fortLavaUV(F,u,v))lava++;}}
-  const thr=at(Math.floor(S.lord.x+F.ox*-9),F.Fh+3,Math.floor(S.lord.z+F.oz*-9)),u=unsoundLava();
-  info(F.name,': basalt bricks',bb,'; ember bricks',eb,'; lava in its troughs',lava,'; the throne',nameOf(thr),'; unsound lava',u,'; named there',layerName(F.Fh+2,Math.floor(S.hall.x),Math.floor(S.hall.z)));
-  assert(bb>5000&&eb>300&&lava>30&&thr===OBSID&&u===0,'the fortress stands: gate, towers, a hall in, a throne hall with rivers of lava held in its floor and an obsidian throne');
-  assert(layerName(F.Fh+2,Math.floor(S.hall.x),Math.floor(S.hall.z))===F.name&&surfaceName(F.GX+F.ox*6,F.Fy,F.GZ+F.oz*6)===F.name,'within and before it the readout names the fortress');}
+  const E=F.U1+F.Lh,tX=F.GX-F.ox*(E-3),tZ=F.GZ-F.oz*(E-3),thr=at(tX,F.Fh+F.P.steps,tZ),u0=unsoundLava();let room=0;for(let y=F.Fh;y<F.Fh+F.Hh;y++)if(at(Math.floor(S.lord.x),y,Math.floor(S.lord.z))===AIR)room++;
+  info(F.name,': basalt bricks',bb,'; ember bricks',eb,'; lava in its troughs',lava,'; the throne',nameOf(thr),'; open above the lord\'s place',room,'; unsound lava',u0,'; named there',layerName(F.Fh+2,Math.floor(S.hall.x),Math.floor(S.hall.z)));
+  assert(bb>20000&&eb>1000&&lava>100&&thr===OBSID&&room>=FOES.ember.tall+10&&u0===0,'the Ember Throne stands: towers, a broad way in, a vast throne hall with room for its lord, rivers of lava held in its floor and an obsidian throne');
+  assert(layerName(F.Fh+2,Math.floor(S.hall.x),Math.floor(S.hall.z))===F.name&&surfaceName(F.GX+F.ox*6,F.Fy,F.GZ+F.oz*6)===F.name,'within and before it the readout names the fortress');
+  const H2=holds[0],S2=fortSpots(H2);gen(Math.round(S2.hall.x),Math.round(S2.hall.z));let hb=0;for(let X=H2.box[0];X<=H2.box[1];X++)for(let Z=H2.box[2];Z<=H2.box[3];Z++)for(let y=H2.box[4];y<=H2.box[5];y++)if(at(X,y,Z)===BASBRICK)hb++;
+  const u1=unsoundLava();info(H2.name,': basalt bricks',hb,'; unsound lava',u1);assert(hb>5000&&u1===0,'a warhold stands in a lesser volcano, its lava held');}

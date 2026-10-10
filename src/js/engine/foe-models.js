@@ -61,7 +61,7 @@
       paint(P,c){P.coat(['body','head','jaw','nose','legL','armL'],c.hide,18);P.spots('body',['T','L','R','B'],[c.hide[0]+30,c.hide[1]+30,c.hide[2]+28],0.12);P.cracks(['body','armL','legL'],c.crack,0.06);
         P.coat(['tuskL'],[220,206,176],8);P.coat(['club'],[46,44,48],14);P.cracks(['club'],c.crack,0.05);P.coat(['sp1'],[50,48,50],12);P.glowEyes('head',2,3,[255,170,50]);P.rows('jaw',['F'],0,1,[30,22,20]);}},
     // the Emberlord: a demon of fire and shadow, horned, maned with flame, on wings of smoke, a burning blade and a whip of fire
-    ember:{scale:1.35,parts:[...legs(20,6,6,4),['body',null,[0,20,0],[-8,0,-5,16,20,10],[0.1,0,0]],['head','body',[0,20,1],[-4,0,-4,8,8,8],[-0.1,0,0],{head:1}],
+    ember:{scale:3.8,parts:[...legs(20,6,6,4),['body',null,[0,20,0],[-8,0,-5,16,20,10],[0.1,0,0]],['head','body',[0,20,1],[-4,0,-4,8,8,8],[-0.1,0,0],{head:1}],
       ['jaw','head',[0,1,4],[-3,-1,-1,6,3,4],0,{head:1}],['hornL','head',[-4,6,0],[-1,0,-1,2,6,2],[0.2,0,-1],{head:1}],['tipL','hornL',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,0.6],{head:1}],
       ['hornR','head',[4,6,0],[-1,0,-1,2,6,2],[0.2,0,1],{head:1,m:'hornL'}],['tipR','hornR',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,-0.6],{head:1,m:'tipL'}],
       ['mane','head',[0,4,-2],[-6,0,-4,12,10,5],[-0.3,0,0],{head:1,nb:1}],

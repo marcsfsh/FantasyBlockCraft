@@ -18,7 +18,9 @@ const FOES={
   brute:{n:'Orc Brute',m:'obrute',hp:32,dmg:6,reach:2.3,walk:1.2,run:3.8,sight:20,cd:1.7,wind:0.6,block:0.6,mass:0.35,drops:[[213,2,4,0.7],[227,1,2,0.3],[362,1,2,0.4]],cause:'orc'},
   ochief:{n:'Orc Warchief',m:'ochief',hp:48,dmg:7,reach:2.5,walk:1.4,run:4.4,sight:28,cd:1.4,wind:0.55,mass:0.3,boss:1,drops:[[227,2,4,1],[224,1,3,0.6],[374,1,1,0.25]],cause:'orc'},
   troll:{n:'Ash Troll',m:'troll',hp:70,dmg:8,reach:3.2,walk:1.1,run:3.6,sight:20,cd:2.2,wind:0.8,shot:{dmg:6,v:15,lo:8,hi:22,cd:7,k:'rock'},mass:0.15,tall:3,drops:[[386,1,2,1],[CINDER,2,5,0.6],[230,1,1,0.1]],cause:'troll'},
-  ember:{n:'Emberlord',m:'ember',hp:320,dmg:10,reach:4.5,walk:1.4,run:3.4,sight:30,cd:2,wind:0.7,shot:{dmg:5,v:13,lo:6,hi:28,cd:4,k:'fire',n:3},whip:{dmg:6,lo:3,hi:9,cd:5},mass:0.06,tall:5,boss:1,lord:1,
+  // the Emberlord towers eleven blocks tall: a reach of eight, a whip of eighteen, fire thrown in threes from forty; it never
+  // goes farther from its throne than the terrace before its gate (leash, set when it is placed)
+  ember:{n:'Emberlord',m:'ember',hp:640,dmg:12,reach:8,dyr:9,walk:1.8,run:4.2,sight:50,cd:2.2,wind:0.8,shot:{dmg:6,v:18,lo:10,hi:44,cd:3.5,k:'hellfire',n:3},whip:{dmg:7,lo:6,hi:18,cd:4.5},mass:0.02,tall:12,stride:4.5,boss:1,lord:1,
     drops:[[377,1,1,1],[378,1,1,1],[229,4,8,1],[228,3,6,1],[224,6,12,1]],cause:'ember'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
@@ -59,7 +61,7 @@ function foePlaces(){
   // a warren's halls fill while you are underground near them (or right above); the camps at its ways in whenever you are near
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),under=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y<ground[bx+W*bz]-6;
   for(const s of warrenSpots(X,Z,60))if(s.kind==='camp'||(under?Math.hypot(s.x-X,s.z-Z)<52:Math.hypot(s.x-X,s.z-Z)<28))out.push(s);
-  for(const F of fortsNear(X,Z,80)){const S=fortSpots(F),id='f'+F.v.i+','+F.v.j;out.push({id:id+'g',x:S.guards[0].x,y:F.Fy,z:S.guards[0].z,R:6,kind:'gate'});if(!fallenLords.has(id))out.push({id:id,x:S.lord.x,y:S.lord.y,z:S.lord.z,R:1,kind:'lord',F:F});}
+  for(const F of fortsNear(X,Z,80)){const S=fortSpots(F),id=F.id;out.push({id:id+'g',x:S.guards[0].x,y:F.Fy,z:S.guards[0].z,R:6,kind:'gate'});if(!F.great||!fallenLords.has(id))out.push({id:id,x:S.lord.x,y:S.lord.y,z:S.lord.z,R:F.great?1:5,kind:'lord',F:F});}
   const sg=sigNear(X,Z,60);if(sg&&sg.kind==='citadel')out.push({id:'s'+sg.X+','+sg.Z,x:sg.X,y:sg.g,z:sg.Z,R:9,kind:'citadel'});
   return out;
 }
@@ -69,7 +71,8 @@ function foeSpawnTick(){
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>120)foeSpots.delete(id);
   for(const s of foePlaces()){if(foeSpots.has(s.id)||(foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     foeSpots.set(s.id,{x:s.x,z:s.z});const o={spot:s.id};
-    if(s.kind==='lord'){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
+    if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
+    if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':null,sleep:s.kind==='den'?0.45:0});}
@@ -101,6 +104,7 @@ function stepFoe(f,dt){
   if(!tg){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
   else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(f.vis&&dp<rr)foeAlert(f);}
   else if(f.st==='chase'){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||dp>F.sight*2.5){f.st='return';f.atk=0;}}
+  if(f.leash&&f.st==='chase'&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
   if(F.flee&&tg&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
   if(f.st==='flee'&&f.t<=0)f.st='chase';
   let want=0,face=false;
@@ -115,7 +119,7 @@ function stepFoe(f,dt){
       // ranged: shoot when in range and in view, keeping a distance; otherwise close in
       if(S&&f.vis&&dp>=S.lo&&dp<=S.hi&&f.shotT<=0&&!f.atk){f.atk=0.45;f.atkK='shot';f.shotT=S.cd*(0.8+Math.random()*0.4);}
       if(F.whip&&f.vis&&dp>=F.whip.lo&&dp<=F.whip.hi&&f.whipT<=0&&!f.atk){f.atk=0.55;f.atkK='whip';f.whipT=F.whip.cd;}
-      if(dp<F.reach+0.2&&Math.abs(dy)<2.4&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
+      if(dp<F.reach+0.2&&Math.abs(dy)<(F.dyr||2.4)&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
       if(F.keep&&dp<F.keep&&!f.atk){f.hd=toward+Math.PI+(f.id%2?0.5:-0.5);want=F.walk*1.2;}
       else if(F.keep&&S&&dp<=S.hi*0.8&&f.vis){f.hd=toward+(Math.floor(foeClock/3+f.id)%2?1.4:-1.4);want=F.walk*0.6;}
       else if(dp>F.reach*0.8){f.hd=toward;want=dp>6?F.run:F.walk*1.6;}
@@ -132,7 +136,7 @@ function stepFoe(f,dt){
   if(Math.abs(dh)>1.3)want*=0.3;f.sp+=(want-f.sp)*Math.min(1,dt*6);if(f.sp<0.01)f.sp=0;
   const mx=Math.sin(f.yaw)*f.sp+f.kvx,mz=Math.cos(f.yaw)*f.sp+f.kvz;f.kvx*=Math.max(0,1-dt*5);f.kvz*=Math.max(0,1-dt*5);
   if(Math.abs(mx)+Math.abs(mz)>1e-4){const nx=f.x+mx*dt,nz=f.z+mz*dt,ml=Math.hypot(mx,mz),rr=Math.max(0.25,f.m.box[5]*0.8),fx=f.x+mx/ml*rr,fz=f.z+mz/ml*rr;
-    const gn=foeStand(nx,f.y+0.05,nz,tall),gf=foeStand(fx,f.y+0.05,fz,tall),ok=gn>0&&gf>0&&gn-f.y<=1.01&&gf-f.y<=1.01&&f.y-gn<=3&&f.y-gf<=3&&!foeWet(nx,gn,nz)&&!foeWet(fx,gf,fz);
+    const gn=foeStand(nx,f.y+0.05,nz,tall),gf=foeStand(fx,f.y+0.05,fz,tall),ok=!(f.leash&&Math.hypot(nx-f.hx,nz-f.hz)>f.leash)&&gn>0&&gf>0&&gn-f.y<=1.01&&gf-f.y<=1.01&&f.y-gn<=3&&f.y-gf<=3&&!foeWet(nx,gn,nz)&&!foeWet(fx,gf,fz);
     if(ok){f.x=nx;f.z=nz;f.gy=gn;f.stuck=0;}else{f.sp*=0.2;f.kvx=f.kvz=0;f.stuck=(f.stuck||0)+dt;if(f.st==='walk'){f.st='idle';f.t=0.5;}else if(f.st==='chase'&&f.detT<=0){f.det=Math.random()<0.5?1:-1;f.detT=0.9;}
       else if(f.st==='flee'||f.st==='return')f.hd=f.yaw+(f.id%2?1:-1)*(1.4+Math.random());}}
   const gy=foeStand(f.x,f.y+0.05,f.z,tall);if(gy>0)f.gy=gy;
@@ -148,7 +152,7 @@ function stepFoe(f,dt){
 // a blow, a shot or a lash, as its wind-up ends
 function foeStrike(f,F){
   const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
-  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<2.6){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
+  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
   else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(tg&&dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtPlayer(F.whip.dmg,F.cause,-dx/(dp||1)*0.6,-dz/(dp||1)*0.6,4);
     for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
   else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
@@ -156,7 +160,7 @@ function foeStrike(f,F){
 // a hit on the player: the blow, knocked back and up, less through armour
 function foeHurtPlayer(n,cause,ux,uz,kb){if(!foeTarget())return;const before=hp;hurt(armourCut(n),cause);if(hp<before){PL.vx+=ux*kb;PL.vz+=uz*kb;PL.vy=Math.max(PL.vy,3.5);PL.ground=false;}}
 // ---- Shots: arrows, sling stones, goblin fire, a troll's rock and an Emberlord's fire, flying by speed and weight
-const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]}};
+const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]},hellfire:{g:0,sz:0.9,col:[1,0.5,0.1],glow:1}};
 const shotGeo=new THREE.BoxGeometry(1,1,1);
 function foeShoot(f,S,k){
   const K=SHOT_K[S.k],ex=f.x+Math.sin(f.yaw)*0.6,ey=f.y+f.m.box[4]*0.8,ez=f.z+Math.cos(f.yaw)*0.6;
@@ -166,7 +170,7 @@ function foeShoot(f,S,k){
   const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(K.col[0],K.col[1],K.col[2]),transparent:!!K.glow,opacity:K.glow?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
   m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}m.frustumCulled=false;scene.add(m);
   shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
-  if(S.k==='fire')burst(0.5,'lowpass',500,0.8,0.25,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
+  if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
 }
 function updShots(dt){
   for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;s.vy-=K.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;
@@ -174,8 +178,8 @@ function updShots(dt){
     if(!gone&&SOLID[id])gone=true;
     if(!gone&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
       const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
-    if(s.k==='fire'&&Math.random()<0.6)spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
-    if(gone){if(s.k==='fire')for(let k=0;k<8;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
+    if((s.k==='fire'||s.k==='hellfire')&&Math.random()<(s.k==='fire'?0.6:1))spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
+    if(gone){if(s.k==='fire'||s.k==='hellfire')for(let k=0;k<(s.k==='fire'?8:24);k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
       else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
       scene.remove(s.m);s.m.material.dispose();shots.splice(i,1);continue;}
     s.m.position.x=s.x;s.m.position.y=s.y;s.m.position.z=s.z;s.m.rotation.y=Math.atan2(s.vx,s.vz);s.m.rotation.x=-Math.atan2(s.vy,Math.hypot(s.vx,s.vz));}
@@ -184,7 +188,8 @@ function updShots(dt){
 // a whip that trails, a fall when slain
 function placeFoe(f,dt){
   const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
-  f.ph+=sp*dt/(big?1.6:F.walk>1.4?0.9:1.1)*6.2832;f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
+  const ph0=f.ph;f.ph+=sp*dt/(F.stride||(big?1.6:F.walk>1.4?0.9:1.1))*6.2832;
+  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the groundf.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
   if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
@@ -238,7 +243,7 @@ function foeCall(f,what){
 // back; slain, it falls and leaves what it carried to you
 function foeHit(reach){
   const e=eyePos(),d=camDir(),o=[e.x,e.y,e.z],v=[d.x,d.y,d.z];let best=null,bt=reach;const bh=raycast(e,d,reach);
-  if(bh){const t=rayBox(o,v,[bh.x,bh.y,bh.z],[bh.x+1,bh.y+1,bh.z+1],reach);if(t>=0)bt=Math.min(bt,t);}
+  if(bh&&SOLID[get(bh.x,bh.y,bh.z)]){const t=rayBox(o,v,[bh.x,bh.y,bh.z],[bh.x+1,bh.y+1,bh.z+1],reach);if(t>=0)bt=Math.min(bt,t);} // a blow passes through plants and grass
   for(const f of foes){if(f.dead)continue;const c=Math.cos(f.yaw),s=Math.sin(f.yaw),ox=o[0]-f.x,oz=o[2]-f.z,b=f.m.box;
     const t=rayBox([ox*c-oz*s,o[1]-f.y,ox*s+oz*c],[v[0]*c-v[2]*s,v[1],v[0]*s+v[2]*c],[b[0],b[1],b[2]],[b[3],b[4],b[5]],bt);if(t>=0&&t<bt){bt=t;best=f;}}
   if(best){const a=animalHit(reach);if(a&&Math.hypot(a.x-e.x,a.z-e.z)<Math.hypot(best.x-e.x,best.z-e.z))return null;}

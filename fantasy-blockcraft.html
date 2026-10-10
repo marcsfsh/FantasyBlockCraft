@@ -3180,7 +3180,7 @@ function surfaceName(X,Y,Z){
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
-  {const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcCand(ci+a,cj+b)&&volcAt(ci+a,cj+b);if(v&&Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name;}} // the volcanoes (D-051)
+  for(const v of volcanoesNear(X,Z,0))if(Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name; // the volcanoes (D-051), the great ones too (D-054)
   return null;
 }
 // ---- The forests (M6b, D-040; Q111, Q124, Q130): the seven forest lands' own trees, floors and plants, and each stretch's
@@ -3982,14 +3982,49 @@ function keptBuild(s,r){
 // flows lie cooled to glowing crust across the plains; fissures split the ground to fire; the rivers run with lava, cooled to
 // obsidian where they meet the water of other lands. The ground is black ash and cinder, with charred trees (some still
 // smouldering), basalt spires, obsidian shards and fumaroles ringed with sulphur. All pure functions of the seed.
-const VOLC_C=272,volcCandC=new Map(),volcC=new Map(),TVC={},TVC2={};let volcSkip=false;
+const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
+// ---- The great volcano (D-054): every stretch of the wastes has one near its middle, far larger than the rest, the seat of an
+// Emberlord's fortress. Placed where the land is wholly volcanic for its whole width (the widest that fits, searched outward from
+// the stretch's middle); the lesser volcanoes keep clear of it.
+function greatOf(c){
+  const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;
+  if(LANDS[cellLand(c)].k==='volcanic'){
+    // the widest cone that fits and still leaves room for two lesser cones about its foot; failing that, the widest that fits
+    for(const R of [118,104,92,80]){const g=greatTry(c,R);if(g&&(!v||g.sats.length>v.sats.length))v=g;if(v&&v.sats.length>=2)break;}}
+  greatC.set(key,v);return v;
+}
+function greatTry(c,R){
+  for(let k=0;k<16;k++){const a=k*2.4,d=k?k*7:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);
+    landsAt(X,Z,TVC);if(TVC.wVolc<0.9||TVC.wS>0.01)continue;let ok=true;
+    for(let m=0;m<12&&ok;m++){const aa=m*0.5236;landsAt(X+Math.round(Math.cos(aa)*R),Z+Math.round(Math.sin(aa)*R),TVC2);if(TVC2.wVolc<0.6||TVC2.wS>0.02)ok=false;}
+    if(!ok)continue;volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<SEA+2||o.river||o.rvBot!==999)continue;
+      const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-50-o.h,Math.round(R*(1.0+r()*0.18))),rc=Math.round(R*0.16)+4,cd=10+Math.floor(r()*5);
+      const fl=[],nf=4+Math.floor(r()*2),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.7,len:0.85+r()*0.45});const old=[];for(let q=0;q<4;q++)old.push(r()*6.283);
+      const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
+      // lesser cones about its foot, where the land holds them, clear of each other
+      const s0=r()*6.283;for(let q=0;q<14&&v.sats.length<4;q++){const sa=s0+q*0.9+(r()-0.5)*0.3,sR=30+Math.floor(r()*26),sd=R*1.12+sR*0.9+8+(q%2)*26+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
+        landsAt(sX,sZ,TVC);if(TVC.wVolc<0.7||TVC.wS>0.01)continue;let sok=true;for(let m=0;m<8&&sok;m++){landsAt(sX+Math.round(Math.cos(m*0.785)*sR),sZ+Math.round(Math.sin(m*0.785)*sR),TVC2);if(TVC2.wVolc<0.45||TVC2.wS>0.02)sok=false;}
+        if(!sok||v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12))continue;const so={};colInfoBase(sX,sZ,so);if(so.h<SEA+2||so.river||so.rvBot!==999)continue;
+        const sHv=Math.min(H-50-so.h,Math.round(sR*(0.58+sh*0.24))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
+        v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
+      return v;}finally{volcSkip=false;}}
+  return null;
+}
+// the great volcanoes whose works may reach within r of (X,Z) (cached by 32-block tile for the terrain)
+function greatNear(X,Z,r){
+  const tk=(X>>5)*65536+(Z>>5)+(r>200?0.5:0);if(r<=200){const c=greatNC.get(tk);if(c)return c;}if(greatNC.size>40000)greatNC.clear();
+  const out=[],seen=new Set(),ci=Math.floor(X/LS),cj=Math.floor(Z/LS),n=r>200?2:1;
+  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);const g=greatOf(c);if(g&&Math.hypot(g.X-X,g.Z-Z)<Math.max(r,200)+g.R*1.4){out.push(g);for(const t of g.sats)out.push(t);}}
+  if(r<=200)greatNC.set(tk,out);return out;
+}
 // a candidate: one per grid cell where the land is wholly volcanic for its whole width (no base height yet)
 function volcCand(i,j){
   const key=i*65536+j;if(volcCandC.has(key))return volcCandC.get(key);let v=null;
-  if(hsh(i,9101,j)<0.85){const X=Math.floor((i+0.3+hsh(i,9103,j)*0.4)*VOLC_C),Z=Math.floor((j+0.3+hsh(i,9105,j)*0.4)*VOLC_C),R=60+Math.floor(hsh(i,9107,j)*42);
-    landsAt(X,Z,TVC);let ok=TVC.wVolc>0.9&&TVC.wS<0.01;
-    for(let k=0;k<8&&ok;k++){const a=k*0.785;landsAt(X+Math.round(Math.cos(a)*R),Z+Math.round(Math.sin(a)*R),TVC2);if(TVC2.wVolc<0.6||TVC2.wS>0.02)ok=false;}
-    if(ok)v={i:i,j:j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
+  if(hsh(i,9101,j)<0.95){const X=Math.floor((i+0.15+hsh(i,9103,j)*0.7)*VOLC_C),Z=Math.floor((j+0.15+hsh(i,9105,j)*0.7)*VOLC_C),R=34+Math.floor(hsh(i,9107,j)*30);
+    landsAt(X,Z,TVC);let ok=TVC.wVolc>0.85&&TVC.wS<0.01;
+    for(let k=0;k<8&&ok;k++){const a=k*0.785;landsAt(X+Math.round(Math.cos(a)*R),Z+Math.round(Math.sin(a)*R),TVC2);if(TVC2.wVolc<0.55||TVC2.wS>0.02)ok=false;}
+    if(ok)for(const g of greatNear(X,Z,200))if(Math.hypot(g.X-X,g.Z-Z)<(g.great?g.R*1.15+R*0.9+8:(g.R+R)*1.3+12))ok=false; // clear of the great volcano
+    if(ok)v={i:i,j:j,key:i+','+j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
   volcCandC.set(key,v);return v;
 }
 // a volcano: a candidate not crowded by a stronger neighbour, with its heights fixed from the ground at its heart
@@ -3997,20 +4032,21 @@ function volcAt(i,j){
   const key=i*65536+j;if(volcC.has(key))return volcC.get(key);let v=null;const c=volcCand(i,j);
   if(c){let ok=true;for(let a=-1;a<=1&&ok;a++)for(let b=-1;b<=1&&ok;b++){if(!a&&!b)continue;const n=volcCand(i+a,j+b);if(n&&n.pri>c.pri&&Math.hypot(n.X-c.X,n.Z-c.Z)<(n.R+c.R)*1.3+12)ok=false;}
     if(ok){volcSkip=true;const o={};colInfoBase(c.X,c.Z,o);volcSkip=false;
-      if(o.h>=SEA+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.5+hsh(i,9109,j)*0.22))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
+      if(o.h>=SEA+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.58+hsh(i,9109,j)*0.24))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
         const fl=[],nf=2+Math.floor(r()*3),a0=r()*6.283;for(let k=0;k<nf;k++)fl.push({a:a0+k*6.283/nf+(r()-0.5)*0.9,len:0.8+r()*0.55});
         const old=[];for(let k=0;k<3;k++)old.push(r()*6.283);
         v=Object.assign({},c,{base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'Mount '+fullName('drow',r,false)});}}}
   volcC.set(key,v);return v;
 }
 function volcanoesNear(X,Z,r){const out=[],n=Math.ceil(r/VOLC_C)+1,ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);
+  for(const g of greatNear(X,Z,r))if(Math.hypot(g.X-X,g.Z-Z)<r+g.R)out.push(g);
   for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const v=volcAt(ci+a,cj+b);if(v&&Math.hypot(v.X-X,v.Z-Z)<r+v.R)out.push(v);}return out;}
 const angDiffV=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d;};
 // The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
-  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C);
-  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const v=volcAt(ci+a,cj+b);if(!v)continue;const dx=X-v.X,dz=Z-v.Z,d=Math.hypot(dx,dz),reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(d>=reach)continue;
+  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);
+  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z,d=Math.hypot(dx,dz),reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(d>=reach)continue;
     // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
     const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;const th=Math.atan2(dz,dx);if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
     if(d<v.rc){const q=d/v.rc;hh=v.rimTop-(v.cd+3)+(v.cd+3)*Math.pow(q,4);o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}
@@ -4092,93 +4128,106 @@ function volcBuild(s,r){
       break;}
   }
 }
-// ---- The Emberlords' fortresses (D-052). The owner asked for balrogs; the name is Tolkien's, so ours are the Emberlords, great
-// demons of fire and shadow. Some of the great volcanoes hold one in a fortress cut into the mountain: a terrace and a gate
-// between two towers at the foot of the cone, a hall in through the rock over a trough of lava, and under the summit the throne
-// hall with its pillars, rivers of lava in the floor, a dais, the throne and the hoard. Its lord waits there; orcs keep the gate.
-// The fortress faces the quarter of the mountain farthest from its flows. It is built per chunk from the volcano's plan, and
-// every block of its lava lies in a trough it lays itself (rock under and on every side), so it is always held.
+// ---- Fortresses in the volcanoes (D-052, D-054). The owner asked for balrogs; the name is Tolkien's, so ours are the Emberlords,
+// towering demons of fire and shadow. Each stretch of the wastes has one great volcano (volcanic.js), and in it the Ember Throne:
+// an Emberlord's fortress built to its lord's size, with a gate between two great towers at the mountain's foot, a broad way in
+// through the rock past troughs of lava, and under the summit a vast throne hall with pillars, rivers of lava in the floor, a dais,
+// the throne and the hoard. The lesser volcanoes hold warholds of the orcs on the same plan at a smaller size. A fortress faces
+// the quarter of its mountain farthest from the flows. It is built per chunk from the volcano's plan, and every block of its lava
+// lies in a trough it lays itself (rock under and on every side), so it is always held.
+// The sizes: gate half-width and height; the way in's half-width and height; the hall's half-width, depths and heights; the
+// towers (|v| of their middle, half-size, height); the facade (half-width, height); the terrace (half-width, depth); pillars
+// (|v|, half-size, spacing); lava rivers (|v|); the dais (half-width, steps); k, the throne's size; bw, the bridges' half-width.
+const FORT_P={
+  hold:{gw:3,gh:10,cw:3,ch:9,hw:14,Lhs:[26,22],Hmin:14,Hmax:18,tv:11,ts:2,th:22,fw:14,fh:18,tz:12,td:12,pv:9,ps:1,pg:6,lv:5,dw:7,steps:3,k:1,bw:1},
+  throne:{gw:8,gh:22,cw:9,ch:24,hw:32,Lhs:[60,50,42],Hmin:28,Hmax:36,tv:24,ts:4,th:46,fw:30,fh:40,tz:28,td:24,pv:20,ps:2,pg:10,lv:11,dw:16,steps:5,k:2,bw:3},
+  // a narrower throne hall for the smaller great volcanoes
+  throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:24,td:20,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
 const FORT_C=new Map();
-// The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across (the gate is v -3 to 3).
+// The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across.
 function fortOf(v){
-  const key=v.i*65536+v.j;if(FORT_C.has(key))return FORT_C.get(key);let F=null;
-  if(v.Hv>=34&&hsh(v.i,9171,v.j)<0.85){
-    let best=null;for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);if(!best||m>best.m)best={th:th,m:m};}
-    const ox=Math.round(Math.cos(best.th)),oz=Math.round(Math.sin(best.th)),px=-oz,pz=ox; // outward from the mountain's heart, and across
-    let dg=-1;for(let d=Math.round(v.R*1.05);d>v.R*0.35;d--)if(hAt(v.X+ox*d,v.Z+oz*d)>=v.base+6){dg=d;break;}
-    if(dg>0){const GX=v.X+ox*dg,GZ=v.Z+oz*dg,Fy=hAt(GX,GZ);
-      // the throne hall (Lh deep, 33 across) lies under the summit, its far end just past the mountain's heart, under the
-      // crater's floor; the way in steps down (one block in two) if it must, so five blocks of rock at least lie over the hall
-      for(const Lh of [26,22]){const U1=Math.round(dg+4-Lh);if(U1<10)continue;let cov=1e9;
-        for(let u=U1;u<=U1+Lh;u+=3)for(let w=-16;w<=16;w+=4)cov=Math.min(cov,hAt(GX-ox*u+px*w,GZ-oz*u+pz*w));
-        for(let Dd=0;Dd<=Math.min(16,Math.floor((U1-8)/2));Dd+=2){const Fh=Fy-Dd,Hh=Math.min(18,cov-Fh-6);if(Hh<14)continue;
-          const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),xs=[GX+ox*20,GX-ox*(U1+Lh+1)],zs=[GZ+oz*20,GZ-oz*(U1+Lh+1)];for(const w of [-17,17]){xs.push(GX+px*w);zs.push(GZ+pz*w);}
-          F={v:v,GX:GX,GZ:GZ,Fy:Fy,Fh:Fh,Dd:Dd,ox:ox,oz:oz,px:px,pz:pz,U1:U1,Lh:Lh,Hh:Hh,lord:lord,name:'The Ember Throne of '+lord,
-            box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Fh-8,Fy+26],seed:Math.floor(r()*1e6)};break;}
+  const key=v.key||v.i+','+v.j;if(FORT_C.has(key))return FORT_C.get(key);let F=null;
+  for(const P of v.great?[FORT_P.throne,FORT_P.throneS]:v.Hv>=34&&hsh(v.i,9171,v.j)<0.85?[FORT_P.hold]:[]){if(F)break;
+    const quarters=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
+      for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);quarters.push({th:th,m:m});}
+    quarters.sort((a,b)=>b.m-a.m);
+    for(const qt of quarters){if(F)break;const ox=Math.round(Math.cos(qt.th)),oz=Math.round(Math.sin(qt.th)),px=-oz,pz=ox; // outward from the mountain's heart, and across
+      let dg=-1;for(let d=Math.round(v.R*1.05);d>v.R*0.35;d--)if(hAt(v.X+ox*d,v.Z+oz*d)>=v.base+(v.great?8:6)){dg=d;break;}
+      if(dg<0)continue;const GX=v.X+ox*dg,GZ=v.Z+oz*dg,Fy=hAt(GX,GZ);
+      // the throne hall lies under the summit, its far end just past the mountain's heart, under the crater's floor; the way in
+      // steps down (one block in two) if it must, so five blocks of rock at least lie over the hall
+      for(const Lh of P.Lhs){const U1=Math.round(dg+4-Lh);if(U1<10)continue;let cov=1e9;
+        for(let u=U1;u<=U1+Lh;u+=3)for(let w=-P.hw-2;w<=P.hw+2;w+=4)cov=Math.min(cov,hAt(GX-ox*u+px*w,GZ-oz*u+pz*w));
+        for(let Dd=0;Dd<=Math.min(20,Math.floor((U1-8)/2));Dd+=2){const Fh=Fy-Dd,Hh=Math.min(P.Hmax,cov-Fh-6);if(Hh<P.Hmin)continue;
+          const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),E=U1+Lh,xs=[GX+ox*(P.td+8),GX-ox*(E+1)],zs=[GZ+oz*(P.td+8),GZ-oz*(E+1)],wd=Math.max(P.hw+2,P.fw,P.tz,P.tv+P.ts)+1;
+          for(const w of [-wd,wd]){xs.push(GX+px*w);zs.push(GZ+pz*w);}
+          F={v:v,P:P,great:!!v.great,GX:GX,GZ:GZ,Fy:Fy,Fh:Fh,Dd:Dd,ox:ox,oz:oz,px:px,pz:pz,U1:U1,Lh:Lh,Hh:Hh,lord:lord,id:'f'+key,
+            name:v.great?'The Ember Throne of '+lord:'The Warhold of '+v.name,box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Fh-8,Fy+Math.max(P.th,P.fh)+4],seed:Math.floor(r()*1e6)};break;}
         if(F)break;}}}
   FORT_C.set(key,F);return F;
 }
 // the fortresses whose works reach within m of (X,Z)
-function fortsNear(X,Z,m){const out=[];for(const v of volcanoesNear(X,Z,m+40)){const F=fortOf(v);if(F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m)out.push(F);}return out;}
+function fortsNear(X,Z,m){const out=[];for(const v of volcanoesNear(X,Z,m+60)){const F=fortOf(v);if(F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m)out.push(F);}return out;}
 // Is (X,Y,Z) within m of a fortress's works? (the warrens keep out)
 function fortZone(X,Y,Z,m){for(const F of fortsNear(X,Z,m))if(Y>=F.box[4]-m&&Y<=F.box[5]+m)return true;return false;}
 // local (u,v) of a world column
 const fortUV=(F,X,Z)=>{const dx=X-F.GX,dz=Z-F.GZ;return [-(dx*F.ox+dz*F.oz),dx*F.px+dz*F.pz];};
 // the floor (first open cell) along the way in: level for four blocks, then down a step every two to the hall's floor
 const fortFloor=(F,u)=>u<=F.U1-1?F.Fy-Math.min(F.Dd,Math.max(0,Math.floor((u-4)/2))):F.Fh;
-// Is (u,v) a lava cell of the fortress (one under the floor there)? A trough across the way in where it is level again (with a
-// bridge), and two rivers down the throne hall.
-function fortLavaUV(F,u,v){const U1=F.U1,ut=U1-6;
-  if(ut-4>=2*F.Dd+2&&u>=ut&&u<=ut+2&&Math.abs(v)<=3&&Math.abs(v)>=2)return true;
-  const um=Math.floor((ut+2*F.Dd+6)/2);if(ut-um>=12&&u>=um&&u<=um+2&&Math.abs(v)<=3&&Math.abs(v)>=2)return true;
-  return Math.abs(v)===5&&u>=U1+4&&u<=U1+F.Lh-8;}
+// Is (u,v) a lava cell of the fortress (one under the floor there)? Troughs across the way in where it is level (a bridge over
+// each), and rivers down the throne hall either side of the middle.
+function fortLavaUV(F,u,v){const P=F.P,U1=F.U1,ut=U1-6,av=Math.abs(v);
+  if(av<=P.cw&&av>P.bw&&u<U1){if(ut-4>=2*F.Dd+2&&u>=ut&&u<=ut+2)return true;const um=Math.floor((ut+2*F.Dd+6)/2);if(ut-um>=12&&u>=um&&u<=um+2)return true;}
+  return av>=P.lv&&av<P.lv+P.k&&u>=U1+4&&u<=U1+F.Lh-P.steps-6;}
 function fortLavaAt(X,Y,Z){for(const F of fortsNear(X,Z,0)){const [u,v]=fortUV(F,X,Z);if(Y===fortFloor(F,u)-1&&fortLavaUV(F,u,v))return true;}return false;}
 // the name of the fortress at (X,y,Z), or null
-function fortName(X,y,Z){for(const F of fortsNear(X,Z,0)){if(y<F.box[4]||y>F.box[5])continue;const [u,v]=fortUV(F,X,Z);if(u>=-13&&u<=F.U1+F.Lh&&Math.abs(v)<=16)return F.name;}return null;}
-// where the lord waits and the guards stand (world coordinates, y the floor)
-function fortSpots(F){const at=(u,v)=>({x:F.GX-F.ox*u+F.px*v+0.5,y:fortFloor(F,u),z:F.GZ-F.oz*u+F.pz*v+0.5});
-  return {lord:at(F.U1+F.Lh-12,0),hall:at(F.U1+F.Lh/2,0),guards:[at(-6,-4),at(-6,4),at(-9,0),at(5,0),at(F.U1-2,2)]};}
+function fortName(X,y,Z){for(const F of fortsNear(X,Z,0)){if(y<F.box[4]||y>F.box[5])continue;const [u,v]=fortUV(F,X,Z),P=F.P;if(u>=-P.td-1&&u<=F.U1+F.Lh&&Math.abs(v)<=Math.max(P.hw+2,P.tz,P.fw))return F.name;}return null;}
+// where the lord waits and the guards stand (world coordinates, y the floor), and how far the lord will go from its throne
+function fortSpots(F){const P=F.P,at=(u,v)=>({x:F.GX-F.ox*u+F.px*v+0.5,y:fortFloor(F,u),z:F.GZ-F.oz*u+F.pz*v+0.5}),lu=F.U1+F.Lh-P.steps-3-6*P.k;
+  return {lord:at(lu,0),hall:at(F.U1+F.Lh/2,0),reach:lu+P.td+6,
+    guards:[at(-6,-P.gw-1),at(-6,P.gw+1),at(-9,0),at(5,0),at(F.U1-2,2)],hallGuards:[at(lu-4,-P.pv+3),at(lu-4,P.pv-3),at(F.U1+4,0)]};}
 // ---- building, per chunk
 function fortBuild(F){
-  const {Fy,Fh,U1,Hh,Lh}=F,top=Fh+Hh,E=U1+Lh,S=(X,y,Z,id)=>PW(X,y,Z,id,MODE_SET);
+  const {Fy,Fh,U1,Hh,Lh,P}=F,top=Fh+Hh,E=U1+Lh,k=P.k,S=(X,y,Z,id)=>PW(X,y,Z,id,MODE_SET),wall=P.cw+1,dz=P.steps+3,tw=P.tv+P.ts,span=Math.max(P.hw+2,P.fw,P.tz,tw);
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,[u,v]=fortUV(F,X,Z),av=Math.abs(v),h=hsh(X,9175,Z);
-    if(u<-18||u>E||av>16)continue;
+    if(u<-P.td-8||u>E||av>span)continue;
     // the terrace before the gate, with steps down from its outer edge
-    if(u>=-12&&u<=-1&&av<=12){const edge=u===-12||av===12;
-      for(let y=Fy-8;y<Fy-1;y++)S(X,y,Z,BASALT);S(X,Fy-1,Z,(u+v)%4===0?OBSID:BASBRICK);for(let y=Fy;y<=Fy+16;y++)S(X,y,Z,AIR);
-      if(edge&&!(u===-12&&av<=2))S(X,Fy,Z,BASBRICK);if(edge&&!(u===-12&&av<=2)&&(u+v)%2===0)S(X,Fy+1,Z,BASBRICK);}
-    if(u<-12&&u>=-18&&av<=2){const y=Fy-1-(-12-u);for(let k=y-4;k<=y;k++)S(X,k,Z,BASBRICK);for(let k=y+1;k<=Fy+4;k++)S(X,k,Z,AIR);}
+    if(u>=-P.td&&u<=-1&&av<=P.tz){const edge=u===-P.td||av===P.tz,gap=u===-P.td&&av<P.gw;
+      for(let y=Fy-8;y<Fy-1;y++)S(X,y,Z,BASALT);S(X,Fy-1,Z,(u+v)%4===0?OBSID:BASBRICK);for(let y=Fy;y<=Fy+P.gh+6;y++)S(X,y,Z,AIR);
+      if(edge&&!gap){S(X,Fy,Z,BASBRICK);if((u+v)%2===0)S(X,Fy+1,Z,BASBRICK);}}
+    if(u<-P.td&&u>=-P.td-8&&av<P.gw){const y=Fy-1-(-P.td-u);for(let q=y-4;q<=y;q++)S(X,q,Z,BASBRICK);for(let q=y+1;q<=Fy+4;q++)S(X,q,Z,AIR);}
     // the gate towers
-    if(av>=9&&av<=13&&u>=-4&&u<=0){const ring=av===9||av===13||u===-4||u===0;
-      for(let y=Fy-1;y<=Fy+22;y++)S(X,y,Z,(y===Fy+8||y===Fy+16)&&ring?EMBRICK:BASBRICK);
-      if(ring&&(u+v)%2===0)S(X,Fy+23,Z,BASBRICK);if(av===11&&u===-2)S(X,Fy+23,Z,MAGMA);}
-    // the facade: a wall up the mountain's foot with the gate in it, a raised portcullis and two glowing eyes above
-    if(u>=0&&u<=2&&av<=14&&!(av>=9&&av<=13&&u===0)){
-      for(let y=Fy-1;y<=Fy+18;y++){const gate=av<=3&&y>=Fy&&y<=Fy+9;S(X,y,Z,gate?(u===1&&y>=Fy+7?GRATE:AIR):y===Fy+12?EMBRICK:(av===2&&y===Fy+14&&u===0)?MAGMA:BASBRICK);}
-      if(v%2===0&&u===0)S(X,Fy+19,Z,BASBRICK);}
-    // the way in: walls, a floor stepping down, a ceiling, a line of fire in the walls, a trough of lava with a bridge
-    if(u>=3&&u<U1&&av<=4){const fl=fortFloor(F,u);for(let y=fl-3;y<fl-1;y++)S(X,y,Z,BASBRICK);
-      if(av===4){for(let y=fl-1;y<=fl+9;y++)S(X,y,Z,y===fl+6?EMBRICK:BASBRICK);}
-      else{S(X,fl-1,Z,fortLavaUV(F,u,v)?LAVA:(u%6===0?OBSID:BASBRICK));for(let y=fl;y<=fl+8;y++)S(X,y,Z,AIR);S(X,fl+9,Z,BASBRICK);S(X,fl+10,Z,BASBRICK);
-        if(av===3&&u%7===5)S(X,fl,Z,MAGMA);}}
+    if(av>=P.tv-P.ts&&av<=tw&&u>=-2*P.ts&&u<=0){const ring=av===P.tv-P.ts||av===tw||u===-2*P.ts||u===0,band=Math.round(P.th/3);
+      for(let y=Fy-1;y<=Fy+P.th;y++)S(X,y,Z,ring&&(y-Fy)%band===band-1?EMBRICK:BASBRICK);
+      if(ring&&(u+v)%2===0)S(X,Fy+P.th+1,Z,BASBRICK);if(av===P.tv&&u===-P.ts){S(X,Fy+P.th+1,Z,MAGMA);if(k>1)S(X,Fy+P.th+2,Z,MAGMA);}}
+    // the facade: a wall up the mountain's foot with the gate in it, a raised portcullis, and glowing eyes above
+    if(u>=0&&u<=2&&av<=P.fw&&!(av>=P.tv-P.ts&&av<=tw&&u===0)){const eye=u===0&&av>=Math.round(P.gw/2)&&av<Math.round(P.gw/2)+k;
+      for(let y=Fy-1;y<=Fy+P.fh;y++){const gate=av<=P.gw&&y>=Fy&&y<Fy+P.gh;S(X,y,Z,gate?(u===1&&y>=Fy+P.gh-3*k?GRATE:AIR):y===Fy+P.gh+2*k?EMBRICK:(eye&&y>=Fy+P.gh+4*k&&y<Fy+P.gh+5*k)?MAGMA:BASBRICK);}
+      if(v%2===0&&u===0)S(X,Fy+P.fh+1,Z,BASBRICK);}
+    // the way in: walls, a floor stepping down, a ceiling, a line of fire in the walls, troughs of lava with bridges, braziers
+    if(u>=3&&u<U1&&av<=wall){const fl=fortFloor(F,u);for(let y=fl-3;y<fl-1;y++)S(X,y,Z,BASBRICK);
+      if(av===wall){for(let y=fl-1;y<=fl+P.ch;y++)S(X,y,Z,y===fl+Math.round(P.ch*0.6)?EMBRICK:BASBRICK);}
+      else{S(X,fl-1,Z,fortLavaUV(F,u,v)?LAVA:(u%6===0?OBSID:BASBRICK));for(let y=fl;y<fl+P.ch;y++)S(X,y,Z,AIR);S(X,fl+P.ch,Z,BASBRICK);S(X,fl+P.ch+1,Z,BASBRICK);
+        if(av===P.cw&&u%7===5){S(X,fl,Z,MAGMA);if(k>1)S(X,fl+1,Z,MAGMA);}}}
     // the throne hall
-    if(u>=U1&&u<=E&&av<=16){const wall=av>=15||u<=U1+1||u>=E-1,door=u<=U1+1&&av<=3;
-      if(wall&&!door){for(let y=Fh-3;y<=top+1;y++)S(X,y,Z,(y-Fh)%6===5?EMBRICK:BASBRICK);continue;}
+    if(u>=U1&&u<=E&&av<=P.hw+2){const isWall=av>P.hw||u<=U1+1||u>=E-1,door=u<=U1+1&&av<=P.cw;
+      if(isWall&&!door){for(let y=Fh-3;y<=top+1;y++)S(X,y,Z,(y-Fh)%6===5?EMBRICK:BASBRICK);continue;}
       S(X,Fh-3,Z,BASBRICK);S(X,Fh-2,Z,BASBRICK);
-      if(door){S(X,Fh-1,Z,BASBRICK);for(let y=Fh;y<=Fh+8;y++)S(X,y,Z,AIR);for(let y=Fh+9;y<=top+1;y++)S(X,y,Z,BASBRICK);continue;}
-      S(X,Fh-1,Z,fortLavaUV(F,u,v)?LAVA:(av<=2||(u-U1)%6===0)?OBSID:BASBRICK);
+      if(door){S(X,Fh-1,Z,BASBRICK);for(let y=Fh;y<Fh+P.ch;y++)S(X,y,Z,AIR);for(let y=Fh+P.ch;y<=top+1;y++)S(X,y,Z,BASBRICK);continue;}
+      S(X,Fh-1,Z,fortLavaUV(F,u,v)?LAVA:(av<=2*k||(u-U1)%6===0)?OBSID:BASBRICK);
       for(let y=Fh;y<top;y++)S(X,y,Z,AIR);S(X,top,Z,(u-U1)%6===0?EMBRICK:BASBRICK);S(X,top+1,Z,BASBRICK);
       // pillars in two rows
-      const pu=u-U1,pd=E-u;if(av>=8&&av<=10&&pu>=4&&pd>=8&&(pu-4)%6<=2){for(let y=Fh;y<top;y++)S(X,y,Z,(y===Fh+3||y===top-3)?EMBRICK:BASBRICK);continue;}
-      // the dais at the far end, stepping up to the throne
-      if(pd>=2&&pd<=6&&av<=7){const st=pd===6?1:pd===5?2:3;for(let y=Fh;y<Fh+st;y++)S(X,y,Z,y===Fh+st-1?OBSID:BASBRICK);
-        if(pd===5&&av===6){S(X,Fh+2,Z,BASBRICK);S(X,Fh+3,Z,MAGMA);}
-        if(pd===3&&v===0)S(X,Fh+3,Z,OBSID);if(pd===3&&av===1){S(X,Fh+3,Z,EMBRICK);S(X,Fh+4,Z,EMBRICK);}
-        if(pd===2&&v===0)for(let y=Fh+3;y<=Fh+8;y++)S(X,y,Z,y===Fh+8?EMBRICK:OBSID);
-        if(pd===2&&av>=2&&av<=6){const k=(av+(v>0?0:5))%5;S(X,Fh+3,Z,k===0?DWCHEST:k===1?GOLDB:k===2?CRATE:k===3?GOLDB:SKULLS);}
+      const pu=u-U1,pd=E-u;if(av>=P.pv-P.ps&&av<=P.pv+P.ps&&pu>=4&&pd>=dz+2&&(pu-4)%P.pg<=2*P.ps){for(let y=Fh;y<top;y++)S(X,y,Z,(y-Fh)%Math.max(4,Math.round(Hh/4))===3?EMBRICK:BASBRICK);continue;}
+      // the dais at the far end, stepping up to the throne; braziers at its corners, the hoard behind
+      if(pd>=2&&pd<=dz&&av<=P.dw){const st=Math.min(P.steps,dz+1-pd);for(let y=Fh;y<Fh+st;y++)S(X,y,Z,y===Fh+st-1?OBSID:BASBRICK);const fl=Fh+st;
+        if(pd===dz-1&&av===P.dw-1){for(let y=fl;y<fl+2*k;y++)S(X,y,Z,BASBRICK);S(X,fl+2*k,Z,MAGMA);}
+        if(pd===3&&av<k)for(let y=fl;y<fl+k;y++)S(X,y,Z,OBSID); // the seat
+        if(pd===3&&av===k)for(let y=fl;y<fl+2*k;y++)S(X,y,Z,EMBRICK); // the arms
+        if(pd===2&&av<=k)for(let y=fl;y<=fl+5*k;y++)S(X,y,Z,y>=fl+5*k-(k-1)?EMBRICK:OBSID); // the back
+        if(pd===2&&av>k&&av<P.dw-1){const q=(av+(v>0?0:5))%5;S(X,fl,Z,q===0?DWCHEST:q===1?GOLDB:q===2?CRATE:q===3?GOLDB:SKULLS);if(k>1&&q===1)S(X,fl+1,Z,GOLDB);}
         continue;}
       // banners on the side walls, bones and skulls about the floor
-      if(av===14&&pu%5===2){S(X,Fh,Z,BANNER);S(X,Fh+1,Z,BANNER);}
+      if(av===P.hw&&pu%5===2){for(let y=Fh;y<Fh+2*k;y++)S(X,y,Z,BANNER);}
       else if(h<0.025&&!fortLavaUV(F,u,v))S(X,Fh,Z,h<0.008?SKULLS:BONES);}
   }
 }
@@ -6593,7 +6642,7 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
       paint(P,c){P.coat(['body','head','jaw','nose','legL','armL'],c.hide,18);P.spots('body',['T','L','R','B'],[c.hide[0]+30,c.hide[1]+30,c.hide[2]+28],0.12);P.cracks(['body','armL','legL'],c.crack,0.06);
         P.coat(['tuskL'],[220,206,176],8);P.coat(['club'],[46,44,48],14);P.cracks(['club'],c.crack,0.05);P.coat(['sp1'],[50,48,50],12);P.glowEyes('head',2,3,[255,170,50]);P.rows('jaw',['F'],0,1,[30,22,20]);}},
     // the Emberlord: a demon of fire and shadow, horned, maned with flame, on wings of smoke, a burning blade and a whip of fire
-    ember:{scale:1.35,parts:[...legs(20,6,6,4),['body',null,[0,20,0],[-8,0,-5,16,20,10],[0.1,0,0]],['head','body',[0,20,1],[-4,0,-4,8,8,8],[-0.1,0,0],{head:1}],
+    ember:{scale:3.8,parts:[...legs(20,6,6,4),['body',null,[0,20,0],[-8,0,-5,16,20,10],[0.1,0,0]],['head','body',[0,20,1],[-4,0,-4,8,8,8],[-0.1,0,0],{head:1}],
       ['jaw','head',[0,1,4],[-3,-1,-1,6,3,4],0,{head:1}],['hornL','head',[-4,6,0],[-1,0,-1,2,6,2],[0.2,0,-1],{head:1}],['tipL','hornL',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,0.6],{head:1}],
       ['hornR','head',[4,6,0],[-1,0,-1,2,6,2],[0.2,0,1],{head:1,m:'hornL'}],['tipR','hornR',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,-0.6],{head:1,m:'tipL'}],
       ['mane','head',[0,4,-2],[-6,0,-4,12,10,5],[-0.3,0,0],{head:1,nb:1}],
@@ -6858,7 +6907,9 @@ const FOES={
   brute:{n:'Orc Brute',m:'obrute',hp:32,dmg:6,reach:2.3,walk:1.2,run:3.8,sight:20,cd:1.7,wind:0.6,block:0.6,mass:0.35,drops:[[213,2,4,0.7],[227,1,2,0.3],[362,1,2,0.4]],cause:'orc'},
   ochief:{n:'Orc Warchief',m:'ochief',hp:48,dmg:7,reach:2.5,walk:1.4,run:4.4,sight:28,cd:1.4,wind:0.55,mass:0.3,boss:1,drops:[[227,2,4,1],[224,1,3,0.6],[374,1,1,0.25]],cause:'orc'},
   troll:{n:'Ash Troll',m:'troll',hp:70,dmg:8,reach:3.2,walk:1.1,run:3.6,sight:20,cd:2.2,wind:0.8,shot:{dmg:6,v:15,lo:8,hi:22,cd:7,k:'rock'},mass:0.15,tall:3,drops:[[386,1,2,1],[CINDER,2,5,0.6],[230,1,1,0.1]],cause:'troll'},
-  ember:{n:'Emberlord',m:'ember',hp:320,dmg:10,reach:4.5,walk:1.4,run:3.4,sight:30,cd:2,wind:0.7,shot:{dmg:5,v:13,lo:6,hi:28,cd:4,k:'fire',n:3},whip:{dmg:6,lo:3,hi:9,cd:5},mass:0.06,tall:5,boss:1,lord:1,
+  // the Emberlord towers eleven blocks tall: a reach of eight, a whip of eighteen, fire thrown in threes from forty; it never
+  // goes farther from its throne than the terrace before its gate (leash, set when it is placed)
+  ember:{n:'Emberlord',m:'ember',hp:640,dmg:12,reach:8,dyr:9,walk:1.8,run:4.2,sight:50,cd:2.2,wind:0.8,shot:{dmg:6,v:18,lo:10,hi:44,cd:3.5,k:'hellfire',n:3},whip:{dmg:7,lo:6,hi:18,cd:4.5},mass:0.02,tall:12,stride:4.5,boss:1,lord:1,
     drops:[[377,1,1,1],[378,1,1,1],[229,4,8,1],[228,3,6,1],[224,6,12,1]],cause:'ember'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
@@ -6899,7 +6950,7 @@ function foePlaces(){
   // a warren's halls fill while you are underground near them (or right above); the camps at its ways in whenever you are near
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),under=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y<ground[bx+W*bz]-6;
   for(const s of warrenSpots(X,Z,60))if(s.kind==='camp'||(under?Math.hypot(s.x-X,s.z-Z)<52:Math.hypot(s.x-X,s.z-Z)<28))out.push(s);
-  for(const F of fortsNear(X,Z,80)){const S=fortSpots(F),id='f'+F.v.i+','+F.v.j;out.push({id:id+'g',x:S.guards[0].x,y:F.Fy,z:S.guards[0].z,R:6,kind:'gate'});if(!fallenLords.has(id))out.push({id:id,x:S.lord.x,y:S.lord.y,z:S.lord.z,R:1,kind:'lord',F:F});}
+  for(const F of fortsNear(X,Z,80)){const S=fortSpots(F),id=F.id;out.push({id:id+'g',x:S.guards[0].x,y:F.Fy,z:S.guards[0].z,R:6,kind:'gate'});if(!F.great||!fallenLords.has(id))out.push({id:id,x:S.lord.x,y:S.lord.y,z:S.lord.z,R:F.great?1:5,kind:'lord',F:F});}
   const sg=sigNear(X,Z,60);if(sg&&sg.kind==='citadel')out.push({id:'s'+sg.X+','+sg.Z,x:sg.X,y:sg.g,z:sg.Z,R:9,kind:'citadel'});
   return out;
 }
@@ -6909,7 +6960,8 @@ function foeSpawnTick(){
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>120)foeSpots.delete(id);
   for(const s of foePlaces()){if(foeSpots.has(s.id)||(foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     foeSpots.set(s.id,{x:s.x,z:s.z});const o={spot:s.id};
-    if(s.kind==='lord'){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
+    if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
+    if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':null,sleep:s.kind==='den'?0.45:0});}
@@ -6941,6 +6993,7 @@ function stepFoe(f,dt){
   if(!tg){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
   else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(f.vis&&dp<rr)foeAlert(f);}
   else if(f.st==='chase'){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||dp>F.sight*2.5){f.st='return';f.atk=0;}}
+  if(f.leash&&f.st==='chase'&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
   if(F.flee&&tg&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
   if(f.st==='flee'&&f.t<=0)f.st='chase';
   let want=0,face=false;
@@ -6955,7 +7008,7 @@ function stepFoe(f,dt){
       // ranged: shoot when in range and in view, keeping a distance; otherwise close in
       if(S&&f.vis&&dp>=S.lo&&dp<=S.hi&&f.shotT<=0&&!f.atk){f.atk=0.45;f.atkK='shot';f.shotT=S.cd*(0.8+Math.random()*0.4);}
       if(F.whip&&f.vis&&dp>=F.whip.lo&&dp<=F.whip.hi&&f.whipT<=0&&!f.atk){f.atk=0.55;f.atkK='whip';f.whipT=F.whip.cd;}
-      if(dp<F.reach+0.2&&Math.abs(dy)<2.4&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
+      if(dp<F.reach+0.2&&Math.abs(dy)<(F.dyr||2.4)&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
       if(F.keep&&dp<F.keep&&!f.atk){f.hd=toward+Math.PI+(f.id%2?0.5:-0.5);want=F.walk*1.2;}
       else if(F.keep&&S&&dp<=S.hi*0.8&&f.vis){f.hd=toward+(Math.floor(foeClock/3+f.id)%2?1.4:-1.4);want=F.walk*0.6;}
       else if(dp>F.reach*0.8){f.hd=toward;want=dp>6?F.run:F.walk*1.6;}
@@ -6972,7 +7025,7 @@ function stepFoe(f,dt){
   if(Math.abs(dh)>1.3)want*=0.3;f.sp+=(want-f.sp)*Math.min(1,dt*6);if(f.sp<0.01)f.sp=0;
   const mx=Math.sin(f.yaw)*f.sp+f.kvx,mz=Math.cos(f.yaw)*f.sp+f.kvz;f.kvx*=Math.max(0,1-dt*5);f.kvz*=Math.max(0,1-dt*5);
   if(Math.abs(mx)+Math.abs(mz)>1e-4){const nx=f.x+mx*dt,nz=f.z+mz*dt,ml=Math.hypot(mx,mz),rr=Math.max(0.25,f.m.box[5]*0.8),fx=f.x+mx/ml*rr,fz=f.z+mz/ml*rr;
-    const gn=foeStand(nx,f.y+0.05,nz,tall),gf=foeStand(fx,f.y+0.05,fz,tall),ok=gn>0&&gf>0&&gn-f.y<=1.01&&gf-f.y<=1.01&&f.y-gn<=3&&f.y-gf<=3&&!foeWet(nx,gn,nz)&&!foeWet(fx,gf,fz);
+    const gn=foeStand(nx,f.y+0.05,nz,tall),gf=foeStand(fx,f.y+0.05,fz,tall),ok=!(f.leash&&Math.hypot(nx-f.hx,nz-f.hz)>f.leash)&&gn>0&&gf>0&&gn-f.y<=1.01&&gf-f.y<=1.01&&f.y-gn<=3&&f.y-gf<=3&&!foeWet(nx,gn,nz)&&!foeWet(fx,gf,fz);
     if(ok){f.x=nx;f.z=nz;f.gy=gn;f.stuck=0;}else{f.sp*=0.2;f.kvx=f.kvz=0;f.stuck=(f.stuck||0)+dt;if(f.st==='walk'){f.st='idle';f.t=0.5;}else if(f.st==='chase'&&f.detT<=0){f.det=Math.random()<0.5?1:-1;f.detT=0.9;}
       else if(f.st==='flee'||f.st==='return')f.hd=f.yaw+(f.id%2?1:-1)*(1.4+Math.random());}}
   const gy=foeStand(f.x,f.y+0.05,f.z,tall);if(gy>0)f.gy=gy;
@@ -6988,7 +7041,7 @@ function stepFoe(f,dt){
 // a blow, a shot or a lash, as its wind-up ends
 function foeStrike(f,F){
   const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
-  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<2.6){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
+  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
   else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(tg&&dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtPlayer(F.whip.dmg,F.cause,-dx/(dp||1)*0.6,-dz/(dp||1)*0.6,4);
     for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
   else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
@@ -6996,7 +7049,7 @@ function foeStrike(f,F){
 // a hit on the player: the blow, knocked back and up, less through armour
 function foeHurtPlayer(n,cause,ux,uz,kb){if(!foeTarget())return;const before=hp;hurt(armourCut(n),cause);if(hp<before){PL.vx+=ux*kb;PL.vz+=uz*kb;PL.vy=Math.max(PL.vy,3.5);PL.ground=false;}}
 // ---- Shots: arrows, sling stones, goblin fire, a troll's rock and an Emberlord's fire, flying by speed and weight
-const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]}};
+const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]},hellfire:{g:0,sz:0.9,col:[1,0.5,0.1],glow:1}};
 const shotGeo=new THREE.BoxGeometry(1,1,1);
 function foeShoot(f,S,k){
   const K=SHOT_K[S.k],ex=f.x+Math.sin(f.yaw)*0.6,ey=f.y+f.m.box[4]*0.8,ez=f.z+Math.cos(f.yaw)*0.6;
@@ -7006,7 +7059,7 @@ function foeShoot(f,S,k){
   const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(K.col[0],K.col[1],K.col[2]),transparent:!!K.glow,opacity:K.glow?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
   m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}m.frustumCulled=false;scene.add(m);
   shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
-  if(S.k==='fire')burst(0.5,'lowpass',500,0.8,0.25,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
+  if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
 }
 function updShots(dt){
   for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;s.vy-=K.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;
@@ -7014,8 +7067,8 @@ function updShots(dt){
     if(!gone&&SOLID[id])gone=true;
     if(!gone&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
       const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
-    if(s.k==='fire'&&Math.random()<0.6)spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
-    if(gone){if(s.k==='fire')for(let k=0;k<8;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
+    if((s.k==='fire'||s.k==='hellfire')&&Math.random()<(s.k==='fire'?0.6:1))spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
+    if(gone){if(s.k==='fire'||s.k==='hellfire')for(let k=0;k<(s.k==='fire'?8:24);k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
       else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
       scene.remove(s.m);s.m.material.dispose();shots.splice(i,1);continue;}
     s.m.position.x=s.x;s.m.position.y=s.y;s.m.position.z=s.z;s.m.rotation.y=Math.atan2(s.vx,s.vz);s.m.rotation.x=-Math.atan2(s.vy,Math.hypot(s.vx,s.vz));}
@@ -7024,7 +7077,8 @@ function updShots(dt){
 // a whip that trails, a fall when slain
 function placeFoe(f,dt){
   const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
-  f.ph+=sp*dt/(big?1.6:F.walk>1.4?0.9:1.1)*6.2832;f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
+  const ph0=f.ph;f.ph+=sp*dt/(F.stride||(big?1.6:F.walk>1.4?0.9:1.1))*6.2832;
+  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the groundf.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
   if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
@@ -7078,7 +7132,7 @@ function foeCall(f,what){
 // back; slain, it falls and leaves what it carried to you
 function foeHit(reach){
   const e=eyePos(),d=camDir(),o=[e.x,e.y,e.z],v=[d.x,d.y,d.z];let best=null,bt=reach;const bh=raycast(e,d,reach);
-  if(bh){const t=rayBox(o,v,[bh.x,bh.y,bh.z],[bh.x+1,bh.y+1,bh.z+1],reach);if(t>=0)bt=Math.min(bt,t);}
+  if(bh&&SOLID[get(bh.x,bh.y,bh.z)]){const t=rayBox(o,v,[bh.x,bh.y,bh.z],[bh.x+1,bh.y+1,bh.z+1],reach);if(t>=0)bt=Math.min(bt,t);} // a blow passes through plants and grass
   for(const f of foes){if(f.dead)continue;const c=Math.cos(f.yaw),s=Math.sin(f.yaw),ox=o[0]-f.x,oz=o[2]-f.z,b=f.m.box;
     const t=rayBox([ox*c-oz*s,o[1]-f.y,ox*s+oz*c],[v[0]*c-v[2]*s,v[1],v[0]*s+v[2]*c],[b[0],b[1],b[2]],[b[3],b[4],b[5]],bt);if(t>=0&&t<bt){bt=t;best=f;}}
   if(best){const a=animalHit(reach);if(a&&Math.hypot(a.x-e.x,a.z-e.z)<Math.hypot(best.x-e.x,best.z-e.z))return null;}
@@ -7402,7 +7456,7 @@ function bringAnimal(v){
 // Bring a foe (D-052): it stands a few blocks in front of you and, in creative, takes no notice of you
 function bringFoe(k){
   if(creativeOnly()||!FOES[k])return null;const tall=FOES[k].tall||2;
-  for(const d of [5,4,6,3.5,8]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=foeStand(x,PL.y+1,z,tall);if(y<0||foeWet(x,y,z))continue;
+  for(const d of tall>6?[16,14,20,24]:[5,4,6,3.5,8]){const x=PL.x-Math.sin(PL.yaw)*d,z=PL.z-Math.cos(PL.yaw)*d,y=foeStand(x,PL.y+1,z,tall);if(y<0||foeWet(x,y,z))continue;
     const f=addFoe(k,x,y,z,{st:'idle',t:4});f.yaw=f.hd=PL.yaw;toast('A'+(/^[AEIOU]/.test(FOES[k].n)?'n ':' ')+FOES[k].n.toLowerCase()+(SURV()?'':', which takes no notice of you in creative'));return f;}
   toast('No open ground in front of you');return null;
 }
@@ -7570,7 +7624,7 @@ const HINTS={
   f_brute:()=>'An orc brute. Its shield takes most of a blow from the front: strike it from the side or behind.',
   f_ochief:()=>'An orc warchief. When it sounds its horn the whole warband comes.',
   f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
-  f_ember:()=>'An Emberlord: a demon of fire and shadow. Its whip reaches far and its fire comes in threes. Few survive it.'
+  f_ember:()=>'An Emberlord: a towering demon of fire and shadow, lord of the Ember Throne in the great volcano. Its whip reaches far, its fire comes in threes, and it never leaves its fortress. Few survive it.'
 };
 let hintT=0,darkT=0;
 function hint(id){
@@ -8115,12 +8169,12 @@ function puffTexture(){if(puffTex)return puffTex;const cv=document.createElement
   for(let k=0;k<7;k++){const x=20+Math.random()*24,y=20+Math.random()*24,r=12+Math.random()*12,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);}
   puffTex=new THREE.CanvasTexture(cv);return puffTex;}
 const plumes=new Map(),PUFFS=34,smokeC=new THREE.Color(0.15,0.12,0.11),fireC=new THREE.Color(0.85,0.3,0.1);
-function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;p.vy=4+Math.random()*2;p.s0=10+Math.random()*6;p.s1=42+Math.random()*24;
+function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
   for(let t=0;t<age;t+=0.5)movePuff(p,0.5);}
 function movePuff(p,dt){p.Y+=p.vy*dt;p.vy=Math.max(1.2,p.vy-dt*0.15);p.X+=1.6*dt;p.Z+=0.6*dt;}
 function updPlumes(dt){
   const X=PL.x+OX,Z=PL.z+OZ,near=LWX.burn>0.05||plumes.size?volcanoesNear(X,Z,300):[],keep=new Set();
-  for(const v of near){const k=v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
+  for(const v of near){const k=v.key||v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
     if(!pl){pl={v:v,puffs:[]};for(let n=0;n<PUFFS;n++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:smokeC.clone()}));scene.add(s);const p={s:s};newPuff(p,v,Math.random()*50);pl.puffs.push(p);}plumes.set(k,pl);}
     for(const p of pl.puffs){p.age+=dt;movePuff(p,dt);if(p.age>p.life)newPuff(p,v,0);const f=p.age/p.life,sz=p.s0+(p.s1-p.s0)*Math.sqrt(f),d=Math.hypot(p.X-X,p.Z-Z);
       p.s.position.set(p.X-OX,p.Y,p.Z-OZ);p.s.scale.set(sz,sz,1);p.s.material.color.copy(smokeC).lerp(fireC,Math.max(0,1-p.age/7)).multiplyScalar(0.55+0.45*U.skyMul.value+0.3*Math.max(0,1-p.age/7));

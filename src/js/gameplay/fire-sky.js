@@ -61,12 +61,12 @@ function puffTexture(){if(puffTex)return puffTex;const cv=document.createElement
   for(let k=0;k<7;k++){const x=20+Math.random()*24,y=20+Math.random()*24,r=12+Math.random()*12,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);}
   puffTex=new THREE.CanvasTexture(cv);return puffTex;}
 const plumes=new Map(),PUFFS=34,smokeC=new THREE.Color(0.15,0.12,0.11),fireC=new THREE.Color(0.85,0.3,0.1);
-function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;p.vy=4+Math.random()*2;p.s0=10+Math.random()*6;p.s1=42+Math.random()*24;
+function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
   for(let t=0;t<age;t+=0.5)movePuff(p,0.5);}
 function movePuff(p,dt){p.Y+=p.vy*dt;p.vy=Math.max(1.2,p.vy-dt*0.15);p.X+=1.6*dt;p.Z+=0.6*dt;}
 function updPlumes(dt){
   const X=PL.x+OX,Z=PL.z+OZ,near=LWX.burn>0.05||plumes.size?volcanoesNear(X,Z,300):[],keep=new Set();
-  for(const v of near){const k=v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
+  for(const v of near){const k=v.key||v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
     if(!pl){pl={v:v,puffs:[]};for(let n=0;n<PUFFS;n++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:smokeC.clone()}));scene.add(s);const p={s:s};newPuff(p,v,Math.random()*50);pl.puffs.push(p);}plumes.set(k,pl);}
     for(const p of pl.puffs){p.age+=dt;movePuff(p,dt);if(p.age>p.life)newPuff(p,v,0);const f=p.age/p.life,sz=p.s0+(p.s1-p.s0)*Math.sqrt(f),d=Math.hypot(p.X-X,p.Z-Z);
       p.s.position.set(p.X-OX,p.Y,p.Z-OZ);p.s.scale.set(sz,sz,1);p.s.material.color.copy(smokeC).lerp(fireC,Math.max(0,1-p.age/7)).multiplyScalar(0.55+0.45*U.skyMul.value+0.3*Math.max(0,1-p.age/7));

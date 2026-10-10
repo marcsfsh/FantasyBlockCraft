@@ -1,4 +1,4 @@
-// The Volcanic Wastes remade (D-051): volcanoes in the terrain with crater lakes of lava held in rock, flows down their flanks
+// The Volcanic Wastes remade (D-051, D-054): a great volcano and lesser ones in the terrain with crater lakes of lava held in rock, flows down their flanks
 // and names of their own; rivers of lava that never meet water; fissures; black ash, cinder, crust, charred trees and vents; the
 // Ashen Citadel and the Rift of Fire, their lava held; a burning sky with lightning, plumes over the craters and a soundscape.
 setMode('creative');
@@ -10,10 +10,16 @@ function unsoundLava(){let n=0;for(let z=1;z<D-1;z++)for(let x=1;x<W-1;x++){cons
 const count=ids=>{const c={};for(const id of ids)c[id]=0;for(let z=0;z<D;z++)for(let x=0;x<W;x++){const g=ground[x+W*z];for(let y=Math.max(0,g-3);y<Math.min(H,g+14);y++){const id=world[I(x,y,z)];if(c[id]!==undefined)c[id]++;}}return c;};
 assert([BLACKASH,CINDER,LAVACRUST,CHARWOOD,SMOULDER,SULFUR,VENT].every(id=>BL[id]&&BL[id].t)&&BL[LAVACRUST].ember&&BL[SMOULDER].lum>0&&BL[VENT].lum>0,'the burnt land\'s blocks are defined, the crust, embers and vents glowing');
 // ---- volcanoes
-const vs=[];for(let i=-30;i<30;i++)for(let j=-30;j<30;j++){const v=volcAt(i,j);if(v)vs.push(v);}
-vs.sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z));
-info('volcanoes within 8000 blocks',vs.length,'; nearest',vs.slice(0,3).map(v=>v.name+' at X '+v.X+' Z '+v.Z+', '+v.Hv+' high, rim '+v.rimTop+', lake '+v.lake).join('; '));
-assert(vs.length>=4&&vs.every(v=>v.Hv>=25&&v.rimTop-v.lake>=7&&!isBlockedName(v.name)),'volcanoes rise in the Volcanic Wastes, each at least 25 blocks high with a crater deeper than its lake, named');
+// the great volcano of each stretch (D-054) and the lesser ones, its satellites among them
+const gs=new Map();for(let i=-25;i<25;i++)for(let j=-25;j<25;j++){const g=greatOf(stretchCell(landSite(i,j)));if(g)gs.set(g.key,g);}
+const great=[...gs.values()].sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z)),lesser=[];
+for(let i=-57;i<57;i++)for(let j=-57;j<57;j++){const v=volcAt(i,j);if(v)lesser.push(v);}for(const g of great)lesser.push(...g.sats);
+let stretches=new Set();for(let i=-25;i<25;i++)for(let j=-25;j<25;j++){const c=stretchCell(landSite(i,j));if(LANDS[cellLand(c)].k==='volcanic')stretches.add(landKey(c.i,c.j));}
+info('volcanic stretches within 8000 blocks',stretches.size,'; great volcanoes',great.length,'; lesser volcanoes',lesser.length,'; the nearest great:',great.slice(0,3).map(v=>v.name+' at X '+v.X+' Z '+v.Z+', '+v.Hv+' high, '+v.R+' across the foot, '+v.sats.length+' lesser about it').join('; '));
+assert(great.length>=stretches.size-2&&great.every(v=>v.Hv>=80&&v.R>=80&&v.rimTop-v.lake>=10&&!isBlockedName(v.name.replace('The Burning Mountain of ',''))),'nearly every stretch of the wastes has a great volcano near its middle, at least 80 high, named');
+assert(lesser.length>=great.length*2&&lesser.every(v=>v.Hv>=18&&v.Hv<great[0].Hv*0.5&&v.rimTop-v.lake>=7&&!isBlockedName(v.name)),'lesser volcanoes rise about them, at most half as high, each with a crater deeper than its lake');
+assert(great.filter(g=>g.sats.length+lesser.filter(v=>!v.sat&&Math.hypot(v.X-g.X,v.Z-g.Z)<420).length>=2).length>=great.length*0.6,'most stretches hold several volcanoes about the great one');
+const vs=great;
 {const v=vs[0];gen(v.X,v.Z);const at=(X,y,Z)=>get(X-OX,y,Z-OZ);let lake=0,flank=0,rimLow=0,rimN=0;
   for(let dx=-v.R;dx<=v.R;dx++)for(let dz=-v.R;dz<=v.R;dz++){const d=Math.hypot(dx,dz);if(d>v.R)continue;
     if(d<v.rc*0.7&&at(v.X+dx,v.lake,v.Z+dz)===LAVA)lake++;
