@@ -32,6 +32,10 @@ item(334,'Roast Turnip','turnip',[206,140,90]);item(335,'Pottage','bowl',[170,13
 item(338,'Lamp Oil','oil',[214,180,70],{fuel:1200});item(339,'Pitch Candle','candle',[60,52,46],{fuel:480});item(340,"Miner's Lantern",'lantern',[214,120,68],{equip:'belt',lamp:true,one:true});
 // More room (M4b, Q67): a pack for the pack slot (woven, then sturdy) and a satchel for the bag slot add inventory rows
 item(341,'Woven Pack','pack',[150,170,96],{equip:'pack',slots:9,one:true});item(342,'Sturdy Pack','pack',[150,110,60],{equip:'pack',slots:18,one:true});item(343,'Satchel','satchel',[170,140,90],{equip:'bag',slots:9,one:true});
+// Wildlife (E1, Q47, Q48): meat, hides, eggs and milk from the animals; roasted at a furnace; hides cured into leather
+item(350,'Raw Venison','meat',[176,70,66]);item(351,'Raw Mutton','meat',[190,84,80]);item(352,'Hide','hide',[150,110,72]);item(353,'Raw Rabbit','meat',[196,120,110]);item(354,'Raw Pork','meat',[210,130,124]);
+item(355,'Egg','egg',[226,214,190]);item(356,'Roast Venison','meat',[130,78,44]);item(357,'Roast Mutton','meat',[146,90,52]);item(358,'Roast Rabbit','meat',[160,104,64]);item(359,'Roast Pork','meat',[168,108,64]);
+item(360,"Goat's Milk",'flask',[236,234,226]);item(361,'Boiled Egg','egg',[240,232,214]);item(362,'Leather','hide',[120,78,44]);
 const durOf=id=>(ITEMS[id]&&ITEMS[id].dur)||0;
 // Held to use once per press: holding the button does not repeat it
 const oneShot=id=>isTool(id)||!!(ITEMS[id]&&ITEMS[id].once);
@@ -57,6 +61,10 @@ function itemIcon(id){
   else if(it.kind==='jack'){g.fillStyle='#30323a';g.fillRect(3,2,10,2);g.fillStyle='#e0b030';g.fillRect(5,4,6,6);g.fillStyle='#8a8e98';g.fillRect(7,10,2,4);g.fillStyle='#c8ccd4';g.fillRect(7,14,2,2);}
   else if(it.kind==='saw'){g.fillStyle='#e07828';g.fillRect(2,6,6,6);g.fillStyle='#30323a';g.fillRect(3,4,4,2);g.fillStyle='#b8bcc6';g.fillRect(8,8,7,3);g.fillStyle='#50545e';for(let x=8;x<15;x+=2){g.fillRect(x,7,1,1);g.fillRect(x+1,11,1,1);}}
   else if(it.kind==='hoe'){for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}g.fillStyle='#9a9ea8';g.fillRect(8,2,6,2);g.fillRect(12,4,2,2);g.fillStyle='#6a6e78';g.fillRect(8,3,6,1);}
+  else if(it.kind==='meat'){for(let y=3;y<13;y++)for(let x=2;x<12;x++){const d=Math.hypot((x-6.5)/4.6,(y-7.5)/4.2);if(d<1)px(x,y,(d>0.8?-40:0)+(x<6&&y<7?24:0)+(r()-.5)*24);}g.fillStyle='#ece4d0';g.fillRect(11,10,3,2);g.fillRect(13,9,2,1);g.fillRect(13,12,2,1);}
+  else if(it.kind==='egg'){for(let y=2;y<14;y++)for(let x=3;x<13;x++){const d=Math.hypot((x-7.5)/4.6,(y-(y<8?8:8))/(y<8?5.6:5));if(d<1)px(x,y,(d>0.82?-34:0)+(x<7&&y<7?22:0));}}
+  else if(it.kind==='hide'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const e=Math.abs(x-7.5)+Math.abs(y-7.5)*0.8+Math.sin(x*1.3+y)*0.8;if(e<7.5)px(x,y,(e>6.3?-36:0)+(r()-.5)*26);}}
+  else if(it.kind==='flask'){for(let y=6;y<14;y++)for(let x=4;x<12;x++)px(x,y,(x===4||y===13?-30:0)+(x<7?18:0));g.fillStyle='#8a6a40';g.fillRect(6,2,4,4);g.fillStyle='#5a4428';g.fillRect(6,2,4,1);}
   else if(it.kind==='bread'){for(let y=5;y<13;y++)for(let x=2;x<14;x++){const d=Math.hypot((x-7.5)/6,(y-9)/4);if(d<1)px(x,y,(y<8?20:0)+(d>0.8?-40:0)+((x-y)%4===0&&y<9?-30:0));}}
   else if(it.kind==='apple'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-9)*1.1);if(d<5.2)px(x,y,(d>4.4?-40:0)+(x<6&&y<8?40:0));}g.fillStyle='#5a3a1a';g.fillRect(8,2,1,3);g.fillStyle='#4a9a3a';g.fillRect(9,2,3,2);}
   else if(it.kind==='pan'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot((x-7.5)/7,(y-9)/4);if(d<1)px(x,y,d>0.78?-30:d>0.6?10:30);}g.fillStyle='#fad246';g.fillRect(6,9,1,1);g.fillRect(9,8,1,1);}

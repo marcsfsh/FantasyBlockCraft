@@ -1,5 +1,5 @@
 // Player
-const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false,climb:false};
+const PL={x:0,y:0,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:-0.15,ground:false,fly:false,noclip:false,climb:false,ride:null};
 let spawnW=[0.5,H-5,0.5];
 const HW=0.3,PH=1.8,EYE=1.62;
 function solidAt(x,y,z){if(x<0||z<0||x>=W||z>=D)return true;if(y<0||y>=H)return false;return SOLID[world[I(x,y,z)]]===1;}

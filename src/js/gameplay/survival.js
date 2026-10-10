@@ -1,7 +1,7 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4};
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3}; // meat, eggs and milk since E1
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -246,7 +246,7 @@ function jumpPress(){
 }
 // where the player looks and from where, from the player's view angles (the camera follows them every frame)
 function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Math.sin(PL.pitch),z:-Math.cos(PL.yaw)*cp};}
-function eyePos(){return{x:PL.x,y:PL.y+EYE,z:PL.z};}
+function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
   const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
@@ -255,6 +255,7 @@ function useBlock(th){
 function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
+  if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}

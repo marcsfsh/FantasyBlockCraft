@@ -46,6 +46,8 @@ These twelve are the looks the world draws today. Since 0.15.0 (M6a, D-039) they
 
 **Sound (M8, D-048):** all synthesized, no music. Master, effects and ambience volumes in the pause menu. Each land has a soundscape by day and by night (birds, crickets, surf and gulls, frogs, wind, rumble and lava, chimes, creaks), and each layer underground its own (drips, rumble, lava near the fire, hammers in an inhabited hold). Sounds come from where they happen, and running water from its direction.
 
+**Wildlife (E1, D-049):** deer, rabbits, sheep, mountain goats, wild hens, boars, wild horses, stray hounds and wild mules live in the lands that suit them. They wander and graze, and the shy ones flee a running player; none attacks. Hunting gives meat and hides; shears give wool, an empty hand milk and eggs. A wild horse can be ridden. A hound fed meat and a mule fed crops follow you; the mule carries a pack like a chest.
+
 **Lands and their layout (M6a, D-039):**
 - **Cells:** the world is cut into cells about 320 blocks across, their centres shifted and their borders warped. Each cell takes one land from the climate at its centre: warmth (five bands), damp (three), relief (low, hills, high), and sea or coast. Warmth and damp change over thousands of blocks, so neighbouring cells share a climate.
 - **Tiers (Q118):** common lands spread over several cells (median about 490 blocks on a side); uncommon lands are mostly one or two cells (about 340); rare lands are always one cell (about 330). No land is smaller than 215 x 215 blocks; all but the tips of corners lie within a 115-block circle of their own land.

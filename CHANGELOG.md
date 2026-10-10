@@ -5,6 +5,21 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.25.0 (2026-10-10): E1, wildlife
+
+Saves from 0.24.0 load as they are; the world is unchanged.
+
+### Game
+- **Animals in the lands that suit them:** deer, rabbits and boars in the woods, sheep and wild hens on the farmland and meadows, mountain goats on the heights, wild horses on the meadows and steppe, stray hounds and wild mules here and there. They wander, graze and flee if you run at them. None attacks.
+- **Hunting:** strike an animal for meat and hides (an axe works best). Roast venison, mutton, rabbit and pork, boil eggs and cure hides into leather at a furnace. Six leather and two rope make a sturdy pack.
+- **Wool, milk and eggs:** shear a sheep for two white wool; an empty hand milks a goat or takes an egg from a hen.
+- **Riding:** use a wild horse to ride it, faster than running and jumping higher; use it again to get off.
+- **Companions:** feed a stray hound meat, or a wild mule crops, and it follows you. Use it to make it stay or follow again. The mule carries a pack as big as a chest.
+- **Discovery log:** a new category for the animals you meet.
+
+### Tooling
+- New test `46-wildlife`.
+
 ## 0.24.0 (2026-10-10): M8, audio
 
 Saves from 0.23.0 load as they are; the world is unchanged.
