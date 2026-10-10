@@ -114,6 +114,10 @@
       "about": "Landmarks and features of the five old kept lands (M6h)"
     },
     {
+      "path": "world/volcanic.js",
+      "about": "The Volcanic Wastes (D-051): volcanoes in the terrain, lava flows, rivers and fissures, the burnt ground, charred trees, the citadel and the rift"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },
@@ -232,6 +236,10 @@
     {
       "path": "gameplay/land-weather.js",
       "about": "Weather by land (M6h): mist, storms, dust and ash, tinted skies, eased between lands"
+    },
+    {
+      "path": "gameplay/fire-sky.js",
+      "about": "The burning sky of the Volcanic Wastes (D-051): sky colours, lightning bolts (storms too), crater plumes, embers, vent smoke, lava thrown from craters"
     },
     {
       "path": "core/main-loop.js",

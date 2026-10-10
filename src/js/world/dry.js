@@ -10,14 +10,12 @@ function deadTreeP(X,y,Z,r){ // a dead tree: a grey trunk and a few bare branche
 Object.assign(FOREST,{
   dry:{trees:0.006,tree:(X,y,Z,r)=>cactusP(X,y,Z,r),top:o=>o.dn>0.25?RSAND:SAND,shore:()=>SAND,rock:SANDSTONE,soil:SAND,plant:r=>r<0.02?DBUSH:0},
   steppe:{trees:0.0015,glade:true,tree:(X,y,Z,r)=>bigOakP(X,y,Z,r),top:()=>GOLDGRASS,plant:r=>r<0.3?STEPPEG:r<0.31?FLOWY:0},
-  volcanic:{trees:0.004,tree:(X,y,Z,r)=>spireP(X,y,Z,r,BASALT),top:o=>o.dn>0.2?BASALT:ASH,rock:BASALT,soil:ASH,plant:r=>r<0.01?DBUSH:0},
   blight:{trees:0.01,tree:(X,y,Z,r)=>deadTreeP(X,y,Z,r),top:o=>o.dn>0.3?DIRT:DEADGRASS,plant:r=>r<0.06?DBUSH:0}
 });
 FLOORS.add(GOLDGRASS);FLOORS.add(DEADGRASS);FLOORS.add(ASH);FOREST.dry.floors=new Set([SAND,RSAND]); // sand is a floor only in the drylands
 Object.assign(SIGS,{
   dry:[['sandtemple','Sand-buried Temple',9],['wadi','Dry Wadi with a Well',10]],
   steppe:[['horsestones','Ring of Horse Stones',9],['outcrop','Lone Outcrop',7]],
-  volcanic:[['fireshrine','Fire Shrine',7],['cone','Smoking Cone',13]],
   blight:[['deadhall',"Dead Lord's Hall",10],['deadgrove','Grey Grove',11]]
 });
 // The hotter deep: over the Fire Below under the Volcanic Wastes, the rock of the lava sea's roof is shot through with magma stone
@@ -47,15 +45,6 @@ function dryBuild(s,r){
     case 'outcrop':{ // a lone outcrop of grey rock standing over the grass
       for(let y=g-2;y<=g+10;y++){const t=(y-g)/10,R=6*(1-t*0.6)+fbm2(y/3,X/9,1,8517.1)*1.2,ri=Math.ceil(R);
         for(let dx=-ri;dx<=ri;dx++)for(let dz=-ri;dz<=ri;dz++){const d=Math.hypot(dx*1.2,dz)+fbm2((X+dx)/4,(Z+dz)/4,1,8519.3)*1.5;if(d<=R)PW(X+dx,y,Z+dz,y>=g+9&&d<R-1?GRASS:hsh(X+dx,y,Z+dz)<0.25?MOSSY:STONE,MODE_SET);}}break;}
-    case 'fireshrine':{ // a ruined fire shrine: a basalt floor, four obsidian pillars, magma at the heart, a cold brazier
-      sigFloor(X-3,Z-3,X+3,Z+3,g,BASALT,8);
-      for(const [a,b] of [[-3,-3],[3,-3],[-3,3],[3,3]]){const hh=3+(hsh(X+a,8521,Z+b)*3|0);for(let y=g+1;y<=g+hh;y++)PW(X+a,y,Z+b,OBSID,MODE_SET);}
-      PW(X,g,Z,MAGMA,MODE_SET);PW(X+1,g,Z,MAGMA,MODE_SET);PW(X,g+1,Z-2,BASALT,MODE_SET);PW(X,g+2,Z-2,DLANTERN,MODE_SET);break;}
-    case 'cone':{ // a smoking cone of basalt and ash with a lake of lava held in its crater, walled by rock on every side
-      const Hc=12,top=g+Hc;
-      for(let dx=-13;dx<=13;dx++)for(let dz=-13;dz<=13;dz++){const d=Math.hypot(dx,dz)+fbm2((X+dx)/6,(Z+dz)/6,1,8523.7)*1.2;if(d>13)continue;const hh=Math.round(Hc*Math.min(1,(13-d)/8)),pg=hAt(X+dx,Z+dz);
-        for(let y=pg;y<=g+hh;y++)PW(X+dx,y,Z+dz,y===g+hh?(hsh(X+dx,y,Z+dz)<0.6?ASH:BASALT):BASALT,MODE_SET);
-        if(d<4.2){for(let y=top-3;y<=top;y++)PW(X+dx,y,Z+dz,y<=top-2?(d<3.4?LAVA:BASALT):AIR,MODE_SET);PW(X+dx,top-4,Z+dz,MAGMA,MODE_SET);}}break;}
     case 'deadhall':{ // the hall of a dead lord: walls of dark stone, a fallen roof, a broken throne, cobwebs in the corners
       sigFloor(X-7,Z-4,X+7,Z+4,g,MOSSY,9);
       for(let dx=-7;dx<=7;dx++)for(let dz=-4;dz<=4;dz++){const edge=Math.abs(dx)===7||Math.abs(dz)===4;if(!edge)continue;const hh=3+Math.floor(3*Math.abs(fbm2((X+dx)/5,(Z+dz)/5,1,8525.1))*2);

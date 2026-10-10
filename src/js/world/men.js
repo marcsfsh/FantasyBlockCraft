@@ -36,11 +36,11 @@ function smallAt(WCX,WCZ){
     if(!surfTaken(X,Z,14)&&!sigNear(X,Z,14)&&TSM.rvBot===999){
       // a river through the middle of the chunk: a bridge across it, or a mill on its bank
       if(TSM.river){for(const [dx,dz] of [[1,0],[0,1]]){let a=0,b=0;for(let t=1;t<14&&!a;t++)if(!colInfo(X+dx*t,Z+dz*t,TSM2).river&&TSM2.h>=SEA)a=t;for(let t=1;t<14&&!b;t++)if(!colInfo(X-dx*t,Z-dz*t,TSM2).river&&TSM2.h>=SEA)b=t;
-        if(a&&b&&a+b<=18){s=q<0.75?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
+        if(a&&b&&a+b<=18){s=q<0.75||L==='volcanic'?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
       else if(TSM.h>SEA+2&&!TSM.wet&&!TSM.lake&&!TSM.bank){
         // a lake within a few blocks: a jetty out over it
         let lake=null;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){colInfo(X+dx*10,Z+dz*10,TSM2);if(TSM2.lake&&!lake)lake=[dx,dz];}
-        if(lake)s={kind:'jetty',X:X,Z:Z,dx:lake[0],dz:lake[1],g:TSM.h};
+        if(lake&&L!=='volcanic')s={kind:'jetty',X:X,Z:Z,dx:lake[0],dz:lake[1],g:TSM.h};
         else{const kinds=Object.keys(SMALL_LANDS).filter(k=>SMALL_LANDS[k]&&SMALL_LANDS[k].includes(L));if(kinds.length){const kind=kinds[Math.floor(q*kinds.length)];
           let ok=flatOK(X,Z,TSM.h);if(kind==='beacon'||kind==='cairn'){ok=true;for(let m=0;m<8&&ok;m++)if(hAt(X+Math.round(Math.cos(m*0.785)*12),Z+Math.round(Math.sin(m*0.785)*12))>TSM.h)ok=false;}
           if(ok)s={kind:kind,X:X,Z:Z,g:TSM.h};}}}}}

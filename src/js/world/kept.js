@@ -12,6 +12,7 @@ function keptMound(x,z,y,top){for(let yy=y-1;yy>y-10;yy--){const c=GW(x,yy,z);if
 function keptBuild(s,r){
   const X=s.X,Z=s.Z,g=s.g,face=Math.floor(s.seed*4),fx=[1,0,-1,0][face],fz=[0,1,0,-1][face];
   switch(s.kind){
+    default:volcBuild(s,r);break; // the Volcanic Wastes (D-051)
     case 'hillfort':{ // two rings of earth bank with a ditch between, a gap for the gate, the stones of a hall inside
       for(let dx=-12;dx<=12;dx++)for(let dz=-12;dz<=12;dz++){const d=Math.hypot(dx,dz),gate=(dx*fx+dz*fz)>d*0.93;if(gate)continue;
         if(d>=10.5&&d<12)keptMound(X+dx,Z+dz,g+1);else if(d>=7&&d<9)keptMound(X+dx,Z+dz,g+2);else if(d>=9&&d<10.5){PW(X+dx,g,Z+dz,GRASS,MODE_SET);PW(X+dx,g+1,Z+dz,AIR,MODE_SET);}}

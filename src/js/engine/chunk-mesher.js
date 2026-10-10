@@ -99,7 +99,7 @@ function buildChunk(cx,cz){
           vl=sl/n;vb=sb/n;
           a=(A&&B)?0:3-A-B-C;
         }
-        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:2):vb*v);M.a.push(v);
+        ao[k]=a;const v=F.s*AOF[a];M.l.push(vl*v);M.b.push(b.emit?(id===LAVA?3:b.ember?4:2):vb*v);M.a.push(v);
       }
       if(ao[0]+ao[3]>ao[1]+ao[2])M.i.push(base,base+1,base+2,base+2,base+1,base+3);
       else M.i.push(base,base+1,base+3,base,base+3,base+2);

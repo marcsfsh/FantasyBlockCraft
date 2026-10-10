@@ -5,6 +5,7 @@
 //   node tools/shot.mjs --seed=4242 --out=tests/.tmp/shots
 //   node tools/shot.mjs --view=gate:824,330,1700,3.1,-0.6,0.3     name:X,Y,Z,yaw,pitch[,time of day 0 to 1]
 //   node tools/shot.mjs --view=... --animals[=deer.s,sheep.y,horse.2,hen.w]   animals lined up in front of the camera (E1), held
+//   node tools/shot.mjs --view=... --bolt     a lightning bolt strikes just before the shot (the Volcanic Wastes, D-051)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
 // Uses the Playwright that is installed globally on the cloud VM (no project dependency, D-026). Builds a copy of the game
@@ -32,10 +33,11 @@ const HOOK=`window.__fbc={
     if(SURV())setMode('creative');fallTop=null;hp=20;dead=false;$('death').style.display='none';settings.view=2;drawView();
     if(!PL.fly)toggleFly();PL.x=X-OX+0.5;PL.y=Y;PL.z=Z-OZ+0.5;PL.yaw=yaw;PL.pitch=pitch;PL.vx=PL.vy=PL.vz=0;
     if(t!==undefined){settings.time='fixed';tod=t;}settings.weather=false;rainAmt=0;raining=false;
-    playing=true;$('overlay').style.display='none';setPhoto(true);
+    playing=true;$('overlay').style.display='none';setPhoto(true);landWeatherNow();
     const real=performance.now;performance.now=()=>0;try{while(genQ.length||genJob)processGenQ();meshBand();for(let k=0;k<4;k++)flush();}finally{performance.now=real;}
     return {fog:FOGF,surf:MB.surf,queued:genQ.length,dirty:dirty.size};
   },
+  bolt(){flash=0;const b=strike(false,true);b.hold=1;flash=0.2;},
   // animals in two rows ahead of the camera, side on or three-quarter, still; then a few frames of their update
   stage(kinds,sec){
     for(const a of [...animals])removeAnimal(a);const ks=kinds.length?kinds:Object.keys(ANIMALS),cols=Math.ceil(ks.length/2);
@@ -62,6 +64,7 @@ for(const [name,X,Y,Z,yaw,pitch,t] of views){
   const r=await p.evaluate(a=>window.__fbc.go(...a),[X,Y,Z,yaw,pitch,t]);
   if(args.animals!==undefined)await p.evaluate(k=>window.__fbc.stage(k?k.split(','):[],1),args.animals);
   await p.waitForTimeout(1500);
+  if(args.bolt!==undefined)await p.evaluate(()=>window.__fbc.bolt());
   const file=path.join(out,seed+'-'+name+'.png');await p.screenshot({path:file});
   console.log('shot '+path.relative(ROOT,file)+'  fog '+Math.round(r.fog)+(r.surf?' surface':' cave')+' mode');
 }

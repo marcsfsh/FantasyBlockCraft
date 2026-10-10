@@ -60,6 +60,7 @@ function colInfoBase(X,Z,o){
     // the channel shelves up into its bank, and the bank slopes up to the land
     const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
+  o.vflow=o.vcrust=o.vfis=o.vcr=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
   h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
   const cold=o.tb===0,lk=LANDS[o.land].look;
