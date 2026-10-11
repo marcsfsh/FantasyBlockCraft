@@ -121,7 +121,7 @@ RB.house=(s,p,u,v,X,Z)=>{
 // A square tower of half-width p.h2 rising p.H over p.y, in a margin ring of p.mg (1 unless given) for its relief: a rock-faced
 // foot (battered out into the margin with p.batt, outside a wall's inner face p.wr), toothed quoins, arrow slits set into its
 // faces, a moulded band at p.band, a carved band under the top, and a parapet carried out on corbels with merlons; p.roof a
-// slate spire within the parapet, p.ban a banner on its roof, p.fire a beacon, p.hollow floors and a ladder inside, p.bell an
+// slate spire within the parapet (twice as steep on towers of half-width 3 or more), p.ban a banner on its roof, p.fire a beacon, p.hollow floors and a ladder inside, p.bell an
 // open belfry with a bell under the spire; p.gp keeps the margin out of a gate's passage (|v| up to p.gp)
 RB.tower=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs(b)),h2=p.h2,g=p.y,top=g+p.H,mg=p.mg===undefined?1:p.mg;if(m>h2+mg)return;
   const t=Math.abs(a)>=Math.abs(b)?b:a; // along the face, from its middle
@@ -144,7 +144,8 @@ RB.tower=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs
     else id=WSBRICK;
     RBP(X,y,Z,id);}
   if(mg===0&&!p.roof){if(ring&&!cor&&(Math.abs(a)+Math.abs(b))%2===0)RBP(X,top+1,Z,WSBRICK);if(cor){RBP(X,top+1,Z,WSBRICK);RBP(X,top+2,Z,WSBRICK);}}
-  if(p.roof&&m<=h2){const ry=top+1+(h2-m);RBP(X,ry,Z,m===0?WSPILLAR:SLATE);if(m===0){RBP(X,ry+1,Z,WSPILLAR);RBP(X,ry+2,Z,RBANNER);RBP(X,ry+3,Z,RBANNER);}}
+  if(p.roof&&m<=h2){const k=h2>=3?2:1,ry=top+1+(h2-m)*k;for(let y=Math.max(top+1,ry-k+1);y<=ry;y++)RBP(X,y,Z,m===0?WSPILLAR:SLATE); // the spire, steeper on the great towers
+    if(m===0){RBP(X,ry+1,Z,WSPILLAR);RBP(X,ry+2,Z,RBANNER);RBP(X,ry+3,Z,RBANNER);}}
   if(!p.roof&&a===0&&b===0){if(p.fire){RBS(X,Z,top+1,top+2,LOG);RBP(X,top+3,Z,BRAZIER);}else if(p.ban){RBS(X,Z,top+1,top+2,WSPILLAR);RBS(X,Z,top+3,top+4,RBANNER);}}
   if(p.fire&&!p.roof&&m===1&&!cor)RBP(X,top+1,Z,LOG);
 };
