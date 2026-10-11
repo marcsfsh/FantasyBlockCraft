@@ -78,7 +78,7 @@ function holdGates(h){
   const key=ckey(h.rx,h.rz);let out=gateC.get(key);if(out)return out;if(gateC.size>400)gateC.clear();
   const cand=[],R=Math.ceil(h.R*1.4);
   for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){const cx=h.cx+a,cz=h.cz+b,d=holdReach(h,cx,cz);if(d<0.5||d>=0.95)continue;
-    if(!isAvenue(cx,cz)||isPlaza(cx,cz)||inDelf(cx,cz)||stairAt(cx,cz))continue;
+    if(!isAvenue(cx,cz)||isPlaza(cx,cz)||inDelf(cx,cz)||stairAt(cx,cz)||realmNear(cx*CS+8,cz*CS+8,10))continue; // never in a realm's city, village or road (D-060)
     colInfo(cx*CS+8,cz*CS+8,TG);if(TG.wet||TG.lake||TG.river||TG.h<=TG.sl+2||TG.rvBot<999)continue;
     cand.push({cx:cx,cz:cz,s:TG.h+hsh(cx,1401,cz)*30});}
   cand.sort((p,q)=>q.s-p.s);out=[];

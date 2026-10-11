@@ -16,7 +16,7 @@ assert(LANDS.every(L=>Array.isArray(WILD_OF[L.k]))&&Object.values(ANIMALS).every
   // or be cut away on purpose (alpha 1, D-055); each texture is read at its own size
   const foeM=new Set(Object.values(FOES).map(F=>F.m));
   let holes=0;for(const k in AM_KINDS){const K=AM_KINDS[k],TX=K.tex||AM_TEX,L=amLayout(K),Dt=amTexture(k,0,{}).amData,ok=a=>a===255||(foeM.has(k)&&(a===200||a===1));
-    for(const n in L){const [u,v,b]=L[n];for(const f of ['L','F','R','B','T','D']){const R=amRect(f,u,v,b[3],b[4],b[5]);for(let t=0;t<R[3];t++)for(let q=0;q<R[2];q++)if(!ok(Dt[((R[1]+t)*TX+R[0]+q)*4+3]))holes++;}}}
+    const q=K.res||1;for(const n in L){const [u,v,b]=L[n];for(const f of ['L','F','R','B','T','D']){const R=amRect(f,u,v,b[3]*q,b[4]*q,b[5]*q);for(let t=0;t<R[3];t++)for(let q=0;q<R[2];q++)if(!ok(Dt[((R[1]+t)*TX+R[0]+q)*4+3]))holes++;}}}
   assert(holes===0&&amTexture('horse',0,{})===amTexture('horse',0,{}),'each coat is painted whole on its own texture, made once and shared');}
 const standAt=k=>{const c=nearestLand(LAND_I[k],0,0,48);gen(c.X,c.Z);let bx=c.X-OX,bz=c.Z-OZ;PL.x=bx+0.5;PL.z=bz+0.5;PL.y=ground[bx+W*bz]+1;PL.vx=PL.vz=0;LWX.t=0;landWeather(0.1);return c;};
 const clearAll=()=>{for(const a of [...animals])removeAnimal(a);};

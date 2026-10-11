@@ -148,7 +148,7 @@ function stretchCell(c){let best=c;for(const [a,b] of LN8){const n=landSite(c.i+
 function stretchName(key){
   let s=LNAME.get(key);if(s)return s;if(LNAME.size>20000)LNAME.clear();
   const i=Math.floor(key/65536)-32768,j=key%65536-32768,c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];
-  const w=nameWord(L.p,rngAt(c.i,8131,c.j)),base=landShown(L);
+  const RC=realmHeld(c),w=nameWord(RC?RC.names:L.p,rngAt(c.i,8131,c.j)),base=landShown(L); // a stretch a kingdom holds takes its people's names (D-060, D-061)
   s=L.sea?'The Sea of '+w:(base.startsWith('The ')?base.slice(4):base)+' of '+w;LNAME.set(key,s);return s;
 }
 // The name the readout shows on open land: the stretch's name, or the edge it is on (the Grey Shore, a lake, open sea)
@@ -166,11 +166,11 @@ function landSpawn(){
 // The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells; a cell whose
 // middle another land has taken (the sunken wastes spread over their neighbours, D-055) is passed over
 const TNL={};
-function nearestLand(k,X,Z,rmax){
+function nearestLand(k,X,Z,rmax,ok){
   const ci=Math.floor(X/LS),cj=Math.floor(Z/LS);let best=null,bd=Infinity;
   for(let r=0;r<=rmax;r++){
     for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
-      if(cellLand(c)!==k||landsAt(c.x,c.z,TNL).land!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
+      if(cellLand(c)!==k||landsAt(c.x,c.z,TNL).land!==k||(ok&&!ok(c)))continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
     if(best&&bd<(r-1)*LS)break;}
   return best?{X:Math.round(best.x),Z:Math.round(best.z),d:Math.round(bd)}:null;
 }

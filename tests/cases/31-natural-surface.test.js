@@ -33,8 +33,9 @@ const o={},q={};
     const p=s.g-ring/8;if(p<-1)hollow++;if(s.kind!=='keep'){prom+=p;pn++;}}
   info('sites',n,'; in a hollow',hollow,'; mean rise of towers and castles over the land around them',(prom/Math.max(1,pn)).toFixed(1),'blocks');
   assert(hollow===0,'no site stands in a hollow');assert(prom/Math.max(1,pn)>2,'towers and castles stand on high ground');}
-// trees gather in groves: trunks by grove field in a window on the nearest Green Hills (woods are thick throughout)
-{const ne=nearestLand(LAND_I.green,PL.x+OX,PL.z+OZ,40);regenerateAll(ne.X,ne.Z);while(genQ.length)processGenQ();const TR=new Set([LOG,BIRCH,SPRUCE,JLOG]);let inG=0,inGc=0,outG=0,outGc=0;
+// trees gather in groves: trunks by grove field in a window on the nearest Green Hills (woods are thick throughout) that no
+// realm holds (a held stretch is farmed and settled, its towns and fields cleared: D-060)
+{const ne=nearestLand(LAND_I.green,PL.x+OX,PL.z+OZ,40,c=>!realmHeld(stretchCell(c)));regenerateAll(ne.X,ne.Z);while(genQ.length)processGenQ();const TR=new Set([LOG,BIRCH,SPRUCE,JLOG]);let inG=0,inGc=0,outG=0,outGc=0;
   for(let z=0;z<D;z++)for(let x=0;x<W;x++){const g=ground[x+W*z],b=biome[x+W*z];if(![2,3,4,6,10].includes(b))continue;const G=fbm2((x+OX)/70,(z+OZ)/70,2,4801.3),t=TR.has(world[I(x,g+1,z)])?1:0;
     if(G>0.25){inG+=t;inGc++;}else if(G<-0.2){outG+=t;outGc++;}}
   info('trunks per 1000 columns of open land: in groves',(1000*inG/Math.max(1,inGc)).toFixed(1),'; in clearings',(1000*outG/Math.max(1,outGc)).toFixed(1));

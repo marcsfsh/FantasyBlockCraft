@@ -120,11 +120,12 @@ function frame(now){
     let where='';
     if(inside){const ci=bx+W*bz,yy=Math.floor(PL.y);where=(yy<hm[ci]&&!(hg[ci]>=0&&yy>hg[ci]))?(ruinAt(bx+OX,yy,bz+OZ)||(q=>q?POI_NAMES[q.tp]:(d=>d?DUNGEON_NAMES[d.kind]:(m=>m?m.name:layerName(yy,bx+OX,bz+OZ))(remainsNear(bx+OX,yy,bz+OZ)))(dungeonNear(bx+OX,yy,bz+OZ)))(poiNear(bx+OX,yy,bz+OZ))):surfaceName(bx+OX,yy,bz+OZ);
       if(where)notePlace(where,bx+OX,bz+OZ);else where=landPlaceName(bx+OX,bz+OZ); // lands and their stretches are not places
-      if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}}
+      if(where!=='Underground'&&where!=='Caves'&&where!==lastWhere&&now-lastWhereT>5000){if(lastWhere)showBiome(where);lastWhere=where;lastWhereT=now;}
+      {const rp=realmPlace(bx+OX,bz+OZ),P=rp?null:realmOfColumn(bx+OX,bz+OZ);realmLine=rp?rp.line:P?'held by '+P.kingdom.name.replace(/^The /,'the '):'';}}
     const fms=1000/Math.max(1,fps);
-    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+'  res '+Math.round(RES.ratio/DPR*100)+'%'+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
+    $('info').textContent=fps+' fps  '+fms.toFixed(1)+' ms (worst '+Math.round(fmax*1000)+', work '+fwork.toFixed(1)+')'+(settings.view<0?'  view '+AUTO_VIEW.far:'')+'  res '+Math.round(RES.ratio/DPR*100)+'%'+(genQ.length?'  streaming '+genQ.length:'')+navLine(bx,bz)+'\n'+where+(realmLine?'\n'+realmLine:'')+(brushR?'\nBrush '+(brushR*2+1)+'x':'')+(gliding?'\nGliding':'')+(PL.noclip?'\nNoclip':'')+(PL.climb?'\nClimbing':'')+(primed.length?'\nKegs lit: '+primed.length:'')+infoExtra();fmax=0;}
   {const work=performance.now()-w0;fwork=fwork*0.9+work*0.1;if(ready&&playing)autoView(raw,work);}}
-let lastWhere='',lastWhereT=0;
+let lastWhere='',lastWhereT=0,realmLine='';
 function navLine(bx,bz){
   const yy=Math.floor(PL.y),g=bx>=0&&bz>=0&&bx<W&&bz<D?ground[bx+W*bz]:yy,c=carries(323),d=carries(324);
   if(!c&&!d)return '';

@@ -12,6 +12,12 @@ const PEOPLES={
   highelf:{a:['Aen','Cal','Ilm','Ith','Nar','Qua','Sel','Tar','Vae','Ys'],b:['adir','enor','idel','oriel','uvar','esse','ander','ithra']},
   drow:{a:['Dra','Ilv','Jhar','Mal','Nhel','Vel','Xun','Zar','Quar','Shy'],b:['aeth','dra','ith','lyn','ryn','vex','zith','nyss','ra']},
   fiend:{a:['Vor','Kael','Azh','Ghul','Skar','Thra','Ulm','Zhar','Ruuk','Xal'],b:['gath','rax','zul','thar','vex','okk','dun','ash','ruun']}, // the Emberlords (D-052)
+  // the high men of the southern realms (D-060): their kings, cities and strongholds; their country folk name villages in the human style
+  realm:{a:['Aur','Cal','Cael','Orn','Pel','Mer','Val','Vael','Tor','Lin','Ser','Eld','Ar','Bel','Cor','Fal','Hal','Ir','Nim','Ros','Tar','Thal','Ves','Alm'],
+         b:['arel','amar','ennar','aris','ehan','elin','emir','ethil','iand','iel','ost','ovar','uin','avel','esse','iorn','orin','ustan','arin','oval']},
+  // the riders of the plains (D-061): horse-lords of the steppe, the moors and the downs, their kings, halls, holds and steadings
+  rider:{a:['Ash','Beor','Brec','Ceol','Cyn','Ead','Eald','Gar','Hwit','Heah','Hroth','Lind','Os','Rad','Sig','Stan','Tid','Wig','Ord','Bern','Cuth','Torh','Wyn','Hun'],
+         b:['ric','wold','mod','gar','ulf','wine','stan','ward','frith','bald','here','thorn','mer','red','ferth','gyth','burh','ley']},
   beastfolk:{a:['Arr','Fang','Grr','Hoof','Mar','Rha','Tusk','Whis','Brin','Ska'],b:['ka','mane','rek','tail','th','uun','rro','hide']}
 };
 // Proper names from Tolkien's works (lowercase, letters only). Exact matches, near misses (one letter off) and the roots below are refused.
@@ -24,7 +30,12 @@ const TOLKIEN=('aragorn arathorn arda arnor arwen azog bagend balin balrog bard 
  'uglukh ugluk ungoliant valinor varda wormtongue zirak zirakzigil kibilnala baraddur dol guldur dolguldur erech helmsdeep hornburg mithlond angmar '+
  'erebluin nimrodel anduin brandywine baranduin gwaihir shadowfax beregond eorl theoden theodred hama gamling haldir elladan '+
  'elrohir amroth imrahil halbarad lindir erestor glorfindel undomiel elessar estel strider ithil anor angband utumno thangorodrim tirion alqualonde '+
- 'telperion laurelin yavanna aule ulmo orome tulkas nienna irmo varda estel khazaddum azanulbizar celebrant nenya vilya narya ringil anglachel narsil anduril sting glamdring orcrist').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
+ 'telperion laurelin yavanna aule ulmo orome tulkas nienna irmo varda estel khazaddum azanulbizar celebrant nenya vilya narya ringil anglachel narsil anduril sting glamdring orcrist '+
+ // the Rohirrim's people, places and horses, so the riders' style (D-061) can never draw one
+ 'brego aldor frea freawine goldwine deor gram helm frealaf brytta leofa walda folca folcwine fengel thengel theodwyn eomund eowyn eothain erkenbrand '+
+ 'elfhelm grimbold dunhere guthlaf gleowine ceorl deorwine herefara herubrand fastred harding dernhelm holdwine freca wulf hild elfhild morwen leod '+
+ 'meduseld dunharrow harrowdale westfold eastfold westemnet eastemnet fenmarch aldburg firienfeld halifirien snowbourn aglarond deeping isenfords '+
+ 'eorlingas mearas felarof hasufel arod snowmane firefoot windfola stybba simbelmyne riddermark mundburg upbourn edoras').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
 const TOLKIEN_SET=new Set(TOLKIEN);
 const TOLKIEN_ROOTS=['khaz','durin','moria','mordor','gondor','erebor','sauron','morgoth','thror','thrain','thorin','smaug','rivendell','lorien','isengard','numenor','mithril','nazgul','silmaril','gandalf','aragorn','galadriel','legolas','gimli'];
 const normName=s=>s.toLowerCase().replace(/[^a-z]/g,'');

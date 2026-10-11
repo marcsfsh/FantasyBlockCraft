@@ -113,7 +113,7 @@ function caveStep(B,ni,dir,kind,r,o){
 function caveEntrance(B,r,mx){
   let best=null,flat=null;const o={};
   for(let k=0;k<28;k++){const X=B.x0+mx+Math.floor(r()*(CRB-2*mx)),Z=B.z0+mx+Math.floor(r()*(CRB-2*mx)),h=hAt(X,Z);
-    colInfo(X,Z,o);if(h<o.sl+3||o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))continue;
+    colInfo(X,Z,o);if(h<o.sl+3||o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS))||realmNear(X,Z,8))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,ux=Math.cos(a),uz=Math.sin(a),rise=hAt(Math.round(X+ux*7),Math.round(Z+uz*7))-h;sl=Math.max(sl,Math.abs(rise));
       if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}

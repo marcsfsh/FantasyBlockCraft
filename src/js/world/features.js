@@ -107,13 +107,13 @@ function stairwayAt(WCX,WCZ){
   let s=null;
   if(hsh(WCX,6301,WCZ)<0.15){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
     let rise=0;for(let k=0;k<8;k++){const a=k*0.785;rise=Math.max(rise,hAt(Math.round(X+Math.cos(a)*9),Math.round(Z+Math.sin(a)*9))-o.h);} // at the foot of a slope
-    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>o.sl+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>o.sl+2&&!ruinZone(WCX,WCZ)&&!realmNear(X,Z,8)&&flatOK(X,Z,o.h)){
       const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
   stairwayC.set(key,s);return s;
 }
 function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
 // Surface columns that structures have claimed: trees, boulders and other surface features keep off them
-function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m);}
+function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m)||!!realmNear(X,Z,m);}
 const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
 function stairwayP(s,r){
   const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};

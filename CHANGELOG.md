@@ -5,6 +5,59 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.31.0 (2026-10-11): the riders of the plains
+
+Saves from 0.30.0 do not carry over (save key v22): the riders are new to the world.
+
+### Game
+- **The riders of the plains.** About half the stretches of the Golden Steppe, the Heath Moors and the Barrow Hills are held by kingdoms of horse-lords in mail and green, under their sign of a white horse running. Each held stretch is a province:
+  - **Hill town:** round terraces on a hill behind a palisade of sharpened logs over a ditch, timber towers under golden thatch, the way up by stairs between carved posts to the golden hall (carved and gilded, a long hearth, tapestries and shields, the high seat), longhouses of wattle under turf and thatch in rings round the terraces, stables, a paddock of horses, a smithy and stalls by the gate. Kings' mounds line the road before the king's seat.
+  - **Hold:** a round fieldstone wall over a ditch, round gate towers capped in thatch, a round keep with a gallery, a training ring for horses.
+  - **Steadings:** longhouses and a mead hall round a green and well, a paddock, a smithy, a fence of wattle hurdles, fields.
+  - **Horse farms:** a long stable, a farmhouse and paddocks of horses. **Beacons** on the heights, kept lit.
+  - **Roads:** the riders' road of beaten earth with carved posts and the horse heads, cart tracks, timber bridges.
+- **Their folk:**
+  - **Guards** in long mail and green cloaks bordered in gold, tall helms with a tail of white horsehair, round green shields with the white horse, pennoned spears; **bowmen** in quilted coats with short horn bows; **marshals** in gilded helms with a horn at the belt.
+  - **Horsemen** ride saddled and caparisoned horses, gallop, and ride the roads in patrols.
+  - **Freemen, freewomen, horse-herds and thanes** in woven borders, embroidered gowns and braids, hoods and crooks, green and gold.
+  - Neutral like the white realm's folk, with their own greetings and a low horn when they take up arms. Horses in the paddocks stay penned until you ride one away.
+- Their towns sound of voices, horses, hooves, a forge and a horn.
+- No heather, bracken or reeds grow on the realms' sites.
+- New blocks (creative, Building): Golden Thatch, Turf Roof, Wattle and Daub, Carved Oak, Fieldstone, Sharpened Stakes, Banner of the Riders, Horse-Head Gable, Hung Shields, Long Hearth, Tapestry, Gilded Oak, Rail Fence.
+- Creative: the land tour lists the riders' places (a king's seat, a hill town, a hold, a steading, a beacon, a horse farm).
+
+### Tooling
+- New test case `53-riders`; `52-realms` measures the white realm's own lands.
+
+## 0.30.0 (2026-10-11): the realms of men
+
+Saves from 0.29.0 do not carry over (save key v21): the realms of men are new to the world.
+
+### Game
+- **The realms of men.** About half the stretches of Green Hills, Overgrown Farmland, Wild Orchards, Flower Meadows and Old Terraces are held by kingdoms of high men, in white stone and black livery under their sign of a star over a tower. Each held stretch is a province:
+  - **City:** a walled city in tiers (the royal city in three), its avenue climbing by stairs under arches to the citadel. It has a market square with a fountain and stalls, whitestone and timbered houses under slate, gardens, barracks and a training yard, a smithy and stables, the domed Hall of Lamps, and in the citadel a great hall, a statue of a king of old and the white tower.
+  - **Castle:** a castle on the border.
+  - **Villages:** thatched cottages round a green and well, an inn, a chapel with a bell tower, a smithy.
+  - **Farmsteads:** farmsteads with hedged fields of wheat, potatoes, turnips and beans.
+  - **Watchtowers:** watchtowers with beacons on the heights.
+  - **Roads:** paved king's roads with lamp-topped milestones, country lanes, and bridges over the rivers.
+- **Their folk:**
+  - **Soldiers:** spearmen and swordsmen with kite shields, archers with longbows, captains in black cloaks, all in black surcoats over mail with the white sign, and tall crested helms.
+  - **Townsfolk:** townsmen and townswomen, merchants, smiths, farmers and lords of the realm, each dressed by their trade.
+  - **Behaviour:** they go about their places, patrol the king's roads, stop and turn to you, and greet you by the name of their town and kingdom. They are neutral: strike one and the guards near by take up arms while the townsfolk flee, until their wrath passes. Never in creative.
+- The readout names the place and the kingdom that holds it. Places of the realms and the folk you meet go in the journal. Towns have their own sounds: voices, carts, a bell, a forge, dogs at night.
+- New blocks (creative, Building):
+  - Whitestone, Whitestone Bricks, Carved Whitestone, Whitestone Pillar.
+  - Slate Roof, Timbered Plaster, Braced Timber Frame, Thatch.
+  - Banner of the Realm, Hay Bale, Paving Stones, Leaded Glass.
+- Creative: the land tour takes you to the nearest royal city, city, castle, village, watchtower or farmstead.
+- **The realms' buildings stand in relief:** rock-faced plinths, quoins, windows set back over sills, moulded string courses and corbelled cornices, jettied timber storeys, dormers, overhanging verges with finials, buttresses, corbelled parapets on towers and walls, arrow loops, a deep gatehouse, a domed hall on a drum, a chapel with lancets, a rose window and a belfry. Two new blocks: Rough Whitestone and Whitestone Moulding.
+- **The folk in detail:** painted at twice the resolution, with mail in rings, riveted plate, stitched leather and cloth in folds; soldiers have nasal helms with cheek guards, layered pauldrons, vambraces, greaves, gauntlets, swords with guards and pommels, leaf-bladed spears, curved longbows; the townsfolk have laced bodices, fur trims, smocking, woven hats and a lord's chain of office.
+
+### Tooling
+- New test case `52-realms`. Province planning runs in a streaming step of its own, a slice of at most 6 ms a frame.
+- Models can be painted at more than one texel to a pixel (`res`). `tools/shot.mjs --near=2` stands lined-up figures closer to the camera.
+
 ## 0.29.0 (2026-10-11): the Ember Throne, built with care
 
 Saves from 0.28.0 do not carry over (save key v20): the fortresses in the volcanoes are rebuilt.

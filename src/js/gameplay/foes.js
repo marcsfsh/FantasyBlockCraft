@@ -21,13 +21,50 @@ const FOES={
   // the Emberlord towers eleven blocks tall: a reach of eight, a whip of eighteen, fire thrown in threes from forty; it never
   // goes farther from its throne than the terrace before its gate (leash, set when it is placed)
   ember:{n:'Emberlord',m:'ember',hp:640,dmg:12,reach:8,dyr:9,walk:1.8,run:4.2,sight:50,cd:2.2,wind:0.8,shot:{dmg:6,v:18,lo:10,hi:44,cd:3.5,k:'hellfire',n:3},whip:{dmg:7,lo:6,hi:18,cd:4.5},mass:0.02,tall:12,stride:4.5,boss:1,lord:1,
-    drops:[[377,1,1,1],[378,1,1,1],[229,4,8,1],[228,3,6,1],[224,6,12,1]],cause:'ember'}
+    drops:[[377,1,1,1],[378,1,1,1],[229,4,8,1],[228,3,6,1],[224,6,12,1]],cause:'ember'},
+  // ---- the folk of the realms of men (D-060): neutral. folk: of a realm; civ: townsfolk, who flee rather than fight. They take no
+  // notice of the player until one of them is struck; then the realm's guards near by take up arms and its people flee (wrath)
+  rspear:{n:'Spearman of the Realm',m:'rspear',hp:22,dmg:4,reach:2.7,walk:1.3,run:4.6,sight:24,cd:1.3,wind:0.45,block:0.5,mass:0.55,folk:1,drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'guard'},
+  rsword:{n:'Swordsman of the Realm',m:'rsword',hp:24,dmg:5,reach:2.2,walk:1.35,run:4.7,sight:24,cd:1.1,wind:0.4,block:0.5,mass:0.55,folk:1,drops:[[223,1,1,0.35],[206,1,2,0.5]],cause:'guard'},
+  rbow:{n:'Archer of the Realm',m:'rbow',hp:16,dmg:2,reach:2,walk:1.35,run:4.7,sight:30,cd:1.2,wind:0.4,shot:{dmg:3,v:28,lo:5,hi:28,cd:2.2,k:'arrow'},keep:11,mass:0.6,folk:1,drops:[[201,2,4,0.6],[206,1,1,0.4]],cause:'rarrow'},
+  rcapt:{n:'Captain of the Realm',m:'rcapt',hp:44,dmg:7,reach:2.4,walk:1.35,run:4.6,sight:28,cd:1.1,wind:0.45,mass:0.4,folk:1,drops:[[227,1,2,0.6],[206,1,2,0.6]],cause:'guard'},
+  rman:{n:'Townsman',m:'rman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.4,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,1,0.5]],cause:'guard'},
+  rwoman:{n:'Townswoman',m:'rwoman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.4,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[207,1,2,0.5]],cause:'guard'},
+  rmerch:{n:'Merchant',m:'rmerch',hp:12,dmg:1,reach:1.6,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,1,0.3],[207,1,2,0.5]],cause:'guard'},
+  rsmith:{n:'Smith',m:'rsmith',hp:16,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'guard'},
+  rfarmer:{n:'Farmer',m:'rfarmer',hp:12,dmg:1,reach:1.8,walk:1.15,run:4.3,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[202,1,3,0.6],[209,1,2,0.4]],cause:'guard'},
+  rnoble:{n:'Lord of the Realm',m:'rnoble',hp:14,dmg:1,reach:1.6,walk:1.05,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,2,0.6]],cause:'guard'},
+  // the riders of the plains (D-061): say names the lines they greet with; mount: a horseman (three blocks tall, a horse's pace,
+  // a long reach with the spear); fem: a woman's voice
+  hspear:{n:'Guard of the Riders',m:'hspear',hp:22,dmg:4,reach:2.8,walk:1.3,run:4.7,sight:24,cd:1.3,wind:0.45,block:0.45,mass:0.55,folk:1,say:'hguard',drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'rider'},
+  hbow:{n:'Bowman of the Riders',m:'hbow',hp:16,dmg:2,reach:2,walk:1.35,run:4.8,sight:30,cd:1.2,wind:0.4,shot:{dmg:3,v:28,lo:5,hi:28,cd:2,k:'arrow'},keep:11,mass:0.6,folk:1,say:'hguard',drops:[[201,2,4,0.6],[206,1,1,0.4]],cause:'harrow'},
+  hcapt:{n:'Marshal of the Riders',m:'hcapt',hp:44,dmg:7,reach:2.4,walk:1.35,run:4.7,sight:28,cd:1.1,wind:0.45,block:0.45,mass:0.4,folk:1,drops:[[227,1,2,0.6],[206,1,2,0.6]],cause:'rider'},
+  hrider:{n:'Horseman of the Riders',m:'hrider',hp:34,dmg:5,reach:3.2,walk:1.7,run:7,sight:32,cd:1.4,wind:0.5,block:0.4,mass:0.25,tall:3,mount:1,folk:1,say:'hguard',drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'horse'},
+  hman:{n:'Freeman',m:'hman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.5,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,1,0.5]],cause:'rider'},
+  hwoman:{n:'Freewoman',m:'hwoman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.5,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'rider'},
+  hherd:{n:'Horse-herd',m:'hherd',hp:12,dmg:1,reach:1.8,walk:1.25,run:4.6,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[202,1,2,0.5]],cause:'rider'},
+  hthane:{n:'Thane of the Riders',m:'hthane',hp:16,dmg:2,reach:1.8,walk:1.05,run:4.3,sight:16,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.6]],cause:'rider'},
+  hsmith:{n:'Smith',m:'rsmith',hp:16,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'rider'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
-  troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash'});
+  troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you',
+  rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down'});
 // who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
 const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
   lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]]};
+// the folk's places in a realm's sites (a layout's spots, siteLayout) and its roads (D-060)
+Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],['rsword',1]],r_barracks:[['rsword',2],['rspear',1]],r_drill:[['rsword',2],['rspear',1]],r_keep:[['rsword',1]],
+  r_market:[['rmerch',3],['rwoman',2],['rman',2]],r_street:[['rman',2],['rwoman',2],['rspear',0.5]],r_smithy:[['rman',1]],r_citadel:[['rspear',2],['rsword',1]],r_hall:[['rsword',1],['rman',0.4]],
+  r_citgate:[['rspear',1]],r_green:[['rman',2],['rwoman',2],['rfarmer',1]],r_lane:[['rfarmer',1],['rman',1]],r_farm:[['rwoman',1],['rfarmer',1]],r_field:[['rfarmer',1]],r_post:[['rspear',2],['rbow',2]],
+  r_patrol:[['rspear',2],['rsword',1.5],['rbow',1]],
+  // the riders' places (D-061): their halls are kept by guards, their towns full of folk, horsemen at the drill and on the roads
+  h_gate:[['hspear',3],['hbow',1.5]],h_gatein:[['hspear',2],['hrider',1]],h_hall:[['hspear',1.5],['hman',1],['hwoman',1]],h_citgate:[['hspear',1]],
+  h_street:[['hman',2],['hwoman',2],['hherd',0.6],['hspear',0.4]],h_market:[['hwoman',3],['hman',2]],h_smithy:[['hman',1]],h_stable:[['hherd',2],['hman',1]],
+  h_paddock:[['hherd',1]],h_keep:[['hspear',2]],h_barracks:[['hspear',2],['hbow',1]],h_drill:[['hrider',2],['hspear',1]],h_green:[['hman',2],['hwoman',2],['hherd',1]],
+  h_lane:[['hman',1],['hherd',1]],h_farm:[['hherd',2],['hwoman',1]],h_field:[['hman',1]],h_post:[['hspear',2],['hbow',2]],h_patrol:[['hrider',1]]});
+const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
+    stable:[1,2],paddock:[1,1]},
+  FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -50,7 +87,7 @@ function spawnGroup(table,n,x,y,z,r,o){
   let lead=null;const out=[];
   for(let i=0;i<n;i++){const kind=i===0&&o&&o.lead?o.lead:pickW(FOE_HOME[table]),tall=FOES[kind].tall||2;let p=null;
     for(let k=0;k<14&&!p;k++){const a=Math.random()*6.283,d=Math.random()*r,xx=x+Math.cos(a)*d,zz=z+Math.sin(a)*d,yy=foeStand(xx,y+1,zz,tall);if(yy>0&&!foeWet(xx,yy,zz))p=[xx,yy,zz];}
-    if(!p)continue;const f=addFoe(kind,p[0],p[1],p[2],Object.assign({grp:lead?lead.grp:0,spot:o&&o.spot},o&&o.sleep&&Math.random()<o.sleep?{st:'sleep',t:999}:{}));if(!lead)lead=f;out.push(f);}
+    if(!p)continue;const f=addFoe(kind,p[0],p[1],p[2],Object.assign({grp:lead?lead.grp:0,spot:o&&o.spot,prov:o&&o.prov,site:o&&o.site},o&&o.sleep&&Math.random()<o.sleep?{st:'sleep',t:999}:{}));if(!lead)lead=f;out.push(f);}
   return out;
 }
 // ---- Where foes come from: the places near the player (warren halls and camps, fortresses, the Ashen Citadel) are peopled
@@ -63,33 +100,88 @@ function foePlaces(){
   for(const s of warrenSpots(X,Z,60))if(s.kind==='camp'||(under?Math.hypot(s.x-X,s.z-Z)<52:Math.hypot(s.x-X,s.z-Z)<28))out.push(s);
   for(const F of fortsNear(X,Z,80)){const S=fortSpots(F),id=F.id;out.push({id:id+'g',x:S.guards[0].x,y:F.Fy,z:S.guards[0].z,R:6,kind:'gate'});if(!F.great||!fallenLords.has(id))out.push({id:id,x:S.lord.x,y:S.lord.y,z:S.lord.z,R:F.great?1:5,kind:'lord',F:F});}
   const sg=sigNear(X,Z,60);if(sg&&sg.kind==='citadel')out.push({id:'s'+sg.X+','+sg.Z,x:sg.X,y:sg.g,z:sg.Z,R:9,kind:'citadel'});
+  // the realms of men (D-060): each spot of a site's layout within 46 blocks
+  for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites){if(Math.hypot(s.X-X,s.Z-Z)>s.R+70)continue;const L=siteLayout(s);
+    L.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);if(Math.hypot(x-X,z-Z)>46)return;out.push({id:s.id+':'+i,x:x+0.5,y:p.y>0?p.y+1:hAt(Math.round(x),Math.round(z))+1,z:z+0.5,R:p.kind==='gate'||p.kind==='post'||p.kind==='citgate'?2.5:4,kind:s.prov.cult.fp+p.kind,folk:1,horses:p.horses||0,s:s});});}
   return out;
 }
 function foeSpawnTick(){
   const X=PL.x+OX,Z=PL.z+OZ;
   // a place is peopled once while the player is near; it may be again after they have gone well away
-  for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>120)foeSpots.delete(id);
-  for(const s of foePlaces()){if(foeSpots.has(s.id)||(foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
-    foeSpots.set(s.id,{x:s.x,z:s.z});const o={spot:s.id};
+  for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
+  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+    if(folk&&folkCount()>=FOLK_CAP)continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
+    if(folk){const k=s.kind.slice(2),N=FOLK_N[k]||[1,2],night=ambNight()&&!['gate','gatein','post','citgate','barracks','keep','citadel'].includes(k);
+      spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s});
+      if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':null,sleep:s.kind==='den'?0.45:0});}
+  folkPatrol();
   // the wastes: a warband (sometimes led by a warchief) or a troll, out of sight, on open ground of the volcanic land
-  const roam=foes.filter(f=>!f.spot&&!f.dead).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
+  const roam=foes.filter(f=>!f.spot&&!f.dead&&!FOES[f.kind].folk).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
   const a=PL.yaw+Math.PI+(Math.random()-0.5)*Math.PI*1.4,d=38+Math.random()*28,x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
   if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA-WB_DEP||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
   colInfo(bx+OX,bz+OZ,TFO);if(TFO.wVolc<0.55||TFO.vflow||TFO.vfis||TFO.vlake)return;const top=get(bx,g,bz);if(!SOLID[top]||top===LAVA)return;
   if(Math.random()<0.2)spawnGroup('band',1,x,g,z,2,{lead:'troll'});
   else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),x,g,z,5,{lead:Math.random()<0.12?'ochief':null});
 }
+// ---- The folk of the realms (D-060): neutral until struck. A blow to any of them sets their province's wrath (eased away over a
+// minute or two, longer for a death): its guards near by take up arms against the player, its townsfolk flee; never in
+// creative. Patrols walk the king's roads; folk greet the player who comes close and looks at them.
+const FOLK_CAP=34,realmWrath=new Map();let folkGreetT=0;
+const folkCount=()=>{let n=0;for(const f of foes)if(FOES[f.kind].folk&&!f.dead)n++;return n;};
+const folkWrath=f=>!!f.prov&&(realmWrath.get(f.prov)||0)>0;
+function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
+  for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
+    if(G.civ){if(Math.hypot(g.x-PL.x,g.z-PL.z)<18){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;g.ct=Math.random()*0.8;}}
+  if(!was){toast('The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
+// a patrol on the king's road (two to four soldiers, now and then with their captain), out of sight, walking the road
+function folkPatrol(){
+  if(folkCount()>=FOLK_CAP-4||Math.random()>0.25)return;const X=PL.x+OX,Z=PL.z+OZ,T=realmTile(Math.floor(X),Math.floor(Z));
+  const roads=T.roads.filter(r=>r.k==='high');if(!roads.length)return;if(foes.some(f=>f.road&&!f.dead))return;
+  const rd=roads[Math.floor(Math.random()*roads.length)],t=Math.random(),px=rd.a[0]+(rd.b[0]-rd.a[0])*t,pz=rd.a[1]+(rd.b[1]-rd.a[1])*t,d=Math.hypot(px-X,pz-Z);
+  if(d<34||d>70)return;const x=px-OX,z=pz-OZ,bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return;
+  const C=rd.P.cult,horse=C.k==='horse',grp=spawnGroup(C.fp+'patrol',2+Math.floor(Math.random()*2),x,ground[bx+W*bz],z,horse?3:2,{lead:!horse&&Math.random()<0.3?'rcapt':null,prov:rd.P.key,site:rd.P.sites[0]});
+  const dir=Math.random()<0.5?1:-1;for(const f of grp){f.road={rd:rd,dir:dir,along:t*rd.len};f.st='idle';f.t=0.5;}
+}
+// the horses of a riders' paddock (D-061): put out once while the player is near, penned until one is ridden away
+function folkHorses(s,x,z){for(const a of [...animals])if(a.spot===s.id&&!a.tame)removeAnimal(a);
+  for(let i=0;i<s.horses;i++){const xx=x+(Math.random()-0.5)*4,zz=z+(Math.random()-0.5)*4,yy=standY(xx,s.y+1,zz);if(yy<0||wetAt(xx,yy,zz))continue;
+    addAnimal('horse',xx,yy,zz,{spot:s.id,pen:{x:x,z:z,r:2.6},young:i>0&&Math.random()<0.3});}}
+// what the folk say to a passer-by (the place and the kingdom by name)
+const FOLK_SAY={
+  guard:['Hail, traveller. Keep the peace within these walls.','The roads of {k} are watched. Go safely.','Walk freely, stranger, but draw no blade here.','Mind the king\'s law in {p}.','Nothing stirs on the border tonight. Long may it stay so.'],
+  rcapt:['You stand in {p}, of {k}. The king\'s peace holds here.','My men keep the roads from the hills to the river. Travel by day.','If you have seen smoke in the east, speak of it to me.'],
+  rman:['Good day to you.','Have you come far? The roads are long.','They say the ash lands burn brighter every year.','The harvest was good. The king\'s granaries are full.','Welcome to {p}.'],
+  rwoman:['Good day, traveller.','The well water is the sweetest in {k}.','Mind the carts on the avenue.','There is bread at the market, if you are hungry.'],
+  rmerch:['Wares from every corner of {k}!','Fine cloth and good iron. Trade will come in better days.','The southern road is safe again, they say.'],
+  rsmith:['Steel for the king\'s guard. Mind the sparks.','A good blade wants a good arm behind it.','The forge never sleeps in {p}.'],
+  rfarmer:['Fair weather for the harvest, by the look of it.','The fields of {p} feed half the city.','Watch your step in the furrows.'],
+  rnoble:['Welcome to {p}. The king\'s peace is upon this hall.','The white tower has stood a thousand years. It will stand a thousand more.','You are far from home, I think. Be welcome here.'],
+  // the riders (D-061)
+  hguard:['Halt and be known, stranger. Then go on in peace.','The plains of {k} are wide, but they are watched.','You are welcome in {p} while you keep the peace.','Few walk where we ride. Where is your horse?','The beacons are dark tonight. Long may they stay so.'],
+  hcapt:['I am a marshal of the riders of {p}. Speak your errand.','Our horses run from the hills to the river. Nothing crosses the grass unseen.','If you ride east, keep clear of the burning lands.'],
+  hman:['Well met.','The grass is high this year. The herds grow fat.','Have you seen the king\'s horses? Finer were never foaled.','There is mead in the hall tonight, if you are thirsty.','Welcome to {p}.'],
+  hwoman:['Well met, traveller.','The hearth in {p} is never let go out.','Mind the foals by the paddock.','My brothers ride with the riders of {k}.'],
+  hherd:['Easy now. They are skittish with strangers.','Every horse in {p} knows my whistle.','The wolves came close last winter, but not one foal was lost.'],
+  hthane:['Be welcome in the hall of {p}. Lay aside your blade at the door.','The kings of {k} sleep in their mounds beside the road. We keep their memory green.','Sit by the fire, guest. The hall is open to friends.'],
+  hsmith:['Shoes for horses and heads for spears. Mind the sparks.','The riders of {p} ride on my iron.','A loose shoe can lose a battle.']};
+function folkGreet(){
+  if(folkGreetT>0||!playing||dead)return;const d=camDir();
+  for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):'the kingdom';
+    toast(F.n+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
+}
 // ---- Behaviour
 // can a foe see the player? A ray from its eyes to the player's, through anything but solid opaque blocks
 function foeSees(f){const F=FOES[f.kind],ex=f.x,ey=f.y+f.m.box[4]*0.85,ez=f.z,tx=PL.x,ty=PL.y+EYE,tz=PL.z,d=Math.hypot(tx-ex,ty-ey,tz-ez),n=Math.ceil(d*2);
   if(d>F.sight*2.6)return false;for(let k=1;k<n;k++){const q=k/n,id=get(Math.floor(ex+(tx-ex)*q),Math.floor(ey+(ty-ey)*q),Math.floor(ez+(tz-ez)*q));if(OPQ[id]&&SOLID[id])return false;}return true;}
 const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
-function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee')continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
+function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee')continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
   foeCall(f,'alert');}
 function foeHome(f,r){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=1+Math.random()*r,tx=f.hx+Math.sin(a)*d,tz=f.hz+Math.cos(a)*d,ty=foeStand(tx,f.y,tz,FOES[f.kind].tall||2);
   if(ty>0&&Math.abs(ty-f.y)<=2&&!foeWet(tx,ty,tz)){f.tx=tx;f.tz=tz;return true;}}return false;}
@@ -102,16 +194,18 @@ function stepFoe(f,dt){
   // sight: noticed when near and in view (sleepers only close by); lost when long unseen or far
   f.losT-=dt;if(tg&&f.losT<=0&&dp<F.sight*2.6+4){f.losT=0.35+Math.random()*0.15;f.vis=dp<F.sight*2.6&&Math.abs(dy)<14&&foeSees(f);}
   if(!tg){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
-  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(f.vis&&dp<rr)foeAlert(f);}
+  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(f.vis&&dp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||dp<14)))foeAlert(f);}
   else if(f.st==='chase'){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||dp>F.sight*2.5){f.st='return';f.atk=0;}}
   if(f.leash&&f.st==='chase'&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
+  if(F.folk&&f.st==='chase'&&!folkWrath(f)){f.st='return';f.atk=0;} // the realm's wrath has passed
   if(F.flee&&tg&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
-  if(f.st==='flee'&&f.t<=0)f.st='chase';
+  if(f.st==='flee'&&f.t<=0){if(!F.civ)f.st='chase';else if(tg&&folkWrath(f)&&dp<16)f.t=3+Math.random()*2;else{f.st='return';f.t=0;}}
   let want=0,face=false;
   switch(f.st){
     case 'sleep':break;
-    case 'idle':if(f.t<=0){if(Math.random()<0.5&&foeHome(f,6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
-    case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=1+Math.random()*3;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
+    case 'idle':if(F.folk&&dp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
+      if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
+    case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&dp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
     case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);if(d<2.5||f.t<-30){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{
@@ -149,6 +243,10 @@ function stepFoe(f,dt){
   if(dp<12&&f.st!=='sleep'){f.lkT=Math.max(-0.8,Math.min(0.8,angTo(f.yaw,Math.atan2(dx,dz))));}else f.lkT*=0.9;
   f.ct-=dt;if(f.ct<=0){f.ct=(f.st==='chase'?3:8)+Math.random()*10;if(dp<36&&f.st!=='sleep')foeCall(f,f.st==='chase'?'alert':'idle');}
 }
+// a patrol's next stretch of road: twelve blocks on in the way it walks, turning back at the road's ends; its home moves with it
+function folkRoadStep(f){const R=f.road,rd=R.rd;R.along+=R.dir*12;if(R.along<0||R.along>rd.len){R.dir=-R.dir;R.along=Math.max(0,Math.min(rd.len,R.along));}
+  const q=R.along/(rd.len||1),tx=rd.a[0]+(rd.b[0]-rd.a[0])*q-OX+((f.id%3)-1)*1.2,tz=rd.a[1]+(rd.b[1]-rd.a[1])*q-OZ+((f.id%2)?0.8:-0.8),ty=foeStand(tx,f.y+2,tz,2);
+  if(ty<0)return false;f.tx=tx;f.tz=tz;f.hx=tx;f.hz=tz;return true;}
 // a blow, a shot or a lash, as its wind-up ends
 function foeStrike(f,F){
   const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
@@ -189,7 +287,7 @@ function updShots(dt){
 function placeFoe(f,dt){
   const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
   const ph0=f.ph;f.ph+=sp*dt/(F.stride||(big?1.6:F.walk>1.4?0.9:1.1))*6.2832;
-  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the ground
+  if(F.stride&&F.tall>5&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the ground
   f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
@@ -211,6 +309,8 @@ function placeFoe(f,dt){
   if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
   if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
   if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
+  if(F.mount&&!f.dead)riderPose(f,P,amp);
+  if(F.mount&&!f.dead&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.5){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<40&&AX&&settings.sound)burst(0.06,'bandpass',sp>3?520:760,3,0.22*(1-d/40),0,[f.x,f.y,f.z]);} // hoofbeats
   M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
@@ -222,6 +322,16 @@ function placeFoe(f,dt){
   // an Emberlord sheds embers
   if(f.kind==='ember'&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
 }
+// A horseman's gait (D-061): at a walk the horse's legs move in diagonal pairs, at the gallop the forelegs reach together and the
+// hind legs drive under, its body rocking and its neck nodding; the rider rises with each stride, the shield arm and the rein
+// hand steady, the spear arm still but for its blow
+function riderPose(f,P,amp){
+  const rest=g=>g.userData.rest[0],ph=f.ph,s=Math.sin(ph),gal=f.sp>3.2,a=Math.min(1,amp*1.4);
+  if(gal){P.legFL.rotation.x=Math.sin(ph)*0.95*a;P.legFR.rotation.x=Math.sin(ph-0.45)*0.95*a;P.legBL.rotation.x=Math.sin(ph+Math.PI)*0.85*a;P.legBR.rotation.x=Math.sin(ph+Math.PI-0.45)*0.85*a;}
+  else{P.legFL.rotation.x=s*0.55*a;P.legBR.rotation.x=s*0.5*a;P.legFR.rotation.x=-s*0.55*a;P.legBL.rotation.x=-s*0.5*a;}
+  P.hbody.rotation.x=gal?Math.cos(ph)*0.07*a:0;P.neck.rotation.x=rest(P.neck)+(gal?Math.sin(ph+0.6)*0.14:Math.sin(ph*2)*0.04)*a;
+  P.body.position.y=(11.5+Math.abs(Math.sin(ph))*(gal?1.1:0.4)*a)*AM_PX;P.body.rotation.x=gal?-0.12*a:0;
+  P.armL.rotation.x=rest(P.armL);P.armL.rotation.z=P.armL.userData.rest[2];if(!(f.atk>0)&&!(f.swing>0))P.armR.rotation.x=rest(P.armR);}
 // The Emberlord's gait (D-055): hunched and heavy, its body rolling over each stride and dipping as a foot comes down, the shins
 // folding under it on the back swing, arms swaying low, the head thrust forward and bobbing; the wings beat slowly (harder in the
 // chase, flung wide as it strikes), the outer wing lagging the inner; its flames, whip and tail never rest.
@@ -250,10 +360,11 @@ function emberPose(f,P,root,prog){
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
-  foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover('f',FOES[f.kind].n);}
+  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
+  foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
     if(f.dead>2.6){removeFoe(f);continue;}
-    if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(f.spot?130:96)){removeFoe(f);continue;}
+    if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(FOES[f.kind].folk?(f.spot?72:96):f.spot?130:96)){removeFoe(f);continue;}
     stepFoe(f,dt);placeFoe(f,dt);}
 }
 // ---- Calls: each kind's own (synthesized like every sound in the game), from where it stands
@@ -262,6 +373,11 @@ function foeCall(f,what){
   if(k[0]==='g'){if(what==='alert'||what==='hurt')for(let i=0;i<3;i++)voice(700*p+Math.random()*200,900*p,0.12,0.07,{type:'square',form:1400,q:2,delay:i*0.11},at);
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
+  else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
+    else{if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
+      else if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn
+      if(FOES[k].mount&&what!=='blow'&&Math.random()<0.5)voice(420*p,260,0.7,0.06,{form:900,q:2,vib:16,vd:0.18},at); // the horse whinnies
+      voice(150*p,120,what==='alert'?0.45:0.3,0.07,{form:700,q:1.3,vib:5,vd:0.04},at);}}
   else if(k==='ember'){voice(70*p,45,what==='alert'?1.8:1.1,0.16,{form:200,q:0.9,vib:3,vd:0.08},at);burst(1.2,'lowpass',400,0.6,0.22,0,at);}
   else{if(what==='alert'&&(k==='ochief'||Math.random()<0.25))tone(155,150,1.2,0.12,0,'sawtooth',at); // a war horn
     voice(180*p,130,what==='alert'?0.5:0.3,0.09,{form:520,q:1.4,vib:6,vd:0.05},at);}
@@ -285,12 +401,13 @@ function foeAct(btn){
   if(F.block&&front&&f.st!=='sleep'){dmg*=1-F.block;burst(0.12,'bandpass',2600,4,0.25,0,[f.x,f.y+1.2,f.z]);}
   f.hp-=dmg;f.hurt=1;const kx=f.x-PL.x,kz=f.z-PL.z,kd=Math.hypot(kx,kz)||1;f.kvx=kx/kd*5*F.mass;f.kvz=kz/kd*5*F.mass;if(F.mass>0.3)f.vy=2.5;
   wearHeld(1);for(let k=0;k<6;k++)spawnP(f.x,f.y+f.m.box[4]*0.6,f.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,f.kind==='ember'?[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
+  if(F.folk)folkProvoke(f,90);
   if(f.st!=='chase'&&f.st!=='flee'&&foeTarget())foeAlert(f);if(f.st==='sleep'){f.st='idle';}foeCall(f,'hurt');
   if(f.hp<=0)foeSlain(f);
   return true;
 }
 function foeSlain(f){
-  const F=FOES[f.kind],got=[];f.dead=0.001;f.st='dead';f.sp=0;f.atk=0;
+  const F=FOES[f.kind],got=[];f.dead=0.001;f.st='dead';f.sp=0;f.atk=0;if(F.folk)folkProvoke(f,180);
   if(SURV())for(const [id,lo,hi,ch] of F.drops)if(Math.random()<ch){const n=lo+Math.floor(Math.random()*(hi-lo+1)),left=addItem(id,n);if(left)toast('No room for '+nameOf(id));got.push(n+' '+nameOf(id));}
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
   if(f.lordOf){fallenLords.add(f.lordOf);saveDirty=true;showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);

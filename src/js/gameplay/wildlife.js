@@ -22,7 +22,7 @@ const WILD_OF={autumn:['wood'],birch:['wood'],pine:['wood','high'],giant:['wood'
 const WILD_CAP=22,animals=[],TWL={};let wildT=0,wildId=1,wildClock=0;
 // The window slides: every animal moves with it. The area is rebuilt elsewhere: the same, and those left outside the window are
 // dropped (befriended ones wait in wildPending until you come back).
-entityKind({name:'animals',list:animals,update:dt=>updAnimals(dt),persist:true,shift:(dx,dz)=>{for(const a of animals){a.x-=dx;a.z-=dz;if(a.tx!==undefined){a.tx-=dx;a.tz-=dz;}}}});
+entityKind({name:'animals',list:animals,update:dt=>updAnimals(dt),persist:true,shift:(dx,dz)=>{for(const a of animals){a.x-=dx;a.z-=dz;if(a.tx!==undefined){a.tx-=dx;a.tz-=dz;}if(a.pen){a.pen.x-=dx;a.pen.z-=dz;}}}});
 // the ground an animal stands on near height y: the first solid block at or below y+1, with two blocks of room above
 function standY(x,y,z){const bx=Math.floor(x),bz=Math.floor(z);if(bx<0||bz<0||bx>=W||bz>=D)return -1;for(let yy=Math.floor(y)+1;yy>=Math.floor(y)-3;yy--){if(yy<1||yy>=H-2)continue;if(SOLID[get(bx,yy-1,bz)]&&!SOLID[get(bx,yy,bz)]&&!SOLID[get(bx,yy+1,bz)])return yy;}return -1;}
 const wetAt=(x,y,z)=>isWetId(get(Math.floor(x),y,Math.floor(z)));
@@ -53,7 +53,9 @@ const angTo=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.28
 function herdCentre(a){let n=0,x=0,z=0;for(const b of animals)if(b.herd===a.herd&&!b.dead&&Math.abs(b.x-a.x)<24&&Math.abs(b.z-a.z)<24){n++;x+=b.x;z+=b.z;}return n?[x/n,z/n]:[a.x,a.z];}
 // one animal takes fright, and the rest of its herd nearby with it
 function alarm(a,fx,fz,secs){for(const b of animals){if(b.dead||b.tame||b===PL.ride)continue;if(b===a||(b.herd===a.herd&&Math.hypot(b.x-a.x,b.z-a.z)<18)){b.st='flee';b.t=secs||(4+Math.random()*2);b.fx=fx;b.fz=fz;b.sl=Math.min(b.sl,0.99);}}}
-function setTarget(a,r){const [cx,cz]=herdCentre(a);for(let k=0;k<6;k++){const an=Math.random()*6.283,d=1.5+Math.random()*r,tx=(cx+a.x)/2+Math.sin(an)*d,tz=(cz+a.z)/2+Math.cos(an)*d,ty=standY(tx,a.y,tz);
+// (an animal in a pen, a.pen {x, z, r}: the horses in the riders' paddocks, D-061, stays inside it until it is ridden)
+function setTarget(a,r){const [cx,cz]=herdCentre(a);for(let k=0;k<6;k++){const an=Math.random()*6.283,d=a.pen?Math.random()*a.pen.r:1.5+Math.random()*r,
+    tx=(a.pen?a.pen.x:(cx+a.x)/2)+Math.sin(an)*d,tz=(a.pen?a.pen.z:(cz+a.z)/2)+Math.cos(an)*d,ty=standY(tx,a.y,tz);
   if(ty>0&&Math.abs(ty-a.y)<=2&&!wetAt(tx,ty,tz)){a.tx=tx;a.tz=tz;return true;}}return false;}
 // what to do next when the current thing is done: walk somewhere near the herd, graze, look about, or sleep at night
 function nextState(a){
@@ -72,7 +74,7 @@ function stepAnimal(a,dt){
   a.hurt=Math.max(0,a.hurt-dt*3);
   if(a.dead){a.dead+=dt;a.sp=0;return;}
   if(a.hold){a.sp=a.holdSp||0;a.hd=a.yaw;return;} // held still (screenshots and tests); holdSp walks it on the spot
-  if(PL.ride===a){const v=Math.hypot(PL.vx,PL.vz);a.sp=v;if(v>0.6)a.hd=Math.atan2(PL.vx,PL.vz);a.yaw+=angTo(a.yaw,a.hd)*Math.min(1,dt*8);a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;a.st='walk';return;}
+  if(PL.ride===a){a.pen=null;const v=Math.hypot(PL.vx,PL.vz);a.sp=v;if(v>0.6)a.hd=Math.atan2(PL.vx,PL.vz);a.yaw+=angTo(a.yaw,a.hd)*Math.min(1,dt*8);a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;a.st='walk';return;}
   a.t-=dt;
   // fright: a running player inside the shy distance, or any player inside half of it
   if(A.shy&&!a.tame&&a.st!=='flee'&&dp<A.shy&&(ps>4.6||dp<A.shy*0.45)&&Math.abs(PL.y-a.y)<8)alarm(a,PL.x,PL.z);
@@ -92,7 +94,7 @@ function stepAnimal(a,dt){
   // move, looking ahead by the body's length: steps of one block up, drops of up to three, never into water
   const mx=Math.sin(a.yaw)*a.sp+a.kvx,mz=Math.cos(a.yaw)*a.sp+a.kvz;a.kvx*=Math.max(0,1-dt*5);a.kvz*=Math.max(0,1-dt*5);
   if(Math.abs(mx)+Math.abs(mz)>1e-4){const nx=a.x+mx*dt,nz=a.z+mz*dt,ml=Math.hypot(mx,mz),rr=Math.max(0.2,a.m.box[5]*0.85),fx=a.x+mx/ml*rr,fz=a.z+mz/ml*rr;
-    const gn=standY(nx,a.y+0.05,nz),gf=standY(fx,a.y+0.05,fz),ok=gn>0&&gf>0&&gn-a.y<=1.01&&gf-a.y<=1.01&&a.y-gn<=3&&a.y-gf<=3&&!wetAt(nx,gn,nz)&&!wetAt(fx,gf,fz);
+    const gn=standY(nx,a.y+0.05,nz),gf=standY(fx,a.y+0.05,fz),ok=gn>0&&gf>0&&gn-a.y<=1.01&&gf-a.y<=1.01&&a.y-gn<=3&&a.y-gf<=3&&!wetAt(nx,gn,nz)&&!wetAt(fx,gf,fz)&&(!a.pen||Math.hypot(nx-a.pen.x,nz-a.pen.z)<Math.max(a.pen.r,Math.hypot(a.x-a.pen.x,a.z-a.pen.z)));
     if(ok){a.x=nx;a.z=nz;a.gy=gn;a.stuck=0;}else{a.sp*=0.2;a.kvx=a.kvz=0;a.stuck=(a.stuck||0)+dt;if(a.st==='walk'){a.st='idle';a.t=0.4;}else if(a.st==='flee')a.hd=a.yaw+(a.id%2?1:-1)*(1.4+Math.random());}}
   // stepping up eases over a moment; falling follows gravity; a struck animal hops
   const gy=standY(a.x,a.y+0.05,a.z);if(gy>0)a.gy=gy;

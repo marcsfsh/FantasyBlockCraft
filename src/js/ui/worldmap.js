@@ -15,7 +15,7 @@ const mapSave=()=>({ex:exPack(),pl:places.map(p=>[p.n,p.X,p.Z]),mk:markers.map(m
 function exploreChunk(cx,cz){const k=ckey(cx,cz);if(explored.has(k))return;if(explored.size>=EXPL_CAP)explored.delete(explored.values().next().value);explored.add(k);wmDirty.add(ckey(Math.floor(cx/16),Math.floor(cz/16)));}
 // Places: a named place the readout shows (a site, a hold, a point of interest, remains...) is kept the first time you are there.
 // Lands, their stretches and the general names of cave layers are not places.
-const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.values(DEEP_NAMES),'Underground','Caves','The Fire Below','The Great Caverns','The Old Workings','Crawlways','An Old Road','An Ancient Waystone']);
+const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.values(DEEP_NAMES),'Underground','Caves','The Fire Below','The Great Caverns','The Old Workings','Crawlways','An Old Road','The King\'s Road','A Country Lane','An Ancient Waystone']);
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
   for(const p of places)if(p.n===n&&Math.hypot(p.X-X,p.Z-Z)<160)return false;
