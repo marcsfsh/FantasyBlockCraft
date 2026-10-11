@@ -16,14 +16,16 @@ const FORT_P={
   throneL:{gw:9,gh:26,cw:10,ch:28,hw:40,Lhs:[84,72,60],Hmin:34,Hmax:50,tv:28,ts:5,th:58,fw:36,fh:50,tz:36,td:40,pv:24,ps:3,pg:12,lv:14,dw:20,steps:6,k:3,bw:4},
   throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:27,td:30,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
 const FORT_C=new Map();
+// the four quarters of a volcano, the one farthest from its flows (old and new) and its lesser cones first: a fortress faces the
+// first where it fits (pure, without the ground, so the gullies' lava can keep off it, D-064)
+function fortQuarters(v){const qs=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
+    for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);qs.push({th:th,m:m});}
+  return qs.sort((a,b)=>b.m-a.m);}
 // The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across.
 function fortOf(v){
   const key=v.key||v.i+','+v.j;if(FORT_C.has(key))return FORT_C.get(key);let F=null;
   for(const P of v.great?(v.R>=200?[FORT_P.throneL,FORT_P.throne,FORT_P.throneS]:[FORT_P.throne,FORT_P.throneS]):v.Hv>=34&&hsh(v.i,9171,v.j)<0.85?[FORT_P.hold]:[]){if(F)break;
-    const quarters=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
-      for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);quarters.push({th:th,m:m});}
-    quarters.sort((a,b)=>b.m-a.m);
-    for(const qt of quarters){if(F)break;const ox=Math.round(Math.cos(qt.th)),oz=Math.round(Math.sin(qt.th)),px=-oz,pz=ox; // outward from the mountain's heart, and across
+    for(const qt of fortQuarters(v)){if(F)break;const ox=Math.round(Math.cos(qt.th)),oz=Math.round(Math.sin(qt.th)),px=-oz,pz=ox; // outward from the mountain's heart, and across
       let dg=-1;for(let d=Math.round(v.R*1.05);d>v.R*0.35;d--)if(hAt(v.X+ox*d,v.Z+oz*d)>=v.base+(v.great?8:6)){dg=d;break;}
       if(dg<0)continue;const GX=v.X+ox*dg,GZ=v.Z+oz*dg,Fy=hAt(GX,GZ);
       // the throne hall lies under the summit, its far end just past the mountain's heart, under the crater's floor; the way in

@@ -449,6 +449,14 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     const mx=Math.min(x,15-x),my=Math.min(y,15-y),cr=Math.hypot(x-(x<8?0:15),y-(y<8?0:15)),ma=Math.atan2(Math.abs(y-(y<8?0:15)),Math.abs(x-(x<8?0:15)));
     P(320,x,y,cr<6&&Math.abs(Math.sin(ma*4))>0.6-cr*0.05?sh(cr<3?[214,180,90]:[96,112,132],(hn(x,y,431)-.5)*8):(mx===7||my===7)?sh([180,170,150],(hn(x,y,432)-.5)*6):sh([224,216,196],(hn(x,y,433)-.5)*8));
   }
+  // the orcs (D-064): a palisade of charred logs, four to a face, split and grained, bound by two iron bands with rivets; their
+  // ends, charred rings about a paler heart; riveted iron, four plates with dark seams, rivets at their corners, rust run down
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const lx=x%4,band=(y>=3&&y<=4)||(y>=11&&y<=12),riv=band&&lx===1&&(y===3||y===11),crack=hn(x>>2,y>>1,441)<0.12&&lx===2;
+    P(321,x,y,band?sh([122,118,122],(riv?40:y===4||y===12?-18:6)+(hn(x,y,442)-.5)*12):sh([96,78,64],(lx===0?-30:lx===3?-12:lx===1?10:0)+(crack?-22:0)+(hn(lx,y,443+(x>>2))-.5)*22+(hn(x,y,444)-.5)*10));
+    const ex=x%8-3.5,ey=y%8-3.5,er=Math.hypot(ex,ey);P(322,x,y,er>3.9?sh([58,48,42],(hn(x,y,445)-.5)*14):sh([132,104,78],(er>3?-38:Math.floor(er)%2?-14:6)+(hn(x,y,446)-.5)*14));
+    const px=x%8,py=y%8,seam=px===0||py===0,rv=(px===2||px===6)&&(py===2||py===6),rust=hn(x,0,447)<0.3&&hn(x,y>>2,448)<0.6;
+    P(323,x,y,seam?sh([72,72,78],(hn(x,y,449)-.5)*10):rv?sh([168,166,170],(px===2&&py===2?14:0)):rust?sh([132,86,56],(hn(x,y,450)-.5)*22):sh([112,112,120],(py===1?14:py===7?-10:0)+(hn(x,y,451)-.5)*14));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

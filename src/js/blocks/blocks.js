@@ -209,6 +209,10 @@ def(EVTRACERY,'Elven Tracery',[311,311,311],{opq:false,occ:false});def(EVGLASS,'
 def(EVROOF,'Verdigris Roof',[313,313,313]);def(EVSHINGLE,'Elven Shingles',[315,315,315]);def(EVGOLD,'Gilt Filigree',[316,316,316],{opq:false,occ:false});
 def(EVLAMP,'Elven Lamp',[317,317,317],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});def(EVBANNER,'Banner of the Elves',[318,318,318],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
 def(EVWOOD,'Golden Wood',[319,319,319],{snd:'wood'});def(EVMOSAIC,'Elven Mosaic',[320,320,320]);
+// The orcs' places on the wastes (D-064): a palisade of charred logs bound in iron, and plates of riveted iron
+const ORCLOG=1147,ORCIRON=1148;
+def(ORCLOG,'Black Palisade',[322,322,321],{snd:'wood'});def(ORCIRON,'Riveted Iron',[323,323,323],{snd:'stone'});
+setH([ORCLOG],2,'wood');setH([ORCIRON],6,'metal',2);
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);

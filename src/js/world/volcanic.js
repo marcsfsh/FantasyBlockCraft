@@ -89,16 +89,23 @@ function volcFrame(v,S,X,Z){
   const w0=th=>1+S.a[0]*Math.sin(th+S.p[0])+S.a[1]*Math.sin(2*th+S.p[1])+S.a[2]*Math.sin(3*th+S.p[2]);
   let dx=X-v.X,dz=Z-v.Z,th=Math.atan2(dz,dx);const d0=Math.hypot(dx,dz)/w0(th),s0=d0<v.rc?1:d0<v.R?1-(d0-v.rc)/(v.R-v.rc):0,lw=Math.pow(s0,1.5);
   dx-=S.ox*lw;dz-=S.oz*lw;th=Math.atan2(dz,dx);return [Math.hypot(dx,dz)/w0(th),th];}
-// the cone's height over its base at a point of its frame (without the flows)
+// the cone's height over its base at a point of its frame (without the flows). The gullies run straight down the flank, each a
+// trough with a flat floor (D-064: wider toward the foot) between steep sides; VCG tells volcTerrain where the point lies in one
+const VCG={lat:1e9,fw:0,k:0,s:0};
 function volcCone(v,S,d,th,X,Z){
-  const rv=S.rv*Math.max(0,0.7*Math.sin(2*th+S.p[2])+0.5*Math.sin(5*th+S.p[0])+0.2*Math.sin(11*th+S.p[1]));
+  VCG.lat=1e9;const rv=S.rv*Math.max(0,0.7*Math.sin(2*th+S.p[2])+0.5*Math.sin(5*th+S.p[0])+0.2*Math.sin(11*th+S.p[1]));
   if(d<v.rc){const q=d/v.rc;return v.Hv-(v.cd+3)+(v.cd+3)*Math.pow(q,4)+rv*Math.pow(q,8);}
   if(d>=v.R)return 0;
-  const s=1-(d-v.rc)/(v.R-v.rc),e=S.e0+S.e1*Math.sin(th+S.ep),gn=fbm2(Math.cos(th)*3+v.i*0.37,Math.sin(th)*3+v.j*0.37,2,9311.3),gul=Math.abs(Math.sin(th*(v.great?9:6)+gn*5)),deep=Math.max(10,v.R*0.17)*4*s*(1-s);
+  const n=v.great?9:6,gnf=t=>fbm2(Math.cos(t)*3+v.i*0.37,Math.sin(t)*3+v.j*0.37,2,9311.3),s=1-(d-v.rc)/(v.R-v.rc),e=S.e0+S.e1*Math.sin(th+S.ep),g0=gnf(th),ph=th*n+g0*5,
+    dph=Math.max(0.3,Math.abs(n+(gnf(th+0.002)-g0)*2500)),k=Math.round(ph/Math.PI),off=Math.abs(ph-k*Math.PI),fw=v.great?2.2+2.8*(1-s):1.2+1.3*(1-s),
+    gul=Math.sin(Math.max(0,off-fw*dph/d)),deep=Math.max(10,v.R*0.17)*4*s*(1-s);
+  VCG.lat=off/dph*d;VCG.fw=fw;VCG.k=((k%(2*n))+2*n)%(2*n);VCG.s=s;
   let hh=Math.pow(s,e)*v.Hv+rv*sstep(0.86,1,s)-(1-gul)*(1-gul)*(1-gul)*deep+fbm2(X/29,Z/29,2,9315.7)*(v.great?7:3)*4*s*(1-s)+fbm2(X/11,Z/11,1,9119.3)*1.8;
   if(S.col){const k=sstep(0.55,0.2,Math.abs(angDiffV(th,S.thc)))*sstep(0.1,0.32,s)*sstep(0.96,0.78,s);hh-=k*S.col*v.Hv;} // the fallen flank
   for(const p of S.par){const dp=Math.hypot(X-p.x,Z-p.z);if(dp<p.r){const u=1-dp/p.r;hh+=p.h*Math.pow(u,1.3)-(u>0.78?p.h*0.4*(u-0.78)/0.22:0);}} // shoulder cones
   return hh;}
+// Does gully k (counted round the cone) of volcano v carry lava? Most do; never those near the quarter of its fortress
+function gullyLava(v,S,k,th){if(hsh(v.i*7+k,9333,v.j)>=(v.great?0.88:0.7))return false;if(S.fq===undefined)S.fq=fortQuarters(v)[0].th;return Math.abs(angDiffV(th,S.fq))>(v.great?0.4:0.6);}
 // The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
@@ -108,7 +115,10 @@ function volcTerrain(X,Z,o,h){
     const S=volcShape(v),[d,th]=volcFrame(v,S,X,Z);if(d>=v.reach)continue;
     // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
     const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
-    if(d<v.R){hh+=volcCone(v,S,d,th,X,Z);if(d<v.rc){o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}else o.vs=1-(d-v.rc)/(v.R-v.rc);}
+    if(d<v.R){hh+=volcCone(v,S,d,th,X,Z);if(d<v.rc){o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}else o.vs=1-(d-v.rc)/(v.R-v.rc);
+      // a gully's floor (D-064): most carry a stream of lava a block down in it from high on the flank to the foot, the rest
+      // a floor of glowing crust; none on the quarter the mountain's fortress faces
+      if(VCG.lat<VCG.fw-0.35&&VCG.s>0.03&&VCG.s<0.9){if(gullyLava(v,S,VCG.k,th)){hh=Math.round(hh)-1;o.vflow=true;o.vgul=true;}else o.vcrust=true;}}
     // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
     if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
       const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=(0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0))*(v.great?1.6:1);
