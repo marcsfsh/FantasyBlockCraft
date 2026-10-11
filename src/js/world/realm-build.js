@@ -8,7 +8,7 @@ function siteFrame(s){if(s.fr)return s.fr;const d=DIRS[s.dir];return s.fr={fx:-d
 const siteUV=(s,X,Z)=>{const f=siteFrame(s),dx=X-s.X,dz=Z-s.Z;return [dx*f.fx+dz*f.fz,dx*f.sx+dz*f.sz];};
 const siteXZ=(s,u,v)=>{const f=siteFrame(s);return [s.X+u*f.fx+v*f.sx,s.Z+u*f.fz+v*f.sz];};
 // the ground of a site at local (u, v): its level, a city's by tier
-const siteG=(s,u,v)=>s.k==='city'&&Math.max(Math.abs(u),Math.abs(v))<=s.R?s.T+cityTier(s,u,v)*5:s.T;
+const siteG=(s,u,v)=>{if(s.k!=='city')return s.T;const f=cityFrame(s);return (f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))<=s.R?s.T+cityTier(s,u,v)*f.step:s.T;};
 // A part's own frame: a across its front, b back from its front; f is the side its front faces (0 toward -u, 1 +u, 2 -v, 3 +v)
 function partAB(p,u,v){switch(p.f){case 0:return [v-p.v0,u-p.u0,p.v1-p.v0+1,p.u1-p.u0+1];case 1:return [p.v1-v,p.u1-u,p.v1-p.v0+1,p.u1-p.u0+1];
   case 2:return [p.u1-u,v-p.v0,p.u1-p.u0+1,p.v1-p.v0+1];default:return [u-p.u0,p.v1-v,p.u1-p.u0+1,p.v1-p.v0+1];}}
@@ -32,25 +32,29 @@ const lit=(X,y,Z)=>RBP(X,y,Z,LANTERN);
 //   timber: a stone ground storey, the storeys above jettied out over the margins on beam ends, framed in timber and plaster
 //   cottage: a cobble footing, plaster in a frame of logs, low thatch two blocks thick at its edges; with p.xchim a chimney up
 //     the back gable, and about it a bench, flower boxes and a woodpile
+//   wattle (the riders' longhouses, D-061): a fieldstone footing, wattle and daub between log posts, carved oak about the door,
+//     the roof low and thick at its edges like a cottage's; p.pitch steepens a roof (2: two up for one across), p.horns sets
+//     crossed horse heads on the gables, p.hearth a long hearth in the floor
 // The roof is a gable along the depth (p.ridge 'a': along the width) of p.roof, its verges out over the gables, a finial on
 // each gable of stone or timber, dormers in the roofs of the taller houses; inside, floors, a ladder, lamps, a few furnishings.
 RB.house=(s,p,u,v,X,Z)=>{
   const [a,b]=partAB(p,u,v),mg=p.mg,pr=p.porch||0,ca=a-mg[0],cb=b-mg[2]-pr,W=p.W,D=p.D,g=p.y,st=p.st,sh=p.sh||4,eave=g+st*sh;
-  const mat=p.mat,stone=mat==='stone',tim=mat==='timber',cot=mat==='cottage',inA=ca>=0&&ca<W,inB=cb>=0&&cb<D,core=inA&&inB,r=hsh(X,9501,Z);
-  const alongB=p.ridge!=='a',span=alongB?W:D,pos=alongB?ca:cb,rb=cot?1:2,ry=eave+rb+Math.min(pos,span-1-pos),roof=p.roof||SLATE;
+  const mat=p.mat,stone=mat==='stone',tim=mat==='timber',cot=mat==='cottage',wat=mat==='wattle',low=cot||wat,inA=ca>=0&&ca<W,inB=cb>=0&&cb<D,core=inA&&inB,r=hsh(X,9501,Z);
+  const alongB=p.ridge!=='a',span=alongB?W:D,pos=alongB?ca:cb,rb=low?1:2,pit=p.pitch||1,ry=eave+rb+Math.min(pos,span-1-pos)*pit,roof=p.roof||SLATE;
   // the porch: pillars along its front under an entablature, the roof carried over it, a pediment with the realm's sign
   if(cb<0&&cb>=-pr&&inA){const fr=cb===-pr,col=fr&&(ca%2===0||ca===W-1);RBP(X,g,Z,WSTONE);
     for(let y=g+1;y<eave;y++)RBP(X,y,Z,col?WSPILLAR:AIR);RBP(X,eave,Z,col?WSCARVE:WSTRIM);
     for(let y=eave+1;y<ry;y++)RBP(X,y,Z,!fr?AIR:y===ry-1?WSTRIM:ca===W>>1&&y===eave+2?WSCARVE:WSBRICK);RBP(X,ry,Z,roof);return;}
   const ring=k=>tim&&k>0?[-mg[0],W-1+mg[1],-mg[2],D-1+mg[3]]:[0,W-1,0,D-1];
-  const wh=cot?2:Math.max(2,sh-2),sparse=p.pil||tim,winAt=(pa,L)=>sparse?pa%4===2&&pa<=L-3:L<=6?pa===(L>>1):pa>=2&&pa<=L-3&&pa%2===0;
+  const wh=low?2:Math.max(2,sh-2),sparse=p.pil||tim,winAt=(pa,L)=>sparse?pa%4===2&&pa<=L-3:L<=6?pa===(L>>1):pa>=2&&pa<=L-3&&pa%2===0;
   const dw=p.dw||1,dh=p.dh||2,dd=Math.abs(ca-p.door),ld=winAt(p.door+dw+1,W)?dw+2:dw+1;
   // a wall's own block, where no window, door or floor line is
   const wallOf=(k,dy,pa,L,cor)=>{
     if(stone||(tim&&k===0)){if(k===0&&dy===0)return WSROUGH;if(cor)return WSTONE;if((pa===1||pa===L-2)&&dy%2===1)return WSTONE;if(p.pil&&pa%4===0&&dy>0)return WSPILLAR;return WSBRICK;}
     if(tim){if(cor||pa%4===0)return LOG;return (pa+k+(dy>(sh>>1)?1:0))%2?TIMBER:PLASTER;}
+    if(wat){if(dy===0&&k===0)return FSTONE;if(cor||pa%3===0)return LOG;return WATTLE;}
     if(dy===0&&k===0)return COBBLE;if(cor)return LOG;return pa%3===0?TIMBER:PLASTER;};
-  if(core)RBP(X,g,Z,ca===0||ca===W-1||cb===0||cb===D-1?(cot?COBBLE:WSROUGH):p.floor||PLANKS);
+  if(core)RBP(X,g,Z,ca===0||ca===W-1||cb===0||cb===D-1?(cot?COBBLE:wat?FSTONE:WSROUGH):p.hearth&&ca===(W>>1)&&cb>1&&cb<D-2&&Math.abs(cb-(D>>1))<=Math.max(1,(D>>2)-1)?HEARTH:p.floor||PLANKS);
   for(let k=0;k<st;k++){const y0=g+1+k*sh,y1=y0+sh-1,R=ring(k),top=k===st-1,inR=ca>=R[0]&&ca<=R[1]&&cb>=R[2]&&cb<=R[3];
     const line=stone?WSTRIM:tim&&k===0?(top?WSTRIM:LOG):LOG; // the floor line: a moulded band, or a beam
     if(inR&&(ca===R[0]||ca===R[1]||cb===R[2]||cb===R[3])){ // the wall
@@ -59,10 +63,11 @@ RB.house=(s,p,u,v,X,Z)=>{
       for(let y=y0;y<=y1;y++){const dy=y-y0;let id;
         if(y===y1)id=line;
         else if(win&&dy>=1&&dy<=wh)id=AIR; // the window's reveal: its glass stands one in
-        else if(win&&dy===0&&k>0&&!cot)id=stone?WSTONE:PLANKS; // its sill
+        else if(win&&dy===0&&k>0&&!low)id=stone?WSTONE:PLANKS; // its sill
         else id=wallOf(k,dy,pa,L,cor);
         if(front&&dd<dw&&dy<dh)id=AIR; // the door, its lintel and jambs, a lamp beside it
-        else if(front&&dd<dw&&dy===dh)id=cot?LOG:dw>1?WSCARVE:WSTONE;
+        else if(front&&dd<dw&&dy===dh)id=cot?LOG:wat?CTIMBER:dw>1?WSCARVE:WSTONE;
+        else if(front&&dd===dw&&dy>=0&&dy<=dh&&wat)id=CTIMBER; // carved door posts
         else if(front&&dd===dw&&dy>0&&dy<dh)id=cot?LOG:WSPILLAR;
         else if(front&&p.lamp&&!mg[2]&&dd===ld&&dy===2)id=LANTERN;
         RBP(X,y,Z,id);}
@@ -73,7 +78,7 @@ RB.house=(s,p,u,v,X,Z)=>{
         if(lad)id=LADDER;
         else if(glass&&dy>=1&&dy<=wh)id=LGLASS;
         else if(p.pil&&dy<sh-1&&ca>1&&ca<W-2&&cb>1&&cb<D-2&&(ca===2||ca===W-3)&&cb%3===1)id=WSPILLAR;
-        else if(ca===(W>>1)&&cb===(D>>1)&&y===y1-1)id=LANTERN;
+        else if(ca===(W>>1)&&cb===(D>>1)&&y===y1-1&&!(p.hearth&&dy===0))id=LANTERN;
         else if(dy===0&&(ca===1||ca===W-2)&&(cb===1||cb===D-2)&&r<0.5)id=r<0.18?BARREL:r<0.34?CRATE:BOOKS;
         RBP(X,y,Z,id);}
     }else{ // the margin about this storey
@@ -100,15 +105,16 @@ RB.house=(s,p,u,v,X,Z)=>{
     else if(!inR){const pa=sB?ca:cb;RBP(X,eave+1,Z,WSBRICK);if(sA&&sB||((pa%2)+2)%2===0)RBP(X,eave+2,Z,WSBRICK);}return;}
   // the gables and a frieze along the eaves carried up to the roof (a window in a gable), the loft, the roof
   const gableM=alongB?sB:sA,gableW=alongB?(cb===R[2]||cb===R[3]):(ca===R[0]||ca===R[1]),eaveW=alongB?(ca===R[0]||ca===R[1]):(cb===R[2]||cb===R[3]);
-  const gpa=alongB?ca-R[0]:cb-R[2],gmid=(span-1)/2,gwall=stone?WSBRICK:gpa%3===0?TIMBER:PLASTER;
+  const gpa=alongB?ca-R[0]:cb-R[2],gmid=(span-1)/2,gwall=stone?WSBRICK:wat?(gpa%3===0?LOG:WATTLE):gpa%3===0?TIMBER:PLASTER;
   if(onR){for(let y=eave+1;y<ry;y++){let id=gwall;
-      if(gableW&&!eaveW){const o=Math.abs(pos-gmid),dy=y-eave;if(p.rose?(o<0.6&&dy>=2&&dy<=4)||(o>0.4&&o<1.6&&dy===3):!cot&&o<0.6&&dy===rb+1&&ry-eave>=rb+3)id=LGLASS;}
+      if(gableW&&!eaveW){const o=Math.abs(pos-gmid),dy=y-eave;if(p.rose?(o<0.6&&dy>=2&&dy<=4)||(o>0.4&&o<1.6&&dy===3):!cot&&o<0.6&&dy===rb+1&&ry-eave>=rb+3)id=LGLASS;
+        else if(wat&&o<0.6&&dy===rb+2&&ry-eave>=rb+4)id=CTIMBER;} // a carved boss high in a longhouse's gable
       RBP(X,y,Z,id);}}
   else if(inR){if(ry>eave+1)RBP(X,eave,Z,PLANKS);for(let y=eave+1;y<ry;y++)RBP(X,y,Z,AIR);}
-  else if(cot)RBP(X,ry-1,Z,roof); // the thatch thick at its edges
+  else if(low)RBP(X,ry-1,Z,roof); // the thatch thick at its edges
   else if(gableM&&ry-1>eave)RBP(X,ry-1,Z,stone?WSTRIM:PLANKS); // a barge board under the verge
-  RBP(X,ry,Z,roof);
-  if(!cot&&gableM&&!(alongB?sA:sB)&&Math.abs(pos-gmid)<0.6)RBP(X,ry+1,Z,stone?WSPILLAR:LOG); // a finial on the gable
+  RBP(X,ry,Z,roof);for(let y=ry-1;y>ry-pit&&y>eave;y--)RBP(X,y,Z,roof); // a steep roof, its steps filled
+  if(!cot&&gableM&&!(alongB?sA:sB)&&Math.abs(pos-gmid)<0.6)RBP(X,ry+1,Z,p.horns?HORNS:stone?WSPILLAR:LOG); // a finial on the gable
   // dormers in the upper roofs: a window at the wall's plane under a little gable of its own
   if(!cot&&st>=2&&span>=7&&inR){const p0=alongB?R[0]:R[2],p1=alongB?R[1]:R[3],q=pos-p0<=1?pos-p0:p1-pos<=1?p1-pos:-1;
     if(q>=0){const lo=alongB?R[2]:R[0],Lr=(alongB?R[3]:R[1])-lo+1,dl=(alongB?cb:ca)-lo,off=((dl-2)%4+4)%4,c=off===0?dl:off===1?dl-1:off===3?dl+1:-9,yW=ry-q;
@@ -263,7 +269,7 @@ RB.dome=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,H=p.H,c=(W-1)/2,dx=a
 // quench in, under a gabled roof on posts open at the front, a beam across it
 RB.smithy=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1,side=a===0||a===W-1;RBP(X,g,Z,COBBLE);
   for(let y=g+1;y<=g+4;y++)RBP(X,y,Z,back||(side&&b>0)?(y===g+4?LOG:COBBLE):side||y===g+4&&b===0?LOG:AIR);
-  const ry=g+5+Math.min(a,W-1-a);if(!side&&(b===0||back))for(let y=g+5;y<ry;y++)RBP(X,y,Z,back?COBBLE:PLANKS);RBP(X,ry,Z,SLATE);
+  const ry=g+5+Math.min(a,W-1-a);if(!side&&(b===0||back))for(let y=g+5;y<ry;y++)RBP(X,y,Z,back?COBBLE:PLANKS);RBP(X,ry,Z,p.roof||SLATE);
   if(b===D-2&&a===1){RBP(X,g+1,Z,COBBLE);RBP(X,g+2,Z,BRAZIER);RBP(X,g+4,Z,COBBLE);}if(back&&a===1)RBS(X,Z,g+5,ry+2,COBBLE);
   if(b===D-2&&a===2)RBP(X,g+1,Z,FURN);if(b===2&&a===2)RBP(X,g+1,Z,STEELB);if(b===D-2&&a===W-2)RBP(X,g+1,Z,BARREL);
   if(b===1&&a===W-2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
@@ -274,7 +280,7 @@ RB.yard=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y;RBP(X,g,Z,a===0||b==
 // stables: stalls open at the front between posts, a hayloft over them under a gabled slate roof, hay and a water trough
 RB.stable=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1,end=a===0||a===W-1,ry=g+4+Math.min(b,D-1-b);RBP(X,g,Z,back?COBBLE:hsh(X,9517,Z)<0.4?HAYBALE:DIRT);
   for(let y=g+1;y<=g+3;y++)RBP(X,y,Z,back||end?PLANKS:b===0&&a%3===0?LOG:a%3===0&&b<D-1&&y===g+1?PLANKS:AIR);
-  RBP(X,g+4,Z,b===0&&!end?LOG:PLANKS);for(let y=g+5;y<ry;y++)RBP(X,y,Z,end?PLANKS:y===g+5&&b>0&&b<D-1&&hsh(X,9535,Z)<0.4?HAYBALE:AIR);RBP(X,ry,Z,SLATE);
+  RBP(X,g+4,Z,b===0&&!end?LOG:PLANKS);for(let y=g+5;y<ry;y++)RBP(X,y,Z,end?PLANKS:y===g+5&&b>0&&b<D-1&&hsh(X,9535,Z)<0.4?HAYBALE:AIR);RBP(X,ry,Z,p.roof||SLATE);
   if(b===D-2&&a%3===2)RBP(X,g+1,Z,HAYBALE);if(b===1&&a%3===2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
 // a haystack
 RB.hay=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,g=p.y,m=Math.abs(a)+Math.abs(b);if(m>2)return;RBS(X,Z,g+1,g+(m===0?3:m===1?2:1),HAYBALE);};
@@ -287,7 +293,7 @@ const TRB={};
 // ---- Layouts
 function siteLayout(s){if(s.lay)return s.lay;const L={parts:[],spots:[]};s.lay=L;
   const r=rngAt(Math.round(s.X),9521,Math.round(s.Z));
-  if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
+  if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
   // the margins about houses, towers and walls, where their relief stands
   for(const p of L.parts){if(p.k==='house'){if(!p.mg){const o=p.ov||0;p.mg=[o,o,o,o];}if(p.gnd===undefined)p.gnd=s.k!=='city';}
     else if(p.k==='tower'){const e=p.mg===undefined?1:p.mg;p.u0-=e;p.u1+=e;p.v0-=e;p.v1+=e;}else if(p.k==='cwall'){p.u0--;p.u1++;p.v0--;p.v1++;}}
@@ -448,7 +454,7 @@ RB.ring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>=p.r-1.5&&d<p.r+0.5)RBP(X,p
 // ---- Roads: paved with flagstones between kerbs of white stone (the king's roads), lanes of beaten earth; a bridge of stone
 // or planks where a road crosses water; on the king's roads a white milestone with a lamp every 72 blocks
 function realmRoadCol(X,Z,x,z){
-  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
+  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
     if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}

@@ -8,7 +8,8 @@
 // gilded sword and a white plume. The townsfolk dress by their trade: a tunic with a belt and purse, a laced gown with an
 // apron, a merchant's fur-trimmed robe and feathered hat, a smith's stitched leather apron and hammer, a farmer's smocked
 // shirt and woven straw hat, a lord's robe embroidered in silver under a white mantle, a chain of office and a circlet.
-(function(){
+// The painting helpers are shared with the riders' folk (rider-models.js, D-061) as FOLK_KIT.
+const FOLK_KIT=(function(){
   const SK=[[226,186,152],[204,160,122],[176,128,94],[142,96,66],[232,198,170]],HAIR=[[40,30,24],[70,46,30],[112,76,44],[150,96,52],[150,146,140],[30,26,26]];
   const ALL=['L','F','R','B','T','D'],SIDE=['L','F','R','B'],sh=(c,k)=>[c[0]+k,c[1]+k,c[2]+k],hz=(s,t,q)=>amHash(s,t,q)-0.5;
   const legs=()=>[['legL',null,[-2,12,0],[-2,-12,-2,4,12,4]],['legR',null,[2,12,0],[-2,-12,-2,4,12,4],0,{m:'legL'}],
@@ -189,4 +190,5 @@
         P.map('body',['F'],(s,t)=>Math.abs(t-3-Math.abs(s-7.5)*0.45)<0.6&&t<8?sh(GOLD,(s+t)%2?24:-10):null);
         plate(P,['circ'],GOLD);P.map('circ',['F'],(s)=>s===6||s===7?[110,170,230]:null);}}
   });
+  return {SK,HAIR,ALL,SIDE,sh,hz,legs,arms,man,cloth,mail,plate,leather,band,rivets,boots,hands,face,sword,swordPaint,STEEL,SILVER,GOLD,BLACK};
 })();

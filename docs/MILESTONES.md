@@ -286,7 +286,7 @@ These are planned now so refinements leave room for them.
   - Animals for atmosphere, resources (wool, milk, eggs, hides), hunting for food, mounts, companions and pack animals (Q67).
 - **E2 Settlements and peoples (Q4, Q5, Q11, Q26, Q46).**
   - Inhabited places: hamlets, camps, travelers, inhabited dwarven holds.
-  - Begun in 0.30.0 (D-060) with the first archetype of the kingdoms of men: the white-stone realms, holding about half the stretches of the gentle lands with cities, castles, villages, watchtowers, farmsteads, roads and their folk (neutral until struck). Other archetypes of men and the other peoples follow; order to be confirmed with the owner.
+  - Begun in 0.30.0 (D-060) with the first archetype of the kingdoms of men: the white-stone realms, holding about half the stretches of the gentle lands with cities, castles, villages, watchtowers, farmsteads, roads and their folk (neutral until struck). The second followed in 0.31.0 (D-061): the riders of the plains, holding about half the stretches of the Golden Steppe, the Heath Moors and the Barrow Hills with hill towns, holds, steadings, horse farms, beacons, their roads and their folk (horsemen among them). Further archetypes of men and the other peoples follow; order to be confirmed with the owner.
   - Peoples: dwarves, humans, halflings, gnomes, goblins, orcs, wood elves, drow, high elves, beastfolk and more.
   - Orcs and goblins are neutral, not violent; hostility is revisited later. (Revisited for the Volcanic Wastes in 0.28.0, D-052: the orcs, trolls and goblins there are hostile. Whether E2's orc and goblin peoples are the same folk is for the owner.)
   - NPC trading brings coins back (Q7, Q68), and NPCs give quests (Q17).

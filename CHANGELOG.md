@@ -5,6 +5,30 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.31.0 (2026-10-11): the riders of the plains
+
+Saves from 0.30.0 do not carry over (save key v22): the riders are new to the world.
+
+### Game
+- **The riders of the plains.** About half the stretches of the Golden Steppe, the Heath Moors and the Barrow Hills are held by kingdoms of horse-lords in mail and green, under their sign of a white horse running. Each held stretch is a province:
+  - **Hill town:** round terraces on a hill behind a palisade of sharpened logs over a ditch, timber towers under golden thatch, the way up by stairs between carved posts to the golden hall (carved and gilded, a long hearth, tapestries and shields, the high seat), longhouses of wattle under turf and thatch in rings round the terraces, stables, a paddock of horses, a smithy and stalls by the gate. Kings' mounds line the road before the king's seat.
+  - **Hold:** a round fieldstone wall over a ditch, round gate towers capped in thatch, a round keep with a gallery, a training ring for horses.
+  - **Steadings:** longhouses and a mead hall round a green and well, a paddock, a smithy, a fence of wattle hurdles, fields.
+  - **Horse farms:** a long stable, a farmhouse and paddocks of horses. **Beacons** on the heights, kept lit.
+  - **Roads:** the riders' road of beaten earth with carved posts and the horse heads, cart tracks, timber bridges.
+- **Their folk:**
+  - **Guards** in long mail and green cloaks bordered in gold, tall helms with a tail of white horsehair, round green shields with the white horse, pennoned spears; **bowmen** in quilted coats with short horn bows; **marshals** in gilded helms with a horn at the belt.
+  - **Horsemen** ride saddled and caparisoned horses, gallop, and ride the roads in patrols.
+  - **Freemen, freewomen, horse-herds and thanes** in woven borders, embroidered gowns and braids, hoods and crooks, green and gold.
+  - Neutral like the white realm's folk, with their own greetings and a low horn when they take up arms. Horses in the paddocks stay penned until you ride one away.
+- Their towns sound of voices, horses, hooves, a forge and a horn.
+- No heather, bracken or reeds grow on the realms' sites.
+- New blocks (creative, Building): Golden Thatch, Turf Roof, Wattle and Daub, Carved Oak, Fieldstone, Sharpened Stakes, Banner of the Riders, Horse-Head Gable, Hung Shields, Long Hearth, Tapestry, Gilded Oak, Rail Fence.
+- Creative: the land tour lists the riders' places (a king's seat, a hill town, a hold, a steading, a beacon, a horse farm).
+
+### Tooling
+- New test case `53-riders`; `52-realms` measures the white realm's own lands.
+
 ## 0.30.0 (2026-10-11): the realms of men
 
 Saves from 0.29.0 do not carry over (save key v21): the realms of men are new to the world.

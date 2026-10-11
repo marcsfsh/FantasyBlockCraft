@@ -182,12 +182,22 @@ const WSTONE=1107,WSBRICK=1108,WSCARVE=1109,WSPILLAR=1110,SLATE=1111,PLASTER=111
 // and for the relief of their buildings: rock-faced whitestone for plinths and the feet of walls, a moulded band for string
 // courses, cornices and copings
 const WSROUGH=1119,WSTRIM=1120;
+// The riders of the plains (D-061): golden thatch for their halls and turf for their houses, wattle and daub, carved and gilded
+// oak, fieldstone, the sharpened stakes of a palisade, their banner (a white horse on green), crossed horse heads for gable
+// ends, shields hung on a wall, a long hearth, tapestries, a rail fence for paddocks
+const GTHATCH=1121,TURF=1122,WATTLE=1123,CTIMBER=1124,FSTONE=1125,STAKES=1126,HBANNER=1127,HORNS=1128,SHIELDS=1129,HEARTH=1130,TAPESTRY=1131,GILDED=1132,FENCE=1133;
 def(WSTONE,'Whitestone',[270,270,270]);def(WSBRICK,'Whitestone Bricks',[271,271,271]);def(WSCARVE,'Carved Whitestone',[270,270,272]);
 def(WSPILLAR,'Whitestone Pillar',[273,273,274]);def(SLATE,'Slate Roof',[275,275,275]);def(PLASTER,'Timbered Plaster',[276,276,276]);
 def(TIMBER,'Braced Timber Frame',[276,276,277]);def(THATCH,'Thatch',[278,278,279],{snd:'soft'});
 def(RBANNER,'Banner of the Realm',[280,280,280],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(HAYBALE,'Hay Bale',[281,281,282],{snd:'soft'});
 def(PAVING,'Paving Stones',[283,283,283]);def(WSROUGH,'Rough Whitestone',[285,285,285]);def(WSTRIM,'Whitestone Moulding',[270,270,286]);def(LGLASS,'Leaded Glass',[284,284,284],{opq:false,occ:false,snd:'glass'});
-setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,WSROUGH,WSTRIM],4,'stone',1);setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
+setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,WSROUGH,WSTRIM],4,'stone',1);
+def(GTHATCH,'Golden Thatch',[287,287,288],{snd:'soft'});def(TURF,'Turf Roof',[289,2,290],{snd:'soft'});def(WATTLE,'Wattle and Daub',[291,291,291],{snd:'wood'});
+def(CTIMBER,'Carved Oak',[292,292,293],{snd:'wood'});def(FSTONE,'Fieldstone',[294,294,294]);def(STAKES,'Sharpened Stakes',[295,295,295],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+def(HBANNER,'Banner of the Riders',[296,296,296],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(HORNS,'Horse-Head Gable',[297,297,297],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+def(SHIELDS,'Hung Shields',[9,9,298],{snd:'wood'});def(HEARTH,'Long Hearth',[299,294,300],{emit:true,ember:true,lum:13});def(TAPESTRY,'Tapestry',[301,301,301],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
+def(GILDED,'Gilded Oak',[303,303,302],{snd:'wood'});def(FENCE,'Rail Fence',[305,305,304],{opq:false,occ:false,snd:'wood'});
+setH([GTHATCH,TURF],0.6,'soft');setH([WATTLE,CTIMBER,GILDED,SHIELDS,FENCE],2,'wood');setH([FSTONE,HEARTH],3,'stone',1);setH([STAKES],1,'wood');setH([HBANNER,TAPESTRY,HORNS],0,'soft');setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
 setH([BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR],5,'stone',1);setH([OBSBRICK],20,'stone',7);setH([CHAIN,SPIKES],1.5,'metal',2);setH([BRAZIER],3,'metal',2);
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;

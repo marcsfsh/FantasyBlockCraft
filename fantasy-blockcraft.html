@@ -226,7 +226,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v21',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v22',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -239,7 +239,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=21,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=22,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
@@ -286,6 +286,9 @@ const PEOPLES={
   // the high men of the southern realms (D-060): their kings, cities and strongholds; their country folk name villages in the human style
   realm:{a:['Aur','Cal','Cael','Orn','Pel','Mer','Val','Vael','Tor','Lin','Ser','Eld','Ar','Bel','Cor','Fal','Hal','Ir','Nim','Ros','Tar','Thal','Ves','Alm'],
          b:['arel','amar','ennar','aris','ehan','elin','emir','ethil','iand','iel','ost','ovar','uin','avel','esse','iorn','orin','ustan','arin','oval']},
+  // the riders of the plains (D-061): horse-lords of the steppe, the moors and the downs, their kings, halls, holds and steadings
+  rider:{a:['Ash','Beor','Brec','Ceol','Cyn','Ead','Eald','Gar','Hwit','Heah','Hroth','Lind','Os','Rad','Sig','Stan','Tid','Wig','Ord','Bern','Cuth','Torh','Wyn','Hun'],
+         b:['ric','wold','mod','gar','ulf','wine','stan','ward','frith','bald','here','thorn','mer','red','ferth','gyth','burh','ley']},
   beastfolk:{a:['Arr','Fang','Grr','Hoof','Mar','Rha','Tusk','Whis','Brin','Ska'],b:['ka','mane','rek','tail','th','uun','rro','hide']}
 };
 // Proper names from Tolkien's works (lowercase, letters only). Exact matches, near misses (one letter off) and the roots below are refused.
@@ -298,7 +301,12 @@ const TOLKIEN=('aragorn arathorn arda arnor arwen azog bagend balin balrog bard 
  'uglukh ugluk ungoliant valinor varda wormtongue zirak zirakzigil kibilnala baraddur dol guldur dolguldur erech helmsdeep hornburg mithlond angmar '+
  'erebluin nimrodel anduin brandywine baranduin gwaihir shadowfax beregond eorl theoden theodred hama gamling haldir elladan '+
  'elrohir amroth imrahil halbarad lindir erestor glorfindel undomiel elessar estel strider ithil anor angband utumno thangorodrim tirion alqualonde '+
- 'telperion laurelin yavanna aule ulmo orome tulkas nienna irmo varda estel khazaddum azanulbizar celebrant nenya vilya narya ringil anglachel narsil anduril sting glamdring orcrist').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
+ 'telperion laurelin yavanna aule ulmo orome tulkas nienna irmo varda estel khazaddum azanulbizar celebrant nenya vilya narya ringil anglachel narsil anduril sting glamdring orcrist '+
+ // the Rohirrim's people, places and horses, so the riders' style (D-061) can never draw one
+ 'brego aldor frea freawine goldwine deor gram helm frealaf brytta leofa walda folca folcwine fengel thengel theodwyn eomund eowyn eothain erkenbrand '+
+ 'elfhelm grimbold dunhere guthlaf gleowine ceorl deorwine herefara herubrand fastred harding dernhelm holdwine freca wulf hild elfhild morwen leod '+
+ 'meduseld dunharrow harrowdale westfold eastfold westemnet eastemnet fenmarch aldburg firienfeld halifirien snowbourn aglarond deeping isenfords '+
+ 'eorlingas mearas felarof hasufel arod snowmane firefoot windfola stybba simbelmyne riddermark mundburg upbourn edoras').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
 const TOLKIEN_SET=new Set(TOLKIEN);
 const TOLKIEN_ROOTS=['khaz','durin','moria','mordor','gondor','erebor','sauron','morgoth','thror','thrain','thorin','smaug','rivendell','lorien','isengard','numenor','mithril','nazgul','silmaril','gandalf','aragorn','galadriel','legolas','gimli'];
 const normName=s=>s.toLowerCase().replace(/[^a-z]/g,'');
@@ -501,12 +509,22 @@ const WSTONE=1107,WSBRICK=1108,WSCARVE=1109,WSPILLAR=1110,SLATE=1111,PLASTER=111
 // and for the relief of their buildings: rock-faced whitestone for plinths and the feet of walls, a moulded band for string
 // courses, cornices and copings
 const WSROUGH=1119,WSTRIM=1120;
+// The riders of the plains (D-061): golden thatch for their halls and turf for their houses, wattle and daub, carved and gilded
+// oak, fieldstone, the sharpened stakes of a palisade, their banner (a white horse on green), crossed horse heads for gable
+// ends, shields hung on a wall, a long hearth, tapestries, a rail fence for paddocks
+const GTHATCH=1121,TURF=1122,WATTLE=1123,CTIMBER=1124,FSTONE=1125,STAKES=1126,HBANNER=1127,HORNS=1128,SHIELDS=1129,HEARTH=1130,TAPESTRY=1131,GILDED=1132,FENCE=1133;
 def(WSTONE,'Whitestone',[270,270,270]);def(WSBRICK,'Whitestone Bricks',[271,271,271]);def(WSCARVE,'Carved Whitestone',[270,270,272]);
 def(WSPILLAR,'Whitestone Pillar',[273,273,274]);def(SLATE,'Slate Roof',[275,275,275]);def(PLASTER,'Timbered Plaster',[276,276,276]);
 def(TIMBER,'Braced Timber Frame',[276,276,277]);def(THATCH,'Thatch',[278,278,279],{snd:'soft'});
 def(RBANNER,'Banner of the Realm',[280,280,280],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(HAYBALE,'Hay Bale',[281,281,282],{snd:'soft'});
 def(PAVING,'Paving Stones',[283,283,283]);def(WSROUGH,'Rough Whitestone',[285,285,285]);def(WSTRIM,'Whitestone Moulding',[270,270,286]);def(LGLASS,'Leaded Glass',[284,284,284],{opq:false,occ:false,snd:'glass'});
-setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,WSROUGH,WSTRIM],4,'stone',1);setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
+setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,WSROUGH,WSTRIM],4,'stone',1);
+def(GTHATCH,'Golden Thatch',[287,287,288],{snd:'soft'});def(TURF,'Turf Roof',[289,2,290],{snd:'soft'});def(WATTLE,'Wattle and Daub',[291,291,291],{snd:'wood'});
+def(CTIMBER,'Carved Oak',[292,292,293],{snd:'wood'});def(FSTONE,'Fieldstone',[294,294,294]);def(STAKES,'Sharpened Stakes',[295,295,295],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+def(HBANNER,'Banner of the Riders',[296,296,296],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(HORNS,'Horse-Head Gable',[297,297,297],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+def(SHIELDS,'Hung Shields',[9,9,298],{snd:'wood'});def(HEARTH,'Long Hearth',[299,294,300],{emit:true,ember:true,lum:13});def(TAPESTRY,'Tapestry',[301,301,301],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
+def(GILDED,'Gilded Oak',[303,303,302],{snd:'wood'});def(FENCE,'Rail Fence',[305,305,304],{opq:false,occ:false,snd:'wood'});
+setH([GTHATCH,TURF],0.6,'soft');setH([WATTLE,CTIMBER,GILDED,SHIELDS,FENCE],2,'wood');setH([FSTONE,HEARTH],3,'stone',1);setH([STAKES],1,'wood');setH([HBANNER,TAPESTRY,HORNS],0,'soft');setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
 setH([BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR],5,'stone',1);setH([OBSBRICK],20,'stone',7);setH([CHAIN,SPIKES],1.5,'metal',2);setH([BRAZIER],3,'metal',2);
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
@@ -1001,6 +1019,55 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   {const FS=[[0,0,6,5],[7,0,15,7],[0,6,6,15],[7,8,10,15],[11,8,15,15]];
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){let k=0;for(;k<FS.length;k++){const q=FS[k];if(x>=q[0]&&x<=q[2]&&y>=q[1]&&y<=q[3])break;}const q=FS[k];
       const joint=x===q[0]||y===q[1],lip=x===q[2]||y===q[3];P(283,x,y,joint?sh([100,98,92],(hn(x,y,341)-.5)*8):sh([176,172,160],(hn(k,0,342)-.5)*24+(hn(x,y,343)-.5)*10+(lip?-10:x===q[0]+1||y===q[1]+1?8:0)));}}
+  // The riders of the plains (D-061). Golden thatch: straws combed one way, bound every few rows, its cut ends in rows on the
+  // side; turf: grass in tufts with a few flowers over layered sod and roots; wattle: hazel rods woven through stakes, daubed
+  // in ochre clay; carved oak: interlaced strands raised on dark oak, rings on its ends; fieldstone: rounded stones in pale lime
+  // mortar; the palisade's stakes, sharpened; the riders' banner, a white horse's head on green with a gold border and fringe;
+  // crossed horse heads for a gable; a round shield (green with a gold sun and a boss) hung on planks; a long hearth's embers
+  // in their stone kerb; a tapestry of green and gold; gilded oak, gold leaf in a lattice on dark wood; a rail fence
+  for(const t of [295,296,297,301,304,305])clear(t);
+  {const pts=[];for(let k=0;k<9;k++)pts.push([((k%3)*5.3+1.5+hn(k,1,361)*3.5)%16,(Math.floor(k/3)*5.3+1.5+hn(k,2,361)*3.5)%16,hn(k,3,362)]);
+   for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    P(287,x,y,sh([224,190,92],(hn(x>>1,y*3+(x&1),363)-.5)*26+(x%3===0?-12:x%3===1?8:0)+(y%5===4?-26:0)+(hn(x>>2,y>>2,364)-.5)*12));
+    P(288,x,y,sh([218,184,88],(hn(x,y>>1,365)-.5)*22+(y%5===4?-30:y%5===0?14:0)+(x%2?-8:6)+(hn(x,y,366)-.5)*8));
+    const fl=hn(x,y,367);P(289,x,y,fl<.025?[236,214,90]:fl<.04?[236,236,226]:sh([92,146,56],(hn(x,y,368)-.5)*28+((x*7+y*3)%5===0?18:0)));
+    // the side of a turf roof: grass grown long and hanging over the sod in strands, mossy and darker toward the foot, a little
+    // earth and root showing between the strands at the bottom
+    const strand=hn(x,0,369),low=y>=11+Math.floor(strand*4);P(290,x,y,low&&hn(x,y,372)<.35?sh([74,56,38],(hn(x,y,373)-.5)*16):
+      sh(low?[62,96,42]:[82,134,52],(strand-.5)*30+(y===0?14:0)+(hn(x,y>>1,370)-.5)*14-y*1.4+((x+Math.floor(y/3))%4===0?-10:0)));
+    const stake=x===3||x===8||x===13,rod=((y>>1)+(x>4&&x<12?1:0))%2,dab=fbm2(x/5,y/5,2,374.1)>-0.05;
+    P(291,x,y,x===0||y===0||x===15||y===15?sh([88,60,38],(hn(x,y,375)-.5)*10):dab?sh([204,178,128],(hn(x,y,376)-.5)*18+(hn(x>>1,y>>1,377)<.15?-14:0)):stake?sh([96,66,40],(hn(x,y,378)-.5)*10):sh([138,100,60],(rod?12:-14)+(y%2?-10:6)+(hn(x,y,379)-.5)*10));
+    const r=Math.hypot(x-7.5,y-7.5);P(292,x,y,sh([110,74,44],(Math.floor(r)%2?-14:6)+(r>7?-24:0)+(hn(x,y,380)-.5)*8));
+    const s1=Math.abs(x-7.5-Math.sin(y*0.8)*4)<1.3,s2=Math.abs(x-7.5+Math.sin(y*0.8)*4)<1.3,band=x<=1||x>=14;
+    P(293,x,y,band?sh([86,56,34],(x===0||x===15?-16:6)+(hn(x,y,381)-.5)*8):s1||s2?sh([150,104,62],(s1&&s2?12:0)+(hn(x,y,382)-.5)*10):sh([70,46,28],(hn(x,y,383)-.5)*10));
+    let d1=99,d2=99,id=0;for(let k=0;k<pts.length;k++)for(const ox of [-16,0,16])for(const oy of [-16,0,16]){const d=Math.hypot(x-pts[k][0]-ox,y-pts[k][1]-oy);if(d<d1){d2=d1;d1=d;id=k;}else if(d<d2)d2=d;}
+    P(294,x,y,d2-d1<1.1?sh([182,174,156],(hn(x,y,384)-.5)*10):sh([[138,132,122],[150,138,118],[122,120,116],[160,150,130]][Math.floor(pts[id][2]*4)],(d1<2.2?14:0)-(d1>3.5?12:0)+(hn(x,y,385)-.5)*12));
+    const fire=hn(x,y,386),rim=x<=1||y<=1||x>=14||y>=14;P(299,x,y,rim?sh([150,140,124],(hn(x>>1,y>>1,387)-.5)*24):fire<.3?[255,190,80]:fire<.55?[236,110,40]:fire<.7?[140,40,20]:(x+y)%5===0?[60,40,30]:[200,80,30]);
+    P(300,x,y,y<2?sh([120,60,30],(hn(x,y,388)-.5)*20):sh([146,138,124],(d2-d1<1.1?20:0)+(hn(x,y,389)-.5)*16));
+    const lat=(x+y)%6===0||(x-y+18)%6===0;P(302,x,y,lat?sh([228,188,82],(hn(x,y,390)-.5)*20+((x+y)%6===0?10:0)):sh([74,48,30],(hn(x,y,391)-.5)*10+(x<1||x>14?-10:0)));
+    P(303,x,y,Math.hypot(x-7.5,y-7.5)>6.5?sh([228,188,82],(hn(x,y,392)-.5)*16):sh([86,58,36],(Math.floor(Math.hypot(x-7.5,y-7.5))%2?-12:4)));
+    const sr=Math.hypot(x-7.5,y-7.5),ang=Math.atan2(y-7.5,x-7.5),ray=Math.abs(Math.sin(ang*4))>0.8;
+    P(298,x,y,sr>7?sh([150,108,62],(y%4===3?-22:0)+(hn(x,y>>2,393)-.5)*12):sr>6.2?sh([196,160,70],(hn(x,y,394)-.5)*12):sr<1.6?sh([160,164,170],sr<0.8?30:0):sr<4.5&&ray?sh([220,180,74],(hn(x,y,395)-.5)*10):sh([40,96,52],(hn(x,y,396)-.5)*12+(x<y?6:0)));
+  }}
+  // the palisade's stakes: three to a block, pointed
+  for(const [cx,top] of [[2.5,1],[7.5,3],[12.5,0]])for(let y=top;y<16;y++){const w=Math.min(2.2,(y-top)*0.7+0.4);for(let x=0;x<16;x++)if(Math.abs(x-cx)<=w)P(295,x,y,y<top+3?sh([170,130,84],(x<cx?14:-8)):sh([96,68,42],(x<cx?10:-10)+(hn(x,y,397)-.5)*14+(y%5===0?-12:0)));}
+  // the riders' banner: a pole, the green cloth in a gold border, a white horse's head, a fringe of gold
+  {const HEAD=['......11......','.....1111.....','....111111....','...11111111...','..1111111111..','..111.111111..','.111111111111.','1111..1111111.','11....111111..','......111111..','......1111111.','.....111111111'];
+   for(let y=0;y<16;y++)P(296,1,y,sh([110,84,52],(hn(1,y,398)-.5)*12));for(let x=1;x<16;x++)P(296,x,0,[160,140,100]);
+   for(let y=1;y<16;y++)for(let x=2;x<16;x++){const fringe=y===15&&x%2===0;if(y===15&&!fringe)continue;const border=x===2||x===15||y===1||y===14;
+     const hy=y-2,hx=x-2,hd=hy>=0&&hy<HEAD.length&&hx>=0&&hx<14&&HEAD[hy][hx]==='1';
+     P(296,x,y,fringe?[220,180,70]:border?sh([214,176,72],(hn(x,y,399)-.5)*10):hd?sh([238,238,232],(hn(x,y,400)-.5)*8):sh([36,96,52],(hn(x,y,401)-.5)*10));}}
+  // crossed horse heads at a gable's peak: two boards crossing, each ending in a carved head turned outward, a gold eye
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const b1=Math.abs((x-2)-(15-y))<=1.1&&y>=5,b2=Math.abs((13-x)-(15-y))<=1.1&&y>=5;
+    const hL=Math.hypot(x-3.2,y-3.6)<2.4||(x>=0&&x<=2&&y>=4&&y<=5),hR=Math.hypot(x-12.3,y-3.6)<2.4||(x>=13&&x<=15&&y>=4&&y<=5);
+    if(b1||b2||hL||hR)P(297,x,y,(x===2&&y===3)||(x===13&&y===3)?[230,190,80]:sh([90,60,36],(b1&&b2?14:0)+(hn(x,y,402)-.5)*14+((x+y)%4===0?-10:0)));}
+  // a tapestry on its rod: green, a gold border of interlace, a gold knot in the middle, tassels
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){if(y===0){P(301,x,y,[120,90,56]);continue;}if(x<2||x>13)continue;if(y===15&&x%3!==0)continue;
+    const brd=x===2||x===13||y===1||y===14,knot=Math.abs(Math.hypot(x-7.5,y-8)-3)<0.8||Math.abs(x-7.5)<0.6&&Math.abs(y-8)<4||Math.abs(y-8)<0.6&&Math.abs(x-7.5)<4;
+    P(301,x,y,y===15?[214,176,72]:brd?sh([214,176,72],((x+y)%2?12:-8)):knot?sh([222,184,78],(hn(x,y,403)-.5)*10):sh([30,84,48],(hn(x,y,404)-.5)*10+(x%4===0?-6:0)));}
+  // a rail fence: posts at the sides, two rails, open between
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const post=x<=1||x>=14,rail=(y>=3&&y<=5)||(y>=10&&y<=12);if(post||rail)P(304,x,y,sh([124,90,56],(post?(x===0||x===15?-14:4):(y===3||y===10?12:y===5||y===12?-14:0))+(hn(x,y,405)-.5)*12));
+    if(x<=1&&y<=1||x>=14&&y>=14||x<=1&&y>=14||x>=14&&y<=1||(y>=7&&y<=8))P(305,x,y,sh([124,90,56],(hn(x,y,406)-.5)*12));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
@@ -1283,7 +1350,7 @@ function stretchCell(c){let best=c;for(const [a,b] of LN8){const n=landSite(c.i+
 function stretchName(key){
   let s=LNAME.get(key);if(s)return s;if(LNAME.size>20000)LNAME.clear();
   const i=Math.floor(key/65536)-32768,j=key%65536-32768,c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];
-  const w=nameWord(realmHeld(c)?'realm':L.p,rngAt(c.i,8131,c.j)),base=landShown(L); // a stretch a kingdom holds takes its people's names (D-060)
+  const RC=realmHeld(c),w=nameWord(RC?RC.names:L.p,rngAt(c.i,8131,c.j)),base=landShown(L); // a stretch a kingdom holds takes its people's names (D-060, D-061)
   s=L.sea?'The Sea of '+w:(base.startsWith('The ')?base.slice(4):base)+' of '+w;LNAME.set(key,s);return s;
 }
 // The name the readout shows on open land: the stretch's name, or the edge it is on (the Grey Shore, a lake, open sea)
@@ -1363,13 +1430,16 @@ function wasteTerrain(X,Z,o,h){
 // ground before any realm levels it (realmRaw, never cached); colInfoBase then levels the ground under every site (realmGround).
 // Kingdoms gather the held stretches of a square of 8 x 8 land cells (some 2500 blocks) under one name; the oldest stretch among
 // them holds the capital.
-const REALM_LANDS=new Set(['green','farm','orchard','flower','terrace']),REALM_SG=16,provC=new Map(),provJ=new Map(),REALM_STEP_MS=6,realmTC=new Map(),TRP={},TRL={};let realmSkip=false;
+const REALM_SG=16,provC=new Map(),provJ=new Map(),REALM_STEP_MS=6,realmTC=new Map(),TRP={},TRL={};let realmSkip=false;
 // the ground before any realm levels it, and never cached (so the plans cannot depend on themselves)
 function realmRaw(X,Z){const was=realmSkip;realmSkip=true;try{return colInfoBase(X,Z,TRP);}finally{realmSkip=was;}}
-const realmHeld=c=>REALM_LANDS.has(LANDS[cellLand(c)].k)&&hsh(c.i,9401,c.j)<0.5; // c: the stretch's first cell
-function kingdomOf(c){const ki=Math.floor(c.i/8),kj=Math.floor(c.j/8);let best=null;
-  for(let a=0;a<8;a++)for(let b=0;b<8;b++){const s=stretchCell(landSite(ki*8+a,kj*8+b));if(realmHeld(s)&&(!best||s.pr>best.pr))best=s;}
-  return {key:ki+','+kj,name:'The Kingdom of '+nameWord('realm',rngAt(ki,9403,kj)),cap:best?best.i+','+best.j:''};}
+// the people whose lands a stretch lies in (REALM_CULTS, below), and whether they hold it: one stretch in two (c: its first cell)
+const realmCult=c=>{const k=LANDS[cellLand(c)].k;for(const n in REALM_CULTS)if(REALM_CULTS[n].lands.has(k))return REALM_CULTS[n];return null;};
+const realmHeld=c=>{const C=realmCult(c);return C&&hsh(c.i,9401,c.j)<0.5?C:null;};
+// A kingdom gathers its people's held stretches in a square of 8 x 8 cells; the oldest of them holds the royal seat
+function kingdomOf(c,C){const ki=Math.floor(c.i/8),kj=Math.floor(c.j/8);let best=null;
+  for(let a=0;a<8;a++)for(let b=0;b<8;b++){const s=stretchCell(landSite(ki*8+a,kj*8+b));if(realmHeld(s)===C&&(!best||s.pr>best.pr))best=s;}
+  return {key:C.k+ki+','+kj,name:C.kingdom+nameWord(C.names,rngAt(ki,C.ks,kj)),cap:best?best.i+','+best.j:''};}
 // The province of the stretch a cell belongs to, or null where no kingdom holds it
 function provinceOf(i,j){
   const root=stretchCell(landSite(i,j)),key=landKey(root.i,root.j);if(provC.has(key))return provC.get(key);if(provC.size>3000)provC.clear();
@@ -1380,6 +1450,25 @@ function provinceOf(i,j){
 // not), then the sites in order (the city, the castle, villages, watchtowers, farmsteads), then the roads between them
 const SITE_K={ // R the core, M the margin over which the ground eases back, spread the most the raw ground may vary under it, round or square
   city:{M:20,spread:16,sq:1},fort:{R:22,M:12,spread:12,sq:1},village:{R:26,M:12,spread:9},outpost:{R:8,M:8,spread:14,sq:1},farm:{R:12,M:8,spread:6}};
+// The peoples of the realms, each on its own lands with its own sites, names, readout and roads:
+//   white: the high men of the southern realms (D-060): walled cities of white stone in square tiers, castles, villages,
+//     watchtowers and farmsteads
+//   horse: the riders of the plains (D-061): hill towns in round tiers inside a timber palisade under the king's golden hall,
+//     round stone holds, steadings of longhouses, beacons on the heights and horse farms, on Golden Steppe, Heath Moors and the
+//     Barrow Hills; their walled places are round (wall), the edges of the open ones wander
+// R: the radii of their sites (the city's grows with the province); w: how the city weighs the ground (its spread against the
+// prominence it wants under it)
+const REALM_CULTS={
+  white:{k:'white',lands:new Set(['green','farm','orchard','flower','terrace']),names:'realm',folkNames:'human',kingdom:'The Kingdom of ',ks:9403,fp:'r_',
+    site:SITE_K,R:{city:40,cap:50,cmax:64,small:34,fort:22,village:26,hamlet:18,outpost:8,farm:12},w:{spread:0.6,prom:0.35,pmax:12},
+    label:{fort:'Castle %',outpost:'% Watch',farm:'% Farm'},kind:{city:'a city of',fort:'a castle of',village:'a village of',outpost:'a watchtower of',farm:'a farmstead of'},
+    capital:'the royal city of',roads:["The King's Road",'A Country Lane']},
+  horse:{k:'horse',lands:new Set(['steppe','moors','barrow']),names:'rider',folkNames:'rider',kingdom:'The Riders of ',ks:9431,fp:'h_',
+    site:{city:{M:22,spread:24,wall:1},fort:{M:12,spread:12,wall:1},village:{M:12,spread:9},outpost:{M:8,spread:16,wall:1},farm:{M:10,spread:7}},
+    R:{city:38,cap:46,cmax:58,small:32,fort:20,village:24,hamlet:16,outpost:9,farm:16},w:{spread:0.3,prom:0.8,pmax:20},
+    label:{fort:'% Hold',outpost:'% Beacon',farm:'% Stud'},kind:{city:'a hill town of',fort:'a hold of',village:'a steading of',outpost:'a beacon of',farm:'a horse farm of'},
+    capital:'the king\'s seat of',roads:["The Riders' Road",'A Cart Track']}};
+const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands]));
 function* planProvince(root,key){
   const L=LANDS[cellLand(root)],cells=[root],seen=new Set([key]),r=rngAt(root.i,9405,root.j);
   for(let q=0;q<cells.length&&cells.length<24;q++){const c=cells[q];for(const [a,b] of LN8){const n=landSite(c.i+a,c.j+b),nk=landKey(n.i,n.j);if(seen.has(nk))continue;seen.add(nk);
@@ -1395,7 +1484,7 @@ function* planProvince(root,key){
   // how far each sample lies from the province's edge (in samples), for castles near the border
   const bd=new Int16Array(N).fill(999),qq=[];for(let k=0;k<N;k++)if(!ok[k]){bd[k]=0;qq.push(k);}
   for(let h=0;h<qq.length;h++){const k=qq[h],a=k%nx,b=(k/nx)|0;for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const A=a+da,B=b+db;if(A<0||B<0||A>=nx||B>=nz)continue;const n=A+B*nx;if(bd[n]>bd[k]+1){bd[n]=bd[k]+1;qq.push(n);}}}
-  const P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,kingdom:kingdomOf(root),sites:[],roads:[],name:''};
+  const C=realmCult(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
   P.capital=P.kingdom.cap===root.i+','+root.j;P.name=stretchName(key);
   // fit a site of kind k (radius R) at sample (a,b): every sample under it good ground, little height spread; its level (the
   // median), how far it stands above the land around it, how far it is from the province's edge
@@ -1414,25 +1503,26 @@ function* planProvince(root,key){
   function* clean(X,Z,K,R){const rr=R+4;for(let dz=-rr;dz<=rr;dz+=4){yield;for(let dx=-rr;dx<=rr;dx+=4){if((K.sq?Math.max(Math.abs(dx),Math.abs(dz)):Math.hypot(dx,dz))>rr)continue;
     const o=realmRaw(X+dx,Z+dz);if(o.river||o.bank||o.wet||o.h<o.sl+3||o.rvBot<999)return false;}}return true;}
   function* pick(K,R,score,need){for(let k=0;k<6;k++){const t=yield* best(K,R,score,need);if(!t)return null;if(yield* clean(t.X,t.Z,K,R))return t;ok[Math.round((t.X/S)-gx0)+Math.round((t.Z/S)-gz0)*nx]=1;}return null;}
-  const add=(k,R,t)=>{const K=SITE_K[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,prov:P,id:k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
-  // the city: in the middle of the province's good ground, gently raised if the land allows; the capital the largest
-  const n=cells.length,Rc=Math.min(64,(P.capital?50:40)+Math.min(3,n-1)*5);
-  for(const R of [Rc,Rc-8,Rc-16,34,30]){const t=yield* pick(SITE_K.city,R,(f,X,Z)=>-f.spread*0.6-Math.hypot(X-cx,Z-cz)/50+Math.max(-4,Math.min(12,f.prom))*0.35);if(t){const s=add('city',R,t);s.tiers=P.capital?3:2;break;}}
+  const add=(k,R,t)=>{const K=SK[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,wall:!!(K.sq||K.wall),prov:P,id:C.k[0]+k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
+  // the city (the riders' hill town): in the middle of the province's good ground, raised if the land allows (the riders want a
+  // hill under their hall); the capital the largest
+  const n=cells.length,Z_=C.R,Rc=Math.min(Z_.cmax,(P.capital?Z_.cap:Z_.city)+Math.min(3,n-1)*5);
+  for(const R of [Rc,Rc-8,Rc-16,Z_.small,Z_.small-4]){const t=yield* pick(SK.city,R,(f,X,Z)=>-f.spread*C.w.spread-Math.hypot(X-cx,Z-cz)/50+Math.max(-4,Math.min(C.w.pmax,f.prom))*C.w.prom);if(t){const s=add('city',R,t);s.tiers=P.capital?3:2;break;}}
   const city=P.sites[0]&&P.sites[0].k==='city'?P.sites[0]:null;
-  // a castle on the high ground near the border, well away from the city
-  if(n>=2||hsh(root.i,9411,root.j)<0.5){const t=yield* pick(SITE_K.fort,22,(f)=>Math.min(14,f.prom)*0.7-f.spread*0.4-Math.abs(f.bd-90)/40,(X,Z)=>far(X,Z,city?190:60));if(t)add('fort',22,t);}
+  // a castle (the riders' hold) on the high ground near the border, well away from the city
+  if(n>=2||hsh(root.i,9411,root.j)<0.5){const t=yield* pick(SK.fort,Z_.fort,(f)=>Math.min(14,f.prom)*0.7-f.spread*0.4-Math.abs(f.bd-90)/40,(X,Z)=>far(X,Z,city?190:60));if(t)add('fort',Z_.fort,t);}
   // villages, spread out
-  const nv=Math.max(2,Math.min(8,Math.round(n*1.1+1)));for(let k=0;k<nv;k++){const t=yield* pick(SITE_K.village,26,(f)=>-f.spread+hsh(k,9413,root.i)*2,(X,Z)=>far(X,Z,120));if(!t)break;add('village',26,t);}
+  const nv=Math.max(2,Math.min(8,Math.round(n*1.1+1)));for(let k=0;k<nv;k++){const t=yield* pick(SK.village,Z_.village,(f)=>-f.spread+hsh(k,9413,root.i)*2,(X,Z)=>far(X,Z,120));if(!t)break;add('village',Z_.village,t);}
   // where the ground is too rough for a village, a hamlet
-  if(!P.sites.some(s=>s.k==='village'||s.k==='city'))for(let k=0;k<2;k++){const t=yield* pick(SITE_K.village,18,(f)=>-f.spread,(X,Z)=>far(X,Z,90));if(!t)break;add('village',18,t);}
-  // watchtowers on the heights, mostly toward the edges
-  const no=Math.max(1,Math.min(6,n));for(let k=0;k<no;k++){const t=yield* pick(SITE_K.outpost,8,(f)=>Math.min(20,f.prom)-f.spread*0.2-f.bd/200,(X,Z)=>far(X,Z,110));if(!t)break;add('outpost',8,t);}
-  // farmsteads, near the villages and the city
-  const nf=Math.max(2,Math.min(14,n*2));for(let k=0;k<nf;k++){const t=yield* pick(SITE_K.farm,12,(f)=>-f.spread*0.5+hsh(k,9415,root.j),(X,Z)=>far(X,Z,60)&&P.sites.some(s=>(s.k==='village'||s.k==='city')&&Math.hypot(s.X-X,s.Z-Z)<s.R+170));if(!t)break;add('farm',12,t);}
-  // names, the way each site faces (toward its road), the roads
+  if(!P.sites.some(s=>s.k==='village'||s.k==='city'))for(let k=0;k<2;k++){const t=yield* pick(SK.village,Z_.hamlet,(f)=>-f.spread,(X,Z)=>far(X,Z,90));if(!t)break;add('village',Z_.hamlet,t);}
+  // watchtowers (the riders' beacons) on the heights, mostly toward the edges
+  const no=Math.max(1,Math.min(6,n));for(let k=0;k<no;k++){const t=yield* pick(SK.outpost,Z_.outpost,(f)=>Math.min(20,f.prom)-f.spread*0.2-f.bd/200,(X,Z)=>far(X,Z,110));if(!t)break;add('outpost',Z_.outpost,t);}
+  // farmsteads (the riders' horse farms), near the villages and the city
+  const nf=Math.max(2,Math.min(14,n*2));for(let k=0;k<nf;k++){const t=yield* pick(SK.farm,Z_.farm,(f)=>-f.spread*0.5+hsh(k,9415,root.j),(X,Z)=>far(X,Z,60)&&P.sites.some(s=>(s.k==='village'||s.k==='city')&&Math.hypot(s.X-X,s.Z-Z)<s.R+170));if(!t)break;add('farm',Z_.farm,t);}
+  // names (in the people's styles, no two alike in a province), the way each site faces (toward its road), the roads
   const used=new Set();for(const s of P.sites){const rs=rngAt(Math.round(s.X),9417,Math.round(s.Z));let w='';
-    for(let k=0;k<12&&(!w||used.has(w));k++)w=nameWord(s.k==='village'||s.k==='farm'?'human':'realm',rs);used.add(w); // no two alike in a province
-    s.name=s.k==='city'?w:s.k==='fort'?'Castle '+w:s.k==='outpost'?w+' Watch':s.k==='village'?w:w+' Farm';}
+    for(let k=0;k<12&&(!w||used.has(w));k++)w=nameWord(s.k==='village'||s.k==='farm'?C.folkNames:C.names,rs);used.add(w);
+    s.name=(C.label[s.k]||'%').replace('%',w);}
   realmRoads(P,city);
   return P;
 }
@@ -1445,10 +1535,10 @@ function realmRoads(P,city){
   const S=P.sites,link=(a,b)=>{if(a.dir===undefined)a.dir=dirTo(a,b.X,b.Z);if(b.dir===undefined)b.dir=dirTo(b,a.X,a.Z);
     const pa=sitePort(a),pb=sitePort(b),pts=[pa];
     // leave a walled site straight out of its gate; round a city's flank toward a place behind it, never through it
-    if(a.sq){const d=DIRS[a.dir],q=[pa[0]+d[0]*14,pa[1]+d[1]*14];pts.push(q);
+    if(a.wall){const d=DIRS[a.dir],q=[pa[0]+d[0]*14,pa[1]+d[1]*14];pts.push(q);
       if(a.k==='city'&&(b.X-a.X)*d[0]+(b.Z-a.Z)*d[1]<0){const sx=-d[1],sz=d[0],side=(b.X-a.X)*sx+(b.Z-a.Z)*sz>=0?1:-1,e=a.R+a.M+8;
         pts.push([a.X+d[0]*e+sx*side*e,a.Z+d[1]*e+sz*side*e]);pts.push([a.X+sx*side*e,a.Z+sz*side*e]);}}
-    if(b.sq){const d=DIRS[b.dir];pts.push([pb[0]+d[0]*14,pb[1]+d[1]*14]);}
+    if(b.wall){const d=DIRS[b.dir];pts.push([pb[0]+d[0]*14,pb[1]+d[1]*14]);}
     pts.push(pb);
     for(let k=0;k+1<pts.length;k++)P.roads.push({a:pts[k],b:pts[k+1],w:K==='high'?2:1,k:K,P:P,seed:hsh(Math.round(pts[k][0]),9419,Math.round(pts[k][1]))});};
   let K='high';
@@ -1465,7 +1555,7 @@ function realmRoads(P,city){
     rd.box=[x0-30,z0-30,x1+30,z1+30];rd.len=Math.hypot(rd.b[0]-rd.a[0],rd.b[1]-rd.a[1]);}
 }
 // where a road meets a site: just outside the gate of a walled one (city, castle, watchtower), the edge of an open one
-function sitePort(s){const d=DIRS[s.dir===undefined?0:s.dir],off=s.sq?s.R+3:s.R-4;return [s.X+d[0]*off,s.Z+d[1]*off];}
+function sitePort(s){const d=DIRS[s.dir===undefined?0:s.dir],off=s.wall?s.R+3:s.R-4;return [s.X+d[0]*off,s.Z+d[1]*off];}
 // ---- Queries
 // The stretches whose provinces a tile of 64 blocks may meet (those of the cells two around it)
 function realmRoots(tx,tz){const ci=Math.floor((tx*64+32)/LS),cj=Math.floor((tz*64+32)/LS),out=[],seen=new Set();
@@ -1489,7 +1579,7 @@ function realmTile(X,Z){
   realmTC.set(tk,T);return T;
 }
 // how far (X,Z) lies from a site's middle: square for walled sites, round (with a wandering edge) for open ones
-const siteDist=(s,X,Z)=>s.sq?Math.max(Math.abs(X-s.X),Math.abs(Z-s.Z)):Math.hypot(X-s.X,Z-s.Z)+fbm2(X/14,Z/14,1,9423.1)*3;
+const siteDist=(s,X,Z)=>s.sq?Math.max(Math.abs(X-s.X),Math.abs(Z-s.Z)):s.wall?Math.hypot(X-s.X,Z-s.Z):Math.hypot(X-s.X,Z-s.Z)+fbm2(X/14,Z/14,1,9423.1)*3;
 // the site whose core (grown by m) holds (X,Z), or null
 function realmSiteAt(X,Z,m){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(m||0))return s;return null;}
 // The road at (X,Z): the nearest road whose band holds the column (its middle wanders a little, less near its ends), as
@@ -1500,7 +1590,7 @@ function realmRoadAt(X,Z,m){if(realmSkip)return null;
     if(Math.abs(off)<=rd.w+0.5+(m||0))return {rd:rd,off:off,t:t,along:along};}
   return null;}
 // Is a surface column taken by the realm (a site's core or margin, or a road)? Trees, boulders, ruins and the like keep off
-function realmNear(X,Z,m){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(s.k==='village'||s.k==='farm'?s.M+30:s.M*0.6)+(m||0))return s;return realmRoadAt(X,Z,m);}
+function realmNear(X,Z,m){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(s.k==='village'||s.k==='farm'||(s.k==='city'&&s.prov.cult.k==='horse')?s.M+30:s.M*0.6)+(m||0))return s;return realmRoadAt(X,Z,m);}
 // ---- The ground: each site's core levelled to its height (a city's to its tiers), easing back to the land over its margin.
 // Sets o.town (0 or 1) and o.tsite.
 function realmGround(X,Z,o,h){
@@ -1511,15 +1601,19 @@ function realmGround(X,Z,o,h){
 }
 // ---- A city's tiers (D-060): rings round the citadel, which stands toward the back of the city (away from the gate); each
 // ring five blocks above the one outside it, held by a retaining wall. The capital has three, other cities two.
-function cityFrame(s){if(s.cf)return s.cf;const d=DIRS[s.dir],R=s.R,cu=Math.round(R*0.5),f={fx:-d[0],fz:-d[1],sx:-d[1],sz:d[0],cu:cu,
-  r1:s.tiers>=3?Math.round(R*0.66):Math.round(R*0.36),r2:s.tiers>=3?Math.round(R*0.34):-1,step:5};return s.cf=f;}
+// The riders' hill town (D-061) is round: its tiers are circles about its hall, which stands a little toward the back, four
+// blocks a step.
+function cityFrame(s){if(s.cf)return s.cf;const d=DIRS[s.dir],R=s.R,f={fx:-d[0],fz:-d[1],sx:-d[1],sz:d[0]};
+  if(s.prov.cult.k==='horse')Object.assign(f,{cu:Math.round(R*0.25),r1:s.tiers>=3?Math.round(R*0.62):Math.round(R*0.44),r2:s.tiers>=3?Math.round(R*0.32):-1,step:4,round:1});
+  else Object.assign(f,{cu:Math.round(R*0.5),r1:s.tiers>=3?Math.round(R*0.66):Math.round(R*0.36),r2:s.tiers>=3?Math.round(R*0.34):-1,step:5});return s.cf=f;}
 // local (u, v) of a column: u from the city's middle toward the back (the gate is at u = -R), v across
 const cityUV=(s,X,Z)=>{const f=cityFrame(s),dx=X-s.X,dz=Z-s.Z;return [dx*f.fx+dz*f.fz,dx*f.sx+dz*f.sz];};
-function cityTier(s,u,v){const f=cityFrame(s),d=Math.max(Math.abs(u-f.cu),Math.abs(v));return f.r2>=0&&d<=f.r2?2:d<=f.r1?1:0;}
-function cityGround(s,X,Z){const [u,v]=cityUV(s,X,Z);if(Math.max(Math.abs(u),Math.abs(v))>s.R)return s.T;return s.T+cityTier(s,u,v)*cityFrame(s).step;}
+function cityTier(s,u,v){const f=cityFrame(s),d=f.round?Math.hypot(u-f.cu,v):Math.max(Math.abs(u-f.cu),Math.abs(v));return f.r2>=0&&d<=f.r2?2:d<=f.r1?1:0;}
+function cityGround(s,X,Z){const [u,v]=cityUV(s,X,Z),f=cityFrame(s);if((f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))>s.R)return s.T;return s.T+cityTier(s,u,v)*f.step;}
 // ---- Names: the readout's line for a site, and the realm a column lies in
-const REALM_KIND={city:'a city of',fort:'a castle of',village:'a village of',outpost:'a watchtower of',farm:'a farmstead of'};
-function realmPlace(X,Z){const s=realmSiteAt(X,Z,4);return s?{s:s,name:s.name,line:(s.k==='city'&&s.prov.capital?'the royal city of':REALM_KIND[s.k])+' '+s.prov.kingdom.name.replace(/^The /,'the ')}:null;}
+function realmPlace(X,Z){const s=realmSiteAt(X,Z,4),C=s&&s.prov.cult;return s?{s:s,name:s.name,line:(s.k==='city'&&s.prov.capital?C.capital:C.kind[s.k])+' '+s.prov.kingdom.name.replace(/^The /,'the ')}:null;}
+// a road's name: the people's high road or its lanes
+const realmRoadName=rd=>rd.P.cult.roads[rd.k==='high'?0:1];
 function realmOfColumn(X,Z){const o=landsAt(X,Z,{}),i=Math.floor(o.lcell/65536)-32768,j=o.lcell%65536-32768,P=provinceOf(i,j);return P&&P.L.i===o.land?P:null;}
 // ---- Cave systems (M3.5a, D-028): planned in place of noise. Each region of CR x CR chunks holds one main system and sometimes
 // a smaller one: a trunk that winds down from an entrance on a hillside, through the depths, to the Fire Below, with branches
@@ -3525,7 +3619,7 @@ function buildSite(s){
 function surfaceName(X,Y,Z){
   const s=siteNear(X,Z,1);if(s){if(s.way&&Math.abs(X-(s.X+s.R+4))<=2&&Math.abs(Z-s.Z)<=2)return 'An Ancient Waystone';return s.name;}
   {const rp=realmPlace(X,Z);if(rp)return rp.name;} // a city, castle, village, watchtower or farmstead of the realms of men (D-060)
-  if(realmRoadAt(X,Z,0))return realmRoadAt(X,Z,0).rd.k==='high'?'The King\'s Road':'A Country Lane';
+  {const rr=realmRoadAt(X,Z,0);if(rr)return realmRoadName(rr.rd);} // the people's high road or a lane (D-060, D-061)
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(gateNear(X,Z,0))return 'The Gate of '+holdOf(cx,cz).name;
   if(stairwayNear(X,Z,1))return 'A Ruined Stairway';
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
@@ -4833,7 +4927,7 @@ function siteFrame(s){if(s.fr)return s.fr;const d=DIRS[s.dir];return s.fr={fx:-d
 const siteUV=(s,X,Z)=>{const f=siteFrame(s),dx=X-s.X,dz=Z-s.Z;return [dx*f.fx+dz*f.fz,dx*f.sx+dz*f.sz];};
 const siteXZ=(s,u,v)=>{const f=siteFrame(s);return [s.X+u*f.fx+v*f.sx,s.Z+u*f.fz+v*f.sz];};
 // the ground of a site at local (u, v): its level, a city's by tier
-const siteG=(s,u,v)=>s.k==='city'&&Math.max(Math.abs(u),Math.abs(v))<=s.R?s.T+cityTier(s,u,v)*5:s.T;
+const siteG=(s,u,v)=>{if(s.k!=='city')return s.T;const f=cityFrame(s);return (f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))<=s.R?s.T+cityTier(s,u,v)*f.step:s.T;};
 // A part's own frame: a across its front, b back from its front; f is the side its front faces (0 toward -u, 1 +u, 2 -v, 3 +v)
 function partAB(p,u,v){switch(p.f){case 0:return [v-p.v0,u-p.u0,p.v1-p.v0+1,p.u1-p.u0+1];case 1:return [p.v1-v,p.u1-u,p.v1-p.v0+1,p.u1-p.u0+1];
   case 2:return [p.u1-u,v-p.v0,p.u1-p.u0+1,p.v1-p.v0+1];default:return [u-p.u0,p.v1-v,p.u1-p.u0+1,p.v1-p.v0+1];}}
@@ -4857,25 +4951,29 @@ const lit=(X,y,Z)=>RBP(X,y,Z,LANTERN);
 //   timber: a stone ground storey, the storeys above jettied out over the margins on beam ends, framed in timber and plaster
 //   cottage: a cobble footing, plaster in a frame of logs, low thatch two blocks thick at its edges; with p.xchim a chimney up
 //     the back gable, and about it a bench, flower boxes and a woodpile
+//   wattle (the riders' longhouses, D-061): a fieldstone footing, wattle and daub between log posts, carved oak about the door,
+//     the roof low and thick at its edges like a cottage's; p.pitch steepens a roof (2: two up for one across), p.horns sets
+//     crossed horse heads on the gables, p.hearth a long hearth in the floor
 // The roof is a gable along the depth (p.ridge 'a': along the width) of p.roof, its verges out over the gables, a finial on
 // each gable of stone or timber, dormers in the roofs of the taller houses; inside, floors, a ladder, lamps, a few furnishings.
 RB.house=(s,p,u,v,X,Z)=>{
   const [a,b]=partAB(p,u,v),mg=p.mg,pr=p.porch||0,ca=a-mg[0],cb=b-mg[2]-pr,W=p.W,D=p.D,g=p.y,st=p.st,sh=p.sh||4,eave=g+st*sh;
-  const mat=p.mat,stone=mat==='stone',tim=mat==='timber',cot=mat==='cottage',inA=ca>=0&&ca<W,inB=cb>=0&&cb<D,core=inA&&inB,r=hsh(X,9501,Z);
-  const alongB=p.ridge!=='a',span=alongB?W:D,pos=alongB?ca:cb,rb=cot?1:2,ry=eave+rb+Math.min(pos,span-1-pos),roof=p.roof||SLATE;
+  const mat=p.mat,stone=mat==='stone',tim=mat==='timber',cot=mat==='cottage',wat=mat==='wattle',low=cot||wat,inA=ca>=0&&ca<W,inB=cb>=0&&cb<D,core=inA&&inB,r=hsh(X,9501,Z);
+  const alongB=p.ridge!=='a',span=alongB?W:D,pos=alongB?ca:cb,rb=low?1:2,pit=p.pitch||1,ry=eave+rb+Math.min(pos,span-1-pos)*pit,roof=p.roof||SLATE;
   // the porch: pillars along its front under an entablature, the roof carried over it, a pediment with the realm's sign
   if(cb<0&&cb>=-pr&&inA){const fr=cb===-pr,col=fr&&(ca%2===0||ca===W-1);RBP(X,g,Z,WSTONE);
     for(let y=g+1;y<eave;y++)RBP(X,y,Z,col?WSPILLAR:AIR);RBP(X,eave,Z,col?WSCARVE:WSTRIM);
     for(let y=eave+1;y<ry;y++)RBP(X,y,Z,!fr?AIR:y===ry-1?WSTRIM:ca===W>>1&&y===eave+2?WSCARVE:WSBRICK);RBP(X,ry,Z,roof);return;}
   const ring=k=>tim&&k>0?[-mg[0],W-1+mg[1],-mg[2],D-1+mg[3]]:[0,W-1,0,D-1];
-  const wh=cot?2:Math.max(2,sh-2),sparse=p.pil||tim,winAt=(pa,L)=>sparse?pa%4===2&&pa<=L-3:L<=6?pa===(L>>1):pa>=2&&pa<=L-3&&pa%2===0;
+  const wh=low?2:Math.max(2,sh-2),sparse=p.pil||tim,winAt=(pa,L)=>sparse?pa%4===2&&pa<=L-3:L<=6?pa===(L>>1):pa>=2&&pa<=L-3&&pa%2===0;
   const dw=p.dw||1,dh=p.dh||2,dd=Math.abs(ca-p.door),ld=winAt(p.door+dw+1,W)?dw+2:dw+1;
   // a wall's own block, where no window, door or floor line is
   const wallOf=(k,dy,pa,L,cor)=>{
     if(stone||(tim&&k===0)){if(k===0&&dy===0)return WSROUGH;if(cor)return WSTONE;if((pa===1||pa===L-2)&&dy%2===1)return WSTONE;if(p.pil&&pa%4===0&&dy>0)return WSPILLAR;return WSBRICK;}
     if(tim){if(cor||pa%4===0)return LOG;return (pa+k+(dy>(sh>>1)?1:0))%2?TIMBER:PLASTER;}
+    if(wat){if(dy===0&&k===0)return FSTONE;if(cor||pa%3===0)return LOG;return WATTLE;}
     if(dy===0&&k===0)return COBBLE;if(cor)return LOG;return pa%3===0?TIMBER:PLASTER;};
-  if(core)RBP(X,g,Z,ca===0||ca===W-1||cb===0||cb===D-1?(cot?COBBLE:WSROUGH):p.floor||PLANKS);
+  if(core)RBP(X,g,Z,ca===0||ca===W-1||cb===0||cb===D-1?(cot?COBBLE:wat?FSTONE:WSROUGH):p.hearth&&ca===(W>>1)&&cb>1&&cb<D-2&&Math.abs(cb-(D>>1))<=Math.max(1,(D>>2)-1)?HEARTH:p.floor||PLANKS);
   for(let k=0;k<st;k++){const y0=g+1+k*sh,y1=y0+sh-1,R=ring(k),top=k===st-1,inR=ca>=R[0]&&ca<=R[1]&&cb>=R[2]&&cb<=R[3];
     const line=stone?WSTRIM:tim&&k===0?(top?WSTRIM:LOG):LOG; // the floor line: a moulded band, or a beam
     if(inR&&(ca===R[0]||ca===R[1]||cb===R[2]||cb===R[3])){ // the wall
@@ -4884,10 +4982,11 @@ RB.house=(s,p,u,v,X,Z)=>{
       for(let y=y0;y<=y1;y++){const dy=y-y0;let id;
         if(y===y1)id=line;
         else if(win&&dy>=1&&dy<=wh)id=AIR; // the window's reveal: its glass stands one in
-        else if(win&&dy===0&&k>0&&!cot)id=stone?WSTONE:PLANKS; // its sill
+        else if(win&&dy===0&&k>0&&!low)id=stone?WSTONE:PLANKS; // its sill
         else id=wallOf(k,dy,pa,L,cor);
         if(front&&dd<dw&&dy<dh)id=AIR; // the door, its lintel and jambs, a lamp beside it
-        else if(front&&dd<dw&&dy===dh)id=cot?LOG:dw>1?WSCARVE:WSTONE;
+        else if(front&&dd<dw&&dy===dh)id=cot?LOG:wat?CTIMBER:dw>1?WSCARVE:WSTONE;
+        else if(front&&dd===dw&&dy>=0&&dy<=dh&&wat)id=CTIMBER; // carved door posts
         else if(front&&dd===dw&&dy>0&&dy<dh)id=cot?LOG:WSPILLAR;
         else if(front&&p.lamp&&!mg[2]&&dd===ld&&dy===2)id=LANTERN;
         RBP(X,y,Z,id);}
@@ -4898,7 +4997,7 @@ RB.house=(s,p,u,v,X,Z)=>{
         if(lad)id=LADDER;
         else if(glass&&dy>=1&&dy<=wh)id=LGLASS;
         else if(p.pil&&dy<sh-1&&ca>1&&ca<W-2&&cb>1&&cb<D-2&&(ca===2||ca===W-3)&&cb%3===1)id=WSPILLAR;
-        else if(ca===(W>>1)&&cb===(D>>1)&&y===y1-1)id=LANTERN;
+        else if(ca===(W>>1)&&cb===(D>>1)&&y===y1-1&&!(p.hearth&&dy===0))id=LANTERN;
         else if(dy===0&&(ca===1||ca===W-2)&&(cb===1||cb===D-2)&&r<0.5)id=r<0.18?BARREL:r<0.34?CRATE:BOOKS;
         RBP(X,y,Z,id);}
     }else{ // the margin about this storey
@@ -4925,15 +5024,16 @@ RB.house=(s,p,u,v,X,Z)=>{
     else if(!inR){const pa=sB?ca:cb;RBP(X,eave+1,Z,WSBRICK);if(sA&&sB||((pa%2)+2)%2===0)RBP(X,eave+2,Z,WSBRICK);}return;}
   // the gables and a frieze along the eaves carried up to the roof (a window in a gable), the loft, the roof
   const gableM=alongB?sB:sA,gableW=alongB?(cb===R[2]||cb===R[3]):(ca===R[0]||ca===R[1]),eaveW=alongB?(ca===R[0]||ca===R[1]):(cb===R[2]||cb===R[3]);
-  const gpa=alongB?ca-R[0]:cb-R[2],gmid=(span-1)/2,gwall=stone?WSBRICK:gpa%3===0?TIMBER:PLASTER;
+  const gpa=alongB?ca-R[0]:cb-R[2],gmid=(span-1)/2,gwall=stone?WSBRICK:wat?(gpa%3===0?LOG:WATTLE):gpa%3===0?TIMBER:PLASTER;
   if(onR){for(let y=eave+1;y<ry;y++){let id=gwall;
-      if(gableW&&!eaveW){const o=Math.abs(pos-gmid),dy=y-eave;if(p.rose?(o<0.6&&dy>=2&&dy<=4)||(o>0.4&&o<1.6&&dy===3):!cot&&o<0.6&&dy===rb+1&&ry-eave>=rb+3)id=LGLASS;}
+      if(gableW&&!eaveW){const o=Math.abs(pos-gmid),dy=y-eave;if(p.rose?(o<0.6&&dy>=2&&dy<=4)||(o>0.4&&o<1.6&&dy===3):!cot&&o<0.6&&dy===rb+1&&ry-eave>=rb+3)id=LGLASS;
+        else if(wat&&o<0.6&&dy===rb+2&&ry-eave>=rb+4)id=CTIMBER;} // a carved boss high in a longhouse's gable
       RBP(X,y,Z,id);}}
   else if(inR){if(ry>eave+1)RBP(X,eave,Z,PLANKS);for(let y=eave+1;y<ry;y++)RBP(X,y,Z,AIR);}
-  else if(cot)RBP(X,ry-1,Z,roof); // the thatch thick at its edges
+  else if(low)RBP(X,ry-1,Z,roof); // the thatch thick at its edges
   else if(gableM&&ry-1>eave)RBP(X,ry-1,Z,stone?WSTRIM:PLANKS); // a barge board under the verge
-  RBP(X,ry,Z,roof);
-  if(!cot&&gableM&&!(alongB?sA:sB)&&Math.abs(pos-gmid)<0.6)RBP(X,ry+1,Z,stone?WSPILLAR:LOG); // a finial on the gable
+  RBP(X,ry,Z,roof);for(let y=ry-1;y>ry-pit&&y>eave;y--)RBP(X,y,Z,roof); // a steep roof, its steps filled
+  if(!cot&&gableM&&!(alongB?sA:sB)&&Math.abs(pos-gmid)<0.6)RBP(X,ry+1,Z,p.horns?HORNS:stone?WSPILLAR:LOG); // a finial on the gable
   // dormers in the upper roofs: a window at the wall's plane under a little gable of its own
   if(!cot&&st>=2&&span>=7&&inR){const p0=alongB?R[0]:R[2],p1=alongB?R[1]:R[3],q=pos-p0<=1?pos-p0:p1-pos<=1?p1-pos:-1;
     if(q>=0){const lo=alongB?R[2]:R[0],Lr=(alongB?R[3]:R[1])-lo+1,dl=(alongB?cb:ca)-lo,off=((dl-2)%4+4)%4,c=off===0?dl:off===1?dl-1:off===3?dl+1:-9,yW=ry-q;
@@ -5088,7 +5188,7 @@ RB.dome=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,H=p.H,c=(W-1)/2,dx=a
 // quench in, under a gabled roof on posts open at the front, a beam across it
 RB.smithy=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1,side=a===0||a===W-1;RBP(X,g,Z,COBBLE);
   for(let y=g+1;y<=g+4;y++)RBP(X,y,Z,back||(side&&b>0)?(y===g+4?LOG:COBBLE):side||y===g+4&&b===0?LOG:AIR);
-  const ry=g+5+Math.min(a,W-1-a);if(!side&&(b===0||back))for(let y=g+5;y<ry;y++)RBP(X,y,Z,back?COBBLE:PLANKS);RBP(X,ry,Z,SLATE);
+  const ry=g+5+Math.min(a,W-1-a);if(!side&&(b===0||back))for(let y=g+5;y<ry;y++)RBP(X,y,Z,back?COBBLE:PLANKS);RBP(X,ry,Z,p.roof||SLATE);
   if(b===D-2&&a===1){RBP(X,g+1,Z,COBBLE);RBP(X,g+2,Z,BRAZIER);RBP(X,g+4,Z,COBBLE);}if(back&&a===1)RBS(X,Z,g+5,ry+2,COBBLE);
   if(b===D-2&&a===2)RBP(X,g+1,Z,FURN);if(b===2&&a===2)RBP(X,g+1,Z,STEELB);if(b===D-2&&a===W-2)RBP(X,g+1,Z,BARREL);
   if(b===1&&a===W-2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
@@ -5099,7 +5199,7 @@ RB.yard=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y;RBP(X,g,Z,a===0||b==
 // stables: stalls open at the front between posts, a hayloft over them under a gabled slate roof, hay and a water trough
 RB.stable=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1,end=a===0||a===W-1,ry=g+4+Math.min(b,D-1-b);RBP(X,g,Z,back?COBBLE:hsh(X,9517,Z)<0.4?HAYBALE:DIRT);
   for(let y=g+1;y<=g+3;y++)RBP(X,y,Z,back||end?PLANKS:b===0&&a%3===0?LOG:a%3===0&&b<D-1&&y===g+1?PLANKS:AIR);
-  RBP(X,g+4,Z,b===0&&!end?LOG:PLANKS);for(let y=g+5;y<ry;y++)RBP(X,y,Z,end?PLANKS:y===g+5&&b>0&&b<D-1&&hsh(X,9535,Z)<0.4?HAYBALE:AIR);RBP(X,ry,Z,SLATE);
+  RBP(X,g+4,Z,b===0&&!end?LOG:PLANKS);for(let y=g+5;y<ry;y++)RBP(X,y,Z,end?PLANKS:y===g+5&&b>0&&b<D-1&&hsh(X,9535,Z)<0.4?HAYBALE:AIR);RBP(X,ry,Z,p.roof||SLATE);
   if(b===D-2&&a%3===2)RBP(X,g+1,Z,HAYBALE);if(b===1&&a%3===2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
 // a haystack
 RB.hay=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,g=p.y,m=Math.abs(a)+Math.abs(b);if(m>2)return;RBS(X,Z,g+1,g+(m===0?3:m===1?2:1),HAYBALE);};
@@ -5112,7 +5212,7 @@ const TRB={};
 // ---- Layouts
 function siteLayout(s){if(s.lay)return s.lay;const L={parts:[],spots:[]};s.lay=L;
   const r=rngAt(Math.round(s.X),9521,Math.round(s.Z));
-  if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
+  if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
   // the margins about houses, towers and walls, where their relief stands
   for(const p of L.parts){if(p.k==='house'){if(!p.mg){const o=p.ov||0;p.mg=[o,o,o,o];}if(p.gnd===undefined)p.gnd=s.k!=='city';}
     else if(p.k==='tower'){const e=p.mg===undefined?1:p.mg;p.u0-=e;p.u1+=e;p.v0-=e;p.v1+=e;}else if(p.k==='cwall'){p.u0--;p.u1++;p.v0--;p.v1++;}}
@@ -5273,7 +5373,7 @@ RB.ring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>=p.r-1.5&&d<p.r+0.5)RBP(X,p
 // ---- Roads: paved with flagstones between kerbs of white stone (the king's roads), lanes of beaten earth; a bridge of stone
 // or planks where a road crosses water; on the king's roads a white milestone with a lamp every 72 blocks
 function realmRoadCol(X,Z,x,z){
-  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
+  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
     if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}
@@ -5295,6 +5395,240 @@ function applyRealms(WCX,WCZ){
         for(const p of ps)if(u>=p.bu0&&u<=p.bu1&&v>=p.bv0&&v<=p.bv1)RB[p.k](s,p,u,v,X,Z);}}
     if(T.roads.length)for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++)realmRoadCol(x0+lx,z0+lz,x0+lx-OX,z0+lz-OZ);
   }finally{genLit=false;}
+}
+// ---- Building the riders of the plains (D-061): their hill towns, holds, steadings, beacons and horse farms, in the same frame
+// and parts as the white realm's (realm-build.js): a layout of parts, each a box in the site's own frame (u toward its back from
+// the side its road comes in on, v across) with a column builder; a chunk builds its own columns. Their ways: timber and wattle
+// under golden thatch or turf, their halls carved and gilded with crossed horse heads on the gables; fieldstone for footings,
+// terraces and the round walls of their holds; palisades of sharpened logs on an earth bank over a ditch; paddocks of horses.
+// the ground of a hill town: grass on its terraces, lanes of beaten earth round each (p.lanes: their radii about the hall's
+// middle), the way up of fieldstone flags; where a terrace rises over the one below, a fieldstone wall under a turf edge with a
+// rail fence along it
+RB.hground=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>s.R-3)return;const f=cityFrame(s),t=cityTier(s,u,v),g=s.T+t*f.step;
+  let lo=t;for(const [du,dv] of [[1,0],[-1,0],[0,1],[0,-1]])lo=Math.min(lo,cityTier(s,u+du,v+dv));
+  if(lo<t){RBS(X,Z,s.T+lo*f.step+1,g-1,FSTONE);RBP(X,g,Z,GRASS);if(!p.stair(u,v)&&!p.way(u,v))RBP(X,g+1,Z,FENCE);return;}
+  if(p.way(u,v)){RBP(X,g,Z,Math.abs(v)===2||hsh(X,9601,Z)>0.25?FSTONE:GRAVEL);return;}
+  const dc=Math.hypot(u-f.cu,v),lane=p.lanes.some(q=>Math.abs(dc-q)<1.2);
+  RBP(X,g,Z,lane?(hsh(X,9603,Z)<0.3?GRAVEL:PATH):GRASS);
+  if(!lane&&hsh(X,9605,Z)<0.06)RBP(X,g+1,Z,hsh(X,9607,Z)<0.5?TGRASS:[OXEYE,FLOWY,LAVENDER][(hsh(X,9609,Z)*3)|0]);};
+// the way up a terrace: steps of fieldstone between carved posts, a lamp on each post
+RB.hstair=(s,p,u,v,X,Z)=>{const k=u-p.u0,yl=p.y,av=Math.abs(v),st=cityFrame(s).step;
+  if(av<=2){if(k<st)RBS(X,Z,yl+1,yl+k+1,FSTONE);RBS(X,Z,yl+Math.min(k,st)+2,yl+st+6,AIR);}
+  else if(av===3&&k<st){RBS(X,Z,yl+1,yl+k+1,FSTONE);if(k===0||k===st-1){RBS(X,Z,yl+k+2,yl+k+3,CTIMBER);RBP(X,yl+k+4,Z,LANTERN);}}};
+// A palisade round a town or a beacon (p.r its line, p.H high): logs on a fieldstone footing, sharpened at the top; with p.walk a
+// walk of planks behind it on posts; with p.ditch an earth bank faced in fieldstone at its foot and a ditch outside, left
+// whole before the gate (a causeway); the gate's passage (p.gw either side of the middle, toward -u) is open
+RB.palisade=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v),R=p.r,g=p.y;if(u<0&&Math.abs(v)<=p.gw)return;const t=Math.round(Math.atan2(v,u)*R);
+  if(d>=R-0.7&&d<R+0.7){RBP(X,g+1,Z,FSTONE);RBS(X,Z,g+2,g+p.H,LOG);RBP(X,g+p.H+1,Z,STAKES);return;}
+  if(p.walk&&d>=R-2.2&&d<R-0.7){RBP(X,g+p.H-2,Z,PLANKS);if(((t%6)+6)%6===0)RBS(X,Z,g+1,g+p.H-3,LOG);return;}
+  if(p.ditch&&d>=R+0.7&&d<R+1.8){RBP(X,g+1,Z,FSTONE);return;}
+  if(p.ditch&&d>=R+2.6&&d<R+5.6){const o=colInfo(X,Z,TRB);if(o.wet||o.river||o.lake)return;RBS(X,Z,o.h-1,o.h+2,AIR);RBP(X,o.h-2,Z,GRASS);}};
+// A square timber tower (half-width p.h2, platform p.H over p.y): log posts at its corners, a rail low down, a platform of planks
+// with stakes round it and a ladder up the middle, a steep pyramid of golden thatch over it out one past its posts, the riders'
+// banner on a pole at its peak
+RB.ptower=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs(b)),g=p.y,h=p.h2,top=g+p.H;if(m>h+1)return;
+  if(m<=h){const cor=Math.abs(a)===h&&Math.abs(b)===h;if(cor)RBS(X,Z,g+1,top+2,LOG);else if(m===h){RBP(X,top-4,Z,LOG);RBP(X,top+1,Z,STAKES);}
+    RBP(X,top,Z,PLANKS);if(a===0&&b===0)RBS(X,Z,g+1,top,LADDER);}
+  const ry=top+3+(h+1-m)*2;RBS(X,Z,ry-1,ry,GTHATCH);if(m===0){RBP(X,ry+1,Z,LOG);RBP(X,ry+2,Z,HBANNER);RBP(X,ry+3,Z,HBANNER);}};
+// the bridge over a gate between its towers: a carved lintel, a walk of planks with stakes along its front, the horse heads
+RB.gatebeam=(s,p,u,v,X,Z)=>{const g=p.y,top=g+p.H,av=Math.abs(v);RBS(X,Z,top-3,top-2,av<=p.gw?CTIMBER:LOG);RBP(X,top-1,Z,PLANKS);
+  if(u===p.u0){RBP(X,top,Z,STAKES);if(v===0){RBP(X,top,Z,CTIMBER);RBP(X,top+1,Z,HORNS);}}};
+// The king's golden hall (a thane's hall in a lesser town): on a fieldstone terrace with steps before it, a long hall (p.W across,
+// p.D deep, p.sh to its eaves) of carved and gilded oak under a steep roof of golden thatch, its ridge gilded, crossed horse heads
+// on its gables; a porch on carved pillars before its doors; within, two rows of carved pillars under the open roof, a long hearth
+// down the middle, tapestries and shields on the walls, lamps, and at the far end a dais with the high seat under the banners
+RB.ghall=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),tm=2,pr=3,W=p.W,D=p.D,TW=W+2*tm,TD=D+pr+2*tm,ca=a-tm,cb=b-tm-pr,g=p.y,fl=g+2,eave=fl+p.sh,mid=(W-1)/2;
+  if(a<0||b<0||a>=TW||b>=TD)return;const inA=ca>=0&&ca<W,core=inA&&cb>=0&&cb<D,porch=inA&&cb>=-pr&&cb<0,dm=Math.abs(ca-mid);
+  // the steps up to the terrace, the terrace, its low wall and lamps
+  if(b<tm&&dm<=2){RBP(X,g,Z,FSTONE);if(b===1)RBP(X,g+1,Z,FSTONE);RBS(X,Z,b===1?g+2:g+1,g+5,AIR);return;}
+  RBS(X,Z,g,fl,FSTONE);const roofed=ca>=-1&&ca<=W&&cb>=-pr&&cb<=D;
+  if(!roofed){if(a===0||b===0||a===TW-1||b===TD-1){if((a+b)%2===0)RBP(X,fl+1,Z,FSTONE);if((a===0||a===TW-1)&&(b===0||b===TD-1)){RBP(X,fl+1,Z,CTIMBER);RBP(X,fl+2,Z,LANTERN);}}return;}
+  const pos=ca,ry=eave+1+Math.min(pos,W-1-pos)*2,ridge=Math.abs(pos-mid)<0.6;
+  if(porch){ // pillars along its front, a gilded beam over them, the roof carried over it with its gable closed above the beam
+    const col=cb===-pr&&(ca%3===0||ca===W-1);RBP(X,fl,Z,PLANKS);for(let y=fl+1;y<eave;y++)RBP(X,y,Z,col?CTIMBER:AIR);RBP(X,eave,Z,col||cb===-pr?GILDED:PLANKS);
+    for(let y=eave+1;y<ry-1;y++)RBP(X,y,Z,cb===-pr?(dm<0.6&&y===eave+2?SHIELDS:PLANKS):AIR);}
+  else if(core){const wall=ca===0||ca===W-1||cb===0||cb===D-1,cor=(ca===0||ca===W-1)&&(cb===0||cb===D-1),side=ca===0||ca===W-1,pa=side?cb:ca;
+    RBP(X,fl,Z,wall?FSTONE:PLANKS);
+    for(let y=fl+1;y<=eave;y++){const dy=y-fl;let id=AIR;
+      if(wall){const post=cor||pa%3===0;id=y===eave?GILDED:dy===1?CTIMBER:post?CTIMBER:PLANKS;
+        if(!post&&side&&pa%3===2&&dy===3)id=SHIELDS;if(!post&&side&&pa%3===1&&dy>=p.sh-2&&dy<p.sh)id=LGLASS;
+        if(cb===0&&dm<=1&&dy<=4)id=AIR;else if(cb===0&&dm<=1&&dy===5)id=GILDED;else if(cb===0&&dm===2&&dy<=5)id=CTIMBER;} // the doors
+      else{const dais=cb>=D-4;
+        if(dais&&dy===1)id=PLANKS;
+        if((ca===2||ca===W-3)&&cb%3===1&&cb<D-4)id=CTIMBER; // the pillars
+        else if(dm<0.6&&cb>=3&&cb<=D-7&&dy===0)id=HEARTH;
+        else if((ca===1||ca===W-2)&&cb%4===2&&cb<D-4&&dy>=2&&dy<=4)id=TAPESTRY;
+        else if(dm<0.6&&cb===D-3&&dy===2)id=GILDED; // the high seat
+        else if(dm<0.6&&cb===D-2&&dy>=2&&dy<=4)id=GILDED;
+        else if(Math.abs(dm-2)<0.6&&cb===D-2&&dy>=3&&dy<=5)id=HBANNER;
+        else if((ca===2||ca===W-3)&&cb%6===4&&y===eave)id=LANTERN;}
+      if(id!==AIR||!wall)RBP(X,y,Z,id);else RBP(X,y,Z,AIR);}
+    if(!(cb===0||cb===D-1))for(let y=eave+1;y<ry-1;y++)RBP(X,y,Z,AIR);
+    else for(let y=eave+1;y<ry-1;y++)RBP(X,y,Z,dm<0.6&&y===eave+3?SHIELDS:y===ry-2?GILDED:PLANKS);} // the gables
+  else if(cb===D&&inA){for(let y=eave+1;y<ry-1;y++)RBP(X,y,Z,AIR);} // the eaves out behind
+  RBP(X,ry,Z,ridge?GILDED:GTHATCH);RBP(X,ry-1,Z,GTHATCH);
+  if(ridge&&(cb===-pr||cb===D))RBP(X,ry+1,Z,HORNS);};
+// A paddock: grass in a rail fence with a gap at its front for a gate, a trough of water at the back, hay in a corner
+RB.paddock=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,edge=a===0||b===0||a===W-1||b===D-1;RBP(X,g,Z,GRASS);RBS(X,Z,g+1,g+3,AIR);
+  if(edge){if(!(b===0&&Math.abs(a-(W>>1))<=1))RBP(X,g+1,Z,FENCE);return;}
+  if(b===D-2&&a>=2&&a<=4)RBP(X,g,Z,WATER);else if(b===D-2&&(a===1||a===5))RBP(X,g+1,Z,PLANKS);
+  if(a===W-2&&b===1)RBS(X,Z,g+1,g+2,HAYBALE);else if(a===W-3&&b===1)RBP(X,g+1,Z,HAYBALE);};
+// A king's mound beside the road before the royal seat: a grassy barrow, white flowers on it
+RB.mound=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv);if(d>p.r)return;const o=colInfo(X,Z,TRB);if(o.wet||o.river||o.lake)return;const g=o.h,h=Math.round(p.hm*(1-(d/p.r)*(d/p.r)));
+  if(h<=0)return;RBS(X,Z,g,g+h-1,DIRT);RBP(X,g+h,Z,GRASS);RBP(X,g+h+1,Z,hsh(X,9611,Z)<0.22?OXEYE:AIR);};
+// A beacon: a ring of fieldstone, a crib of logs stacked within it, the fire basket on top, kept lit
+RB.pyre=(s,p,u,v,X,Z)=>{const d=Math.max(Math.abs(u-p.cu),Math.abs(v-p.cv)),g=p.y;if(d>2)return;RBP(X,g+1,Z,FSTONE);if(d===2)return;
+  RBS(X,Z,g+2,g+3,LOG);if(d===0){RBS(X,Z,g+4,g+5,LOG);RBP(X,g+6,Z,BRAZIER);}else if(((u+v)%2+2)%2===0)RBP(X,g+4,Z,LOG);};
+// A hold's round wall (p.r its outer face, p.H high, three thick): fieldstone on a battered foot, loops near its top, merlons
+// along its outer edge over a walk, the gate's arch at -u (p.gw either side) under a carved lintel with the horse heads over it;
+// outside, a ditch, left whole before the gate
+RB.rwall=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v),R=p.r,g=p.y,top=g+p.H,t=Math.round(Math.atan2(v,u)*R),gate=u<0&&Math.abs(v)<=p.gw;
+  if(d<R-2.6||d>=R+6.6)return;
+  if(d>=R+2.6){if(gate||d<R+3.4)return;const o=colInfo(X,Z,TRB);if(o.wet||o.river||o.lake)return;RBS(X,Z,o.h-1,o.h+2,AIR);RBP(X,o.h-2,Z,GRASS);return;}
+  if(d>=R+0.6){if(!gate){RBP(X,g+1,Z,FSTONE);if(d<R+1.5)RBP(X,g+2,Z,FSTONE);}return;}
+  for(let y=g+1;y<=top;y++){let id=FSTONE;
+    if(gate){const dy=y-g,arch=Math.abs(v)===p.gw?p.gh-1:p.gh;if(dy<=arch)id=AIR;else if(dy===arch+1)id=CTIMBER;}
+    else if(d>=R-0.6&&y>=top-3&&y<=top-2&&((t%5)+5)%5===0)id=AIR;
+    RBP(X,y,Z,id);}
+  if(gate)RBP(X,g,Z,FSTONE);
+  if(d>=R-0.6&&((t%2)+2)%2===0)RBP(X,top+1,Z,FSTONE);
+  if(gate&&d>=R-0.6&&v===0){RBP(X,top+1,Z,CTIMBER);RBP(X,top+2,Z,HORNS);}};
+// A round tower of fieldstone (p.rr its radius, p.H high): a battered foot, slits at the four quarters, floors, lamps and a
+// ladder within, a door toward the front (p.door), a gallery of planks carried out round its top on brackets with stakes; p.roof
+// a cone of golden thatch over it, else merlons and the riders' banner
+RB.rtower=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),rr=p.rr,g=p.y,top=g+p.H,t=Math.round(Math.atan2(b,a)*rr);if(d>rr+1.6)return;
+  if(p.roof&&d<=rr+1.6){const ry=top+2+Math.round((rr+1.6-d)*1.3);RBS(X,Z,Math.max(top+2,ry-1),ry,GTHATCH);if(d<0.6){RBP(X,ry+1,Z,LOG);RBP(X,ry+2,Z,HBANNER);RBP(X,ry+3,Z,HBANNER);}}
+  if(d>rr+0.5){RBP(X,g+1,Z,FSTONE);if(((t%2)+2)%2===0)RBP(X,top-1,Z,LOG);RBP(X,top,Z,PLANKS);RBP(X,top+1,Z,STAKES);return;}
+  const ring=d>rr-0.9,lad=Math.abs(a-(Math.round(rr)-2))<0.5&&Math.abs(b)<0.5;
+  for(let y=g+1;y<=top;y++){const dy=y-g;let id;
+    if(ring){id=FSTONE;if((Math.abs(a)<0.6||Math.abs(b)<0.6)&&dy%6>=3&&dy%6<=4&&y<top-2)id=AIR;if(p.door&&a<0&&Math.abs(b)<=1&&dy<=3)id=dy===3?CTIMBER:AIR;}
+    else id=lad?LADDER:dy%6===0?PLANKS:dy%6===5&&d<0.6?LANTERN:AIR;
+    RBP(X,y,Z,id);}
+  RBP(X,g,Z,FSTONE);
+  if(!p.roof){if(ring&&((t%2)+2)%2===0)RBP(X,top+1,Z,FSTONE);if(d<0.6){RBS(X,Z,top+1,top+2,LOG);RBS(X,Z,top+3,top+4,HBANNER);}}
+  if(ring&&!p.roof)RBP(X,top,Z,FSTONE);else if(!ring)RBP(X,top,Z,lad?LADDER:PLANKS);};
+// a ring of sand for training horses and riders, a rail fence round it
+RB.tring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),g=p.y;if(d>p.r+0.5)return;RBP(X,g,Z,d>p.r-0.6?GRASS:hsh(X,9613,Z)<0.6?SAND:GRAVEL);RBS(X,Z,g+1,g+3,AIR);
+  if(d>p.r-0.6&&!(Math.abs(v-p.cv)<=1&&u<p.cu))RBP(X,g+1,Z,FENCE);};
+// ---- Layouts of the riders' places
+function riderLayout(s,L,r){if(s.k==='city')riderTown(s,L,r);else if(s.k==='fort')riderHold(s,L,r);else if(s.k==='village')riderSteading(s,L,r);else if(s.k==='farm')riderStud(s,L,r);else riderBeacon(s,L,r);}
+// a longhouse of the riders: wattle and daub under turf or golden thatch, a steep roof with the horse heads on its gables, carved
+// door posts, a hearth within; on its core (u0..u1, v0..v1), its front facing f
+// (its ridge runs along its longer side, so the roof spans the shorter)
+const longhouse=(u0,u1,v0,v1,f,o)=>{const W=f<2?v1-v0+1:u1-u0+1,D=f<2?u1-u0+1:v1-v0+1;
+  return housePart(u0,u1,v0,v1,f,[1,1,1,1],Object.assign({st:1,sh:4,mat:'wattle',roof:TURF,pitch:2,horns:true,hearth:true,ridge:W>D?'a':'b',lamp:true},o));};
+// The hill town: a round town on a hill in terraces (cityGround), a palisade on an earth bank round it over a ditch, timber towers
+// along it and a gatehouse of two towers; the way up from the gate by stairs to the golden hall on the top terrace; longhouses in
+// rings round each terrace facing its lane; by the gate stables, a paddock, a smithy, a few stalls and a well; before the royal
+// seat the kings' mounds along the road
+function riderTown(s,L,r){
+  const R=s.R,f=cityFrame(s),cu=f.cu,P=L.parts,g0=s.T,tierY=t=>g0+t*f.step,taken=[],top=s.tiers>=3?2:1,rt=top===2?f.r2:f.r1;
+  const free=(a0,a1,b0,b1)=>!taken.some(q=>!(a1<q[0]||a0>q[1]||b1<q[2]||b0>q[3])),take=(a0,a1,b0,b1)=>taken.push([a0,a1,b0,b1]);
+  const tierOfBox=(a0,a1,b0,b1)=>{const ts=new Set();for(const [uu,vv] of [[a0-1,b0-1],[a1+1,b0-1],[a0-1,b1+1],[a1+1,b1+1],[(a0+a1)>>1,(b0+b1)>>1],[a0-1,(b0+b1)>>1],[a1+1,(b0+b1)>>1],[(a0+a1)>>1,b0-1],[(a0+a1)>>1,b1+1]])ts.add(cityTier(s,uu,vv));return ts.size===1?[...ts][0]:-1;};
+  const bounds=[{r:f.r1,t:1}];if(top===2)bounds.push({r:f.r2,t:2});
+  const stairAt=(u,v)=>Math.abs(v)<=3&&bounds.some(B=>u>=cu-B.r-f.step&&u<=cu-B.r);
+  const lanes=[];
+  // the golden hall on the top terrace, its front toward the gate; as long as the terrace allows
+  let D=Math.min(25,Math.max(13,Math.round(rt*1.3)|1)),W=D>=21?13:11;while(D>13&&Math.hypot((D+3+4)/2,(W+4)/2)>rt-1)D-=2;
+  const hu0=Math.round(cu-(D+3+4)/2),hu1=hu0+D+3+4-1;P.push({k:'ghall',u0:hu0,u1:hu1,v0:-(W>>1)-2,v1:(W>>1)+2,f:0,W:W,D:D,y:tierY(top),sh:6});take(hu0-1,hu1+1,-(W>>1)-3,(W>>1)+3);
+  P.unshift({k:'hground',u0:-R,u1:R,v0:-R,v1:R,f:0,stair:stairAt,way:(u,v)=>Math.abs(v)<=2&&u<hu0+1,lanes:lanes});
+  take(-R,hu0,-4,4); // the way up
+  for(const B of bounds){const u0=cu-B.r-f.step;P.push({k:'hstair',u0:u0,u1:u0+f.step-1,v0:-3,v1:3,f:0,y:tierY(B.t-1)});}
+  // longhouses in a ring round each terrace below the hall's, their long sides facing a lane along its inner edge, smaller
+  // houses where the ring turns (a house's box keeps to the site's axes)
+  for(let t=top-1;t>=0;t--){const rI=t===top-1?rt:bounds.find(B=>B.t===t+1).r,rO=t===0?R-4:bounds.find(B=>B.t===t).r,rin=rI+2,avail=rO-2-rin;if(avail<7)continue;
+    lanes.push(rin+1);const D0=Math.min(7,avail-2);
+    for(let ang=-Math.PI;ang<Math.PI;ang+=12/(rin+6)){const ca=Math.cos(ang),sa=Math.sin(ang);if(ca<-0.8&&Math.abs(sa*(rin+6))<9)continue; // the way
+      const fu=Math.abs(ca)>=Math.abs(sa),f0=fu?(ca>0?0:1):(sa>0?2:3);
+      for(const [w,dd] of [[11,D0],[9,D0],[7,Math.min(D0,5)],[5,5]]){const rm=rin+3+(dd-1)/2,uc=Math.round(cu+ca*rm),vc=Math.round(sa*rm),hu=fu?dd:w,hv=fu?w:dd,a0=uc-(hu>>1),a1=a0+hu-1,b0=vc-(hv>>1),b1=b0+hv-1;
+        if(!free(a0-1,a1+1,b0-1,b1+1)||tierOfBox(a0-1,a1+1,b0-1,b1+1)!==t||Math.hypot(Math.max(Math.abs(a0),Math.abs(a1))+1,Math.max(Math.abs(b0),Math.abs(b1))+1)>R-5)continue;
+        const q=hsh(uc,9615,vc);P.push(longhouse(a0,a1,b0,b1,f0,{y:tierY(t),door:w>>1,roof:q<0.55?TURF:GTHATCH,chim:null,lamp:w>=9}));take(a0-1,a1+1,b0-1,b1+1);
+        if(q>0.7)L.spots.push({kind:'street',u:Math.round(cu+ca*(rin+1)),v:Math.round(sa*(rin+1)),y:tierY(t)});break;}}}
+  // by the gate: stables and a paddock on one side, a smithy and stalls on the other, a well by the way
+  const sg=r()<0.5?1:-1,gu=-R+8;
+  if(free(gu,gu+8,sg*6,sg*20)){const a=sg>0?6:-20;P.push({k:'stable',u0:gu,u1:gu+5,v0:a,v1:a+14,f:0,y:g0,roof:TURF});P.push({k:'paddock',u0:gu+7,u1:gu+15,v0:a,v1:a+14,f:0,y:g0});take(gu-1,gu+16,a-1,a+15);
+    L.spots.push({kind:'stable',u:gu-2,v:a+7,y:g0},{kind:'paddock',u:gu+11,v:a+7,y:g0,horses:3});}
+  if(free(gu,gu+6,-sg*18,-sg*6)){const a=sg>0?-13:7;P.push({k:'smithy',u0:gu,u1:gu+5,v0:a,v1:a+6,f:3*(sg>0?1:0)+2*(sg>0?0:1),y:g0,roof:GTHATCH});take(gu-1,gu+6,a-1,a+7);L.spots.push({kind:'smithy',u:gu+2,v:a+(sg>0?8:-2),y:g0});
+    for(let k=0;k<2;k++){const u0=gu+8+k*5;P.push({k:'stall',u0:u0,u1:u0+2,v0:sg>0?-9:5,v1:sg>0?-6:8,f:sg>0?3:2,y:g0,wool:[WOOLG,WOOLY][k],c:k});}
+    L.spots.push({kind:'market',u:gu+11,v:-sg*5,y:g0});}
+  P.push({k:'well',u0:gu+16,u1:gu+18,v0:-sg*7-1,v1:-sg*7+1,cu:gu+17,cv:-sg*7,y:g0,roof:GTHATCH});
+  // the palisade on its bank, timber towers along it, the gatehouse
+  P.push({k:'palisade',u0:-R-6,u1:R+6,v0:-R-6,v1:R+6,f:0,r:R-1,H:7,gw:2,walk:true,ditch:true,y:g0});
+  const n=Math.max(6,Math.round(2*Math.PI*R/26));for(let k=1;k<n;k++){const a=Math.PI+k*2*Math.PI/n,cu0=Math.round(Math.cos(a)*(R-1)),cv0=Math.round(Math.sin(a)*(R-1));
+    if(Math.abs(cv0)<8&&cu0<0)continue;P.push({k:'ptower',u0:cu0-3,u1:cu0+3,v0:cv0-3,v1:cv0+3,cu:cu0,cv:cv0,h2:2,H:9,y:g0});}
+  for(const sd of [1,-1])P.push({k:'ptower',u0:-R-3,u1:-R+3,v0:sd*5-3,v1:sd*5+3,cu:-R,cv:sd*5,h2:2,H:9,y:g0});
+  P.push({k:'gatebeam',u0:-R-1,u1:-R+1,v0:-2,v1:2,f:0,y:g0,H:9,gw:2});
+  for(const vv of [8,-8])P.push({k:'ladder',u0:-R+3,u1:-R+3,v0:vv,v1:vv,f:0,y0:g0+1,y1:g0+5});
+  // the kings' mounds along the road before the royal seat
+  if(s.prov.capital)for(let k=0;k<6;k++){const sd=k%2?1:-1,cu0=-R-12-Math.floor(k/2)*11,cv0=sd*(11+(k%3)*2);P.push({k:'mound',u0:cu0-5,u1:cu0+5,v0:cv0-5,v1:cv0+5,cu:cu0,cv:cv0,r:5,hm:4});}
+  L.spots.push({kind:'gate',u:-R-8,v:0,y:g0},{kind:'gatein',u:-R+6,v:0,y:g0},{kind:'hall',u:hu0+(D>>1)+5,v:0,y:tierY(top)+2},{kind:'citgate',u:hu0-1,v:0,y:tierY(top)},{kind:'street',u:Math.round(cu-f.r1-8),v:0,y:g0});
+}
+// The hold: a round wall of fieldstone on its bank over a ditch, the gate in it under the horse heads; within, a round keep at
+// the back with a gallery round its top, a hall (a longhouse), stables, a ring for training, a well, hay
+function riderHold(s,L,r){
+  const R=s.R,g=s.T,P=L.parts;
+  P.push({k:'lane',u0:-R+2,u1:4,v0:-2,v1:2,f:0,y:g,id:FSTONE});
+  P.push({k:'rtower',u0:4,u1:16,v0:-6,v1:6,cu:10,cv:0,rr:5,H:24,y:g,door:true});
+  P.push(longhouse(-9,3,-15,-9,3,{y:g,roof:GTHATCH,door:3,chim:null}));
+  P.push({k:'stable',u0:-10,u1:3,v0:8,v1:13,f:2,y:g,roof:TURF});
+  P.push({k:'tring',u0:-16,u1:-6,v0:-5,v1:5,cu:-11,cv:0,r:4,y:g});
+  P.push({k:'well',u0:4,u1:6,v0:-12,v1:-10,cu:5,cv:-11,y:g,roof:GTHATCH});P.push({k:'hay',u0:5,u1:9,v0:7,v1:11,cu:7,cv:9,y:g});
+  P.push({k:'rwall',u0:-R-7,u1:R+7,v0:-R-7,v1:R+7,r:R-1,H:10,gw:2,gh:6,y:g});
+  for(const sd of [1,-1]){const a=Math.PI+sd*0.42;P.push({k:'rtower',u0:Math.round(Math.cos(a)*(R-1))-4,u1:Math.round(Math.cos(a)*(R-1))+4,v0:Math.round(Math.sin(a)*(R-1))-4,v1:Math.round(Math.sin(a)*(R-1))+4,cu:Math.round(Math.cos(a)*(R-1)),cv:Math.round(Math.sin(a)*(R-1)),rr:3,H:14,y:g,roof:true});}
+  L.spots.push({kind:'gate',u:-R-8,v:0,y:g},{kind:'gatein',u:-R+5,v:0,y:g},{kind:'keep',u:2,v:0,y:g},{kind:'barracks',u:-3,v:-7,y:g},{kind:'drill',u:-11,v:0,y:g},{kind:'stable',u:-3,v:6,y:g});
+}
+// A steading: longhouses round a green with a thatched well, the mead hall at its back under golden thatch, a smithy, a paddock
+// of horses, haystacks; a fence of wattle hurdles round it, open where the lanes run; fields and pasture about it
+function riderSteading(s,L,r){
+  const R=s.R,g=s.T,P=L.parts,small=R<20,rg=small?5:7,rs=small?10:15;
+  for(const [a0,a1,b0,b1] of [[-R,-rg+2,-1,1],[rg-2,R-2,-1,1],[-1,1,-R+3,-rg+2],[-1,1,rg-2,R-3]])P.push({k:'lane',u0:a0,u1:a1,v0:b0,v1:b1,f:0,y:g});
+  P.push({k:'ring',u0:-rg,u1:rg,v0:-rg,v1:rg,f:0,y:g,r:rg});P.push({k:'well',u0:-1,u1:1,v0:-1,v1:1,cu:0,cv:0,y:g,roof:GTHATCH});
+  P.push({k:'hurdle',u0:-R,u1:R,v0:-R,v1:R,f:0,y:g,r:R-1});
+  const slots=[];for(let k=0;k<8;k++){const a=(k*45+22.5)*Math.PI/180,rd=rs+(k%2)*2,cu0=Math.round(Math.cos(a)*rd),cv0=Math.round(Math.sin(a)*rd);slots.push([cu0,cv0,Math.abs(cu0)>Math.abs(cv0)?(cu0<0?1:0):(cv0<0?3:2)]);}
+  const order=slots.map((q,i)=>[q,hsh(i,9617,Math.round(s.X))]).sort((a,b)=>a[1]-b[1]).map(q=>q[0]),kinds=['hall','smithy','paddock'];
+  order.forEach((q,i)=>{const [cu0,cv0,f]=q,kind=kinds[i]||'house';
+    if(kind==='smithy'){if(Math.max(Math.abs(cu0),Math.abs(cv0))+4>R-2)return;P.push(partC('smithy',cu0,cv0,7,6,f,{y:g,roof:GTHATCH}));L.spots.push({kind:'smithy',u:cu0,v:cv0,y:g});return;}
+    if(kind==='paddock'){if(Math.max(Math.abs(cu0),Math.abs(cv0))+5>R-2)return;P.push(partC('paddock',cu0,cv0,9,9,f,{y:g}));L.spots.push({kind:'paddock',u:cu0,v:cv0,y:g,horses:small?2:3});return;}
+    const hall=kind==='hall',w=hall?9:7,d=hall?15:11;if(Math.max(Math.abs(cu0),Math.abs(cv0))+Math.max(w,d)/2>R-2)return;
+    P.push(partC('house',cu0,cv0,w+2,d+2,f,{W:w,D:d,mg:[1,1,1,1],y:g,st:1,sh:hall?5:4,mat:'wattle',roof:hall?GTHATCH:hsh(i,9619,Math.round(s.Z))<0.5?TURF:GTHATCH,pitch:2,horns:true,hearth:true,ridge:'b',door:w>>1,dw:hall?2:1,dh:hall?3:2,lamp:hall}));
+    if(hall)L.spots.push({kind:'green',u:cu0*0.55,v:cv0*0.55,y:g});
+    const bu=f===0?cu0+d/2+2:f===1?cu0-d/2-2:cu0,bv=f===2?cv0+d/2+2:f===3?cv0-d/2-2:cv0;if(Math.max(Math.abs(bu),Math.abs(bv))<R-3&&hsh(i,9621,Math.round(s.Z))<0.5)P.push({k:'hay',u0:Math.round(bu)-2,u1:Math.round(bu)+2,v0:Math.round(bv)-2,v1:Math.round(bv)+2,cu:Math.round(bu),cv:Math.round(bv),y:g});});
+  L.spots.push({kind:'green',u:-3,v:3,y:g},{kind:'green',u:3,v:-3,y:g},{kind:'lane',u:-R+4,v:0,y:g});
+  fieldsRound(s,L,r,3);
+}
+// a fence of wattle hurdles round a steading (p.r its line), open where the lanes leave it
+RB.hurdle=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d<p.r-0.7||d>=p.r+0.7||Math.abs(u)<=2||Math.abs(v)<=2)return;RBP(X,p.y+1,Z,WATTLE);if(hsh(X,9623,Z)<0.3)RBP(X,p.y+2,Z,STAKES);};
+// A horse farm: a long stable under turf, the farmhouse (a longhouse), two paddocks of horses with their troughs, hay
+function riderStud(s,L,r){
+  const g=s.T,P=L.parts;P.push({k:'lane',u0:-s.R,u1:-2,v0:-1,v1:1,f:0,y:g});
+  P.push(longhouse(-6,4,-12,-6,3,{y:g,door:3,chim:null}));
+  P.push({k:'stable',u0:-1,u1:12,v0:-4,v1:1,f:2,y:g,roof:TURF});
+  P.push({k:'paddock',u0:-12,u1:-4,v0:3,v1:12,f:3,y:g});P.push({k:'paddock',u0:0,u1:9,v0:4,v1:13,f:3,y:g});
+  P.push({k:'hay',u0:5,u1:9,v0:-12,v1:-8,cu:7,cv:-10,y:g});
+  L.spots.push({kind:'farm',u:-3,v:-2,y:g},{kind:'paddock',u:-8,v:7,y:g,horses:3},{kind:'paddock',u:4,v:8,y:g,horses:3});
+  fieldsRound(s,L,r,2);
+}
+// A beacon on the heights: a palisade ring of stakes, the beacon (a crib of logs under its fire basket, kept lit), a timber
+// lookout and a hut of turf
+function riderBeacon(s,L,r){
+  const R=s.R,g=s.T,P=L.parts;P.push({k:'lane',u0:-R+1,u1:R-1,v0:-R+1,v1:R-1,f:0,y:g,id:PATH});
+  P.push({k:'palisade',u0:-R-1,u1:R+1,v0:-R-1,v1:R+1,f:0,r:R-1,H:3,gw:1,y:g});
+  P.push({k:'pyre',u0:0,u1:4,v0:-2,v1:2,cu:2,cv:0,y:g});
+  P.push({k:'ptower',u0:-5,u1:-1,v0:1,v1:5,cu:-3,cv:3,h2:1,H:8,y:g});
+  P.push(housePart(-5,-2,-5,-2,3,[0,0,0,0],{y:g,st:1,sh:3,mat:'wattle',roof:TURF,pitch:2,horns:true,ridge:'b',door:1}));
+  L.spots.push({kind:'post',u:-1,v:0,y:g});
+}
+// ---- Roads of the riders: a broad track of beaten earth with gravel in its ruts and grass along its crown (the riders' road),
+// lanes of earth; timber bridges on piles of logs; beside the riders' road a carved post with the horse heads every 72 blocks
+function riderRoadCol(X,Z,x,z,rr){
+  const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBS(X,Z,g+1,g+2,CTIMBER);RBP(X,g+3,Z,HORNS);}return;}
+  if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,PLANKS);if(edge)RBP(X,y+1,Z,LOG);RBS(X,Z,y+(edge?2:1),y+3,AIR);
+    if(Math.floor(rr.along)%5===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,LOG);return;}
+  const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
+  const rut=hi&&ao>rd.w-1.5&&ao<rd.w-0.5,crown=hi&&ao<0.5;
+  RBP(X,g,Z,hi?(crown?GRASS:rut&&hsh(X,9625,Z)<0.45?GRAVEL:PATH):hsh(X,9627,Z)<0.12?GRAVEL:PATH);
+  for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
 }
 // ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
 // dug in hot black rock. Halls on two levels under the sunken floor of the wastes (D-055: the upper at y 168 to 192, the lower
@@ -5626,10 +5960,10 @@ function plants(WCX,WCZ){let F0=null;
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
       if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);const F=forestOf(TP); // mountains and fells only where their land has its own plants
-        const heath=b===4?1:Math.max(0,(TP.dw-0.2)*1.6),reed=b===11?1:Math.max(0,(TP.fen-0.25)*1.6),dark=b===8?1:Math.max(0,(TP.sw-0.25)*1.6);
+        const tn=TP.town?0:1,heath=tn*(b===4?1:Math.max(0,(TP.dw-0.2)*1.6)),reed=tn*(b===11?1:Math.max(0,(TP.fen-0.25)*1.6)),dark=tn*(b===8?1:Math.max(0,(TP.sw-0.25)*1.6)); // none of the wild growth on a realm's sites (D-061)
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
-        const fr=hsh(X,7,Z),fg=(b===3||b===4||b===8)&&fr<0.06&&fbm2(X/28,Z/28,1,4311.3)>0.2?BERRYB:(b===3||b===8)&&fr>0.994?MUSHB:(b===2||b===7||b===10)&&fr>0.994?WTURN:0;
+        const fr=hsh(X,7,Z),fg=!tn?0:(b===3||b===4||b===8)&&fr<0.06&&fbm2(X/28,Z/28,1,4311.3)>0.2?BERRYB:(b===3||b===8)&&fr>0.994?MUSHB:(b===2||b===7||b===10)&&fr>0.994?WTURN:0;
         if(fg)world[I(x,g+1,z)]=fg;
         else if(F&&F.plant){const p=F.plant(r,X,Z,TP);if(p)world[I(x,g+1,z)]=p;}
         else if(id)world[I(x,g+1,z)]=id;
@@ -6438,6 +6772,10 @@ const AMB_EV={
   voices:at=>{for(let i=0;i<2+(Math.random()*3|0);i++){const hi=Math.random()<0.5;voice((hi?260:150)+Math.random()*60,(hi?300:180)+Math.random()*40,0.18+Math.random()*0.2,0.025,{form:hi?1100:800,q:1.3,delay:i*0.35+Math.random()*0.2},at);}},
   cart:at=>{for(let i=0;i<6;i++)burst(0.06,'bandpass',420+Math.random()*120,2,0.05,i*0.28,at);creakish(at);},
   dog:at=>{const n=1+(Math.random()*3|0);for(let i=0;i<n;i++)voice(520,380,0.12,0.06,{form:900,q:2,delay:i*0.3},at);},
+  // the riders of the plains (D-061): a horse whinnying in a paddock, hooves on the beaten earth, a horn blown long and low
+  whinny:at=>{voice(620,300,0.9,0.045,{form:900,q:2,vib:18,vd:0.2},at);burst(0.25,'lowpass',300,0.8,0.02,0.8,at);},
+  hooves:at=>{const n=6+(Math.random()*6|0),gap=0.13+Math.random()*0.08;for(let i=0;i<n;i++)burst(0.05,'bandpass',300+Math.random()*80,3,0.05,i*gap+(i%3===2?0.08:0),at);},
+  horn:at=>{const far=[at[0]+(at[0]-PL.x)*3,at[1]+6,at[2]+(at[2]-PL.z)*3];tone(147,147,1.6,0.05,0,'sawtooth',far);tone(196,196,2.2,0.04,1.4,'triangle',far);},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -6453,7 +6791,10 @@ const AMB_LAND={
   ring:{wind:0.02,day:{chime:5},night:{chime:7}},
   // in a city, castle or village of the realms of men (D-060): voices and wheels by day, a bell now and then, a forge, dogs at night
   town:{wind:0.02,day:{voices:10,cart:2,bell:0.7,hammer:3,bird:5,dog:1},night:{cricket:8,dog:1.5,bell:0.3,voices:1}},
-  farmstead:{wind:0.03,day:{bird:10,dog:1,voices:1.5},night:{cricket:14,dog:1}}
+  farmstead:{wind:0.03,day:{bird:10,dog:1,voices:1.5},night:{cricket:14,dog:1}},
+  // in a hill town, hold or steading of the riders (D-061): voices, horses, a forge and a horn; the wind over the grass
+  riders:{wind:0.05,day:{voices:8,whinny:3,hooves:3,hammer:2,horn:0.4,bird:4,dog:1},night:{cricket:8,whinny:1,dog:1,voices:1}},
+  stud:{wind:0.05,day:{whinny:5,hooves:2,bird:8,voices:1},night:{cricket:12,whinny:1}}
 };
 const AMB_OF={sea:'sea',isles:'sea',kelp:'sea',chalk:'sea',fjord:'sea',blacksand:'sea',willow:'wet',bog:'wet',moors:'high',mtn:'high',alpine:'high',glacier:'high',tundra:'high',karst:'high',cloud:'wet',
   dry:'dry',steppe:'dry',petrified:'dry',volcanic:'fire',blight:'grey',shadow:'grey',barrow:'grey',crystal:'ring',starfall:'ring',glowcap:'ring'};
@@ -6474,7 +6815,7 @@ function ambProfile(){
     if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
     if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
-  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
+  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
   return {surf:P.surf||0,rumble:P.rumble||0,lava:P.lava||0,wind:(P.wind||0)*(1+Math.max(0,yy-SEA-40)/80),ev:ev,under:false};
 }
@@ -7836,7 +8177,8 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
 // gilded sword and a white plume. The townsfolk dress by their trade: a tunic with a belt and purse, a laced gown with an
 // apron, a merchant's fur-trimmed robe and feathered hat, a smith's stitched leather apron and hammer, a farmer's smocked
 // shirt and woven straw hat, a lord's robe embroidered in silver under a white mantle, a chain of office and a circlet.
-(function(){
+// The painting helpers are shared with the riders' folk (rider-models.js, D-061) as FOLK_KIT.
+const FOLK_KIT=(function(){
   const SK=[[226,186,152],[204,160,122],[176,128,94],[142,96,66],[232,198,170]],HAIR=[[40,30,24],[70,46,30],[112,76,44],[150,96,52],[150,146,140],[30,26,26]];
   const ALL=['L','F','R','B','T','D'],SIDE=['L','F','R','B'],sh=(c,k)=>[c[0]+k,c[1]+k,c[2]+k],hz=(s,t,q)=>amHash(s,t,q)-0.5;
   const legs=()=>[['legL',null,[-2,12,0],[-2,-12,-2,4,12,4]],['legR',null,[2,12,0],[-2,-12,-2,4,12,4],0,{m:'legL'}],
@@ -8017,6 +8359,215 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
         P.map('body',['F'],(s,t)=>Math.abs(t-3-Math.abs(s-7.5)*0.45)<0.6&&t<8?sh(GOLD,(s+t)%2?24:-10):null);
         plate(P,['circ'],GOLD);P.map('circ',['F'],(s)=>s===6||s===7?[110,170,230]:null);}}
   });
+  return {SK,HAIR,ALL,SIDE,sh,hz,legs,arms,man,cloth,mail,plate,leather,band,rivets,boots,hands,face,sword,swordPaint,STEEL,SILVER,GOLD,BLACK};
+})();
+// ---- The folk of the riders of the plains (D-061), built and painted like the white realm's (folk-models.js, whose painting
+// helpers they share through FOLK_KIT): boxes measured in pixels, two texels to a pixel.
+// The riders go in long mail to the knee under green cloaks bordered in gold, their sign a white horse running on green. Their
+// helms are tall cones with a gilt brow band, cheek guards and a nasal, a tail of white horsehair streaming from the crown; their
+// fair hair hangs long beneath. Guards carry an ash spear with a leaf blade and a green pennon and a round shield of green boards
+// with a gilt rim, a boss and the horse; bowmen go in quilted coats with a short horn-tipped bow and a quiver at the hip;
+// marshals in gilded helms with a long plume, a sword with a gold hilt and a horn at the belt. Horsemen ride armed as the guards
+// with a longer spear, on horses in a green saddlecloth with the horse on its flank, a saddle, a breast collar and a bridle.
+// The folk of the steadings: freemen in knee-length tunics with woven borders and cross-gartered legs, a cloak pinned at the
+// shoulder and a long knife; freewomen in long gowns with embroidered hems and necklines, a fillet and two braids, keys at the
+// girdle; horse-herds in leather and a hood with a coil of rope and a crook; thanes in green and gold, a fur-collared cloak, a
+// great brooch, an arm ring and a sword.
+(function(){
+  const {SK,ALL,SIDE,sh,hz,legs,arms,man,cloth,mail,plate,leather,band,rivets,boots,hands,face,sword,swordPaint,STEEL,GOLD}=FOLK_KIT;
+  const GREEN=[50,92,48],DGREEN=[34,64,36],WHITE=[236,234,224],BRONZE=[176,132,70],MAILC=[126,130,138];
+  const HAIR=[[222,186,112],[198,154,86],[162,114,62],[120,82,46],[232,214,164],[92,64,42]];
+  const coats=b=>SK.map((s,i)=>[{skin:s,hair:HAIR[(i*2+b)%HAIR.length],beard:(i+b)%2===0,eye:[[80,120,160],[110,130,140],[90,120,90]][(i+b)%3]},i===4?1:2]);
+  // the riders' sign: a white horse running, sixteen texels by twelve, its head toward high s
+  const HORSE_ROWS=['................','...........1....','..........111...','.........11111..','........111..11.','.......111......','.11111111111....',
+    '1..11111111.....','1..111111111....','...11.....11....','..1..1...1..1...','.1....1.1....1..'];
+  const HORSE=(x,y)=>x>=0&&y>=0&&x<16&&y<12&&HORSE_ROWS[y][x]==='1';
+  const horseSign=(P,n,f,s0,t0,col)=>P.map(n,[f],(s,t)=>HORSE(s-s0,t-t0)?sh(col,hz(s,t,201)*6):null);
+  // a woven border: a band of rows in gold with a running zigzag through it in the cloth's own darker shade
+  const woven=(P,n,fs,t0,t1,col,ground)=>P.map(n,fs,(s,t)=>{if(t<t0||t>=t1)return null;const m=t1-t0,k=t-t0;if(k===0||k===m-1)return sh(ground,-30);
+    const z=Math.abs(((s%6)+6)%6-3);return Math.abs(k-1-z*(m-3)/3)<0.7?sh(ground,-20):sh(col,(k===1?16:0)+hz(s,t,203)*8);});
+  // ---- the soldiers: a long hauberk of mail to the knee over a green tunic, a belt with a round gilt buckle, the green cloak
+  // with its woven border pinned by a round brooch, the helm and its horsehair, leather vambraces, long hair under the helm
+  const helmParts=o=>[['avent','head',[0,0,0],[-3.5,-2,-3.5,7,2,7],0,{head:1}],
+    ['helm','head',[0,4,0],[-3.5,0,-3.5,7,5,7],0,{head:1,tp:['y',0.42,0.42,0,0]}],['brim','head',[0,4,0],[-3.5,-0.5,-3.5,7,1.5,7],0,{head:1}],
+    ['knob','helm',[0,5,0],[-0.5,0,-0.5,1,1,1],0,{head:1,nb:1}],
+    ['hplume','helm',[0,5.5,-0.5],[-1,-(o&&o.long?13:10),-0.5,2,o&&o.long?13:10,1],[0.42,0,0],{head:1,nb:1,tp:['-y',1.6,1,0,0]}],
+    ['nasal','head',[0,4,0],[-0.5,-2.5,3,1,2.5,1],0,{head:1}],
+    ['chL','head',[-3,4,0],[-0.5,-3.5,-1,1,3.5,3],0,{head:1}],['chR','head',[3,4,0],[-0.5,-3.5,-1,1,3.5,3],0,{head:1,m:'chL'}],
+    ['hairB','head',[0,1,-3],[-2.5,-4,-1,5,6,1],0,{head:1,nb:1}]];
+  const kit=(coatH,capeH,capeR)=>[['coat','body',[0,0,0],[-4.5,-coatH+11,-2.5,9,coatH,5],0,{tp:['-y',1.1,1.12,0,0]}],['belt','body',[0,0,0],[-5,2,-3,10,1,6]],
+    ['cape','body',[0,10.5,-2.4],[-4.5,-capeH,-0.5,9,capeH,1],[capeR,0,0],{nb:1}],['brooch','body',[3,9.5,2.2],[-1,-1,0,2,2,1],0,{nb:1}],
+    ['vL','armL',[0,-6,0],[-3.5,-4,-2,4,4,4]],['vR','armR',[0,-6,0],[-0.5,-4,-2,4,4,4],0,{m:'vL'}]];
+  const soldier=(extra,o)=>[...man(),...kit(o&&o.coatH||18,16,0.1),...helmParts(o),...extra];
+  const helmPaint=(P,c,o)=>{const gilt=o&&o.gilt;
+    plate(P,['helm','nasal','chL'],gilt?GOLD:STEEL);P.map('helm',SIDE,(s,t,w)=>s%4===0?sh(gilt?GOLD:STEEL,-24):s%4===1?sh(gilt?GOLD:STEEL,18):null); // its plates, joined by ribs
+    plate(P,['brim','knob'],gilt?[230,196,110]:GOLD);P.map('brim',SIDE,(s,t)=>t===1&&s%3===1?sh(GOLD,40):t===2&&s%3===1?sh(GOLD,-30):null); // the brow band, its studs
+    P.map('brim',['F'],(s,t,w)=>Math.abs(s-(w>>1)+0.5)<2&&t<3?sh(WHITE,hz(s,t,205)*6):null); // a white boss over the nasal
+    P.map('chL',['L','R'],(s,t)=>(s+t)%3===0&&t>0?sh(STEEL,40):null);
+    // the horsehair: white, in strands, spreading toward its end
+    P.map('hplume',ALL,(s,t,w,h)=>sh([238,236,228],hz(s,0,207)*26+(t%5===0?-8:0)-t/h*14));
+    P.map('hairB',ALL,(s,t)=>sh(c.hair,hz(s,0,209)*22+(t%4===0?-8:0)));};
+  const soldierPaint=(P,c,o)=>{const gilt=o&&o.gilt,quilt=o&&o.quilt;face(P,c,{eyeRow:4,long:1});
+    // the hauberk: mail in rings over the arms and down to the knee, its hem and sleeves edged in leather, the green tunic's
+    // border showing below it; slit up the front and back for riding
+    mail(P,['armL','avent','body','coat']);hands(P,c,[104,72,44]);cloth(P,['legL'],[84,74,58],{off:1});
+    if(quilt){cloth(P,['coat','body'],[118,104,72]);P.map('coat',SIDE,(s,t)=>(s+t)%6===0||(s-t+60)%6===0?sh([118,104,72],-26):null);P.map('body',SIDE,(s,t)=>(s+t)%6===0||(s-t+60)%6===0?sh([118,104,72],-26):null);}
+    P.map('coat',['F','B'],(s,t,w,h)=>(s===w/2-1||s===w/2)&&t>=h-12?sh(DGREEN,-10):null);
+    P.map('coat',SIDE,(s,t,w,h)=>t>=h-3?sh(GREEN,(t===h-3?14:-6)+hz(s,t,211)*8):t===h-4?[70,50,30]:null);
+    if(gilt)P.map('coat',SIDE,(s,t,w,h)=>t===h-5?sh(GOLD,hz(s,t,213)*8):null);
+    P.map('armL',SIDE,(s,t,w,h)=>t===10?[70,50,30]:null);
+    // boots to the knee, bound with crossed straps
+    boots(P,[96,66,40],12);P.map('legL',SIDE,(s,t,w,h)=>t>=12&&t<h-2&&((s+t)%6===0||(s-t+60)%6===0)?[52,36,24]:null);
+    // the belt and its round gilt buckle, studs along it
+    leather(P,['belt'],[80,54,32]);P.map('belt',['F'],(s,t)=>s>=8&&s<=11?(Math.hypot(s-9.5,t-0.5)<1.2?[70,50,30]:sh(GOLD,t===0?24:0)):s%4===1&&t===1?sh(GOLD,10):null);
+    // the cloak: green, in folds, its border woven in gold; the brooch
+    cloth(P,['cape'],gilt?[40,76,42]:GREEN,{off:2});woven(P,'cape',SIDE,26,32,GOLD,GREEN);
+    P.map('cape',['L','R'],(s,t)=>sh(GOLD,hz(s,t,215)*8));if(gilt)horseSign(P,'cape','B',1,6,WHITE);
+    plate(P,['brooch'],GOLD);P.map('brooch',['F'],(s,t)=>s===1&&t===1||s===2&&t===2?[200,60,50]:null);
+    leather(P,['vL'],[110,76,44]);P.map('vL',SIDE,(s,t)=>t===2||t===5?[60,42,26]:(s%3===0&&t>2&&t<5)?[200,170,110]:null); // laced
+    helmPaint(P,c,o);};
+  // the round shield: green boards in a gilt rim with rivets round it, the white horse; within, planks and a strap; a boss
+  const shieldParts=(at)=>[['shield','armL',at||[-3.5,-6,0],[-1,-5,-5,1,10,10],0,{nb:1}],['boss','shield',[-1,0,0],[-1,-1.5,-1.5,1,3,3],0,{nb:1}]];
+  const shieldPaint=P=>{P.sheet('shield','x',(a,b)=>{const dx=a-9.5,dy=b-9.5,r=Math.hypot(dx,dy);if(r>10)return 'cut';
+      if(r>8.6)return sh(GOLD,(dy<-3?18:dy>3?-14:0)+hz(a,b,217)*6);
+      if(r>7.6&&(Math.round(Math.atan2(dy,dx)*12/Math.PI)%2===0))return r>8.1?sh(GOLD,30):sh(GOLD,-20);
+      if(HORSE(a-2,b-4))return sh(WHITE,hz(a,b,219)*6);
+      return sh(GREEN,(a%5===0?-16:a%5===1?6:0)+hz(a>>1,b,221)*10+(r>7?-10:0));});
+    P.map('shield',['R'],(s,t,w,h)=>{const a=w-1-s,r=Math.hypot(a-9.5,t-9.5);if(r>10)return null;return t>=8&&t<=11?sh([80,56,34],hz(s,t,223)*8):sh([128,92,56],(a%5===0?-18:0)+hz(a>>1,t,225)*12);});
+    plate(P,['boss'],GOLD);};
+  // an ash spear with a long leaf blade over its socket, and a green pennon with a gold stripe and a swallowtail
+  const spear=(len,rot)=>[['spear','armR',[1.5,-10,0.5],[-0.5,-8,-0.5,1,len,1],[rot,0,0],{nb:1}],
+    ['tipA','spear',[0,len-8,0],[-0.75,0,-0.75,1.5,2,1.5],0,{nb:1,tp:['y',0.6,0.6,0,0]}],['tipB','spear',[0,len-6,0],[-1,0,-0.5,2,6,1],0,{nb:1,tp:['y',0,1,0,0]}],
+    ['flag','spear',[0,len-12,0],[-0.5,-4,-7,1,4,7],0,{nb:1}]];
+  const spearPaint=P=>{P.map('spear',ALL,(s,t,w,h)=>t>=h-24&&t<=h-20||t>=24&&t<=28?((t>>1)%2?[60,40,26]:[200,170,100]):sh([132,98,60],hz(s,t>>2,227)*14));
+    plate(P,['tipA'],STEEL);P.map('tipB',ALL,(s,t,w)=>sh([216,222,230],s===(w>>1)||s===(w>>1)-1?-18:18));
+    P.sheet('flag','x',(a,b)=>{if(a<5&&Math.abs(b-3.5)<(5-a)*0.75)return 'cut';return b===3||b===4?sh(GOLD,hz(a,b,229)*8):sh(GREEN,(a%4===0?-10:0)+hz(a,b,231)*8);});};
+  Object.assign(AM_KINDS,{
+    hspear:{res:2,tex:256,parts:soldier([...shieldParts(),...spear(34,0.15)]),coats:coats(0),
+      paint(P,c){soldierPaint(P,c);shieldPaint(P);spearPaint(P);}},
+    // the bowman: a quilted coat to the thigh, the short bow of horn and wood with its tips curved forward, a quiver at the hip
+    hbow:{res:2,tex:256,parts:soldier([['bowU','armL',[-1.5,-10,1.5],[-0.5,0,-0.5,1,7,1],[-0.3,0,0],{nb:1,tp:['y',0.6,0.6,0,0]}],
+        ['bowUt','bowU',[0,7,0],[-0.5,0,-0.5,1,2,1],[0.9,0,0],{nb:1}],['bowD','armL',[-1.5,-10,1.5],[-0.5,-7,-0.5,1,7,1],[0.3,0,0],{nb:1,tp:['-y',0.6,0.6,0,0]}],
+        ['bowDt','bowD',[0,-7,0],[-0.5,-2,-0.5,1,2,1],[-0.9,0,0],{nb:1}],['bgrip','armL',[-1.5,-10,1.5],[-1,-1,-1,2,2,2],0,{nb:1}],
+        ['bstr','armL',[-1.5,-10,-0.2],[-0.5,-7,-0.5,1,14,1],0,{nb:1}],
+        ['quiver','body',[4.6,4,0.5],[-1,-8,-1.5,2,9,3],[0.1,0,0.12],{nb:1}],['fletch','quiver',[0,1,0],[-1,0,-1.5,2,2,3],0,{nb:1}]],{coatH:15}),coats:coats(1),
+      paint(P,c){soldierPaint(P,c,{quilt:1});
+        P.map('bowU',ALL,(s,t)=>sh([150,112,64],hz(s,t>>1,233)*12+(s===0?10:0)));P.map('bowD',ALL,(s,t)=>sh([150,112,64],hz(s,t>>1,235)*12+(s===0?10:0)));
+        P.map('bowUt',ALL,()=>[226,214,190]);P.map('bowDt',ALL,()=>[226,214,190]);P.map('bgrip',ALL,(s,t)=>(t+s)%2?[70,48,30]:[180,60,46]);P.map('bstr',ALL,()=>[230,226,212]);
+        leather(P,['quiver'],[112,74,42]);band(P,'quiver',SIDE,0,3,GOLD);band(P,'quiver',SIDE,12,14,[70,48,30]);P.map('quiver',['F','B'],(s,t)=>t>3&&t<12&&(s+t)%4===0?sh(GOLD,0):null);
+        P.map('fletch',ALL,(s,t)=>(s+t)%2?[238,236,230]:[60,110,56]);}},
+    // the marshal: a gilded helm with a long plume, gilt at the hauberk's hem, the horse on the cloak; a gold-hilted sword
+    // and a horn bound in gold at the belt
+    hcapt:{res:2,tex:256,scale:1.05,parts:soldier([...shieldParts(),['sheath','body',[-4.6,2,0.5],[-0.5,-11,-1,1,11,2],[0.3,0,0.08],{nb:1}],...sword(12),
+        ['horn','body',[4.8,3,1],[-1,-1,-3,2,2,6],[0.2,0.3,0],{nb:1,tp:['-z',0.4,0.4,0,0.6]}]],{long:1}),coats:coats(3),
+      paint(P,c){soldierPaint(P,c,{gilt:1});shieldPaint(P);swordPaint(P,1);leather(P,['sheath'],[50,70,44]);band(P,'sheath',SIDE,0,2,GOLD);band(P,'sheath',SIDE,20,22,GOLD);
+        P.map('horn',ALL,(s,t,w,h,f)=>{const z=f==='F'||f==='B'?0:f==='L'?s:w-1-s;return z%4===0?sh(GOLD,20):sh([226,212,182],hz(s,t,237)*10-(f==='D'?14:0));});
+        // a gold ring about the neck
+        P.map('avent',['F','L','R'],(s,t)=>t===3?sh(GOLD,(s%2?10:-6)):null);}},
+    // the horseman: a horse in a green saddlecloth with the horse on its flanks, a saddle, a breast collar and a bridle; on it a
+    // rider armed as the guards, with a longer spear
+    hrider:{res:2,tex:256,parts:[
+        ['legFL',null,[-3,14,7],[-2,-14,-2,4,14,4]],['legFR',null,[3,14,7],[-2,-14,-2,4,14,4],0,{m:'legFL'}],['legBL',null,[-3,14,-7],[-2,-14,-2,4,14,4]],['legBR',null,[3,14,-7],[-2,-14,-2,4,14,4],0,{m:'legBL'}],
+        ['hbody',null,[0,14,0],[-5,0,-10,10,10,20]],['neck','hbody',[0,7,8],[-2,-2,-3,4,11,6],[0.55,0,0]],['mane','neck',[0,0,0],[-1,-1,-4,2,13,2],0,{nb:1}],
+        ['hhead','neck',[0,9.5,0],[-2.5,-2,-3,5,5,6],[0.6,0,0]],['muzzle','hhead',[0,-1,3],[-2,-1,0,4,4,5]],
+        ['earL','hhead',[-1.5,3,-1.5],[-0.5,0,-0.5,1,3,1],[-0.15,0,-0.12]],['earR','hhead',[1.5,3,-1.5],[-0.5,0,-0.5,1,3,1],[-0.15,0,0.12],{m:'earL'}],
+        ['tail','hbody',[0,9,-10],[-1.5,-12,-1.5,3,12,3],[0.35,0,0]],
+        ['scloth','hbody',[0,0,0],[-5.5,2.5,-7,11,8,10]],['saddle','hbody',[0,10.5,-2],[-4,0,-4,8,1,7]],['cantle','saddle',[0,1,-4],[-3,0,0,6,2,1]],['pommel','saddle',[0,1,3],[-1.5,0,-1,3,2,1]],
+        ['breast','hbody',[0,0,10],[-4.5,4,-0.5,9,2,1]],
+        ['body','hbody',[0,11.5,-2.5],[-4,0,-2,8,11,4]],['head','body',[0,11,0],[-3,0,-3,6,7,6],0,{head:1}],...arms(-0.55),
+        ['thL','body',[-2,0.5,0],[-2,-11,-2,4,11,4],[-0.5,0,-0.42]],['thR','body',[2,0.5,0],[-2,-11,-2,4,11,4],[-0.5,0,0.42],{m:'thL'}],
+        ['stL','thL',[0,-11,0.5],[-1.5,-1,-1.5,3,1,3],0,{nb:1}],['stR','thR',[0,-11,0.5],[-1.5,-1,-1.5,3,1,3],0,{m:'stL',nb:1}],
+        ...kit(13,12,0.5),...helmParts(),...shieldParts([-3.5,-5,0]),...spear(40,0.75)],
+      coats:[[0,{coat:[128,72,42],mane:[34,28,26],low:[34,28,26]}],[1,{coat:[178,176,172],mane:[96,94,92],low:[120,118,116],dapple:1}],[2,{coat:[158,86,46],mane:[176,104,62],low:[150,82,46]}],
+        [3,{coat:[220,216,206],mane:[236,234,226],low:[200,196,188]}],[4,{coat:[48,44,44],mane:[30,28,28],low:[30,28,28]}],[0,{coat:[196,160,104],mane:[58,46,38],low:[58,46,38],stripe:1}]]
+        .map(([i,h],k)=>[Object.assign({},coats(k)[i][0],{h:h,sock:k%2===0,blaze:k%3!==1}),k===3?1:2]),
+      paint(P,c){
+        // the horse: its coat in fine hair, darker on the legs below the knee, the hooves, socks and a blaze on some; the mane
+        // and tail in strands; the eyes, nostrils and mouth
+        const H=c.h,hair=(n,col,k)=>P.map(n,ALL,(s,t,w,h,f)=>sh(col,hz(s,t>>2,239)*(k||8)+hz(s,t,241)*5-(f==='D'?18:f==='T'?0:t/h*10)));
+        for(const n of ['hbody','neck','hhead','muzzle','earL','legFL','legBL'])hair(n,H.coat);
+        if(H.dapple)P.map('hbody',['T','L','R','B'],(s,t)=>amHash(s>>1,t>>1,243)<0.22?sh([214,212,208],hz(s,t,245)*8):null);if(H.stripe)P.map('hbody',['T'],(s,t,w)=>Math.abs(s-w/2+0.5)<1?H.mane:null);
+        for(const n of ['legFL','legBL'])P.map(n,SIDE,(s,t,w,h)=>t>=h-3?[40,34,30]:t>=h-8&&c.sock?sh([228,224,216],hz(s,t,247)*6):t>=h-14?sh(H.low,hz(s,t,249)*8):null);
+        for(const n of ['legFL','legBL'])P.map(n,['D'],()=>[34,30,28]);
+        P.map('mane',ALL,(s,t)=>sh(H.mane,hz(s,0,251)*30+(t%6===0?-8:0)));P.map('tail',ALL,(s,t,w,h)=>sh(H.mane,hz(s,0,253)*30-t/h*10));
+        if(c.blaze){P.map('hhead',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1.5?[232,228,220]:null);P.map('muzzle',['T'],(s,t,w)=>Math.abs(s-w/2+0.5)<1.5?[232,228,220]:null);}
+        P.map('muzzle',['F'],(s,t,w,h)=>t>=h-3?[54,44,40]:(t===2&&(s===1||s===w-2))?[24,20,20]:null);
+        P.map('hhead',['L','R'],(s,t,w,h,f)=>{const e=f==='L'?w-4:3;return t>=2&&t<=3&&(s===e||s===e+(f==='L'?-1:1))?(t===2?[30,26,24]:[18,14,14]):null;});
+        // the bridle: a browband, a cheek strap and a noseband in leather, a gilt rosette, a steel ring at the bit
+        P.map('hhead',['L','R'],(s,t,w,h,f)=>{const c0=f==='L'?w-6:5;return s===c0||s===c0+(f==='L'?-1:1)?[70,46,28]:null;});P.map('hhead',['F','T'],(s,t,w,h,f)=>f==='F'&&t===1?[70,46,28]:null);
+        P.map('muzzle',['L','R','T'],(s,t,w,h,f)=>f==='T'?(t===2?[70,46,28]:null):(t===2?[70,46,28]:t===4&&(f==='L'?s===w-3:s===2)?sh(STEEL,30):null));
+        P.map('hhead',['L','R'],(s,t,w,h,f)=>t===2&&s===(f==='L'?w-6:5)?sh(GOLD,24):null);
+        // the reins down the neck to the rider's hands
+        P.map('neck',['L','R'],(s,t,w,h,f)=>s===(f==='L'?w-2:1)||s===(f==='L'?w-3:2)?[66,44,26]:null);
+        // the saddlecloth: green, a woven gold border, the horse on each flank; the saddle and its stitched seat; the breast collar
+        cloth(P,['scloth'],GREEN);woven(P,'scloth',['L','R','F','B'],12,16,GOLD,GREEN);horseSign(P,'scloth','L',2,0,WHITE);horseSign(P,'scloth','R',2,0,WHITE);
+        leather(P,['saddle','cantle','pommel'],[104,64,36]);P.map('saddle',['T'],(s,t,w,h)=>s%4===0||t%4===0?[78,46,26]:null);band(P,'cantle',SIDE,0,1,GOLD);band(P,'pommel',SIDE,0,1,GOLD);
+        leather(P,['breast'],[80,52,30]);P.map('breast',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<2?sh(GOLD,(t===0?20:-4)):s%4===2?sh(GOLD,0):null);
+        // the rider
+        soldierPaint(P,c);P.map('thL',ALL,(s,t,w,h,f)=>t>=10?(t===h-1?[40,30,24]:sh([96,66,40],hz(s,t,255)*10+((s+t)%6===0||(s-t+60)%6===0?-36:0))):sh(MAILC,((s+(t>>1))%2===0?(t%2===0?30:4):(t%2===0?-6:-28))));
+        plate(P,['stL'],STEEL);shieldPaint(P);spearPaint(P);}},
+    // ---- the folk of the steadings
+    hman:{res:2,tex:256,parts:[...man(),['tunic','body',[0,0,0],[-4.5,-5,-2.5,9,16,5],0,{tp:['-y',1.12,1.12,0,0]}],['belt','body',[0,0,0],[-5,3,-3,10,1,6]],
+        ['cape','body',[0,10.5,-2.4],[-4.5,-11,-0.5,9,11,1],[0.08,0,0],{nb:1}],['brooch','body',[3,9.5,2.2],[-1,-1,0,2,2,1],0,{nb:1}],['seax','body',[0,3.5,3],[-3.5,-1,0,6,1.5,1],[0,0,0.12],{nb:1}],
+        ['hairB','head',[0,1,-3],[-2.5,-4,-1,5,6,1],0,{head:1,nb:1}]],
+      coats:[[{skin:SK[0],hair:HAIR[0],cl:[76,104,62],emb:[214,176,84],hose:[110,92,64],beard:1},2],[{skin:SK[1],hair:HAIR[2],cl:[132,92,56],emb:[60,100,60],hose:[80,72,58]},2],
+        [{skin:SK[2],hair:HAIR[1],cl:[150,62,44],emb:[220,190,110],hose:[96,86,66],beard:1},2],[{skin:SK[0],hair:HAIR[4],cl:[176,156,112],emb:[150,62,44],hose:[100,84,60],beard:1},1],[{skin:SK[3],hair:HAIR[3],cl:[70,82,110],emb:[214,176,84],hose:[86,74,58]},1]],
+      paint(P,c){face(P,c,{long:1});P.map('hairB',ALL,(s,t)=>sh(c.hair,hz(s,0,257)*22+(t%4===0?-8:0)));
+        cloth(P,['armL','tunic','body'],c.cl);hands(P,c);cloth(P,['legL'],c.hose,{off:1});boots(P,[92,64,40],21);
+        // borders woven at the hem, the cuffs and round the neck; cross-gartering up the legs; the cloak and its brooch
+        woven(P,'tunic',SIDE,25,31,c.emb,c.cl);P.map('armL',SIDE,(s,t,w,h)=>t>=h-8&&t<h-4?(t===h-8||t===h-5?sh(c.cl,-26):sh(c.emb,(s%3===0?-18:6))):null);
+        P.map('body',['F'],(s,t,w)=>t<3&&Math.abs(s-w/2+0.5)<5?(t===2?sh(c.emb,(s%2?10:-10)):sh(c.skin,-8)):null);
+        P.map('legL',SIDE,(s,t,w,h)=>t>=6&&t<h-3&&((s+t)%5===0||(s-t+50)%5===0)?[200,182,140]:null);
+        cloth(P,['cape'],sh(c.cl,-30),{off:2});band(P,'cape',SIDE,18,22,sh(c.emb,-20));plate(P,['brooch'],BRONZE);P.map('brooch',['F'],(s,t)=>(s+t)%2===0?sh(BRONZE,30):null);
+        leather(P,['belt'],[86,58,34]);P.map('belt',['F'],(s)=>s>=9&&s<=10?sh(BRONZE,20):null);
+        leather(P,['seax'],[70,46,28]);P.map('seax',ALL,(s,t,w)=>s<3?sh([120,90,60],hz(s,t,259)*10):s===3||s===w-1?sh(BRONZE,10):null);}},
+    hwoman:{res:2,tex:256,parts:[...man(),['gown','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.25,1.3,0,0]}],['girdle','body',[0,0,0],[-5,1.5,-3,10,1,6]],
+        ['keys','body',[2.5,1.5,3],[-0.5,-4,0,1.5,4,0.5],0,{nb:1}],['fillet','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}],
+        ['hairB','head',[0,1,-3],[-3,-6,-1,6,9,1],0,{head:1,nb:1}],['braidL','head',[-2.5,1,1.5],[-1,-8,-0.5,2,8,1.5],[0,0,0.05],{head:1,nb:1}],['braidR','head',[2.5,1,1.5],[-1,-8,-0.5,2,8,1.5],[0,0,-0.05],{head:1,nb:1,m:'braidL'}]],
+      coats:[[{skin:SK[0],hair:HAIR[0],cl:[60,98,64],emb:[214,176,84]},2],[{skin:SK[1],hair:HAIR[4],cl:[150,64,50],emb:[226,206,150]},2],[{skin:SK[2],hair:HAIR[2],cl:[176,150,100],emb:[60,96,60]},2],
+        [{skin:SK[4],hair:HAIR[1],cl:[96,72,120],emb:[214,176,84]},1],[{skin:SK[3],hair:HAIR[5],cl:[110,84,58],emb:[200,170,110]},1]],
+      paint(P,c){face(P,c,{long:1});P.map('hairB',ALL,(s,t)=>sh(c.hair,hz(s,0,261)*20+(t%4===0?-6:0)));
+        P.map('braidL',ALL,(s,t,w,h)=>t>=h-2?sh(c.emb,-10):sh(c.hair,((t+s)%3===0?-20:6)+hz(s,t,263)*8));
+        cloth(P,['armL','body','gown'],c.cl);hands(P,c);P.map('legL',ALL,(s,t)=>sh([80,60,44],hz(s,t,265)*8));boots(P,[80,56,36],21);
+        // the neckline and the hem embroidered, the cuffs banded, the girdle with its keys, the fillet worked in the same thread
+        P.map('body',['F'],(s,t,w)=>t<5&&Math.abs(s-w/2+0.5)<(5-t)*0.8+1?(t===4||Math.abs(s-w/2+0.5)>=(5-t)*0.8?sh(c.emb,(s+t)%2?14:-10):sh(c.skin,-6)):null);
+        woven(P,'gown',SIDE,20,27,c.emb,c.cl);P.map('armL',SIDE,(s,t,w,h)=>t>=h-7&&t<h-4?sh(c.emb,(s%2?-14:8)):null);
+        leather(P,['girdle'],[120,86,48]);P.map('girdle',['F'],(s,t)=>s===13?sh(BRONZE,20):null);P.map('keys',ALL,(s,t)=>t%3===0?sh(BRONZE,30):sh(BRONZE,-10));
+        P.map('fillet',ALL,(s,t)=>sh(c.emb,(s%3===0?-20:8)+hz(s,t,267)*6));}},
+    hherd:{res:2,tex:256,parts:[...man(),['jerkin','body',[0,0,0],[-4.5,-4,-2.5,9,15,5]],['belt','body',[0,0,0],[-5,2.5,-3,10,1,6]],
+        ['hood','body',[0,11,0],[-4.5,-2,-3,9,2.5,6]],['cowl','head',[0,0,-3.5],[-3,-3,-0.5,6,5,1],0,{head:1,nb:1}],['pointH','cowl',[0,-2,-0.5],[-1,-6,-0.5,2,6,1],[0.25,0,0],{head:1,nb:1}],
+        ['coil','body',[-4.8,5,0],[-1,-3,-2.5,2,6,5],[0,0,-0.15],{nb:1}],
+        ['staff','armR',[1.5,-10,0.5],[-0.5,-8,-0.5,1,27,1],[0.15,0,0],{nb:1}],['crook','staff',[0,19,0],[-0.5,0,-0.5,1,1,4],0,{nb:1}],['crook2','staff',[0,19,3],[-0.5,-2,0,1,2,1],0,{nb:1}]],
+      coats:[[{skin:SK[1],hair:HAIR[2],hd:[70,92,56],beard:1},2],[{skin:SK[2],hair:HAIR[0],hd:[110,80,50]},2],[{skin:SK[3],hair:HAIR[5],hd:[86,70,52],beard:1},1]],
+      paint(P,c){face(P,c,{long:1});cloth(P,['armL','body'],[164,148,112]);hands(P,c);cloth(P,['legL'],[90,76,58]);boots(P,[84,58,36],16);
+        P.map('legL',SIDE,(s,t,w,h)=>t>=8&&t<16&&(s+t)%4===0?[60,46,32]:null);
+        // a jerkin of hide laced up the front, its edges stitched; a hood over the shoulders with its point hanging behind
+        leather(P,['jerkin'],[124,88,54],1);P.map('jerkin',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1?(t%3===0?[220,200,150]:[60,40,26]):null);
+        cloth(P,['hood','cowl','pointH'],c.hd);P.map('hood',SIDE,(s,t,w,h)=>t===h-1?sh(c.hd,-28):null);
+        leather(P,['belt'],[70,48,30]);
+        // the coil of rope: twisted strands in loops
+        P.map('coil',ALL,(s,t)=>sh([186,160,110],((s+t*2)%4===0?-30:(s+t*2)%4===1?14:0)+(t%3===0?-12:0)));
+        P.map('staff',ALL,(s,t)=>sh([120,88,56],hz(s,t>>2,269)*16+(t%9===0?-14:0)));P.map('crook',ALL,(s,t)=>sh([120,88,56],hz(s,t,271)*12));P.map('crook2',ALL,(s,t)=>sh([120,88,56],hz(s,t,273)*12));}},
+    hthane:{res:2,tex:256,scale:1.03,parts:[...man(),['tunic','body',[0,0,0],[-4.5,-8,-2.5,9,19,5],0,{tp:['-y',1.12,1.15,0,0]}],['belt','body',[0,0,0],[-5,3,-3,10,1,6]],
+        ['cape','body',[0,10.5,-2.4],[-4.5,-18,-0.5,9,18,1],[0.06,0,0],{nb:1}],['fur','body',[0,10,0],[-5,-1,-3,10,2.5,6]],['brooch','body',[3,9,3],[-1.5,-1.5,0,3,3,1],0,{nb:1}],
+        ['ring','armL',[0,-5,0],[-3.5,-1,-2,4,1,4]],['ringR','armR',[0,-5,0],[-0.5,-1,-2,4,1,4],0,{m:'ring'}],
+        ['sheath','body',[-4.6,2,0.5],[-0.5,-11,-1,1,11,2],[0.3,0,0.08],{nb:1}],['shilt','sheath',[0,0,0],[-0.5,0,-0.5,1,3,1],0,{nb:1}],['sguard','sheath',[0,0,0],[-1,0,-1.5,2,1,4],0,{nb:1}],
+        ['hairB','head',[0,1,-3],[-2.5,-4,-1,5,6,1],0,{head:1,nb:1}]],
+      coats:[[{skin:SK[0],hair:HAIR[0],beard:1},2],[{skin:SK[4],hair:HAIR[4],beard:1},1],[{skin:SK[1],hair:HAIR[2],eye:[90,70,50],beard:1},1]],
+      paint(P,c){face(P,c,{long:1});P.map('hairB',ALL,(s,t)=>sh(c.hair,hz(s,0,275)*22+(t%4===0?-8:0)));
+        cloth(P,['armL','body','tunic'],[44,86,46]);hands(P,c);cloth(P,['legL'],[60,52,40]);boots(P,[70,46,30],20);
+        // gold thread: a broad border at the hem and down the front, bands at the cuffs; the horse on the breast; a gold collar
+        woven(P,'tunic',SIDE,28,36,GOLD,[44,86,46]);P.map('tunic',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1.5&&t<28?sh(GOLD,(t%3===0?-16:8)):null);
+        P.map('armL',SIDE,(s,t,w,h)=>t>=h-8&&t<h-4?sh(GOLD,(s+t)%3===0?-18:6):null);horseSign(P,'body','F',0,6,WHITE);
+        P.map('body',['F'],(s,t,w)=>t<2?sh(GOLD,t===0?20:-6):null);
+        // the cloak: deep green, in folds, bordered in gold; a collar of grey fur; the great brooch with its garnets
+        cloth(P,['cape'],[30,58,34],{off:2});woven(P,'cape',SIDE,28,36,GOLD,[30,58,34]);horseSign(P,'cape','B',1,8,sh(GOLD,10));
+        P.map('fur',ALL,(s,t)=>sh([150,140,128],hz(s,t,277)*30+((s+t)%3===0?-16:0)));
+        plate(P,['brooch'],GOLD);P.map('brooch',['F'],(s,t,w,h)=>Math.hypot(s-w/2+0.5,t-h/2+0.5)<1.2?[170,40,40]:(s+t)%3===0?sh(GOLD,30):null);
+        plate(P,['ring'],GOLD);P.map('ring',SIDE,(s)=>s%2?sh(GOLD,-20):null);
+        leather(P,['belt'],[60,40,26]);P.map('belt',['F'],(s,t)=>s>=8&&s<=11?sh(GOLD,t===0?24:0):s%3===0&&t===1?sh(GOLD,10):null);
+        leather(P,['sheath'],[50,70,44]);band(P,'sheath',SIDE,0,2,GOLD);band(P,'sheath',SIDE,20,22,GOLD);P.map('shilt',ALL,(s,t)=>(s+t)%2?[70,48,30]:sh(GOLD,0));plate(P,['sguard'],GOLD);}}
+  });
 })();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
 // they give wool, milk and eggs, meat and hides to the hunter; wild horses can be ridden, a stray hound fed meat follows you, and
@@ -8042,7 +8593,7 @@ const WILD_OF={autumn:['wood'],birch:['wood'],pine:['wood','high'],giant:['wood'
 const WILD_CAP=22,animals=[],TWL={};let wildT=0,wildId=1,wildClock=0;
 // The window slides: every animal moves with it. The area is rebuilt elsewhere: the same, and those left outside the window are
 // dropped (befriended ones wait in wildPending until you come back).
-entityKind({name:'animals',list:animals,update:dt=>updAnimals(dt),persist:true,shift:(dx,dz)=>{for(const a of animals){a.x-=dx;a.z-=dz;if(a.tx!==undefined){a.tx-=dx;a.tz-=dz;}}}});
+entityKind({name:'animals',list:animals,update:dt=>updAnimals(dt),persist:true,shift:(dx,dz)=>{for(const a of animals){a.x-=dx;a.z-=dz;if(a.tx!==undefined){a.tx-=dx;a.tz-=dz;}if(a.pen){a.pen.x-=dx;a.pen.z-=dz;}}}});
 // the ground an animal stands on near height y: the first solid block at or below y+1, with two blocks of room above
 function standY(x,y,z){const bx=Math.floor(x),bz=Math.floor(z);if(bx<0||bz<0||bx>=W||bz>=D)return -1;for(let yy=Math.floor(y)+1;yy>=Math.floor(y)-3;yy--){if(yy<1||yy>=H-2)continue;if(SOLID[get(bx,yy-1,bz)]&&!SOLID[get(bx,yy,bz)]&&!SOLID[get(bx,yy+1,bz)])return yy;}return -1;}
 const wetAt=(x,y,z)=>isWetId(get(Math.floor(x),y,Math.floor(z)));
@@ -8073,7 +8624,9 @@ const angTo=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.28
 function herdCentre(a){let n=0,x=0,z=0;for(const b of animals)if(b.herd===a.herd&&!b.dead&&Math.abs(b.x-a.x)<24&&Math.abs(b.z-a.z)<24){n++;x+=b.x;z+=b.z;}return n?[x/n,z/n]:[a.x,a.z];}
 // one animal takes fright, and the rest of its herd nearby with it
 function alarm(a,fx,fz,secs){for(const b of animals){if(b.dead||b.tame||b===PL.ride)continue;if(b===a||(b.herd===a.herd&&Math.hypot(b.x-a.x,b.z-a.z)<18)){b.st='flee';b.t=secs||(4+Math.random()*2);b.fx=fx;b.fz=fz;b.sl=Math.min(b.sl,0.99);}}}
-function setTarget(a,r){const [cx,cz]=herdCentre(a);for(let k=0;k<6;k++){const an=Math.random()*6.283,d=1.5+Math.random()*r,tx=(cx+a.x)/2+Math.sin(an)*d,tz=(cz+a.z)/2+Math.cos(an)*d,ty=standY(tx,a.y,tz);
+// (an animal in a pen, a.pen {x, z, r}: the horses in the riders' paddocks, D-061, stays inside it until it is ridden)
+function setTarget(a,r){const [cx,cz]=herdCentre(a);for(let k=0;k<6;k++){const an=Math.random()*6.283,d=a.pen?Math.random()*a.pen.r:1.5+Math.random()*r,
+    tx=(a.pen?a.pen.x:(cx+a.x)/2)+Math.sin(an)*d,tz=(a.pen?a.pen.z:(cz+a.z)/2)+Math.cos(an)*d,ty=standY(tx,a.y,tz);
   if(ty>0&&Math.abs(ty-a.y)<=2&&!wetAt(tx,ty,tz)){a.tx=tx;a.tz=tz;return true;}}return false;}
 // what to do next when the current thing is done: walk somewhere near the herd, graze, look about, or sleep at night
 function nextState(a){
@@ -8092,7 +8645,7 @@ function stepAnimal(a,dt){
   a.hurt=Math.max(0,a.hurt-dt*3);
   if(a.dead){a.dead+=dt;a.sp=0;return;}
   if(a.hold){a.sp=a.holdSp||0;a.hd=a.yaw;return;} // held still (screenshots and tests); holdSp walks it on the spot
-  if(PL.ride===a){const v=Math.hypot(PL.vx,PL.vz);a.sp=v;if(v>0.6)a.hd=Math.atan2(PL.vx,PL.vz);a.yaw+=angTo(a.yaw,a.hd)*Math.min(1,dt*8);a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;a.st='walk';return;}
+  if(PL.ride===a){a.pen=null;const v=Math.hypot(PL.vx,PL.vz);a.sp=v;if(v>0.6)a.hd=Math.atan2(PL.vx,PL.vz);a.yaw+=angTo(a.yaw,a.hd)*Math.min(1,dt*8);a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;a.st='walk';return;}
   a.t-=dt;
   // fright: a running player inside the shy distance, or any player inside half of it
   if(A.shy&&!a.tame&&a.st!=='flee'&&dp<A.shy&&(ps>4.6||dp<A.shy*0.45)&&Math.abs(PL.y-a.y)<8)alarm(a,PL.x,PL.z);
@@ -8112,7 +8665,7 @@ function stepAnimal(a,dt){
   // move, looking ahead by the body's length: steps of one block up, drops of up to three, never into water
   const mx=Math.sin(a.yaw)*a.sp+a.kvx,mz=Math.cos(a.yaw)*a.sp+a.kvz;a.kvx*=Math.max(0,1-dt*5);a.kvz*=Math.max(0,1-dt*5);
   if(Math.abs(mx)+Math.abs(mz)>1e-4){const nx=a.x+mx*dt,nz=a.z+mz*dt,ml=Math.hypot(mx,mz),rr=Math.max(0.2,a.m.box[5]*0.85),fx=a.x+mx/ml*rr,fz=a.z+mz/ml*rr;
-    const gn=standY(nx,a.y+0.05,nz),gf=standY(fx,a.y+0.05,fz),ok=gn>0&&gf>0&&gn-a.y<=1.01&&gf-a.y<=1.01&&a.y-gn<=3&&a.y-gf<=3&&!wetAt(nx,gn,nz)&&!wetAt(fx,gf,fz);
+    const gn=standY(nx,a.y+0.05,nz),gf=standY(fx,a.y+0.05,fz),ok=gn>0&&gf>0&&gn-a.y<=1.01&&gf-a.y<=1.01&&a.y-gn<=3&&a.y-gf<=3&&!wetAt(nx,gn,nz)&&!wetAt(fx,gf,fz)&&(!a.pen||Math.hypot(nx-a.pen.x,nz-a.pen.z)<Math.max(a.pen.r,Math.hypot(a.x-a.pen.x,a.z-a.pen.z)));
     if(ok){a.x=nx;a.z=nz;a.gy=gn;a.stuck=0;}else{a.sp*=0.2;a.kvx=a.kvz=0;a.stuck=(a.stuck||0)+dt;if(a.st==='walk'){a.st='idle';a.t=0.4;}else if(a.st==='flee')a.hd=a.yaw+(a.id%2?1:-1)*(1.4+Math.random());}}
   // stepping up eases over a moment; falling follows gravity; a struck animal hops
   const gy=standY(a.x,a.y+0.05,a.z);if(gy>0)a.gy=gy;
@@ -8282,10 +8835,22 @@ const FOES={
   rmerch:{n:'Merchant',m:'rmerch',hp:12,dmg:1,reach:1.6,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,1,0.3],[207,1,2,0.5]],cause:'guard'},
   rsmith:{n:'Smith',m:'rsmith',hp:16,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'guard'},
   rfarmer:{n:'Farmer',m:'rfarmer',hp:12,dmg:1,reach:1.8,walk:1.15,run:4.3,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[202,1,3,0.6],[209,1,2,0.4]],cause:'guard'},
-  rnoble:{n:'Lord of the Realm',m:'rnoble',hp:14,dmg:1,reach:1.6,walk:1.05,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,2,0.6]],cause:'guard'}
+  rnoble:{n:'Lord of the Realm',m:'rnoble',hp:14,dmg:1,reach:1.6,walk:1.05,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,2,0.6]],cause:'guard'},
+  // the riders of the plains (D-061): say names the lines they greet with; mount: a horseman (three blocks tall, a horse's pace,
+  // a long reach with the spear); fem: a woman's voice
+  hspear:{n:'Guard of the Riders',m:'hspear',hp:22,dmg:4,reach:2.8,walk:1.3,run:4.7,sight:24,cd:1.3,wind:0.45,block:0.45,mass:0.55,folk:1,say:'hguard',drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'rider'},
+  hbow:{n:'Bowman of the Riders',m:'hbow',hp:16,dmg:2,reach:2,walk:1.35,run:4.8,sight:30,cd:1.2,wind:0.4,shot:{dmg:3,v:28,lo:5,hi:28,cd:2,k:'arrow'},keep:11,mass:0.6,folk:1,say:'hguard',drops:[[201,2,4,0.6],[206,1,1,0.4]],cause:'harrow'},
+  hcapt:{n:'Marshal of the Riders',m:'hcapt',hp:44,dmg:7,reach:2.4,walk:1.35,run:4.7,sight:28,cd:1.1,wind:0.45,block:0.45,mass:0.4,folk:1,drops:[[227,1,2,0.6],[206,1,2,0.6]],cause:'rider'},
+  hrider:{n:'Horseman of the Riders',m:'hrider',hp:34,dmg:5,reach:3.2,walk:1.7,run:7,sight:32,cd:1.4,wind:0.5,block:0.4,mass:0.25,tall:3,mount:1,folk:1,say:'hguard',drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'horse'},
+  hman:{n:'Freeman',m:'hman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.5,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,1,0.5]],cause:'rider'},
+  hwoman:{n:'Freewoman',m:'hwoman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.5,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'rider'},
+  hherd:{n:'Horse-herd',m:'hherd',hp:12,dmg:1,reach:1.8,walk:1.25,run:4.6,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[202,1,2,0.5]],cause:'rider'},
+  hthane:{n:'Thane of the Riders',m:'hthane',hp:16,dmg:2,reach:1.8,walk:1.05,run:4.3,sight:16,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.6]],cause:'rider'},
+  hsmith:{n:'Smith',m:'rsmith',hp:16,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'rider'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
-  troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you'});
+  troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you',
+  rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down'});
 // who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
 const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
   lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]]};
@@ -8293,9 +8858,15 @@ const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gsling
 Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],['rsword',1]],r_barracks:[['rsword',2],['rspear',1]],r_drill:[['rsword',2],['rspear',1]],r_keep:[['rsword',1]],
   r_market:[['rmerch',3],['rwoman',2],['rman',2]],r_street:[['rman',2],['rwoman',2],['rspear',0.5]],r_smithy:[['rman',1]],r_citadel:[['rspear',2],['rsword',1]],r_hall:[['rsword',1],['rman',0.4]],
   r_citgate:[['rspear',1]],r_green:[['rman',2],['rwoman',2],['rfarmer',1]],r_lane:[['rfarmer',1],['rman',1]],r_farm:[['rwoman',1],['rfarmer',1]],r_field:[['rfarmer',1]],r_post:[['rspear',2],['rbow',2]],
-  r_patrol:[['rspear',2],['rsword',1.5],['rbow',1]]});
-const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3]},
-  FOLK_LEAD={barracks:'rcapt',keep:'rcapt',smithy:'rsmith',hall:'rnoble',farm:'rfarmer'};
+  r_patrol:[['rspear',2],['rsword',1.5],['rbow',1]],
+  // the riders' places (D-061): their halls are kept by guards, their towns full of folk, horsemen at the drill and on the roads
+  h_gate:[['hspear',3],['hbow',1.5]],h_gatein:[['hspear',2],['hrider',1]],h_hall:[['hspear',1.5],['hman',1],['hwoman',1]],h_citgate:[['hspear',1]],
+  h_street:[['hman',2],['hwoman',2],['hherd',0.6],['hspear',0.4]],h_market:[['hwoman',3],['hman',2]],h_smithy:[['hman',1]],h_stable:[['hherd',2],['hman',1]],
+  h_paddock:[['hherd',1]],h_keep:[['hspear',2]],h_barracks:[['hspear',2],['hbow',1]],h_drill:[['hrider',2],['hspear',1]],h_green:[['hman',2],['hwoman',2],['hherd',1]],
+  h_lane:[['hman',1],['hherd',1]],h_farm:[['hherd',2],['hwoman',1]],h_field:[['hman',1]],h_post:[['hspear',2],['hbow',2]],h_patrol:[['hrider',1]]});
+const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
+    stable:[1,2],paddock:[1,1]},
+  FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -8333,20 +8904,21 @@ function foePlaces(){
   const sg=sigNear(X,Z,60);if(sg&&sg.kind==='citadel')out.push({id:'s'+sg.X+','+sg.Z,x:sg.X,y:sg.g,z:sg.Z,R:9,kind:'citadel'});
   // the realms of men (D-060): each spot of a site's layout within 46 blocks
   for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites){if(Math.hypot(s.X-X,s.Z-Z)>s.R+70)continue;const L=siteLayout(s);
-    L.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);if(Math.hypot(x-X,z-Z)>46)return;out.push({id:s.id+':'+i,x:x+0.5,y:p.y>0?p.y+1:hAt(Math.round(x),Math.round(z))+1,z:z+0.5,R:p.kind==='gate'||p.kind==='post'||p.kind==='citgate'?2.5:4,kind:'r_'+p.kind,s:s});});}
+    L.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);if(Math.hypot(x-X,z-Z)>46)return;out.push({id:s.id+':'+i,x:x+0.5,y:p.y>0?p.y+1:hAt(Math.round(x),Math.round(z))+1,z:z+0.5,R:p.kind==='gate'||p.kind==='post'||p.kind==='citgate'?2.5:4,kind:s.prov.cult.fp+p.kind,folk:1,horses:p.horses||0,s:s});});}
   return out;
 }
 function foeSpawnTick(){
   const X=PL.x+OX,Z=PL.z+OZ;
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
-  for(const s of foePlaces()){const folk=s.kind.startsWith('r_');if(foeSpots.has(s.id)||(!folk&&foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     if(folk&&folkCount()>=FOLK_CAP)continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     if(folk){const k=s.kind.slice(2),N=FOLK_N[k]||[1,2],night=ambNight()&&!['gate','gatein','post','citgate','barracks','keep','citadel'].includes(k);
-      spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[k]||null,prov:s.s.prov.key,site:s.s});continue;}
+      spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s});
+      if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':null,sleep:s.kind==='den'?0.45:0});}
   folkPatrol();
@@ -8374,9 +8946,13 @@ function folkPatrol(){
   const roads=T.roads.filter(r=>r.k==='high');if(!roads.length)return;if(foes.some(f=>f.road&&!f.dead))return;
   const rd=roads[Math.floor(Math.random()*roads.length)],t=Math.random(),px=rd.a[0]+(rd.b[0]-rd.a[0])*t,pz=rd.a[1]+(rd.b[1]-rd.a[1])*t,d=Math.hypot(px-X,pz-Z);
   if(d<34||d>70)return;const x=px-OX,z=pz-OZ,bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return;
-  const grp=spawnGroup('r_patrol',2+Math.floor(Math.random()*2),x,ground[bx+W*bz],z,2,{lead:Math.random()<0.3?'rcapt':null,prov:rd.P.key,site:rd.P.sites[0]});
+  const C=rd.P.cult,horse=C.k==='horse',grp=spawnGroup(C.fp+'patrol',2+Math.floor(Math.random()*2),x,ground[bx+W*bz],z,horse?3:2,{lead:!horse&&Math.random()<0.3?'rcapt':null,prov:rd.P.key,site:rd.P.sites[0]});
   const dir=Math.random()<0.5?1:-1;for(const f of grp){f.road={rd:rd,dir:dir,along:t*rd.len};f.st='idle';f.t=0.5;}
 }
+// the horses of a riders' paddock (D-061): put out once while the player is near, penned until one is ridden away
+function folkHorses(s,x,z){for(const a of [...animals])if(a.spot===s.id&&!a.tame)removeAnimal(a);
+  for(let i=0;i<s.horses;i++){const xx=x+(Math.random()-0.5)*4,zz=z+(Math.random()-0.5)*4,yy=standY(xx,s.y+1,zz);if(yy<0||wetAt(xx,yy,zz))continue;
+    addAnimal('horse',xx,yy,zz,{spot:s.id,pen:{x:x,z:z,r:2.6},young:i>0&&Math.random()<0.3});}}
 // what the folk say to a passer-by (the place and the kingdom by name)
 const FOLK_SAY={
   guard:['Hail, traveller. Keep the peace within these walls.','The roads of {k} are watched. Go safely.','Walk freely, stranger, but draw no blade here.','Mind the king\'s law in {p}.','Nothing stirs on the border tonight. Long may it stay so.'],
@@ -8386,11 +8962,19 @@ const FOLK_SAY={
   rmerch:['Wares from every corner of {k}!','Fine cloth and good iron. Trade will come in better days.','The southern road is safe again, they say.'],
   rsmith:['Steel for the king\'s guard. Mind the sparks.','A good blade wants a good arm behind it.','The forge never sleeps in {p}.'],
   rfarmer:['Fair weather for the harvest, by the look of it.','The fields of {p} feed half the city.','Watch your step in the furrows.'],
-  rnoble:['Welcome to {p}. The king\'s peace is upon this hall.','The white tower has stood a thousand years. It will stand a thousand more.','You are far from home, I think. Be welcome here.']};
+  rnoble:['Welcome to {p}. The king\'s peace is upon this hall.','The white tower has stood a thousand years. It will stand a thousand more.','You are far from home, I think. Be welcome here.'],
+  // the riders (D-061)
+  hguard:['Halt and be known, stranger. Then go on in peace.','The plains of {k} are wide, but they are watched.','You are welcome in {p} while you keep the peace.','Few walk where we ride. Where is your horse?','The beacons are dark tonight. Long may they stay so.'],
+  hcapt:['I am a marshal of the riders of {p}. Speak your errand.','Our horses run from the hills to the river. Nothing crosses the grass unseen.','If you ride east, keep clear of the burning lands.'],
+  hman:['Well met.','The grass is high this year. The herds grow fat.','Have you seen the king\'s horses? Finer were never foaled.','There is mead in the hall tonight, if you are thirsty.','Welcome to {p}.'],
+  hwoman:['Well met, traveller.','The hearth in {p} is never let go out.','Mind the foals by the paddock.','My brothers ride with the riders of {k}.'],
+  hherd:['Easy now. They are skittish with strangers.','Every horse in {p} knows my whistle.','The wolves came close last winter, but not one foal was lost.'],
+  hthane:['Be welcome in the hall of {p}. Lay aside your blade at the door.','The kings of {k} sleep in their mounds beside the road. We keep their memory green.','Sit by the fire, guest. The hall is open to friends.'],
+  hsmith:['Shoes for horses and heads for spears. Mind the sparks.','The riders of {p} ride on my iron.','A loose shoe can lose a battle.']};
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=FOLK_SAY[F.civ?f.kind:f.kind==='rcapt'?'rcapt':'guard'];
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):'the kingdom';
     toast(F.n+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -8505,7 +9089,7 @@ function updShots(dt){
 function placeFoe(f,dt){
   const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
   const ph0=f.ph;f.ph+=sp*dt/(F.stride||(big?1.6:F.walk>1.4?0.9:1.1))*6.2832;
-  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the ground
+  if(F.stride&&F.tall>5&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the ground
   f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
@@ -8527,6 +9111,8 @@ function placeFoe(f,dt){
   if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
   if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
   if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
+  if(F.mount&&!f.dead)riderPose(f,P,amp);
+  if(F.mount&&!f.dead&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.5){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<40&&AX&&settings.sound)burst(0.06,'bandpass',sp>3?520:760,3,0.22*(1-d/40),0,[f.x,f.y,f.z]);} // hoofbeats
   M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
@@ -8538,6 +9124,16 @@ function placeFoe(f,dt){
   // an Emberlord sheds embers
   if(f.kind==='ember'&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
 }
+// A horseman's gait (D-061): at a walk the horse's legs move in diagonal pairs, at the gallop the forelegs reach together and the
+// hind legs drive under, its body rocking and its neck nodding; the rider rises with each stride, the shield arm and the rein
+// hand steady, the spear arm still but for its blow
+function riderPose(f,P,amp){
+  const rest=g=>g.userData.rest[0],ph=f.ph,s=Math.sin(ph),gal=f.sp>3.2,a=Math.min(1,amp*1.4);
+  if(gal){P.legFL.rotation.x=Math.sin(ph)*0.95*a;P.legFR.rotation.x=Math.sin(ph-0.45)*0.95*a;P.legBL.rotation.x=Math.sin(ph+Math.PI)*0.85*a;P.legBR.rotation.x=Math.sin(ph+Math.PI-0.45)*0.85*a;}
+  else{P.legFL.rotation.x=s*0.55*a;P.legBR.rotation.x=s*0.5*a;P.legFR.rotation.x=-s*0.55*a;P.legBL.rotation.x=-s*0.5*a;}
+  P.hbody.rotation.x=gal?Math.cos(ph)*0.07*a:0;P.neck.rotation.x=rest(P.neck)+(gal?Math.sin(ph+0.6)*0.14:Math.sin(ph*2)*0.04)*a;
+  P.body.position.y=(11.5+Math.abs(Math.sin(ph))*(gal?1.1:0.4)*a)*AM_PX;P.body.rotation.x=gal?-0.12*a:0;
+  P.armL.rotation.x=rest(P.armL);P.armL.rotation.z=P.armL.userData.rest[2];if(!(f.atk>0)&&!(f.swing>0))P.armR.rotation.x=rest(P.armR);}
 // The Emberlord's gait (D-055): hunched and heavy, its body rolling over each stride and dipping as a foot comes down, the shins
 // folding under it on the back swing, arms swaying low, the head thrust forward and bobbing; the wings beat slowly (harder in the
 // chase, flung wide as it strikes), the outer wing lagging the inner; its flames, whip and tail never rest.
@@ -8579,8 +9175,10 @@ function foeCall(f,what){
   if(k[0]==='g'){if(what==='alert'||what==='hurt')for(let i=0;i<3;i++)voice(700*p+Math.random()*200,900*p,0.12,0.07,{type:'square',form:1400,q:2,delay:i*0.11},at);
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
-  else if(FOES[k].folk){if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((k==='rwoman'?520:330)*p,(k==='rwoman'?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((k==='rwoman'?300:190)+Math.random()*30,(k==='rwoman'?330:210),0.4,0.035,{form:900,q:1.2},at);}
-    else{if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn
+  else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
+    else{if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
+      else if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn
+      if(FOES[k].mount&&what!=='blow'&&Math.random()<0.5)voice(420*p,260,0.7,0.06,{form:900,q:2,vib:16,vd:0.18},at); // the horse whinnies
       voice(150*p,120,what==='alert'?0.45:0.3,0.07,{form:700,q:1.3,vib:5,vd:0.04},at);}}
   else if(k==='ember'){voice(70*p,45,what==='alert'?1.8:1.1,0.16,{form:200,q:0.9,vib:3,vd:0.08},at);burst(1.2,'lowpass',400,0.6,0.22,0,at);}
   else{if(what==='alert'&&(k==='ochief'||Math.random()<0.25))tone(155,150,1.2,0.12,0,'sawtooth',at); // a war horn
@@ -8928,12 +9526,12 @@ function landTour(k){
   goTo(X,Z,L.sea?SEA+4:undefined);toast(L.n+(L.built?'':' (planned for '+LAND_FAM[L.fam].replace(/.*\(|\)/g,'')+', shown as '+landShown(L)+')')+', '+c.d+' blocks from where you were');
   return{X:X,Z:Z,d:c.d};
 }
-// The nearest place of a kind in the realms of men (D-060): 'city', 'capital', 'fort', 'village', 'outpost' or 'farm'; to the
-// road before its gate, or its edge
-function realmTour(kind){
+// The nearest place of a kind in the realms of men (D-060): 'city', 'capital', 'fort', 'village', 'outpost' or 'farm', of one
+// people (ck: 'white' or 'horse', D-061) or any; to the road before its gate, or its edge
+function realmTour(kind,ck){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
   for(let r=0;r<=40&&!(best&&bd<(r-1)*LS);r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=stretchCell(landSite(ci+a,cj+b)),k=landKey(s.i,s.j);
-    if(seen.has(k))continue;seen.add(k);const P=provinceOf(s.i,s.j);if(!P)continue;
+    if(seen.has(k))continue;seen.add(k);const P=provinceOf(s.i,s.j);if(!P||ck&&P.cult.k!==ck)continue;
     for(const t of P.sites){if(kind==='capital'?!(t.k==='city'&&P.capital):t.k!==kind)continue;const d=Math.hypot(t.X-X,t.Z-Z);if(d<bd){bd=d;best=t;}}}
   if(!best){toast('No such place of the realms within reach');return null;}
   const [x,z]=sitePort(best),d=DIRS[best.dir];goTo(Math.round(x+d[0]*6),Math.round(z+d[1]*6));PL.yaw=Math.atan2(d[0],d[1]);
@@ -9135,7 +9733,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -9182,9 +9780,10 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];
     for(const L of LANDS)if(L.fam===f){const o=document.createElement('option');o.value=L.i;o.textContent=L.n+(L.built?'':' (planned)');g.appendChild(o);}sel.appendChild(g);}
-  {const g=document.createElement('optgroup');g.label='The realms of men';for(const [k,n] of [['capital','A royal city'],['city','A city'],['fort','A castle'],['village','A village'],['outpost','A watchtower'],['farm','A farmstead']]){
-    const o=document.createElement('option');o.value='r:'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value;if(v.startsWith('r:')?realmTour(v.slice(2)):landTour(+v))lockOrPlay();});}
+  for(const [pre,label,list] of [['r','The realms of men',[['capital','A royal city'],['city','A city'],['fort','A castle'],['village','A village'],['outpost','A watchtower'],['farm','A farmstead']]],
+    ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm']]]]){
+    const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='r:'||rk==='h:'?realmTour(v.slice(2),rk==='r:'?'white':'horse'):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});

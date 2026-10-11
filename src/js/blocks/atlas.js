@@ -355,6 +355,55 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   {const FS=[[0,0,6,5],[7,0,15,7],[0,6,6,15],[7,8,10,15],[11,8,15,15]];
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){let k=0;for(;k<FS.length;k++){const q=FS[k];if(x>=q[0]&&x<=q[2]&&y>=q[1]&&y<=q[3])break;}const q=FS[k];
       const joint=x===q[0]||y===q[1],lip=x===q[2]||y===q[3];P(283,x,y,joint?sh([100,98,92],(hn(x,y,341)-.5)*8):sh([176,172,160],(hn(k,0,342)-.5)*24+(hn(x,y,343)-.5)*10+(lip?-10:x===q[0]+1||y===q[1]+1?8:0)));}}
+  // The riders of the plains (D-061). Golden thatch: straws combed one way, bound every few rows, its cut ends in rows on the
+  // side; turf: grass in tufts with a few flowers over layered sod and roots; wattle: hazel rods woven through stakes, daubed
+  // in ochre clay; carved oak: interlaced strands raised on dark oak, rings on its ends; fieldstone: rounded stones in pale lime
+  // mortar; the palisade's stakes, sharpened; the riders' banner, a white horse's head on green with a gold border and fringe;
+  // crossed horse heads for a gable; a round shield (green with a gold sun and a boss) hung on planks; a long hearth's embers
+  // in their stone kerb; a tapestry of green and gold; gilded oak, gold leaf in a lattice on dark wood; a rail fence
+  for(const t of [295,296,297,301,304,305])clear(t);
+  {const pts=[];for(let k=0;k<9;k++)pts.push([((k%3)*5.3+1.5+hn(k,1,361)*3.5)%16,(Math.floor(k/3)*5.3+1.5+hn(k,2,361)*3.5)%16,hn(k,3,362)]);
+   for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    P(287,x,y,sh([224,190,92],(hn(x>>1,y*3+(x&1),363)-.5)*26+(x%3===0?-12:x%3===1?8:0)+(y%5===4?-26:0)+(hn(x>>2,y>>2,364)-.5)*12));
+    P(288,x,y,sh([218,184,88],(hn(x,y>>1,365)-.5)*22+(y%5===4?-30:y%5===0?14:0)+(x%2?-8:6)+(hn(x,y,366)-.5)*8));
+    const fl=hn(x,y,367);P(289,x,y,fl<.025?[236,214,90]:fl<.04?[236,236,226]:sh([92,146,56],(hn(x,y,368)-.5)*28+((x*7+y*3)%5===0?18:0)));
+    // the side of a turf roof: grass grown long and hanging over the sod in strands, mossy and darker toward the foot, a little
+    // earth and root showing between the strands at the bottom
+    const strand=hn(x,0,369),low=y>=11+Math.floor(strand*4);P(290,x,y,low&&hn(x,y,372)<.35?sh([74,56,38],(hn(x,y,373)-.5)*16):
+      sh(low?[62,96,42]:[82,134,52],(strand-.5)*30+(y===0?14:0)+(hn(x,y>>1,370)-.5)*14-y*1.4+((x+Math.floor(y/3))%4===0?-10:0)));
+    const stake=x===3||x===8||x===13,rod=((y>>1)+(x>4&&x<12?1:0))%2,dab=fbm2(x/5,y/5,2,374.1)>-0.05;
+    P(291,x,y,x===0||y===0||x===15||y===15?sh([88,60,38],(hn(x,y,375)-.5)*10):dab?sh([204,178,128],(hn(x,y,376)-.5)*18+(hn(x>>1,y>>1,377)<.15?-14:0)):stake?sh([96,66,40],(hn(x,y,378)-.5)*10):sh([138,100,60],(rod?12:-14)+(y%2?-10:6)+(hn(x,y,379)-.5)*10));
+    const r=Math.hypot(x-7.5,y-7.5);P(292,x,y,sh([110,74,44],(Math.floor(r)%2?-14:6)+(r>7?-24:0)+(hn(x,y,380)-.5)*8));
+    const s1=Math.abs(x-7.5-Math.sin(y*0.8)*4)<1.3,s2=Math.abs(x-7.5+Math.sin(y*0.8)*4)<1.3,band=x<=1||x>=14;
+    P(293,x,y,band?sh([86,56,34],(x===0||x===15?-16:6)+(hn(x,y,381)-.5)*8):s1||s2?sh([150,104,62],(s1&&s2?12:0)+(hn(x,y,382)-.5)*10):sh([70,46,28],(hn(x,y,383)-.5)*10));
+    let d1=99,d2=99,id=0;for(let k=0;k<pts.length;k++)for(const ox of [-16,0,16])for(const oy of [-16,0,16]){const d=Math.hypot(x-pts[k][0]-ox,y-pts[k][1]-oy);if(d<d1){d2=d1;d1=d;id=k;}else if(d<d2)d2=d;}
+    P(294,x,y,d2-d1<1.1?sh([182,174,156],(hn(x,y,384)-.5)*10):sh([[138,132,122],[150,138,118],[122,120,116],[160,150,130]][Math.floor(pts[id][2]*4)],(d1<2.2?14:0)-(d1>3.5?12:0)+(hn(x,y,385)-.5)*12));
+    const fire=hn(x,y,386),rim=x<=1||y<=1||x>=14||y>=14;P(299,x,y,rim?sh([150,140,124],(hn(x>>1,y>>1,387)-.5)*24):fire<.3?[255,190,80]:fire<.55?[236,110,40]:fire<.7?[140,40,20]:(x+y)%5===0?[60,40,30]:[200,80,30]);
+    P(300,x,y,y<2?sh([120,60,30],(hn(x,y,388)-.5)*20):sh([146,138,124],(d2-d1<1.1?20:0)+(hn(x,y,389)-.5)*16));
+    const lat=(x+y)%6===0||(x-y+18)%6===0;P(302,x,y,lat?sh([228,188,82],(hn(x,y,390)-.5)*20+((x+y)%6===0?10:0)):sh([74,48,30],(hn(x,y,391)-.5)*10+(x<1||x>14?-10:0)));
+    P(303,x,y,Math.hypot(x-7.5,y-7.5)>6.5?sh([228,188,82],(hn(x,y,392)-.5)*16):sh([86,58,36],(Math.floor(Math.hypot(x-7.5,y-7.5))%2?-12:4)));
+    const sr=Math.hypot(x-7.5,y-7.5),ang=Math.atan2(y-7.5,x-7.5),ray=Math.abs(Math.sin(ang*4))>0.8;
+    P(298,x,y,sr>7?sh([150,108,62],(y%4===3?-22:0)+(hn(x,y>>2,393)-.5)*12):sr>6.2?sh([196,160,70],(hn(x,y,394)-.5)*12):sr<1.6?sh([160,164,170],sr<0.8?30:0):sr<4.5&&ray?sh([220,180,74],(hn(x,y,395)-.5)*10):sh([40,96,52],(hn(x,y,396)-.5)*12+(x<y?6:0)));
+  }}
+  // the palisade's stakes: three to a block, pointed
+  for(const [cx,top] of [[2.5,1],[7.5,3],[12.5,0]])for(let y=top;y<16;y++){const w=Math.min(2.2,(y-top)*0.7+0.4);for(let x=0;x<16;x++)if(Math.abs(x-cx)<=w)P(295,x,y,y<top+3?sh([170,130,84],(x<cx?14:-8)):sh([96,68,42],(x<cx?10:-10)+(hn(x,y,397)-.5)*14+(y%5===0?-12:0)));}
+  // the riders' banner: a pole, the green cloth in a gold border, a white horse's head, a fringe of gold
+  {const HEAD=['......11......','.....1111.....','....111111....','...11111111...','..1111111111..','..111.111111..','.111111111111.','1111..1111111.','11....111111..','......111111..','......1111111.','.....111111111'];
+   for(let y=0;y<16;y++)P(296,1,y,sh([110,84,52],(hn(1,y,398)-.5)*12));for(let x=1;x<16;x++)P(296,x,0,[160,140,100]);
+   for(let y=1;y<16;y++)for(let x=2;x<16;x++){const fringe=y===15&&x%2===0;if(y===15&&!fringe)continue;const border=x===2||x===15||y===1||y===14;
+     const hy=y-2,hx=x-2,hd=hy>=0&&hy<HEAD.length&&hx>=0&&hx<14&&HEAD[hy][hx]==='1';
+     P(296,x,y,fringe?[220,180,70]:border?sh([214,176,72],(hn(x,y,399)-.5)*10):hd?sh([238,238,232],(hn(x,y,400)-.5)*8):sh([36,96,52],(hn(x,y,401)-.5)*10));}}
+  // crossed horse heads at a gable's peak: two boards crossing, each ending in a carved head turned outward, a gold eye
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const b1=Math.abs((x-2)-(15-y))<=1.1&&y>=5,b2=Math.abs((13-x)-(15-y))<=1.1&&y>=5;
+    const hL=Math.hypot(x-3.2,y-3.6)<2.4||(x>=0&&x<=2&&y>=4&&y<=5),hR=Math.hypot(x-12.3,y-3.6)<2.4||(x>=13&&x<=15&&y>=4&&y<=5);
+    if(b1||b2||hL||hR)P(297,x,y,(x===2&&y===3)||(x===13&&y===3)?[230,190,80]:sh([90,60,36],(b1&&b2?14:0)+(hn(x,y,402)-.5)*14+((x+y)%4===0?-10:0)));}
+  // a tapestry on its rod: green, a gold border of interlace, a gold knot in the middle, tassels
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){if(y===0){P(301,x,y,[120,90,56]);continue;}if(x<2||x>13)continue;if(y===15&&x%3!==0)continue;
+    const brd=x===2||x===13||y===1||y===14,knot=Math.abs(Math.hypot(x-7.5,y-8)-3)<0.8||Math.abs(x-7.5)<0.6&&Math.abs(y-8)<4||Math.abs(y-8)<0.6&&Math.abs(x-7.5)<4;
+    P(301,x,y,y===15?[214,176,72]:brd?sh([214,176,72],((x+y)%2?12:-8)):knot?sh([222,184,78],(hn(x,y,403)-.5)*10):sh([30,84,48],(hn(x,y,404)-.5)*10+(x%4===0?-6:0)));}
+  // a rail fence: posts at the sides, two rails, open between
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const post=x<=1||x>=14,rail=(y>=3&&y<=5)||(y>=10&&y<=12);if(post||rail)P(304,x,y,sh([124,90,56],(post?(x===0||x===15?-14:4):(y===3||y===10?12:y===5||y===12?-14:0))+(hn(x,y,405)-.5)*12));
+    if(x<=1&&y<=1||x>=14&&y>=14||x<=1&&y>=14||x>=14&&y<=1||(y>=7&&y<=8))P(305,x,y,sh([124,90,56],(hn(x,y,406)-.5)*12));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

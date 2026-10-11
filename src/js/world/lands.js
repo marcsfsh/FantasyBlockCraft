@@ -148,7 +148,7 @@ function stretchCell(c){let best=c;for(const [a,b] of LN8){const n=landSite(c.i+
 function stretchName(key){
   let s=LNAME.get(key);if(s)return s;if(LNAME.size>20000)LNAME.clear();
   const i=Math.floor(key/65536)-32768,j=key%65536-32768,c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];
-  const w=nameWord(realmHeld(c)?'realm':L.p,rngAt(c.i,8131,c.j)),base=landShown(L); // a stretch a kingdom holds takes its people's names (D-060)
+  const RC=realmHeld(c),w=nameWord(RC?RC.names:L.p,rngAt(c.i,8131,c.j)),base=landShown(L); // a stretch a kingdom holds takes its people's names (D-060, D-061)
   s=L.sea?'The Sea of '+w:(base.startsWith('The ')?base.slice(4):base)+' of '+w;LNAME.set(key,s);return s;
 }
 // The name the readout shows on open land: the stretch's name, or the edge it is on (the Grey Shore, a lake, open sea)

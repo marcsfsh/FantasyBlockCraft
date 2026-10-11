@@ -147,7 +147,7 @@ function buildSite(s){
 function surfaceName(X,Y,Z){
   const s=siteNear(X,Z,1);if(s){if(s.way&&Math.abs(X-(s.X+s.R+4))<=2&&Math.abs(Z-s.Z)<=2)return 'An Ancient Waystone';return s.name;}
   {const rp=realmPlace(X,Z);if(rp)return rp.name;} // a city, castle, village, watchtower or farmstead of the realms of men (D-060)
-  if(realmRoadAt(X,Z,0))return realmRoadAt(X,Z,0).rd.k==='high'?'The King\'s Road':'A Country Lane';
+  {const rr=realmRoadAt(X,Z,0);if(rr)return realmRoadName(rr.rd);} // the people's high road or a lane (D-060, D-061)
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(gateNear(X,Z,0))return 'The Gate of '+holdOf(cx,cz).name;
   if(stairwayNear(X,Z,1))return 'A Ruined Stairway';
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places

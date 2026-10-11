@@ -5,8 +5,9 @@
 const gen=(X,Z)=>{regenerateAll(X,Z);while(genQ.length)processGenQ();};
 const at=(X,y,Z)=>get(X-OX,y,Z-OZ);
 // ---- which stretches are held
-const elig=new Map();for(let i=-20;i<20;i++)for(let j=-20;j<20;j++){const c=stretchCell(landSite(i,j));if(REALM_LANDS.has(LANDS[cellLand(c)].k))elig.set(landKey(c.i,c.j),c);}
-const held=[...elig.values()].filter(realmHeld),share=held.length/Math.max(1,elig.size);
+// (the white realm's lands only: the riders of the plains have their own case, 53-riders, D-061)
+const elig=new Map();for(let i=-20;i<20;i++)for(let j=-20;j<20;j++){const c=stretchCell(landSite(i,j));if(REALM_CULTS.white.lands.has(LANDS[cellLand(c)].k))elig.set(landKey(c.i,c.j),c);}
+const held=[...elig.values()].filter(c=>realmHeld(c)===REALM_CULTS.white),share=held.length/Math.max(1,elig.size);
 info('stretches of Green Hills, Overgrown Farmland, Wild Orchards, Flower Meadows and Old Terraces within 6400 blocks:',elig.size,'; held by a kingdom:',held.length,'('+Math.round(share*100)+'%)');
 assert(elig.size>=30&&share>0.3&&share<0.7,'about half the stretches of the gentle lands are held by a kingdom');
 assert([...elig.values()].every(c=>REALM_LANDS.has(LANDS[cellLand(c)].k))&&!held.some(c=>['volcanic','mtn','sea'].includes(LANDS[cellLand(c)].k)),'only the gentle lands are held');

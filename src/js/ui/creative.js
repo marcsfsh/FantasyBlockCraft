@@ -80,12 +80,12 @@ function landTour(k){
   goTo(X,Z,L.sea?SEA+4:undefined);toast(L.n+(L.built?'':' (planned for '+LAND_FAM[L.fam].replace(/.*\(|\)/g,'')+', shown as '+landShown(L)+')')+', '+c.d+' blocks from where you were');
   return{X:X,Z:Z,d:c.d};
 }
-// The nearest place of a kind in the realms of men (D-060): 'city', 'capital', 'fort', 'village', 'outpost' or 'farm'; to the
-// road before its gate, or its edge
-function realmTour(kind){
+// The nearest place of a kind in the realms of men (D-060): 'city', 'capital', 'fort', 'village', 'outpost' or 'farm', of one
+// people (ck: 'white' or 'horse', D-061) or any; to the road before its gate, or its edge
+function realmTour(kind,ck){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
   for(let r=0;r<=40&&!(best&&bd<(r-1)*LS);r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=stretchCell(landSite(ci+a,cj+b)),k=landKey(s.i,s.j);
-    if(seen.has(k))continue;seen.add(k);const P=provinceOf(s.i,s.j);if(!P)continue;
+    if(seen.has(k))continue;seen.add(k);const P=provinceOf(s.i,s.j);if(!P||ck&&P.cult.k!==ck)continue;
     for(const t of P.sites){if(kind==='capital'?!(t.k==='city'&&P.capital):t.k!==kind)continue;const d=Math.hypot(t.X-X,t.Z-Z);if(d<bd){bd=d;best=t;}}}
   if(!best){toast('No such place of the realms within reach');return null;}
   const [x,z]=sitePort(best),d=DIRS[best.dir];goTo(Math.round(x+d[0]*6),Math.round(z+d[1]*6));PL.yaw=Math.atan2(d[0],d[1]);
