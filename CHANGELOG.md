@@ -5,6 +5,19 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.33.0 (2026-10-11): the peoples against the wastes
+
+Saves from 0.32.0 carry over (save key v23): the world is unchanged.
+
+### Game
+- **The peoples and the creatures of the wastes are foes.** Men, riders and elves on one side, orcs, trolls, goblins and the Emberlords on the other, fight wherever they meet, in creative too: they see each other, close in, strike, shoot and throw until one falls. Townsfolk flee. Each side keeps the peace within itself.
+  - The folk never turn on a player who does them no harm: their blows and arrows strike only the creatures they fight (an arrow passes the player by). The creatures' arrows and stones still strike a player in survival.
+  - A creature the player strikes turns from the folk it fights to the player. What falls to the other side leaves the player nothing.
+- **Hosts in the wastes.** Every few minutes a host of the nearest people (men, riders or elves, four to six with a captain) marches through the Volcanic Wastes past the player and falls upon the warbands it meets. A host greets a passer-by in its own words and turns on a player who strikes one of it.
+
+### Tooling
+- New test case `55-strife`.
+
 ## 0.32.0 (2026-10-11): the high elves
 
 Saves from 0.31.0 do not carry over (save key v23): the high elves are new to the world.

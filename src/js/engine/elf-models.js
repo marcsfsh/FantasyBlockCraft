@@ -58,9 +58,9 @@
       return sh(field,(dx<2?6:0)+hz(a,b,521)*8+(b%6===0?-6:0));});
     P.map('shield',['R'],(s,t,w,h)=>t>=12&&t<=16&&s>=3&&s<=10?[80,56,34]:null);};
   // a long elven blade, curving a little toward its point, a long grip, a guard swept forward like two leaves, a pommel
-  const blade=(len,hand)=>[['grip','armR',hand||[1.5,-10.5,0.5],[-0.5,-0.5,-2.5,1,1,4],0,{nb:1}],['pommel','grip',[0,0,-2.5],[-0.5,-1,-1,1,2,1],0,{nb:1,tp:['-z',1,0.4,0,0]}],
-    ['guard','grip',[0,0,1.5],[-0.5,-3,0,1,6,1],[0.3,0,0],{nb:1,tp:['z',1,0.6,0,0]}],['bl1','grip',[0,0,2],[-0.5,-1,0,1,2,len*0.6],0,{nb:1}],
-    ['bl2','bl1',[0,0,len*0.6],[-0.5,-1,0,1,2,len*0.4],[-0.2,0,0],{nb:1,tp:['z',1,0,0,0.5]}]];
+  const blade=(len,hand,a=Math.round(len*1.2)/2)=>[['grip','armR',hand||[1.5,-10.5,0.5],[-0.5,-0.5,-2.5,1,1,4],0,{nb:1}],['pommel','grip',[0,0,-2.5],[-0.5,-1,-1,1,2,1],0,{nb:1,tp:['-z',1,0.4,0,0]}],
+    ['guard','grip',[0,0,1.5],[-0.5,-3,0,1,6,1],[0.3,0,0],{nb:1,tp:['z',1,0.6,0,0]}],['bl1','grip',[0,0,2],[-0.5,-1,0,1,2,a],0,{nb:1}],
+    ['bl2','bl1',[0,0,a],[-0.5,-1,0,1,2,len-a],[-0.2,0,0],{nb:1,tp:['z',1,0,0,0.5]}]];
   const bladePaint=P=>{P.map('grip',ALL,(s,t)=>(s+t)%2?sh(GOLD,0):[60,40,30]);plate(P,['pommel','guard'],GOLD);
     for(const n of ['bl1','bl2'])P.map(n,ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([220,226,234],t===0?26:t===h-1?-10:t===1?-20:4):sh([230,234,240],12));
     P.map('bl1',['L','R'],(s,t)=>s<6&&t===1?sh(GOLD,0):null);}; // gold worked near the hilt
