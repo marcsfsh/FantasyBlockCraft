@@ -18,6 +18,9 @@ const PEOPLES={
   // the riders of the plains (D-061): horse-lords of the steppe, the moors and the downs, their kings, halls, holds and steadings
   rider:{a:['Ash','Beor','Brec','Ceol','Cyn','Ead','Eald','Gar','Hwit','Heah','Hroth','Lind','Os','Rad','Sig','Stan','Tid','Wig','Ord','Bern','Cuth','Torh','Wyn','Hun'],
          b:['ric','wold','mod','gar','ulf','wine','stan','ward','frith','bald','here','thorn','mer','red','ferth','gyth','burh','ley']},
+  // the high elves of the elder realms (D-062): their kings, hidden cities, fastnesses, refuges, spires and gardens
+  elder:{a:['Aer','Cael','Cir','Ith','Lis','Quel','Sil','Thal','Ves','Yr','Aes','Ner','Fael','Ilm','Lath','Saer','Tael','Vael','Orl','Cal','Sel','Mael','Ean','Ys'],
+         b:['adhel','anthe','elis','endra','enor','ethil','idor','ilas','imar','ion','ira','ithe','oran','orwe','uvain','ynde','alis','evar','aris','eth']},
   beastfolk:{a:['Arr','Fang','Grr','Hoof','Mar','Rha','Tusk','Whis','Brin','Ska'],b:['ka','mane','rek','tail','th','uun','rro','hide']}
 };
 // Proper names from Tolkien's works (lowercase, letters only). Exact matches, near misses (one letter off) and the roots below are refused.
@@ -35,7 +38,11 @@ const TOLKIEN=('aragorn arathorn arda arnor arwen azog bagend balin balrog bard 
  'brego aldor frea freawine goldwine deor gram helm frealaf brytta leofa walda folca folcwine fengel thengel theodwyn eomund eowyn eothain erkenbrand '+
  'elfhelm grimbold dunhere guthlaf gleowine ceorl deorwine herefara herubrand fastred harding dernhelm holdwine freca wulf hild elfhild morwen leod '+
  'meduseld dunharrow harrowdale westfold eastfold westemnet eastemnet fenmarch aldburg firienfeld halifirien snowbourn aglarond deeping isenfords '+
- 'eorlingas mearas felarof hasufel arod snowmane firefoot windfola stybba simbelmyne riddermark mundburg upbourn edoras').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
+ 'eorlingas mearas felarof hasufel arod snowmane firefoot windfola stybba simbelmyne riddermark mundburg upbourn edoras '+
+ // the Noldor and the other elves of the elder days, their kings, cities and lands, so the elder style (D-062) can never draw one
+ 'hithlum dorthonion eldamar vanyar teleri noldor sindar avari quenya sindarin hollin lindon himring nevrast vinyamar finarfin fingon turgon '+
+ 'aredhel maeglin idril ecthelion melian doriath menegroth cirdan gildor rumil orophin gilgalad amanyar calacirya taniquetil formenos aman '+
+ 'ossiriand maedhros celegorm curufin caranthir amrod amras angrod aegnor orodreth gwindor beleg mablung elwe olwe ingwe finwe indis').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
 const TOLKIEN_SET=new Set(TOLKIEN);
 const TOLKIEN_ROOTS=['khaz','durin','moria','mordor','gondor','erebor','sauron','morgoth','thror','thrain','thorin','smaug','rivendell','lorien','isengard','numenor','mithril','nazgul','silmaril','gandalf','aragorn','galadriel','legolas','gimli'];
 const normName=s=>s.toLowerCase().replace(/[^a-z]/g,'');

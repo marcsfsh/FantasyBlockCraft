@@ -138,6 +138,10 @@
       "about": "Building the riders of the plains (D-061): hill towns in round terraces with the golden hall, holds, steadings, horse farms and beacons, palisades, longhouses, paddocks, mounds, the riders' roads"
     },
     {
+      "path": "world/elf-build.js",
+      "about": "Building the high elves of the elder realms (D-062): hidden cities terraced into the mountainside, fastnesses, refuges, watch-spires and gardens; halls with arched windows under swept roofs, slender towers, pavilions, walls and gates, statues, the elven ways"
+    },
+    {
       "path": "world/warrens.js",
       "about": "The goblin warrens under the Volcanic Wastes (D-052): halls, tunnels, ways in and down planned with the cave systems, lava channels, per-chunk dressing and camps, spawn spots"
     },
@@ -224,6 +228,10 @@
     {
       "path": "engine/rider-models.js",
       "about": "The folk of the riders of the plains (D-061): guards, bowmen, marshals and horsemen in mail and green with the white horse, freemen, freewomen, horse-herds and thanes, sharing the folk's painting helpers (FOLK_KIT)"
+    },
+    {
+      "path": "engine/elf-models.js",
+      "about": "The folk of the high elves (D-062): spearwardens, bladewardens, archers, lord-captains and knights in gilded leaf-scale armour over wine-red robes, and lords, ladies, loremasters and smiths, with FOLK_KIT's painters"
     },
     {
       "path": "gameplay/wildlife.js",

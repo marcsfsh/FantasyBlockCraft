@@ -12,7 +12,7 @@ for(const people of Object.keys(PEOPLES)){
 info('sample names',Object.entries(samples).map(([p,s])=>p+': '+s.join(', ')).join(' | '));
 info('syllable pairs the blocklist refuses',raw);
 assert(blocked===0,'no generated name is blocked ('+total+' names across '+Object.keys(PEOPLES).length+' peoples)');
-assert(raw<=4,'the syllable sets are original: at most 4 pairs ever need refusing (D-061: the Rohirrim\'s names refuse Edmund and Marwen as near misses)');
+assert(raw<=5,'the syllable sets are original: at most 5 pairs ever need refusing (D-061: the Rohirrim\'s names refuse Edmund and Marwen as near misses; D-062: the realm style\'s Eldamar is refused)');
 // 3. Hold names (and their kings and queens) over a wide area are all allowed
 let holdBad=[];for(let a=-60;a<=60;a+=8)for(let b=-60;b<=60;b+=8){const h=holdOf(a,b);for(const n of [h.name,h.king,h.queen])if(isBlockedName(n))holdBad.push(n);}
 assert(holdBad.length===0,'hold, king and queen names are allowed'+(holdBad.length?' ('+holdBad.slice(0,5).join(', ')+')':''));
