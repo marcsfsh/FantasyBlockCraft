@@ -85,3 +85,17 @@ const find=kind=>{for(let r=0;r<40;r++)for(let i=-r;i<=r;i++)for(let j=-r;j<=r;j
   for(let i=0;i<30;i++)updBolts(0.05);assert(!bolts.includes(b),'and is gone in a moment');
   updPlumes(0.1);assert(plumes.size>=1&&[...plumes.values()][0].puffs.length===PUFFS,'smoke rises over the crater nearby');
   const P=ambLand('volcanic');assert(P.rumble>0&&P.day.crackle>0&&P.day.boom>0,'the ground rumbles, embers crackle and far eruptions boom');}
+// ---- the wastes' dark rock keeps its definition (D-059): every dark block of the wastes is painted bright enough, with enough
+// contrast inside its face, that the burning light does not turn it to black; and the burning sky dims the day but leaves a red
+// glow by night (its strength, skyMul; its red tint is a three.js colour, which the harness stands in for)
+{const lum=(t,x,y)=>{const i=((((t/AC)|0)*16+y)*AW+(t%AC)*16+x)*4;return 0.299*dat[i]+0.587*dat[i+1]+0.114*dat[i+2];};
+  const stat=t=>{let s=0,q=0;for(let y=0;y<16;y++)for(let x=0;x<16;x++){const l=lum(t,x,y);s+=l;q+=l*l;}const m=s/256;return [m,Math.sqrt(Math.max(0,q/256-m*m))];};
+  const dark={BLACKASH,CINDER,LAVACRUST,CHARWOOD,BASALT,OBSID,BLACKSAND,SCORCH,BASBRICK,BASCRACK,BASTILE,BASCARVE,OBSBRICK,BASPILLAR},rows=[];let bad=[];
+  for(const [n,id] of Object.entries(dark))for(const t of new Set(BL[id].t)){const [m,sd]=stat(t);rows.push(n+' '+t+': '+Math.round(m)+' ±'+Math.round(sd));if(m<(id===OBSID||id===OBSBRICK?40:50)||sd<8)bad.push(n+' '+t);}
+  info('dark blocks, mean brightness ± spread:',rows.join('; '));
+  assert(!bad.length,'the wastes\' dark blocks are bright enough, and varied enough inside a face, to keep their definition'+(bad.length?' (not: '+bad.join(', ')+')':''));
+  const keep=[U.skyMul.value,U.skyTint.value.clone(),LWX.burn];LWX.burn=1;
+  U.skyMul.value=1;burnSkyTick(1);const day=U.skyMul.value;U.skyMul.value=0.16;burnSkyTick(0);const night=U.skyMul.value;
+  U.skyMul.value=keep[0];U.skyTint.value.copy(keep[1]);LWX.burn=keep[2];
+  info('the burning sky\'s light (skyMul): by day',day.toFixed(2),'of plain daylight; by night',night.toFixed(2),'(plain night 0.16)');
+  assert(day>=0.7&&night>=0.3,'under the burning sky the day is dimmed but not dark, and the night keeps a red glow');}

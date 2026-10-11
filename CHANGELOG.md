@@ -22,10 +22,17 @@ Saves from 0.28.0 do not carry over (save key v20): the fortresses in the volcan
   - The hall's side walls are lined with carved blind arches with a fire at each foot, and its end walls with sunk lancets. A deep arch behind the throne frames the lord's sign.
   - The towers are grooved, the way in's walls are coursed, and the facade carries ledges and panels.
   - The halls are a little brighter, so the relief shows.
+- **The Volcanic Wastes are no longer black.**
+  - The dark rock (black ash, cinder, basalt, obsidian, charred wood, lava crust and every kind of basalt brick) is painted lighter and with edges: wind ripples in the ash, rims round the cinder's pits, bevelled bricks, and glassy streaks in the obsidian.
+  - The burning sky dims the day less.
+  - By night the burning smoke lights the land a dull red, so it never sinks into black.
+  - The goblin warrens are a little brighter.
+  - Basalt, obsidian and black sand are lighter wherever they lie.
 - New blocks: cracked basalt bricks, basalt tiles, carved basalt, ember script, obsidian bricks, basalt pillar, iron chain (climbable), fire basket and iron spikes (creative, Building).
 
 ### Tooling
 - `tools/shot.mjs --tiles=` draws atlas tiles enlarged side by side.
+- The test harness paints the whole atlas (its stand-in image data was 256 by 256). `47-volcanic` checks that the wastes' dark blocks keep their definition and that the burning sky leaves enough light.
 - `49-warrens` checks the fortress's detail: its masonry, the pointed gate, the guardians, the tower pools and the lava behind the grates.
 
 ## 0.28.0 (2026-10-10): foes in the fire

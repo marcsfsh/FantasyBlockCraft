@@ -842,8 +842,8 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(190);for(let f=0;f<3;f++){const ox=3+f*5;for(let k=0;k<7;k++)P(190,ox,15-k,[62,120,52]);for(let dy=0;dy<3;dy++)for(let dx=-1;dx<=1;dx++)P(190,ox+dx,7-dy+Math.abs(dx),[44,74,200]);}
   clear(191);for(let f=0;f<3;f++){const ox=3+f*5;for(let k=0;k<6;k++)P(191,ox,15-k,[140,150,130]);for(let a=0;a<5;a++){P(191,ox+Math.round(Math.cos(a*1.26)*2),8+Math.round(Math.sin(a*1.26)*2),[236,236,226]);}P(191,ox,8,[226,206,90]);}
   // coasts and waters (M6d): chalk, black sand, basalt (top and side), peat, bog moss, kelp, seagrass, lily pad, cotton grass
-  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(210,x,y,sh([236,234,224],(hn(x,y,111)-.5)*12+(hn(x>>1,y,112)<.05?-60:0)));P(211,x,y,sh([46,44,48],(hn(x,y,113)-.5)*26+(hn(x,y,114)<.06?40:0)));
-    const e=x===0||x===15||y===0||y===15||((x+y*3)%11===0&&hn(x,y,115)<.5);P(212,x,y,sh([70,70,76],(hn(x,y,116)-.5)*14+(e?-26:0)));P(213,x,y,sh([66,66,72],(hn(x,y,117)-.5)*14+(x%5===0?-24:0)));
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(210,x,y,sh([236,234,224],(hn(x,y,111)-.5)*12+(hn(x>>1,y,112)<.05?-60:0)));P(211,x,y,sh([68,65,70],(hn(x,y,113)-.5)*28+(hn(x,y,114)<.06?44:0)+(hn(x>>1,y>>1,300)<.18?-12:0)));
+    const e=x===0||x===15||y===0||y===15||((x+y*3)%11===0&&hn(x,y,115)<.5);P(212,x,y,sh([92,91,98],(hn(x,y,116)-.5)*14+(e?-34:(x===1||y===1)?10:0)));P(213,x,y,sh([88,87,94],(hn(x,y,117)-.5)*14+(x%5===0?-34:x%5===1?12:x%5===4?-8:0)+(y===(((x/5|0)*7+3)&15)?-22:0)));
     P(214,x,y,sh([74,52,36],(hn(x,y,118)-.5)*22+(hn(x,y>>1,119)<.15?16:0)));const q=hn(x,y,120);P(215,x,y,sh(q<.35?[204,92,84]:q<.7?[222,150,72]:[150,178,72],(hn(x,y,121)-.5)*20));}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=2+Math.floor(hn(x,0,122)*2);P(216,x,y,y<d?sh([160,90,56],(hn(x,y,123)-.5)*20):sh([74,52,36],(hn(x,y,124)-.5)*22));}
   clear(217);for(let f=0;f<3;f++){const ox=3+f*5;for(let y=0;y<16;y++){const x=ox+Math.round(Math.sin(y*0.6+f)*1.2);P(217,x,y,[64,110,40]);P(217,x+1,y,[86,132,52]);if(y%4===f)P(217,x+2,y,[100,148,60]);}}
@@ -853,13 +853,13 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   // dry and fiery (M6e): golden grass (top, side), steppe grass, ash, magma stone, dead grass (top, side), dead wood (rings, bark)
   floorTop(221,[[208,176,82],[222,192,96],[190,158,70],[230,204,120]],131);floorSide(222,[208,176,82],132);
   clear(223);for(let f=0;f<8;f++){const ox=1+f*2,h=6+Math.floor(hn(f,4,133)*9),lean=f%3-1;for(let k=0;k<h;k++)P(223,ox+Math.round(k*lean*0.15),15-k,sh([220,186,96],(hn(f,k,134)-.5)*30+(k>h-3?20:0)));}
-  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(224,x,y,sh([112,108,104],(hn(x,y,135)-.5)*26+(hn(x,y,136)<.05?-30:0)));const m=hn(x>>1,y>>1,137);P(225,x,y,m<.3?sh([250,130,30],(hn(x,y,138)-.5)*40):sh([52,40,36],(hn(x,y,139)-.5)*20));}
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){P(224,x,y,sh([112,108,104],(hn(x,y,135)-.5)*26+(hn(x,y,136)<.05?-30:0)));const m=hn(x>>1,y>>1,137);P(225,x,y,m<.3?sh([250,130,30],(hn(x,y,138)-.5)*40):sh([76,60,54],(hn(x,y,139)-.5)*22+(hn(x>>1,y>>1,301)<.2?-12:0)));}
   floorTop(226,[[128,122,96],[112,108,88],[140,130,104],[96,94,82]],140);floorSide(227,[124,118,94],141);
   bark(228,[104,100,94],142,1);ring(229,[150,144,132],[130,124,114],[104,100,94],143);
   // strange lands (M6f): prism shard, petrified wood (side, rings), amber, starmetal ore, scorched stone, glowcap flesh and gills, pale grass
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const f=((x+y)%5===0)||((x-y+16)%7===0);P(230,x,y,f?[250,250,255]:sh([196,214,250],(hn(x,y,151)-.5)*40+(y<8?18:0)));
     P(231,x,y,sh([150,140,124],(hn(x,y,152)-.5)*20+(x%4===1?-22:0)));const d=Math.hypot(x-7.5,y-7.5);P(232,x,y,sh(((d|0)%2)?[176,164,146]:[156,146,130],(hn(x,y,153)-.5)*14));
-    P(233,x,y,sh([226,150,40],(hn(x,y,154)-.5)*30+(hn(x>>1,y>>1,155)<.2?30:0)));P(235,x,y,sh([58,52,56],(hn(x,y,156)-.5)*24+(hn(x,y,157)<.08?50:0)));
+    P(233,x,y,sh([226,150,40],(hn(x,y,154)-.5)*30+(hn(x>>1,y>>1,155)<.2?30:0)));P(235,x,y,sh([84,76,80],(hn(x,y,156)-.5)*24+(hn(x,y,157)<.08?50:0)+(hn(x>>2,y,302)<.12?-16:0)));
     P(236,x,y,sh([176,150,206],(hn(x,y,158)-.5)*20+(hn(x>>1,y>>1,159)<.18?40:0)));P(237,x,y,(x%3===0)?[120,240,210]:sh([90,160,170],(hn(x,y,160)-.5)*20));}
   for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(234,x,y,sh([128,128,128],(hn(x,y,163)-.5)*22));for(let i=0;i<5;i++){const x=1+Math.floor(hn(i,0,164)*12),y=1+Math.floor(hn(i,1,164)*12);P(234,x,y,[150,190,255]);P(234,x+1,y,[128,168,233]);P(234,x,y+1,[136,176,241]);P(234,x+1,y+1,[170,210,255]);}
   floorTop(238,[[176,196,160],[190,206,176],[160,182,150],[206,214,196]],161);floorSide(239,[176,196,160],162);
@@ -868,18 +868,18 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(242);for(let f=0;f<3;f++){const ox=3+f*5,h=7+Math.floor(hn(f,5,173)*5);for(let k=0;k<h;k++)P(242,ox,15-k,[70,130,48]);const cy=15-h;for(let a=0;a<8;a++)P(242,ox+Math.round(Math.cos(a*0.785)*2),cy+Math.round(Math.sin(a*0.785)*2),[244,244,236]);P(242,ox,cy,[236,196,60]);}
   // the burnt land (D-051)
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){
-    P(244,x,y,sh([40,37,36],(hn(x,y,180)-.5)*16+(hn(x,y,181)<.07?34:0)+(hn(x>>1,y>>1,182)<.2?-8:0))); // black ash: soft, flecked with grey
-    const pit=hn(x,y,183);P(245,x,y,pit<.12?[22,18,18]:pit<.17?sh([96,44,30],(hn(x,y,184)-.5)*20):sh([56,50,50],(hn(x,y,185)-.5)*22+(hn(x>>1,y>>1,186)<.3?-10:0))); // cinder: porous, rusty pits
+    const rip=(y+Math.floor(hn(x>>2,0,303)*3))%5;P(244,x,y,sh([66,62,60],(hn(x,y,180)-.5)*16+(hn(x,y,181)<.07?42:0)+(hn(x>>1,y>>1,182)<.2?-10:0)+(rip===0?-14:rip===1?8:0))); // black ash: soft, flecked with grey, rippled by the wind
+    const pit=hn(x,y,183);P(245,x,y,pit<.12?[30,24,24]:pit<.17?sh([124,62,42],(hn(x,y,184)-.5)*20):sh([84,76,76],(hn(x,y,185)-.5)*24+(hn(x>>1,y>>1,186)<.3?-12:0)+(pit<.24?12:0))); // cinder: porous, rusty pits
     // lava crust: black plates with glowing seams between them
     {let d1=99,d2=99;for(let k=0;k<5;k++){const px=hn(k,0,187)*16,py=hn(k,1,187)*16;for(const ox of [-16,0,16])for(const oy of [-16,0,16]){const d=Math.hypot(x-px-ox,y-py-oy);if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}}
-      P(246,x,y,d2-d1<0.75?sh([240,(d2-d1<0.35?150:80),24],(hn(x,y,188)-.5)*30):d2-d1<1.3?sh([70,26,18],(hn(x,y,188)-.5)*16):sh([32,28,28],(hn(x,y,189)-.5)*16));}
+      P(246,x,y,d2-d1<0.75?sh([240,(d2-d1<0.35?150:80),24],(hn(x,y,188)-.5)*30):d2-d1<1.3?sh([70,26,18],(hn(x,y,188)-.5)*16):sh([58,52,52],(hn(x,y,189)-.5)*16+(d2-d1>2.6?12:0)));}
     // charred wood: black bark split in grey cracks; its rings; smouldering bark glows in its cracks
-    const crack=hn(x,y>>2,190)<.18||hn(x,(y+2)>>2,191)<.06;P(247,x,y,crack?sh([92,86,82],(hn(x,y,192)-.5)*16):sh([26,22,22],(hn(x,y,193)-.5)*14));
-    P(249,x,y,crack?sh([255,120+hn(x,y,194)*80,30],(hn(x,y,195)-.5)*20):sh([30,22,20],(hn(x,y,196)-.5)*14));
-    const r=Math.hypot(x-7.5,y-7.5);P(248,x,y,r>6.5?[24,20,20]:sh([60,54,50],(Math.floor(r)%2?-14:6)+(hn(x,y,197)-.5)*10));
+    const crack=hn(x,y>>2,190)<.18||hn(x,(y+2)>>2,191)<.06;P(247,x,y,crack?sh([124,116,110],(hn(x,y,192)-.5)*16):sh([52,46,44],(hn(x,y,193)-.5)*14+(x%3===0?-10:x%3===1?6:0)));
+    P(249,x,y,crack?sh([255,120+hn(x,y,194)*80,30],(hn(x,y,195)-.5)*20):sh([54,40,36],(hn(x,y,196)-.5)*14+(x%3===0?-10:0)));
+    const r=Math.hypot(x-7.5,y-7.5);P(248,x,y,r>6.5?sh([48,42,40],(hn(x,y,304)-.5)*10):sh([88,80,74],(Math.floor(r)%2?-16:6)+(hn(x,y,197)-.5)*10));
     P(250,x,y,sh([176,154,64],(hn(x,y,198)-.5)*30+(hn(x>>1,y>>1,199)<.25?26:0)+(hn(x,y,200)<.08?-50:0))); // sulphur
     // fumarole: cinder round a glowing throat
-    const t=Math.hypot(x-7.5,y-7.5);P(251,x,y,t<2.6?sh([255,150,40],(hn(x,y,201)-.5)*40):t<4?sh([200,170,60],(hn(x,y,202)-.5)*30):sh([56,50,50],(hn(x,y,203)-.5)*22));
+    const t=Math.hypot(x-7.5,y-7.5);P(251,x,y,t<2.6?sh([255,150,40],(hn(x,y,201)-.5)*40):t<4?sh([200,170,60],(hn(x,y,202)-.5)*30):sh([84,76,76],(hn(x,y,203)-.5)*22));
   }
   // The foes' places (D-052): hide canvas stitched in panels, an iron grate, basalt bricks, the same with glowing mortar, a pole
   // of skulls and a ragged war banner (the last two drawn like plants)
@@ -889,8 +889,9 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(252,x,y,seam?[78,52,32]:stitch?[196,170,128]:sh([150,108,70],(hn(x,y,210)-.5)*18+(hn(x>>2,y>>2,211)<.25?-16:0)+(hn(x,y,212)<.05?-26:0)));
     const bar=(x%5===1||x%5===2),band=y===3||y===12;if(bar||band)P(253,x,y,sh([66,64,70],(x%5===1&&!band?18:0)+(hn(x,y,213)-.5)*14+(hn(x,y,214)<.1?-20:0)));
     const row=y>>2,off=row%2?4:0,mort=y%4===3||(x+off)%8===7;
-    P(254,x,y,mort?sh([26,24,26],(hn(x,y,215)-.5)*8):sh([58,55,60],(hn(x,y,216)-.5)*16+(hn((x+off)>>3,row,217)-.5)*18));
-    P(255,x,y,mort?sh([250,(hn(x,y,218)<.5?120:170),34],(hn(x,y,219)-.5)*30):sh([46,42,46],(hn(x,y,220)-.5)*14+(hn((x+off)>>3,row,221)-.5)*16));
+    const bev=(y%4===0?16:y%4===2?-8:0)+((x+off)%8===0?8:(x+off)%8===6?-6:0);
+    P(254,x,y,mort?sh([34,31,35],(hn(x,y,215)-.5)*8):sh([86,82,90],(hn(x,y,216)-.5)*16+(hn((x+off)>>3,row,217)-.5)*20+bev));
+    P(255,x,y,mort?sh([250,(hn(x,y,218)<.5?120:170),34],(hn(x,y,219)-.5)*30):sh([74,70,76],(hn(x,y,220)-.5)*14+(hn((x+off)>>3,row,221)-.5)*16+bev));
   }
   for(let y=0;y<16;y++){P(256,7,y,sh([60,44,32],(hn(7,y,222)-.5)*14));P(256,8,y,sh([44,32,24],(hn(8,y,222)-.5)*14));}
   for(const sy of [1,8])for(let y=0;y<5;y++)for(let x=5;x<11;x++){const eye=y===2&&(x===6||x===9),jaw=y===4&&(x===5||x===10);if(jaw)continue;P(256,x,sy+y,eye?[20,14,12]:sh([222,214,190],(hn(x,y+sy,223)-.5)*24-(y===4?30:0)));}
@@ -903,35 +904,38 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   clear(265);clear(269);
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){
     const row=y>>2,off=row%2?4:0,mort=y%4===3||(x+off)%8===7,chip=hn((x+off)>>3,row,230)<.35&&((x+off)%8===6||(x+off)%8===0)&&(y%4===0||y%4===2);
-    P(258,x,y,mort||chip?sh([22,20,22],(hn(x,y,231)-.5)*8):sh([54,51,56],(hn(x,y,232)-.5)*18+(hn((x+off)>>3,row,233)-.5)*22+(hn(x>>1,y>>1,234)<.18?-12:0)));
+    P(258,x,y,mort||chip?sh([30,28,31],(hn(x,y,231)-.5)*8):sh([80,76,84],(hn(x,y,232)-.5)*18+(hn((x+off)>>3,row,233)-.5)*22+(hn(x>>1,y>>1,234)<.18?-12:0)+(y%4===0?14:y%4===2?-8:0)));
     const tx=x&7,ty=y&7,tl=(hn(x>>3,y>>3,235)-.5)*10;
-    P(259,x,y,tx===0||ty===0?sh([20,18,22],(hn(x,y,236)-.5)*6):sh([50,48,56],tl+(tx===1||ty===1?14:tx===7||ty===7?-10:0)+(hn(x,y,237)-.5)*7+((tx+ty)===8&&hn(x,y,238)<.5?8:0)));
+    P(259,x,y,tx===0||ty===0?sh([32,30,36],(hn(x,y,236)-.5)*6):sh([78,76,86],tl+(tx===1||ty===1?14:tx===7||ty===7?-10:0)+(hn(x,y,237)-.5)*7+((tx+ty)===8&&hn(x,y,238)<.5?8:0)));
     // carved: a frame, and a flame rising between two horns, cut into the stone (dark in the cut, lit along its lower edge)
     const fw=y>=3&&y<=13?(y<9?(y-3)*0.55:(13-y)*0.8):-9,dx=Math.abs(x-7.5),flame=fw>0&&dx<=fw+0.5&&dx>=fw-0.7,horn=(y>=3&&y<=8&&Math.abs(dx-(2.5+(8-y)*0.55))<0.6),frame=x===1||x===14||y===1||y===14;
-    P(260,x,y,flame||horn||frame?[24,21,26]:sh([62,58,64],(hn(x,y,239)-.5)*12+((flame||horn||frame)?0:(x===2||x===15||y===2||y===15)?10:0)));
-    P(261,x,y,y===1||y===14?[26,24,28]:sh([46,42,46],(hn(x,y,240)-.5)*12));
-    const ob=y%4===3||(x+off)%8===7;P(262,x,y,ob?sh([12,10,16],(hn(x,y,241)-.5)*6):sh([30,22,40],(hn(x,y,242)-.5)*14+((x+2*y)%9===0&&hn(x,y,243)<.6?34:0)+(hn((x+off)>>3,row,244)-.5)*10));
-    const r=Math.hypot(x-7.5,y-7.5);P(263,x,y,r>7?[28,26,30]:sh([60,57,62],(Math.abs(r-5)<0.6?-18:0)+(r<1.5?-10:0)+(hn(x,y,245)-.5)*10));
-    P(264,x,y,sh([58,55,60],(x%4===0?-28:x%4===1?16:0)+(y===0||y===15?-14:0)+(hn(x,y,246)-.5)*10+(hn(x>>2,y,247)<.08?-14:0)));
+    P(260,x,y,flame||horn||frame?[36,32,38]:sh([90,86,94],(hn(x,y,239)-.5)*12+((flame||horn||frame)?0:(x===2||x===15||y===2||y===15)?10:0)));
+    P(261,x,y,y===1||y===14?[42,39,44]:sh([76,72,78],(hn(x,y,240)-.5)*12));
+    const ob=y%4===3||(x+off)%8===7;P(262,x,y,ob?sh([22,17,30],(hn(x,y,241)-.5)*6):sh([54,42,72],(hn(x,y,242)-.5)*14+((x+2*y)%9===0&&hn(x,y,243)<.6?44:0)+(hn((x+off)>>3,row,244)-.5)*10+(y%4===0?14:y%4===2?-8:0)+((x+off)%8===0?8:0)));
+    const r=Math.hypot(x-7.5,y-7.5);P(263,x,y,r>7?[44,42,48]:sh([88,84,92],(Math.abs(r-5)<0.6?-18:0)+(r<1.5?-10:0)+(hn(x,y,245)-.5)*10));
+    P(264,x,y,sh([86,82,90],(x%4===0?-32:x%4===1?16:0)+(y===0||y===15?-14:0)+(hn(x,y,246)-.5)*10+(hn(x>>2,y,247)<.08?-14:0)));
     // a basket of fire: an iron rim round glowing coals (top), iron underneath, bars with coals low and flames high (sides)
     const coal=hn(x>>1,y>>1,248),hot=coal<.3?[255,214,96]:coal<.65?[244,120,32]:[110,34,18];
-    P(266,x,y,x===0||y===0||x===15||y===15?sh([52,48,50],(hn(x,y,249)-.5)*10):sh(hot,(hn(x,y,250)-.5)*30));
-    P(267,x,y,sh([42,40,44],(x%5===2||y%5===2?14:0)+(hn(x,y,251)-.5)*10));
+    P(266,x,y,x===0||y===0||x===15||y===15?sh([72,68,70],(hn(x,y,249)-.5)*10):sh(hot,(hn(x,y,250)-.5)*30));
+    P(267,x,y,sh([64,60,66],(x%5===2||y%5===2?14:0)+(hn(x,y,251)-.5)*10));
     const bar=x%5===0,band=y===0||y===8||y===15,fl=y<8?(hn(x,0,252)*8>y+(hn(x,y,253)<.3?2:0)?0:1):2;
-    P(268,x,y,bar||band?sh([54,50,52],(bar&&!band?(x===0?-8:8):0)+(hn(x,y,254)-.5)*10):fl===0?[34,18,14]:fl===1?sh(y<4?[255,226,120]:[255,150,40],(hn(x,y,255)-.5)*30):sh(hot,(hn(x,y,256)-.5)*24));
+    P(268,x,y,bar||band?sh([74,70,72],(bar&&!band?(x===0?-8:8):0)+(hn(x,y,254)-.5)*10):fl===0?[34,18,14]:fl===1?sh(y<4?[255,226,120]:[255,150,40],(hn(x,y,255)-.5)*30):sh(hot,(hn(x,y,256)-.5)*24));
   }
   // the burning script: two rows of angular signs, each a stem with two or three strokes branching from it
   for(const [ry,sr] of [[3,0],[9,1]])for(let g=0;g<4;g++){const x0=1+g*4,glow=[255,130+Math.floor(hn(g,sr,258)*60),36],B=[[[2,0]],[[2,4]],[[0,2]],[[0,0]],[[2,1],[2,2]],[[0,3],[0,4]]];
     for(let y=0;y<5;y++)P(261,x0+1,ry+y,glow);const a=Math.floor(hn(g,sr,257)*6),b=(a+1+Math.floor(hn(g,sr,259)*5))%6;for(const q of [a,b])for(const [dx,dy] of B[q])P(261,x0+dx,ry+dy,glow);
     if(hn(g,sr,260)<.4)for(const [dx,dy] of B[(b+3)%6])P(261,x0+dx,ry+dy,glow);}
   // cracks across the cracked bricks
-  for(let c=0;c<3;c++){let x=Math.floor(hn(c,1,262)*16),y=Math.floor(hn(c,2,262)*6);for(let k=0;k<11;k++){P(258,x&15,y&15,[14,12,14]);if(hn(c,k,263)<.35)P(258,(x+1)&15,y&15,[30,27,30]);x+=hn(c,k,264)<.5?1:-1;y+=hn(c,k,265)<.7?1:0;}}
+  for(let c=0;c<3;c++){let x=Math.floor(hn(c,1,262)*16),y=Math.floor(hn(c,2,262)*6);for(let k=0;k<11;k++){P(258,x&15,y&15,[24,21,24]);if(hn(c,k,263)<.35)P(258,(x+1)&15,y&15,[44,40,44]);x+=hn(c,k,264)<.5?1:-1;y+=hn(c,k,265)<.7?1:0;}}
   // the chain: front-on rings and side-on links in turn
   for(const y0 of [4,12])for(let y=y0+1;y<y0+5;y++){P(265,7,y&15,[96,92,100]);P(265,8,y&15,[56,54,60]);}
   for(const y0 of [0,8]){for(let y=y0+1;y<y0+5;y++){P(265,6,y,[100,96,104]);P(265,9,y,[58,56,62]);}for(const y of [y0,y0+5]){P(265,7,y,[88,84,92]);P(265,8,y,[70,68,74]);}}
   // spikes on a bar, their tips rusted dark
   for(const [cx,top] of [[3,5],[8,2],[12,6]])for(let y=top;y<16;y++){const w=(y-top)/(15-top)*1.6;for(let x=Math.floor(cx-w);x<=Math.ceil(cx+w);x++)if(Math.abs(x-cx)<=w+0.2)P(269,x,y,y<top+3?[96,40,30]:sh([66,64,70],(x<cx?14:-6)+(hn(x,y,261)-.5)*10));}
   for(let x=1;x<15;x++){P(269,x,12,[52,50,56]);P(269,x,13,[40,38,44]);}
+  // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
+    P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles
@@ -8580,11 +8584,13 @@ function tintSky(c){tintMul.copy(c).multiply(LWX.tint);c.lerp(tintMul,LWX.ta);}
 // in blue-white bolts that strike the plains and the craters; a plume of smoke over every volcano, lit red from the crater; lava
 // thrown up from the craters; embers rising from the lava and smoke from the vents. All cosmetic, none of it saved. Storms
 // elsewhere get visible bolts too.
-const burnSky=new THREE.Color(),burnTint=new THREE.Color(1,0.52,0.4),burnSun=new THREE.Color(0.5,0.1,0.04),burnCloud=new THREE.Color(),blueFlash=new THREE.Color(0.5,0.6,1);
+const burnSky=new THREE.Color(),burnTint=new THREE.Color(1,0.66,0.54),burnSun=new THREE.Color(0.5,0.1,0.04),burnCloud=new THREE.Color(),blueFlash=new THREE.Color(0.5,0.6,1);
 // the sky's colours, called from updSky once the day's own colours are set (d: daylight 0 to 1)
 function burnSkyTick(d){
   const b=LWX.burn;flashC.setHex(0xdfe6ff).lerp(blueFlash,b);if(b<0.002)return;
-  U.skyMul.value*=1-0.42*b;U.skyTint.value.lerp(burnTint,0.75*b);
+  // dimmed and reddened by day, but not so far that dark rock goes black; by night the burning smoke still lights the land a dull
+  // red, about a third of daylight, so the wastes never sink into black (D-059)
+  U.skyMul.value=Math.max(U.skyMul.value*(1-0.22*b),0.34*b*(1-0.3*rainAmt));U.skyTint.value.lerp(burnTint,(0.7+0.3*(1-d))*b);
   skyC.lerp(burnSky.setRGB(0.17,0.05,0.035).multiplyScalar(0.4+0.6*d),0.9*b);
   stars.material.opacity*=1-b;clouds.material.color.lerp(burnCloud.setRGB(0.2,0.09,0.07).multiplyScalar(0.5+0.5*d),0.85*b);
   sun.material.color.lerp(burnSun,0.85*b);if(b>0.5)halo.visible=false;
@@ -8828,7 +8834,7 @@ function frame(now){
   else if(head===LAVA){U.fogColor.value.setHex(0xc84a10);U.fogNear.value=0;U.fogFar.value=4;renderer.setClearColor(0xc84a10);tint.style.display='block';tint.style.background='rgba(220,90,20,.4)';}
   else{
     const CV=[[0.0,0.78,13,40],[0.12,0.95,20,64],[0.62,1.0,26,110]][settings.cave||0];
-    const lmp=lampLevel();U.caveMin.value=Math.max(CV[0]*caveF*(SURV()?depthDim(PL.y):1),0.15*warF*caveF,0.34*fortF*caveF);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
+    const lmp=lampLevel();U.caveMin.value=Math.max(CV[0]*caveF*(SURV()?depthDim(PL.y):1),0.22*warF*caveF,0.34*fortF*caveF);U.lamp.value=lmp[0];U.lampR.value=lmp[1];
     caveFogC.copy(skyC).lerp(caveDark,caveF);U.fogColor.value.copy(caveFogC);
     U.fogNear.value=lerp(Math.max(Math.min(6,FOGN),FOGN*(1-0.3*rainAmt)*(1-0.6*LWX.fog)),CV[3]*0.35,caveF);U.fogFar.value=lerp(Math.max(Math.min(38,FOGF),FOGF*(1-0.25*rainAmt)*(1-0.55*LWX.fog)),CV[3],caveF);renderer.setClearColor(caveFogC);tint.style.display='none';} // mist by land (M6h)
   cullT-=dt;if(cullT<=0){cullT=0.25;const lim=(U.fogFar.value+24)*(U.fogFar.value+24),pcx=PL.x,pcz=PL.z;

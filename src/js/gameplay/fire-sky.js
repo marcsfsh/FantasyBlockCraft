@@ -2,11 +2,13 @@
 // in blue-white bolts that strike the plains and the craters; a plume of smoke over every volcano, lit red from the crater; lava
 // thrown up from the craters; embers rising from the lava and smoke from the vents. All cosmetic, none of it saved. Storms
 // elsewhere get visible bolts too.
-const burnSky=new THREE.Color(),burnTint=new THREE.Color(1,0.52,0.4),burnSun=new THREE.Color(0.5,0.1,0.04),burnCloud=new THREE.Color(),blueFlash=new THREE.Color(0.5,0.6,1);
+const burnSky=new THREE.Color(),burnTint=new THREE.Color(1,0.66,0.54),burnSun=new THREE.Color(0.5,0.1,0.04),burnCloud=new THREE.Color(),blueFlash=new THREE.Color(0.5,0.6,1);
 // the sky's colours, called from updSky once the day's own colours are set (d: daylight 0 to 1)
 function burnSkyTick(d){
   const b=LWX.burn;flashC.setHex(0xdfe6ff).lerp(blueFlash,b);if(b<0.002)return;
-  U.skyMul.value*=1-0.42*b;U.skyTint.value.lerp(burnTint,0.75*b);
+  // dimmed and reddened by day, but not so far that dark rock goes black; by night the burning smoke still lights the land a dull
+  // red, about a third of daylight, so the wastes never sink into black (D-059)
+  U.skyMul.value=Math.max(U.skyMul.value*(1-0.22*b),0.34*b*(1-0.3*rainAmt));U.skyTint.value.lerp(burnTint,(0.7+0.3*(1-d))*b);
   skyC.lerp(burnSky.setRGB(0.17,0.05,0.035).multiplyScalar(0.4+0.6*d),0.9*b);
   stars.material.opacity*=1-b;clouds.material.color.lerp(burnCloud.setRGB(0.2,0.09,0.07).multiplyScalar(0.5+0.5*d),0.85*b);
   sun.material.color.lerp(burnSun,0.85*b);if(b>0.5)halo.visible=false;

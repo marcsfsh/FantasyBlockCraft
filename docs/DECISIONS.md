@@ -459,3 +459,22 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Generation change:** the fortresses and, through their larger boxes, the warrens near them change. The save key is now v20 (`SAVE_V` 20), and old saves do not carry over (D-019). The world-hash snapshot is unchanged, since no fortress lies in the spawn windows.
 - **Tools:** `tools/shot.mjs --tiles=` draws atlas tiles enlarged, to judge a texture.
 
+### D-059 The Volcanic Wastes keep their definition: lighter dark rock, and a burning sky that dims without blacking out (2026-10-11)
+- **The owner:** "Much of the darker blocks in the biome are so dark that they have no definition. It's just black space", and that it applies to the whole of the wastes, the fortresses with it.
+- **Why it was black:** the wastes' dark blocks were painted at 22 to 46 out of 255 on average (stone is 126): black ash 39, cinder 46, basalt bricks 46, obsidian 26, obsidian bricks 22, cracked bricks 33, charred bark 36. The burning sky then took daylight down to about 43% of plain daylight (`skyMul` cut by 42% and a strong red tint), and to about 16% by night. Black ash came out at about 17 on screen, with nothing inside a face to show its edges.
+- **The textures, repainted lighter with edges** (`blocks/atlas.js`): every dark block of the wastes now averages 58 to 83 (obsidian and obsidian bricks about 42 to 58), with a spread inside each face so its pattern shows.
+  - Black ash is rippled by the wind and flecked with grey.
+  - Cinder's pits have lighter rims.
+  - Lava crust plates are lighter in their middles.
+  - Charred bark has a grain, and its rings show.
+  - Basalt columns have lit and shaded edges and cross-joints.
+  - Black sand, scorched stone and magma stone's rock are lighter.
+  - All the bricks (basalt, ember, cracked, obsidian) and the tiles are bevelled: lit on the top and left of each brick, shaded on the bottom and right, in dark mortar.
+  - Obsidian is black glass with a purple sheen, glassy streaks and curved fracture lines. Its first painting draws from the atlas's shared stream (`tr`), which must not change, so it is painted again at the end with hashes only.
+- **The light:**
+  - By day the burning sky dims daylight by 22% (was 42%) and reddens it less (tint 1, 0.66, 0.54 at 70%, was 1, 0.52, 0.4 at 75%), about 64% of plain daylight in all.
+  - By night the burning smoke keeps the land lit a dull red, at no less than about a third of daylight (`burnSkyTick`), so the wastes never sink into black. The night tint leans further to red.
+  - The goblin warrens' dim light rises from 0.15 to 0.22. The fortresses keep theirs at 0.34 (D-058).
+- **Elsewhere:** basalt, obsidian and black sand are lighter wherever they lie (the coasts, the highlands, crafted blocks); nothing else changes outside the wastes. No generation change: the world-hash snapshot is unchanged.
+- **Tests:** `47-volcanic` checks that every dark block of the wastes averages 50 or more (40 for obsidian and its bricks) with a spread of 8 or more inside a face, and that the burning sky's strength (`skyMul`) stays at 0.7 or more of daylight by day and 0.3 or more by night (its red tint is a three.js colour, which the harness stands in for, so it is judged in screenshots). The harness's stand-in image data is now the size of the whole atlas (128 by 1024), so tiles past 255 are painted in tests too.
+
