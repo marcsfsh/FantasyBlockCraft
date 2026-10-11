@@ -426,3 +426,29 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **What it costs:** memory, at five bytes a block, is 123 MB Near, 250 MB Far and 423 MB Farthest; a slide of the window (every 16 blocks walked) moves all of it, about 14, 30 and 49 ms on the cloud VM; the starting area has 196, 400 or 676 chunks to generate, and more meshes to draw. The owner's device is the judge.
 - **The stand-in from afar (D-055) stays** for what lies beyond even the widest area: with Farthest the real ground of the grand volcano shows from the basin's floor to 200 blocks, and the stand-in only fills in above and beyond.
 - **Tests:** a case may set its area (`// @area 1`); `51-area` runs in the Far area. `tools/shot.mjs --area= --viewd=` shows the wider views. No generation change.
+
+### D-058 The Emberlords' fortresses built with detail (2026-10-11)
+- **The owner:** "The balrog fortress could do with a lot more detail, texture, and attention overall".
+- **Where it stood:** one flat facade with a square gate and two specks of magma for eyes, plain box towers, a rectangular tunnel for the way in, and a box of a hall with square pillars, all in one brick.
+- **New masonry** (blocks 1098 to 1106, tiles 258 to 269): Cracked Basalt Bricks, Basalt Tiles, Carved Basalt (a flame between horns cut into the stone), Ember Script (angular signs that burn), Obsidian Bricks, Basalt Pillar (fluted), Iron Chain (hangs and can be climbed), Fire Basket (an iron basket of coals and flame, light 14) and Iron Spikes. All are in the creative menu under Building. Fortress walls mix their bricks by hash: cracked in patches, here and there rough basalt, now and then a seam that still glows (`fortStone`).
+- **The plan, part by part** (`world/fortress.js`, every part a function of the fortress's own frame, so each chunk builds its share alone):
+  - **The approach:** a stair between low walls with skulls on them.
+  - **The terrace:** deeper than before (40 blocks for the grandest). The way to the gate is paved between obsidian edges, with chevrons pointing in and a burning line down its middle. A moat of fire crosses the terrace, bridged by the way, with fire baskets at the bridge's ends and along the way. Parapets carry skulls and spikes, an obelisk stands at each outer corner, and a foundation runs down to the ground beneath.
+  - **The guardians:** two of them, statues in the lord's likeness, 13 times the fortress's scale (42 blocks at the Ember Throne). Each rests its hands on a great sword set point down, its wings folded and edged with fire, horned, with burning eyes and maw, on a plinth written round with burning script (`fortStatue`).
+  - **The facade:** a pointed gate in three rings (obsidian, fire, carving), with fangs at its mouth and the portcullis drawn up into it. Above it a demon's face: a heavy V of brow over slanted burning eyes, a ridge of nose from the keystone and a jaw round the arch. Horns rise over battlements that carry spikes and a peak. A line of burning script runs across the wall.
+  - **The towers:** a battered foot capped in obsidian, fluted corners and bands of fire. Slits are lit from within, under a carved frieze and machicolations on corbels. The battlements carry spikes, horns sweep out from the corners, a pool of fire lies on the roof, and banners hang down the outer face.
+  - **The way in:** a pointed vault on ribs of fire, standing on pillars against the walls with fire baskets before them. Between the ribs are niches with skulls under lintels of burning script, and fire hangs on chains in every other bay. A runner with burning lines runs down the floor, and an inner portcullis is drawn up.
+  - **The throne hall:**
+    - Vaults: a tall pointed vault over the nave and lower ones over the aisles, ribs of fire over both, and an obsidian ridge.
+    - Pillars: compound, on obsidian bases, with carved capitals and a ring of burning script, joined by pointed arcades. Fire baskets stand before the pillars and the wall's.
+    - Hung fire: cages of fire on chains in every bay.
+    - Floor: the rivers of fire are now kerbed and bridged in every bay, either side of a burning runner.
+    - Aisles: guardians stand in the aisles where they are wide enough, with banners between them.
+    - Dais and throne: the dais's steps are written in fire. The throne is peaked, horned and holds a burning sign, with skulls on its arms, and the hoard is heaped beside and behind it.
+    - Back wall: the lord's sign (a ring of fire round a flame, with spikes) between columns of lava behind iron grates.
+- **The lava stays held:** every block of it (the moat, the troughs and rivers, the tower pools, the columns behind the grates) lies in rock or behind iron on every side and below. `fortLava` answers for all of it, and `fortLavaAt` trusts it at chunk edges. On the default seed the nearest Ember Throne has no unsound lava, at its front or in its hall.
+- **Sizes:** the terraces are deeper (`td` 16, 34, 40, 30) and wide enough for the towers (`tz`). The dais is deeper by the throne's scale. The hall's guards stand between the kerbs and the pillars. The fortress's box reaches the horns, the foundation and the back wall's rock; the warrens keep out of it as before.
+- **Warholds** share the plan at their small size: they gain the same pointed gate, face, towers, statues, vaults, cages, dais and sign. The hall's guardians stand only where the aisles are wide enough.
+- **Generation change:** the fortresses and, through their larger boxes, the warrens near them change. The save key is now v20 (`SAVE_V` 20), and old saves do not carry over (D-019). The world-hash snapshot is unchanged, since no fortress lies in the spawn windows.
+- **Tools:** `tools/shot.mjs --tiles=` draws atlas tiles enlarged, to judge a texture.
+

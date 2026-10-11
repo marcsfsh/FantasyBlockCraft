@@ -128,3 +128,14 @@ Same VM type (Intel Xeon 2.80GHz, 4 cores), `npm run bench`, one run per seed, t
 | 4242 | 2624 | 11.55 / 11.02 / 15.4 / 23.06 | 14.11 / 13.33 / 23.16 / 26.99 | 0.68 / 0.46 / 2.61 / 6.28 | 1.61 / 1.36 / 3.13 / 3.87 | 211 |
 
 Generating a chunk at spawn (no wastes near) costs about a tenth more than in 0.10.0 (median 10.5 to 11.0 ms against 9.6 to 10.6): every lookup of the land now also asks whether a sunken basin reaches the column (D-055), and the lands since 0.10.0 add their own work. Streaming steps and meshing are unchanged or cheaper. Inside the wastes a column costs about twice what it did (13 against 6 microseconds). A wider loaded area (D-057) does not change these per-chunk costs, but multiplies the chunks to generate (400 in Far, 676 in Farthest, against 196) and the slide of the window every 16 blocks walked (about 30 and 49 ms, against 14).
+
+## The fortresses built with detail (2026-10-11, 0.29.0)
+
+Same VM type, `npm run bench`, one run per seed, the Near area.
+
+| Seed | Startup | genChunk | Stream 1 chunk | Stream step (one frame) | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 123456789 | 2487 | 10.47 / 10.1 / 12.79 / 20.62 | 13.73 / 13.33 / 16.18 / 38.05 | 0.62 / 0.42 / 2.19 / 5.02 | 2.31 / 1.98 / 5.39 / 6.7 | 207 |
+| 4242 | 2732 | 12.48 / 11.37 / 19.56 / 27.64 | 15.53 / 14.25 / 24.6 / 30.2 | 0.68 / 0.46 / 2.51 / 4.37 | 1.59 / 1.33 / 3.49 / 4.8 | 209 |
+
+Within the noise of 0.28.0 at spawn, where no fortress stands. In the window about the nearest Ember Throne (77 chunks touch it), rebuilding the fortress costs 0.40 ms a chunk on average (`fortBuild`, D-058), against 13.2 ms for the whole chunk there.

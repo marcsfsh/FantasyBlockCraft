@@ -54,5 +54,18 @@ assert(!isBlockedName(plans[0].war.name.replace('The Warrens of ','')),'warrens 
   info(F.name,': basalt bricks',bb,'; ember bricks',eb,'; lava in its troughs',lava,'; the throne',nameOf(thr),'; open above the lord\'s place',room,'; unsound lava',u0,'; named there',layerName(F.Fh+2,Math.floor(S.hall.x),Math.floor(S.hall.z)));
   assert(bb>20000&&eb>1000&&lava>100&&thr===OBSID&&room>=FOES.ember.tall+10&&u0===0,'the Ember Throne stands: towers, a broad way in, a vast throne hall with room for its lord, rivers of lava held in its floor and an obsidian throne');
   assert(layerName(F.Fh+2,Math.floor(S.hall.x),Math.floor(S.hall.z))===F.name&&surfaceName(F.GX+F.ox*6,F.Fy,F.GZ+F.oz*6)===F.name,'within and before it the readout names the fortress');
+  // its detail (D-058): weathered and carved masonry, burning script, fire baskets, chains and spikes; a pointed gate; the two
+  // guardians before it (each with burning eyes and horns); fire in the towers' pools and behind the grates of the back wall
+  {const d=fortD(F),wX=(u,v)=>F.GX-F.ox*u+F.px*v,wZ=(u,v)=>F.GZ-F.oz*u+F.pz*v,A=(u,v,y)=>at(wX(u,v),y,wZ(u,v)),ids=[BASCRACK,BASTILE,BASCARVE,EMGLYPH,OBSBRICK,BASPILLAR,CHAIN,BRAZIER,SPIKES],c={};for(const id of ids)c[id]=0;
+    const tally=()=>{for(let X=F.box[0];X<=F.box[1];X++)for(let Z=F.box[2];Z<=F.box[3];Z++)for(let y=F.box[4];y<=F.box[5];y++){const id=at(X,y,Z);if(c[id]!==undefined)c[id]++;}};
+    tally();const fallAt=()=>{let n=0;for(let y=F.Fh;y<=F.Fh+d.lfH;y++)if(A(d.E,F.P.lv,y)===LAVA&&A(d.E-1,F.P.lv,y)===GRATE)n++;return n;},fall=fallAt();
+    gen(wX(-8,0),wZ(-8,0));tally(); // the front, a window away from the hall (its far end may be counted twice; no matter)
+    const openUp=v=>{let y=F.Fy;while(y<F.Fy+F.P.gh+8&&(A(1,v,y)===AIR||A(1,v,y)===GRATE))y++;return y-F.Fy;},g0=openUp(0),g1=openUp(F.P.gw-1);let eyes=0,horns=0,pool=0;
+    for(const sd of [-1,1])for(let u=d.us-d.sw;u<=d.us+d.sw;u++)for(let v=d.vs-d.sw-2;v<=d.vs+d.sw+2;v++)for(let y=F.Fy+d.ph;y<=F.Fy+d.ph+13*F.P.k;y++){const id=A(u,sd*v,y);if(id===MAGMA)eyes++;else if(id===OBSID&&y>=F.Fy+d.ph+9*F.P.k)horns++;}
+    for(let a=-F.P.ts;a<=F.P.ts;a++)for(let b=-F.P.ts;b<=F.P.ts;b++)if(A(-F.P.ts+b,F.P.tv+a,F.Fy+F.P.th)===LAVA)pool++;
+    info(F.name,'detail:',ids.map(id=>nameOf(id)+' '+c[id]).join(', '),'; gate open',g0,'high in the middle and',g1,'at its side; guardians: eye blocks',eyes,', horn blocks',horns,'; tower pool',pool,'; lava behind grates',fall,'; unsound lava at the front',unsoundLava());
+    assert(c[BASCRACK]>2000&&c[BASTILE]>2000&&c[BASCARVE]>200&&c[EMGLYPH]>200&&c[OBSBRICK]>2000&&c[BASPILLAR]>300&&c[CHAIN]>50&&c[BRAZIER]>30&&c[SPIKES]>30,'the Ember Throne is built in weathered, carved and burning masonry, with fire baskets, chains and spikes');
+    assert(g0>=F.P.gh-1&&g1<g0-3&&eyes>=8&&horns>=8,'its gate is a pointed arch, and guardians with burning eyes and horns stand before it');
+    assert(pool>0&&fall===d.lfH+1&&unsoundLava()===0,'fire pools on its towers, and lava stands behind grates in the back wall of its hall, all of it held');}
   const H2=holds[0],S2=fortSpots(H2);gen(Math.round(S2.hall.x),Math.round(S2.hall.z));let hb=0;for(let X=H2.box[0];X<=H2.box[1];X++)for(let Z=H2.box[2];Z<=H2.box[3];Z++)for(let y=H2.box[4];y<=H2.box[5];y++)if(at(X,y,Z)===BASBRICK)hb++;
   const u1=unsoundLava();info(H2.name,': basalt bricks',hb,'; unsound lava',u1);assert(hb>5000&&u1===0,'a warhold stands in a lesser volcano, its lava held');}

@@ -268,6 +268,40 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   for(let y=1;y<13;y++)for(let x=3;x<14;x++){if(y>9&&hn(x,0,225)<(y-9)/4)continue;const em=Math.abs(x-8)+Math.abs(y-5)*1.3<3.2&&!(Math.abs(x-8)+Math.abs(y-5)*1.3<1.4);
     P(257,x,y,em?[24,20,20]:sh([148,30,24],(hn(x,y,226)-.5)*22+(x===3?-20:0)));}
   clear(243);for(let f=0;f<5;f++){const ox=2+f*3,h=8+Math.floor(hn(f,6,174)*6);for(let k=0;k<h;k++)P(243,ox,15-k,k>h-5?sh([150,110,210],(hn(f,k,175)-.5)*30):[90,130,80]);}
+  // The Emberlords' masonry (D-058): cracked basalt bricks, polished tiles, a carved panel (a flame between horns), burning
+  // script, obsidian bricks, a fluted pillar, a chain, a basket of fire and a row of spikes (the last two drawn like plants)
+  clear(265);clear(269);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const row=y>>2,off=row%2?4:0,mort=y%4===3||(x+off)%8===7,chip=hn((x+off)>>3,row,230)<.35&&((x+off)%8===6||(x+off)%8===0)&&(y%4===0||y%4===2);
+    P(258,x,y,mort||chip?sh([22,20,22],(hn(x,y,231)-.5)*8):sh([54,51,56],(hn(x,y,232)-.5)*18+(hn((x+off)>>3,row,233)-.5)*22+(hn(x>>1,y>>1,234)<.18?-12:0)));
+    const tx=x&7,ty=y&7,tl=(hn(x>>3,y>>3,235)-.5)*10;
+    P(259,x,y,tx===0||ty===0?sh([20,18,22],(hn(x,y,236)-.5)*6):sh([50,48,56],tl+(tx===1||ty===1?14:tx===7||ty===7?-10:0)+(hn(x,y,237)-.5)*7+((tx+ty)===8&&hn(x,y,238)<.5?8:0)));
+    // carved: a frame, and a flame rising between two horns, cut into the stone (dark in the cut, lit along its lower edge)
+    const fw=y>=3&&y<=13?(y<9?(y-3)*0.55:(13-y)*0.8):-9,dx=Math.abs(x-7.5),flame=fw>0&&dx<=fw+0.5&&dx>=fw-0.7,horn=(y>=3&&y<=8&&Math.abs(dx-(2.5+(8-y)*0.55))<0.6),frame=x===1||x===14||y===1||y===14;
+    P(260,x,y,flame||horn||frame?[24,21,26]:sh([62,58,64],(hn(x,y,239)-.5)*12+((flame||horn||frame)?0:(x===2||x===15||y===2||y===15)?10:0)));
+    P(261,x,y,y===1||y===14?[26,24,28]:sh([46,42,46],(hn(x,y,240)-.5)*12));
+    const ob=y%4===3||(x+off)%8===7;P(262,x,y,ob?sh([12,10,16],(hn(x,y,241)-.5)*6):sh([30,22,40],(hn(x,y,242)-.5)*14+((x+2*y)%9===0&&hn(x,y,243)<.6?34:0)+(hn((x+off)>>3,row,244)-.5)*10));
+    const r=Math.hypot(x-7.5,y-7.5);P(263,x,y,r>7?[28,26,30]:sh([60,57,62],(Math.abs(r-5)<0.6?-18:0)+(r<1.5?-10:0)+(hn(x,y,245)-.5)*10));
+    P(264,x,y,sh([58,55,60],(x%4===0?-28:x%4===1?16:0)+(y===0||y===15?-14:0)+(hn(x,y,246)-.5)*10+(hn(x>>2,y,247)<.08?-14:0)));
+    // a basket of fire: an iron rim round glowing coals (top), iron underneath, bars with coals low and flames high (sides)
+    const coal=hn(x>>1,y>>1,248),hot=coal<.3?[255,214,96]:coal<.65?[244,120,32]:[110,34,18];
+    P(266,x,y,x===0||y===0||x===15||y===15?sh([52,48,50],(hn(x,y,249)-.5)*10):sh(hot,(hn(x,y,250)-.5)*30));
+    P(267,x,y,sh([42,40,44],(x%5===2||y%5===2?14:0)+(hn(x,y,251)-.5)*10));
+    const bar=x%5===0,band=y===0||y===8||y===15,fl=y<8?(hn(x,0,252)*8>y+(hn(x,y,253)<.3?2:0)?0:1):2;
+    P(268,x,y,bar||band?sh([54,50,52],(bar&&!band?(x===0?-8:8):0)+(hn(x,y,254)-.5)*10):fl===0?[34,18,14]:fl===1?sh(y<4?[255,226,120]:[255,150,40],(hn(x,y,255)-.5)*30):sh(hot,(hn(x,y,256)-.5)*24));
+  }
+  // the burning script: two rows of angular signs, each a stem with two or three strokes branching from it
+  for(const [ry,sr] of [[3,0],[9,1]])for(let g=0;g<4;g++){const x0=1+g*4,glow=[255,130+Math.floor(hn(g,sr,258)*60),36],B=[[[2,0]],[[2,4]],[[0,2]],[[0,0]],[[2,1],[2,2]],[[0,3],[0,4]]];
+    for(let y=0;y<5;y++)P(261,x0+1,ry+y,glow);const a=Math.floor(hn(g,sr,257)*6),b=(a+1+Math.floor(hn(g,sr,259)*5))%6;for(const q of [a,b])for(const [dx,dy] of B[q])P(261,x0+dx,ry+dy,glow);
+    if(hn(g,sr,260)<.4)for(const [dx,dy] of B[(b+3)%6])P(261,x0+dx,ry+dy,glow);}
+  // cracks across the cracked bricks
+  for(let c=0;c<3;c++){let x=Math.floor(hn(c,1,262)*16),y=Math.floor(hn(c,2,262)*6);for(let k=0;k<11;k++){P(258,x&15,y&15,[14,12,14]);if(hn(c,k,263)<.35)P(258,(x+1)&15,y&15,[30,27,30]);x+=hn(c,k,264)<.5?1:-1;y+=hn(c,k,265)<.7?1:0;}}
+  // the chain: front-on rings and side-on links in turn
+  for(const y0 of [4,12])for(let y=y0+1;y<y0+5;y++){P(265,7,y&15,[96,92,100]);P(265,8,y&15,[56,54,60]);}
+  for(const y0 of [0,8]){for(let y=y0+1;y<y0+5;y++){P(265,6,y,[100,96,104]);P(265,9,y,[58,56,62]);}for(const y of [y0,y0+5]){P(265,7,y,[88,84,92]);P(265,8,y,[70,68,74]);}}
+  // spikes on a bar, their tips rusted dark
+  for(const [cx,top] of [[3,5],[8,2],[12,6]])for(let y=top;y<16;y++){const w=(y-top)/(15-top)*1.6;for(let x=Math.floor(cx-w);x<=Math.ceil(cx+w);x++)if(Math.abs(x-cx)<=w+0.2)P(269,x,y,y<top+3?[96,40,30]:sh([66,64,70],(x<cx?14:-6)+(hn(x,y,261)-.5)*10));}
+  for(let x=1;x<15;x++){P(269,x,12,[52,50,56]);P(269,x,13,[40,38,44]);}
   actx.putImageData(im,0,0);
 })();
 // Average tile colors for particles

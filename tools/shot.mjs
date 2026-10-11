@@ -8,6 +8,7 @@
 //   node tools/shot.mjs --view=... --bolt     a lightning bolt strikes just before the shot (the Volcanic Wastes, D-051)
 //   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep;
 //        a third part turns it (ember.w.90: side on), and --far=30 stands an Emberlord further off
+//   node tools/shot.mjs --tiles=258-269,254      atlas tiles enlarged side by side, to tiles.png (no views unless --view is given)
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
@@ -24,7 +25,7 @@ const seed=args.seed||'123456789',out=path.resolve(ROOT,args.out||'tests/.tmp/sh
 const SHOTS=[['spawn-day',0,345,40,0,-0.25,0.3],['spawn-dusk',0,345,40,2.4,-0.15,0.74],['spawn-night',0,345,40,0,0.15,0.95],
   ['mountains',-640,470,-560,2.3,-0.3,0.35],['lake-cavern',-18,82,44,0.6,-0.2,0.3],['lava-sea',70,16,-86,0.8,-0.25,0.3],
   ['gate',824,338,1736,0,-0.55,0.3],['sea',119,318,-91,0.8,-0.4,0.45]];
-const views=args.view?args.view.split(';').map(v=>{const [n,r]=v.split(':');return [n,...r.split(',').map(Number)];}):SHOTS;
+const views=args.view?args.view.split(';').map(v=>{const [n,r]=v.split(':');return [n,...r.split(',').map(Number)];}):args.tiles!==undefined?[]:SHOTS;
 
 let require;try{require=createRequire(import.meta.url);const g=execSync('npm root -g',{encoding:'utf8'}).trim();require=createRequire(path.join(g,'x.js'));require.resolve('playwright');}
 catch(e){console.error('Playwright is not installed globally; tools/shot.mjs needs it (it is on the cloud VM).');process.exit(2);}
@@ -40,6 +41,8 @@ const HOOK=`window.__fbc={
     const real=performance.now;performance.now=()=>0;try{while(genQ.length||genJob)processGenQ();meshBand();for(let k=0;k<4;k++)flush();}finally{performance.now=real;}
     return {fog:FOGF,surf:MB.surf,queued:genQ.length,dirty:dirty.size};
   },
+  tiles(ts){const c=document.createElement('canvas'),s=8;c.width=ts.length*(16*s+8);c.height=16*s;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.fillStyle='#7a7a7a';x.fillRect(0,0,c.width,c.height);
+    ts.forEach((t,i)=>x.drawImage(atlas,(t%AC)*16,((t/AC)|0)*16,16,16,i*(16*s+8),0,16*s,16*s));return c.toDataURL();},
   bolt(){flash=0;const b=strike(false,true);b.hold=1;flash=0.2;},
   // foes in a row (or two) ahead of the camera, three-quarter on, held still: walking, winding up, asleep (D-052)
   stageFoes(kinds,sec){
@@ -73,6 +76,8 @@ p.on('console',m=>{const t=m.text();if(m.type()==='error'||/shader|WebGLProgram|
 if(args.area!==undefined)await p.addInitScript(a=>{try{localStorage.setItem('blockcraft-settings-v1',JSON.stringify({area:a}));}catch(e){}},Number(args.area)); // the loaded area (D-057), read at start
 await p.goto('file://'+html);
 await p.waitForFunction(()=>window.__fbc,null,{timeout:180000});
+if(args.tiles!==undefined){const ts=args.tiles.split(',').flatMap(r=>{const [a,b]=r.split('-').map(Number);return b===undefined?[a]:Array.from({length:b-a+1},(_,i)=>a+i);});
+  const d=await p.evaluate(t=>window.__fbc.tiles(t),ts),file=path.join(out,'tiles.png');fs.writeFileSync(file,Buffer.from(d.split(',')[1],'base64'));console.log('tiles '+ts.join(',')+' to '+path.relative(ROOT,file));}
 for(const [name,X,Y,Z,yaw,pitch,t] of views){
   const r=await p.evaluate(a=>window.__fbc.go(...a),[X,Y,Z,yaw,pitch,t]);
   if(args.animals!==undefined)await p.evaluate(k=>window.__fbc.stage(k?k.split(','):[],1),args.animals);

@@ -168,6 +168,14 @@ def(HIDE,'Hide Canvas',[252,252,252],{snd:'soft'});def(GRATE,'Iron Grate',[253,2
 def(EMBRICK,'Ember Bricks',[255,255,255],{emit:true,ember:true,lum:4});def(SKULLS,'Skull Totem',[256,256,256],{solid:false,opq:false,occ:false,cross:true});
 def(BANNER,'War Banner',[257,257,257],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
 setH([HIDE],0.8,'soft');setH([GRATE],6,'metal',3);setH([BASBRICK,EMBRICK],5,'stone',1);setH([SKULLS,BANNER],0,'soft');
+// The Emberlords' masonry (D-058): bricks cracked by heat and age, polished floor tiles, carved panels, script that still burns,
+// obsidian bricks, fluted pillars, chains hung from the vaults, iron baskets of fire, and spikes along the battlements
+const BASCRACK=1098,BASTILE=1099,BASCARVE=1100,EMGLYPH=1101,OBSBRICK=1102,BASPILLAR=1103,CHAIN=1104,BRAZIER=1105,SPIKES=1106;
+def(BASCRACK,'Cracked Basalt Bricks',[258,258,258]);def(BASTILE,'Basalt Tiles',[259,259,259]);def(BASCARVE,'Carved Basalt',[254,254,260]);
+def(EMGLYPH,'Ember Script',[254,254,261],{emit:true,ember:true,lum:5});def(OBSBRICK,'Obsidian Bricks',[262,262,262]);def(BASPILLAR,'Basalt Pillar',[263,263,264]);
+def(CHAIN,'Iron Chain',[265,265,265],Object.assign({cross:true},CLIMB,{snd:'stone'}));def(BRAZIER,'Fire Basket',[266,267,268],{emit:true,ember:true,lum:14,snd:'stone'});
+def(SPIKES,'Iron Spikes',[269,269,269],{solid:false,opq:false,occ:false,cross:true,snd:'stone'});
+setH([BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR],5,'stone',1);setH([OBSBRICK],20,'stone',7);setH([CHAIN,SPIKES],1.5,'metal',2);setH([BRAZIER],3,'metal',2);
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
