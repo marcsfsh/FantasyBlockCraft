@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.34.0 (2026-10-11): lava down the gullies, and the orcs' places
+
+Saves from 0.33.0 do not carry over (save key v24): the volcanoes' gullies and the orcs' places are new to the world.
+
+### Game
+- **Lava down the gullies.** The gullies down every volcano's flanks have flat floors now, and most carry a stream of lava from high on the flank to the foot; the rest have floors of glowing crust. None runs down the side a mountain's fortress faces.
+- **The orcs' places.** War camps, watchtowers, forges and fighting pits stand across the open floor of the Volcanic Wastes, each named and held by orcs:
+  - **War camps** behind black palisades with gate towers, tents of hide round a fire, poles of skulls, the warchief's tent, cages, racks of spears.
+  - **Watchtowers** of basalt, palisade and riveted iron, bowmen on a platform under a roof of hide.
+  - **Forges** with a smelter glowing at its mouth, a trough of lava, anvils under an awning hung with chains.
+  - **Fighting pits** walled in basalt with spikes along the rim and cages in the wall, sometimes with a troll in them.
+- They show in the readout, on the world map and in the journal ("Places of the orcs"); the hosts of the peoples fall on them.
+- New blocks (creative, Building): Black Palisade, Riveted Iron.
+
+### Tooling
+- New test case `56-orcs`.
+
 ## 0.33.0 (2026-10-11): the peoples against the wastes
 
 Saves from 0.32.0 carry over (save key v23): the world is unchanged.

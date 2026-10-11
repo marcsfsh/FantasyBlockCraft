@@ -130,6 +130,10 @@
       "about": "The Emberlords' fortresses cut into the great volcanoes (D-052): plan per volcano (fortOf), trusted lava troughs, names, spawn spots, per-chunk building"
     },
     {
+      "path": "world/orcs.js",
+      "about": "The orcs' places on the floor of the Volcanic Wastes (D-064): war camps, watchtowers, forges and fighting pits, planned on a grid where the floor is open, built per chunk, with their spawn spots and names"
+    },
+    {
       "path": "world/realm-build.js",
       "about": "Building the realms of men (D-060): each site's layout of parts (walls, towers, houses, halls, the square, gardens, fields), their column builders, the roads and bridges, per chunk"
     },

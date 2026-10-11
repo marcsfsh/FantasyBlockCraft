@@ -154,6 +154,7 @@ function surfaceName(X,Y,Z){
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
+  {const op=orcNear(X,Z,0);if(op)return op.name;} // the orcs' places on the wastes (D-064)
   for(const v of volcanoesNear(X,Z,0))if(Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name; // the volcanoes (D-051), the great ones too (D-054)
   return null;
 }
