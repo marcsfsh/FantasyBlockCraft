@@ -226,7 +226,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v25',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v26',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -239,7 +239,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=25,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=26,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
@@ -558,6 +558,18 @@ def(WLAMP,'Woodland Lamp',[328,328,328],{opq:false,occ:false,emit:true,lum:14,sn
 def(WCARVE,'Carved Wood',[326,326,330],{snd:'wood'});def(WROOT,'Rootstone',[331,331,331]);def(WHEDGE,'Clipped Hedge',[332,332,332],{snd:'soft'});
 def(WBANNER,'Banner of the Wood',[333,333,333],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(WTHATCH,'Leaf Thatch',[334,334,334],{snd:'soft'});
 NEW_LOGS.push(WBARK);NEW_PLANKS.push(WPLANK);NEW_LEAVES.push(WLEAF);
+// The mountain dwarves (D-066): dressed granite in great blocks and in long courses, granite carved in angular knotwork inlaid
+// with bronze, fluted columns banded in bronze, riveted bronze plating, firebrick black with soot, molten iron that glows in
+// their forges and channels (it never flows), the hold's lamps of bronze, cogwheels of iron, ore carts, slag, pit props of
+// oiled timber banded in iron, the banner of the mountain (a golden anvil under three peaks on deep blue), anvils, and the
+// polished flagstones of their halls
+const DGRAN=1159,DCOURSE=1160,DKNOT=1161,DCOL=1162,DBRONZE=1163,DFORGE=1164,DMOLTEN=1165,DLAMP=1166,DGEAR=1167,DCART=1168,DSLAG=1169,DPROP=1170,DBANNER=1171,DANVIL=1172,DFLAG=1173;
+def(DGRAN,'Dwarven Granite',[335,335,335]);def(DCOURSE,'Granite Courses',[335,335,336]);def(DKNOT,'Knotwork Granite',[335,335,337]);def(DCOL,'Hold Column',[338,338,339]);
+def(DBRONZE,'Bronze Plating',[340,340,340],{snd:'stone'});def(DFORGE,'Forge Brick',[341,341,341]);def(DMOLTEN,'Molten Iron',[342,342,342],{emit:true,ember:true,lum:15});
+def(DLAMP,'Hold Lamp',[343,343,343],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});def(DGEAR,'Iron Cogwheel',[345,345,344],{snd:'stone'});
+def(DCART,'Ore Cart',[346,347,347],{snd:'stone'});def(DSLAG,'Slag',[348,348,348]);def(DPROP,'Pit Prop',[349,349,350],{snd:'wood'});
+def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(DANVIL,'Anvil',[352,353,353],{snd:'stone'});def(DFLAG,'Hold Flagstones',[354,354,354]);
+setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
 setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
@@ -1178,6 +1190,48 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
       if(!sw)P(333,x,y,x<=1||x>=14?sh([196,160,64],(hn(x,y,479)-.5)*10):vein?[150,110,30]:inLeaf?sh([232,190,70],(hn(x,y,480)-.5)*12+(lfy<0?8:0)):sh([40,86,48],(hn(x,y,481)-.5)*10+(x%4===0?-6:0)));}
     const ry=y%4,rx=(x+(Math.floor(y/4)%2)*3)%6;P(334,x,y,sh(Math.floor(y/4)%2?[118,140,60]:[176,150,64],(ry===3?-26:ry===0?12:0)+(rx===0?-14:0)+(hn(x,y,482)-.5)*14));
   }
+  // the mountain dwarves (D-066): granite, warm grey flecked with black, pink and white, dressed in great blocks (two courses to a
+  // face, the joints staggered and their edges chamfered) and in long low courses; knotwork, an angular interlace cut in a band
+  // and inlaid with bronze; the hold's columns, fluted between bronze bands, their tops ringed in bronze; bronze plating in
+  // riveted panels streaked with verdigris; firebrick, small dark-red bricks blackened with soot toward the top; molten iron,
+  // white-gold under a crust that drifts in dark seams; the hold's lamp, a bronze cage round an amber flame; an iron cogwheel on
+  // dark iron; an ore cart, an iron tub banded and riveted on its wheels, heaped with ore; slag, black and glassy with rust and
+  // bubbles; pit props, dark oiled timber banded in iron; the banner of the mountain, a golden anvil under three white peaks on
+  // deep blue; an anvil's polished face and its dark iron body; the hold's flagstones, polished, set in bronze
+  for(const t of [343,351])clear(t);
+  const gran=(x,y,k)=>{const q=hn(x,y,k);return q<0.08?[86,84,86]:q<0.14?[178,152,142]:q>0.95?[204,202,198]:sh([150,146,142],(hn(x>>1,y>>1,k+1)-.5)*12+(q-.5)*10);};
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const row=y>>3,jx=(x+(row?8:0))%16,jy=y%8,edge=jx===0||jy===0,ch=jx===1||jy===1,lo=jx===15||jy===7;
+      P(335,x,y,edge?sh([98,96,94],(hn(x,y,484)-.5)*8):sh(gran(x,y,485),ch?14:lo?-12:0));}
+    {const row=y>>2,jx=(x+[0,6,11,3][row])%16,jy=y%4;P(336,x,y,jx===0||jy===3?sh([100,98,96],(hn(x,y,487)-.5)*8):sh(gran(x,y,488),jy===0?12:0));}
+    {const band=y>=3&&y<=12,kx=x%8,ky=(y-3)%8;let k=false;if(band){const a=[[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[6,5],[6,4],[6,3],[6,2],[5,2],[4,2],[3,2],[3,3],[3,4],[4,4]];
+      k=a.some(([px,py])=>px===kx&&py===ky)&&ky<8;}
+      P(337,x,y,y===2||y===13?sh([110,106,102],0):y<2||y>13?sh(gran(x,y,489),y===0?12:0):k?sh([196,148,72],(hn(x,y,490)-.5)*14+(ky===1||kx===1?14:0)):sh(gran(x,y,491),-16));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(338,x,y,r>7.2?sh([110,106,102],0):r>6?sh([190,142,70],(hn(x,y,492)-.5)*12+(r<6.5?12:0)):sh(gran(x,y,493),Math.floor(r*1.2)%3===0?-6:4));}
+    {const br=y<=1||y>=14,fl=x%4;P(339,x,y,br?sh([194,146,72],(y===0||y===14?16:-10)+(hn(x,y,494)-.5)*12):sh(gran(x,y,495),fl===0?-22:fl===1?10:fl===3?-6:4));}
+    {const px=x%8,py=y%8,rv=(px===1||px===6)&&(py===1||py===6),seam=px===7||py===7,vg=hn(x,y>>1,496)<0.12&&py>2;
+      P(340,x,y,rv?[226,196,120]:seam?[96,66,34]:vg?sh([96,150,120],(hn(x,y,497)-.5)*14):sh([176,124,62],(py===0?18:0)+(hn(x,y,498)-.5)*14+(px===0?10:0)));}
+    {const row=y>>1,jx=(x+(row%2?2:0))%4,soot=Math.max(0,(10-y))*3;P(341,x,y,jx===0||y%2===1?sh([52,40,36],-soot*0.3):sh([128,62,44],(hn(x>>2,row,499)-.5)*20+(hn(x,y,500)-.5)*8-soot));}
+    {const sw=Math.sin(x*0.5+Math.sin(y*0.4)*2.4+hn(0,y>>2,501)*3),cr=Math.abs(sw)<0.16;P(342,x,y,cr?sh([150,58,20],(hn(x,y,502)-.5)*20):sw>0.6?[255,236,150]:sh([250,170,50],(hn(x,y,503)-.5)*24));}
+    {const cage=(x===3||x===12)&&y>=4&&y<=13||(y===4||y===13)&&x>=3&&x<=12,cap=y<=3&&x>=5&&x<=10&&y>=1,hook=y===0&&(x===7||x===8),core=x>4&&x<11&&y>4&&y<13;
+      if(cage||cap||hook)P(343,x,y,sh([184,134,64],(hn(x,y,504)-.5)*16+(cap&&y===1?16:0)));else if(core)P(343,x,y,sh([255,206,110],-Math.hypot(x-7.5,y-9)*7));}
+    {const r=Math.hypot(x-7.5,y-7.5),ang=Math.atan2(y-7.5,x-7.5),tooth=Math.cos(ang*8)>0.2,cog=r<4.6||r<6.6&&tooth,hub=r<1.6,spk=r<4.6&&r>1.6&&(Math.abs(Math.sin(ang*2))<0.25);
+      P(344,x,y,hub?[60,60,64]:cog?sh([150,152,158],(r<4.6&&r>3.6?-18:spk||r>4.6?10:-24)+(hn(x,y,505)-.5)*10):sh([70,72,78],(hn(x,y,506)-.5)*10));
+      P(345,x,y,sh([84,86,92],(x===0||y===0?14:x===15||y===15?-14:0)+(hn(x,y,507)-.5)*12));}
+    {const q=hn(x,y,508);P(346,x,y,q<0.12?sh([196,120,70],(hn(x,y,509)-.5)*20):q<0.16?[220,186,80]:sh([70,64,60],(hn(x>>1,y>>1,510)-.5)*24+(q-.5)*16));
+      const wheel=y>=12&&(Math.hypot(x-3,y-13.5)<2.6||Math.hypot(x-12,y-13.5)<2.6),band=y===2||y===9,rim=y<=1,rivet=(y===2||y===9)&&x%3===1;
+      P(347,x,y,wheel?sh([40,40,44],Math.hypot(x-(x<8?3:12),y-13.5)<1?20:0):y>=12?sh([36,32,30],0):rivet?[176,178,182]:rim?sh([120,122,128],10):band?sh([96,98,104],0):sh([84,72,62],(hn(x,y,511)-.5)*14+(x===0||x===15?-14:0)));}
+    {const q=hn(x,y,512),b=hn(x>>1,y>>1,513);P(348,x,y,q<0.06?[150,80,44]:q>0.93?sh([110,110,120],10):sh([46,44,50],(b-.5)*30+(Math.abs(Math.sin(x*0.7+y*0.3))<0.15?18:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(349,x,y,r>6.8?sh([78,80,86],(hn(x,y,514)-.5)*10):sh([96,70,46],(Math.floor(r*1.4)%2?-14:6)+(hn(x,y,515)-.5)*8));
+      const band=(y>=2&&y<=3)||(y>=12&&y<=13);P(350,x,y,band?sh([86,88,94],(y===2||y===12?16:-8)+(x%5===2?28:0)):sh([88,62,40],(x%4===0?-14:x%4===2?6:0)+(hn(x,y>>2,516)-.5)*12));}
+    if(y===0)P(351,x,y,[170,130,66]);else{const sw=y>=14&&Math.abs(x-7.5)<(y-13)*2.2;
+      if(!sw){const ax=x-7.5,anvil=(y>=9&&y<=10&&Math.abs(ax)<=4.5)||(y===11&&Math.abs(ax)<=1.5)||(y===12&&Math.abs(ax)<=3)||(y===9&&ax<-4.5&&ax>-6.5),
+        peak=y>=3&&y<=7&&(Math.abs(x-7.5)<=(y-2)*0.8||Math.abs(x-3.5)<=(y-4)*0.8&&y>=5||Math.abs(x-11.5)<=(y-4)*0.8&&y>=5),snow=peak&&y<=4;
+        P(351,x,y,x<=1||x>=14?sh([196,160,64],(hn(x,y,517)-.5)*10):anvil?sh([226,184,76],(hn(x,y,518)-.5)*12+(y===9?16:0)):snow?[236,236,240]:peak?[176,180,196]:sh([34,48,104],(hn(x,y,519)-.5)*10+(x%4===0?-6:0)));}}
+    P(352,x,y,sh([176,180,188],(hn(x,y,520)-.5)*10+(x===0||y===0?20:x===15||y===15?-24:0)));
+    P(353,x,y,y<=2?sh([170,174,182],y===0?24:0):(y>=6&&y<=11&&(x<3||x>12))?sh([30,30,34],0):sh([66,68,74],(hn(x,y,521)-.5)*10+(y===3?-16:0)));
+    {const jx=x%8,jy=y%8,gold=jx===0||jy===0;P(354,x,y,gold?sh([190,146,72],(hn(x,y,522)-.5)*12):sh(gran(x,y,523),12+(jx===1||jy===1?10:0)+(hn(x>>2,y>>2,524)-.5)*10));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
@@ -1545,7 +1599,10 @@ const REALM_SG=16,provC=new Map(),provJ=new Map(),REALM_STEP_MS=6,realmTC=new Ma
 function realmRaw(X,Z){const was=realmSkip;realmSkip=true;try{return colInfoBase(X,Z,TRP);}finally{realmSkip=was;}}
 // the people whose lands a stretch lies in (REALM_CULTS, below), and whether they hold it: one stretch in two (c: its first cell)
 const realmCult=c=>{const k=LANDS[cellLand(c)].k;for(const n in REALM_CULTS)if(REALM_CULTS[n].lands.has(k))return REALM_CULTS[n];return null;};
-const realmHeld=c=>{const C=realmCult(c);return C&&hsh(c.i,9401,c.j)<0.5?C:null;};
+// A people may also share a land with its holders (share: {land: [lo, hi)}, D-066): the dwarves take the High Mountains the
+// high elves leave, where the same hash falls in their band
+const realmHeld=c=>{const C=realmCult(c),q=hsh(c.i,9401,c.j);if(C&&q<0.5)return C;const k=LANDS[cellLand(c)].k;
+  for(const n in REALM_CULTS){const S=REALM_CULTS[n].share;if(S&&S[k]&&q>=S[k][0]&&q<S[k][1])return REALM_CULTS[n];}return null;};
 // A kingdom gathers its people's held stretches in a square of 8 x 8 cells; the oldest of them holds the royal seat
 function kingdomOf(c,C){const ki=Math.floor(c.i/8),kj=Math.floor(c.j/8);let best=null;
   for(let a=0;a<8;a++)for(let b=0;b<8;b++){const s=stretchCell(landSite(ki*8+a,kj*8+b));if(realmHeld(s)===C&&(!best||s.pr>best.pr))best=s;}
@@ -1594,8 +1651,16 @@ const REALM_CULTS={
     site:{city:{M:16,spread:48,wall:1,raw:1},fort:{M:14,spread:30,wall:1,raw:1},village:{M:12,spread:36,raw:1},outpost:{M:8,spread:48,raw:1},farm:{M:10,spread:16,raw:1}},
     R:{city:46,cap:56,cmax:64,small:34,fort:24,village:26,hamlet:18,outpost:8,farm:16},w:{spread:0.1,prom:0.2,pmax:10},
     label:{fort:'The Halls of %',outpost:'% Watch-tree',farm:'% Glade'},kind:{city:'a city in the trees of',fort:'the halls of',village:'a tree-village of',outpost:'a watch-tree of',farm:'a glade of'},
-    capital:'the king\'s wood of',roads:['The Lamplit Way','A Woodland Path']}};
-const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands]));
+    capital:'the king\'s wood of',roads:['The Lamplit Way','A Woodland Path']},
+  // the mountain dwarves (D-066): holds on and in the High Mountains (those the high elves leave) and the Glacier Fields. Their
+  // ground is cut into terraces like the elves' (terr), and under it they delve: a city's halls, forges, cistern and mines go
+  // down into the mountain behind its great gate, cut into a massif raised at its back (the layout's mass, elfGround)
+  dwarf:{k:'dwarf',lands:new Set(['glacier','pine']),share:{mtn:[0.5,1]},names:'dwarf',folkNames:'dwarf',kingdom:'The Mountain Kingdom of ',ks:9461,fp:'d_',
+    site:{city:{M:24,spread:72,wall:1,terr:4},fort:{M:14,spread:56,wall:1,terr:4},village:{M:14,spread:56,terr:3},outpost:{M:10,spread:64,wall:1,terr:3},farm:{M:12,spread:56,terr:3}},
+    R:{city:50,cap:58,cmax:64,small:34,fort:26,village:30,hamlet:24,outpost:9,farm:16},w:{spread:0.08,prom:0.4,pmax:24},
+    label:{fort:'% Bastion',outpost:'% Lookout',farm:'% Mine'},kind:{city:'a mountain hold of',fort:'a bastion of',village:'a mining town of',outpost:'a lookout of',farm:'a mine of'},
+    capital:'the high hold of',roads:['The Stone Road','A Miners\' Track']}};
+const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands,...Object.keys(C.share||{})]));
 function* planProvince(root,key){
   const L=LANDS[cellLand(root)],cells=[root],seen=new Set([key]),r=rngAt(root.i,9405,root.j);
   for(let q=0;q<cells.length&&cells.length<24;q++){const c=cells[q];for(const [a,b] of LN8){const n=landSite(c.i+a,c.j+b),nk=landKey(n.i,n.j);if(seen.has(nk))continue;seen.add(nk);
@@ -1611,7 +1676,7 @@ function* planProvince(root,key){
   // how far each sample lies from the province's edge (in samples), for castles near the border
   const bd=new Int16Array(N).fill(999),qq=[];for(let k=0;k<N;k++)if(!ok[k]){bd[k]=0;qq.push(k);}
   for(let h=0;h<qq.length;h++){const k=qq[h],a=k%nx,b=(k/nx)|0;for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const A=a+da,B=b+db;if(A<0||B<0||A>=nx||B>=nz)continue;const n=A+B*nx;if(bd[n]>bd[k]+1){bd[n]=bd[k]+1;qq.push(n);}}}
-  const C=realmCult(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
+  const C=realmHeld(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
   P.capital=P.kingdom.cap===root.i+','+root.j;P.name=stretchName(key);
   // fit a site of kind k (radius R) at sample (a,b): every sample under it good ground, little height spread; its level (the
   // median), how far it stands above the land around it, how far it is from the province's edge
@@ -1757,7 +1822,11 @@ function elfRaw(s,X,Z){const g=s.hg,n=g.n,fx=(X-s.X+g.E)/8,fz=(Z-s.Z+g.E)/8,ix=M
   return (a[ix+iz*n]*(1-tx)+a[ix+1+iz*n]*tx)*(1-tz)+(a[ix+(iz+1)*n]*(1-tx)+a[ix+1+(iz+1)*n]*tx)*tz;}
 const elfTerrace=(s,X,Z)=>s.T+Math.round((elfRaw(s,X,Z)-s.T)/s.terr)*s.terr;
 function elfPad(s,u,v){for(const p of siteLayout(s).pads)if(u>=p.u0-1&&u<=p.u1+1&&v>=p.v0-1&&v<=p.v1+1)return p;return null;}
-function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);return p?p.y:elfTerrace(s,X,Z);}
+function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);if(p)return p.y;const t=elfTerrace(s,X,Z),M=siteLayout(s).mass;return M?Math.max(t,massifAt(M,u,v)):t;}
+// The massif at the back of a dwarves' hold (D-066): rock raised to M.y + M.H over a box (u from its face M.f to M.b, |v| up to
+// M.w), its face sheer, falling away over M.m to its sides and back in ridges, its top broken; -1 elsewhere
+function massifAt(M,u,v){if(u<M.f)return -1;const du=Math.max(0,u-M.b),dv=Math.max(0,Math.abs(v)-M.w),d=Math.hypot(du,dv)/M.m;if(d>=1)return -1;
+  const k=Math.pow(1-d,1.4)*(1-0.25*Math.abs(Math.sin(u*0.21+v*0.13))*d);return M.y+Math.round(M.H*k+(u>M.f+3?hsh(u>>2,9463,v>>2)*3*d:0));}
 // ---- Names: the readout's line for a site, and the realm a column lies in
 function realmPlace(X,Z){const s=realmSiteAt(X,Z,4),C=s&&s.prov.cult;return s?{s:s,name:s.name,line:(s.k==='city'&&s.prov.capital?C.capital:C.kind[s.k])+' '+s.prov.kingdom.name.replace(/^The /,'the ')}:null;}
 // a road's name: the people's high road or its lanes
@@ -3856,7 +3925,7 @@ function sigOf(c){
     if(mode){const t=coastSite(c,L,R,mode);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else if(kind==='sinkhole'){const t=sinkholeSite(c,L,R);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else
-    for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?(12+k*3)*(L.k==='volcanic'?3:1):0, /* the wastes' great volcano fills the middle of the basin (D-055) */X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
+    for(let k=0;k<64&&!s;k++){const a=k*2.4,d=k?(12+k*3)*(L.k==='volcanic'?3:1):0, /* the wastes' great volcano fills the middle of the basin (D-055) */X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
       const low=L.k==='willow'||L.k==='bog'; // the vales' pools and stilt house stand on the low wet ground itself
       if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=TSG.sl+(low?0:2))continue;
       let ok=true,lo=TSG.h;for(let m=0;m<8&&ok;m++){const e=colInfo(X+Math.round(Math.cos(m*0.785)*R),Z+Math.round(Math.sin(m*0.785)*R),TSG2);if(Math.abs(e.h-TSG.h)>3||(e.wet&&!low)||e.h<e.sl||e.lake||e.river||e.rvBot<999)ok=false;lo=Math.min(lo,e.h);}
@@ -5516,7 +5585,7 @@ const TRB={};
 // ---- Layouts
 function siteLayout(s){if(s.lay)return s.lay;const L={parts:[],spots:[],pads:[]};s.lay=L;
   const r=rngAt(Math.round(s.X),9521,Math.round(s.Z));
-  if(s.prov.cult.k==='wood')woodLayout(s,L,r);else if(s.prov.cult.k==='elf')elfLayout(s,L,r);else if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
+  if(s.prov.cult.k==='dwarf')dwarfLayout(s,L,r);else if(s.prov.cult.k==='wood')woodLayout(s,L,r);else if(s.prov.cult.k==='elf')elfLayout(s,L,r);else if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
   // the margins about houses, towers and walls, where their relief stands
   for(const p of L.parts){if(p.k==='house'){if(!p.mg){const o=p.ov||0;p.mg=[o,o,o,o];}if(p.gnd===undefined)p.gnd=s.k!=='city';}
     else if(p.k==='tower'){const e=p.mg===undefined?1:p.mg;p.u0-=e;p.u1+=e;p.v0-=e;p.v1+=e;}else if(p.k==='cwall'){p.u0--;p.u1++;p.v0--;p.v1++;}}
@@ -5677,7 +5746,7 @@ RB.ring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>=p.r-1.5&&d<p.r+0.5)RBP(X,p
 // ---- Roads: paved with flagstones between kerbs of white stone (the king's roads), lanes of beaten earth; a bridge of stone
 // or planks where a road crosses water; on the king's roads a white milestone with a lamp every 72 blocks
 function realmRoadCol(X,Z,x,z){
-  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
+  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='dwarf')return dwarfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
     if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}
@@ -6425,6 +6494,445 @@ function woodRoadCol(X,Z,x,z,rr){
   RBP(X,g,Z,hi&&ao>rd.w-0.5?FMOSS:hsh(X,9751,Z)<0.2?FMOSS:LITTER);
   for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
 }
+// ---- Building the mountain dwarves (D-066), in the frame and parts of realm-build.js. They live on and in the mountains: their
+// sites are cut into terraces like the elves' (elfTerrace), every building on a platform of its own, and under them they delve.
+// Above: walls of dressed granite with square towers bearing ballistae, a gatehouse with its portcullis, houses of granite under
+// steep slate, smithies, smelting furnaces of firebrick glowing at their mouths, headframes over the shafts with their wheels,
+// treadwheel cranes, trebuchets, heaps of slag and spoil; at the back of a city a massif of rock (L.mass, massifAt) with the great
+// gate cut in its face between two colossal statues. Below (L.hold, RB.dhold): the gate hall, the great hall on its pillars with
+// the king's seat, barracks, the shaft with its hoist down through every level, the forge hall with its channel of molten iron,
+// the cistern, and deep down the smelting hall and the mines; a town or a mine has its shaft and galleries. Their works are
+// tools and arms of the age (wheels, cranes, engines of war); nothing in them is powered or runs on rails (D-019).
+// A layout reads only the raw samples (dvRaw); builders read the ground through siteG (DVG) and hAt.
+const DVG=(s,u,v)=>siteG(s,u,v);
+const dvRaw=(s,u,v)=>{const [X,Z]=siteXZ(s,u,v);return elfRaw(s,X,Z);};
+const dvLvl=(s,u,v)=>s.T+Math.round((dvRaw(s,u,v)-s.T)/s.terr)*s.terr;
+// the ground a layout may count on over (u, v): its terrace or the massif inside the site (less a little for the platforms and
+// retaining walls), the raw ground beyond it
+const dvGnd=(s,L,u,v)=>Math.hypot(u,v)>s.R-2?dvRaw(s,u,v):Math.max(Math.min(dvLvl(s,u,v),dvRaw(s,u,v))-2,L.mass?massifAt(L.mass,u,v):-1);
+// ---- Below the mountain. A site's workings are shapes in its frame, y in world heights: boxes (t 'b', a vault rising p.vr
+// across p.vax), stairs (t 's', along ax from a0 to a1, the floor y0 at a0 rising dir a block a step, h clear) and shafts (t 'c',
+// round). Their interiors are carved as one; every block beside an interior that is not itself interior is walled (st 1: dressed
+// granite, flagstones under, granite over; st 2: the rock as it stands, filled where a cave or water touches it, ore in it here
+// and there), so no cave's water or lava reaches in; above the ground nothing is walled. Each shape's kind (k) furnishes it.
+function dIv(q,u,v){
+  if(q.t==='b'){if(u<q.u0||u>q.u1||v<q.v0||v>q.v1)return null;let top=q.y1;
+    if(q.vr){const a=q.vax==='v'?v:u,c=q.vax==='v'?(q.v0+q.v1)/2:(q.u0+q.u1)/2,h=(q.vax==='v'?q.v1-q.v0:q.u1-q.u0)/2+1,d=(a-c)/h;top+=Math.round(q.vr*Math.sqrt(Math.max(0,1-d*d)));}
+    return [q.y0,top];}
+  if(q.t==='s'){const a=q.ax==='u'?u:v,c=q.ax==='u'?v:u;if(a<q.a0||a>q.a1||c<q.c0||c>q.c1)return null;const f=q.y0+q.dir*(a-q.a0);return [f+1,f+q.h];}
+  if(Math.hypot(u-q.cu,v-q.cv)>q.r)return null;return [q.y0,q.y1];}
+function dBox(q){
+  if(q.t==='b'){q.bu0=q.u0;q.bu1=q.u1;q.bv0=q.v0;q.bv1=q.v1;q.by0=q.y0;q.by1=q.y1+(q.vr||0);}
+  else if(q.t==='s'){const e=q.y0+q.dir*(q.a1-q.a0);if(q.ax==='u'){q.bu0=q.a0;q.bu1=q.a1;q.bv0=q.c0;q.bv1=q.c1;}else{q.bv0=q.a0;q.bv1=q.a1;q.bu0=q.c0;q.bu1=q.c1;}q.by0=Math.min(q.y0,e)+1;q.by1=Math.max(q.y0,e)+q.h;}
+  else{const r=Math.ceil(q.r);q.bu0=Math.floor(q.cu)-r;q.bu1=Math.ceil(q.cu)+r;q.bv0=Math.floor(q.cv)-r;q.bv1=Math.ceil(q.cv)+r;q.by0=q.y0;q.by1=q.y1;}
+  return q;}
+const DORE=[COAL,COAL,IRON,IRON,COPO,TINO,GOLD];
+RB.dhold=(s,p,u,v,X,Z)=>{const near=[];for(const q of p.S)if(u>=q.bu0-1&&u<=q.bu1+1&&v>=q.bv0-1&&v<=q.bv1+1)near.push(q);if(!near.length)return;
+  let lo=1e9,hi=-1e9;for(const q of near){lo=Math.min(lo,q.by0);hi=Math.max(hi,q.by1);}lo--;hi++;const n=hi-lo+1;
+  const col=(cu,cv)=>{let a=null;for(const q of near){const iv=dIv(q,cu,cv);if(!iv)continue;if(!a)a=new Uint8Array(n);for(let y=iv[0];y<=iv[1];y++){const k=y-lo;if(!a[k]||q.st<a[k])a[k]=q.st;}}return a;};
+  const me=col(u,v),nb=[col(u+1,v),col(u-1,v),col(u,v+1),col(u,v-1)];if(!me&&!nb.some(Boolean))return;const g=hAt(X,Z);
+  for(let k=0;k<n;k++){const y=lo+k;if(me&&me[k]){RBP(X,y,Z,AIR);continue;}
+    const up=me&&k+1<n?me[k+1]:0,dn=me&&k>0?me[k-1]:0;let st=up||dn||0;for(const c of nb)if(c&&c[k]&&(!st||c[k]<st))st=c[k];
+    if(!st||y>g)continue;const cur=GW(X,y,Z);
+    if(st===2){if(!SOLID[cur])RBP(X,y,Z,up?COBBLE:STONE);else if(!up&&(cur===STONE||cur===DEEP)){const h=hsh(X*7+y,9465,Z);if(h<0.045)RBP(X,y,Z,DORE[(h*155)|0]);}continue;}
+    RBP(X,y,Z,up?DFLAG:dn?DGRAN:y<=lo+1?DGRAN:(((y-p.y0)%6)+6)%6===4?DKNOT:DCOURSE);}
+  // each shape furnishes its own interior
+  for(const q of near){const D=DEC[q.k];if(!D)continue;const iv=dIv(q,u,v);if(iv)D(s,p,q,u,v,X,Z,iv);}};
+// hanging lamps: a chain from the top of an interior, the lamp under it
+const dHang=(X,Z,top,n)=>{if(n>0)RBS(X,Z,top-n+1,top,CHAIN);RBP(X,top-n,Z,DLAMP);};
+const DEC={};
+// the gate hall: columns against its walls, banners between, lamps hung from its vault; the bronze doors stand open against
+// its walls at the front
+DEC.gate=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,a=v-(q.v0+q.v1)/2,hv=(q.v1-q.v0)/2,av=Math.abs(a),du=u-q.u0;
+  if(av>hv-0.6){if(du>=1&&du<=3&&y<=iv[1])RBS(X,Z,y,y+8,DBRONZE);else if(du%4===0&&du>3)RBS(X,Z,y,iv[1],DCOL);else if(du%4===2&&du>3)RBS(X,Z,y+3,y+5,DBANNER);return;}
+  if(av<0.6&&du%5===2)dHang(X,Z,iv[1],2);};
+// the great hall: two rows of great square columns with knotwork capitals, long tables down its nave, lamps hung from the vault
+// between the rows and on brackets along the aisles; at the back a dais and the king's seat of granite and bronze crowned with
+// gold, braziers either side, the banners of the mountain behind
+DEC.great=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,a=v-(q.v0+q.v1)/2,av=Math.abs(a),hv=(q.v1-q.v0)/2,du=u-q.u0,dd=q.u1-u,top=iv[1];
+  if(dd<=4&&av<=6.5){RBP(X,y,Z,dd===4||av>6?DKNOT:DFLAG);
+    if(dd===0&&av<0.6){RBS(X,Z,y+1,y+3,DGRAN);RBS(X,Z,y+4,y+5,DBRONZE);RBP(X,y+6,Z,GOLDB);}
+    else if(dd===0&&av<1.6){RBS(X,Z,y+1,y+4,DBRONZE);RBP(X,y+5,Z,DKNOT);}
+    else if(dd===1&&av<0.6)RBP(X,y+1,Z,DGRAN);else if(dd===1&&av<1.6)RBS(X,Z,y+1,y+2,DKNOT);
+    else if(dd===2&&Math.abs(av-4.5)<0.6)RBP(X,y+1,Z,BRAZIER);else if(dd===0&&Math.abs(av-3.5)<0.6)RBS(X,Z,y+3,y+7,DBANNER);return;}
+  const pr=hv-4,ip=Math.abs(av-pr)<=1.01&&du>=3&&dd>=7&&(du%7>=3&&du%7<=5);
+  if(ip){RBP(X,y,Z,DGRAN);RBS(X,Z,y+1,top-2,DCOL);RBS(X,Z,top-1,top,DKNOT);return;}
+  if((av<0.6&&du%7===4||Math.abs(av-4)<0.6&&du%7===1)&&dd>8)dHang(X,Z,top,Math.max(1,top-y-9));else if(Math.abs(av-(hv-2))<0.6&&du%7===4&&dd>6)dHang(X,Z,top,Math.max(1,top-y-7));
+  if(Math.abs(av-2.5)<0.6&&du>=4&&dd>=9&&du%7!==4)RBP(X,y,Z,PLANKS);
+  if(av>hv-0.6&&du%7===0&&du>0){RBP(X,y+4,Z,DGRAN);RBP(X,y+5,Z,DLAMP);}};
+// barracks: bunks in two tiers along the far wall between posts, racks of arms along the ends, lamps
+DEC.barracks=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0;
+  if(v===q.far){if(du%3===0)RBS(X,Z,y,y+3,DPROP);else{RBP(X,y,Z,WOOLB);RBP(X,y+2,Z,WOOLB);}return;}
+  if((u===q.u0||u===q.u1)&&Math.abs(v-q.far)>2){RBP(X,y,Z,DPROP);RBP(X,y+1,Z,(v&1)?STEELB:DBRONZE);return;}
+  if(Math.abs(v-q.far)===3&&du%5===2)dHang(X,Z,iv[1],1);};
+// a store: barrels and crates stacked in rows with aisles between
+DEC.store=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=Math.abs(v-q.far);if(dv<=1&&du%4!==3){const h=hsh(X,9475,Z);RBP(X,y,Z,h<0.5?BARREL:CRATE);if(h<0.3)RBP(X,y+1,Z,h<0.15?BARREL:CRATE);}
+  else if(dv===3&&du%6===3)dHang(X,Z,iv[1],1);};
+// a stair: lamps over it every six steps
+DEC.stair=(s,p,q,u,v,X,Z,iv)=>{const a=q.ax==='u'?u:v,c=q.ax==='u'?v:u;if(Math.abs(c-(q.c0+q.c1)/2)<0.6&&((a-q.a0)%6+6)%6===3)RBP(X,iv[1],Z,DLAMP);};
+// the forge hall: a channel of molten iron down its middle between knotwork kerbs; forges along both walls every eight, each a
+// hearth of firebrick glowing at its mouth under a hood and a flue to the vault, bellows of hide beside it, a quench barrel, an
+// anvil before it; ore carts by the channel, chains hung from the vault, lamps
+DEC.forge=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,a=v-(q.v0+q.v1)/2,av=Math.abs(a),hv=(q.v1-q.v0)/2,du=u-q.u0,top=iv[1],k=du%8;
+  if(av<=1.01){RBP(X,y-1,Z,DMOLTEN);return;}if(av<=2.01){RBP(X,y,Z,DKNOT);return;}
+  if(du<2||q.u1-u<2)return;
+  if(av>=hv-2.01&&k>=2&&k<=4){const c=k===3,back=av>hv-0.6,mid=Math.abs(av-(hv-1))<0.6,front=Math.abs(av-(hv-2))<0.6;
+    RBP(X,y,Z,DFORGE);RBP(X,y+1,Z,c&&(mid||front)?DMOLTEN:DFORGE);RBP(X,y+2,Z,DFORGE);if(!front)RBP(X,y+3,Z,DFORGE);if(c&&back)RBS(X,Z,y+4,top,DFORGE);return;}
+  if(av>hv-0.6&&k===1)RBS(X,Z,y,y+1,HIDE);else if(av>hv-0.6&&k===5)RBP(X,y,Z,BARREL);
+  else if(Math.abs(av-(hv-4))<0.6&&k===3)RBP(X,y,Z,DANVIL);
+  else if(Math.abs(av-3)<0.6&&k===6&&hsh(X,9477,Z)<0.5)RBP(X,y,Z,DCART);
+  else if(Math.abs(av-4)<0.6&&k===7)dHang(X,Z,top,2);else if(Math.abs(av-(hv-6))<0.6&&k===0)RBS(X,Z,top-3,top,CHAIN);};
+// the cistern: a basin two deep held in granite over the floor, columns standing in the water, lamps hung over it
+DEC.cistern=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,W=q.u1-q.u0,Dv=q.v1-q.v0,inB=du>=2&&du<=W-2&&dv>=2&&dv<=Dv-2;
+  RBP(X,y-3,Z,DGRAN);RBP(X,y-2,Z,DGRAN);if(!inB)return;RBS(X,Z,y-2,y-1,WATER);
+  if(du%4===0&&dv%4===0){RBS(X,Z,y-2,iv[1]-1,DCOL);RBP(X,iv[1],Z,DKNOT);}else if(du%4===2&&dv%4===2)dHang(X,Z,iv[1],2);};
+// a landing about a shaft: a rail of iron round the shaft but where its ladder is, crates, barrels and carts by its walls, a
+// winding drum with its cogwheels beside the shaft at the top, lamps
+DEC.landing=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,S=q.sh;
+  if(S){const d=Math.hypot(u-S.cu,v-S.cv);if(d<=S.r)return;if(d<=S.r+1.2){if(!(u>S.cu+0.5&&Math.abs(v-S.cv)<1.5))RBP(X,y,Z,GRATE);return;}
+    if(q.drum&&Math.abs(u-S.cu)<0.6&&Math.abs(Math.abs(v-S.cv)-S.r-2)<0.6){RBP(X,y,Z,DPROP);RBP(X,y+1,Z,DGEAR);RBP(X,y+2,Z,DPROP);return;}
+    if(q.drum&&Math.abs(u-S.cu)<0.6&&Math.abs(v-S.cv)>S.r+1.2&&Math.abs(v-S.cv)<S.r+2){RBP(X,y+1,Z,DPROP);return;}}
+  const edge=u===q.u0||u===q.u1||v===q.v0||v===q.v1,h=hsh(X,9479,Z);
+  if(edge&&h<0.3){RBP(X,y,Z,[CRATE,BARREL,DCART][(h*10)|0]);return;}
+  if(((u-q.u0)%5+5)%5===2&&((v-q.v0)%5+5)%5===2)dHang(X,Z,iv[1],1);};
+// a shaft: the hoist's chain down its middle, a ladder down its side
+DEC.shaft=(s,p,q,u,v,X,Z,iv)=>{const a=u-q.cu,b=v-q.cv;if(Math.abs(a)<0.6&&Math.abs(b)<0.6){RBS(X,Z,q.y0,q.y1,CHAIN);return;}
+  if(Math.abs(a-(Math.floor(q.r)))<0.6&&Math.abs(b)<0.6)RBS(X,Z,q.y0,q.y1,LADDER);};
+// a gallery of the mines (along ax): a set of timbers every four (two props and a cap), a lamp hung from every other cap's
+// middle, an ore cart standing here and there
+DEC.gal=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,a=q.ax==='u'?u-q.u0:v-q.v0,c=q.ax==='u'?v-q.v0:u-q.u0,cw=q.ax==='u'?q.v1-q.v0:q.u1-q.u0,top=iv[1];
+  if(a%4===0){if(c===0||c===cw)RBS(X,Z,y,top-1,DPROP);RBP(X,top,Z,DPROP);return;}
+  if(a%8===2&&c===(cw>>1))RBP(X,top,Z,DLAMP);else if(a%8===6&&c===0&&hsh(X,9481,Z)<0.4)RBP(X,y,Z,DCART);};
+// the smelting hall: great furnaces of firebrick (q.fs) glowing within and at their mouths, channels of molten iron run from
+// them across the floor, heaps of slag in its corners, carts of ore, lamps
+DEC.smelt=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,top=iv[1];
+  for(const [fu,fv] of q.fs){const a=u-fu,b=v-fv,d=Math.hypot(a,b);
+    if(d<=3.5){for(let yy=y;yy<=top-2;yy++){const r=3.5-(yy-y)/(top-y)*1.2;if(d>r+0.4)continue;RBP(X,yy,Z,d<r-0.9?(yy<=y+3?DMOLTEN:AIR):yy===y+3?DKNOT:DFORGE);}
+      if(a<-2.4&&Math.abs(b)<0.6){RBP(X,y,Z,DMOLTEN);RBP(X,y+1,Z,DMOLTEN);RBP(X,y+2,Z,DKNOT);}return;}
+    if(Math.abs(b)<0.6&&a<-3.5&&a>=-9){RBP(X,y-1,Z,DMOLTEN);return;}if(Math.abs(Math.abs(b)-1)<0.6&&a<-3.5&&a>=-9){RBP(X,y,Z,DKNOT);return;}}
+  const cnr=(u-q.u0<3||q.u1-u<3)&&(v-q.v0<3||q.v1-v<3);if(cnr){const h=Math.max(0,3-Math.min(u-q.u0,q.u1-u,v-q.v0,q.v1-v));RBS(X,Z,y,y+h,DSLAG);return;}
+  if((v===q.v0||v===q.v1)&&hsh(X,9483,Z)<0.25)RBP(X,y,Z,DCART);else if(((u-q.u0)%6+6)%6===3&&(v===q.v0+2||v===q.v1-2))dHang(X,Z,top,2);};
+// ---- Above the ground
+// The ground of a terraced site: paving, gravel and setts on the terraces, and where a terrace stands over the ground beside it
+// a retaining wall of granite courses under a knotwork coping (a parapet on the higher ones); the way from the gate is paved in
+// flagstones and climbs by stairs where it meets a terrace's edge, between walls, with lamps on columns. The massif is left as
+// it stands.
+RB.dground=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>s.R-1.5)return;const L=siteLayout(s);if(L.mass&&massifAt(L.mass,u,v)>=dvLvl(s,u,v))return;const g=DVG(s,u,v),av=Math.abs(v);
+  if(p.way(u,v)){const h=Math.max(g,p.stairs(u));if(h>g)RBS(X,Z,g+1,h-1,DCOURSE);RBP(X,h,Z,av===p.ww?DCOURSE:DFLAG);RBS(X,Z,h+1,h+5,AIR);
+    if(av===p.ww&&h===g&&((u%8)+8)%8===4){RBS(X,Z,h+1,h+3,DCOL);RBP(X,h+4,Z,DLAMP);}return;}
+  if(av===p.ww+1&&p.onWay(u)){const h=p.stairs(u);if(h>g){RBS(X,Z,g+1,h,DCOURSE);RBP(X,h+1,Z,DKNOT);return;}}
+  let lo=g;for(const [du,dv] of [[1,0],[-1,0],[0,1],[0,-1]])lo=Math.min(lo,DVG(s,u+du,v+dv));const pd=elfPad(s,u,v);
+  if(lo<g){for(let y=lo+1;y<g;y++)RBP(X,y,Z,DCOURSE);RBP(X,g,Z,DKNOT);if(!pd&&g-lo>=3&&d<s.R-3&&(((u+v)%2)+2)%2===0)RBP(X,g+1,Z,DGRAN);return;}
+  const q=hsh(X,9471,Z);RBP(X,g,Z,q<0.6?PAVING:q<0.85?GRAVEL:COBBLE);RBS(X,Z,g+1,g+3,AIR);};
+// steps from a building's door out to the terrace before it (as the elves' estep, in granite)
+RB.dstep=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),k=D-b,t=dvLvl(s,u,v),dm=Math.abs(a-(W-1)/2);if(t===p.y||dm>p.w+1.01)return;
+  const gp=siteLayout(s).parts[0];if(elfPad(s,u,v)||gp.k==='dground'&&gp.way(u,v))return;
+  const h=p.y>t?Math.max(t,p.y-k):Math.min(t,p.y+k);
+  if(h>t){if(dm>p.w){if(h-1>t){RBS(X,Z,t+1,h,DCOURSE);RBP(X,h+1,Z,DKNOT);}return;}RBS(X,Z,t+1,h-1,DCOURSE);RBP(X,h,Z,DFLAG);RBS(X,Z,h+1,h+4,AIR);return;}
+  if(dm>p.w){RBS(X,Z,h+1,t,DCOURSE);return;}RBP(X,h,Z,DFLAG);RBS(X,Z,h+1,Math.max(t,h)+4,AIR);};
+// A house of the dwarves (p.W across, p.D deep, p.st storeys of five, its floor p.y, its front facing p.f): granite courses on a
+// footing of dressed granite, quoins at its corners, a knotwork band under the eaves, small windows barred in iron, a door under a
+// knotwork lintel with a lamp beside it; a steep roof of slate between granite gables, a knotwork ridge, a chimney of firebrick;
+// inside, flagstones, timber floors and a ladder, a fire basket on the hearth, barrels, a lamp to each storey
+RB.dhouse=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),a=a0-1,b=b0-1,W=p.W,D=p.D,g=p.y,st=p.st||1,sh=5,eave=g+st*sh,mid=(W-1)/2,dm=Math.abs(a-mid);
+  const inA=a>=0&&a<W,core=inA&&b>=0&&b<D,wall=core&&(a===0||a===W-1||b===0||b===D-1);
+  RBP(X,g,Z,core?DFLAG:PAVING);
+  if(core){if(wall){const cor=(a===0||a===W-1)&&(b===0||b===D-1),side=a===0||a===W-1,pa=side?b:a;
+      for(let y=g+1;y<=eave;y++){const ry=(y-g-1)%sh;let id=y===g+1||cor?DGRAN:ry===sh-1?DKNOT:DCOURSE;
+        if(!cor&&ry===2&&pa%3===1&&!(b===0&&dm<=1.01))id=GRATE;
+        if(b===0&&dm<=0.51&&y<=g+3)id=AIR;if(b===0&&dm<=1.01&&y===g+4)id=DKNOT;
+        RBP(X,y,Z,id);}}
+    else{RBS(X,Z,g+1,eave,AIR);for(let k=1;k<st;k++)RBP(X,g+k*sh,Z,a===1&&b===D-2?AIR:PLANKS);if(a===1&&b===D-2&&st>1)RBS(X,Z,g+1,g+(st-1)*sh,LADDER);
+      if(a===W-2&&b===D-2)RBP(X,g+1,Z,BRAZIER);else if(a===W-2&&b===1)RBP(X,g+1,Z,BARREL);
+      for(let k=0;k<st;k++)if(Math.abs(a-mid)<0.6&&Math.abs(b-(D>>1))<0.6)RBP(X,g+k*sh+sh-1,Z,DLAMP);}}
+  else if(b===-1&&Math.abs(dm-2)<0.6)RBP(X,g+3,Z,DLAMP);
+  // the roof: its ridge along the depth, a block out over the walls all round
+  const pos=Math.min(a+1,W-a),ry=eave+pos;if(pos>=0&&b>=-1&&b<=D)RBS(X,Z,Math.max(eave,ry-1),ry,dm<0.6?DKNOT:SLATE);
+  if(inA&&(b===0||b===D-1))for(let y=eave+1;y<ry;y++)RBP(X,y,Z,DGRAN);
+  if(a===W-2&&b===D-1)RBS(X,Z,eave+1,eave+Math.ceil(W/2)+2,DFORGE);};
+// A square tower (half-width p.h2, p.H over p.y): a battered foot of dressed granite reaching down to the ground, courses with a
+// knotwork band every six, arrow slits in the middle of each face, a door toward p.door; corbels under a parapet of merlons round
+// a platform of flagstones; on the platform a ballista (p.ball, aimed toward -u), a beacon (p.fire) or the banner (p.flag);
+// inside, timber floors every six and a ladder
+RB.dtower=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,aa=Math.abs(a),ab=Math.abs(b),m=Math.max(aa,ab),h2=p.h2,g=p.y,top=g+p.H;if(m>h2+1)return;const gnd=DVG(s,u,v);
+  if(m>h2){if(gnd<g)RBS(X,Z,gnd+1,g,DGRAN);RBS(X,Z,g+1,g+2,DGRAN);RBP(X,top-1,Z,DKNOT);RBP(X,top,Z,DGRAN);
+    const t=(a+b+h2*4)%2===0;RBP(X,top+1,Z,t?DGRAN:AIR);if(t)RBP(X,top+2,Z,DKNOT);return;}
+  if(gnd<g)RBS(X,Z,gnd+1,g-1,DGRAN);RBP(X,g,Z,DFLAG);const dr=p.door||0,door=(dr===0?a===-h2:dr===1?a===h2:dr===2?b===-h2:b===h2)&&(dr<2?ab:aa)<1.01;
+  const lad=a===h2-1&&b===0;
+  for(let y=g+1;y<=top;y++){const dy=y-g;let id;
+    if(m===h2){id=aa===h2&&ab===h2?DGRAN:dy%6===0?DKNOT:DCOURSE;if((aa<0.6||ab<0.6)&&dy%6>=3&&dy%6<=4&&y<top-2)id=AIR;if(door&&dy<=3)id=AIR;}
+    else id=lad&&y<top?LADDER:y===top?DFLAG:dy%6===0?PLANKS:dy%6===5&&a===0&&b===0?DLAMP:AIR;
+    RBP(X,y,Z,id);}
+  if(m<h2&&lad)RBP(X,top,Z,LADDER);
+  // the platform's piece
+  if(p.ball&&ab<=1&&a<=1&&a>=-h2){if(a===1&&b===0)RBP(X,top+1,Z,DPROP);if(a===0&&b===0){RBP(X,top+1,Z,DPROP);RBP(X,top+2,Z,DGEAR);}
+    if(a===-1&&ab<=1)RBP(X,top+2,Z,ab===1?DBRONZE:DPROP);if(a<-1&&b===0)RBP(X,top+2,Z,a===-h2?STEELB:DPROP);}
+  if(p.fire&&a===0&&b===0)RBP(X,top+1,Z,BRAZIER);
+  if(p.flag&&a===1-h2&&b===h2-1)RBS(X,Z,top+1,top+5,DCOL);if(p.flag&&a===1-h2&&b===h2-2)RBS(X,Z,top+3,top+5,DBANNER);};
+// A wall round a city or a bastion (p.r its line, four thick, p.H over the ground at each column, so it steps with the land; not
+// where the massif stands): a footing of dressed granite, courses with knotwork bands, a walk of flagstones behind merlons on its
+// outer edge; the gate's passage (p.gw either side of the middle, toward -u) under its portcullis, drawn up
+RB.dwall=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v),R=p.r;if(d<R-2||d>=R+2)return;const L=siteLayout(s);if(L.mass&&massifAt(L.mass,u,v)>=0)return;
+  const g=DVG(s,u,v),top=g+p.H,av=Math.abs(v),gate=u<0&&av<=p.gw+0.5;
+  if(gate){RBP(X,g,Z,DFLAG);RBS(X,Z,g+1,g+p.gh-1,AIR);RBP(X,g+p.gh,Z,GRATE);RBP(X,g+p.gh+1,Z,DKNOT);RBS(X,Z,g+p.gh+2,top,DCOURSE);RBP(X,top,Z,DFLAG);return;}
+  for(let y=g+1;y<=top;y++)RBP(X,y,Z,y<=g+2?DGRAN:(y-g)%6===0?DKNOT:DCOURSE);
+  if(d>=R+1){const t=Math.round(Math.atan2(v,u)*R),k=((t%3)+3)%3;if(k<2)RBP(X,top+1,Z,DGRAN);if(k===0)RBP(X,top+2,Z,DKNOT);}else RBP(X,top,Z,DFLAG);};
+// A smithy (p.W by p.D, its front open toward p.f): columns at its corners, walls of courses to the eaves at the sides and back,
+// a roof of slate; at the back a hearth of firebrick glowing at its mouth with a chimney up through the roof, bellows of hide,
+// anvils before it, a quench barrel, an ore cart and crates
+RB.dforge=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),a=a0-1,b=b0-1,W=p.W,D=p.D,g=p.y,eave=g+5,mid=(W-1)/2,dm=Math.abs(a-mid),inA=a>=0&&a<W,core=inA&&b>=0&&b<D;
+  RBP(X,g,Z,core?DFLAG:PAVING);if(!core){if(b===-1||b===D||a===-1||a===W)RBP(X,eave,Z,SLATE);return;}
+  const cor=(a===0||a===W-1)&&(b===0||b===D-1),side=(a===0||a===W-1||b===D-1)&&b>0;
+  for(let y=g+1;y<eave;y++)RBP(X,y,Z,cor?DCOL:side?(y===eave-1?DKNOT:DCOURSE):AIR);RBP(X,eave,Z,cor||dm<0.6?DKNOT:SLATE);
+  if(b>=D-3&&b<=D-2&&dm<=1.01){RBP(X,g+1,Z,DFORGE);RBP(X,g+2,Z,dm<0.6&&b===D-3?DMOLTEN:DFORGE);RBP(X,g+3,Z,DFORGE);if(b===D-2&&dm<0.6)RBS(X,Z,g+4,eave+4,DFORGE);else RBP(X,g+4,Z,DFORGE);return;}
+  if(b===D-3&&Math.abs(dm-2)<0.6&&a<mid)RBS(X,Z,g+1,g+2,HIDE);else if(b===D-3&&Math.abs(dm-2)<0.6)RBP(X,g+1,Z,BARREL);
+  else if(b===2&&Math.abs(dm-1.5)<0.6)RBP(X,g+1,Z,DANVIL);else if(b===1&&a===0)RBP(X,g+1,Z,DCART);else if(b===1&&a===W-1)RBP(X,g+1,Z,CRATE);
+  else if(dm<0.6&&b===1)RBP(X,eave-1,Z,DLAMP);};
+// A smelting furnace (round, about (p.cu, p.cv), p.H high, narrowing as it rises): firebrick with a knotwork band, molten iron
+// within it glowing at its mouth (toward -u) and at its top; a ladder and a deck of timber at its back for charging it
+RB.dsmelt=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),g=p.y,H=p.H;if(d>4.6)return;RBP(X,g,Z,DFLAG);
+  for(let y=g+1;y<=g+H;y++){const r=3.6-(y-g)/H*1.6;if(d>r+0.5){if(y>g+3)continue;RBP(X,y,Z,AIR);continue;}const shell=d>r-0.9;
+    RBP(X,y,Z,shell?(y===g+4?DKNOT:DFORGE):y<g+H-1?DMOLTEN:AIR);}
+  if(a<-2.4&&Math.abs(b)<0.6){RBP(X,g+1,Z,DMOLTEN);RBP(X,g+2,Z,DMOLTEN);RBP(X,g+3,Z,DKNOT);}
+  if(a>3.4&&a<4.6&&Math.abs(b)<0.6)RBS(X,Z,g+1,g+H-4,LADDER);if(a>2.4&&Math.abs(b)<=1.01&&d>3)RBP(X,g+H-4,Z,DPROP);};
+// A headframe over a shaft (about (p.cu, p.cv), the shaft p.r across, its mouth at p.y): a collar of flagstones railed in iron
+// but on the ladder's side, four legs of timber leaning in to a deck p.H up, braced every five, and over the deck the sheave
+// wheel standing across v on its iron axle; the hoist's chain from the wheel down into the shaft
+RB.dhead=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,g=p.y,H=p.H,aa=Math.abs(a),ab=Math.abs(b),d=Math.hypot(a,b);if(aa>5||ab>5)return;
+  if(d>p.r&&d<=p.r+1.3){RBP(X,g,Z,DFLAG);if(!(a>0&&ab<1.5))RBP(X,g+1,Z,GRATE);}
+  for(let y=g+1;y<=g+H;y++){const t=(y-g-1)/(H-1),e=Math.round(4.6-1.6*t);if(aa===e&&ab===e)RBP(X,y,Z,DPROP);if((y-g)%5===0&&((aa===e&&ab<=e)||(ab===e&&aa<=e))&&d>p.r)RBP(X,y,Z,DPROP);}
+  if(aa<=3&&ab<=3&&!(aa<1&&ab<1))RBP(X,g+H,Z,DPROP);
+  if(aa<0.6){const cy=g+H+4.5;for(let y=g+H+1;y<=g+H+9;y++){const r=Math.hypot(b,y-cy);if(Math.abs(r-3.4)<0.6||r<3.4&&(Math.abs(b)<0.6||Math.abs(y-cy)<0.6))RBP(X,y,Z,r<0.8?DGEAR:DPROP);}}
+  if(aa<0.6&&ab<0.6)RBS(X,Z,g+1,g+H+1,CHAIN);};
+// A treadwheel crane (about (p.cu, p.cv)): the great wheel of timber standing across v between two rims, its spokes and iron
+// axle; two posts carrying a beam out to the jib, a chain hung from its end and a block of granite on it
+RB.dcrane=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,aa=Math.abs(a),g=p.y,cy=g+5.5;if(aa>1||b<-6||b>9)return;
+  if(aa===1&&Math.abs(b)<=5){for(let y=g+1;y<=g+10;y++){const r=Math.hypot(b,y-cy),sp=r<4.3&&(Math.abs(b)<0.6||Math.abs(y-cy)<0.6||Math.abs(Math.abs(b)-Math.abs(y-cy))<0.6);if(Math.abs(r-4.3)<0.6||sp)RBP(X,y,Z,DPROP);}}
+  if(aa===0&&b===0)RBP(X,Math.round(cy),Z,DGEAR);
+  if(aa===0&&Math.abs(b)===6)RBS(X,Z,g+1,g+11,DPROP);if(aa===0&&b>=-6&&b<=9)RBP(X,g+12,Z,DPROP);
+  if(aa===0&&b===9){RBS(X,Z,g+6,g+11,CHAIN);RBP(X,g+5,Z,DGRAN);}};
+// A trebuchet (its front toward p.f, 7 across and 12 deep): two frames of timber on their sills, the axle across them, the arm
+// drawn down to the back with its sling and a stone in it, the counterweight of bronze hung high at its front
+RB.dtreb=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y;
+  if((a===1||a===5)&&b>=2&&b<=10)RBP(X,g+1,Z,DPROP);
+  if(a===1||a===5){for(let y=g+2;y<=g+8;y++){const t=(y-g-2)/6,f=Math.round(3+3*t),k=Math.round(9-3*t);if(b===f||b===k)RBP(X,y,Z,DPROP);}}
+  if(a>=1&&a<=5&&b===6)RBP(X,g+9,Z,a===3?DGEAR:DPROP);
+  if(a===3){for(let bb=2;bb<=11;bb++)if(b===bb){const y=Math.round(g+9+(6-bb)*1.2);if(y>g)RBP(X,y,Z,DPROP);}
+    if(b===2)RBS(X,Z,g+11,g+13,CHAIN);if(b===11)RBP(X,g+1,Z,DGRAN);}
+  if(a>=2&&a<=4&&b>=1&&b<=3)RBS(X,Z,g+8,g+10,DBRONZE);};
+// a heap of slag (p.slag) or of spoil from the mines, its ore showing here and there
+RB.dheap=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv);if(d>p.r)return;const h=Math.round(p.H*(1-d/p.r)),g=p.y;
+  for(let y=g+1;y<=g+h;y++)RBP(X,y,Z,p.slag?(hsh(X*3+y,9485,Z)<0.1?COBBLE:DSLAG):(hsh(X*3+y,9487,Z)<0.07?IRON:GRAVEL));};
+// The forecourt before the great gate: flagstones within a knotwork border, fire baskets on granite blocks at its corners
+RB.dcourt=(s,p,u,v,X,Z)=>{const g=p.y,edge=u===p.u0||u===p.u1||v===p.v0||v===p.v1;RBP(X,g,Z,edge?DKNOT:DFLAG);RBS(X,Z,g+1,g+6,AIR);
+  if((u===p.u0||u===p.u1)&&(v===p.v0||v===p.v1)){RBP(X,g+1,Z,DGRAN);RBP(X,g+2,Z,BRAZIER);}};
+// The face of the massif over the great gate (p.f the face's u, |v| up to p.w): dressed in courses with knotwork bands; columns
+// standing out before it either side of the gate under a great knotwork lintel; pilasters along it; over the lintel the sign of
+// the mountain worked in bronze and granite, banners either side; lamps on brackets by the gate
+RB.dfacade=(s,p,u,v,X,Z)=>{const F=p.f,av=Math.abs(v),Y=p.y,g=u===F?hAt(X,Z):Math.max(Y,massifAt(siteLayout(s).mass,F,v));
+  if(u===F){for(let y=Y+1;y<=Math.min(g,Y+40);y++){if(GW(X,y,Z)===AIR)continue;RBP(X,y,Z,(y-Y)%12===0?DKNOT:DCOURSE);}return;}
+  if(u!==F-1)return;
+  if(av>=6&&av<=7){RBS(X,Z,Y+1,Y+11,DCOL);RBP(X,Y+12,Z,DKNOT);return;}
+  if(av<=7&&av<6){RBS(X,Z,Y+11,Y+13,DKNOT);}
+  if(av<6&&av>=0){ // the sign over the lintel: the anvil in bronze under three peaks of granite
+    const k=v;if(Y+16<=g){if(Math.abs(k)<=1)RBP(X,Y+15,Z,DBRONZE);if(k===0)RBP(X,Y+16,Z,DBRONZE);if(Math.abs(k)<=3||k===-4)RBP(X,Y+17,Z,GOLDB);
+      for(let y=Y+19;y<=Y+24;y++){if(Math.abs(k)<=Math.max(0,(Y+24-y)*0.7))RBP(X,y,Z,y>=Y+23?PSNOW:DGRAN);if(Math.abs(Math.abs(k)-4)<=Math.max(0,(Y+22-y)*0.7)&&y<=Y+22)RBP(X,y,Z,DGRAN);}}}
+  if(av===8)RBS(X,Z,Y+3,Y+9,DBANNER);
+  if(av>=12&&av%8===4&&av<=p.w){RBS(X,Z,Y+1,Math.min(g,Y+28),DCOL);RBP(X,Math.min(g,Y+28)+0,Z,DKNOT);}};
+// A colossal statue of a dwarf king of old (9 across, 6 deep, facing p.f), on a plinth of courses: booted feet, a mail skirt,
+// a broad body belted in knotwork, a beard falling to the belt between two braids, the great axe held head-down before him with
+// both hands on its haft, knotwork pauldrons, a stern face under a crested helm, a cloak behind
+RB.dstatue=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y,y0=g+4,at=(dy,id)=>RBP(X,y0+dy,Z,id);
+  RBS(X,Z,g+1,g+2,DCOURSE);RBP(X,g+3,Z,DKNOT);RBS(X,Z,y0,y0+24,AIR);
+  if(b>=1&&b<=4&&(a>=1&&a<=3||a>=5&&a<=7))for(let dy=0;dy<=1;dy++)at(dy,DGRAN); // the boots
+  if(b>=1&&b<=4&&a>=1&&a<=7)for(let dy=2;dy<=7;dy++)at(dy,dy===2?DKNOT:DCOURSE); // the mail skirt
+  if(b>=1&&b<=4&&a>=0&&a<=8)for(let dy=8;dy<=13;dy++)at(dy,dy===8?DKNOT:DGRAN); // the body, the belt
+  if(b>=1&&b<=4&&a>=0&&a<=8)for(let dy=14;dy<=15;dy++)at(dy,DKNOT); // the pauldrons
+  if(b===5&&a>=1&&a<=7)for(let dy=4;dy<=15;dy++)at(dy,DCOURSE); // the cloak
+  if(b===0&&a===4)for(let dy=2;dy<=13;dy++)at(dy,DCOL); // the haft
+  if(b===0&&a>=2&&a<=6)for(let dy=1;dy<=3;dy++)if(Math.abs(a-4)<=(dy===2?2:1))at(dy,DGRAN); // the axe's head, down
+  if(b===0&&a>=3&&a<=5)for(let dy=12;dy<=13;dy++)at(dy,DGRAN); // the hands on the haft
+  if(b===0)for(let dy=8;dy<=15;dy++){const w=dy>=14?2:dy>=11?1.5:1;if(Math.abs(a-4)<=w&&!(a===4&&dy<=13))at(dy,DCOURSE);} // the beard
+  if(b===0&&(a===2||a===6))for(let dy=9;dy<=13;dy++)at(dy,dy%2?DKNOT:DCOURSE); // the braids
+  if(b>=1&&b<=4&&a>=2&&a<=6)for(let dy=16;dy<=19;dy++)at(dy,DGRAN); // the head
+  if(b===0&&a===4){at(16,DGRAN);at(17,DGRAN);} // the nose
+  if(b===0&&(a===3||a===5))at(18,DKNOT); // the brows
+  if(b>=0&&b<=5&&a>=1&&a<=7)at(20,DKNOT); // the helm's rim
+  if(b>=1&&b<=4&&a>=2&&a<=6)at(21,DGRAN);if(b>=2&&b<=3&&a>=3&&a<=5)at(22,DGRAN); // the helm
+  if(a===4&&b>=1&&b<=4)at(23,DKNOT);}; // its crest
+// ---- Layouts
+function dwarfLayout(s,L,r){L.water=[];if(s.k==='city')dwarfCity(s,L,r);else if(s.k==='fort')dwarfBastion(s,L,r);else if(s.k==='village')dwarfTown(s,L,r);else if(s.k==='farm')dwarfMine(s,L,r);else dwarfLookout(s,L,r);
+  if(L.hold&&L.hold.length){let y0=1e9,y1=-1e9,u0=1e9,u1=-1e9,v0=1e9,v1=-1e9;for(const q of L.hold){u0=Math.min(u0,q.bu0);u1=Math.max(u1,q.bu1);v0=Math.min(v0,q.bv0);v1=Math.max(v1,q.bv1);}
+    // the workings are carved after the ground and before the buildings
+    L.parts.splice(1,0,{k:'dhold',u0:u0-1,u1:u1+1,v0:v0-1,v1:v1+1,S:L.hold,y0:L.holdY||s.T});}}
+// the toolkit: the ground's level, boxes taken, platforms, buildings with their steps, and the workings below with their cover
+function dwKit(s,L){
+  const P=L.parts,taken=[],R=s.R,lvl=(u,v)=>dvLvl(s,u,v);L.hold=L.hold||[];
+  const inM=(u,v)=>!!L.mass&&massifAt(L.mass,u,v)>=0;
+  const free=(a0,a1,b0,b1)=>{if(taken.some(q=>!(a1<q[0]||a0>q[1]||b1<q[2]||b0>q[3])))return false;if(Math.hypot(Math.max(Math.abs(a0),Math.abs(a1)),Math.max(Math.abs(b0),Math.abs(b1)))>=R-2)return false;
+    for(let a=a0;a<=a1+2;a+=3)for(let b=b0;b<=b1+2;b+=3)if(inM(Math.min(a,a1),Math.min(b,b1)))return false;return true;};
+  const take=(a0,a1,b0,b1)=>taken.push([a0,a1,b0,b1]);
+  const pad=(u0,u1,v0,v1,y)=>{L.pads.push({u0:u0,u1:u1,v0:v0,v1:v1,y:y});take(u0-1,u1+1,v0-1,v1+1);};
+  const downhill=(u,v)=>{const gu=dvRaw(s,u+6,v)-dvRaw(s,u-6,v),gv=dvRaw(s,u,v+6)-dvRaw(s,u,v-6);return Math.abs(gu)>=Math.abs(gv)?(gu>0?0:1):(gv>0?2:3);};
+  // a building on its platform (k its builder), W across and D deep, facing f, with steps from its door
+  const bld=(k,cu,cv,W,D,f,o)=>{const bw=W+2,bd=D+2,ac=f<2,hu=ac?bd:bw,hv=ac?bw:bd,u0=Math.round(cu-hu/2),v0=Math.round(cv-hv/2),u1=u0+hu-1,v1=v0+hv-1;
+    const su=f===0?[u0-8,u0-1]:f===1?[u1+1,u1+8]:[u0,u1],sv=f===2?[v0-8,v0-1]:f===3?[v1+1,v1+8]:[v0,v1];
+    if(!free(u0-1,u1+1,v0-1,v1+1))return null;const y=lvl((u0+u1)/2,(v0+v1)/2);
+    const p=Object.assign({k:k,u0:u0,u1:u1,v0:v0,v1:v1,f:f,W:W,D:D,y:y},o||{});P.push(p);pad(u0,u1,v0,v1,y);
+    P.push(Object.assign({k:'dstep',f:f,y:y,w:1.6},f<2?{u0:su[0],u1:su[1],v0:v0,v1:v1}:{u0:u0,u1:u1,v0:sv[0],v1:sv[1]}));
+    if(f===0)take(u0-3,u0-1,v0,v1);else if(f===1)take(u1+1,u1+3,v0,v1);else if(f===2)take(u0,u1,v0-3,v0-1);else take(u0,u1,v1+1,v1+3);
+    const fu=f<2?(f===0?u0-3:u1+3):(u0+u1)/2,fv=f<2?(v0+v1)/2:(f===2?v0-3:v1+3);p.front=[Math.round(fu),Math.round(fv)];return p;};
+  const tower=(cu,cv,h2,H,o,force)=>{const e=o&&o.nopad?h2+1:h2+2;if(!force&&!free(cu-e,cu+e,cv-e,cv+e))return null;const y=o&&o.y!==undefined?o.y:lvl(cu,cv);
+    const p=Object.assign({k:'dtower',u0:cu-h2-1,u1:cu+h2+1,v0:cv-h2-1,v1:cv+h2+1,cu:cu,cv:cv,h2:h2,H:H,y:y},o||{});P.push(p);if(o&&o.nopad)take(cu-e,cu+e,cv-e,cv+e);else pad(cu-h2-1,cu+h2+1,cv-h2-1,cv+h2+1,y);return p;};
+  const round=(k,cu,cv,e,o)=>{if(!free(cu-e,cu+e,cv-e,cv+e))return null;const y=lvl(cu,cv);const p=Object.assign({k:k,u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,y:y},o||{});P.push(p);pad(cu-e,cu+e,cv-e,cv+e,y);return p;};
+  const smelt=(cu,cv)=>round('dsmelt',cu,cv,5,{H:13});
+  const heap=(cu,cv,r,H,slag)=>{const e=Math.ceil(r);if(!free(cu-e,cu+e,cv-e,cv+e))return null;const y=lvl(cu,cv);P.push({k:'dheap',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,r:r,H:H,slag:slag,y:y});pad(cu-e,cu+e,cv-e,cv+e,y);return y;};
+  const crane=(cu,cv)=>{if(!free(cu-2,cu+2,cv-7,cv+10))return null;const y=lvl(cu,cv);P.push({k:'dcrane',u0:cu-1,u1:cu+1,v0:cv-6,v1:cv+9,cu:cu,cv:cv,y:y});pad(cu-1,cu+1,cv-6,cv+9,y);return y;};
+  const treb=(cu,cv,f)=>{const ac=f<2,hu=ac?12:7,hv=ac?7:12,u0=cu-(hu>>1),v0=cv-(hv>>1);if(!free(u0-1,u0+hu,v0-1,v0+hv))return null;const y=lvl(cu,cv);
+    P.push({k:'dtreb',u0:u0,u1:u0+hu-1,v0:v0,v1:v0+hv-1,f:f,y:y});pad(u0,u0+hu-1,v0,v0+hv-1,y);return y;};
+  // the workings: a shape is kept where the ground over it stands four or more above its interior (or where it is open, o.open)
+  const covered=q=>{if(q.open)return true;for(let u=q.bu0;u<=q.bu1+2;u+=3)for(let v=q.bv0;v<=q.bv1+2;v+=3){const uu=Math.min(u,q.bu1),vv=Math.min(v,q.bv1),iv=dIv(q,uu,vv);if(!iv)continue;if(dvGnd(s,L,uu,vv)<iv[1]+4)return false;}return true;};
+  const ug=(q,force)=>{dBox(q);if(!force&&!covered(q))return null;L.hold.push(q);return q;};
+  const room=(k,u0,u1,v0,v1,y,h,o)=>ug(Object.assign({t:'b',k:k,st:1,u0:u0,u1:u1,v0:v0,v1:v1,y0:y+1,y1:y+h},o||{}),o&&o.force);
+  // a gallery from (u, v) along ax (+1 or -1 by dir) up to len, three wide and four high, kept as far as its cover holds; side
+  // drifts off it every eight, alternately left and right
+  const gallery=(u,v,y,ax,dir,len,side)=>{let n=0;for(let k=4;k<=len;k+=4){const a0=dir>0?0:-k+1,a1=dir>0?k-1:0,q=ax==='u'?{t:'b',k:'gal',st:2,ax:'u',u0:u+a0,u1:u+a1,v0:v-1,v1:v+1,y0:y+1,y1:y+4}:{t:'b',k:'gal',st:2,ax:'v',v0:v+a0,v1:v+a1,u0:u-1,u1:u+1,y0:y+1,y1:y+4};
+      dBox(q);if(!covered(q))break;n=k;}
+    if(n<4)return 0;const a0=dir>0?0:-n+1,a1=dir>0?n-1:0;ug(ax==='u'?{t:'b',k:'gal',st:2,ax:'u',u0:u+a0,u1:u+a1,v0:v-1,v1:v+1,y0:y+1,y1:y+4}:{t:'b',k:'gal',st:2,ax:'v',v0:v+a0,v1:v+a1,u0:u-1,u1:u+1,y0:y+1,y1:y+4},true);
+    if(side)for(let k=8;k<n-2;k+=8){const sd=(k/8)%2?1:-1,l=side+((hsh(u+k,9489,v)*6)|0),pu=ax==='u'?u+dir*k:u,pv=ax==='v'?v+dir*k:v;
+      if(ax==='u')gallery(pu,pv+sd*2,y,'v',sd,l,0);else gallery(pu+sd*2,pv,y,'u',sd,l,0);}
+    return n;};
+  const shaft=(cu,cv,y0,y1,r)=>ug({t:'c',k:'shaft',st:1,cu:cu,cv:cv,r:r||2.5,y0:y0,y1:y1,open:1},true);
+  return {P:P,R:R,lvl:lvl,free:free,take:take,pad:pad,downhill:downhill,bld:bld,tower:tower,smelt:smelt,heap:heap,crane:crane,treb:treb,covered:covered,ug:ug,room:room,gallery:gallery,shaft:shaft,inM:inM};}
+// the ground part with its way: from the gate (u = -R) up to uEnd, ww either side of the middle, its stairs' tops cached
+function dwGroundPart(s,L,uEnd,ww){const cache=new Map(),onWay=u=>u>=-s.R&&u<=uEnd,
+  stairs=u=>{let h=cache.get(u);if(h!==undefined)return h;h=DVG(s,u,0);for(let k=1;k<=14;k++){h=Math.max(h,DVG(s,u+k,0)-k,DVG(s,u-k,0)-k);}cache.set(u,h);return h;};
+  L.parts.unshift({k:'dground',u0:-s.R,u1:s.R,v0:-s.R,v1:s.R,f:0,ww:ww,onWay:onWay,way:(u,v)=>onWay(u)&&Math.abs(v)<=ww,stairs:stairs});}
+// a mine under a headframe: the frame over a shaft from the ground (y) down to its levels (each `dep` below the last), a
+// landing about the shaft at each with galleries out from it as far as the rock covers them
+function dwMineHead(K,s,L,cu,cv,y,levels,dep,glen){
+  const sh={cu:cu,cv:cv,r:1.5};let yb=y;const hubs=[];
+  for(let l=1;l<=levels;l++){const yl=y-dep*l,hub=K.room('landing',cu-4,cu+4,cv-4,cv+4,yl,5,{sh:sh});if(!hub)break;yb=yl;hubs.push(yl);
+    const n=K.gallery(cu+5,cv,yl,'u',1,glen,8)+K.gallery(cu-5,cv,yl,'u',-1,glen,8)+K.gallery(cu,cv+5,yl,'v',1,glen,8)+K.gallery(cu,cv-5,yl,'v',-1,glen,8);
+    L.spots.push({kind:'deep',u:cu+3,v:cv+3,y:yl+1});if(!n)break;}
+  if(!hubs.length)return null;K.shaft(cu,cv,yb+1,y,1.5);
+  L.parts.push({k:'dhead',u0:cu-5,u1:cu+5,v0:cv-5,v1:cv+5,cu:cu,cv:cv,r:1.5,y:y,H:12});L.spots.push({kind:'mine',u:cu-5,v:cv+2,y:y});return hubs;}
+// The mountain hold: terraces up to a forecourt under the massif at the back, the great gate cut in its face between two
+// colossal kings of stone; inside the walls (and the towers with their ballistae, the gatehouse with its portcullis and banners)
+// houses of granite on the terraces, smithies, smelting furnaces with their heaps of slag, a headframe over the city's mine,
+// treadwheel cranes, trebuchets behind the gate. Under the massif: the gate hall, the great hall with the king's seat, the
+// barracks, the shaft with its hoist and landings down through every level; below, the forge hall with its channel of molten
+// iron, the cistern; deep down the smelting hall and the mines spreading from the shaft
+function dwarfCity(s,L,r){
+  const K=dwKit(s,L),R=s.R,P=K.P,cap=s.prov.capital,F=Math.round(R*0.08),Y0=K.lvl(F-7,0),Lg=cap?34:30;
+  L.mass={f:F,b:R-8,w:Math.max(20,Math.round(R*0.38)),m:14,H:34,y:Y0};L.holdY=Y0;
+  dwGroundPart(s,L,F-14,2);K.take(-R,F-14,-4,4);
+  // the forecourt and the face, the statues before it
+  K.pad(F-13,F-1,-15,15,Y0);P.push({k:'dcourt',u0:F-13,u1:F-1,v0:-15,v1:15,y:Y0});
+  P.push({k:'dfacade',u0:F-1,u1:F,v0:-L.mass.w,v1:L.mass.w,f:F,y:Y0,w:L.mass.w});
+  for(const sg of [1,-1])P.push({k:'dstatue',u0:F-7,u1:F-2,v0:sg*13-4,v1:sg*13+4,f:0,y:Y0});
+  L.spots.push({kind:'door',u:F-6,v:0,y:Y0+1},{kind:'court',u:F-10,v:dwSide(r)*8,y:Y0+1});
+  // level 0: the gate hall, the great hall, the barracks, the shaft's landing with its winding drum
+  const Yf=Y0-22,Yd=Y0-46,sv=-19,su=F+Lg-4,sh={cu:su,cv:sv,r:2.5};
+  K.room('gate',F,F+11,-5,5,Y0,9,{vr:2,vax:'v',open:1,force:1});
+  K.room('great',F+12,F+11+Lg,-12,12,Y0,14,{vr:5,vax:'v',force:1});
+  L.spots.push({kind:'hall',u:F+16,v:4,y:Y0+1},{kind:'keep',u:F+Lg+6,v:2,y:Y0+2},{kind:'hall',u:F+Lg-6,v:-6,y:Y0+1});
+  if(K.room('barracks',F+16,F+28,-24,-15,Y0,6,{far:-24})){K.room('door',F+21,F+23,-14,-13,Y0,4,{force:1});L.spots.push({kind:'barracks',u:F+22,v:-19,y:Y0+1});}
+  K.room('landing',su-4,su+4,sv-4,sv+4,Y0,7,{sh:sh,drum:1,force:1});K.room('door',su-1,su+1,-14,-13,Y0,4,{force:1});
+  // the stair down beside the great hall to the forge hall
+  K.room('landing',F+Lg-3,F+Lg+1,13,19,Y0,6,{force:1});
+  K.ug({t:'s',k:'stair',st:1,ax:'u',a0:F+Lg-26,a1:F+Lg-4,c0:15,c1:19,y0:Yf,dir:1,h:6},true);
+  K.room('landing',F+Lg-31,F+Lg-27,13,19,Yf,6,{force:1});K.room('door',F+Lg-30,F+Lg-28,10,12,Yf,4,{force:1});
+  // level 1: the forge hall, the cistern, the shaft's landing
+  K.room('forge',F+2,F+Lg+4,-9,9,Yf,10,{vr:2,vax:'v',force:1});L.spots.push({kind:'dforge',u:F+12,v:5,y:Yf+1},{kind:'dforge',u:F+Lg-6,v:-5,y:Yf+1});
+  const ci=K.room('cistern',F+3,F+18,-24,-13,Yf,8);if(ci){K.room('door',F+10,F+12,-12,-10,Yf,4,{force:1});L.water.push({u0:F+5,u1:F+16,v0:-22,v1:-15,y0:Yf-1,y1:Yf});}
+  K.room('landing',su-4,su+4,sv-4,sv+4,Yf,6,{sh:sh,force:1});K.room('door',su-1,su+1,-14,-10,Yf,4,{force:1});
+  // level 2: the shaft's landing, the smelting hall beside it, the mines out from both
+  K.room('landing',su-5,su+5,sv-5,sv+5,Yd,7,{sh:sh,force:1});L.spots.push({kind:'deep',u:su+3,v:sv+4,y:Yd+1});
+  const sm=K.room('smelt',F-12,su-9,-16,4,Yd,10,{fs:[[F-6,-6],[F+4,-6],[F+14,-6]].filter(f=>f[0]<su-12)});
+  if(sm){K.room('door',su-8,su-6,-16,-14,Yd,4,{force:1});L.spots.push({kind:'smelt',u:F,v:0,y:Yd+1});K.gallery(F-13,-6,Yd,'u',-1,40,10);}
+  K.gallery(su+6,sv,Yd,'u',1,44,10);K.gallery(su,sv-6,Yd,'v',-1,40,10);K.gallery(su,sv+6,Yd,'v',1,8,0);
+  K.shaft(su,sv,Yd+1,Y0+6,2.5);
+  // the wall, its towers, the gatehouse
+  const WH=15;P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:WH,gw:3,gh:8});
+  const n=Math.max(6,Math.round(2*Math.PI*R/30));for(let k=1;k<n;k++){const a=Math.PI+k*2*Math.PI/n,cu=Math.round(Math.cos(a)*(R-1)),cv=Math.round(Math.sin(a)*(R-1));if(Math.abs(cv)<12&&cu<0||K.inM(cu,cv))continue;
+    K.tower(cu,cv,3,WH+5,{nopad:1,ball:1,door:cu>0?0:1},true);}
+  for(const sg of [1,-1]){const t=K.tower(-R+1,sg*8,4,WH+8,{nopad:1,ball:1,flag:1,door:2+(sg>0?0:1)},true);L.spots.push({kind:'wall',u:-R+1,v:sg*8,y:t.y+WH+8});}
+  L.spots.push({kind:'gate',u:-R-6,v:0,y:DVG(s,-R-6,0)},{kind:'gatein',u:-R+6,v:0,y:DVG(s,-R+6,0)});
+  // trebuchets behind the gate
+  for(const sg of [1,-1])K.treb(-R+16,sg*16,0);
+  // the city's works: smelting furnaces with their slag, smithies, a headframe over its mine, cranes
+  const spots=[];for(let cu=-R+10;cu<F-16;cu+=5)for(let cv=-R+6;cv<R-6;cv+=5){if(Math.abs(cv)<8||Math.hypot(cu,cv)>R-9)continue;spots.push([cu,cv,hsh(cu,9491,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
+  let ns=0,nf=0,nm=0,nc=0;
+  for(const [cu,cv] of spots){
+    if(nm<1){const y=K.lvl(cu,cv);if(K.free(cu-6,cu+6,cv-6,cv+6)&&dwMineHead(K,s,L,cu,cv,y,1,22,26)){K.pad(cu-5,cu+5,cv-5,cv+5,y);nm++;K.heap(cu+8,cv+(cv>0?-8:8),4.5,4,0);continue;}}
+    if(ns<2&&K.smelt(cu,cv)){ns++;L.spots.push({kind:'forge',u:cu-6,v:cv,y:K.lvl(cu,cv)});K.heap(cu+3,cv+(cv>0?7:-7),3.5,3,1);continue;}
+    if(nf<2){const f=K.bld('dforge',cu,cv,7,9,K.downhill(cu,cv));if(f){nf++;L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});continue;}}
+    if(nc<1&&K.crane(cu,cv)!==null){nc++;continue;}}
+  // houses on the terraces facing the view; barracks by the gate
+  for(const sg of [1,-1]){const b=K.bld('dhouse',-R+12,sg*24,9,15,sg>0?2:3,{st:2});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y});}
+  const hs=[];for(let cu=-R+7;cu<R-7;cu+=4)for(let cv=-R+5;cv<R-5;cv+=4){if(Math.abs(cv)<7||Math.hypot(cu,cv)>R-8)continue;hs.push([cu,cv,hsh(cu,9493,cv)]);}hs.sort((a,b)=>a[2]-b[2]);
+  let nh=0;const nmax=Math.round(R*R/170);for(const [cu,cv] of hs){if(nh>=nmax)break;const f=K.downhill(cu,cv),q=hsh(cu,9495,cv);
+    const h=K.bld('dhouse',cu,cv,9,11,f,{st:q<0.5?2:1})||K.bld('dhouse',cu,cv,7,9,f,{st:q<0.3?2:1})||K.bld('dhouse',cu,cv,7,7,f,{st:1});if(!h)continue;nh++;if(q<0.5)L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:h.y});}
+  for(let u=-R+16;u<F-16;u+=14)L.spots.push({kind:'street',u:u,v:0,y:DVG(s,u,0)});}
+const dwSide=r=>r()<0.5?1:-1;
+// The bastion: a squat keep at the back of a walled court with towers at its corners and a gatehouse, ballistae on them all,
+// trebuchets in the court, a barracks hall and a smithy; a stair cut down into the rock of the court to the garrison's hall and
+// the armoury below
+function dwarfBastion(s,L,r){
+  const K=dwKit(s,L),R=s.R,P=K.P,sg=dwSide(r);dwGroundPart(s,L,R-16,1);K.take(-R,R-16,-3,3);
+  const kp=K.tower(R-9,0,5,22,{ball:1,flag:1,door:0},true);L.spots.push({kind:'keep',u:R-17,v:0,y:kp.y},{kind:'wall',u:R-9,v:0,y:kp.y+22});
+  P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:13,gw:2,gh:7});
+  for(const a of [0.75,1.25,1.75,0.25].map(q=>q*Math.PI))K.tower(Math.round(Math.cos(a)*(R-1)),Math.round(Math.sin(a)*(R-1)),3,18,{nopad:1,ball:1,door:Math.cos(a)>0?0:1},true);
+  for(const g of [1,-1]){const t=K.tower(-R+1,g*5,3,20,{nopad:1,ball:1,flag:1,door:2+(g>0?0:1)},true);L.spots.push({kind:'wall',u:-R+1,v:g*5,y:t.y+20});}
+  K.treb(-4,-sg*11,0);
+  const b=K.bld('dhouse',6,-sg*13,7,9,sg>0?3:2,{st:2});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y});
+  const f=K.bld('dforge',-6,sg*12,7,7,sg>0?2:3);if(f)L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});
+  L.spots.push({kind:'gate',u:-R-5,v:0,y:DVG(s,-R-5,0)},{kind:'gatein',u:-R+4,v:0,y:DVG(s,-R+4,0)},{kind:'drill',u:-2,v:0,y:DVG(s,-2,0)});
+  // the garrison below: a stair cut down from the court beside the keep's door to the garrison's hall under the keep (under its
+  // platform, so the rock over it is certain), the armoury beside it
+  const y=K.lvl(R-22,sg*6),yb=Math.min(kp.y,y)-10,n=y-yb,a0=R-15-n;L.holdY=yb;
+  if(K.free(a0-1,R-17,sg*6-2,sg*6+2)){K.take(a0-1,R-17,sg*6-2,sg*6+2);
+    K.ug({t:'s',k:'stair',st:1,ax:'u',a0:a0,a1:R-15,c0:sg*6-1,c1:sg*6+1,y0:y,dir:-1,h:6,open:1},true);
+    P.push({k:'dcourt',u0:a0-1,u1:a0-1,v0:sg*6-2,v1:sg*6+2,y:y});
+    K.room('barracks',R-14,R-4,-5,5,yb,6,{far:-5*sg,force:1});
+    if(K.room('store',R-14,R-6,sg>0?-11:7,sg>0?-7:11,yb,5,{far:sg>0?-11:11}))K.room('door',R-11,R-9,sg>0?-6:6,sg>0?-6:6,yb,4,{force:1});
+    L.spots.push({kind:'barracks',u:R-9,v:0,y:yb+1});}}
+// A mining town: a headframe in its middle over a shaft down to two levels of mines, smelting furnaces and a smithy, a crane,
+// heaps of slag and spoil, houses of granite round it on the terraces
+function dwarfTown(s,L,r){
+  const K=dwKit(s,L),R=s.R,P=K.P;dwGroundPart(s,L,-8,1);K.take(-R,-8,-3,3);
+  const y=K.lvl(0,0);if(dwMineHead(K,s,L,0,0,y,2,16,30))K.pad(-6,6,-6,6,y);
+  const sm=K.smelt(0,-14)||K.smelt(0,14);if(sm){L.spots.push({kind:'forge',u:sm.cu-6,v:sm.cv,y:sm.y});K.heap(sm.cu+7,sm.cv,3,3,1);}
+  const f=K.bld('dforge',-11,sm&&sm.cv>0?-12:12,7,7,sm&&sm.cv>0?3:2);if(f)L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});
+  K.heap(10,-10,3.5,3,0);
+  let n=0;for(let k=0;k<16&&n<9;k++){const a=k/16*6.283+0.2,rd=R-11,cu=Math.round(Math.cos(a)*rd),cv=Math.round(Math.sin(a)*rd);if(cu<-R*0.4&&Math.abs(cv)<6)continue;
+    const h=K.bld('dhouse',cu,cv,7,7,K.downhill(cu,cv),{st:hsh(cu,9497,cv)<0.4?2:1})||K.bld('dhouse',cu,cv,5,7,K.downhill(cu,cv),{st:1});if(!h)continue;n++;if(n%3===1)L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:h.y});}
+  L.spots.push({kind:'street',u:-R+4,v:0,y:DVG(s,-R+4,0)});}
+// A mine: a headframe over its shaft with a level of galleries below, heaps of spoil, a shed, ore carts at the shaft's mouth
+function dwarfMine(s,L,r){
+  const K=dwKit(s,L),R=s.R;dwGroundPart(s,L,-R+3,1);const y=K.lvl(1,0);K.pad(-5,7,-6,6,y);dwMineHead(K,s,L,1,0,y,1,14,24);
+  K.heap(-2,R-6,4,4,0)||K.heap(-2,-R+6,4,4,0);K.bld('dhouse',Math.round(R*0.4),-Math.round(R*0.45),7,7,K.downhill(Math.round(R*0.4),-Math.round(R*0.45)),{st:1});
+  L.spots.push({kind:'mine',u:-6,v:2,y:y});}
+// A lookout: a square tower on the heights with a ballista and a beacon, a low wall round its yard, a hut
+function dwarfLookout(s,L,r){
+  const K=dwKit(s,L),R=s.R,P=K.P;dwGroundPart(s,L,-R+2,1);
+  const t=K.tower(1,0,3,18,{ball:1,fire:1,flag:1,door:0},true);if(t)L.spots.push({kind:'post',u:-4,v:0,y:t.y},{kind:'wall',u:1,v:0,y:t.y+18});
+  P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:3,gw:1,gh:3});}
+// ---- The dwarves' roads: the stone road paved in setts between kerbs of courses, a lamp on a column every 40 blocks; miners'
+// tracks of gravel; bridges of granite on piers where they cross water
+function dwarfRoadCol(X,Z,x,z,rr){
+  const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%40===20){RBS(X,Z,g+1,g+3,DCOL);RBP(X,g+4,Z,DLAMP);}return;}
+  if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?DCOURSE:DFLAG);if(edge)RBP(X,y+1,Z,DKNOT);RBS(X,Z,y+(edge?2:1),y+3,AIR);
+    if(Math.floor(rr.along)%7===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,DGRAN);return;}
+  const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
+  RBP(X,g,Z,hi?(ao>rd.w-0.5?DCOURSE:PAVING):hsh(X,9499,Z)<0.2?COBBLE:GRAVEL);
+  for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
+}
+// The water the dwarves hold under the ground (their cisterns): drainCaveWater trusts it where a chunk's edge cuts a basin
+function dwarfWaterAt(X,y,Z){for(const s of realmTile(X,Z).sites){if(s.prov.cult.k!=='dwarf'||Math.hypot(s.X-X,s.Z-Z)>s.R+20)continue;const L=siteLayout(s);if(!L.water||!L.water.length)continue;const [u,v]=siteUV(s,X,Z);
+  for(const w of L.water)if(u>=w.u0&&u<=w.u1&&v>=w.v0&&v<=w.v1&&y>=w.y0&&y<=w.y1)return true;}return false;}
 // ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
 // dug in hot black rock. Halls on two levels under the sunken floor of the wastes (D-055: the upper at y 168 to 192, the lower
 // at 130 to 154, the levels the crawlways and the upper caves keep under the lands about) are joined by low
@@ -6819,7 +7327,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)||dwarfWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
@@ -7578,6 +8086,9 @@ const AMB_EV={
   song:at=>{const far=[at[0]+(at[0]-PL.x)*3,at[1]+10,at[2]+(at[2]-PL.z)*3],ph=[[523,659],[587,698],[659,784],[523,659]];for(let i=0;i<ph.length;i++)for(const f of ph[i])voice(f,f*1.01,1.1,0.012,{type:'sine',form:1400,q:1.2,vib:5,vd:0.02,delay:i*1.05},far);},
   // the wood elves (D-065): an owl in the high trees by night
   owl:at=>{const far=[at[0],at[1]+12,at[2]];tone(410,370,0.32,0.04,0,null,far);tone(400,350,0.55,0.04,0.42,null,far);},
+  // the dwarves' chant (D-066): low voices together, slow, a few notes; picks tapping at the rock
+  chant:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1]-4,at[2]+(at[2]-PL.z)*2],ph=[[98,147],[110,165],[123,185],[110,165],[98,147]];for(let i=0;i<ph.length;i++)for(const f of ph[i])voice(f,f*1.005,1.1,0.016,{type:'sawtooth',form:520,q:1.6,vib:3,vd:0.01,delay:i*1.0},far);},
+  pick:at=>{const n=2+(Math.random()*3|0);for(let i=0;i<n;i++){burst(0.03,'bandpass',3200,6,0.06,i*0.7,at);tone(1500,1400,0.08,0.012,i*0.7,null,at);}},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -7600,7 +8111,10 @@ const AMB_LAND={
   // in the high elves' cities, fastnesses and refuges (D-062): a harp, singing far off, chimes in the wind, birds, a few voices
   elves:{wind:0.05,day:{harp:3,song:0.8,chime:1.5,bird:8,voices:3},night:{harp:2,song:1,chime:2,cricket:5}},
   // among the wood elves (D-065): birds all about, singing in the trees, a harp, voices and laughter; by night the songs go on
-  woodelves:{wind:0.06,day:{bird:14,song:1.4,harp:2,voices:4},night:{song:1.8,harp:1.5,cricket:6,owl:1.5,voices:1}}
+  woodelves:{wind:0.06,day:{bird:14,song:1.4,harp:2,voices:4},night:{song:1.8,harp:1.5,cricket:6,owl:1.5,voices:1}},
+  // among the mountain dwarves (D-066): hammers on anvils, carts and voices, picks at the rock, a deep chant now and then, the
+  // mountain's rumble under it all; by night the forges still ring
+  dwarves:{wind:0.06,rumble:0.05,day:{hammer:9,voices:5,cart:2,pick:3,chant:0.6,horn:0.2},night:{hammer:4,voices:1.5,pick:2,chant:0.9,drip:2}}
 };
 const AMB_OF={sea:'sea',isles:'sea',kelp:'sea',chalk:'sea',fjord:'sea',blacksand:'sea',willow:'wet',bog:'wet',moors:'high',mtn:'high',alpine:'high',glacier:'high',tundra:'high',karst:'high',cloud:'wet',
   dry:'dry',steppe:'dry',petrified:'dry',volcanic:'fire',blight:'grey',shadow:'grey',barrow:'grey',crystal:'ring',starfall:'ring',glowcap:'ring'};
@@ -7621,7 +8135,7 @@ function ambProfile(){
     if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
     if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
-  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='wood'?'woodelves':rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
+  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='dwarf'?'dwarves':rs.prov.cult.k==='wood'?'woodelves':rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
   return {surf:P.surf||0,rumble:P.rumble||0,lava:P.lava||0,wind:(P.wind||0)*(1+Math.max(0,yy-SEA-40)/80),ev:ev,under:false};
 }
@@ -9646,6 +10160,125 @@ const FOLK_KIT=(function(){
         vine(P,'tunic',SIDE,26,30,[200,170,90],c.cl);cloth(P,['hoodB'],sh(c.cl,-14));leather(P,['belt'],[80,56,34]);}}
   });
 })();
+// ---- The folk of the mountain dwarves (D-066), built and painted like the other folk (FOLK_KIT): boxes measured in pixels, two
+// texels to a pixel. A dwarf stands a little under a block and a half: short thick legs, a broad deep body, heavy arms reaching to
+// the hip, a big nose, bushy brows, and a beard falling to the belt, its ends braided and bound in bronze and gold. Their
+// warriors wear the mountain's livery of deep blue with the golden anvil under three peaks: axeguards a knee-long mail coat under
+// the tabard, a round helm with a nasal and cheek plates, a bearded axe and a round shield rimmed in bronze; hammerers plate over
+// mail, a helm with a mask of steel and bronze brows, a great hammer; crossbowmen a brimmed kettle hat and a jerkin of leather
+// over mail, the crossbow and a case of bolts; captains a winged helm and a blue cloak bearing the anvil, a gilded axe. The king
+// goes in crimson and gold over mail under a crown, his beard white and long, a rune staff in hand; thanes in fur-trimmed robes
+// with a circlet and a chain of office; ladies in long dresses banded in embroidery, their hair braided in loops and pinned with
+// gold; miners in leather caps with a lamp, a pick on the shoulder; smiths in leather aprons with their arms bare, a hammer.
+(function(){
+  const {ALL,SIDE,sh,hz,cloth,mail,plate,leather,band,rivets,boots,hands,face,STEEL,GOLD}=FOLK_KIT;
+  const BRZ=[186,138,72],BLUE=[40,56,112],CRIM=[134,36,40],DIRON=[96,98,106];
+  const DSKIN=[[226,182,148],[208,162,126],[190,140,106],[234,198,168],[172,124,92]],DHAIR=[[122,62,30],[72,46,28],[42,34,30],[164,98,48],[150,146,140],[212,208,202],[178,76,36]];
+  const coats=b=>DSKIN.map((s,i)=>[{skin:s,hair:DHAIR[(i*3+b)%DHAIR.length],eye:[[70,90,120],[80,60,40],[60,80,60]][(i+b)%3]},i===4?1:2]);
+  // the skeleton: short thick legs, a broad deep body, a man's head (so FOLK_KIT's face paints it), thick arms to the hip; a big
+  // nose; the beard from under the nose to the belt with two braids at its foot, a moustache over it; long hair down the back
+  const dwarf=(o)=>{o=o||{};const bl=o.beard||9;return [['legL',null,[-2.5,7,0],[-2.25,-7,-2.25,4.5,7,4.5]],['legR',null,[2.5,7,0],[-2.25,-7,-2.25,4.5,7,4.5],0,{m:'legL'}],
+    ['toeL','legL',[0,0,0],[-2.25,-7,2.25,4.5,2,1.5]],['toeR','legR',[0,0,0],[-2.25,-7,2.25,4.5,2,1.5],0,{m:'toeL'}],
+    ['body',null,[0,7,0],[-5,0,-3,10,10,6]],['head','body',[0,10,0],[-3,0,-3,6,7,6],0,{head:1}],
+    ['armL','body',[-5,9.5,0],[-3.5,-9,-2,3.5,9,4],[0,0,0.08]],['armR','body',[5,9.5,0],[0,-9,-2,3.5,9,4],[0,0,-0.08],{m:'armL'}],
+    ['nose','head',[0,3,3],[-1,-1,0,2,2.5,1.5],0,{head:1,nb:1}],
+    ['hairB','head',[0,1,-3],[-3,-5,-1,6,10,1],0,{head:1,nb:1}],
+    ...(o.nobeard?[]:[['beard','head',[0,2.5,3],[-3,-bl,-0.25,6,bl+0.5,1.5],[0.1,0,0],{head:1,nb:1,tp:['-y',0.55,1,0,0]}],['must','head',[0,2.6,3.6],[-3.25,-0.75,-0.5,6.5,1.5,1],0,{head:1,nb:1}],
+      ['brdL','beard',[-1,-bl,0.5],[-0.5,-3,-0.5,1,3,1],0,{head:1,nb:1}],['brdR','beard',[1,-bl,0.5],[-0.5,-3,-0.5,1,3,1],0,{head:1,nb:1,m:'brdL'}]])];};
+  const dface=(P,c,o)=>{face(P,c,Object.assign({eyeRow:3},o||{}));P.map('nose',ALL,(s,t,w,h,f)=>sh(c.skin,hz(s,t,701)*6+(f==='D'?-24:f==='F'?4:-6)+(t===0&&f!=='T'?-10:0)));
+    P.map('head',['F'],(s,t)=>t===4&&(s>=1&&s<=4||s>=7&&s<=10)?sh(c.hair,-8+hz(s,t,703)*14):null); // bushy brows
+    P.map('hairB',ALL,(s,t,w,h)=>sh(c.hair,hz(s,0,705)*20+(t%4===0?-6:0)-(t>h-3?10:0)));
+    P.map('beard',ALL,(s,t,w,h,f)=>sh(c.hair,(s%3===0?-18:s%3===1?10:0)+hz(s,t,707)*10-t/h*8+(f==='B'?-20:0)));
+    P.map('must',ALL,(s,t)=>sh(c.hair,(s%2?-10:6)+hz(s,t,709)*8));
+    P.map('brdL',ALL,(s,t,w,h)=>t===1||t===h-2?sh(c.ring||BRZ,18):sh(c.hair,((t+s)%3===0?-16:6)+hz(s,t,711)*8));};
+  // the mountain's sign: a golden anvil under three white peaks (sixteen texels square), for tabards, cloaks and shields
+  const SROWS=['................','.......1........','......111.......','..2..11111..2...','.222.11111.222..','22222111111222..','................','................',
+    '..3333333333....','...33333333.....','.....3333.......','......33........','.....333........','....33333.......','................','................'];
+  const sign=(P,n,f,s0,t0)=>P.map(n,[f],(s,t)=>{const x=s-s0,y=t-t0;if(x<0||y<0||x>15||y>15)return null;const q=SROWS[y][x];
+    return q==='1'?[236,236,240]:q==='2'?[200,204,214]:q==='3'?sh(GOLD,hz(s,t,713)*10+(y===8?16:0)):null;});
+  // a knee-long mail coat, a tabard of the livery over it with a gold hem, a belt with a bronze buckle
+  const kit=()=>[['coat','body',[0,0,0],[-5.25,-5,-3.25,10.5,15,6.5]],['tab','body',[0,0,0],[-4,-5.5,-3.5,8,15,7]],['belt','body',[0,0,0],[-5.5,1.5,-3.5,11,1.5,7]],
+    ['pL','armL',[0,0,0],[-4,-2.5,-2.5,4.5,3,5],0,{tp:['y',0.85,0.85,0,0]}],['pR','armR',[0,0,0],[-0.5,-2.5,-2.5,4.5,3,5],0,{m:'pL',tp:['y',0.85,0.85,0,0]}],
+    ['vL','armL',[0,-5,0],[-3.75,-3.5,-2.25,4,3.5,4.5]],['vR','armR',[0,-5,0],[-0.25,-3.5,-2.25,4,3.5,4.5],0,{m:'vL'}]];
+  const kitPaint=(P,c)=>{dface(P,c);mail(P,['armL','legL','body','coat']);hands(P,c,[96,70,44]);boots(P,[70,50,34],7);
+    cloth(P,['tab'],BLUE);band(P,'tab',SIDE,26,30,GOLD);sign(P,'tab','F',0,2);sign(P,'tab','B',0,2);
+    leather(P,['belt'],[86,58,34]);P.map('belt',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1.5?sh(BRZ,t===0?20:0):null);
+    plate(P,['pL','vL'],STEEL);band(P,'pL',SIDE,0,2,BRZ);rivets(P,'vL',SIDE,2,3,BRZ);};
+  // the round helm: steel in plates, a bronze brow band riveted, a nasal and cheek plates; (o.wings) bronze wings swept back
+  const helm=o=>[['helm','head',[0,4.5,0],[-3.5,0,-3.5,7,3.5,7],0,{head:1,tp:['y',0.7,0.7,0,0]}],['brow','head',[0,4.5,0],[-3.75,-0.5,-3.75,7.5,1,7.5],0,{head:1}],
+    ['nasal','head',[0,4.5,3.5],[-0.5,-2.5,0,1,2.5,1],0,{head:1,nb:1}],['chL','head',[-3.3,4.5,1],[-0.5,-3,-1.5,1,3,3],0,{head:1,nb:1}],['chR','head',[3.3,4.5,1],[-0.5,-3,-1.5,1,3,3],0,{head:1,nb:1,m:'chL'}],
+    ...(o&&o.wings?[['wgL','helm',[-3.5,1.5,0],[-0.5,0,-2,1,4,4],[-0.5,0,0.3],{head:1,nb:1,tp:['y',1,0.3,0,-1.2]}],['wgR','helm',[3.5,1.5,0],[-0.5,0,-2,1,4,4],[-0.5,0,-0.3],{head:1,nb:1,m:'wgL',tp:['y',1,0.3,0,-1.2]}]]:[])];
+  const helmPaint=(P,o)=>{plate(P,['helm','nasal','chL'],STEEL);P.map('helm',SIDE,(s,t,w)=>s===(w>>1)?sh(STEEL,24):null);plate(P,['brow'],BRZ);rivets(P,'brow',SIDE,0,3,GOLD);
+    if(o&&o.wings)P.map('wgL',ALL,(s,t,w,h,f)=>sh(BRZ,(f==='L'||f==='R'?(t%2?-14:10):6)+hz(s,t,715)*8));};
+  // the bearded axe: an iron-shod haft, the blade hooked down beneath it, edged bright
+  const axe=(len,gold)=>[['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-2,1,1,len]],['axe','haft',[0,0,len-4],[-0.5,-4.5,0,1,6.5,3.5],0,{nb:1,tp:['z',1,0.6,0,-1]}]];
+  const axePaint=(P,gold)=>{P.map('haft',ALL,(s,t,w,h,f)=>t%6===0?sh(BRZ,8):sh([92,64,40],hz(s,t>>2,717)*10));
+    P.map('axe',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?(t===0?sh([226,230,236],26):sh(gold?GOLD:[188,192,200],s<2?-20:hz(s,t,719)*10)):sh(gold?GOLD:[200,204,210],6));};
+  // the round shield: blue within a bronze rim, a bronze boss, the sign
+  const shield=['shield','armL',[-3.75,-4.5,0],[-1,-5,-5,1,10,10],0,{nb:1}];
+  const shieldPaint=P=>P.map('shield',ALL,(s,t,w,h,f)=>{if(f!=='L')return f==='R'?sh([96,68,42],hz(s,t,721)*10):sh(BRZ,0);const d=Math.hypot(s-w/2+0.5,t-h/2+0.5);
+    if(d>w/2)return null;if(d>w/2-1.5)return sh(BRZ,hz(s,t,723)*10+(d>w/2-0.7?-16:10));if(d<2)return sh(BRZ,d<1?24:6);
+    return (SROWS[Math.max(0,Math.min(15,Math.round((t-2)*16/(h-4))))]||'')[Math.max(0,Math.min(15,Math.round((s-2)*16/(w-4))))]==='3'?sh(GOLD,0):sh(BLUE,hz(s,t,725)*8);});
+  Object.assign(AM_KINDS,{
+    // the axeguard: mail and the tabard, the round helm, a bearded axe and a round shield
+    daxe:{res:2,tex:256,scale:0.95,parts:[...dwarf(),...kit(),...helm(),...axe(11),shield],coats:coats(0),
+      paint(P,c){kitPaint(P,c);helmPaint(P);axePaint(P);shieldPaint(P);}},
+    // the hammerer: plate over mail, a masked helm, a great hammer
+    dhammer:{res:2,tex:256,scale:0.97,parts:[...dwarf({beard:7}),...kit(),['cuir','body',[0,0,0],[-5.5,1,-3.5,11,9.5,7],0,{tp:['-y',0.95,0.9,0,0]}],['skirt','body',[0,1,0],[-5.5,-5.5,-3.5,11,6,7],0,{tp:['-y',1.12,1.1,0,0]}],
+        ['grL','legL',[0,0,0],[-2.5,-5.5,-2.5,5,4.5,5]],['grR','legR',[0,0,0],[-2.5,-5.5,-2.5,5,4.5,5],0,{m:'grL'}],
+        ['helm','head',[0,0,0],[-3.5,1.5,-3.5,7,6.5,7],0,{head:1,tp:['y',0.8,0.8,0,0]}],['mask','head',[0,3,3.5],[-3,-1.5,0,6,4,1],0,{head:1,nb:1}],
+        ['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-3,1,1,15]],['maul','haft',[0,0,11],[-2,-2,0,4,4,5],0,{nb:1}]],coats:coats(1),
+      paint(P,c){kitPaint(P,c);plate(P,['cuir','skirt','grL','helm'],STEEL);P.map('skirt',SIDE,(s,t)=>t%3===0?sh(STEEL,-24):null);band(P,'cuir',SIDE,0,2,BRZ);sign(P,'cuir','F',3,3);
+        P.map('helm',SIDE,(s,t,w)=>s===(w>>1)?sh(BRZ,10):null);plate(P,['mask'],STEEL);P.map('mask',['F'],(s,t,w)=>t===4&&(s>=1&&s<=4||s>=7&&s<=10)?[20,20,24]:t===5?sh(BRZ,14):s===5||s===6?sh(STEEL,26):null);
+        P.map('haft',ALL,(s,t)=>t%5===0?sh(BRZ,6):sh([86,60,38],hz(s,t>>2,727)*10));plate(P,['maul'],DIRON);P.map('maul',SIDE,(s,t)=>(s+t)%4===0?sh(BRZ,8):null);}},
+    // the crossbowman: a brimmed kettle hat, leather over mail, the crossbow and a case of bolts
+    dxbow:{res:2,tex:256,scale:0.95,parts:[...dwarf(),['jerk','body',[0,0,0],[-5.25,-4,-3.25,10.5,14,6.5]],['belt','body',[0,0,0],[-5.5,1.5,-3.5,11,1.5,7]],
+        ['hat','head',[0,5,0],[-3.5,0,-3.5,7,2.5,7],0,{head:1,tp:['y',0.75,0.75,0,0]}],['brim','head',[0,5,0],[-4.75,-0.5,-4.75,9.5,1,9.5],0,{head:1}],
+        ['stock','armR',[1.75,-8.5,0.5],[-0.5,-0.75,-2,1,1.5,9]],['prod','stock',[0,0,6],[-4.5,-0.5,-0.5,9,1,1],[0,0.1,0],{nb:1,tp:['x',1,1,0,0]}],
+        ['case','body',[4.5,2,-2],[-1,-3,-1,2,7,2],[0,0,-0.2],{nb:1}],['bolts','case',[0,4,0],[-0.75,0,-0.75,1.5,2,1.5],0,{nb:1}]],coats:coats(2),
+      paint(P,c){dface(P,c);mail(P,['armL','legL','body']);hands(P,c,[100,74,48]);boots(P,[74,52,34],7);leather(P,['jerk'],[112,80,50]);band(P,'jerk',SIDE,24,28,BLUE);
+        leather(P,['belt'],[80,54,32]);plate(P,['hat','brim'],STEEL);band(P,'hat',SIDE,0,1,BRZ);
+        P.map('stock',ALL,(s,t)=>sh([110,78,48],hz(s,t>>1,729)*10+(t%6===0?-12:0)));plate(P,['prod'],DIRON);leather(P,['case'],[90,62,38]);P.map('bolts',ALL,(s,t)=>(s+t)%2?[220,214,196]:[60,70,110]);}},
+    // the captain: the axeguard's kit under a winged helm and a blue cloak with the sign, a gilded axe and the shield
+    dcapt:{res:2,tex:256,scale:1,parts:[...dwarf({beard:10}),...kit(),...helm({wings:1}),['cape','body',[0,10,-3.2],[-5,-15,-0.5,10,15,1],[0.06,0,0],{nb:1}],...axe(12),shield],coats:coats(3),
+      paint(P,c){kitPaint(P,c);helmPaint(P,{wings:1});cloth(P,['cape'],BLUE,{off:2});band(P,'cape',SIDE,26,30,GOLD);sign(P,'cape','B',2,6);axePaint(P,1);shieldPaint(P);plate(P,['pL'],sh(STEEL,10));band(P,'pL',SIDE,0,3,GOLD);}},
+    // the king: crimson and gold over mail, a crown, a long white beard, a rune staff of iron with a gold head
+    dking:{res:2,tex:256,scale:1.02,parts:[...dwarf({beard:12}),['robe','body',[0,1,0],[-5.25,-8,-3.25,10.5,9,6.5],0,{tp:['-y',1.12,1.12,0,0]}],['over','body',[0,0,0],[-5.5,-4,-3.5,11,14.5,7]],
+        ['mantle','body',[0,9,0],[-6,-3,-3.75,12,3.5,7.5]],['crown','head',[0,6.5,0],[-3.75,0,-3.75,7.5,1.5,7.5],0,{head:1}],['cpt','crown',[0,1.5,0],[-3.75,0,-3.75,7.5,1.5,7.5],0,{head:1,nb:1}],
+        ['staff','armR',[1.75,-8.5,0.5],[-0.5,-10,-0.5,1,28,1],[0.05,0,0],{nb:1}],['knob','staff',[0,18,0],[-1.25,0,-1.25,2.5,3,2.5],0,{nb:1}]],
+      coats:[[{skin:DSKIN[3],hair:DHAIR[5],ring:GOLD},3],[{skin:DSKIN[0],hair:DHAIR[4],ring:GOLD},1]],
+      paint(P,c){dface(P,c);mail(P,['armL','legL','body']);hands(P,c);boots(P,[80,40,34],7);cloth(P,['robe','over'],CRIM);band(P,'over',SIDE,26,29,GOLD);band(P,'robe',SIDE,14,17,GOLD);
+        P.map('over',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1.2?sh(GOLD,hz(s,t,731)*10):null);cloth(P,['mantle'],[226,220,206]);P.map('mantle',ALL,(s,t)=>(s*3+t*5)%7===0?[40,36,34]:null);
+        plate(P,['crown'],GOLD);P.map('cpt',ALL,(s,t,w,h,f)=>f==='T'||f==='D'?null:s%3===1?sh(GOLD,t===h-1?20:4):null);P.map('crown',['F'],(s)=>s===6||s===7?[60,140,200]:null);
+        P.map('staff',ALL,(s,t)=>t%9===0?sh(GOLD,0):sh(DIRON,hz(s,t>>2,733)*10));plate(P,['knob'],GOLD);}},
+    // a thane: a robe trimmed in fur, a circlet, a chain of office
+    dlord:{res:2,tex:256,scale:0.97,parts:[...dwarf(),['robe','body',[0,1,0],[-5.25,-8,-3.25,10.5,9,6.5],0,{tp:['-y',1.1,1.1,0,0]}],['over','body',[0,0,0],[-5.5,-4,-3.5,11,14.5,7]],
+        ['fur','body',[0,9,0],[-5.75,-1,-3.75,11.5,2.5,7.5]],['circ','head',[0,5.5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}],['chain','body',[0,9,3.5],[-3.5,-5,0,7,5,0.5],0,{nb:1,tp:['-y',0.4,1,0,0]}]],
+      coats:[[{skin:DSKIN[0],hair:DHAIR[0],cl:[60,80,120],ring:GOLD},2],[{skin:DSKIN[1],hair:DHAIR[2],cl:[110,60,40],ring:GOLD},2],[{skin:DSKIN[2],hair:DHAIR[4],cl:[60,90,70],ring:BRZ},1]],
+      paint(P,c){dface(P,c);cloth(P,['armL','body','robe','over'],c.cl);band(P,'over',SIDE,26,29,GOLD);hands(P,c);boots(P,[70,50,36],7);P.map('legL',ALL,(s,t)=>t<7?sh(c.cl,-30):null);
+        cloth(P,['fur'],[150,120,90]);P.map('fur',ALL,(s,t)=>(s+t)%2?sh([150,120,90],14):sh([110,84,60],0));plate(P,['circ'],GOLD);P.map('chain',ALL,(s,t)=>(s+t)%2?sh(GOLD,10):null);}},
+    // a lady of the hold: a long dress banded in embroidery, braids in loops pinned with gold, a girdle
+    dlady:{res:2,tex:256,scale:0.94,parts:[...dwarf({nobeard:1}),['dress','body',[0,1,0],[-5.25,-8,-3.25,10.5,9,6.5],0,{tp:['-y',1.18,1.15,0,0]}],['girdle','body',[0,1.5,0],[-5.5,0,-3.5,11,1,7]],
+        ['loopL','head',[-3.25,2.5,0],[-1,-2,-1.5,1.5,4,3],0,{head:1,nb:1}],['loopR','head',[3.25,2.5,0],[-0.5,-2,-1.5,1.5,4,3],0,{head:1,nb:1,m:'loopL'}],
+        ['bun','head',[0,5,-3.5],[-2,0,-1,4,3,1.5],0,{head:1,nb:1}]],
+      coats:[[{skin:DSKIN[3],hair:DHAIR[0],cl:[120,40,44]},2],[{skin:DSKIN[0],hair:DHAIR[3],cl:[50,70,120]},2],[{skin:DSKIN[1],hair:DHAIR[6],cl:[70,100,70]},2],[{skin:DSKIN[2],hair:DHAIR[1],cl:[150,120,70]},1]],
+      paint(P,c){dface(P,c);cloth(P,['armL','body','dress'],c.cl);band(P,'dress',SIDE,12,15,GOLD);band(P,'body',SIDE,16,18,GOLD);hands(P,c);boots(P,[90,60,40],10);
+        plate(P,['girdle'],GOLD);for(const n of ['loopL','bun'])P.map(n,ALL,(s,t)=>t===1?sh(GOLD,10):sh(c.hair,((t+s)%3===0?-16:6)+hz(s,t,735)*8));}},
+    // a miner: a leather cap with its lamp, a rough tunic and an apron, a pick
+    dminer:{res:2,tex:256,scale:0.94,parts:[...dwarf(),['tunic','body',[0,0,0],[-5.25,-4,-3.25,10.5,14,6.5]],['apron','body',[0,0,3.3],[-4,-4.5,0,8,10,0.5]],['belt','body',[0,0,0],[-5.5,1.5,-3.5,11,1.5,7]],
+        ['cap','head',[0,5,0],[-3.5,0,-3.5,7,2.5,7],0,{head:1,tp:['y',0.8,0.8,0,0]}],['lamp','cap',[0,0.5,3.5],[-1,-0.5,0,2,2,1],0,{head:1,nb:1}],
+        ['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-2,1,1,10]],['pick','haft',[0,0,8],[-0.5,-4,0,1,8,1.5],0,{nb:1,tp:['y',1,0.5,0,0]}]],coats:coats(4),
+      paint(P,c){dface(P,c);cloth(P,['armL','body','tunic'],[110,96,80]);hands(P,c,[86,66,46]);boots(P,[70,52,36],7);P.map('legL',ALL,(s,t)=>t<7?sh([90,76,60],hz(s,t,737)*8):null);
+        leather(P,['apron','cap'],[96,70,46]);leather(P,['belt'],[70,50,30]);P.map('lamp',ALL,(s,t,w,h,f)=>f==='F'?[255,226,140]:sh(BRZ,0));
+        P.map('haft',ALL,(s,t)=>sh([110,80,50],hz(s,t>>2,739)*10));plate(P,['pick'],DIRON);}},
+    // a smith: a leather apron over bare arms, a hammer
+    dsmith:{res:2,tex:256,scale:0.95,parts:[...dwarf(),['apron','body',[0,0,0],[-5.25,-5,-3.25,10.5,15,6.5]],['belt','body',[0,0,0],[-5.5,1.5,-3.5,11,1.5,7]],
+        ['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-1,1,1,7]],['hmr','haft',[0,0,5],[-1.25,-1.25,0,2.5,2.5,3],0,{nb:1}]],coats:coats(5),
+      paint(P,c){dface(P,c);P.map('armL',ALL,(s,t)=>sh(c.skin,hz(s,t,741)*8-(t<6?0:4)));P.map('body',ALL,()=>sh(c.skin,-6));boots(P,[70,52,36],7);P.map('legL',ALL,(s,t)=>t<7?sh([80,70,60],hz(s,t,743)*8):null);
+        leather(P,['apron'],[100,66,40]);leather(P,['belt'],[70,50,30]);P.map('apron',['F'],(s,t)=>t%9===4?sh([100,66,40],-20):null);
+        P.map('haft',ALL,(s,t)=>sh([110,80,50],hz(s,t>>1,745)*10));plate(P,['hmr'],DIRON);}}
+  });
+})();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
 // they give wool, milk and eggs, meat and hides to the hunter; wild horses can be ridden, a stray hound fed meat follows you, and
 // a wild mule fed crops carries a pack. Animals are not part of generation: they come and go around the player (Math.random is
@@ -9943,13 +10576,25 @@ const FOES={
   wking:{n:'King of the Wood',m:'wking',hp:30,dmg:3,reach:2,walk:1.1,run:4.6,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'wood'},
   wlord:{n:'Lord of the Wood',m:'wlord',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'wood'},
   wlady:{n:'Lady of the Wood',m:'wlady',hp:18,dmg:1,reach:1.6,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'wood'},
-  wfolk:{n:'Wood-elf',m:'wfolk',hp:16,dmg:1,reach:1.6,walk:1.2,run:5,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,2,0.5],[202,1,2,0.4]],cause:'wood'}
+  wfolk:{n:'Wood-elf',m:'wfolk',hp:16,dmg:1,reach:1.6,walk:1.2,run:5,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,2,0.5],[202,1,2,0.4]],cause:'wood'},
+  // the mountain dwarves (D-066): short, broad and heavy, slow on their feet but hard to move and hard to hurt; axeguards with
+  // round shields, hammerers in plate with great hammers (the heaviest blows of any folk), crossbowmen who shoot far and hard but
+  // slowly, captains; the king, thanes, ladies, miners and smiths
+  daxe:{n:'Axeguard of the Mountain',m:'daxe',hp:36,dmg:6,reach:2,walk:1.2,run:4.4,sight:30,cd:0.9,wind:0.35,block:0.45,mass:0.3,tall:1.7,folk:1,say:'dguard',drops:[[223,1,2,0.5],[224,1,1,0.3]],cause:'dwarf'},
+  dhammer:{n:'Hammerer of the Mountain',m:'dhammer',hp:46,dmg:9,reach:2.3,walk:1.1,run:4.2,sight:28,cd:1.3,wind:0.5,block:0.3,mass:0.2,tall:1.7,folk:1,say:'dguard',drops:[[223,1,2,0.5],[227,1,1,0.3]],cause:'dwarf'},
+  dxbow:{n:'Crossbowman of the Mountain',m:'dxbow',hp:28,dmg:3,reach:1.8,walk:1.2,run:4.4,sight:38,cd:1.2,wind:0.4,shot:{dmg:7,v:40,lo:4,hi:34,cd:2.4,k:'arrow'},keep:10,mass:0.35,tall:1.7,folk:1,say:'dguard',drops:[[201,2,4,0.6],[223,1,1,0.3]],cause:'dbolt'},
+  dcapt:{n:'Captain of the Hold',m:'dcapt',hp:70,dmg:10,reach:2.3,walk:1.2,run:4.4,sight:36,cd:0.9,wind:0.35,block:0.45,mass:0.15,tall:1.8,folk:1,drops:[[227,1,2,0.6],[224,1,2,0.5]],cause:'dwarf'},
+  dking:{n:'Mountain King',m:'dking',hp:34,dmg:3,reach:2,walk:1,run:4,sight:20,cd:1.2,wind:0.4,mass:0.3,tall:1.8,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'dwarf'},
+  dlord:{n:'Thane of the Hold',m:'dlord',hp:22,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'dwarf'},
+  dlady:{n:'Lady of the Hold',m:'dlady',hp:18,dmg:1,reach:1.6,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'dwarf'},
+  dminer:{n:'Miner of the Mountain',m:'dminer',hp:22,dmg:2,reach:1.8,walk:1.15,run:4.3,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[202,1,2,0.5],[206,1,1,0.3]],cause:'dwarf'},
+  dsmith:{n:'Smith of the Mountain',m:'dsmith',hp:24,dmg:3,reach:1.8,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'dwarf'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
   troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you',
   rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down',
   elf:'The warriors of the elves struck you down',earrow:'An elven archer shot you',eknight:'A knight of the elves rode you down',
-  wood:'The elves of the wood struck you down',warrow:'A warden of the wood shot you'});
+  wood:'The elves of the wood struck you down',warrow:'A warden of the wood shot you',dwarf:'The dwarves of the mountain struck you down',dbolt:'A crossbowman of the dwarves shot you'});
 // who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
 const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
   lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]],
@@ -9975,11 +10620,17 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   // the wood elves' places (D-065): wardens on the gate, the platforms and the watch-trees; the halls kept by guards; folk in the glades
   w_gate:[['wbow',2],['wguard',2]],w_deck:[['wbow',2],['wlady',0.6],['wlord',0.4]],w_street:[['wfolk',2],['wlady',1],['wbow',0.6]],w_hall:[['wguard',1],['wlady',1]],
   w_garden:[['wlady',1.5],['wfolk',1.5]],w_range:[['wbow',3]],w_keep:[['wguard',3],['wbow',1]],w_cellar:[['wfolk',1]],w_glade:[['wfolk',2],['wlady',1.5],['wlord',0.6],['wbow',0.5]],
-  w_post:[['wbow',2]],w_patrol:[['wbow',1],['wknife',1]],w_host:[['wbow',3],['wknife',2],['wguard',1.5]]});
+  w_post:[['wbow',2]],w_patrol:[['wbow',1],['wknife',1]],w_host:[['wbow',3],['wknife',2],['wguard',1.5]],
+  // the mountain dwarves' places (D-066): guards at the gates, crossbowmen on the towers, hammerers before the great gate and in
+  // the king's hall, smiths at the forges, miners at the headframes and down in the mines
+  d_gate:[['daxe',2],['dhammer',1],['dxbow',1]],d_gatein:[['daxe',2],['dxbow',1]],d_wall:[['dxbow',3]],d_street:[['dminer',1],['dsmith',0.6],['dlady',1],['dlord',0.4],['daxe',0.6]],
+  d_forge:[['dsmith',3],['dminer',0.5]],d_mine:[['dminer',3]],d_deep:[['dminer',3],['daxe',0.3]],d_court:[['dhammer',2],['daxe',1]],d_door:[['dhammer',3]],
+  d_hall:[['dlord',1],['dlady',1],['daxe',1],['dhammer',0.6]],d_keep:[['dhammer',3],['dlord',1]],d_barracks:[['daxe',2],['dhammer',1],['dxbow',1]],d_dforge:[['dsmith',3],['dminer',1]],
+  d_smelt:[['dsmith',2],['dminer',2]],d_drill:[['daxe',2],['dhammer',2]],d_post:[['dxbow',2],['daxe',1]],d_patrol:[['daxe',1],['dxbow',1]],d_host:[['daxe',3],['dhammer',2],['dxbow',2]]});
 const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
-    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5]},
+    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5],forge:[1,2],mine:[2,3],deep:[2,3],door:[2,3],court:[2,3],wall:[1,2],dforge:[2,4],smelt:[2,3]},
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
-    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt'};
+    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -10119,6 +10770,14 @@ const FOLK_SAY={
   wlord:['The leaves turn gold here every year, and every year it is new to us.','Have you heard the singing in the high trees? It goes on all night.','Welcome to {p}.'],
   wlady:['Walk softly. The trees are listening.','The lamps of {p} were lit before your grandfather\'s grandfather was born.','There is a spring under the great tree. Drink, if you are weary.'],
   wfolk:['Come and sit by the fire, there is room.','The feast lasts till the stars go out.','We have not had a stranger at our tables for many a year.','Mind the roots in the dark.'],
+  // the mountain dwarves (D-066)
+  dguard:['Stone remembers. Mind you do as well.','You stand in the halls of {k}. Keep your hands where I can see them.','Hammer and anvil, stranger. That is our greeting.','The mountain is deep and our watch is long.'],
+  dcapt:['I hold the gate of {p}. Nothing passes that I have not weighed.','Our engines are wound and our bolts are sharp. Be glad you come in peace.','The orcs of the fire have learned the weight of our hammers.'],
+  dking:['Every stone of {p} was cut by the hands of my fathers.','Gold is soft. Iron is honest. Remember that, traveller.','Be welcome under the mountain, while you keep faith with it.'],
+  dlord:['The forges of {p} have not gone cold in nine hundred years.','Our ledgers are as long as our beards. Longer, some say.','Welcome to {p}.'],
+  dlady:['Mind the steps. They are older than your kingdom.','The deep halls are warm, whatever the snows say.','Have you seen the great hall by lamplight? You should.'],
+  dminer:['There is a seam of iron down there as thick as a door.','Keep to the lit galleries. The dark ones are dark for a reason.','Pick, prop and lamp. That is all a miner needs.'],
+  dsmith:['Hot iron waits for no one. Stand aside.','That blade of yours wants a better edge. Bring it to the forge.','Hear that? That is the mountain singing.'],
   // a host in the wastes (D-063)
   host:['We march against the creatures of the ash, for {k}.','Keep close, traveller. The ash hides many foes.','The orcs grow bold. {k} will not wait for them at its gates.','If the horns sound, stand behind our line.','Not all who march out of {k} march home again.']};
 function folkGreet(){
@@ -10379,7 +11038,8 @@ function foeCall(f,what){
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
   else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
-    else{if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
+    else{if(what==='alert'&&k[0]==='d'&&(k==='dcapt'||Math.random()<0.35)){tone(110,110,1.3,0.08,0,'sawtooth',at);tone(147,147,1.8,0.07,1.1,'triangle',at);} // the dwarves' horn, two deep notes
+      else if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
       else if(what==='alert'&&k[0]==='e'&&(k==='ecapt'||Math.random()<0.35)){tone(440,440,1.1,0.07,0,'triangle',at);tone(660,660,1.8,0.06,0.9,'triangle',at);} // the elves' horn, clear and high
       else if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
       else if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn
@@ -10941,7 +11601,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -10991,9 +11651,10 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
   for(const [pre,label,list] of [['r','The realms of men',[['capital','A royal city'],['city','A city'],['fort','A castle'],['village','A village'],['outpost','A watchtower'],['farm','A farmstead']]],
     ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm']]],
     ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves']]],
-    ['w','The wood elves',[['capital','The king\'s wood'],['city','A city in the trees'],['fort','The king\'s halls'],['village','A tree-village'],['outpost','A watch-tree'],['farm','A glade']]]]){
+    ['w','The wood elves',[['capital','The king\'s wood'],['city','A city in the trees'],['fort','The king\'s halls'],['village','A tree-village'],['outpost','A watch-tree'],['farm','A glade']]],
+    ['d','The mountain dwarves',[['capital','The high hold'],['city','A mountain hold'],['fort','A bastion'],['village','A mining town'],['outpost','A lookout'],['farm','A mine']]]]){
     const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood'}[rk]):landTour(+v))lockOrPlay();});}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});

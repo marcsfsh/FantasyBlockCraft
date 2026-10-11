@@ -64,13 +64,25 @@ const FOES={
   wking:{n:'King of the Wood',m:'wking',hp:30,dmg:3,reach:2,walk:1.1,run:4.6,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'wood'},
   wlord:{n:'Lord of the Wood',m:'wlord',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'wood'},
   wlady:{n:'Lady of the Wood',m:'wlady',hp:18,dmg:1,reach:1.6,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'wood'},
-  wfolk:{n:'Wood-elf',m:'wfolk',hp:16,dmg:1,reach:1.6,walk:1.2,run:5,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,2,0.5],[202,1,2,0.4]],cause:'wood'}
+  wfolk:{n:'Wood-elf',m:'wfolk',hp:16,dmg:1,reach:1.6,walk:1.2,run:5,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,2,0.5],[202,1,2,0.4]],cause:'wood'},
+  // the mountain dwarves (D-066): short, broad and heavy, slow on their feet but hard to move and hard to hurt; axeguards with
+  // round shields, hammerers in plate with great hammers (the heaviest blows of any folk), crossbowmen who shoot far and hard but
+  // slowly, captains; the king, thanes, ladies, miners and smiths
+  daxe:{n:'Axeguard of the Mountain',m:'daxe',hp:36,dmg:6,reach:2,walk:1.2,run:4.4,sight:30,cd:0.9,wind:0.35,block:0.45,mass:0.3,tall:1.7,folk:1,say:'dguard',drops:[[223,1,2,0.5],[224,1,1,0.3]],cause:'dwarf'},
+  dhammer:{n:'Hammerer of the Mountain',m:'dhammer',hp:46,dmg:9,reach:2.3,walk:1.1,run:4.2,sight:28,cd:1.3,wind:0.5,block:0.3,mass:0.2,tall:1.7,folk:1,say:'dguard',drops:[[223,1,2,0.5],[227,1,1,0.3]],cause:'dwarf'},
+  dxbow:{n:'Crossbowman of the Mountain',m:'dxbow',hp:28,dmg:3,reach:1.8,walk:1.2,run:4.4,sight:38,cd:1.2,wind:0.4,shot:{dmg:7,v:40,lo:4,hi:34,cd:2.4,k:'arrow'},keep:10,mass:0.35,tall:1.7,folk:1,say:'dguard',drops:[[201,2,4,0.6],[223,1,1,0.3]],cause:'dbolt'},
+  dcapt:{n:'Captain of the Hold',m:'dcapt',hp:70,dmg:10,reach:2.3,walk:1.2,run:4.4,sight:36,cd:0.9,wind:0.35,block:0.45,mass:0.15,tall:1.8,folk:1,drops:[[227,1,2,0.6],[224,1,2,0.5]],cause:'dwarf'},
+  dking:{n:'Mountain King',m:'dking',hp:34,dmg:3,reach:2,walk:1,run:4,sight:20,cd:1.2,wind:0.4,mass:0.3,tall:1.8,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'dwarf'},
+  dlord:{n:'Thane of the Hold',m:'dlord',hp:22,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'dwarf'},
+  dlady:{n:'Lady of the Hold',m:'dlady',hp:18,dmg:1,reach:1.6,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'dwarf'},
+  dminer:{n:'Miner of the Mountain',m:'dminer',hp:22,dmg:2,reach:1.8,walk:1.15,run:4.3,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[202,1,2,0.5],[206,1,1,0.3]],cause:'dwarf'},
+  dsmith:{n:'Smith of the Mountain',m:'dsmith',hp:24,dmg:3,reach:1.8,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'dwarf'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
   troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you',
   rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down',
   elf:'The warriors of the elves struck you down',earrow:'An elven archer shot you',eknight:'A knight of the elves rode you down',
-  wood:'The elves of the wood struck you down',warrow:'A warden of the wood shot you'});
+  wood:'The elves of the wood struck you down',warrow:'A warden of the wood shot you',dwarf:'The dwarves of the mountain struck you down',dbolt:'A crossbowman of the dwarves shot you'});
 // who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
 const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
   lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]],
@@ -96,11 +108,17 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   // the wood elves' places (D-065): wardens on the gate, the platforms and the watch-trees; the halls kept by guards; folk in the glades
   w_gate:[['wbow',2],['wguard',2]],w_deck:[['wbow',2],['wlady',0.6],['wlord',0.4]],w_street:[['wfolk',2],['wlady',1],['wbow',0.6]],w_hall:[['wguard',1],['wlady',1]],
   w_garden:[['wlady',1.5],['wfolk',1.5]],w_range:[['wbow',3]],w_keep:[['wguard',3],['wbow',1]],w_cellar:[['wfolk',1]],w_glade:[['wfolk',2],['wlady',1.5],['wlord',0.6],['wbow',0.5]],
-  w_post:[['wbow',2]],w_patrol:[['wbow',1],['wknife',1]],w_host:[['wbow',3],['wknife',2],['wguard',1.5]]});
+  w_post:[['wbow',2]],w_patrol:[['wbow',1],['wknife',1]],w_host:[['wbow',3],['wknife',2],['wguard',1.5]],
+  // the mountain dwarves' places (D-066): guards at the gates, crossbowmen on the towers, hammerers before the great gate and in
+  // the king's hall, smiths at the forges, miners at the headframes and down in the mines
+  d_gate:[['daxe',2],['dhammer',1],['dxbow',1]],d_gatein:[['daxe',2],['dxbow',1]],d_wall:[['dxbow',3]],d_street:[['dminer',1],['dsmith',0.6],['dlady',1],['dlord',0.4],['daxe',0.6]],
+  d_forge:[['dsmith',3],['dminer',0.5]],d_mine:[['dminer',3]],d_deep:[['dminer',3],['daxe',0.3]],d_court:[['dhammer',2],['daxe',1]],d_door:[['dhammer',3]],
+  d_hall:[['dlord',1],['dlady',1],['daxe',1],['dhammer',0.6]],d_keep:[['dhammer',3],['dlord',1]],d_barracks:[['daxe',2],['dhammer',1],['dxbow',1]],d_dforge:[['dsmith',3],['dminer',1]],
+  d_smelt:[['dsmith',2],['dminer',2]],d_drill:[['daxe',2],['dhammer',2]],d_post:[['dxbow',2],['daxe',1]],d_patrol:[['daxe',1],['dxbow',1]],d_host:[['daxe',3],['dhammer',2],['dxbow',2]]});
 const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
-    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5]},
+    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5],forge:[1,2],mine:[2,3],deep:[2,3],door:[2,3],court:[2,3],wall:[1,2],dforge:[2,4],smelt:[2,3]},
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
-    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt'};
+    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -240,6 +258,14 @@ const FOLK_SAY={
   wlord:['The leaves turn gold here every year, and every year it is new to us.','Have you heard the singing in the high trees? It goes on all night.','Welcome to {p}.'],
   wlady:['Walk softly. The trees are listening.','The lamps of {p} were lit before your grandfather\'s grandfather was born.','There is a spring under the great tree. Drink, if you are weary.'],
   wfolk:['Come and sit by the fire, there is room.','The feast lasts till the stars go out.','We have not had a stranger at our tables for many a year.','Mind the roots in the dark.'],
+  // the mountain dwarves (D-066)
+  dguard:['Stone remembers. Mind you do as well.','You stand in the halls of {k}. Keep your hands where I can see them.','Hammer and anvil, stranger. That is our greeting.','The mountain is deep and our watch is long.'],
+  dcapt:['I hold the gate of {p}. Nothing passes that I have not weighed.','Our engines are wound and our bolts are sharp. Be glad you come in peace.','The orcs of the fire have learned the weight of our hammers.'],
+  dking:['Every stone of {p} was cut by the hands of my fathers.','Gold is soft. Iron is honest. Remember that, traveller.','Be welcome under the mountain, while you keep faith with it.'],
+  dlord:['The forges of {p} have not gone cold in nine hundred years.','Our ledgers are as long as our beards. Longer, some say.','Welcome to {p}.'],
+  dlady:['Mind the steps. They are older than your kingdom.','The deep halls are warm, whatever the snows say.','Have you seen the great hall by lamplight? You should.'],
+  dminer:['There is a seam of iron down there as thick as a door.','Keep to the lit galleries. The dark ones are dark for a reason.','Pick, prop and lamp. That is all a miner needs.'],
+  dsmith:['Hot iron waits for no one. Stand aside.','That blade of yours wants a better edge. Bring it to the forge.','Hear that? That is the mountain singing.'],
   // a host in the wastes (D-063)
   host:['We march against the creatures of the ash, for {k}.','Keep close, traveller. The ash hides many foes.','The orcs grow bold. {k} will not wait for them at its gates.','If the horns sound, stand behind our line.','Not all who march out of {k} march home again.']};
 function folkGreet(){
@@ -500,7 +526,8 @@ function foeCall(f,what){
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
   else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
-    else{if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
+    else{if(what==='alert'&&k[0]==='d'&&(k==='dcapt'||Math.random()<0.35)){tone(110,110,1.3,0.08,0,'sawtooth',at);tone(147,147,1.8,0.07,1.1,'triangle',at);} // the dwarves' horn, two deep notes
+      else if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
       else if(what==='alert'&&k[0]==='e'&&(k==='ecapt'||Math.random()<0.35)){tone(440,440,1.1,0.07,0,'triangle',at);tone(660,660,1.8,0.06,0.9,'triangle',at);} // the elves' horn, clear and high
       else if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
       else if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn

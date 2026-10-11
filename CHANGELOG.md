@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.36.0 (2026-10-11): the mountain dwarves
+
+Saves from 0.35.0 do not carry over (save key v26): the dwarves are new to the world.
+
+### Game
+- **The mountain dwarves.** The High Mountains the high elves do not hold, and about half the stretches of the Pine Highlands and the Glacier Fields, are provinces of mountain kingdoms. They build on terraces cut into the mountains and delve under them. The old dwarven ruins are unchanged.
+  - **Mountain holds:** walls of dressed granite with square towers and ballistae, a gatehouse with its portcullis, granite houses under steep slate, smithies, smelting furnaces glowing at their mouths, a headframe over the city's mine, treadwheel cranes, trebuchets behind the gate. At the back a massif of rock rises with the great gate cut in its face between two colossal kings of stone.
+  - **Under the mountain:** the gate hall, the great hall on its columns with the king's seat, barracks, a great shaft with its hoist down through every level, the forge hall with its channel of molten iron, a cistern, and deep down a smelting hall and mines spreading in timbered galleries with ore in their walls. More is carved under each hold than stands over it.
+  - **Bastions** with a squat keep, ballistae, a trebuchet and a garrison hall under the keep; **mining towns** round a headframe over two levels of mines; **lookouts** with a ballista and a beacon; **mines** under their headframes; stone roads with lamps on columns.
+  - **Their folk:** axeguards with round shields, hammerers in plate with great hammers, crossbowmen, captains in winged helms, the Mountain King in crimson and gold, thanes, ladies, miners and smiths, all short and broad with braided beards. Neutral until one is struck, never hostile in creative; their horn sounds two deep notes. Their hosts march into the wastes like the other peoples'.
+  - Their places sound of hammers, carts, picks and a deep chant.
+- New blocks (creative, Building): Dwarven Granite, Granite Courses, Knotwork Granite, Hold Column, Bronze Plating, Forge Brick, Molten Iron, Hold Lamp, Iron Cogwheel, Ore Cart, Slag, Pit Prop, Banner of the Mountain, Anvil, Hold Flagstones.
+- The creative land tour gains the dwarves' places.
+
+### Tooling
+- New test case `58-dwarves`.
+
 ## 0.35.0 (2026-10-11): the wood elves
 
 Saves from 0.34.0 do not carry over (save key v25): the wood elves are new to the world.

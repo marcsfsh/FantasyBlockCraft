@@ -150,6 +150,10 @@
       "about": "Building the wood elves of the forest kingdoms (D-065): cities in the goldboughs (platforms, winding stairs, houses round the trunks, bridges, golden crowns), the king's halls under a hill, tree-villages round feasting glades, watch-trees, glades; the hedge and gate, paths and lamps, the woodland roads"
     },
     {
+      "path": "world/dwarf-build.js",
+      "about": "Building the mountain dwarves (D-066): terraces, granite houses, smithies, furnaces, headframes, cranes, engines of war, the hold's massif and great gate, and the sealed workings below (halls, forges, cistern, shafts, mines)"
+    },
+    {
       "path": "world/warrens.js",
       "about": "The goblin warrens under the Volcanic Wastes (D-052): halls, tunnels, ways in and down planned with the cave systems, lava channels, per-chunk dressing and camps, spawn spots"
     },
@@ -244,6 +248,10 @@
     {
       "path": "engine/wood-models.js",
       "about": "The folk of the wood elves (D-065), with FOLK_KIT's painters: wardens with hoods, cloaks and long bows, blades with two knives, guards of the halls in copper leaves with glaives, captains, the king with a crown of autumn leaves, lords, ladies, the folk of the glades"
+    },
+    {
+      "path": "engine/dwarf-models.js",
+      "about": "The folk of the mountain dwarves (D-066): axeguards, hammerers, crossbowmen, captains, the king, thanes, ladies, miners and smiths, short and broad with braided beards"
     },
     {
       "path": "gameplay/wildlife.js",

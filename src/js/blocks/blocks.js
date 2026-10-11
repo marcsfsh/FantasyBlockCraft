@@ -222,6 +222,18 @@ def(WLAMP,'Woodland Lamp',[328,328,328],{opq:false,occ:false,emit:true,lum:14,sn
 def(WCARVE,'Carved Wood',[326,326,330],{snd:'wood'});def(WROOT,'Rootstone',[331,331,331]);def(WHEDGE,'Clipped Hedge',[332,332,332],{snd:'soft'});
 def(WBANNER,'Banner of the Wood',[333,333,333],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(WTHATCH,'Leaf Thatch',[334,334,334],{snd:'soft'});
 NEW_LOGS.push(WBARK);NEW_PLANKS.push(WPLANK);NEW_LEAVES.push(WLEAF);
+// The mountain dwarves (D-066): dressed granite in great blocks and in long courses, granite carved in angular knotwork inlaid
+// with bronze, fluted columns banded in bronze, riveted bronze plating, firebrick black with soot, molten iron that glows in
+// their forges and channels (it never flows), the hold's lamps of bronze, cogwheels of iron, ore carts, slag, pit props of
+// oiled timber banded in iron, the banner of the mountain (a golden anvil under three peaks on deep blue), anvils, and the
+// polished flagstones of their halls
+const DGRAN=1159,DCOURSE=1160,DKNOT=1161,DCOL=1162,DBRONZE=1163,DFORGE=1164,DMOLTEN=1165,DLAMP=1166,DGEAR=1167,DCART=1168,DSLAG=1169,DPROP=1170,DBANNER=1171,DANVIL=1172,DFLAG=1173;
+def(DGRAN,'Dwarven Granite',[335,335,335]);def(DCOURSE,'Granite Courses',[335,335,336]);def(DKNOT,'Knotwork Granite',[335,335,337]);def(DCOL,'Hold Column',[338,338,339]);
+def(DBRONZE,'Bronze Plating',[340,340,340],{snd:'stone'});def(DFORGE,'Forge Brick',[341,341,341]);def(DMOLTEN,'Molten Iron',[342,342,342],{emit:true,ember:true,lum:15});
+def(DLAMP,'Hold Lamp',[343,343,343],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});def(DGEAR,'Iron Cogwheel',[345,345,344],{snd:'stone'});
+def(DCART,'Ore Cart',[346,347,347],{snd:'stone'});def(DSLAG,'Slag',[348,348,348]);def(DPROP,'Pit Prop',[349,349,350],{snd:'wood'});
+def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(DANVIL,'Anvil',[352,353,353],{snd:'stone'});def(DFLAG,'Hold Flagstones',[354,354,354]);
+setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
 setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;

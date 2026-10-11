@@ -11,7 +11,10 @@ const REALM_SG=16,provC=new Map(),provJ=new Map(),REALM_STEP_MS=6,realmTC=new Ma
 function realmRaw(X,Z){const was=realmSkip;realmSkip=true;try{return colInfoBase(X,Z,TRP);}finally{realmSkip=was;}}
 // the people whose lands a stretch lies in (REALM_CULTS, below), and whether they hold it: one stretch in two (c: its first cell)
 const realmCult=c=>{const k=LANDS[cellLand(c)].k;for(const n in REALM_CULTS)if(REALM_CULTS[n].lands.has(k))return REALM_CULTS[n];return null;};
-const realmHeld=c=>{const C=realmCult(c);return C&&hsh(c.i,9401,c.j)<0.5?C:null;};
+// A people may also share a land with its holders (share: {land: [lo, hi)}, D-066): the dwarves take the High Mountains the
+// high elves leave, where the same hash falls in their band
+const realmHeld=c=>{const C=realmCult(c),q=hsh(c.i,9401,c.j);if(C&&q<0.5)return C;const k=LANDS[cellLand(c)].k;
+  for(const n in REALM_CULTS){const S=REALM_CULTS[n].share;if(S&&S[k]&&q>=S[k][0]&&q<S[k][1])return REALM_CULTS[n];}return null;};
 // A kingdom gathers its people's held stretches in a square of 8 x 8 cells; the oldest of them holds the royal seat
 function kingdomOf(c,C){const ki=Math.floor(c.i/8),kj=Math.floor(c.j/8);let best=null;
   for(let a=0;a<8;a++)for(let b=0;b<8;b++){const s=stretchCell(landSite(ki*8+a,kj*8+b));if(realmHeld(s)===C&&(!best||s.pr>best.pr))best=s;}
@@ -60,8 +63,16 @@ const REALM_CULTS={
     site:{city:{M:16,spread:48,wall:1,raw:1},fort:{M:14,spread:30,wall:1,raw:1},village:{M:12,spread:36,raw:1},outpost:{M:8,spread:48,raw:1},farm:{M:10,spread:16,raw:1}},
     R:{city:46,cap:56,cmax:64,small:34,fort:24,village:26,hamlet:18,outpost:8,farm:16},w:{spread:0.1,prom:0.2,pmax:10},
     label:{fort:'The Halls of %',outpost:'% Watch-tree',farm:'% Glade'},kind:{city:'a city in the trees of',fort:'the halls of',village:'a tree-village of',outpost:'a watch-tree of',farm:'a glade of'},
-    capital:'the king\'s wood of',roads:['The Lamplit Way','A Woodland Path']}};
-const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands]));
+    capital:'the king\'s wood of',roads:['The Lamplit Way','A Woodland Path']},
+  // the mountain dwarves (D-066): holds on and in the High Mountains (those the high elves leave) and the Glacier Fields. Their
+  // ground is cut into terraces like the elves' (terr), and under it they delve: a city's halls, forges, cistern and mines go
+  // down into the mountain behind its great gate, cut into a massif raised at its back (the layout's mass, elfGround)
+  dwarf:{k:'dwarf',lands:new Set(['glacier','pine']),share:{mtn:[0.5,1]},names:'dwarf',folkNames:'dwarf',kingdom:'The Mountain Kingdom of ',ks:9461,fp:'d_',
+    site:{city:{M:24,spread:72,wall:1,terr:4},fort:{M:14,spread:56,wall:1,terr:4},village:{M:14,spread:56,terr:3},outpost:{M:10,spread:64,wall:1,terr:3},farm:{M:12,spread:56,terr:3}},
+    R:{city:50,cap:58,cmax:64,small:34,fort:26,village:30,hamlet:24,outpost:9,farm:16},w:{spread:0.08,prom:0.4,pmax:24},
+    label:{fort:'% Bastion',outpost:'% Lookout',farm:'% Mine'},kind:{city:'a mountain hold of',fort:'a bastion of',village:'a mining town of',outpost:'a lookout of',farm:'a mine of'},
+    capital:'the high hold of',roads:['The Stone Road','A Miners\' Track']}};
+const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands,...Object.keys(C.share||{})]));
 function* planProvince(root,key){
   const L=LANDS[cellLand(root)],cells=[root],seen=new Set([key]),r=rngAt(root.i,9405,root.j);
   for(let q=0;q<cells.length&&cells.length<24;q++){const c=cells[q];for(const [a,b] of LN8){const n=landSite(c.i+a,c.j+b),nk=landKey(n.i,n.j);if(seen.has(nk))continue;seen.add(nk);
@@ -77,7 +88,7 @@ function* planProvince(root,key){
   // how far each sample lies from the province's edge (in samples), for castles near the border
   const bd=new Int16Array(N).fill(999),qq=[];for(let k=0;k<N;k++)if(!ok[k]){bd[k]=0;qq.push(k);}
   for(let h=0;h<qq.length;h++){const k=qq[h],a=k%nx,b=(k/nx)|0;for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const A=a+da,B=b+db;if(A<0||B<0||A>=nx||B>=nz)continue;const n=A+B*nx;if(bd[n]>bd[k]+1){bd[n]=bd[k]+1;qq.push(n);}}}
-  const C=realmCult(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
+  const C=realmHeld(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
   P.capital=P.kingdom.cap===root.i+','+root.j;P.name=stretchName(key);
   // fit a site of kind k (radius R) at sample (a,b): every sample under it good ground, little height spread; its level (the
   // median), how far it stands above the land around it, how far it is from the province's edge
@@ -223,7 +234,11 @@ function elfRaw(s,X,Z){const g=s.hg,n=g.n,fx=(X-s.X+g.E)/8,fz=(Z-s.Z+g.E)/8,ix=M
   return (a[ix+iz*n]*(1-tx)+a[ix+1+iz*n]*tx)*(1-tz)+(a[ix+(iz+1)*n]*(1-tx)+a[ix+1+(iz+1)*n]*tx)*tz;}
 const elfTerrace=(s,X,Z)=>s.T+Math.round((elfRaw(s,X,Z)-s.T)/s.terr)*s.terr;
 function elfPad(s,u,v){for(const p of siteLayout(s).pads)if(u>=p.u0-1&&u<=p.u1+1&&v>=p.v0-1&&v<=p.v1+1)return p;return null;}
-function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);return p?p.y:elfTerrace(s,X,Z);}
+function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);if(p)return p.y;const t=elfTerrace(s,X,Z),M=siteLayout(s).mass;return M?Math.max(t,massifAt(M,u,v)):t;}
+// The massif at the back of a dwarves' hold (D-066): rock raised to M.y + M.H over a box (u from its face M.f to M.b, |v| up to
+// M.w), its face sheer, falling away over M.m to its sides and back in ridges, its top broken; -1 elsewhere
+function massifAt(M,u,v){if(u<M.f)return -1;const du=Math.max(0,u-M.b),dv=Math.max(0,Math.abs(v)-M.w),d=Math.hypot(du,dv)/M.m;if(d>=1)return -1;
+  const k=Math.pow(1-d,1.4)*(1-0.25*Math.abs(Math.sin(u*0.21+v*0.13))*d);return M.y+Math.round(M.H*k+(u>M.f+3?hsh(u>>2,9463,v>>2)*3*d:0));}
 // ---- Names: the readout's line for a site, and the realm a column lies in
 function realmPlace(X,Z){const s=realmSiteAt(X,Z,4),C=s&&s.prov.cult;return s?{s:s,name:s.name,line:(s.k==='city'&&s.prov.capital?C.capital:C.kind[s.k])+' '+s.prov.kingdom.name.replace(/^The /,'the ')}:null;}
 // a road's name: the people's high road or its lanes
