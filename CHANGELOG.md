@@ -27,9 +27,12 @@ Saves from 0.29.0 do not carry over (save key v21): the realms of men are new to
   - Slate Roof, Timbered Plaster, Braced Timber Frame, Thatch.
   - Banner of the Realm, Hay Bale, Paving Stones, Leaded Glass.
 - Creative: the land tour takes you to the nearest royal city, city, castle, village, watchtower or farmstead.
+- **The realms' buildings stand in relief:** rock-faced plinths, quoins, windows set back over sills, moulded string courses and corbelled cornices, jettied timber storeys, dormers, overhanging verges with finials, buttresses, corbelled parapets on towers and walls, arrow loops, a deep gatehouse, a domed hall on a drum, a chapel with lancets, a rose window and a belfry. Two new blocks: Rough Whitestone and Whitestone Moulding.
+- **The folk in detail:** painted at twice the resolution, with mail in rings, riveted plate, stitched leather and cloth in folds; soldiers have nasal helms with cheek guards, layered pauldrons, vambraces, greaves, gauntlets, swords with guards and pommels, leaf-bladed spears, curved longbows; the townsfolk have laced bodices, fur trims, smocking, woven hats and a lord's chain of office.
 
 ### Tooling
 - New test case `52-realms`. Province planning runs in a streaming step of its own, one province a step.
+- Models can be painted at more than one texel to a pixel (`res`). `tools/shot.mjs --near=2` stands lined-up figures closer to the camera.
 
 ## 0.29.0 (2026-10-11): the Ember Throne, built with care
 

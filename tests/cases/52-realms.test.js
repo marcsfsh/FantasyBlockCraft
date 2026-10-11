@@ -34,12 +34,13 @@ assert(clash===0,'the sites of a province keep apart, and no ruin, landmark or s
 // ---- the nearest city: walls, gate, towers, the citadel's tower, lamps lit, banners, houses, the square
 const cities=ps.flatMap(P=>P.sites.filter(s=>s.k==='city')).sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z)),C=cities[0];
 gen(C.X,C.Z);
-{const cnt={},ids=[WSTONE,WSBRICK,WSCARVE,WSPILLAR,SLATE,PLASTER,TIMBER,PAVING,LGLASS,LANTERN,DLANTERN,RBANNER,WATER,GRATE];for(const id of ids)cnt[id]=0;
+{const cnt={},ids=[WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,SLATE,PLASTER,TIMBER,PAVING,COBBLE,LGLASS,LANTERN,DLANTERN,RBANNER,WATER,GRATE];for(const id of ids)cnt[id]=0;
   for(let X=C.X-C.R-4;X<=C.X+C.R+4;X++)for(let Z=C.Z-C.R-4;Z<=C.Z+C.R+4;Z++)for(let y=C.T-6;y<C.T+70;y++){const id=at(X,y,Z);if(cnt[id]!==undefined)cnt[id]++;}
   const [gx,gz]=siteXZ(C,-C.R,0),gateOpen=[1,2,3,4,5,6].every(dy=>at(gx,C.T+dy,gz)===AIR),f=cityFrame(C),[tx,tz]=siteXZ(C,f.cu+f.r2-(C.tiers>=3?4:3)-2,0);let top=0;for(let y=C.T+100;y>C.T;y--)if(at(tx,y,tz)===RBANNER||at(tx,y,tz)===WSPILLAR){top=y-C.T;break;}
   info(C.name,'('+(C.prov.capital?'the royal city of ':'a city of ')+C.prov.kingdom.name+', '+C.R*2+' across, '+C.tiers+' tiers):',ids.map(id=>nameOf(id)+' '+cnt[id]).join(', '),'; gate open',gateOpen,'; the white tower rises',top,'above the gate');
   const A=C.R*C.R; // what a city holds grows with its area
-  assert(cnt[WSBRICK]>6*A&&cnt[WSTONE]>A&&cnt[SLATE]>0.25*A&&cnt[PAVING]>1.2*A&&cnt[LGLASS]>0.08*A&&cnt[WSCARVE]>50&&cnt[RBANNER]>8,'the city is built of whitestone under slate, paved, its windows glazed, its sign carved and its banners hung');
+  assert(cnt[WSBRICK]>6*A&&cnt[WSTONE]>A&&cnt[SLATE]>0.25*A&&cnt[PAVING]+cnt[COBBLE]>1.2*A&&cnt[LGLASS]>0.08*A&&cnt[WSCARVE]>50&&cnt[RBANNER]>8,'the city is built of whitestone under slate, paved and cobbled, its windows glazed, its sign carved and its banners hung');
+  assert(cnt[WSTRIM]>0.6*A&&cnt[WSROUGH]>0.6*A,'its walls stand in relief: moulded courses, cornices and copings, on rock-faced plinths (D-060)');
   assert(cnt[LANTERN]>0.012*A&&cnt[DLANTERN]===0,'its lamps are lit');
   assert(gateOpen&&top>=35,'its gate stands open and its white tower rises high over the citadel');
   assert(surfaceName(C.X,C.T+1,C.Z)===C.name&&realmPlace(C.X,C.Z).line.includes(C.prov.kingdom.name.replace(/^The /,'')),'standing in it, the readout names the city and its kingdom');}

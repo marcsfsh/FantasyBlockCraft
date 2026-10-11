@@ -498,12 +498,15 @@ def(SPIKES,'Iron Spikes',[269,269,269],{solid:false,opq:false,occ:false,cross:tr
 // tower carved in relief, fluted pillars), roofs of slate, timbered plaster and thatch for the country, the realm's banner, hay,
 // paving for the king's roads and leaded windows
 const WSTONE=1107,WSBRICK=1108,WSCARVE=1109,WSPILLAR=1110,SLATE=1111,PLASTER=1112,TIMBER=1113,THATCH=1114,RBANNER=1115,HAYBALE=1116,PAVING=1117,LGLASS=1118;
+// and for the relief of their buildings: rock-faced whitestone for plinths and the feet of walls, a moulded band for string
+// courses, cornices and copings
+const WSROUGH=1119,WSTRIM=1120;
 def(WSTONE,'Whitestone',[270,270,270]);def(WSBRICK,'Whitestone Bricks',[271,271,271]);def(WSCARVE,'Carved Whitestone',[270,270,272]);
 def(WSPILLAR,'Whitestone Pillar',[273,273,274]);def(SLATE,'Slate Roof',[275,275,275]);def(PLASTER,'Timbered Plaster',[276,276,276]);
 def(TIMBER,'Braced Timber Frame',[276,276,277]);def(THATCH,'Thatch',[278,278,279],{snd:'soft'});
 def(RBANNER,'Banner of the Realm',[280,280,280],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(HAYBALE,'Hay Bale',[281,281,282],{snd:'soft'});
-def(PAVING,'Paving Stones',[283,283,283]);def(LGLASS,'Leaded Glass',[284,284,284],{opq:false,occ:false,snd:'glass'});
-setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING],4,'stone',1);setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
+def(PAVING,'Paving Stones',[283,283,283]);def(WSROUGH,'Rough Whitestone',[285,285,285]);def(WSTRIM,'Whitestone Moulding',[270,270,286]);def(LGLASS,'Leaded Glass',[284,284,284],{opq:false,occ:false,snd:'glass'});
+setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,WSROUGH,WSTRIM],4,'stone',1);setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
 setH([BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR],5,'stone',1);setH([OBSBRICK],20,'stone',7);setH([CHAIN,SPIKES],1.5,'metal',2);setH([BRAZIER],3,'metal',2);
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
@@ -971,6 +974,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     // leaded glass: lead in a lattice of diamonds round pale panes
     const lead=x===0||y===0||x===15||y===15||(x+y)%6===2||(x-y+18)%6===2;P(284,x,y,lead?[66,66,72]:sh([196,220,214],(hn(x,y,345)-.5)*12+((x+y)%6===3?18:0)),lead?255:120);
   }
+  // rough whitestone: big rock-faced blocks in two courses, each face bulging (lit above and to the left, shaded below), chisel
+  // pocks, deep joints; the moulding: a band of profile (a lit fillet, a bead, a shaded hollow, a plain face, a dark drip line)
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const row=y>>3,off=row?6:0,jx=(x+off)%12,bx=Math.floor((x+off)/12),cy=y&7,joint=cy===7||jx===11;
+    const bulge=(3.5-Math.abs(cy-3.2))*3+(5.5-Math.abs(jx-5))*1.6,c=hn(x,y,352)<.12?-16:0;
+    P(285,x,y,joint?sh([118,114,104],(hn(x,y,353)-.5)*8):sh([196,192,178],bulge+(cy===0?14:cy===6?-18:0)+(jx===0?8:jx===10?-12:0)+c+(hn(x,y,354)-.5)*12+(hn(bx,row,355)-.5)*14));
+    const prof=[16,22,-6,10,4,-20,-28,0,2,0,-2,4,0,-4,-16,-30][y];P(286,x,y,sh([214,210,198],prof+(hn(x,y,356)-.5)*6+(y===3&&x%4===0?-10:0)+(hn(x>>2,y,357)-.5)*4));}
   // the realm's sign, drawn pixel by pixel: an eight-pointed star (a square core, long rays up, down and across, short ones on the
   // diagonals) over a tower with two merlons, a lit window and a wider footing
   const SIGN=(x,y)=>{if(x>=7&&x<=8&&y>=3&&y<=4)return 1;if(x>=7&&x<=8&&(y===1||y===2||y===5))return 1;if((y===3||y===4)&&((x>=4&&x<=6)||(x>=9&&x<=11)))return 1;
@@ -1292,11 +1301,11 @@ function landSpawn(){
 // The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells; a cell whose
 // middle another land has taken (the sunken wastes spread over their neighbours, D-055) is passed over
 const TNL={};
-function nearestLand(k,X,Z,rmax){
+function nearestLand(k,X,Z,rmax,ok){
   const ci=Math.floor(X/LS),cj=Math.floor(Z/LS);let best=null,bd=Infinity;
   for(let r=0;r<=rmax;r++){
     for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
-      if(cellLand(c)!==k||landsAt(c.x,c.z,TNL).land!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
+      if(cellLand(c)!==k||landsAt(c.x,c.z,TNL).land!==k||(ok&&!ok(c)))continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
     if(best&&bd<(r-1)*LS)break;}
   return best?{X:Math.round(best.x),Z:Math.round(best.z),d:Math.round(bd)}:null;
 }
@@ -4825,73 +4834,169 @@ function partAB(p,u,v){switch(p.f){case 0:return [v-p.v0,u-p.u0,p.v1-p.v0+1,p.u1
 // a part centred on (u, v), w across and d deep, its front facing f
 function partC(k,u,v,w,d,f,o){const ac=f<2,hw=Math.floor((ac?w:d)/2),hd=Math.floor((ac?d:w)/2);const W2=ac?w:d,D2=ac?d:w;
   return Object.assign({k:k,u0:u-hd,u1:u-hd+D2-1,v0:v-hw,v1:v-hw+W2-1,f:f},o||{});}
+// a house on its core (u0..u1, v0..v1, as built), its front facing f, its box grown by its margins mg ([left, right, front,
+// back]) and its porch; p.core keeps the core's box
+function housePart(u0,u1,v0,v1,f,mg,o){const ac=f<2,W=ac?v1-v0+1:u1-u0+1,D=ac?u1-u0+1:v1-v0+1,core=[u0,u1,v0,v1],[mL,mR,mF0,mB]=mg,mF=mF0+(o.porch||0);
+  if(f===0){v0-=mL;v1+=mR;u0-=mF;u1+=mB;}else if(f===1){v1+=mL;v0-=mR;u1+=mF;u0-=mB;}else if(f===2){u1+=mL;u0-=mR;v0-=mF;v1+=mB;}else{u0-=mL;u1+=mR;v1+=mF;v0-=mB;}
+  return Object.assign({k:'house',u0:u0,u1:u1,v0:v0,v1:v1,f:f,W:W,D:D,mg:mg,core:core},o);}
 // ---- Column builders
 const RB={};
 const lit=(X,y,Z)=>RBP(X,y,Z,LANTERN);
-// A house or hall: a core of p.W by p.D with storeys of p.sh, walls by p.mat (stone: white ashlar with quoins and bands;
-// timber: a stone ground storey and plaster in timbers above; cottage: a cobble footing, plaster and timber, a thatched roof),
-// leaded windows, a door, a gable roof along its depth (p.ridge 'a' for along its width) with eaves of p.ov, a chimney, floors
-// and a ladder inside, lamps, a few furnishings; p.porch rows of pillars before the front; p.pil rows of pillars inside.
+// A house or hall. Its core is p.W across by p.D deep, p.st storeys of p.sh, its front facing p.f; p.mg the margins about the
+// core where its relief stands ([left, right, front, back]; below head height nothing stands in one unless p.gnd, so a city's
+// lanes stay clear), p.porch rows of pillars before the front under a pediment. The walls by p.mat:
+//   stone: white ashlar on a rock-faced plinth with toothed quoins, windows set back in their reveals over sills, a moulded
+//     string course at each floor and a cornice on corbels at the eaves; p.pil pilasters between the windows (and pillars
+//     down a hall), p.butt buttresses, p.batt a flat roof behind a parapet carried out on corbels
+//   timber: a stone ground storey, the storeys above jettied out over the margins on beam ends, framed in timber and plaster
+//   cottage: a cobble footing, plaster in a frame of logs, low thatch two blocks thick at its edges; with p.xchim a chimney up
+//     the back gable, and about it a bench, flower boxes and a woodpile
+// The roof is a gable along the depth (p.ridge 'a': along the width) of p.roof, its verges out over the gables, a finial on
+// each gable of stone or timber, dormers in the roofs of the taller houses; inside, floors, a ladder, lamps, a few furnishings.
 RB.house=(s,p,u,v,X,Z)=>{
-  const [a,b,TW,TD]=partAB(p,u,v),ov=p.ov||0,pr=p.porch||0,ca=a-ov,cb=b-ov-pr,W=p.W,D=p.D,g=p.y,st=p.st,sh=p.sh||4,eave=g+st*sh,r=hsh(X,9501,Z);
-  const inA=ca>=0&&ca<W,inB=cb>=0&&cb<D,core=inA&&inB,edgeA=ca===0||ca===W-1,edgeB=cb===0||cb===D-1,wall=core&&(edgeA||edgeB),corner=core&&edgeA&&edgeB;
-  const alongB=p.ridge!=='a',span=alongB?W:D,pos=alongB?ca:cb,ry=eave+Math.min(pos+ov,span-1-pos+ov)+(span%2?0:0),gable=alongB?(inA&&edgeB):(inB&&edgeA);
-  // the porch: pillars before the front under a lintel, a step of white stone
-  if(cb<0&&cb>=-pr&&inA){RBP(X,g,Z,WSTONE);if(cb===-pr&&(ca%2===0||ca===W-1)){RBS(X,Z,g+1,eave-1,WSPILLAR);RBP(X,eave,Z,WSCARVE);}else if(cb===-pr)RBP(X,eave,Z,WSBRICK);
-    if(cb>-pr)RBP(X,eave,Z,WSBRICK);for(let y=g+1;y<eave;y++)if(!(cb===-pr&&(ca%2===0||ca===W-1)))RBP(X,y,Z,AIR);return;}
-  const roofOnly=!core;
-  if(!roofOnly){
-    RBP(X,g,Z,wall?(p.mat==='cottage'?COBBLE:WSBRICK):p.floor||PLANKS);
-    for(let k=0;k<st;k++){const y0=g+1+k*sh,y1=g+(k+1)*sh;
-      for(let y=y0;y<=y1;y++){let id=AIR;const dy=y-y0,top=y===y1&&k<st-1;
-        if(wall){const pa=edgeB?ca:cb,win=!corner&&pa%3===1&&dy>=1&&dy<=2&&!(edgeB&&cb===0&&Math.abs(ca-p.door)<=(p.dw||1)-1);
-          if(p.mat==='stone')id=corner?WSTONE:top||y===y1?WSTONE:win?LGLASS:WSBRICK;
-          else if(p.mat==='timber')id=k===0?(corner?WSTONE:win?LGLASS:WSBRICK):corner?LOG:y===y1?PLANKS:win?LGLASS:(pa%3===2?TIMBER:PLASTER);
-          else id=corner?LOG:y===g+1?COBBLE:y===y1?PLANKS:win?LGLASS:(pa%3===0?TIMBER:PLASTER);
-          // the door, a lintel over it and a lamp beside it
-          if(edgeB&&cb===0&&k===0){const dd=Math.abs(ca-p.door);if(dd<(p.dw||1)&&dy<=(p.dh||2)-1)id=AIR;else if(dd<(p.dw||1)&&dy===(p.dh||2))id=p.mat==='cottage'?LOG:WSTONE;else if(p.lamp&&dd===(p.dw||1)&&dy===2)id=LANTERN;}}
-        else if(top)id=PLANKS;
-        else if(p.pil&&dy<sh&&ca>0&&ca<W-1&&cb>1&&cb<D-2&&(ca===2||ca===W-3)&&cb%3===1)id=WSPILLAR; // pillars down a hall
+  const [a,b]=partAB(p,u,v),mg=p.mg,pr=p.porch||0,ca=a-mg[0],cb=b-mg[2]-pr,W=p.W,D=p.D,g=p.y,st=p.st,sh=p.sh||4,eave=g+st*sh;
+  const mat=p.mat,stone=mat==='stone',tim=mat==='timber',cot=mat==='cottage',inA=ca>=0&&ca<W,inB=cb>=0&&cb<D,core=inA&&inB,r=hsh(X,9501,Z);
+  const alongB=p.ridge!=='a',span=alongB?W:D,pos=alongB?ca:cb,rb=cot?1:2,ry=eave+rb+Math.min(pos,span-1-pos),roof=p.roof||SLATE;
+  // the porch: pillars along its front under an entablature, the roof carried over it, a pediment with the realm's sign
+  if(cb<0&&cb>=-pr&&inA){const fr=cb===-pr,col=fr&&(ca%2===0||ca===W-1);RBP(X,g,Z,WSTONE);
+    for(let y=g+1;y<eave;y++)RBP(X,y,Z,col?WSPILLAR:AIR);RBP(X,eave,Z,col?WSCARVE:WSTRIM);
+    for(let y=eave+1;y<ry;y++)RBP(X,y,Z,!fr?AIR:y===ry-1?WSTRIM:ca===W>>1&&y===eave+2?WSCARVE:WSBRICK);RBP(X,ry,Z,roof);return;}
+  const ring=k=>tim&&k>0?[-mg[0],W-1+mg[1],-mg[2],D-1+mg[3]]:[0,W-1,0,D-1];
+  const wh=cot?2:Math.max(2,sh-2),sparse=p.pil||tim,winAt=(pa,L)=>sparse?pa%4===2&&pa<=L-3:L<=6?pa===(L>>1):pa>=2&&pa<=L-3&&pa%2===0;
+  const dw=p.dw||1,dh=p.dh||2,dd=Math.abs(ca-p.door),ld=winAt(p.door+dw+1,W)?dw+2:dw+1;
+  // a wall's own block, where no window, door or floor line is
+  const wallOf=(k,dy,pa,L,cor)=>{
+    if(stone||(tim&&k===0)){if(k===0&&dy===0)return WSROUGH;if(cor)return WSTONE;if((pa===1||pa===L-2)&&dy%2===1)return WSTONE;if(p.pil&&pa%4===0&&dy>0)return WSPILLAR;return WSBRICK;}
+    if(tim){if(cor||pa%4===0)return LOG;return (pa+k+(dy>(sh>>1)?1:0))%2?TIMBER:PLASTER;}
+    if(dy===0&&k===0)return COBBLE;if(cor)return LOG;return pa%3===0?TIMBER:PLASTER;};
+  if(core)RBP(X,g,Z,ca===0||ca===W-1||cb===0||cb===D-1?(cot?COBBLE:WSROUGH):p.floor||PLANKS);
+  for(let k=0;k<st;k++){const y0=g+1+k*sh,y1=y0+sh-1,R=ring(k),top=k===st-1,inR=ca>=R[0]&&ca<=R[1]&&cb>=R[2]&&cb<=R[3];
+    const line=stone?WSTRIM:tim&&k===0?(top?WSTRIM:LOG):LOG; // the floor line: a moulded band, or a beam
+    if(inR&&(ca===R[0]||ca===R[1]||cb===R[2]||cb===R[3])){ // the wall
+      const eA=ca===R[0]||ca===R[1],eB=cb===R[2]||cb===R[3],cor=eA&&eB,pa=eB?ca-R[0]:cb-R[2],L=eB?R[1]-R[0]+1:R[3]-R[2]+1;
+      const front=k===0&&cb===0,win=!cor&&winAt(pa,L)&&!(front&&dd<=dw);
+      for(let y=y0;y<=y1;y++){const dy=y-y0;let id;
+        if(y===y1)id=line;
+        else if(win&&dy>=1&&dy<=wh)id=AIR; // the window's reveal: its glass stands one in
+        else if(win&&dy===0&&k>0&&!cot)id=stone?WSTONE:PLANKS; // its sill
+        else id=wallOf(k,dy,pa,L,cor);
+        if(front&&dd<dw&&dy<dh)id=AIR; // the door, its lintel and jambs, a lamp beside it
+        else if(front&&dd<dw&&dy===dh)id=cot?LOG:dw>1?WSCARVE:WSTONE;
+        else if(front&&dd===dw&&dy>0&&dy<dh)id=cot?LOG:WSPILLAR;
+        else if(front&&p.lamp&&!mg[2]&&dd===ld&&dy===2)id=LANTERN;
         RBP(X,y,Z,id);}
-      // inside: a ladder up the side wall, a lamp under each ceiling, now and then a barrel, a crate or a shelf of books
-      if(core&&!wall){if(ca===1&&cb===D-2&&st>1&&k<st-1){for(let y=y0;y<=y1;y++)RBP(X,y,Z,LADDER);}
-        else{if(ca===Math.floor(W/2)&&cb===Math.floor(D/2))RBP(X,y1-(k<st-1?1:0),Z,LANTERN);
-          else if((ca===1||ca===W-2)&&(cb===1||cb===D-2)&&r<0.5)RBP(X,y0,Z,r<0.18?BARREL:r<0.34?CRATE:BOOKS);}}}
-    // under the roof: the gable ends walled up, the loft open
-    for(let y=eave+1;y<ry;y++)RBP(X,y,Z,gable?(p.mat==='stone'?WSBRICK:p.mat==='timber'?PLASTER:PLASTER):AIR);
-    if(gable&&ry-eave>=3&&pos===Math.floor(span/2))RBP(X,eave+2,Z,LGLASS);}
-  // the roof, and the chimney through it
-  RBP(X,ry,Z,p.roof||SLATE);if(core&&!wall&&ry>eave+1)RBP(X,eave,Z,PLANKS); // the loft's floor
-  if(p.chim&&core&&ca===p.chim[0]&&cb===p.chim[1])RBS(X,Z,g+1,ry+2,p.mat==='stone'?SBRICK:COBBLE);
+    }else if(inR){ // inside: floors, the ladder, glass set back in the windows, lamps, furnishings, pillars down a hall
+      const lad=st>1&&ca===1&&cb===D-2&&(!top||p.batt),fw=(pa,L)=>pa>0&&pa<L-1&&winAt(pa,L);
+      const glass=(ca===R[0]+1||ca===R[1]-1)&&fw(cb-R[2],R[3]-R[2]+1)||(cb===R[3]-1||cb===R[2]+1&&!(k===0&&dd<=dw))&&fw(ca-R[0],R[1]-R[0]+1);
+      for(let y=y0;y<=y1;y++){const dy=y-y0;let id=y===y1&&!top?PLANKS:AIR;
+        if(lad)id=LADDER;
+        else if(glass&&dy>=1&&dy<=wh)id=LGLASS;
+        else if(p.pil&&dy<sh-1&&ca>1&&ca<W-2&&cb>1&&cb<D-2&&(ca===2||ca===W-3)&&cb%3===1)id=WSPILLAR;
+        else if(ca===(W>>1)&&cb===(D>>1)&&y===y1-1)id=LANTERN;
+        else if(dy===0&&(ca===1||ca===W-2)&&(cb===1||cb===D-2)&&r<0.5)id=r<0.18?BARREL:r<0.34?CRATE:BOOKS;
+        RBP(X,y,Z,id);}
+    }else{ // the margin about this storey
+      const sA=ca<R[0]||ca>R[1],sB=cb<R[2]||cb>R[3],corner=sA&&sB,pa=sB?ca-R[0]:cb-R[2],L=sB?R[1]-R[0]+1:R[3]-R[2]+1,frontM=cb<R[2]&&!sA;
+      const win=!corner&&pa>=1&&pa<=L-2&&winAt(pa,L)&&!(k===0&&frontM&&dd<=dw),odd=corner||pa%2!==0;
+      if(tim&&k===0&&st>1){RBP(X,y1,Z,LOG);if(odd)RBP(X,y1-1,Z,LOG);} // under a jetty: its floor beam on brackets
+      else if(stone){
+        RBP(X,y1,Z,WSTRIM); // a string course, or the cornice
+        if(top&&odd)RBP(X,eave-1,Z,WSTONE); // the cornice's corbels
+        if(win&&k>0)RBP(X,y0,Z,WSTONE); // a sill
+        if(p.gnd&&k===0&&!(frontM&&dd<=dw))RBP(X,g+1,Z,WSROUGH); // the plinth stepped out
+        if(p.gnd&&p.pil&&!corner&&pa%4===0)RBS(X,Z,Math.max(y0,g+2),Math.min(y1-1,eave-2),WSPILLAR);
+        if(p.butt&&k===0&&(corner||sA&&!sB&&pa%2===1)){RBS(X,Z,g+1,eave-2,WSBRICK);RBP(X,eave-1,Z,WSTRIM);}}
+      if(k===0&&frontM&&p.lamp&&dd===ld)RBP(X,g+3,Z,LANTERN);
+      if(cot&&k===0&&p.gnd){const q=hsh(p.u0,9531,p.v0);
+        if(frontM&&win){RBP(X,g+1,Z,PLANKS);RBP(X,g+2,Z,[FLOWR,FLOWY,LAVENDER,OXEYE][(hsh(X,9533,Z)*4)|0]);}
+        else if(frontM&&dd===dw+1&&q<0.6)RBP(X,g+1,Z,PLANKS);
+        else if(ca<0&&!sB&&cb>=1&&cb<=Math.min(3,D-2)&&q>0.35)RBS(X,Z,g+1,g+2,LOG);}}
+  }
+  const R=ring(st-1),inR=ca>=R[0]&&ca<=R[1]&&cb>=R[2]&&cb<=R[3],onR=inR&&(ca===R[0]||ca===R[1]||cb===R[2]||cb===R[3]);
+  const sA=ca<R[0]||ca>R[1],sB=cb<R[2]||cb>R[3];
+  // a flat roof behind a parapet carried out on corbels (the cornice and its corbels are the top storey's)
+  if(p.batt){if(inR&&!onR)RBP(X,eave,Z,ca===1&&cb===D-2?LADDER:WSTONE);
+    else if(!inR){const pa=sB?ca:cb;RBP(X,eave+1,Z,WSBRICK);if(sA&&sB||((pa%2)+2)%2===0)RBP(X,eave+2,Z,WSBRICK);}return;}
+  // the gables and a frieze along the eaves carried up to the roof (a window in a gable), the loft, the roof
+  const gableM=alongB?sB:sA,gableW=alongB?(cb===R[2]||cb===R[3]):(ca===R[0]||ca===R[1]),eaveW=alongB?(ca===R[0]||ca===R[1]):(cb===R[2]||cb===R[3]);
+  const gpa=alongB?ca-R[0]:cb-R[2],gmid=(span-1)/2,gwall=stone?WSBRICK:gpa%3===0?TIMBER:PLASTER;
+  if(onR){for(let y=eave+1;y<ry;y++){let id=gwall;
+      if(gableW&&!eaveW){const o=Math.abs(pos-gmid),dy=y-eave;if(p.rose?(o<0.6&&dy>=2&&dy<=4)||(o>0.4&&o<1.6&&dy===3):!cot&&o<0.6&&dy===rb+1&&ry-eave>=rb+3)id=LGLASS;}
+      RBP(X,y,Z,id);}}
+  else if(inR){if(ry>eave+1)RBP(X,eave,Z,PLANKS);for(let y=eave+1;y<ry;y++)RBP(X,y,Z,AIR);}
+  else if(cot)RBP(X,ry-1,Z,roof); // the thatch thick at its edges
+  else if(gableM&&ry-1>eave)RBP(X,ry-1,Z,stone?WSTRIM:PLANKS); // a barge board under the verge
+  RBP(X,ry,Z,roof);
+  if(!cot&&gableM&&!(alongB?sA:sB)&&Math.abs(pos-gmid)<0.6)RBP(X,ry+1,Z,stone?WSPILLAR:LOG); // a finial on the gable
+  // dormers in the upper roofs: a window at the wall's plane under a little gable of its own
+  if(!cot&&st>=2&&span>=7&&inR){const p0=alongB?R[0]:R[2],p1=alongB?R[1]:R[3],q=pos-p0<=1?pos-p0:p1-pos<=1?p1-pos:-1;
+    if(q>=0){const lo=alongB?R[2]:R[0],Lr=(alongB?R[3]:R[1])-lo+1,dl=(alongB?cb:ca)-lo,off=((dl-2)%4+4)%4,c=off===0?dl:off===1?dl-1:off===3?dl+1:-9,yW=ry-q;
+      if(c>=2&&c<=Lr-3){if(dl===c){if(q===0){RBP(X,yW,Z,LGLASS);RBP(X,yW+1,Z,stone?WSTRIM:PLANKS);}else RBP(X,yW+1,Z,AIR);RBP(X,yW+2,Z,roof);}
+        else if(q===0){RBP(X,yW,Z,stone?WSBRICK:PLASTER);RBP(X,yW+1,Z,roof);}}}}
+  // chimneys: a stack through the roof, capped; or up the back gable outside a cottage, wider at its foot
+  if(p.chim&&ca===p.chim[0]&&cb===p.chim[1]){RBS(X,Z,g+1,ry+1,stone?SBRICK:COBBLE);RBP(X,ry+2,Z,stone?WSTRIM:COBBLE);}
+  if(p.xchim&&mg[3]&&cb===D){const o=Math.abs(ca-(W>>1));if(o===0)RBS(X,Z,g+1,eave+rb+Math.floor(gmid)+2,COBBLE);else if(o===1)RBS(X,Z,g+1,g+2,COBBLE);}
 };
-// A square tower of half-width p.h2 rising p.H: white ashlar with quoins, slit windows lit within, a band of carving below the top,
-// battlements; p.ban a banner on its roof, p.roof a slate spire, p.fire a beacon basket, p.hollow floors and a ladder inside
-RB.tower=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs(b)),h2=p.h2,g=p.y,top=g+p.H;if(m>h2)return;
-  const ring=m===h2,cor=Math.abs(a)===h2&&Math.abs(b)===h2,mid=ring&&Math.min(Math.abs(a),Math.abs(b))===0;
-  RBP(X,g,Z,WSBRICK);
+// A square tower of half-width p.h2 rising p.H over p.y, in a margin ring of p.mg (1 unless given) for its relief: a rock-faced
+// foot (battered out into the margin with p.batt, outside a wall's inner face p.wr), toothed quoins, arrow slits set into its
+// faces, a moulded band at p.band, a carved band under the top, and a parapet carried out on corbels with merlons; p.roof a
+// slate spire within the parapet, p.ban a banner on its roof, p.fire a beacon, p.hollow floors and a ladder inside, p.bell an
+// open belfry with a bell under the spire; p.gp keeps the margin out of a gate's passage (|v| up to p.gp)
+RB.tower=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs(b)),h2=p.h2,g=p.y,top=g+p.H,mg=p.mg===undefined?1:p.mg;if(m>h2+mg)return;
+  const t=Math.abs(a)>=Math.abs(b)?b:a; // along the face, from its middle
+  if(m===h2+1){ // the margin ring
+    if(p.gp!==undefined&&Math.abs(v)<=p.gp)return;if(p.wr&&Math.max(Math.abs(u),Math.abs(v))<p.wr-2)return;
+    const cor=Math.abs(a)===m&&Math.abs(b)===m,alt=cor||((t%2)+2)%2===1;
+    if(p.batt&&!(p.hollow&&b<0&&a===0)){RBP(X,g+1,Z,WSROUGH);RBP(X,g+2,Z,WSROUGH);}if(p.band)RBP(X,g+p.band,Z,WSTRIM);
+    if(alt)RBP(X,top-1,Z,WSTONE);RBP(X,top,Z,WSTRIM);RBP(X,top+1,Z,WSBRICK);if(alt)RBP(X,top+2,Z,WSBRICK);return;}
+  const ring=m===h2,cor=Math.abs(a)===h2&&Math.abs(b)===h2,slit=h2>=4?Math.abs(t)===2:t===0;
+  RBP(X,g,Z,WSROUGH);
   for(let y=g+1;y<=top;y++){const dy=y-g;let id;
-    if(ring)id=cor?WSTONE:y===top-2?WSCARVE:mid&&dy%6===4&&y<top-3?LGLASS:dy%6===0?WSTONE:WSBRICK;
+    if(ring){
+      if(dy<=2)id=WSROUGH;else if(cor)id=WSTONE;else if(Math.abs(t)===h2-1&&dy%2===1)id=WSTONE;
+      else if(y===top-2)id=t===0?WSCARVE:WSTRIM;else if(p.band&&dy===p.band)id=WSTRIM;
+      else if(slit&&dy%7>=3&&dy%7<=4&&y<top-4)id=p.hollow?AIR:LGLASS;else id=WSBRICK;
+      if(p.bell&&!cor&&t===0&&y>=top-4&&y<top-1)id=AIR; // the belfry's openings
+      if(p.hollow&&b===-h2&&a===0&&dy>=1&&dy<=3)id=dy===3?WSTRIM:AIR;} // a door into a hollow tower, toward the front
     else if(p.hollow){const lad=Math.abs(a)===h2-1&&b===0;id=lad?LADDER:y===top?WSBRICK:dy%6===0?PLANKS:dy%6===5&&a===0&&b===0?LANTERN:AIR;}
+    else if(p.bell&&y>=top-4)id=y===top?WSBRICK:y===top-1&&a===0&&b===0?GOLDB:AIR;
     else id=WSBRICK;
     RBP(X,y,Z,id);}
-  if(ring&&!cor&&(Math.abs(a)+Math.abs(b))%2===0&&!p.roof)RBP(X,top+1,Z,WSBRICK);
-  if(cor&&!p.roof){RBP(X,top+1,Z,WSBRICK);RBP(X,top+2,Z,WSBRICK);}
+  if(mg===0&&!p.roof){if(ring&&!cor&&(Math.abs(a)+Math.abs(b))%2===0)RBP(X,top+1,Z,WSBRICK);if(cor){RBP(X,top+1,Z,WSBRICK);RBP(X,top+2,Z,WSBRICK);}}
   if(p.roof&&m<=h2){const ry=top+1+(h2-m);RBP(X,ry,Z,m===0?WSPILLAR:SLATE);if(m===0){RBP(X,ry+1,Z,WSPILLAR);RBP(X,ry+2,Z,RBANNER);RBP(X,ry+3,Z,RBANNER);}}
-  if(!p.roof&&a===0&&b===0){if(p.fire){RBP(X,top+1,Z,LOG);RBP(X,top+2,Z,BRAZIER);}else if(p.ban){RBS(X,Z,top+1,top+2,WSPILLAR);RBS(X,Z,top+3,top+4,RBANNER);}}
+  if(!p.roof&&a===0&&b===0){if(p.fire){RBS(X,Z,top+1,top+2,LOG);RBP(X,top+3,Z,BRAZIER);}else if(p.ban){RBS(X,Z,top+1,top+2,WSPILLAR);RBS(X,Z,top+3,top+4,RBANNER);}}
   if(p.fire&&!p.roof&&m===1&&!cor)RBP(X,top+1,Z,LOG);
 };
-// A curtain wall round a square site, p.r its outer edge, three thick and p.H high: a plinth, white ashlar, battlements on the
-// outer edge, a walk along the top; the gate through it at the middle of the front (p.gw wide, p.gh high, a portcullis drawn up)
-// with the realm's sign over it and banners either side; ladders up its inner face beside the gate
-RB.cwall=(s,p,u,v,X,Z)=>{const m=Math.max(Math.abs(u),Math.abs(v)),R=p.r;if(m>R||m<R-2)return;const g=siteG(s,u,v),top=g+p.H,outer=m===R;
+// A curtain wall round a square site, p.r its outer face, three thick and p.H high, with a margin outside it for its relief: a
+// rock-faced foot battered out, a moulded course over it, buttresses, and a parapet carried out on corbels with merlons along
+// its top, over a walk three wide; p.arc a blind arcade along its inner face; p.low a low wall with plain merlons. The gate
+// through the middle of its front (p.gw wide, p.gh high, a portcullis drawn up) is paved; the realm's sign is carved over it.
+RB.cwall=(s,p,u,v,X,Z)=>{const m=Math.max(Math.abs(u),Math.abs(v)),R=p.r;if(m>R+1||m<R-2)return;const g=siteG(s,u,v),top=g+p.H,t=Math.abs(u)>=Math.abs(v)?v:u;
   const gateRow=-u>=R-2&&Math.abs(v)<=p.gw&&Math.abs(u)>=Math.abs(v);
-  for(let y=g+1;y<=top;y++){let id=y<=g+2?WSTONE:(y===top-3&&outer?WSTONE:WSBRICK);
+  if(m===R+1){if(gateRow){RBP(X,g,Z,p.low?GRAVEL:PAVING);return;}
+    RBP(X,g+1,Z,WSROUGH);if(p.low)return;RBP(X,g+2,Z,WSROUGH);
+    const cor=Math.abs(u)===m&&Math.abs(v)===m,alt=cor||((t%2)+2)%2===1;
+    if(!cor&&((t%10)+10)%10===5)RBS(X,Z,g+3,top-2,WSBRICK); // buttresses
+    if(alt)RBP(X,top-1,Z,WSTONE);RBP(X,top,Z,WSTRIM);RBP(X,top+1,Z,WSBRICK);if(alt)RBP(X,top+2,Z,WSBRICK);return;}
+  const loop=m===R&&!p.low&&((t%10)+10)%10===0; // arrow loops between the buttresses
+  for(let y=g+1;y<=top;y++){let id=y<=g+2?WSROUGH:y===g+3&&m===R?WSTRIM:loop&&y>=top-4&&y<=top-3?AIR:WSBRICK;
+    if(p.arc&&m===R-2){const q=((t%6)+6)%6;if(y===g+6)id=WSTRIM;else if(y>=g+2&&y<=g+5)id=q===0?WSPILLAR:(y<=g+4||q>=2&&q<=4)?AIR:WSBRICK;}
     if(gateRow){const dy=y-g,arch=Math.abs(v)===p.gw?p.gh-1:p.gh;if(dy<=arch)id=AIR;else if(dy===arch+1&&Math.abs(v)<p.gw&&u===-R+1)id=GRATE;}
     RBP(X,y,Z,id);}
-  if(gateRow)RBP(X,g,Z,p.low?GRAVEL:PAVING); // the gateway paved
-  if(gateRow&&u===-R){if(v===0)RBP(X,g+p.gh+3,Z,WSCARVE);}
-  if(outer&&!gateRow&&(Math.abs(u)+Math.abs(v))%2===0)RBP(X,top+1,Z,WSBRICK);
-  if(!outer&&m===R-2)RBP(X,top,Z,WSBRICK);
+  if(gateRow)RBP(X,g,Z,p.low?GRAVEL:PAVING);
+  if(gateRow&&u===-R&&v===0)RBP(X,g+p.gh+3,Z,WSCARVE);
+  if(p.low&&m===R&&!gateRow&&(Math.abs(u)+Math.abs(v))%2===0)RBP(X,top+1,Z,WSBRICK);
+};
+// The gatehouse's front between its two towers (p.v0 to p.v1, the passage p.gw either side of the middle): a wall two thick
+// from over the arch to the towers' tops, the arch moulded with its shoulders stepped, the portcullis's teeth showing in its
+// slot, the realm's sign over it, a parapet carried out on corbels in front, so the passage runs five deep to the gate
+RB.gatefront=(s,p,u,v,X,Z)=>{const g=p.y,gh=p.gh,top=g+p.H,av=Math.abs(v),k=u-p.u0;RBP(X,g,Z,PAVING);
+  if(k===0){const alt=av%2===1;if(alt)RBP(X,top-1,Z,WSTONE);RBP(X,top,Z,WSTRIM);RBP(X,top+1,Z,WSBRICK);if(alt)RBP(X,top+2,Z,WSBRICK);
+    if(av<=p.gw)RBP(X,g+gh+1,Z,WSTRIM);return;}
+  for(let y=g+1;y<=top;y++){const dy=y-g;let id=WSBRICK;
+    if(av<p.gw&&dy<=gh||av===p.gw&&dy<gh)id=AIR;else if(av===p.gw&&dy===gh)id=WSTRIM;else if(dy===gh+1&&av<p.gw)id=k===1?WSTRIM:GRATE;
+    else if(v===0&&dy===gh+3&&k===1)id=WSCARVE;else if(k===1&&(dy===gh+5||dy===top-g-2))id=WSTRIM;
+    RBP(X,y,Z,id);}
 };
 // banners hung on the outer face of a wall: two blocks long, at p.y
 RB.banner=(s,p,u,v,X,Z)=>{RBS(X,Z,p.y,p.y+(p.n||2)-1,RBANNER);};
@@ -4899,26 +5004,36 @@ RB.banner=(s,p,u,v,X,Z)=>{RBS(X,Z,p.y,p.y+(p.n||2)-1,RBANNER);};
 RB.ladder=(s,p,u,v,X,Z)=>{RBS(X,Z,p.y0,p.y1,LADDER);};
 // a lamp on a white post
 RB.lamp=(s,p,u,v,X,Z)=>{const g=p.y;RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);};
-// the ground inside a city's walls: paving everywhere but the gardens; retaining walls where a tier rises over the one below,
-// with a parapet; lanes of plain paving, the avenue and the square of dressed flagstones
+// the ground inside a city's walls: flagstones on the avenue between kerbs and in rings about the square's fountain, cobbled
+// lanes with flagstones here and there; where a tier rises over the one below, a retaining wall of rock-faced stone under a
+// moulded coping and a parapet with piers (a lamp on every other one), and now and then a buttress against its foot
 RB.cground=(s,p,u,v,X,Z)=>{const m=Math.max(Math.abs(u),Math.abs(v));if(m>s.R-3)return;const t=cityTier(s,u,v),g=s.T+t*5;
-  let low=t;for(const [du,dv] of [[1,0],[-1,0],[0,1],[0,-1]])low=Math.min(low,cityTier(s,u+du,v+dv));
-  if(low<t){RBS(X,Z,s.T+low*5+1,g,WSBRICK);if(!p.stair(u,v))RBP(X,g+1,Z,WSBRICK);if(!p.stair(u,v)&&(u+v)%14===0)RBP(X,g+2,Z,LANTERN);return;}
-  if(p.garden(u,v))return;RBP(X,g,Z,Math.abs(v)<=3||p.square(u,v)?PAVING:hsh(X,9503,Z)<0.12?COBBLE:PAVING);
+  let low=t,high=t;for(const [du,dv] of [[1,0],[-1,0],[0,1],[0,-1]]){const q=cityTier(s,u+du,v+dv);low=Math.min(low,q);high=Math.max(high,q);}
+  if(low<t){RBS(X,Z,s.T+low*5+1,g-1,WSROUGH);RBP(X,g,Z,WSTRIM);
+    if(!p.stair(u,v)){const pier=((u+v)%7+7)%7===0;RBP(X,g+1,Z,pier?WSPILLAR:WSBRICK);if(pier)RBP(X,g+2,Z,((u+v)%14+14)%14===0?LANTERN:WSTRIM);}return;}
+  if(high>t&&!p.stair(u,v)&&p.free(u,v)&&((u*3+v*5)%9+9)%9===0){RBS(X,Z,g+1,g+3,WSROUGH);RBP(X,g+4,Z,WSTRIM);}
+  if(p.garden(u,v))return;const av=Math.abs(v);
+  RBP(X,g,Z,p.square(u,v)?(Math.max(Math.abs(u-p.scu),av)%4===0?WSBRICK:PAVING):av<=4?(av===4?WSBRICK:PAVING):hsh(X,9503,Z)<0.7?COBBLE:PAVING);
 };
-// stairs up the avenue where it climbs a tier: five steps of one block, an arch over the top
-RB.cstair=(s,p,u,v,X,Z)=>{const k=u-p.u0,yl=p.y;if(Math.abs(v)<=3){if(k<5){RBS(X,Z,yl+1,yl+k+1,WSBRICK);RBP(X,yl+k+1,Z,PAVING);}RBS(X,Z,yl+k+2,yl+12,AIR);}
-  if(k===5&&Math.abs(v)===4){RBS(X,Z,yl+6,yl+11,WSPILLAR);RBP(X,yl+12,Z,WSCARVE);}if(k===5&&Math.abs(v)<4)RBP(X,yl+12,Z,Math.abs(v)===0?WSCARVE:WSBRICK);};
+// stairs up the avenue where it climbs a tier: five steps of one block between parapets that step with them, and over the top
+// an arch on pillars, its shoulders stepped in, its head moulded with the realm's sign at the crown and merlons above
+RB.cstair=(s,p,u,v,X,Z)=>{const k=u-p.u0,yl=p.y,av=Math.abs(v);
+  if(av<=3){if(k<5){RBS(X,Z,yl+1,yl+k+1,WSBRICK);RBP(X,yl+k+1,Z,PAVING);}RBS(X,Z,yl+k+2,yl+12,AIR);}
+  else if(k<5){RBS(X,Z,yl+1,yl+k+1,WSROUGH);RBP(X,yl+k+2,Z,WSTRIM);}
+  if(k===5){if(av===4){RBS(X,Z,yl+6,yl+11,WSPILLAR);RBP(X,yl+12,Z,WSTRIM);RBP(X,yl+13,Z,WSBRICK);}
+    else{if(av===3)RBP(X,yl+11,Z,WSTRIM);RBP(X,yl+12,Z,av===0?WSCARVE:WSTRIM);if(av%2===0)RBP(X,yl+13,Z,WSBRICK);}}};
 // a garden: grass left as it grows, a fruit tree in blossom or a white-leafed one, a box hedge round it
 RB.garden=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,edge=a===0||b===0||a===W-1||b===D-1;
   RBP(X,g,Z,GRASS);if(edge){if(!(b===0&&Math.abs(a-(W>>1))<=1))RBP(X,g+1,Z,LEAVES);return;}
   const cx=W>>1,cz=D>>1,d=Math.hypot(a-cx,b-cz);if(d<0.5){RBS(X,Z,g+1,g+3,LOG);}
   if(d<=2.3)for(let y=g+3;y<=g+5;y++){const e=Math.hypot(a-cx,(y-g-4)*1.3,b-cz);if(e<=2.4&&!(d<0.5&&y<g+4))RBP(X,y,Z,p.bl?BLOSSOM:FRUITL);}
   else if(hsh(X,9505,Z)<0.3)RBP(X,g+1,Z,[FLOWR,FLOWY,LAVENDER,OXEYE][(hsh(X,9507,Z)*4)|0]);};
-// a fountain: a basin of white stone holding water, and in its middle a carved column with the realm's sign
+// a fountain: a basin of white stone under a moulded rim holding water; in its middle a fluted column carrying a bowl, the
+// realm's sign carved over it and a lamp on top
 RB.fountain=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs(b)),g=p.y;if(m>3)return;
-  if(m===3){RBP(X,g,Z,WSBRICK);RBP(X,g+1,Z,WSBRICK);return;}RBP(X,g-1,Z,WSBRICK);RBP(X,g,Z,WATER);
-  if(m===0){RBS(X,Z,g,g+2,WSPILLAR);RBP(X,g+3,Z,WSCARVE);RBP(X,g+4,Z,LANTERN);}};
+  if(m===3){RBP(X,g,Z,WSROUGH);RBP(X,g+1,Z,WSTRIM);return;}RBP(X,g-1,Z,WSBRICK);RBP(X,g,Z,WATER);
+  if(m===1&&(a===0||b===0))RBP(X,g+2,Z,WSTRIM);
+  if(m===0){RBS(X,Z,g,g+2,WSPILLAR);RBP(X,g+3,Z,WSCARVE);RBP(X,g+4,Z,WSTRIM);RBP(X,g+5,Z,LANTERN);}};
 // a market stall: posts and a striped awning, a counter of planks with wares on it
 RB.stall=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,post=(a===0||a===W-1)&&(b===0||b===D-1);
   if(post)RBS(X,Z,g+1,g+3,LOG);RBP(X,g+4,Z,(a+(p.c||0))%2?WOOLW:p.wool||WOOLR);
@@ -4929,35 +5044,56 @@ RB.well=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,m=Math.max(Math.abs(a),Math.abs(
   if(m===0){RBS(X,Z,g-4,g-1,WATER);RBP(X,g,Z,WATER);RBS(X,Z,g+1,g+3,AIR);RBP(X,g+4,Z,p.roof||PLANKS);return;}
   RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,COBBLE);const cor=Math.abs(a)===1&&Math.abs(b)===1;if(cor)RBS(X,Z,g+2,g+3,LOG);RBP(X,g+4,Z,p.roof||PLANKS);
   RBS(X,Z,g-4,g-1,COBBLE);};
-// a statue of a king of old on a plinth: white stone, the realm's sign on his breast, a crown of gold
-RB.statue=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,g=p.y;if(Math.abs(a)>1||Math.abs(b)>1)return;RBP(X,g+1,Z,WSBRICK);if(a!==0||b!==0)return;
-  RBP(X,g+2,Z,WSBRICK);RBS(X,Z,g+3,g+4,WSTONE);RBP(X,g+5,Z,WSCARVE);RBP(X,g+6,Z,WSTONE);RBP(X,g+7,Z,GOLDB);};
+// a statue of a king of old: on a rock-faced plinth under a moulded cap, the king in white stone, cloaked, broad in the
+// shoulder, the realm's sign on his breast, a sword held point-down before him, a crown of gold
+RB.statue=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,g=p.y;if(Math.abs(a)>1||Math.abs(b)>1)return;RBP(X,g+1,Z,WSROUGH);RBP(X,g+2,Z,WSTRIM);
+  if(a===0&&b===0){RBS(X,Z,g+3,g+6,WSTONE);RBP(X,g+5,Z,WSCARVE);RBP(X,g+7,Z,WSTONE);RBP(X,g+8,Z,GOLDB);}
+  else if(b===0&&Math.abs(a)===1)RBP(X,g+6,Z,WSTONE);
+  else if(a===0&&b===1)RBS(X,Z,g+3,g+6,WSTONE);
+  else if(a===0&&b===-1){RBS(X,Z,g+3,g+4,WSPILLAR);RBP(X,g+5,Z,WSTRIM);}};
 // lanes and paths: a strip of path (p.id), the grass cleared of its plants above
 RB.lane=(s,p,u,v,X,Z)=>{RBP(X,p.y,Z,p.id||PATH);RBP(X,p.y+1,Z,AIR);};
-// a domed hall of white stone: square walls with pillars at the corners and tall windows, a dome stepped in rings, a lantern on top
-RB.dome=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,H=p.H,c=(W-1)/2,dx=a-c,dz=b-(D-1)/2,m=Math.max(Math.abs(dx),Math.abs(dz)),edge=m>=c-0.1,cor=Math.abs(dx)>=c-0.1&&Math.abs(dz)>=c-0.1;
-  RBP(X,g,Z,edge?WSBRICK:WSTONE);
+// The Hall of Lamps: a square hall of white stone on a rock-faced foot, fluted pilasters between tall windows set back in their
+// reveals, a moulded cornice with the realm's sign at the middle of each face, a portico of two pillars before its door; on its
+// roof a parapet with lamps at the corners, a drum ringed with windows and a dome of slate on ribs of white stone, a lantern on
+// its crown; inside it is open up into the dome, lamps hung about it
+RB.dome=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,H=p.H,c=(W-1)/2,dx=a-c,dz=b-(D-1)/2,m=Math.max(Math.abs(dx),Math.abs(dz)),wl=c-1;
+  const t=Math.abs(dx)>=Math.abs(dz)?dz:dx,at=Math.abs(t),door=dz<0&&Math.abs(dx)<=1&&-dz>=Math.abs(dx);
+  if(m>wl){const cor=Math.abs(dx)>wl&&Math.abs(dz)>wl;if(!door)RBP(X,g+1,Z,WSROUGH);
+    if(!cor&&!door&&at%3===0)RBS(X,Z,g+2,g+H-1,WSPILLAR);
+    if(dz<0&&-dz>Math.abs(dx)&&Math.abs(dx)===2)RBS(X,Z,g+1,g+H-1,WSPILLAR); // the portico
+    RBP(X,g+H,Z,WSTRIM);return;}
+  const edge=m===wl,cor=edge&&Math.abs(dx)===wl&&Math.abs(dz)===wl,win=at%3===1&&at<wl-1;RBP(X,g,Z,edge?WSROUGH:WSTONE);
   for(let y=g+1;y<=g+H;y++){let id=AIR;const dy=y-g;
-    if(edge){id=cor?WSPILLAR:dy<=1?WSTONE:y===g+H?WSCARVE:(Math.min(Math.abs(dx),Math.abs(dz))%3===1&&dy>=3&&dy<=H-2)?LGLASS:WSBRICK;
-      if(dz<-c+0.5&&Math.abs(dx)<=1&&dy<=4)id=AIR;}
-    else if(dy===H-1&&Math.abs(dx)<0.6&&Math.abs(dz)<0.6)id=LANTERN;
+    if(edge){id=dy<=1?WSROUGH:cor?WSPILLAR:y===g+H?(t===0?WSCARVE:WSTRIM):win&&dy>=3&&dy<=H-2?AIR:WSBRICK;if(door&&dy<=4)id=AIR;}
+    else if(m===wl-1&&dy>=3&&dy<=H-2){const tt=Math.abs(dx)===wl-1?Math.abs(dz):Math.abs(dx);if(tt%3===1&&tt<wl-1)id=LGLASS;}
+    else if(dy===H-1&&Math.abs(dx)===3&&Math.abs(dz)===3)id=LANTERN;
     RBP(X,y,Z,id);}
-  const rr=c+0.5,d=Math.hypot(dx,dz);if(d<=rr){const ry=g+H+Math.round(Math.sqrt(Math.max(0,rr*rr-d*d))*0.9);RBP(X,ry,Z,d<1?WSPILLAR:WSTONE);if(d<1){RBP(X,ry+1,Z,WSPILLAR);RBP(X,ry+2,Z,LANTERN);}
-    if(d<rr-1.2)for(let y=g+H+1;y<ry;y++)RBP(X,y,Z,AIR);}};
-// a smithy: a stone hearth with its fire, a furnace, an anvil of iron, water to quench in, under a roof on posts open at the front
+  const rd=wl-3,d=Math.hypot(dx,dz),yd=g+H+4,rr=rd+0.5;
+  if(edge){RBP(X,g+H+1,Z,WSTRIM);if(cor){RBP(X,g+H+2,Z,WSPILLAR);RBP(X,g+H+3,Z,LANTERN);}return;}
+  if(d>rr){RBP(X,g+H,Z,WSTONE);return;} // the roof about the drum
+  if(d>rd-0.5){for(let y=g+H;y<yd;y++)RBP(X,y,Z,y===g+H+2&&((Math.round(Math.atan2(dz,dx)/6.2832*20)%2)+2)%2===0?LGLASS:WSBRICK);RBP(X,yd,Z,WSTRIM);}
+  const hi=yd+Math.round(Math.sqrt(Math.max(0,rr*rr-d*d))),lo=d+1<rr?yd+Math.round(Math.sqrt(rr*rr-(d+1)*(d+1))):yd,rib=Math.abs(dx)<0.6||Math.abs(dz)<0.6||Math.abs(Math.abs(dx)-Math.abs(dz))<0.6;
+  if(d<=rd-0.5)for(let y=g+H;y<=Math.min(lo,hi-1);y++)RBP(X,y,Z,AIR);
+  for(let y=Math.min(lo+1,hi);y<=hi;y++)RBP(X,y,Z,d<1?WSTRIM:rib?WSTONE:SLATE);
+  if(d<1){RBP(X,hi+1,Z,WSPILLAR);RBP(X,hi+2,Z,LANTERN);}};
+// a smithy: a stone hearth with its fire under a hood and a chimney up the back wall, a furnace, an anvil of iron, water to
+// quench in, under a gabled roof on posts open at the front, a beam across it
 RB.smithy=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1,side=a===0||a===W-1;RBP(X,g,Z,COBBLE);
-  for(let y=g+1;y<=g+4;y++)RBP(X,y,Z,back||(side&&b>0)?(y===g+4?PLANKS:COBBLE):(side&&b===0?LOG:AIR));
-  const ry=g+5+Math.min(a,W-1-a);RBP(X,ry,Z,SLATE);
-  if(b===D-2&&a===1){RBP(X,g+1,Z,COBBLE);RBP(X,g+2,Z,BRAZIER);}if(b===D-2&&a===2)RBP(X,g+1,Z,FURN);if(b===2&&a===2)RBP(X,g+1,Z,STEELB);if(b===D-2&&a===W-2)RBP(X,g+1,Z,BARREL);
+  for(let y=g+1;y<=g+4;y++)RBP(X,y,Z,back||(side&&b>0)?(y===g+4?LOG:COBBLE):side||y===g+4&&b===0?LOG:AIR);
+  const ry=g+5+Math.min(a,W-1-a);if(!side&&(b===0||back))for(let y=g+5;y<ry;y++)RBP(X,y,Z,back?COBBLE:PLANKS);RBP(X,ry,Z,SLATE);
+  if(b===D-2&&a===1){RBP(X,g+1,Z,COBBLE);RBP(X,g+2,Z,BRAZIER);RBP(X,g+4,Z,COBBLE);}if(back&&a===1)RBS(X,Z,g+5,ry+2,COBBLE);
+  if(b===D-2&&a===2)RBP(X,g+1,Z,FURN);if(b===2&&a===2)RBP(X,g+1,Z,STEELB);if(b===D-2&&a===W-2)RBP(X,g+1,Z,BARREL);
   if(b===1&&a===W-2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
 // a training yard: sand, straw men on posts, archery butts
 RB.yard=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y;RBP(X,g,Z,a===0||b===0||a===W-1||b===D-1?WSBRICK:hsh(X,9515,Z)<0.5?SAND:GRAVEL);
   if(a%4===2&&b===3){RBP(X,g+1,Z,LOG);RBP(X,g+2,Z,HAYBALE);RBP(X,g+3,Z,WOOLW);}
   if(b===D-2&&a%4===1&&a<W-1){RBS(X,Z,g+1,g+2,HAYBALE);RBP(X,g+3,Z,WOOLR);}};
-// stables: stalls under a slate roof on posts, hay and a water trough
-RB.stable=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1;RBP(X,g,Z,back?COBBLE:hsh(X,9517,Z)<0.4?HAYBALE:DIRT);
-  for(let y=g+1;y<=g+3;y++)RBP(X,y,Z,back||a===0||a===W-1?(y===g+3?PLANKS:PLANKS):(b===0&&a%3===0?LOG:a%3===0&&b<D-1&&y===g+1?PLANKS:AIR));
-  RBP(X,g+4+Math.min(b,D-1-b)*0,Z,SLATE);if(b===D-2&&a%3===2)RBP(X,g+1,Z,HAYBALE);if(b===1&&a%3===2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
+// stables: stalls open at the front between posts, a hayloft over them under a gabled slate roof, hay and a water trough
+RB.stable=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,back=b===D-1,end=a===0||a===W-1,ry=g+4+Math.min(b,D-1-b);RBP(X,g,Z,back?COBBLE:hsh(X,9517,Z)<0.4?HAYBALE:DIRT);
+  for(let y=g+1;y<=g+3;y++)RBP(X,y,Z,back||end?PLANKS:b===0&&a%3===0?LOG:a%3===0&&b<D-1&&y===g+1?PLANKS:AIR);
+  RBP(X,g+4,Z,b===0&&!end?LOG:PLANKS);for(let y=g+5;y<ry;y++)RBP(X,y,Z,end?PLANKS:y===g+5&&b>0&&b<D-1&&hsh(X,9535,Z)<0.4?HAYBALE:AIR);RBP(X,ry,Z,SLATE);
+  if(b===D-2&&a%3===2)RBP(X,g+1,Z,HAYBALE);if(b===1&&a%3===2){RBP(X,g,Z,COBBLE);RBP(X,g+1,Z,WATER);}};
 // a haystack
 RB.hay=(s,p,u,v,X,Z)=>{const a=v-p.cv,b=u-p.cu,g=p.y,m=Math.abs(a)+Math.abs(b);if(m>2)return;RBS(X,Z,g+1,g+(m===0?3:m===1?2:1),HAYBALE);};
 // a field: tilled earth on the land as it lies, crops in rows, a hedge round it with a gap at the front
@@ -4970,6 +5106,9 @@ const TRB={};
 function siteLayout(s){if(s.lay)return s.lay;const L={parts:[],spots:[]};s.lay=L;
   const r=rngAt(Math.round(s.X),9521,Math.round(s.Z));
   if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
+  // the margins about houses, towers and walls, where their relief stands
+  for(const p of L.parts){if(p.k==='house'){if(!p.mg){const o=p.ov||0;p.mg=[o,o,o,o];}if(p.gnd===undefined)p.gnd=s.k!=='city';}
+    else if(p.k==='tower'){const e=p.mg===undefined?1:p.mg;p.u0-=e;p.u1+=e;p.v0-=e;p.v1+=e;}else if(p.k==='cwall'){p.u0--;p.u1++;p.v0--;p.v1++;}}
   for(const p of L.parts){p.bu0=Math.min(p.u0,p.u1);p.bu1=Math.max(p.u0,p.u1);p.bv0=Math.min(p.v0,p.v1);p.bv1=Math.max(p.v0,p.v1);}
   return L;}
 // The city: walls and towers round it, the gatehouse at the front, the avenue up through the tiers to the citadel; a square with
@@ -4985,7 +5124,8 @@ function cityLayout(s,L,r){
   const fb=cu-f.r1,sq={u0:-R+28,u1:Math.min(-R+43,fb-7),v:22}; // the square: astride the avenue, behind the barracks rows
   if(sq.u1-sq.u0<10){sq.u0=-R+17;sq.u1=Math.min(-R+32,fb-7);}
   const gardens=[];
-  P.push({k:'cground',u0:-R,u1:R,v0:-R,v1:R,f:0,stair:stairAt,garden:(u,v)=>gardens.some(q=>u>=q[0]&&u<=q[1]&&v>=q[2]&&v<=q[3]),square:(u,v)=>u>=sq.u0&&u<=sq.u1&&Math.abs(v)<=sq.v});
+  P.push({k:'cground',u0:-R,u1:R,v0:-R,v1:R,f:0,stair:stairAt,garden:(u,v)=>gardens.some(q=>u>=q[0]&&u<=q[1]&&v>=q[2]&&v<=q[3]),square:(u,v)=>u>=sq.u0&&u<=sq.u1&&Math.abs(v)<=sq.v,scu:(sq.u0+sq.u1)>>1,
+    free:(u,v)=>!P.some(q=>q.k!=='cground'&&q.k!=='cwall'&&u>=q.bu0-1&&u<=q.bu1+1&&v>=q.bv0-1&&v<=q.bv1+1)});
   lots.push([sq.u0,sq.u1,-sq.v,sq.v]);
   // the citadel's ground is its own
   const cit=[cu-rt,cu+rt,-rt,rt];lots.push(cit);
@@ -5002,7 +5142,7 @@ function cityLayout(s,L,r){
   for(const c of cells){if(taken(c.u0,c.u1,c.v0,c.v1))continue;const t=tierOf(c);if(t<0)continue;const g=tierY(t),key=c.ci+','+c.cj+','+c.sg,sp=special.get(key);
     const faceAv=c.cj===0?(c.sg>0?2:3):0; // toward the avenue, or toward the gate
     if(sp==='barracks'||sp==='barracks2'){if(sp==='barracks'){const other=cells.find(q=>q.ci===c.ci&&q.cj===1&&q.sg===c.sg);if(other&&tierOf(other)===t&&!taken(other.u0,other.u1,other.v0,other.v1)){
-        const v0=Math.min(c.v0,other.v0),v1=Math.max(c.v1,other.v1);P.push({k:'house',u0:c.u0,u1:c.u1,v0:v0,v1:v1,f:0,W:v1-v0+1,D:9,y:g,st:2,sh:5,mat:'stone',ov:0,roof:SLATE,door:Math.floor((v1-v0)/2),dw:2,dh:3,lamp:true,ridge:'a',chim:[2,8],pil:true});
+        const v0=Math.min(c.v0,other.v0),v1=Math.max(c.v1,other.v1);P.push(housePart(c.u0,c.u1,v0,v1,0,[1,1,1,1],{y:g,st:2,sh:5,mat:'stone',roof:SLATE,door:Math.floor((v1-v0)/2),dw:2,dh:3,lamp:true,ridge:'a',chim:[2,8],pil:true}));
         L.spots.push({kind:'barracks',u:c.u0-2,v:(v0+v1)/2,y:g});lots.push([c.u0,c.u1,v0,v1]);}}continue;}
     if(sp==='yard'||sp==='yard2'){if(sp==='yard'){const other=cells.find(q=>q.ci===c.ci&&q.cj===1&&q.sg===c.sg);if(other&&tierOf(other)===t){const v0=Math.min(c.v0,other.v0),v1=Math.max(c.v1,other.v1);
         P.push({k:'yard',u0:c.u0,u1:c.u1,v0:v0,v1:v1,f:0,y:g});L.spots.push({kind:'drill',u:(c.u0+c.u1)/2,v:(v0+v1)/2,y:g});lots.push([c.u0,c.u1,v0,v1]);}}continue;}
@@ -5012,11 +5152,11 @@ function cityLayout(s,L,r){
     if(q<0.11){gardens.push([c.u0,c.u1,c.v0,c.v1]);P.push({k:'garden',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v1,f:0,y:g,bl:r()<0.5});continue;}
     if(q<0.4&&c.cj>0){ // two narrow houses side by side, their gables to the lane
       const w1=4+(r()<0.5?1:0),f0=faceAv;const st1=r()<0.5?3:2,st2=r()<0.5?3:2,m1=r()<0.5?'stone':'timber',m2=r()<0.5?'stone':'timber';
-      P.push({k:'house',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v0+w1-1,f:f0,W:w1,D:9,y:g,st:st1,sh:4,mat:m1,ov:0,roof:SLATE,door:Math.floor(w1/2),lamp:true,ridge:'b',chim:[1,8]});
-      P.push({k:'house',u0:c.u0,u1:c.u1,v0:c.v0+w1,v1:c.v1,f:f0,W:9-w1,D:9,y:g,st:st2,sh:4,mat:m2,ov:0,roof:SLATE,door:Math.floor((9-w1)/2),lamp:true,ridge:'b',chim:[1,8]});
+      P.push(housePart(c.u0,c.u1,c.v0,c.v0+w1-1,f0,[1,0,1,1],{y:g,st:st1,sh:4,mat:m1,roof:SLATE,door:Math.floor(w1/2),lamp:true,ridge:'b',chim:[1,8]}));
+      P.push(housePart(c.u0,c.u1,c.v0+w1,c.v1,f0,[0,1,1,1],{y:g,st:st2,sh:4,mat:m2,roof:SLATE,door:Math.floor((9-w1)/2),lamp:true,ridge:'b',chim:[1,8]}));
       L.spots.push({kind:'street',u:c.u0-2,v:(c.v0+c.v1)/2,y:g});continue;}
     const st=r()<0.45?3:2,mat=r()<0.55?'stone':'timber';
-    P.push({k:'house',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v1,f:faceAv,W:9,D:9,y:g,st:st,sh:4,mat:mat,ov:0,roof:SLATE,door:4,lamp:true,ridge:r()<0.5?'a':'b',chim:[1,8]});
+    P.push(housePart(c.u0,c.u1,c.v0,c.v1,faceAv,[1,1,1,1],{y:g,st:st,sh:4,mat:mat,roof:SLATE,door:4,lamp:true,ridge:r()<0.5?'a':'b',chim:[1,8]}));
     if(q>0.75)L.spots.push({kind:'street',u:c.u0-2,v:(c.v0+c.v1)/2,y:g});}
   // the square: flagstones, the fountain, stalls round it, lamps
   const scu=(sq.u0+sq.u1)>>1,sg0=tierY(cityTier(s,scu,0));
@@ -5033,27 +5173,27 @@ function cityLayout(s,L,r){
   {let best=null;for(const c of cells){if(c.sg!==1&&c.sg!==-1)continue;const q=[c,...[[1,0],[0,1],[1,1]].map(([a,b])=>cells.find(x=>x.ci===c.ci+a&&x.cj===c.cj+b&&x.sg===c.sg))];
       if(q.some(x=>!x)||q.some(x=>special.has(x.ci+','+x.cj+','+x.sg)))continue;const u0=c.u0,u1=c.u0+20,v0=Math.min(...q.map(x=>x.v0)),v1=Math.max(...q.map(x=>x.v1));
       if(v1-v0!==20||taken(u0-1,u1+1,v0,v1))continue;const t=tierOf({u0:u0,u1:u1,v0:v0,v1:v1});if(t<0)continue;const sc=-c.cj*3-Math.abs(c.ci-2)+hsh(c.ci,9529,c.cj);if(!best||sc>best.sc)best={u0:u0,u1:u1,v0:v0,v1:v1,t:t,sg:c.sg,cj:c.cj,sc:sc};}
-    if(best){const g=tierY(best.t);for(let k=P.length-1;k>=0;k--){const q=P[k];if((q.k==='house'||q.k==='garden')&&q.u0>=best.u0&&q.u1<=best.u1&&Math.min(q.v0,q.v1)>=best.v0&&Math.max(q.v0,q.v1)<=best.v1)P.splice(k,1);}
+    if(best){const g=tierY(best.t);for(let k=P.length-1;k>=0;k--){const q=P[k];const cb=q.core||[q.u0,q.u1,q.v0,q.v1];if((q.k==='house'||q.k==='garden')&&cb[0]>=best.u0&&cb[1]<=best.u1&&Math.min(cb[2],cb[3])>=best.v0&&Math.max(cb[2],cb[3])<=best.v1)P.splice(k,1);}
       for(let k=gardens.length-1;k>=0;k--){const q=gardens[k];if(q[0]>=best.u0&&q[1]<=best.u1&&q[2]>=best.v0&&q[3]<=best.v1)gardens.splice(k,1);}
       lots.push([best.u0,best.u1,best.v0,best.v1]);P.push({k:'dome',u0:best.u0,u1:best.u1,v0:best.v0,v1:best.v1,f:best.cj===0?(best.sg>0?2:3):0,y:g,H:9});
       L.spots.push({kind:'street',u:best.u0-2,v:(best.v0+best.v1)/2,y:g});}}
   // the citadel: a court before the great hall, the white tower behind it, gardens either side; guards at its arch
   {const ct=s.tiers>=3?2:1,g=tierY(ct),tw=s.tiers>=3?4:3,tu=cu+rt-tw-2,hu1=tu-tw-2,hw=Math.min(7,rt-5),hd=Math.max(7,Math.min(18,hu1-(cu-rt+8)-2)),hu0=hu1-hd-1;
-    P.push({k:'house',u0:hu0,u1:hu1,v0:-hw,v1:hw,f:0,W:2*hw+1,D:hd,y:g,st:1,sh:8,mat:'stone',ov:0,roof:SLATE,door:hw,dw:2,dh:4,lamp:true,ridge:'b',porch:2,pil:true,floor:WSTONE});
-    P.push({k:'tower',u0:tu-tw,u1:tu+tw,v0:-tw,v1:tw,cu:tu,cv:0,h2:tw,H:s.tiers>=3?40:30,y:g,roof:true});
+    P.push(housePart(hu0+2,hu1,-hw,hw,0,[1,1,0,1],{y:g,st:1,sh:8,mat:'stone',roof:SLATE,door:hw,dw:2,dh:4,lamp:true,ridge:'b',porch:2,pil:true,floor:WSTONE,gnd:true}));
+    {const H=s.tiers>=3?40:30;P.push({k:'tower',u0:tu-tw,u1:tu+tw,v0:-tw,v1:tw,cu:tu,cv:0,h2:tw,H:H,y:g,roof:true,batt:true,band:Math.round(H*0.6)});}
     P.push({k:'statue',u0:hu0-6,u1:hu0-4,v0:-1,v1:1,cu:hu0-5,cv:0,y:g});
     for(const sg of [1,-1]){const gv0=sg>0?hw+3:-rt+2,gv1=sg>0?rt-2:-hw-3;if(gv1-gv0>=4){gardens.push([cu-rt+3,cu+rt-3,gv0,gv1]);P.push({k:'garden',u0:cu-rt+3,u1:cu+rt-3,v0:gv0,v1:gv1,f:0,y:g,bl:true});}}
     for(const vv of [3,-3])P.push({k:'lamp',u0:hu0-3,u1:hu0-3,v0:vv,v1:vv,f:0,y:g});
     L.spots.push({kind:'citadel',u:hu0-8,v:0,y:g},{kind:'hall',u:hu0+Math.round(hd/2),v:0,y:g},{kind:'citgate',u:cu-rt+2,v:0,y:g});}
   // walls, towers at the corners and along the sides, the gatehouse; banners, ladders
-  P.push({k:'cwall',u0:-R,u1:R,v0:-R,v1:R,f:0,r:R,H:11,gw:2,gh:7});
-  const tw=(cu0,cv0,h2,H,o)=>P.push(Object.assign({k:'tower',u0:cu0-h2,u1:cu0+h2,v0:cv0-h2,v1:cv0+h2,cu:cu0,cv:cv0,h2:h2,H:H,y:siteG(s,cu0,cv0)},o||{}));
+  P.push({k:'cwall',u0:-R,u1:R,v0:-R,v1:R,f:0,r:R,H:11,gw:2,gh:7,arc:true});
+  const tw=(cu0,cv0,h2,H,o)=>P.push(Object.assign({k:'tower',u0:cu0-h2,u1:cu0+h2,v0:cv0-h2,v1:cv0+h2,cu:cu0,cv:cv0,h2:h2,H:H,y:siteG(s,cu0,cv0),batt:true,wr:R,band:Math.round(H*0.55)},o||{}));
   for(const [a,b] of [[-1,-1],[-1,1],[1,-1],[1,1]])tw(a*(R-1),b*(R-1),4,17,{ban:true});
   const n=Math.max(1,Math.round(2*R/30));for(let k=1;k<n;k++){const t2=Math.round(-R+k*2*R/n);for(const sd of [-1,1]){tw(t2,sd*(R-1),3,15);if(Math.abs(t2)>8)tw(sd*(R-1),t2,3,15);}}
-  tw(-(R-1),6,3,19,{ban:true});tw(-(R-1),-6,3,19,{ban:true});
-  for(const vv of [6,-6])P.push({k:'banner',u0:-R-3,u1:-R-3,v0:vv,v1:vv,f:0,y:g0+10,n:3});
+  tw(-(R-1),6,3,19,{ban:true,gp:2});tw(-(R-1),-6,3,19,{ban:true,gp:2});P.push({k:'gatefront',u0:-R-3,u1:-R-1,v0:-2,v1:2,f:0,y:g0,gw:2,gh:7,H:19});
+  for(const vv of [6,-6])P.push({k:'banner',u0:-R-3,u1:-R-3,v0:vv,v1:vv,f:0,y:g0+12,n:3});
   for(const vv of [10,-10])P.push({k:'ladder',u0:-R+3,u1:-R+3,v0:vv,v1:vv,f:0,y0:g0+1,y1:g0+11});
-  L.spots.push({kind:'gate',u:-R-3,v:0,y:g0},{kind:'gatein',u:-R+5,v:0,y:g0});
+  L.spots.push({kind:'gate',u:-R-6,v:0,y:g0},{kind:'gatein',u:-R+5,v:0,y:g0});
 }
 // A village: a green with a well in the middle, lanes out to the road and back, cottages round the green facing it (timbered
 // plaster on cobble, thatched), an inn, a chapel of white stone with a bell tower, a smithy; haystacks and kitchen gardens
@@ -5069,9 +5209,9 @@ function villageLayout(s,L,r){
   order.forEach((q,i)=>{const [cu0,cv0,f]=q,kind=kinds[i]||'cottage',w=kind==='chapel'?7:kind==='inn'?9:7,d=kind==='chapel'?11:kind==='inn'?11:9;
     if(Math.max(Math.abs(cu0),Math.abs(cv0))+Math.max(w,d)/2>R-1)return;
     if(kind==='smithy'){P.push(partC('smithy',cu0,cv0,7,6,f,{y:g}));L.spots.push({kind:'smithy',u:cu0,v:cv0,y:g});return;}
-    if(kind==='chapel'){P.push(partC('house',cu0,cv0,w,d,f,{W:w,D:d,y:g,st:1,sh:6,mat:'stone',ov:0,roof:SLATE,door:3,dw:1,dh:3,lamp:true,ridge:'b',pil:false,floor:WSTONE}));
-      const p=P[P.length-1],bt=f===0?[p.u1-1,cv0]:f===1?[p.u0+1,cv0]:f===2?[cu0,p.v1-1]:[cu0,p.v0+1];P.push({k:'tower',u0:bt[0]-1,u1:bt[0]+1,v0:bt[1]-1,v1:bt[1]+1,cu:bt[0],cv:bt[1],h2:1,H:11,y:g,roof:true});return;}
-    const ov=1,W=w-2*ov,D=d-2*ov;P.push(partC('house',cu0,cv0,w,d,f,{W:W,D:D,y:g,st:kind==='inn'?2:1,sh:4,mat:kind==='inn'?'timber':'cottage',ov:ov,roof:THATCH,door:Math.floor(W/2),dw:1,dh:2,lamp:kind==='inn',ridge:'b',chim:[1,D-1]}));
+    if(kind==='chapel'){P.push(partC('house',cu0,cv0,w+2,d+2,f,{W:w,D:d,mg:[1,1,1,1],y:g,st:1,sh:6,mat:'stone',roof:SLATE,door:3,dw:1,dh:3,lamp:true,ridge:'b',floor:WSTONE,butt:true,rose:true}));
+      const p=P[P.length-1],bt=f===0?[p.u1-2,cv0]:f===1?[p.u0+2,cv0]:f===2?[cu0,p.v1-2]:[cu0,p.v0+2];P.push({k:'tower',u0:bt[0]-1,u1:bt[0]+1,v0:bt[1]-1,v1:bt[1]+1,cu:bt[0],cv:bt[1],h2:1,H:16,y:g,roof:true,mg:0,bell:true});return;}
+    const ov=1,W=w-2*ov,D=d-2*ov;P.push(partC('house',cu0,cv0,w,d,f,{W:W,D:D,y:g,st:kind==='inn'?2:1,sh:4,mat:kind==='inn'?'timber':'cottage',ov:ov,roof:THATCH,door:Math.floor(W/2),dw:1,dh:2,lamp:kind==='inn',ridge:'b',chim:kind==='inn'?[1,D-1]:null,xchim:kind!=='inn'}));
     if(kind==='inn')L.spots.push({kind:'green',u:cu0*0.6,v:cv0*0.6,y:g});
     // a kitchen garden or a haystack behind
     const bu=f===0?cu0+d/2+2:f===1?cu0-d/2-2:cu0,bv=f===2?cv0+d/2+2:f===3?cv0-d/2-2:cv0;if(Math.max(Math.abs(bu),Math.abs(bv))<R-2){if(hsh(i,9525,Math.round(s.Z))<0.5)P.push({k:'hay',u0:Math.round(bu)-2,u1:Math.round(bu)+2,v0:Math.round(bv)-2,v1:Math.round(bv)+2,cu:Math.round(bu),cv:Math.round(bv),y:g});}});
@@ -5082,7 +5222,7 @@ function villageLayout(s,L,r){
 function farmLayout(s,L,r){
   const g=s.T,P=L.parts;
   P.push({k:'lane',u0:-s.R,u1:-3,v0:-1,v1:1,f:0,y:g});
-  P.push(partC('house',-1,-7,9,11,3,{W:7,D:9,y:g,st:1,sh:4,mat:'cottage',ov:1,roof:THATCH,door:3,ridge:'b',chim:[1,8]}));
+  P.push(partC('house',-1,-7,9,11,3,{W:7,D:9,y:g,st:1,sh:4,mat:'cottage',ov:1,roof:THATCH,door:3,ridge:'b',xchim:true}));
   P.push(partC('house',1,8,11,13,2,{W:9,D:11,y:g,st:1,sh:6,mat:'cottage',ov:1,roof:SLATE,door:4,dw:2,dh:4,ridge:'b'}));
   P.push({k:'well',u0:-5,u1:-3,v0:2,v1:4,cu:-4,cv:3,y:g});P.push({k:'hay',u0:6,u1:10,v0:-4,v1:0,cu:8,cv:-2,y:g});
   L.spots.push({kind:'farm',u:-4,v:0,y:g});
@@ -5097,27 +5237,27 @@ function fieldsRound(s,L,r,n){const base=s.R+s.M,crops=[WHEAT,WHEAT,POT3,TURN2,B
 function fortLayout(s,L,r){
   const R=s.R,g=s.T,P=L.parts;
   P.push({k:'lane',u0:-R+3,u1:1,v0:-2,v1:2,f:0,y:g,id:PAVING});
-  P.push({k:'house',u0:2,u1:14,v0:-6,v1:6,f:0,W:13,D:13,y:g,st:4,sh:5,mat:'stone',ov:0,roof:SLATE,door:6,dw:2,dh:3,lamp:true,ridge:'b',chim:[2,12],pil:true,floor:WSTONE});
+  P.push(housePart(2,14,-6,6,0,[1,1,1,1],{y:g,st:4,sh:5,mat:'stone',roof:SLATE,door:6,dw:2,dh:3,lamp:true,ridge:'b',pil:true,floor:WSTONE,batt:true}));
   for(const [a,b] of [[2,-6],[2,6],[14,-6],[14,6]])P.push({k:'tower',u0:a-1,u1:a+1,v0:b-1,v1:b+1,cu:a,cv:b,h2:1,H:24,y:g,ban:a===14});
-  P.push({k:'house',u0:-14,u1:9,v0:13,v1:18,f:2,W:24,D:6,y:g,st:2,sh:4,mat:'stone',ov:0,roof:SLATE,door:12,lamp:true,ridge:'a',chim:[2,5]});
+  P.push(housePart(-14,9,13,18,2,[1,1,1,1],{y:g,st:2,sh:4,mat:'stone',roof:SLATE,door:12,lamp:true,ridge:'a',chim:[2,5]}));
   P.push({k:'stable',u0:-14,u1:5,v0:-18,v1:-13,f:3,y:g});
   P.push({k:'yard',u0:-15,u1:-6,v0:-9,v1:6,f:0,y:g});
   P.push({k:'well',u0:-3,u1:-1,v0:8,v1:10,cu:-2,cv:9,y:g});
   P.push({k:'cwall',u0:-R,u1:R,v0:-R,v1:R,f:0,r:R,H:12,gw:2,gh:6});
-  const tw=(cu0,cv0,h2,H,o)=>P.push(Object.assign({k:'tower',u0:cu0-h2,u1:cu0+h2,v0:cv0-h2,v1:cv0+h2,cu:cu0,cv:cv0,h2:h2,H:H,y:g},o||{}));
+  const tw=(cu0,cv0,h2,H,o)=>P.push(Object.assign({k:'tower',u0:cu0-h2,u1:cu0+h2,v0:cv0-h2,v1:cv0+h2,cu:cu0,cv:cv0,h2:h2,H:H,y:g,batt:true,wr:R,band:Math.round(H*0.55)},o||{}));
   for(const [a,b] of [[-1,-1],[-1,1],[1,-1],[1,1]])tw(a*(R-1),b*(R-1),4,19,{ban:true});
-  tw(-(R-1),5,3,18,{ban:true});tw(-(R-1),-5,3,18,{ban:true});
-  for(const vv of [5,-5])P.push({k:'banner',u0:-R-3,u1:-R-3,v0:vv,v1:vv,f:0,y:g+9,n:3});
+  tw(-(R-1),6,3,18,{ban:true,gp:2});tw(-(R-1),-6,3,18,{ban:true,gp:2});P.push({k:'gatefront',u0:-R-3,u1:-R-1,v0:-2,v1:2,f:0,y:g,gw:2,gh:6,H:18});
+  for(const vv of [6,-6])P.push({k:'banner',u0:-R-3,u1:-R-3,v0:vv,v1:vv,f:0,y:g+11,n:3});
   P.push({k:'ladder',u0:-R+3,u1:-R+3,v0:9,v1:9,f:0,y0:g+1,y1:g+12});
-  L.spots.push({kind:'gate',u:-R-3,v:0,y:g},{kind:'drill',u:-10,v:-2,y:g},{kind:'keep',u:-1,v:0,y:g},{kind:'barracks',u:-6,v:10,y:g});
+  L.spots.push({kind:'gate',u:-R-6,v:0,y:g},{kind:'drill',u:-10,v:-2,y:g},{kind:'keep',u:-1,v:0,y:g},{kind:'barracks',u:-6,v:10,y:g});
 }
 // A watchtower: a tall tower with a beacon on its roof inside a low walled yard, a guardhouse of timber, hay and barrels
 function outpostLayout(s,L,r){
   const R=s.R,g=s.T,P=L.parts;
   P.push({k:'lane',u0:-R+1,u1:R-1,v0:-R+1,v1:R-1,f:0,y:g,id:GRAVEL});
   P.push({k:'cwall',u0:-R,u1:R,v0:-R,v1:R,f:0,r:R,H:3,gw:1,gh:3,low:true});
-  P.push({k:'tower',u0:0,u1:6,v0:-3,v1:3,cu:3,cv:0,h2:3,H:22,y:g,hollow:true,fire:true});
-  P.push({k:'house',u0:-6,u1:-2,v0:-6,v1:-2,f:3,W:5,D:5,y:g,st:1,sh:4,mat:'timber',ov:0,roof:SLATE,door:2,ridge:'b'});
+  P.push({k:'tower',u0:0,u1:6,v0:-3,v1:3,cu:3,cv:0,h2:3,H:22,y:g,hollow:true,fire:true,batt:true,band:11});
+  P.push(housePart(-6,-2,-6,-2,3,[1,1,1,1],{y:g,st:1,sh:4,mat:'timber',roof:SLATE,door:2,ridge:'b'}));
   P.push({k:'hay',u0:-5,u1:-1,v0:3,v1:7,cu:-3,cv:5,y:g});
   L.spots.push({kind:'post',u:-2,v:0,y:g});
 }
@@ -7297,11 +7437,11 @@ function amCorners(b,tp){
 }
 // a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture); a tapered
 // box keeps the same mapping, each face's normal taken from its corners
-function amBoxGeo(b,u,v,TX,tp){
-  TX=TX||AM_TEX;const [,,,w,h,d]=b,K=amCorners(b,tp),pos=[],nor=[],uv=[],idx=[];
+function amBoxGeo(b,u,v,TX,tp,res){
+  TX=TX||AM_TEX;const rq=res||1,[,,,w,h,d]=b,K=amCorners(b,tp),pos=[],nor=[],uv=[],idx=[];
   // for each face: four corners in image order (top left, top right, bottom left, bottom right)
   const C={L:[2,6,0,4],F:[6,7,4,5],R:[7,3,5,1],B:[3,2,1,0],T:[2,3,6,7],D:[4,5,0,1]};
-  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n0=AM_FACES[f],k=pos.length/3,q=C[f].map(i=>K[i]);
+  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w*rq,h*rq,d*rq),n0=AM_FACES[f],k=pos.length/3,q=C[f].map(i=>K[i]);
     // the normal from the diagonals (sound when an edge has shrunk to a point), turned to face outward
     const d1=[q[3][0]-q[0][0],q[3][1]-q[0][1],q[3][2]-q[0][2]],d2=[q[2][0]-q[1][0],q[2][1]-q[1][1],q[2][2]-q[1][2]];
     let n=[d1[1]*d2[2]-d1[2]*d2[1],d1[2]*d2[0]-d1[0]*d2[2],d1[0]*d2[1]-d1[1]*d2[0]];const l=Math.hypot(n[0],n[1],n[2]);
@@ -7417,10 +7557,11 @@ const AM_KINDS={
       P.face('earL','F',c.pale,6);P.rows('earL',['L','F','R','B'],0,1,c.mane);P.rows('legFL',['L','F','R','B'],10,12,[40,34,30]);P.eyes('head',1,1,[18,14,14]);
       P.coat(['bagL','roll'],[124,82,48],10);P.rows('bagL',['L','F','R','B'],1,2,[70,46,26]);P.rows('roll',['L','R'],0,2,[150,130,96]);}}
 };
-// ---- The texture of one coat: parts packed onto a 128 x 128 canvas (shelf packing), each face filled by the kind's paint
+// ---- The texture of one coat: parts packed onto a 128 x 128 canvas (K.tex: larger), each face filled by the kind's paint;
+// K.res texels to a pixel of the model (1 unless given; the folk of the realms are painted at 2, D-060)
 function amLayout(K){
-  if(K.uv)return K.uv;const keys=[];for(const p of K.parts){const o=p[5]||{};if(!o.m&&!keys.some(k=>k[0]===p[0]))keys.push([p[0],p[3]]);}
-  const sz=keys.map(([n,b])=>[n,2*(b[3]+b[5]),b[5]+b[4],b]).sort((a,b)=>b[2]-a[2]);
+  if(K.uv)return K.uv;const keys=[],q=K.res||1;for(const p of K.parts){const o=p[5]||{};if(!o.m&&!keys.some(k=>k[0]===p[0]))keys.push([p[0],p[3]]);}
+  const sz=keys.map(([n,b])=>[n,2*(b[3]+b[5])*q,(b[5]+b[4])*q,b]).sort((a,b)=>b[2]-a[2]);
   const TX=K.tex||AM_TEX,uv={};let x=0,y=0,rowH=0;for(const [n,w,h,b] of sz){if(x+w>TX){x=0;y+=rowH+1;rowH=0;}if(y+h>TX)throw new Error('animal texture overflow '+n);uv[n]=[x,y,b];x+=w+1;rowH=Math.max(rowH,h);} // a pixel apart
   return K.uv=uv;
 }
@@ -7432,7 +7573,7 @@ function amTexture(kind,ci,flags){
   const g=cv.getContext('2d'),img=g.createImageData(TX,TX),D=img.data;let seed=1+ci*977+kind.length*131,rs=seed;
   const cl=v=>v<0?0:v>255?255:v|0,set=(x,y,col,a)=>{if(x<0||y<0||x>=TX||y>=TX)return;const i=(y*TX+x)*4;D[i]=cl(col[0]);D[i+1]=cl(col[1]);D[i+2]=cl(col[2]);D[i+3]=a===undefined?255:a;};
   const src=n=>{const p=K.parts.find(q=>q[0]===n);const o=p&&p[5]||{};return o.m||n;};
-  const rect=(n,f)=>{const u=uv[src(n)];if(!u)return null;const b=u[2];return amRect(f,u[0],u[1],b[3],b[4],b[5]);};
+  const q=K.res||1,rect=(n,f)=>{const u=uv[src(n)];if(!u)return null;const b=u[2];return amRect(f,u[0],u[1],b[3]*q,b[4]*q,b[5]*q);};
   const noisy=(col,amt,x,y)=>{const v=(amHash(x,y,seed)-0.5)*2*amt;return [col[0]+v,col[1]+v,col[2]+v];};
   const P={
     r:()=>{rs=(rs*16807)%2147483647;return rs/2147483647;},
@@ -7445,6 +7586,9 @@ function amTexture(kind,ci,flags){
     rows(n,fs,t0,t1,col){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=Math.max(0,t0);t<Math.min(R[3],t1);t++)for(let s=0;s<R[2];s++)set(R[0]+s,R[1]+t,noisy(col,6,R[0]+s,R[1]+t));}},
     rect(n,f,s0,t0,w,h,col){const R=rect(n,f);if(!R)return;for(let t=t0;t<Math.min(R[3],t0+h);t++)for(let s=s0;s<Math.min(R[2],s0+w);s++)set(R[0]+s,R[1]+t,noisy(col,5,R[0]+s,R[1]+t));},
     px(n,f,s,t,col){const R=rect(n,f);if(R&&s<R[2]&&t<R[3])set(R[0]+s,R[1]+t,col);},
+    // every pixel of these faces through fn(s, t, w, h, f, the colour there now): a colour [r,g,b] (a fourth value: 200 to glow,
+    // 1 to cut) or nothing to leave it
+    map(n,fs,fn){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*TX+R[0]+s)*4,c=fn(s,t,R[2],R[3],f,[D[i],D[i+1],D[i+2]]);if(c)set(R[0]+s,R[1]+t,c,c[3]);}}},
     spots(n,fs,col,dens,t0,t1){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=t0||0;t<Math.min(R[3],t1||R[3]);t++)for(let s=0;s<R[2];s++)if(amHash(R[0]+s,R[1]+t,seed+77)<dens)set(R[0]+s,R[1]+t,noisy(col,8,R[0]+s,R[1]+t));}},
     // eyes on both sides of the head: a dark pupil `fromFront` pixels behind the front, `row` pixels down, with a light glint
     eyes(n,fromFront,row,col,ring){const L=rect(n,'L'),R=rect(n,'R');if(!L)return;const e=col||[22,18,16];
@@ -7468,7 +7612,7 @@ function amTexture(kind,ci,flags){
     // a thin sheet (one pixel thick: across z, or across x when ax is 'x'): fn(s,t) gets every pixel of every face as the place on
     // the sheet's front (F, or L) it lies over, and returns a colour [r,g,b] (with a fourth value, 200, to glow), 'cut' for a hole
     // (alpha 1: the shader drops it), or nothing to leave it. Ragged wings, flames and holes read the same from both sides.
-    sheet(n,ax,fn){const u=uv[src(n)];if(!u)return;const [,,,w,h,d]=u[2];
+    sheet(n,ax,fn){const u=uv[src(n)];if(!u)return;const w=u[2][3]*q,h=u[2][4]*q,d=u[2][5]*q;
       for(const f in AM_FACES){const R=rect(n,f);for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){let a,b;
         if(ax==='x'){a=f==='L'?s:f==='R'?d-1-s:f==='T'?t:f==='D'?d-1-t:f==='F'?d-1:0;b=f==='T'?0:f==='D'?h-1:t;}
         else{a=f==='F'||f==='T'||f==='D'?s:f==='B'?w-1-s:f==='L'?0:w-1;b=f==='T'?0:f==='D'?h-1:t;}
@@ -7478,7 +7622,7 @@ function amTexture(kind,ci,flags){
   };
   K.paint(P,c,flags);
   // fill what the paint left (shared faces never left empty), then a one-pixel darker rim on every face so edges read
-  for(const n in uv){for(const f in AM_FACES){const R=amRect(f,uv[n][0],uv[n][1],uv[n][2][3],uv[n][2][4],uv[n][2][5]);
+  for(const n in uv){for(const f in AM_FACES){const R=amRect(f,uv[n][0],uv[n][1],uv[n][2][3]*q,uv[n][2][4]*q,uv[n][2][5]*q);
     for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*TX+R[0]+s)*4;if(!D[i+3]){D[i]=128;D[i+1]=110;D[i+2]=96;D[i+3]=255;}}}}
   g.putImageData(img,0,0);const tx=new THREE.CanvasTexture(cv);tx.amData=D;tx.magFilter=THREE.NearestFilter;tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;tx.anisotropy=1; // no mipmaps: a coat never bleeds into the part beside it
   amTexC.set(key,tx);return tx;
@@ -7506,7 +7650,7 @@ const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
-    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex,o.tp);amGeoC.set(gk,geo);}
+    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex,o.tp,K.res);amGeoC.set(gk,geo);}
     const grp=new THREE.Group();grp.position.x=piv[0]*AM_PX;grp.position.y=piv[1]*AM_PX;grp.position.z=piv[2]*AM_PX;const r=rot||[0,0,0];grp.rotation.x=r[0];grp.rotation.y=r[1];grp.rotation.z=r[2];grp.userData.rest=r.slice();
     const m=new THREE.Mesh(geo,mat);m.frustumCulled=false;grp.add(m);(par&&parts[par]?parts[par]:root).add(grp);parts[n]=grp;if(o.dyn)dyn.push([grp,o.dyn]);}
   // the young: smaller, with a bigger head (the head's own root grows; what hangs from it grows with it)
@@ -7676,87 +7820,195 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
   });
 })();
 // ---- The folk of the realms of men (D-060): soldiers and townsfolk, built like the foes (foe-models.js) from boxes measured in
-// pixels with painted coats, but in human proportions (about 1.9 blocks tall). The soldiers wear the realm's livery: a black
-// surcoat over mail with the white star-and-tower on the breast, a silver bordered hem, a tall crested helm with cheek guards;
-// spearmen and swordsmen carry a black kite shield with the sign, archers a longbow, the captain a black cloak and a plume.
-// The townsfolk dress by their trade: a tunic and hose, a long gown with an apron, a merchant's robe and hat, a smith's apron, a
-// farmer's smock and straw hat, a lord's robe of black and silver. Faces have eyes, brows and a mouth; some men are bearded.
+// pixels, in human proportions (about 1.9 blocks tall), and painted at two texels to a pixel (res 2) so their gear shows
+// its make: mail in rows of rings, plate lit along its edges and riveted, cloth hanging in folds, leather stitched.
+// The soldiers wear the realm's livery: a black surcoat over mail with the white star-and-tower on the breast and a silver hem,
+// a belt with a buckle, a conical helm with a nasal, cheek guards and a white crest over a mail collar, layered pauldrons,
+// vambraces and greaves; spearmen carry a leaf-bladed spear, swordsmen a sword with its guard and pommel, both a black kite
+// shield with the sign; archers a curved longbow and a quiver of fletched arrows; captains a black cloak with the sign, a
+// gilded sword and a white plume. The townsfolk dress by their trade: a tunic with a belt and purse, a laced gown with an
+// apron, a merchant's fur-trimmed robe and feathered hat, a smith's stitched leather apron and hammer, a farmer's smocked
+// shirt and woven straw hat, a lord's robe embroidered in silver under a white mantle, a chain of office and a circlet.
 (function(){
   const SK=[[226,186,152],[204,160,122],[176,128,94],[142,96,66],[232,198,170]],HAIR=[[40,30,24],[70,46,30],[112,76,44],[150,96,52],[150,146,140],[30,26,26]];
-  const legs=()=>[['legL',null,[-2,12,0],[-2,-12,-2,4,12,4]],['legR',null,[2,12,0],[-2,-12,-2,4,12,4],0,{m:'legL'}]];
+  const ALL=['L','F','R','B','T','D'],SIDE=['L','F','R','B'],sh=(c,k)=>[c[0]+k,c[1]+k,c[2]+k],hz=(s,t,q)=>amHash(s,t,q)-0.5;
+  const legs=()=>[['legL',null,[-2,12,0],[-2,-12,-2,4,12,4]],['legR',null,[2,12,0],[-2,-12,-2,4,12,4],0,{m:'legL'}],
+    ['toeL','legL',[0,0,0],[-2,-12,2,4,2,1]],['toeR','legR',[0,0,0],[-2,-12,2,4,2,1],0,{m:'toeL'}]];
   const arms=r=>[['armL','body',[-4,10.5,0],[-3,-11,-1.5,3,11,3],[r||0,0,0.06]],['armR','body',[4,10.5,0],[0,-11,-1.5,3,11,3],[r||0,0,-0.06],{m:'armL'}]];
   const man=()=>[...legs(),['body',null,[0,12,0],[-4,0,-2,8,11,4]],['head','body',[0,11,0],[-3,0,-3,6,7,6],0,{head:1}],...arms()];
-  // the realm's sign in small: a star over a tower, 5 wide and 9 high (1 white, 2 the dark window)
-  const SIGN=['..1..','.111.','11111','.111.','1.1.1','.....','1.1.1','11111','11211','11111'];
-  const sign=(P,n,f,s0,t0,col)=>{for(let t=0;t<SIGN.length;t++)for(let s=0;s<5;s++){const c=SIGN[t][s];if(c==='1')P.px(n,f,s0+s,t0+t,col);else if(c==='2')P.px(n,f,s0+s,t0+t,[40,40,52]);}};
-  // a face on the front of the head: eyes with whites, brows, a nose's shadow, a mouth; a beard where the coat has one
-  const face=(P,c,o)=>{const sk=c.skin,dk=[sk[0]-34,sk[1]-34,sk[2]-30];P.coat(['head'],sk,6);
-    P.rect('head','F',1,3,1,1,[236,236,232]);P.rect('head','F',2,3,1,1,c.eye||[54,72,96]);P.rect('head','F',3,3,1,1,c.eye||[54,72,96]);P.rect('head','F',4,3,1,1,[236,236,232]);
-    P.rect('head','F',1,2,2,1,c.hair);P.rect('head','F',3,2,2,1,c.hair);P.px('head','F',2,4,dk);P.px('head','F',3,4,dk);P.rect('head','F',2,5,2,1,[150,84,74]);
-    // hair: the top and back, down the sides to the ears, a fringe
-    P.face('head','T',c.hair,10);P.rows('head',['B'],0,o&&o.long?7:4,c.hair);P.rows('head',['L','R'],0,2,c.hair);P.rect('head','L',0,2,3,1,c.hair);P.rect('head','R',3,2,3,1,c.hair);P.rows('head',['F'],0,1,c.hair);
-    if(o&&o.long){P.rect('head','L',0,2,2,5,c.hair);P.rect('head','R',4,2,2,5,c.hair);}
-    if(c.beard){P.rect('head','F',1,5,1,2,c.hair);P.rect('head','F',4,5,1,2,c.hair);P.rect('head','F',1,6,4,1,c.hair);P.rows('head',['L','R'],5,7,c.hair);}};
-  const hands=(P,c)=>{P.rows('armL',['L','F','R','B','D'],9,11,c.skin);};
-  const boots=(P,col)=>{P.rows('legL',['L','F','R','B'],8,12,col);P.face('legL','D',col,6);P.rows('legL',['L','F','R','B'],8,9,[col[0]+22,col[1]+20,col[2]+16]);};
+  // ---- painting at two texels to a pixel
+  // cloth: folds hanging down it (a shaded and a lit line every few texels), a faint weave, darker toward the hem
+  const cloth=(P,ns,col,o)=>{const off=o&&o.off||0;for(const n of ns)P.map(n,ALL,(s,t,w,h,f)=>{const top=f==='T'||f==='D',q=(s+off)%5;
+    return sh(col,(top?0:q===0?-14:q===1?8:0)+hz(s,t,11)*7+((s+t)%2?2:-2)-(f==='D'?16:top?0:t/h*12));});};
+  // mail: rows of rings, each lit along its upper edge and dark in its gap, every other row offset
+  const MAIL=[126,130,138];
+  const mail=(P,ns)=>{for(const n of ns)P.map(n,ALL,(s,t,w,h)=>{const r=(s+(t>>1))%2,u=t%2;return sh(MAIL,(r===0?(u===0?34:6):(u===0?-6:-30))+hz(s,t,13)*8-t/h*10);});};
+  // plate: steel lit along its top, shaded at its foot, a highlight running down it, its side edges dark
+  const STEEL=[172,178,188],SILVER=[204,210,220],GOLD=[214,176,84],BLACK=[30,32,42];
+  const plate=(P,ns,col)=>{for(const n of ns)P.map(n,ALL,(s,t,w,h,f)=>{if(f==='T')return sh(col,18+hz(s,t,17)*6);if(f==='D')return sh(col,-32);
+    return sh(col,(t===0?30:t===1?12:t===h-1?-34:0)+(s===Math.floor(w/3)?20:s===Math.floor(w/3)+1?8:0)+(s===0||s===w-1?-14:0)+hz(s,t,19)*6-t/h*10);});};
+  // leather: stained and creased, stitched along its edges
+  const leather=(P,ns,col,soft)=>{const k=soft?0.45:1;for(const n of ns)P.map(n,ALL,(s,t,w,h)=>{const st=w>4&&h>4&&(s===1||s===w-2||t===1||t===h-2)&&(s+t)%2===0;
+    return st?sh(col,30):sh(col,(hz(s>>1,t>>1,23)*16+hz(s,t,29)*8)*k-t/h*8);});};
+  // a band of rows (lit along its top), rivets along a row, boots with their soles and toes, hands bare or gloved
+  const band=(P,n,fs,t0,t1,col)=>P.map(n,fs,(s,t)=>t>=t0&&t<t1?sh(col,(t===t0?22:t===t1-1?-14:0)+hz(s,t,31)*6):null);
+  const rivets=(P,n,fs,t,step,col)=>P.map(n,fs,(s,tt)=>s%step!==step>>1?null:tt===t?sh(col,44):tt===t+1?sh(col,-26):null);
+  const boots=(P,col,h0)=>{P.map('legL',ALL,(s,t,w,h,f)=>f==='D'?[34,26,20]:t>=h0?(t===h-1?[40,30,24]:t===h0?sh(col,24):sh(col,hz(s,t,33)*12+((t-h0)%4===0?-10:0))):null);
+    P.map('toeL',ALL,(s,t,w,h,f)=>f==='D'||t===h-1?[40,30,24]:sh(col,(f==='T'?18:0)+hz(s,t,35)*10));};
+  const hands=(P,c,glove)=>P.map('armL',ALL,(s,t,w,h,f)=>f==='D'||t>=h-4?(glove?sh(glove,(t===h-4?24:0)+hz(s,t,61)*10-(f==='D'?20:0)):sh(c.skin,hz(s,t,63)*6-(t===h-4?14:0))):null);
+  // the realm's sign as it is worked on cloth and painted on shields, sixteen texels square: an eight-pointed star (long rays
+  // up, down and across, short ones on the diagonals) over a slender tower with three merlons and a wider footing
+  const SIGN_ROWS=['.......11.......','.....1.11.1.....','......1111......','...1111111111...','......1111......','.....1.11.1.....','.......11.......','................',
+    '.....1.11.1.....','.....111111.....','......1111......','......1111......','......1111......','......1111......','.....111111.....','....11111111....'];
+  const SIGN=(x,y)=>x>=0&&y>=0&&x<16&&y<16&&SIGN_ROWS[y][x]==='1'?1:0;
+  const sign=(P,n,f,s0,t0,col)=>P.map(n,[f],(s,t)=>SIGN(s-s0,t-t0)?sh(col,hz(s,t,37)*6):null);
+  // a face: eyes with their whites, irises and lids, brows, the nose's shading and nostrils, cheeks, lips; hair over the crown,
+  // down the back and over the ears, a fringe with its parting; a beard round the mouth and down the jaw where the coat has one
+  const face=(P,c,o)=>{const sk=c.skin,er=(o&&o.eyeRow!==undefined?o.eyeRow:3)*2,hr=c.hair,lg=o&&o.long;
+    P.map('head',ALL,(s,t,w,h,f)=>sh(sk,hz(s,t,41)*6-(f==='D'?20:0)));
+    P.map('head',['F'],(s,t)=>{const L=s>=2&&s<=4,R=s>=7&&s<=9;
+      if(t===er-1&&(L||R))return sh(hr,-10);
+      if((t===er||t===er+1)&&(L||R)){const m=L?s-2:9-s;if(m===1)return t===er?[26,22,22]:(c.eye||[70,100,140]);return t===er?sh(sk,-26):[236,234,228];}
+      if(t===er+2&&(s===5||s===6))return sh(sk,s===5?-16:-6);if(t===er+3&&(s===5||s===6))return sh(sk,s===5?-36:-24);
+      if((t===er+3||t===er+4)&&(s===2||s===3||s===8||s===9))return [sk[0]+6,sk[1]-12,sk[2]-10];
+      if(t===er+5&&s>=4&&s<=7)return [150,80,72];if(t===er+6&&s>=5&&s<=6)return [186,122,110];return null;});
+    P.map('head',['T'],(s,t)=>sh(hr,hz(s,t,43)*16+(s===5?-16:0)));
+    P.map('head',['B'],(s,t,w,h)=>t<(lg?h:12)?sh(hr,hz(s,0,45)*18+(t%3===0?-6:0)+(t===11&&!lg?-12:0)):null);
+    P.map('head',['L','R'],(s,t,w,h,f)=>{const back=f==='L'?s<5:s>=w-5;if(t<3||back&&t<(lg?h:Math.max(er+2,11)))return sh(hr,hz(s,0,47)*16+(t%3===0?-5:0));
+      return t>=er&&t<=er+2&&(f==='L'?s===6||s===7:s===4||s===5)?sh(sk,t===er+1?-26:-14):null;});
+    P.map('head',['F'],(s,t)=>t<2||t===2&&(s<2||s>9)?sh(hr,hz(s,0,49)*16+(s===4&&t<2?-22:0)):null);
+    if(lg)P.map('head',['F'],(s,t,w,h)=>(s===0||s===w-1)&&t<h-2?sh(hr,hz(s,t,51)*14):null);
+    if(c.beard)P.map('head',['F','L','R'],(s,t,w,h,f)=>{if(f==='F'){const lip=t===er+5&&s>=4&&s<=7||t===er+6&&s>=5&&s<=6;if(lip)return null;
+        if(t>=er+5||t===er+4&&(s<=3||s>=8)||t>=er+3&&(s<=1||s>=10))return sh(hr,hz(s,t,53)*20+(t===er+4?6:0));return null;}
+      return t>=er+3&&(f==='L'?s>=6:s<=5)?sh(hr,hz(s,t,55)*18):null;});};
   // ---- soldiers
-  const BLACK=[30,32,40],SILVER=[198,204,214],MAIL=[124,128,136],STEEL=[170,176,186];
-  const mail=(P,ns)=>{for(const n of ns)P.coat([n],MAIL,10);for(const n of ns)P.spots(n,['L','F','R','B'],[MAIL[0]+40,MAIL[1]+40,MAIL[2]+40],0.18);};
-  const soldier=(extra,o)=>[...man(),['coat','body',[0,0,0],[-4.5,-5,-2.5,9,16,5]],
-    ['helm','head',[0,3,0],[-3.5,0,-3.5,7,5,7],0,{head:1,tp:['y',0.62,0.62,0,0]}],['brim','head',[0,3,0],[-3.5,-0.5,-3.5,7,1,7],0,{head:1}],
-    ['gL','head',[-3,3,0],[-0.5,-3,-1,1,3,3],0,{head:1}],['gR','head',[3,3,0],[-0.5,-3,-1,1,3,3],0,{head:1,m:'gL'}],
-    ['crest','helm',[0,4.5,0],[-0.5,0,-3,1,(o&&o.plume)?5:3,7],0,{head:1,nb:1,tp:['y',1,0.7,0,-0.5]}],
-    ['pL','armL',[0,0,0],[-3.5,-2.5,-2,4,3,4]],['pR','armR',[0,0,0],[-0.5,-2.5,-2,4,3,4],0,{m:'pL'}],...extra];
-  const soldierPaint=(P,c,o)=>{face(P,c);mail(P,['armL','legL']);hands(P,c);boots(P,[46,34,26]);
-    P.coat(['coat'],BLACK,5);P.rows('coat',['L','F','R','B'],14,16,SILVER);P.rows('coat',['L','F','R','B'],8,9,[96,70,40]);P.px('coat','F',4,8,[200,170,90]);
-    sign(P,'coat','F',2,1,[236,238,242]);P.rows('coat',['L','R'],0,1,SILVER);P.face('coat','T',BLACK,4);
-    P.coat(['helm','brim','gL','pL'],STEEL,10);P.rows('helm',['L','F','R','B'],4,5,[STEEL[0]-30,STEEL[1]-30,STEEL[2]-30]);P.rows('brim',['L','F','R','B'],0,1,SILVER);
-    P.coat(['crest'],o&&o.plume?[236,236,240]:[226,226,230],8);if(o&&o.plume)P.rows('crest',['L','R'],0,2,[30,30,40]);};
-  // the kite shield: black, a silver rim, the sign in white
+  const soldier=(extra,o)=>[...man(),['coat','body',[0,0,0],[-4.5,-5,-2.5,9,16,5]],['belt','body',[0,0,0],[-5,2,-3,10,1,6]],
+    ['avent','head',[0,0,0],[-3.5,-2,-3.5,7,2,7],0,{head:1}],
+    ['helm','head',[0,4,0],[-3.5,0,-3.5,7,4,7],0,{head:1,tp:['y',0.62,0.62,0,0]}],['brim','head',[0,4,0],[-3.5,-0.5,-3.5,7,1,7],0,{head:1}],
+    ['nasal','head',[0,4,0],[-0.5,-2,3,1,2,1],0,{head:1}],
+    ['chL','head',[-3,4,0],[-0.5,-3,-1,1,3,3],0,{head:1}],['chR','head',[3,4,0],[-0.5,-3,-1,1,3,3],0,{head:1,m:'chL'}],
+    ['crest','helm',[0,4,0],[-0.5,0,-3,1,(o&&o.plume)?5:3,7],0,{head:1,nb:1,tp:['y',1,0.7,0,-0.5]}],
+    ['pL','armL',[0,0,0],[-3.5,-2.5,-2,4,3,4],0,{tp:['y',0.8,0.8,0,0]}],['pR','armR',[0,0,0],[-0.5,-2.5,-2,4,3,4],0,{m:'pL',tp:['y',0.8,0.8,0,0]}],
+    ['lL','armL',[0,-2.5,0],[-3.5,-2,-2,4,2,4],0,{tp:['-y',1.1,1.1,0,0]}],['lR','armR',[0,-2.5,0],[-0.5,-2,-2,4,2,4],0,{m:'lL',tp:['-y',1.1,1.1,0,0]}],
+    ['vL','armL',[0,-6,0],[-3.5,-4,-2,4,4,4]],['vR','armR',[0,-6,0],[-0.5,-4,-2,4,4,4],0,{m:'vL'}],
+    ['grL','legL',[0,0,0],[-2.5,-9,-2.5,5,5,5]],['grR','legR',[0,0,0],[-2.5,-9,-2.5,5,5,5],0,{m:'grL'}],...extra];
+  const soldierPaint=(P,c,o)=>{const capt=o&&o.plume;face(P,c,{eyeRow:4});mail(P,['armL','legL','avent','body']);hands(P,c,STEEL);boots(P,[70,50,34],18);
+    // the surcoat: black, hanging in folds, a silver hem and edging, the sign on breast and back, a slit up the front
+    cloth(P,['coat'],BLACK);band(P,'coat',SIDE,28,32,SILVER);P.map('coat',['L','R'],(s,t)=>t<2?sh(SILVER,hz(s,t,65)*6):null);
+    P.map('coat',['F','B'],(s,t)=>(s===8||s===9)&&t>=24?[16,16,22]:null);sign(P,'coat','F',1,3,[238,240,244]);sign(P,'coat','B',1,3,[238,240,244]);
+    // the belt and its buckle
+    leather(P,['belt'],[86,58,34]);P.map('belt',['F'],(s,t)=>s>=9&&s<=11?(s===10&&t===1?[60,44,26]:sh(GOLD,t===0?20:0)):null);
+    // the helm: its plates joined down the middle, a silver brow band riveted, the nasal and the cheek guards studded
+    plate(P,['helm','nasal','chL'],STEEL);P.map('helm',SIDE,(s,t,w)=>s===(w>>1)||s===(w>>1)-1?sh(STEEL,s===(w>>1)?-26:22):null);
+    plate(P,['brim'],SILVER);rivets(P,'brim',SIDE,0,3,SILVER);P.map('chL',['L','R'],(s,t)=>(s+t)%3===0&&t>0?sh(STEEL,36):null);
+    P.map('crest',ALL,(s,t,w,h,f)=>sh(capt?[240,240,244]:[228,228,232],hz(s,t,67)*14+(f==='L'||f==='R'?(s%2?-12:6):0)));
+    // pauldrons and their lames, vambraces, greaves banded at the knee: steel and riveted, silver on the captain
+    plate(P,['pL','lL','vL','grL'],capt?SILVER:STEEL);rivets(P,'pL',SIDE,4,4,STEEL);rivets(P,'vL',SIDE,1,4,STEEL);
+    band(P,'grL',SIDE,0,3,sh(STEEL,10));rivets(P,'grL',SIDE,4,5,STEEL);};
+  // the kite shield: black, rimmed and riveted in silver, the sign in white; its inner face planked, with a strap across
   const shield=['shield','armL',[-3.5,-6,0],[-1,-7,-4,1,12,8],0,{nb:1,tp:['-y',1,0.15,0,0]}];
-  const shieldPaint=P=>{P.coat(['shield'],BLACK,5);P.rows('shield',['L','R'],0,1,SILVER);for(const f of ['L','R']){P.rect('shield',f,0,0,1,12,SILVER);P.rect('shield',f,7,0,1,12,SILVER);}
-    sign(P,'shield','L',1,1,[236,238,242]);sign(P,'shield','R',2,1,[236,238,242]);};
-  const coats=b=>SK.map((s,i)=>[{skin:s,hair:HAIR[(i*2+b)%HAIR.length],beard:(i+b)%3===0},i===4?1:2]);
+  const shieldPaint=P=>{P.map('shield',ALL,(s,t,w,h,f)=>{
+      if(f==='R')return t>=8&&t<=10?sh([70,46,28],hz(s,t,73)*8):t%5===0?[70,48,30]:sh([116,82,50],hz(s,t,71)*14);
+      if(f!=='L')return sh(SILVER,hz(s,t,75)*6-10);if(s===0||s===w-1||t===0)return sh(SILVER,(t===0?18:0)+hz(s,t,77)*6);
+      return (s===1||s===w-2||t===1)&&(s+t)%3===0?sh(SILVER,30):sh(BLACK,hz(s,t,79)*8+(s<4?6:0));});
+    sign(P,'shield','L',0,3,[238,240,244]);};
+  const coats=b=>SK.map((s,i)=>[{skin:s,hair:HAIR[(i*2+b)%HAIR.length],beard:(i+b)%3===0,eye:[[70,100,140],[90,70,50],[80,110,90]][(i+b)%3]},i===4?1:2]);
+  // a sword: a leather grip bound with wire, a pommel and a cross-guard, the blade lit along its edges with a dark fuller down it
+  const sword=len=>[['grip','armR',[1.5,-10.5,0.5],[-0.5,-0.5,-1.5,1,1,3],0,{nb:1}],['pommel','grip',[0,0,-1.5],[-1,-1,-1,2,2,1],0,{nb:1}],
+    ['guard','grip',[0,0,1.5],[-0.5,-2.5,0,1,5,1],0,{nb:1}],['blade','grip',[0,0,2.5],[-0.5,-1,0,1,2,len],0,{nb:1,tp:['z',1,0,0,0]}]];
+  const swordPaint=(P,gold)=>{P.map('grip',ALL,(s,t)=>(s+t)%3===0?sh([180,180,190],20):sh([74,50,32],hz(s,t,81)*10));plate(P,['pommel','guard'],gold?GOLD:STEEL);
+    P.map('blade',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([214,218,226],t===0||t===h-1?22:t===1?-34:-8+hz(s,t,83)*6):sh([226,230,236],10));};
   Object.assign(AM_KINDS,{
-    rspear:{parts:soldier([shield,['spear','armR',[1.5,-10,0.5],[-0.5,-7,-0.5,1,30,1],[0.15,0,0],{nb:1}],['tip','spear',[0,23,0],[-1,0,-0.5,2,4,1],0,{nb:1,tp:['y',0,1,0,0]}]]),coats:coats(0),
-      paint(P,c){soldierPaint(P,c);shieldPaint(P);P.coat(['spear'],[96,70,44],8);P.coat(['tip'],STEEL,10);}},
-    rsword:{parts:soldier([shield,['wpn','armR',[1.5,-10,0],[-0.5,-1,-1,1,2,12],0,{nb:1,tp:['z',1,0,0,0]}],['hilt','wpn',[0,0,1],[-0.5,-2,0,1,4,1],0,{nb:1}]]),coats:coats(1),
-      paint(P,c){soldierPaint(P,c);shieldPaint(P);P.coat(['wpn'],[206,210,218],10);P.rect('wpn','T',0,0,1,3,[90,62,40]);P.rect('wpn','L',0,0,3,2,[90,62,40]);P.rect('wpn','R',9,0,3,2,[90,62,40]);P.coat(['hilt'],[200,170,90],8);}},
-    rbow:{parts:soldier([['bow','armL',[-1.5,-10,1],[-0.5,-8,-0.5,1,18,1],0,{nb:1,tp:['y',1,0.6,0,0.6]}],['quiver','body',[2,6,-2.5],[-1,-3,-2,2,10,2],[0.3,0,0.2],{nb:1}]]),coats:coats(2),
-      paint(P,c){soldierPaint(P,c);P.coat(['bow'],[110,76,44],8);P.rows('bow',['L','F','R','B'],8,10,[200,170,90]);P.coat(['quiver'],[86,58,36],8);P.rows('quiver',['L','F','R','B'],0,2,[236,236,232]);}},
-    rcapt:{scale:1.05,parts:soldier([['cape','body',[0,10.5,-2.4],[-4.5,-17,-0.5,9,17,1],[0.1,0,0],{nb:1}],['wpn','armR',[1.5,-10,0],[-0.5,-1,-1,1,2,13],0,{nb:1,tp:['z',1,0,0,0]}],['hilt','wpn',[0,0,1],[-0.5,-2.5,0,1,5,1],0,{nb:1}]],{plume:1}),coats:coats(3),
-      paint(P,c){soldierPaint(P,c,{plume:1});P.coat(['cape'],[24,24,32],5);P.rows('cape',['F','B','L','R'],15,17,SILVER);sign(P,'cape','B',2,3,[236,238,242]);P.coat(['wpn'],[220,224,232],10);P.coat(['hilt'],[226,196,100],8);P.coat(['pL'],SILVER,8);}},
+    rspear:{res:2,tex:256,parts:soldier([shield,['spear','armR',[1.5,-10,0.5],[-0.5,-7,-0.5,1,29,1],[0.15,0,0],{nb:1}],
+        ['lug','spear',[0,21,0],[-1.5,0,-0.5,3,1,1],0,{nb:1}],['tipA','spear',[0,22,0],[-1,0,-0.5,2,2,1],0,{nb:1,tp:['-y',0.4,1,0,0]}],
+        ['tipB','spear',[0,24,0],[-1,0,-0.5,2,4,1],0,{nb:1,tp:['y',0,1,0,0]}]]),coats:coats(0),
+      paint(P,c){soldierPaint(P,c);shieldPaint(P);
+        // an ash shaft, bound in two places; steel lugs; the leaf blade lit along its edges, a dark midrib
+        P.map('spear',ALL,(s,t,w,h)=>t>=24&&t<=30||t>=h-30&&t<=h-24?((t>>1)%2?[60,40,26]:[150,120,80]):sh([112,82,52],hz(s,t>>2,85)*14));
+        plate(P,['lug'],STEEL);P.map('tipA',ALL,(s,t,w)=>sh([206,212,220],s===(w>>1)?-18:10));P.map('tipB',ALL,(s,t,w)=>sh([214,220,228],s===(w>>1)||s===(w>>1)-1?-16:16));}},
+    rsword:{res:2,tex:256,parts:soldier([shield,['sheath','body',[-4.6,2,0.5],[-0.5,-10,-1,1,10,2],[0.3,0,0.08],{nb:1}],...sword(11)]),coats:coats(1),
+      paint(P,c){soldierPaint(P,c);shieldPaint(P);swordPaint(P);leather(P,['sheath'],[60,40,26]);band(P,'sheath',SIDE,0,2,STEEL);band(P,'sheath',SIDE,18,20,STEEL);}},
+    rbow:{res:2,tex:256,parts:soldier([['bowU','armL',[-1.5,-10,1.5],[-0.5,0,-0.5,1,9,1],[-0.22,0,0],{nb:1,tp:['y',0.6,0.6,0,0]}],
+        ['bowD','armL',[-1.5,-10,1.5],[-0.5,-9,-0.5,1,9,1],[0.22,0,0],{nb:1,tp:['-y',0.6,0.6,0,0]}],['bgrip','armL',[-1.5,-10,1.5],[-1,-1,-1,2,2,2],0,{nb:1}],
+        ['bstr','armL',[-1.5,-10,-0.5],[-0.5,-8,-0.5,1,16,1],0,{nb:1}],
+        ['quiver','body',[2,6,-2.5],[-1,-3,-2,2,10,2],[0.3,0,0.2],{nb:1}],['fletch','quiver',[0,7,-1],[-1,0,-1,2,2,2],0,{nb:1}]]),coats:coats(2),
+      paint(P,c){soldierPaint(P,c);
+        // the bow's limbs of yew, dark at their nocks; its grip bound in cord; a pale string; a stitched quiver and red-and-white fletching
+        P.map('bowU',ALL,(s,t)=>sh([124,86,48],hz(s,t>>1,87)*12+(s===0?10:0)+(t<2?-24:0)));P.map('bowD',ALL,(s,t,w,h)=>sh([124,86,48],hz(s,t>>1,89)*12+(s===0?10:0)+(t>=h-2?-24:0)));
+        P.map('bgrip',ALL,(s,t)=>(t+s)%2?[72,50,30]:[200,170,100]);P.map('bstr',ALL,()=>[228,224,210]);
+        leather(P,['quiver'],[96,62,36]);band(P,'quiver',SIDE,0,3,[60,40,26]);P.map('fletch',ALL,(s,t)=>(s+t)%2?[238,236,230]:[150,40,36]);}},
+    rcapt:{res:2,tex:256,scale:1.05,parts:soldier([['cape','body',[0,10.5,-2.4],[-4.5,-17,-0.5,9,17,1],[0.1,0,0],{nb:1}],['clasp','body',[0,10,-2.2],[-4.5,-1,-0.5,9,1,1],0,{nb:1}],
+        ['sheath','body',[-4.6,2,0.5],[-0.5,-11,-1,1,11,2],[0.3,0,0.08],{nb:1}],...sword(12)],{plume:1}),coats:coats(3),
+      paint(P,c){soldierPaint(P,c,{plume:1});cloth(P,['cape'],[24,24,34],{off:2});band(P,'cape',SIDE,30,34,SILVER);sign(P,'cape','B',1,5,[238,240,244]);
+        P.map('clasp',ALL,(s,t,w)=>s<3||s>=w-3?sh(GOLD,(t===0?20:0)+hz(s,t,91)*8):[30,30,40]);
+        // a silver sash across the surcoat, the captain's mark
+        P.map('coat',['F'],(s,t)=>Math.abs((s+t)-22)<=1&&t<22?sh(SILVER,(s+t)===21?16:0):null);swordPaint(P,1);leather(P,['sheath'],[40,30,30]);band(P,'sheath',SIDE,0,2,GOLD);band(P,'sheath',SIDE,20,22,GOLD);}},
     // ---- townsfolk
-    rman:{parts:[...man(),['tunic','body',[0,0,0],[-4.5,-4,-2.5,9,15,5]]],
+    rman:{res:2,tex:256,parts:[...man(),['tunic','body',[0,0,0],[-4.5,-4,-2.5,9,15,5]],['belt','body',[0,0,0],[-5,3,-3,10,1,6]],['pouch','body',[2.5,3.5,2.5],[-1,-3,0,2,3,1],0,{nb:1}]],
       coats:[[{skin:SK[0],hair:HAIR[1],cl:[110,80,52],hose:[70,74,60],beard:1},2],[{skin:SK[1],hair:HAIR[0],cl:[70,96,74],hose:[96,78,56]},2],[{skin:SK[2],hair:HAIR[2],cl:[132,60,48],hose:[60,60,70],beard:1},2],
-        [{skin:SK[3],hair:HAIR[5],cl:[90,90,120],hose:[80,66,50]},1],[{skin:SK[4],hair:HAIR[4],cl:[150,130,90],hose:[70,60,50],beard:1},1]],
-      paint(P,c){face(P,c);hands(P,c);P.coat(['armL'],c.cl,8);hands(P,c);P.coat(['legL'],c.hose,8);boots(P,[70,50,34]);P.coat(['tunic'],c.cl,8);P.rows('tunic',['L','F','R','B'],8,9,[60,44,30]);P.px('tunic','F',4,8,[180,150,90]);
-        P.rows('tunic',['L','F','R','B'],14,15,[c.cl[0]-24,c.cl[1]-24,c.cl[2]-24]);P.rect('tunic','F',3,0,3,3,[c.cl[0]-20,c.cl[1]-20,c.cl[2]-20]);}},
-    rwoman:{parts:[...man(),['gown','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.25,1.3,0,0]}],['hairB','head',[0,1,-3],[-3,-4,-0.5,6,7,1],0,{head:1,nb:1}]],
-      coats:[[{skin:SK[0],hair:HAIR[2],cl:[120,40,44],ap:[220,214,196]},2],[{skin:SK[1],hair:HAIR[0],cl:[54,80,120],ap:[214,206,186]},2],[{skin:SK[2],hair:HAIR[3],cl:[96,110,60],ap:[226,220,204]},2],
-        [{skin:SK[3],hair:HAIR[5],cl:[130,96,150],ap:[220,212,196]},1],[{skin:SK[4],hair:HAIR[4],cl:[90,70,52],ap:[200,196,180]},1]],
-      paint(P,c){face(P,c,{long:1});P.coat(['hairB'],c.hair,10);P.hair('hairB');P.coat(['armL'],c.cl,8);hands(P,c);P.coat(['body'],c.cl,8);P.coat(['legL'],[70,52,40],6);
-        P.coat(['gown'],c.cl,8);P.rect('gown','F',2,1,5,12,c.ap);P.rows('gown',['L','F','R','B'],13,14,[c.cl[0]-30,c.cl[1]-30,c.cl[2]-30]);P.rows('body',['F'],3,4,[c.cl[0]+30,c.cl[1]+30,c.cl[2]+30]);}},
-    rmerch:{parts:[...man(),['robe','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.15,1.15,0,0]}],['hat','head',[0,6,0],[-4,0,-4,8,1,8],0,{head:1}],['crown','hat',[0,1,0],[-3,0,-3,6,3,6],0,{head:1}],
-      ['purse','body',[3.5,1,1],[-1,-3,-1,2,3,2],0,{nb:1}]],
-      coats:[[{skin:SK[1],hair:HAIR[1],cl:[110,30,40],trim:[220,180,80],beard:1},2],[{skin:SK[0],hair:HAIR[4],cl:[30,70,90],trim:[200,200,210]},2],[{skin:SK[2],hair:HAIR[0],cl:[90,60,110],trim:[220,180,80],beard:1},1]],
-      paint(P,c){face(P,c);P.coat(['armL'],c.cl,8);hands(P,c);P.coat(['body','robe'],c.cl,8);P.rect('robe','F',4,0,1,13,c.trim);P.rows('robe',['L','F','R','B'],12,14,c.trim);P.rows('body',['L','F','R','B'],0,1,c.trim);
-        P.coat(['legL'],[60,40,30],6);P.coat(['hat'],[40,32,30],6);P.coat(['crown'],[50,40,36],6);P.rows('crown',['L','F','R','B'],2,3,c.trim);P.coat(['purse'],[120,84,50],8);}},
-    rsmith:{parts:[...man(),['apron','body',[0,0,0],[-4.5,-6,-2.5,9,15,5]],['ham','armR',[1.5,-10,0],[-0.5,-0.5,-0.5,1,1,6],[0.3,0,0],{nb:1}],['hhead','ham',[0,0,5],[-1,-1.5,0,2,3,2],0,{nb:1}]],
-      coats:[[{skin:SK[1],hair:HAIR[0],beard:1},2],[{skin:SK[2],hair:HAIR[5],beard:1},2],[{skin:SK[3],hair:HAIR[1]},1]],
-      paint(P,c){face(P,c);P.coat(['armL'],c.skin,8);P.spots('armL',['L','F','R','B'],[c.skin[0]-20,c.skin[1]-20,c.skin[2]-20],0.1);P.coat(['body'],[120,110,96],8);P.coat(['legL'],[70,60,50],6);boots(P,[50,36,26]);
-        P.coat(['apron'],[96,64,40],10);P.rows('apron',['L','R','B'],0,8,[120,110,96]);P.face('apron','T',[120,110,96],6);P.rect('apron','F',0,0,9,1,[70,46,30]);P.spots('apron',['F'],[60,40,28],0.08);
-        P.coat(['ham'],[96,70,44],6);P.coat(['hhead'],[90,92,100],8);}},
-    rfarmer:{parts:[...man(),['smock','body',[0,0,0],[-4.5,-5,-2.5,9,16,5]],['hatb','head',[0,6,0],[-5,0,-5,10,1,10],0,{head:1,nb:1}],['hatc','hatb',[0,1,0],[-3,0,-3,6,2,6],0,{head:1}],
-      ['hoe','armR',[1.5,-10,0.5],[-0.5,-6,-0.5,1,24,1],[0.15,0,0],{nb:1}],['blade','hoe',[0,17,0],[-0.5,0,0,1,1,4],0,{nb:1}]],
-      coats:[[{skin:SK[1],hair:HAIR[2],cl:[176,160,120],beard:1},2],[{skin:SK[2],hair:HAIR[1],cl:[150,140,104]},2],[{skin:SK[0],hair:HAIR[4],cl:[160,150,112],beard:1},1]],
-      paint(P,c){face(P,c);P.coat(['armL'],c.cl,8);hands(P,c);P.coat(['body','smock'],c.cl,10);P.rows('smock',['L','F','R','B'],8,9,[90,64,40]);P.coat(['legL'],[96,80,56],8);boots(P,[70,52,34]);
-        P.coat(['hatb','hatc'],[214,186,108],14);P.rows('hatc',['L','F','R','B'],1,2,[150,60,40]);P.coat(['hoe'],[110,80,50],6);P.coat(['blade'],[120,124,130],8);}},
-    rnoble:{scale:1.03,parts:[...man(),['robe','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.2,1.2,0,0]}],['mantle','body',[0,10.5,-2.4],[-4.5,-17,-0.5,9,17,1],[0.08,0,0],{nb:1}],
-      ['circ','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}]],
-      coats:[[{skin:SK[0],hair:HAIR[0],beard:1},2],[{skin:SK[4],hair:HAIR[4],beard:1},1],[{skin:SK[1],hair:HAIR[5]},1]],
-      paint(P,c){face(P,c);P.coat(['armL'],BLACK,6);hands(P,c);P.coat(['body','robe'],BLACK,6);sign(P,'body','F',2,1,[236,238,242]);P.rect('robe','F',4,0,1,13,SILVER);P.rows('robe',['L','F','R','B'],12,14,SILVER);
-        P.coat(['legL'],[30,30,36],6);P.coat(['mantle'],[200,204,214],6);P.rows('mantle',['F','B'],0,2,[30,30,40]);P.coat(['circ'],SILVER,8);P.px('circ','F',3,0,[120,170,230]);}}
+        [{skin:SK[3],hair:HAIR[5],cl:[90,90,120],hose:[80,66,50],eye:[90,70,50]},1],[{skin:SK[4],hair:HAIR[4],cl:[150,130,90],hose:[70,60,50],beard:1},1]],
+      paint(P,c){face(P,c);cloth(P,['armL','tunic','body'],c.cl);hands(P,c);cloth(P,['legL'],c.hose,{off:1});boots(P,[78,56,36],19);
+        band(P,'tunic',SIDE,26,30,sh(c.cl,-22));P.map('armL',SIDE,(s,t,w,h)=>t>=h-7&&t<h-4?sh(c.cl,t===h-7?14:-10):null);
+        // the neck opening, laced
+        P.map('tunic',['F'],(s,t)=>t<6&&Math.abs(s-8.5)<=(6-t)*0.4+0.5?(t%2===0&&Math.abs(s-8.5)<1?[220,200,160]:sh(c.skin,-10)):null);
+        leather(P,['belt'],[80,54,32]);P.map('belt',['F'],(s)=>s>=9&&s<=10?[200,180,120]:null);leather(P,['pouch'],[110,76,44]);}},
+    rwoman:{res:2,tex:256,parts:[...man(),['gown','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.25,1.3,0,0]}],['girdle','body',[0,0,0],[-5,1.5,-3,10,1,6]],
+        ['hairB','head',[0,1,-3],[-3,-4,-0.5,6,7,1],0,{head:1,nb:1}],['braid','hairB',[0,-4,0],[-1,-5,-0.5,2,5,1],0,{head:1,nb:1}]],
+      coats:[[{skin:SK[0],hair:HAIR[2],cl:[120,40,44],ap:[220,214,196]},2],[{skin:SK[1],hair:HAIR[0],cl:[54,80,120],ap:[214,206,186],eye:[90,70,50]},2],[{skin:SK[2],hair:HAIR[3],cl:[96,110,60],ap:[226,220,204]},2],
+        [{skin:SK[3],hair:HAIR[5],cl:[130,96,150],ap:[220,212,196],eye:[90,70,50]},1],[{skin:SK[4],hair:HAIR[4],cl:[90,70,52],ap:[200,196,180]},1]],
+      paint(P,c){face(P,c,{long:1});P.map('hairB',ALL,(s,t)=>sh(c.hair,hz(s,0,93)*20+(t%4===0?-6:0)));P.map('braid',ALL,(s,t)=>sh(c.hair,((t+s)%3===0?-18:6)+hz(s,t,95)*8));
+        cloth(P,['armL','body','gown'],c.cl);hands(P,c);P.map('legL',ALL,(s,t)=>sh([70,52,40],hz(s,t,97)*8));boots(P,[62,44,30],20);
+        // the bodice laced up the front, a pale shift at the neck, the apron with its pocket and hem, the gown's hem
+        P.map('body',['F'],(s,t)=>t<4&&s>=4&&s<=11?sh([226,220,206],hz(s,t,99)*6):(s===7||s===8)&&t>=4&&t<18?(t%3===0?[230,220,190]:sh(c.cl,-24)):null);
+        P.map('gown',['F'],(s,t,w,h)=>s>=4&&s<=13&&t<h-2?sh(c.ap,(s===4||s===13?-18:0)+(t>=10&&t<=14&&s>=6&&s<=9?(t===10?-20:-8):0)+(t===h-3?-16:0)+hz(s,t,101)*8):null);
+        band(P,'gown',SIDE,24,28,sh(c.cl,-28));leather(P,['girdle'],[110,80,44]);P.map('girdle',['F'],(s,t)=>s===13&&t>0?[200,170,90]:null);}},
+    rmerch:{res:2,tex:256,parts:[...man(),['robe','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.15,1.15,0,0]}],['hat','head',[0,6,0],[-4,0,-4,8,1,8],0,{head:1}],['crown','hat',[0,1,0],[-3,0,-3,6,3,6],0,{head:1}],
+        ['feather','crown',[2,2,-2],[-0.5,0,-0.5,1,5,1],[-0.5,0,-0.4],{head:1,nb:1,tp:['y',1,0.3,0,0]}],['purse','body',[3.5,1,1],[-1,-3,-1,2,3,2],0,{nb:1}],['belt','body',[0,0,0],[-5,1.5,-3,10,1,6]]],
+      coats:[[{skin:SK[1],hair:HAIR[1],cl:[110,30,40],trim:[220,180,80],beard:1},2],[{skin:SK[0],hair:HAIR[4],cl:[30,70,90],trim:[200,200,210],eye:[90,70,50]},2],[{skin:SK[2],hair:HAIR[0],cl:[90,60,110],trim:[220,180,80],beard:1},1]],
+      paint(P,c){face(P,c);cloth(P,['armL','body','robe'],c.cl);hands(P,c);P.map('legL',ALL,()=>[60,40,30]);boots(P,[70,46,30],20);
+        // fur down the front, round the hem and the cuffs; rings on the fingers; a purse with its drawstring
+        const fur=(s,t)=>sh([206,192,170],hz(s,t,103)*26+((s+t)%3===0?-14:0));
+        P.map('robe',SIDE,(s,t,w,h)=>t>=h-4?fur(s,t):null);P.map('body',['F'],(s,t)=>s>=6&&s<=9?fur(s,t):null);
+        P.map('robe',['F'],(s,t)=>s>=7&&s<=10?fur(s,t):null);P.map('armL',SIDE,(s,t,w,h)=>t>=h-8&&t<h-4?fur(s,t):t===h-2&&s%3===1?sh(c.trim,30):null);
+        leather(P,['belt'],[70,46,30]);P.map('belt',['F'],(s)=>s>=9&&s<=10?sh(c.trim,20):null);
+        P.map('hat',ALL,(s,t)=>sh([40,32,30],hz(s,t,105)*10));P.map('crown',ALL,(s,t,w,h)=>t>=h-2&&h>2?sh(c.trim,t===h-2?20:0):sh([52,40,36],hz(s,t,107)*10));
+        P.map('feather',ALL,(s,t)=>sh([236,232,220],t%2?-18:8));leather(P,['purse'],[130,90,52]);P.map('purse',SIDE,(s,t)=>t===1?sh(c.trim,10):null);}},
+    rsmith:{res:2,tex:256,parts:[...man(),['apron','body',[0,0,0],[-4.5,-6,-2.5,9,15,5]],['ham','armR',[1.5,-10,0],[-0.5,-0.5,-0.5,1,1,6],[0.3,0,0],{nb:1}],['hhead','ham',[0,0,5],[-1,-1.5,0,2,3,2],0,{nb:1}],
+        ['glove','armL',[0,-9,0],[-3.5,-2,-2,4,3,4]],['gloveR','armR',[0,-9,0],[-0.5,-2,-2,4,3,4],0,{m:'glove'}]],
+      coats:[[{skin:SK[1],hair:HAIR[0],beard:1},2],[{skin:SK[2],hair:HAIR[5],beard:1,eye:[90,70,50]},2],[{skin:SK[3],hair:HAIR[1],eye:[90,70,50]},1]],
+      paint(P,c){face(P,c);
+        // bare forearms below rolled sleeves, sooted; a shirt; the leather apron stitched, its pocket, soot and scorches; gauntlets
+        P.map('armL',ALL,(s,t)=>t<8?sh([150,138,118],(t===7?-16:t===6?12:0)+hz(s,t,109)*8):sh(c.skin,hz(s,t,111)*8+(amHash(s,t,113)<0.12?-30:0)));
+        cloth(P,['body'],[150,138,118]);P.map('legL',ALL,(s,t)=>sh([76,64,52],hz(s,t,115)*8));boots(P,[52,38,26],18);
+        leather(P,['apron'],[100,66,40],1);P.map('apron',['L','R','B','T'],(s,t,w,h,f)=>f==='T'||t<16?sh([150,138,118],hz(s,t,117)*8):null);
+        P.map('apron',['F'],(s,t)=>t>=14&&t<=19&&s>=4&&s<=13?sh([86,56,34],t===14?18:(s===4||s===13)?-12:0):amHash(s,t,119)<0.025?[58,40,28]:null);
+        P.map('apron',['F'],(s,t)=>t===0||t===1&&(s<3||s>14)?[60,40,24]:null);leather(P,['glove'],[84,60,40]);
+        P.map('ham',ALL,(s,t)=>sh([96,70,44],hz(s,t,121)*12+(t%4===0?-14:0)));plate(P,['hhead'],[96,98,108]);}},
+    rfarmer:{res:2,tex:256,parts:[...man(),['smock','body',[0,0,0],[-4.5,-5,-2.5,9,16,5]],['sash','body',[0,0,0],[-5,3,-3,10,1,6]],['hatb','head',[0,6,0],[-5,0,-5,10,1,10],0,{head:1,nb:1}],['hatc','hatb',[0,1,0],[-3,0,-3,6,2,6],0,{head:1}],
+        ['hoe','armR',[1.5,-10,0.5],[-0.5,-6,-0.5,1,24,1],[0.15,0,0],{nb:1}],['blade','hoe',[0,17,0],[-0.5,-0.5,0,1,1,4],0,{nb:1,tp:['z',1,2,0,-0.5]}]],
+      coats:[[{skin:SK[1],hair:HAIR[2],cl:[176,160,120],beard:1},2],[{skin:SK[2],hair:HAIR[1],cl:[150,140,104],eye:[90,70,50]},2],[{skin:SK[0],hair:HAIR[4],cl:[160,150,112],beard:1},1]],
+      paint(P,c){face(P,c);cloth(P,['armL','body','smock'],c.cl);hands(P,c);cloth(P,['legL'],[96,80,56],{off:2});boots(P,[74,54,34],18);
+        // the smocking across the chest in rows of stitches, a patch, mud at the hem, a red sash
+        P.map('smock',['F','B'],(s,t)=>t>=2&&t<=9&&s>=3&&s<=14&&t%2===0&&(s+(t>>1))%2===0?sh(c.cl,-30):null);
+        P.map('smock',SIDE,(s,t,w,h)=>t>=h-3?sh([96,76,50],hz(s,t,123)*16):null);P.map('smock',['L'],(s,t)=>t>=12&&t<=17&&s>=3&&s<=7?sh([120,100,70],(s===3||s===7||t===12||t===17)?-20:0):null);
+        P.map('sash',ALL,(s,t)=>sh([150,60,40],hz(s,t,125)*10+(s%4===0?-12:0)));
+        // straw woven in rings on the hat's brim and rows on its crown, a red band round it
+        P.map('hatb',ALL,(s,t,w,h,f)=>sh([216,188,108],(f==='T'||f==='D'?(Math.floor(Math.hypot(s-w/2,t-h/2))%2?-16:8):0)+((s+t)%2?-10:6)+hz(s,t,127)*12));
+        P.map('hatc',ALL,(s,t,w,h,f)=>f!=='T'&&t>=h-2?sh([150,56,40],t===h-2?14:0):sh([210,182,104],((s+t)%2?-12:6)+hz(s,t,129)*10));
+        P.map('hoe',ALL,(s,t)=>sh([116,84,52],hz(s,t>>2,131)*14));plate(P,['blade'],[118,122,130]);}},
+    rnoble:{res:2,tex:256,scale:1.03,parts:[...man(),['robe','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.2,1.2,0,0]}],['mantle','body',[0,10.5,-2.4],[-4.5,-17,-0.5,9,17,1],[0.08,0,0],{nb:1}],
+        ['collar','body',[0,10,0],[-4.5,-1,-2.5,9,2,5]],['circ','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}]],
+      coats:[[{skin:SK[0],hair:HAIR[0],beard:1},2],[{skin:SK[4],hair:HAIR[4],beard:1},1],[{skin:SK[1],hair:HAIR[5],eye:[90,70,50]},1]],
+      paint(P,c){face(P,c);cloth(P,['armL','body','robe'],BLACK);hands(P,c);P.map('legL',ALL,()=>[30,30,36]);boots(P,[36,30,30],20);
+        // silver embroidery: a running pattern down the front and round the hem and cuffs; the sign on the breast; a signet ring
+        const emb=(s,t)=>sh(SILVER,((s+t)%4===0?18:(s-t+40)%4===0?-10:0)+hz(s,t,133)*6);
+        P.map('robe',['F'],(s,t)=>s>=7&&s<=10?(s===7||s===10?sh(SILVER,-20):emb(s,t)):null);P.map('robe',SIDE,(s,t,w,h)=>t>=h-5?emb(s,t):null);
+        P.map('armL',SIDE,(s,t,w,h)=>t>=h-8&&t<h-4?emb(s,t):t===h-2&&s===2?[230,200,110]:null);sign(P,'body','F',0,4,[238,240,244]);
+        // the white mantle with its dark spots, an ermine collar, a chain of office across the shoulders, the circlet with its stone
+        P.map('mantle',ALL,(s,t,w,h)=>(s*3+t*5)%11===0&&t%4===2?[24,24,30]:sh([226,228,234],hz(s,t,135)*8-t/h*10));band(P,'mantle',SIDE,30,34,SILVER);
+        P.map('collar',ALL,(s,t)=>(s*3+t*5)%7===0?[24,24,30]:sh([234,234,238],hz(s,t,137)*10));
+        P.map('body',['F'],(s,t)=>Math.abs(t-3-Math.abs(s-7.5)*0.45)<0.6&&t<8?sh(GOLD,(s+t)%2?24:-10):null);
+        plate(P,['circ'],GOLD);P.map('circ',['F'],(s)=>s===6||s===7?[110,170,230]:null);}}
   });
 })();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
@@ -8876,7 +9128,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);

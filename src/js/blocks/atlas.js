@@ -328,6 +328,12 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     // leaded glass: lead in a lattice of diamonds round pale panes
     const lead=x===0||y===0||x===15||y===15||(x+y)%6===2||(x-y+18)%6===2;P(284,x,y,lead?[66,66,72]:sh([196,220,214],(hn(x,y,345)-.5)*12+((x+y)%6===3?18:0)),lead?255:120);
   }
+  // rough whitestone: big rock-faced blocks in two courses, each face bulging (lit above and to the left, shaded below), chisel
+  // pocks, deep joints; the moulding: a band of profile (a lit fillet, a bead, a shaded hollow, a plain face, a dark drip line)
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const row=y>>3,off=row?6:0,jx=(x+off)%12,bx=Math.floor((x+off)/12),cy=y&7,joint=cy===7||jx===11;
+    const bulge=(3.5-Math.abs(cy-3.2))*3+(5.5-Math.abs(jx-5))*1.6,c=hn(x,y,352)<.12?-16:0;
+    P(285,x,y,joint?sh([118,114,104],(hn(x,y,353)-.5)*8):sh([196,192,178],bulge+(cy===0?14:cy===6?-18:0)+(jx===0?8:jx===10?-12:0)+c+(hn(x,y,354)-.5)*12+(hn(bx,row,355)-.5)*14));
+    const prof=[16,22,-6,10,4,-20,-28,0,2,0,-2,4,0,-4,-16,-30][y];P(286,x,y,sh([214,210,198],prof+(hn(x,y,356)-.5)*6+(y===3&&x%4===0?-10:0)+(hn(x>>2,y,357)-.5)*4));}
   // the realm's sign, drawn pixel by pixel: an eight-pointed star (a square core, long rays up, down and across, short ones on the
   // diagonals) over a tower with two merlons, a lit window and a wider footing
   const SIGN=(x,y)=>{if(x>=7&&x<=8&&y>=3&&y<=4)return 1;if(x>=7&&x<=8&&(y===1||y===2||y===5))return 1;if((y===3||y===4)&&((x>=4&&x<=6)||(x>=9&&x<=11)))return 1;

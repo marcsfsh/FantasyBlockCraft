@@ -179,12 +179,15 @@ def(SPIKES,'Iron Spikes',[269,269,269],{solid:false,opq:false,occ:false,cross:tr
 // tower carved in relief, fluted pillars), roofs of slate, timbered plaster and thatch for the country, the realm's banner, hay,
 // paving for the king's roads and leaded windows
 const WSTONE=1107,WSBRICK=1108,WSCARVE=1109,WSPILLAR=1110,SLATE=1111,PLASTER=1112,TIMBER=1113,THATCH=1114,RBANNER=1115,HAYBALE=1116,PAVING=1117,LGLASS=1118;
+// and for the relief of their buildings: rock-faced whitestone for plinths and the feet of walls, a moulded band for string
+// courses, cornices and copings
+const WSROUGH=1119,WSTRIM=1120;
 def(WSTONE,'Whitestone',[270,270,270]);def(WSBRICK,'Whitestone Bricks',[271,271,271]);def(WSCARVE,'Carved Whitestone',[270,270,272]);
 def(WSPILLAR,'Whitestone Pillar',[273,273,274]);def(SLATE,'Slate Roof',[275,275,275]);def(PLASTER,'Timbered Plaster',[276,276,276]);
 def(TIMBER,'Braced Timber Frame',[276,276,277]);def(THATCH,'Thatch',[278,278,279],{snd:'soft'});
 def(RBANNER,'Banner of the Realm',[280,280,280],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(HAYBALE,'Hay Bale',[281,281,282],{snd:'soft'});
-def(PAVING,'Paving Stones',[283,283,283]);def(LGLASS,'Leaded Glass',[284,284,284],{opq:false,occ:false,snd:'glass'});
-setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING],4,'stone',1);setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
+def(PAVING,'Paving Stones',[283,283,283]);def(WSROUGH,'Rough Whitestone',[285,285,285]);def(WSTRIM,'Whitestone Moulding',[270,270,286]);def(LGLASS,'Leaded Glass',[284,284,284],{opq:false,occ:false,snd:'glass'});
+setH([WSTONE,WSBRICK,WSCARVE,WSPILLAR,PAVING,WSROUGH,WSTRIM],4,'stone',1);setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
 setH([BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR],5,'stone',1);setH([OBSBRICK],20,'stone',7);setH([CHAIN,SPIKES],1.5,'metal',2);setH([BRAZIER],3,'metal',2);
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;

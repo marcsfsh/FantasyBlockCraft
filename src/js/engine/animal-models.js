@@ -24,11 +24,11 @@ function amCorners(b,tp){
 }
 // a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture); a tapered
 // box keeps the same mapping, each face's normal taken from its corners
-function amBoxGeo(b,u,v,TX,tp){
-  TX=TX||AM_TEX;const [,,,w,h,d]=b,K=amCorners(b,tp),pos=[],nor=[],uv=[],idx=[];
+function amBoxGeo(b,u,v,TX,tp,res){
+  TX=TX||AM_TEX;const rq=res||1,[,,,w,h,d]=b,K=amCorners(b,tp),pos=[],nor=[],uv=[],idx=[];
   // for each face: four corners in image order (top left, top right, bottom left, bottom right)
   const C={L:[2,6,0,4],F:[6,7,4,5],R:[7,3,5,1],B:[3,2,1,0],T:[2,3,6,7],D:[4,5,0,1]};
-  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n0=AM_FACES[f],k=pos.length/3,q=C[f].map(i=>K[i]);
+  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w*rq,h*rq,d*rq),n0=AM_FACES[f],k=pos.length/3,q=C[f].map(i=>K[i]);
     // the normal from the diagonals (sound when an edge has shrunk to a point), turned to face outward
     const d1=[q[3][0]-q[0][0],q[3][1]-q[0][1],q[3][2]-q[0][2]],d2=[q[2][0]-q[1][0],q[2][1]-q[1][1],q[2][2]-q[1][2]];
     let n=[d1[1]*d2[2]-d1[2]*d2[1],d1[2]*d2[0]-d1[0]*d2[2],d1[0]*d2[1]-d1[1]*d2[0]];const l=Math.hypot(n[0],n[1],n[2]);
@@ -144,10 +144,11 @@ const AM_KINDS={
       P.face('earL','F',c.pale,6);P.rows('earL',['L','F','R','B'],0,1,c.mane);P.rows('legFL',['L','F','R','B'],10,12,[40,34,30]);P.eyes('head',1,1,[18,14,14]);
       P.coat(['bagL','roll'],[124,82,48],10);P.rows('bagL',['L','F','R','B'],1,2,[70,46,26]);P.rows('roll',['L','R'],0,2,[150,130,96]);}}
 };
-// ---- The texture of one coat: parts packed onto a 128 x 128 canvas (shelf packing), each face filled by the kind's paint
+// ---- The texture of one coat: parts packed onto a 128 x 128 canvas (K.tex: larger), each face filled by the kind's paint;
+// K.res texels to a pixel of the model (1 unless given; the folk of the realms are painted at 2, D-060)
 function amLayout(K){
-  if(K.uv)return K.uv;const keys=[];for(const p of K.parts){const o=p[5]||{};if(!o.m&&!keys.some(k=>k[0]===p[0]))keys.push([p[0],p[3]]);}
-  const sz=keys.map(([n,b])=>[n,2*(b[3]+b[5]),b[5]+b[4],b]).sort((a,b)=>b[2]-a[2]);
+  if(K.uv)return K.uv;const keys=[],q=K.res||1;for(const p of K.parts){const o=p[5]||{};if(!o.m&&!keys.some(k=>k[0]===p[0]))keys.push([p[0],p[3]]);}
+  const sz=keys.map(([n,b])=>[n,2*(b[3]+b[5])*q,(b[5]+b[4])*q,b]).sort((a,b)=>b[2]-a[2]);
   const TX=K.tex||AM_TEX,uv={};let x=0,y=0,rowH=0;for(const [n,w,h,b] of sz){if(x+w>TX){x=0;y+=rowH+1;rowH=0;}if(y+h>TX)throw new Error('animal texture overflow '+n);uv[n]=[x,y,b];x+=w+1;rowH=Math.max(rowH,h);} // a pixel apart
   return K.uv=uv;
 }
@@ -159,7 +160,7 @@ function amTexture(kind,ci,flags){
   const g=cv.getContext('2d'),img=g.createImageData(TX,TX),D=img.data;let seed=1+ci*977+kind.length*131,rs=seed;
   const cl=v=>v<0?0:v>255?255:v|0,set=(x,y,col,a)=>{if(x<0||y<0||x>=TX||y>=TX)return;const i=(y*TX+x)*4;D[i]=cl(col[0]);D[i+1]=cl(col[1]);D[i+2]=cl(col[2]);D[i+3]=a===undefined?255:a;};
   const src=n=>{const p=K.parts.find(q=>q[0]===n);const o=p&&p[5]||{};return o.m||n;};
-  const rect=(n,f)=>{const u=uv[src(n)];if(!u)return null;const b=u[2];return amRect(f,u[0],u[1],b[3],b[4],b[5]);};
+  const q=K.res||1,rect=(n,f)=>{const u=uv[src(n)];if(!u)return null;const b=u[2];return amRect(f,u[0],u[1],b[3]*q,b[4]*q,b[5]*q);};
   const noisy=(col,amt,x,y)=>{const v=(amHash(x,y,seed)-0.5)*2*amt;return [col[0]+v,col[1]+v,col[2]+v];};
   const P={
     r:()=>{rs=(rs*16807)%2147483647;return rs/2147483647;},
@@ -172,6 +173,9 @@ function amTexture(kind,ci,flags){
     rows(n,fs,t0,t1,col){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=Math.max(0,t0);t<Math.min(R[3],t1);t++)for(let s=0;s<R[2];s++)set(R[0]+s,R[1]+t,noisy(col,6,R[0]+s,R[1]+t));}},
     rect(n,f,s0,t0,w,h,col){const R=rect(n,f);if(!R)return;for(let t=t0;t<Math.min(R[3],t0+h);t++)for(let s=s0;s<Math.min(R[2],s0+w);s++)set(R[0]+s,R[1]+t,noisy(col,5,R[0]+s,R[1]+t));},
     px(n,f,s,t,col){const R=rect(n,f);if(R&&s<R[2]&&t<R[3])set(R[0]+s,R[1]+t,col);},
+    // every pixel of these faces through fn(s, t, w, h, f, the colour there now): a colour [r,g,b] (a fourth value: 200 to glow,
+    // 1 to cut) or nothing to leave it
+    map(n,fs,fn){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*TX+R[0]+s)*4,c=fn(s,t,R[2],R[3],f,[D[i],D[i+1],D[i+2]]);if(c)set(R[0]+s,R[1]+t,c,c[3]);}}},
     spots(n,fs,col,dens,t0,t1){for(const f of fs){const R=rect(n,f);if(!R)continue;for(let t=t0||0;t<Math.min(R[3],t1||R[3]);t++)for(let s=0;s<R[2];s++)if(amHash(R[0]+s,R[1]+t,seed+77)<dens)set(R[0]+s,R[1]+t,noisy(col,8,R[0]+s,R[1]+t));}},
     // eyes on both sides of the head: a dark pupil `fromFront` pixels behind the front, `row` pixels down, with a light glint
     eyes(n,fromFront,row,col,ring){const L=rect(n,'L'),R=rect(n,'R');if(!L)return;const e=col||[22,18,16];
@@ -195,7 +199,7 @@ function amTexture(kind,ci,flags){
     // a thin sheet (one pixel thick: across z, or across x when ax is 'x'): fn(s,t) gets every pixel of every face as the place on
     // the sheet's front (F, or L) it lies over, and returns a colour [r,g,b] (with a fourth value, 200, to glow), 'cut' for a hole
     // (alpha 1: the shader drops it), or nothing to leave it. Ragged wings, flames and holes read the same from both sides.
-    sheet(n,ax,fn){const u=uv[src(n)];if(!u)return;const [,,,w,h,d]=u[2];
+    sheet(n,ax,fn){const u=uv[src(n)];if(!u)return;const w=u[2][3]*q,h=u[2][4]*q,d=u[2][5]*q;
       for(const f in AM_FACES){const R=rect(n,f);for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){let a,b;
         if(ax==='x'){a=f==='L'?s:f==='R'?d-1-s:f==='T'?t:f==='D'?d-1-t:f==='F'?d-1:0;b=f==='T'?0:f==='D'?h-1:t;}
         else{a=f==='F'||f==='T'||f==='D'?s:f==='B'?w-1-s:f==='L'?0:w-1;b=f==='T'?0:f==='D'?h-1:t;}
@@ -205,7 +209,7 @@ function amTexture(kind,ci,flags){
   };
   K.paint(P,c,flags);
   // fill what the paint left (shared faces never left empty), then a one-pixel darker rim on every face so edges read
-  for(const n in uv){for(const f in AM_FACES){const R=amRect(f,uv[n][0],uv[n][1],uv[n][2][3],uv[n][2][4],uv[n][2][5]);
+  for(const n in uv){for(const f in AM_FACES){const R=amRect(f,uv[n][0],uv[n][1],uv[n][2][3]*q,uv[n][2][4]*q,uv[n][2][5]*q);
     for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){const i=((R[1]+t)*TX+R[0]+s)*4;if(!D[i+3]){D[i]=128;D[i+1]=110;D[i+2]=96;D[i+3]=255;}}}}
   g.putImageData(img,0,0);const tx=new THREE.CanvasTexture(cv);tx.amData=D;tx.magFilter=THREE.NearestFilter;tx.minFilter=THREE.NearestFilter;tx.generateMipmaps=false;tx.anisotropy=1; // no mipmaps: a coat never bleeds into the part beside it
   amTexC.set(key,tx);return tx;
@@ -233,7 +237,7 @@ const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
-    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex,o.tp);amGeoC.set(gk,geo);}
+    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex,o.tp,K.res);amGeoC.set(gk,geo);}
     const grp=new THREE.Group();grp.position.x=piv[0]*AM_PX;grp.position.y=piv[1]*AM_PX;grp.position.z=piv[2]*AM_PX;const r=rot||[0,0,0];grp.rotation.x=r[0];grp.rotation.y=r[1];grp.rotation.z=r[2];grp.userData.rest=r.slice();
     const m=new THREE.Mesh(geo,mat);m.frustumCulled=false;grp.add(m);(par&&parts[par]?parts[par]:root).add(grp);parts[n]=grp;if(o.dyn)dyn.push([grp,o.dyn]);}
   // the young: smaller, with a bigger head (the head's own root grows; what hangs from it grows with it)
