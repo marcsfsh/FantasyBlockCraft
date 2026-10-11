@@ -5,6 +5,36 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.33.0 (2026-10-11): the peoples against the wastes
+
+Saves from 0.32.0 carry over (save key v23): the world is unchanged.
+
+### Game
+- **The peoples and the creatures of the wastes are foes.** Men, riders and elves on one side, orcs, trolls, goblins and the Emberlords on the other, fight wherever they meet, in creative too: they see each other, close in, strike, shoot and throw until one falls. Townsfolk flee. Each side keeps the peace within itself.
+  - The folk never turn on a player who does them no harm: their blows and arrows strike only the creatures they fight (an arrow passes the player by). The creatures' arrows and stones still strike a player in survival.
+  - A creature the player strikes turns from the folk it fights to the player. What falls to the other side leaves the player nothing.
+- **Hosts in the wastes.** Every few minutes a host of the nearest people (men, riders or elves, four to six with a captain) marches through the Volcanic Wastes past the player and falls upon the warbands it meets. A host greets a passer-by in its own words and turns on a player who strikes one of it.
+
+### Tooling
+- New test case `55-strife`.
+
+## 0.32.0 (2026-10-11): the high elves
+
+Saves from 0.31.0 do not carry over (save key v23): the high elves are new to the world.
+
+### Game
+- **The high elves.** About half the stretches of the High Mountains, Alpine Meadows, Karst Crags, Fjords and Chalk Cliffs are held by the elder realms of the high elves, in pale elvenstone and gilded armour under their sign of a silver star over two leaves. They need no level ground: their cities climb the mountainsides in terraces, every building on its own platform behind dressed retaining walls with gilt rails.
+  - **Hidden cities:** behind walls with many towers and a great pointed gate between statues of warriors, the way climbs by stairs to the high hall with its arcaded porch and great tower; halls with tall arched windows of stained glass under tracery, balconies of filigree and roofs of verdigris and dark shingle swept up from low eaves; slender towers with galleries and open belvederes under swept cones; pavilions under domes, pools with lamps standing in them, gardens, silver-leaved and blossoming trees; barracks, an armoury and a training ground by the gate.
+  - **Fastnesses** with a great tower in a walled court, **refuges** of halls round a pavilion and pool, **watch-spires** on the heights, **gardens** of orchards and blossom.
+  - **The elven ways:** paved roads with lamps on columns, hidden paths, bridges on slender piers.
+- **Their folk:** spearwardens with glaives, bladewardens with curved blades and tall leaf-shaped shields, archers with tall bows, lord-captains in blue cloaks, all in gilded leaf-scale armour over wine-red robes under crested helms; knights on horses in long blue caparisons; elf-lords, elf-ladies, loremasters and smiths in flowing robes and gowns. Taller and stronger than men, their gates held by many, neutral until struck, with their own words and a clear high horn.
+- Their cities sound of a harp, singing far off, chimes and birds.
+- New blocks (creative, Building): Elvenstone, Elvenstone Courses, Carved Elvenstone, Elven Column, Elven Tracery, Elven Glass, Verdigris Roof, Elven Shingles, Gilt Filigree, Elven Lamp, Banner of the Elves, Golden Wood, Elven Mosaic.
+- Creative: the land tour lists the high elves' places.
+
+### Tooling
+- New test case `54-elves`; `15-names` allows five refused pairs.
+
 ## 0.31.0 (2026-10-11): the riders of the plains
 
 Saves from 0.30.0 do not carry over (save key v22): the riders are new to the world.

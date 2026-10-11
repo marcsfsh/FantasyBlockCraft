@@ -14,8 +14,8 @@ const o={},q={};
   const rms=b=>Math.sqrt((sq[b]||0)/Math.max(1,cnt[b]||0));
   info('roughness by land:',Object.keys(sq).map(b=>BIOMES[b]+' '+rms(b).toFixed(2)).join(', '));
   assert([2,3,7,10].every(b=>!cnt[b]||rms(b)<0.45),'green hills, elder wood, barrow hills and plains are smooth (about 0.6 to 0.7 before M3.5b)');}
-// mountains: high peaks remain, few sheer steps
-{let mt=0,steep=0,top=0;for(let X=-3000;X<3000;X+=8)for(let Z=-3000;Z<3000;Z+=8){colInfo(X,Z,o);if(o.b!==5)continue;mt++;top=Math.max(top,o.h);
+// mountains: high peaks remain, few sheer steps (the high elves' terraces and platforms, D-062, are built, not natural: their sites are left out)
+{let mt=0,steep=0,top=0;for(let X=-3000;X<3000;X+=8)for(let Z=-3000;Z<3000;Z+=8){colInfo(X,Z,o);if(o.b!==5||o.town)continue;mt++;top=Math.max(top,o.h);
     colInfo(X+1,Z,q);let s=Math.abs(q.h-o.h);colInfo(X,Z+1,q);s=Math.max(s,Math.abs(q.h-o.h));if(s>=4)steep++;}
   info('mountain columns',mt,'; highest',top,'; with a step of 4 or more',(100*steep/mt).toFixed(2)+'%');
   assert(top>420,'the ranges still rise to high peaks');assert(steep/mt<0.01,'mountain slopes are climbable, with cliffs only in places');}

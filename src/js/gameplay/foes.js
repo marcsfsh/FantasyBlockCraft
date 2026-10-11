@@ -44,11 +44,22 @@ const FOES={
   hwoman:{n:'Freewoman',m:'hwoman',hp:10,dmg:1,reach:1.6,walk:1.2,run:4.5,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'rider'},
   hherd:{n:'Horse-herd',m:'hherd',hp:12,dmg:1,reach:1.8,walk:1.25,run:4.6,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[202,1,2,0.5]],cause:'rider'},
   hthane:{n:'Thane of the Riders',m:'hthane',hp:16,dmg:2,reach:1.8,walk:1.05,run:4.3,sight:16,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.6]],cause:'rider'},
-  hsmith:{n:'Smith',m:'rsmith',hp:16,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'rider'}
+  hsmith:{n:'Smith',m:'rsmith',hp:16,dmg:2,reach:1.8,walk:1.1,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,2,0.5]],cause:'rider'},
+  // the high elves (D-062): strong in arms, their warriors stronger and keener-eyed than men's, their archers' reach long
+  espear:{n:'Spearwarden of the Elves',m:'espear',hp:32,dmg:6,reach:3.2,walk:1.4,run:5,sight:32,cd:1.2,wind:0.4,block:0.3,mass:0.5,folk:1,say:'eguard',drops:[[223,1,2,0.4],[206,1,2,0.5]],cause:'elf'},
+  esword:{n:'Bladewarden of the Elves',m:'esword',hp:32,dmg:7,reach:2.4,walk:1.4,run:5,sight:32,cd:1,wind:0.35,block:0.55,mass:0.5,folk:1,say:'eguard',drops:[[223,1,2,0.4],[206,1,2,0.5]],cause:'elf'},
+  ebow:{n:'Archer of the Elves',m:'ebow',hp:24,dmg:3,reach:2,walk:1.45,run:5.1,sight:40,cd:1.1,wind:0.35,shot:{dmg:5,v:34,lo:5,hi:36,cd:1.6,k:'arrow'},keep:13,mass:0.55,folk:1,say:'eguard',drops:[[201,2,5,0.7],[206,1,1,0.4]],cause:'earrow'},
+  ecapt:{n:'Lord-Captain of the Elves',m:'ecapt',hp:64,dmg:10,reach:2.6,walk:1.4,run:5,sight:36,cd:1,wind:0.4,block:0.5,mass:0.35,folk:1,drops:[[227,1,3,0.7],[224,1,2,0.5]],cause:'elf'},
+  eknight:{n:'Knight of the Elves',m:'eknight',hp:48,dmg:8,reach:3.4,walk:1.8,run:7.5,sight:36,cd:1.3,wind:0.45,block:0.45,mass:0.2,tall:3,mount:1,folk:1,say:'eguard',drops:[[223,1,2,0.4],[227,1,1,0.3]],cause:'eknight'},
+  elord:{n:'Elf-lord',m:'elord',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'elf'},
+  elady:{n:'Elf-lady',m:'elady',hp:18,dmg:1,reach:1.6,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'elf'},
+  elore:{n:'Loremaster',m:'elore',hp:16,dmg:1,reach:1.6,walk:1.05,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,1,0.3]],cause:'elf'},
+  esmith:{n:'Elven Smith',m:'esmith',hp:20,dmg:2,reach:1.8,walk:1.1,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,3,0.6]],cause:'elf'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
   troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you',
-  rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down'});
+  rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down',
+  elf:'The warriors of the elves struck you down',earrow:'An elven archer shot you',eknight:'A knight of the elves rode you down'});
 // who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
 const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
   lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]]};
@@ -61,10 +72,18 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   h_gate:[['hspear',3],['hbow',1.5]],h_gatein:[['hspear',2],['hrider',1]],h_hall:[['hspear',1.5],['hman',1],['hwoman',1]],h_citgate:[['hspear',1]],
   h_street:[['hman',2],['hwoman',2],['hherd',0.6],['hspear',0.4]],h_market:[['hwoman',3],['hman',2]],h_smithy:[['hman',1]],h_stable:[['hherd',2],['hman',1]],
   h_paddock:[['hherd',1]],h_keep:[['hspear',2]],h_barracks:[['hspear',2],['hbow',1]],h_drill:[['hrider',2],['hspear',1]],h_green:[['hman',2],['hwoman',2],['hherd',1]],
-  h_lane:[['hman',1],['hherd',1]],h_farm:[['hherd',2],['hwoman',1]],h_field:[['hman',1]],h_post:[['hspear',2],['hbow',2]],h_patrol:[['hrider',1]]});
+  h_lane:[['hman',1],['hherd',1]],h_farm:[['hherd',2],['hwoman',1]],h_field:[['hman',1]],h_post:[['hspear',2],['hbow',2]],h_patrol:[['hrider',1]],
+  // the high elves' places (D-062): strong in arms, their gates, walls and courts are held by many
+  e_gate:[['espear',3],['esword',2],['ebow',2]],e_gatein:[['espear',2],['esword',2],['eknight',1]],e_hall:[['esword',2],['elord',1.5],['elady',1.5],['elore',1]],
+  e_street:[['elord',2],['elady',2],['elore',1],['esword',0.6]],e_garden:[['elady',2],['elord',1.5],['elore',1.5]],e_barracks:[['esword',2],['espear',2],['ebow',1]],
+  e_drill:[['esword',2],['ebow',2],['espear',1]],e_smithy:[['elore',1]],e_keep:[['esword',2],['espear',1],['ebow',1]],e_green:[['elord',1],['elady',2],['elore',1]],
+  e_lane:[['elady',1],['elord',1]],e_farm:[['elady',1],['elord',1]],e_field:[['elady',1],['elore',1]],e_post:[['espear',2],['ebow',2]],e_patrol:[['eknight',1]],
+  // a host of each people that marches through the Volcanic Wastes against its creatures (D-063)
+  r_host:[['rsword',2],['rspear',2],['rbow',1.5]],h_host:[['hrider',3],['hbow',1],['hspear',0.5]],e_host:[['esword',2],['espear',2],['ebow',2],['eknight',1]]});
 const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
     stable:[1,2],paddock:[1,1]},
-  FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt'};
+  FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
+    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -78,10 +97,10 @@ const foeWet=(x,y,z)=>{const id=get(Math.floor(x),y,Math.floor(z));return isWetI
 function addFoe(kind,x,y,z,o){
   const F=FOES[kind],K=AM_KINDS[F.m],ci=o&&o.ci!==undefined&&K.coats[o.ci]?o.ci:amCoat(F.m,Math.random()),m=amBuild(F.m,ci,{});scene.add(m.grp);scene.add(m.shadow);
   const f=Object.assign({id:foeId++,kind:kind,x:x,y:y,z:z,gy:y,vy:0,kvx:0,kvz:0,yaw:Math.random()*6.283,hd:0,sp:0,st:'idle',t:1+Math.random()*2,hp:F.hp,mhp:F.hp,hx:x,hy:y,hz:z,grp:0,
-    ph:Math.random()*6,amp:0,atk:0,atkK:'',atkT:0,shotT:1+Math.random()*2,whipT:3,seen:0,losT:0,vis:false,lk:0,lkT:0,hurt:0,ct:4+Math.random()*10,lt:0,eL:1,eB:0,det:0,detT:0,ci:ci,m:m},o||{});
+    ph:Math.random()*6,amp:0,atk:0,atkK:'',atkT:0,foe:null,eseen:0,scanT:Math.random()*0.5,shotT:1+Math.random()*2,whipT:3,seen:0,losT:0,vis:false,lk:0,lkT:0,hurt:0,ct:4+Math.random()*10,lt:0,eL:1,eB:0,det:0,detT:0,ci:ci,m:m},o||{});
   f.hd=f.yaw;if(!f.grp)f.grp=f.id;foes.push(f);placeFoe(f,0);return f;
 }
-function removeFoe(f){scene.remove(f.m.grp);scene.remove(f.m.shadow);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
+function removeFoe(f){f.gone=1;scene.remove(f.m.grp);scene.remove(f.m.shadow);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
 // a group of `n` from a place's table around (x,z) near height y, sharing a group and a home; spread within r
 function spawnGroup(table,n,x,y,z,r,o){
   let lead=null;const out=[];
@@ -120,13 +139,32 @@ function foeSpawnTick(){
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':null,sleep:s.kind==='den'?0.45:0});}
   folkPatrol();
+  // now and then a host of the nearest people marches through the wastes against their creatures (D-063): from out of sight
+  // behind the player to as far again beyond, one host at a time, every few minutes
+  hostT-=1;if(hostT<=0){hostT=20;if(!foes.some(f=>f.host&&!f.dead)&&folkCount()<FOLK_CAP-6){const p=wasteGround(46,60),H=p&&hostOf(PL.x+OX,PL.z+OZ);if(H){hostT=150+Math.random()*90;
+    const grp=spawnGroup(H.C.fp+'host',4+Math.floor(Math.random()*3),p.x,p.g,p.z,4,{lead:FOLK_LEAD[H.C.fp+'host'],prov:H.key}),hx=2*PL.x-p.x,hz=2*PL.z-p.z;
+    for(const f of grp){f.host=H;f.hx=hx+(Math.random()-0.5)*6;f.hz=hz+(Math.random()-0.5)*6;f.st='return';f.t=60;}
+    if(grp.length){toast('A host of '+H.k.replace(/^The /,'the ')+' marches through the wastes');foeCall(grp[0],'alert');}}}}
   // the wastes: a warband (sometimes led by a warchief) or a troll, out of sight, on open ground of the volcanic land
   const roam=foes.filter(f=>!f.spot&&!f.dead&&!FOES[f.kind].folk).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
-  const a=PL.yaw+Math.PI+(Math.random()-0.5)*Math.PI*1.4,d=38+Math.random()*28,x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
-  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA-WB_DEP||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
-  colInfo(bx+OX,bz+OZ,TFO);if(TFO.wVolc<0.55||TFO.vflow||TFO.vfis||TFO.vlake)return;const top=get(bx,g,bz);if(!SOLID[top]||top===LAVA)return;
-  if(Math.random()<0.2)spawnGroup('band',1,x,g,z,2,{lead:'troll'});
-  else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),x,g,z,5,{lead:Math.random()<0.12?'ochief':null});
+  const p=wasteGround(38,66);if(!p)return;
+  if(Math.random()<0.2)spawnGroup('band',1,p.x,p.g,p.z,2,{lead:'troll'});
+  else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),p.x,p.g,p.z,5,{lead:Math.random()<0.12?'ochief':null});
+}
+// open ground of the volcanic land d0 to d1 blocks from the player, behind them (out of sight), or null
+function wasteGround(d0,d1){
+  const a=PL.yaw+Math.PI+(Math.random()-0.5)*Math.PI*1.4,d=d0+Math.random()*(d1-d0),x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return null;const g=ground[bx+W*bz];if(g<=SEA-WB_DEP||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return null;
+  colInfo(bx+OX,bz+OZ,TFO);if(TFO.wVolc<0.55||TFO.vflow||TFO.vfis||TFO.vlake)return null;const top=get(bx,g,bz);if(!SOLID[top]||top===LAVA)return null;
+  return {x:x,z:z,g:g};
+}
+// the people whose held stretch lies nearest (X,Z), and its kingdom: they send the hosts into the wastes there (kept per cell)
+const hostC=new Map();let hostT=45;
+function hostOf(X,Z){
+  const i0=Math.floor(X/LS),j0=Math.floor(Z/LS),key=i0*65536+j0;if(hostC.has(key))return hostC.get(key);if(hostC.size>200)hostC.clear();let best=null,bd=1e9;
+  for(let r=1;r<=8&&!best;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=stretchCell(landSite(i0+a,j0+b)),C=realmHeld(c);if(!C)continue;
+    const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best={C:C,c:c};}}
+  const H=best?{C:best.C,key:'host:'+best.C.k+best.c.i+','+best.c.j,k:kingdomOf(best.c,best.C).name}:null;hostC.set(key,H);return H;
 }
 // ---- The folk of the realms (D-060): neutral until struck. A blow to any of them sets their province's wrath (eased away over a
 // minute or two, longer for a death): its guards near by take up arms against the player, its townsfolk flee; never in
@@ -137,14 +175,14 @@ const folkWrath=f=>!!f.prov&&(realmWrath.get(f.prov)||0)>0;
 function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
   for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
     if(G.civ){if(Math.hypot(g.x-PL.x,g.z-PL.z)<18){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;g.ct=Math.random()*0.8;}}
-  if(!was){toast('The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
+  if(!was){toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
 // a patrol on the king's road (two to four soldiers, now and then with their captain), out of sight, walking the road
 function folkPatrol(){
   if(folkCount()>=FOLK_CAP-4||Math.random()>0.25)return;const X=PL.x+OX,Z=PL.z+OZ,T=realmTile(Math.floor(X),Math.floor(Z));
   const roads=T.roads.filter(r=>r.k==='high');if(!roads.length)return;if(foes.some(f=>f.road&&!f.dead))return;
   const rd=roads[Math.floor(Math.random()*roads.length)],t=Math.random(),px=rd.a[0]+(rd.b[0]-rd.a[0])*t,pz=rd.a[1]+(rd.b[1]-rd.a[1])*t,d=Math.hypot(px-X,pz-Z);
   if(d<34||d>70)return;const x=px-OX,z=pz-OZ,bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return;
-  const C=rd.P.cult,horse=C.k==='horse',grp=spawnGroup(C.fp+'patrol',2+Math.floor(Math.random()*2),x,ground[bx+W*bz],z,horse?3:2,{lead:!horse&&Math.random()<0.3?'rcapt':null,prov:rd.P.key,site:rd.P.sites[0]});
+  const C=rd.P.cult,horse=C.k==='horse',grp=spawnGroup(C.fp+'patrol',2+Math.floor(Math.random()*2),x,ground[bx+W*bz],z,horse||C.k==='elf'?3:2,{lead:C.k==='white'&&Math.random()<0.3?'rcapt':null,prov:rd.P.key,site:rd.P.sites[0]});
   const dir=Math.random()<0.5?1:-1;for(const f of grp){f.road={rd:rd,dir:dir,along:t*rd.len};f.st='idle';f.t=0.5;}
 }
 // the horses of a riders' paddock (D-061): put out once while the player is near, penned until one is ridden away
@@ -168,55 +206,106 @@ const FOLK_SAY={
   hwoman:['Well met, traveller.','The hearth in {p} is never let go out.','Mind the foals by the paddock.','My brothers ride with the riders of {k}.'],
   hherd:['Easy now. They are skittish with strangers.','Every horse in {p} knows my whistle.','The wolves came close last winter, but not one foal was lost.'],
   hthane:['Be welcome in the hall of {p}. Lay aside your blade at the door.','The kings of {k} sleep in their mounds beside the road. We keep their memory green.','Sit by the fire, guest. The hall is open to friends.'],
-  hsmith:['Shoes for horses and heads for spears. Mind the sparks.','The riders of {p} ride on my iron.','A loose shoe can lose a battle.']};
+  hsmith:['Shoes for horses and heads for spears. Mind the sparks.','The riders of {p} ride on my iron.','A loose shoe can lose a battle.'],
+  // the high elves (D-062)
+  eguard:['You walk in {p}, stranger. Walk softly.','The watch on the walls of {k} has not slept in a thousand years.','Few find their way here, and fewer still unbidden.','Keep your blade sheathed and you are welcome.','The stars are bright over the mountains tonight.'],
+  ecapt:['I keep the gates of {p}. Speak, and be known.','Our blades were forged when these mountains were young.','Dark things stir in the burning lands. We are watching.'],
+  elord:['Be welcome in {p}, traveller. Rest here as long as you need.','The world grows old, and we remember it young.','Even here the years are felt, though slowly.'],
+  elady:['The fountains of {p} sing at night, if you listen.','You have come far. Sit a while by the water.','There is much beauty yet in the world.'],
+  elore:['The histories of {k} fill a hundred halls. I have read but a few.','Every stone here was laid with a song.','Ask, and I will tell you what I know of the elder days.'],
+  esmith:['Steel that sings is steel well made.','A blade from these forges never dulls in a worthy hand.','The forges of {p} burn white, not red.'],
+  // a host in the wastes (D-063)
+  host:['We march against the creatures of the ash, for {k}.','Keep close, traveller. The ash hides many foes.','The orcs grow bold. {k} will not wait for them at its gates.','If the horns sound, stand behind our line.','Not all who march out of {k} march home again.']};
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
-  for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
-    const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):'the kingdom';
+  for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast(F.n+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
 // ---- Behaviour
 // can a foe see the player? A ray from its eyes to the player's, through anything but solid opaque blocks
-function foeSees(f){const F=FOES[f.kind],ex=f.x,ey=f.y+f.m.box[4]*0.85,ez=f.z,tx=PL.x,ty=PL.y+EYE,tz=PL.z,d=Math.hypot(tx-ex,ty-ey,tz-ez),n=Math.ceil(d*2);
-  if(d>F.sight*2.6)return false;for(let k=1;k<n;k++){const q=k/n,id=get(Math.floor(ex+(tx-ex)*q),Math.floor(ey+(ty-ey)*q),Math.floor(ez+(tz-ez)*q));if(OPQ[id]&&SOLID[id])return false;}return true;}
+function foeSees(f){return foeSeesAt(f,PL.x,PL.y+EYE,PL.z,FOES[f.kind].sight*2.6);}
+function foeSeesAt(f,tx,ty,tz,lim){const ex=f.x,ey=f.y+f.m.box[4]*0.85,ez=f.z,d=Math.hypot(tx-ex,ty-ey,tz-ez),n=Math.ceil(d*2);
+  if(d>lim)return false;for(let k=1;k<n;k++){const q=k/n,id=get(Math.floor(ex+(tx-ex)*q),Math.floor(ey+(ty-ey)*q),Math.floor(ez+(tz-ez)*q));if(OPQ[id]&&SOLID[id])return false;}return true;}
+// ---- Strife (D-063): the creatures of the wastes and the folk of the realms are foes to each other wherever they meet, in
+// creative too. Each looks about every half second for the nearest of the other side it can see; it keeps to the one it fights
+// unless another is plainly nearer, and lets it go when long unseen or far. A player it hunts comes first when plainly nearer.
+// A new fight rallies its fellows near by; townsfolk flee. Their blows and shots wound each other (never one of their own side);
+// what falls to the other side leaves nothing for the player.
+const foeRad=f=>Math.max(f.m.box[3],-f.m.box[0]),foeSide=f=>!FOES[f.kind].folk;
+const foeEyeOn=(f,g,lim)=>foeSeesAt(f,g.x,g.y+g.m.box[4]*0.6,g.z,lim);
+function foeScan(f,F,tg){
+  let E=f.foe;const sr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight,far=g=>f.leash&&Math.hypot(g.x-f.hx,g.z-f.hz)>f.leash+12;
+  if(E){const d=Math.hypot(E.x-f.x,E.z-f.z);if(foeEyeOn(f,E,F.sight*2.6))f.eseen=0;else f.eseen+=0.5;
+    if(f.eseen>6||d>F.sight*2.5||far(E)){f.foe=E=null;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}}
+  const hunts=tg&&f.vis&&!F.civ&&(!F.folk||folkWrath(f)),pd=Math.hypot(PL.x-f.x,PL.z-f.z);
+  if(E&&hunts&&pd<Math.hypot(E.x-f.x,E.z-f.z)-3){f.foe=null;f.st='chase';f.seen=0;return;}
+  let best=null,bd=E?Math.hypot(E.x-f.x,E.z-f.z)-3:sr;if(hunts&&f.st==='chase'&&!E)bd=Math.min(bd,pd-3);
+  for(const g of foes){if(g===f||g===E||g.dead||foeSide(g)===foeSide(f))continue;const d=Math.hypot(g.x-f.x,g.z-f.z);
+    if(d>=bd||Math.abs(g.y-f.y)>14||far(g)||!foeEyeOn(f,g,sr+2))continue;best=g;bd=d;}
+  if(best){f.foe=best;f.eseen=0;if(!E)foeRally(f,best);else foeEngage(f);}
+}
+function foeEngage(g){if(FOES[g.kind].civ){if(g.st!=='flee'){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;}}
+function foeRally(f,E){
+  for(const g of foes){if(g.dead||g.foe&&g!==f)continue;if(g!==f&&(g.grp!==f.grp||Math.hypot(g.x-f.x,g.z-f.z)>20||g.st==='chase'))continue;
+    g.foe=E;g.eseen=0;foeEngage(g);if(g!==f&&!FOES[g.kind].civ&&Math.random()<0.5)g.ct=Math.random()*0.6;}
+  foeCall(f,'alert');}
+// a blow or a shot from the other side: less through a shield from the front, a push back; it turns on the one who struck
+// unless it already fights; slain, it falls
+function foeHurtFoe(g,n,by,ux,uz,kb,blow){
+  if(g.dead)return;const G=FOES[g.kind];
+  if(blow&&G.block&&g.st!=='sleep'&&Math.abs(angTo(g.yaw,Math.atan2(by.x-g.x,by.z-g.z)))<1.05){n*=1-G.block;burst(0.12,'bandpass',2600,4,0.2,0,[g.x,g.y+1.2,g.z]);}
+  g.hp-=n;g.hurt=1;g.kvx+=ux*kb*G.mass;g.kvz+=uz*kb*G.mass;if(blow&&G.mass>0.3)g.vy=Math.max(g.vy,2);
+  for(let k=0;k<4;k++)spawnP(g.x,g.y+g.m.box[4]*0.6,g.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,g.kind==='ember'?[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
+  if(g.st==='sleep')g.st='idle';
+  if(!g.foe&&g.st!=='chase'&&!by.gone&&!by.dead){g.foe=by;g.eseen=0;foeRally(g,by);}else foeCall(g,'hurt');
+  if(g.hp<=0)foeFalls(g,by);
+}
+function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;if(g.lordOf)lordFalls(g);
+  if(G.boss&&!g.lordOf&&Math.hypot(g.x-PL.x,g.z-PL.z)<48){const n=FOES[by.kind].n.toLowerCase();toast('The '+G.n.toLowerCase()+' is slain by a'+(/^[aeiou]/.test(n)?'n ':' ')+n);}}
 const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
-function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee')continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
+function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee'||g.foe)continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
   foeCall(f,'alert');}
 function foeHome(f,r){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=1+Math.random()*r,tx=f.hx+Math.sin(a)*d,tz=f.hz+Math.cos(a)*d,ty=foeStand(tx,f.y,tz,FOES[f.kind].tall||2);
   if(ty>0&&Math.abs(ty-f.y)<=2&&!foeWet(tx,ty,tz)){f.tx=tx;f.tz=tz;return true;}}return false;}
 function stepFoe(f,dt){
-  const F=FOES[f.kind],dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
-  f.hurt=Math.max(0,f.hurt-dt*3);f.atkT-=dt;f.shotT-=dt;f.whipT-=dt;f.detT-=dt;
+  const F=FOES[f.kind],pdx=PL.x-f.x,pdz=PL.z-f.z,pdp=Math.hypot(pdx,pdz),pdy=PL.y-f.y,tg=foeTarget();
+  f.hurt=Math.max(0,f.hurt-dt*3);f.atkT-=dt;f.shotT-=dt;f.whipT-=dt;f.detT-=dt;f.scanT-=dt;
   if(f.dead){f.dead+=dt;f.sp=0;return;}
   if(f.hold){f.sp=f.holdSp||0;f.hd=f.yaw;if(f.holdAtk!==undefined)f.atk=f.holdAtk;return;}
   f.t-=dt;
   // sight: noticed when near and in view (sleepers only close by); lost when long unseen or far
-  f.losT-=dt;if(tg&&f.losT<=0&&dp<F.sight*2.6+4){f.losT=0.35+Math.random()*0.15;f.vis=dp<F.sight*2.6&&Math.abs(dy)<14&&foeSees(f);}
-  if(!tg){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
-  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(f.vis&&dp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||dp<14)))foeAlert(f);}
-  else if(f.st==='chase'){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||dp>F.sight*2.5){f.st='return';f.atk=0;}}
-  if(f.leash&&f.st==='chase'&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
-  if(F.folk&&f.st==='chase'&&!folkWrath(f)){f.st='return';f.atk=0;} // the realm's wrath has passed
-  if(F.flee&&tg&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
-  if(f.st==='flee'&&f.t<=0){if(!F.civ)f.st='chase';else if(tg&&folkWrath(f)&&dp<16)f.t=3+Math.random()*2;else{f.st='return';f.t=0;}}
+  f.losT-=dt;if(tg&&f.losT<=0&&pdp<F.sight*2.6+4){f.losT=0.35+Math.random()*0.15;f.vis=pdp<F.sight*2.6&&Math.abs(pdy)<14&&foeSees(f);}
+  // a foe of the other side (D-063): the one it fights while it stands; a fresh look about every half second
+  if(f.foe&&(f.foe.dead||f.foe.gone)){f.foe=null;f.scanT=0;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}
+  if(f.scanT<=0){f.scanT=0.4+Math.random()*0.2;foeScan(f,F,tg);}
+  const E=f.foe,dx=E?E.x-f.x:pdx,dz=E?E.z-f.z:pdz,dp=E?Math.hypot(dx,dz):pdp,dy=E?E.y-f.y:pdy,vis=E?f.eseen===0:f.vis,er=E?foeRad(E):0;
+  if(!tg&&!E){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
+  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(tg&&f.vis&&pdp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||pdp<14)))foeAlert(f);}
+  else if(f.st==='chase'&&!E){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||pdp>F.sight*2.5){f.st='return';f.atk=0;}}
+  if(f.leash&&f.st==='chase'&&!E&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
+  if(F.folk&&f.st==='chase'&&!E&&!folkWrath(f)){f.st='return';f.atk=0;} // the realm's wrath has passed
+  if(F.flee&&(tg||E)&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
+  if(f.st==='flee'&&f.t<=0){if(!F.civ)f.st='chase';else if(E&&dp<16||tg&&folkWrath(f)&&pdp<16)f.t=3+Math.random()*2;else{f.st='return';f.t=0;f.foe=null;}}
   let want=0,face=false;
   switch(f.st){
     case 'sleep':break;
-    case 'idle':if(F.folk&&dp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
+    case 'idle':if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
       if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
-    case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&dp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
+    case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&pdp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
     case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);if(d<2.5||f.t<-30){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{
-      const toward=Math.atan2(dx,dz),S=F.shot;face=true;
+      // against a creature its girth counts: the blow lands on its near side
+      const toward=Math.atan2(dx,dz),S=F.shot,de=dp-er;face=true;
       // ranged: shoot when in range and in view, keeping a distance; otherwise close in
-      if(S&&f.vis&&dp>=S.lo&&dp<=S.hi&&f.shotT<=0&&!f.atk){f.atk=0.45;f.atkK='shot';f.shotT=S.cd*(0.8+Math.random()*0.4);}
-      if(F.whip&&f.vis&&dp>=F.whip.lo&&dp<=F.whip.hi&&f.whipT<=0&&!f.atk){f.atk=0.55;f.atkK='whip';f.whipT=F.whip.cd;}
-      if(dp<F.reach+0.2&&Math.abs(dy)<(F.dyr||2.4)&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
-      if(F.keep&&dp<F.keep&&!f.atk){f.hd=toward+Math.PI+(f.id%2?0.5:-0.5);want=F.walk*1.2;}
-      else if(F.keep&&S&&dp<=S.hi*0.8&&f.vis){f.hd=toward+(Math.floor(foeClock/3+f.id)%2?1.4:-1.4);want=F.walk*0.6;}
-      else if(dp>F.reach*0.8){f.hd=toward;want=dp>6?F.run:F.walk*1.6;}
+      if(S&&vis&&dp>=S.lo&&dp<=S.hi&&f.shotT<=0&&!f.atk){f.atk=0.45;f.atkK='shot';f.shotT=S.cd*(0.8+Math.random()*0.4);}
+      if(F.whip&&vis&&dp>=F.whip.lo&&dp<=F.whip.hi&&f.whipT<=0&&!f.atk){f.atk=0.55;f.atkK='whip';f.whipT=F.whip.cd;}
+      if(de<F.reach+0.2&&Math.abs(dy)<(F.dyr||2.4)&&f.atkT<=0&&!f.atk){f.atk=F.wind;f.atkK='blow';f.atkT=F.cd;}
+      if(F.keep&&de<F.keep&&!f.atk){f.hd=toward+Math.PI+(f.id%2?0.5:-0.5);want=F.walk*1.2;}
+      else if(F.keep&&S&&dp<=S.hi*0.8&&vis){f.hd=toward+(Math.floor(foeClock/3+f.id)%2?1.4:-1.4);want=F.walk*0.6;}
+      else if(de>F.reach*0.8){f.hd=toward;want=de>6?F.run:F.walk*1.6;}
       if(f.atk)want*=0.25;
       // a way round what blocks it
       if(f.det&&f.detT>0)f.hd+=f.det*1.1;break;}
@@ -236,12 +325,12 @@ function stepFoe(f,dt){
   const gy=foeStand(f.x,f.y+0.05,f.z,tall);if(gy>0)f.gy=gy;
   if(f.vy>0||f.y>f.gy+0.001){f.vy-=24*dt;f.y+=f.vy*dt;if(f.y<=f.gy){f.y=f.gy;f.vy=0;}}else if(f.y<f.gy)f.y=Math.min(f.gy,f.y+5*dt);
   // room from each other and the player
-  const r1=Math.max(f.m.box[3],-f.m.box[0])+0.1;
-  if(dp<r1+0.3&&dp>0.01){f.kvx-=dx/dp*dt*14;f.kvz-=dz/dp*dt*14;}
-  for(const g of foes){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e=Math.hypot(ex,ez),rr=r1+Math.max(g.m.box[3],-g.m.box[0]);if(e<rr&&e>0.01){f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}
-  // the head turns to the player when near; now and then a call
+  const r1=foeRad(f)+0.1;
+  if(pdp<r1+0.3&&pdp>0.01){f.kvx-=pdx/pdp*dt*14;f.kvz-=pdz/pdp*dt*14;}
+  for(const g of foes){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e=Math.hypot(ex,ez),rr=r1+foeRad(g);if(e<rr&&e>0.01){f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}
+  // the head turns to whom it faces when near; now and then a call
   if(dp<12&&f.st!=='sleep'){f.lkT=Math.max(-0.8,Math.min(0.8,angTo(f.yaw,Math.atan2(dx,dz))));}else f.lkT*=0.9;
-  f.ct-=dt;if(f.ct<=0){f.ct=(f.st==='chase'?3:8)+Math.random()*10;if(dp<36&&f.st!=='sleep')foeCall(f,f.st==='chase'?'alert':'idle');}
+  f.ct-=dt;if(f.ct<=0){f.ct=(f.st==='chase'?3:8)+Math.random()*10;if(pdp<36&&f.st!=='sleep')foeCall(f,f.st==='chase'?'alert':'idle');}
 }
 // a patrol's next stretch of road: twelve blocks on in the way it walks, turning back at the road's ends; its home moves with it
 function folkRoadStep(f){const R=f.road,rd=R.rd;R.along+=R.dir*12;if(R.along<0||R.along>rd.len){R.dir=-R.dir;R.along=Math.max(0,Math.min(rd.len,R.along));}
@@ -249,6 +338,13 @@ function folkRoadStep(f){const R=f.road,rd=R.rd;R.along+=R.dir*12;if(R.along<0||
   if(ty<0)return false;f.tx=tx;f.tz=tz;f.hx=tx;f.hz=tz;return true;}
 // a blow, a shot or a lash, as its wind-up ends
 function foeStrike(f,F){
+  const E=f.foe&&!f.foe.dead&&!f.foe.gone?f.foe:null;
+  if(E){const dx=E.x-f.x,dz=E.z-f.z,dp=Math.hypot(dx,dz),dy=E.y-f.y,ux=dx/(dp||1),uz=dz/(dp||1);
+    if(f.atkK==='blow'){foeCall(f,'blow');if(dp-foeRad(E)<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6))foeHurtFoe(E,F.dmg,f,ux,uz,F.mass<0.2?9:5,true);}
+    else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtFoe(E,F.whip.dmg,f,ux*0.6,uz*0.6,4);
+      for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
+    else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
+    return;}
   const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
   if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
   else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(tg&&dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtPlayer(F.whip.dmg,F.cause,-dx/(dp||1)*0.6,-dz/(dp||1)*0.6,4);
@@ -261,21 +357,25 @@ function foeHurtPlayer(n,cause,ux,uz,kb){if(!foeTarget())return;const before=hp;
 const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]},hellfire:{g:0,sz:0.9,col:[1,0.5,0.1],glow:1}};
 const shotGeo=new THREE.BoxGeometry(1,1,1);
 function foeShoot(f,S,k){
-  const K=SHOT_K[S.k],ex=f.x+Math.sin(f.yaw)*0.6,ey=f.y+f.m.box[4]*0.8,ez=f.z+Math.cos(f.yaw)*0.6;
-  // lead the player a little, and loft a heavy shot so it lands
-  const tx=PL.x,ty=PL.y+1.1,tz=PL.z,d=Math.hypot(tx-ex,tz-ez),t=d/S.v,ax=tx+PL.vx*t*0.6+(k?(Math.random()-0.5)*k*2.5:0),az=tz+PL.vz*t*0.6+(k?(Math.random()-0.5)*k*2.5:0);
+  const K=SHOT_K[S.k],ex=f.x+Math.sin(f.yaw)*0.6,ey=f.y+f.m.box[4]*0.8,ez=f.z+Math.cos(f.yaw)*0.6,E=f.foe&&!f.foe.dead&&!f.foe.gone?f.foe:null;
+  // lead the player (or the creature it fights) a little, and loft a heavy shot so it lands
+  const tx=E?E.x:PL.x,ty=E?E.y+E.m.box[4]*0.55:PL.y+1.1,tz=E?E.z:PL.z,tvx=E?Math.sin(E.yaw)*E.sp:PL.vx,tvz=E?Math.cos(E.yaw)*E.sp:PL.vz;
+  const d=Math.hypot(tx-ex,tz-ez),t=d/S.v,ax=tx+tvx*t*0.6+(k?(Math.random()-0.5)*k*2.5:0),az=tz+tvz*t*0.6+(k?(Math.random()-0.5)*k*2.5:0);
   const vx=(ax-ex)/t,vz=(az-ez)/t,vy=(ty-ey)/t+0.5*K.g*t;
   const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(K.col[0],K.col[1],K.col[2]),transparent:!!K.glow,opacity:K.glow?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
   m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}m.frustumCulled=false;scene.add(m);
-  shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
+  shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,from:f,side:foeSide(f),atP:!FOES[f.kind].folk||folkWrath(f),cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
   if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
 }
 function updShots(dt){
   for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;s.vy-=K.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;
     let gone=s.life<=0;const id=get(Math.floor(s.x),Math.floor(s.y),Math.floor(s.z));
     if(!gone&&SOLID[id])gone=true;
-    if(!gone&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
+    if(!gone&&s.atP&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
       const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
+    // a shot strikes a creature of the other side (D-063); it passes its own
+    if(!gone)for(const g of foes){if(g.dead||foeSide(g)===s.side)continue;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz){
+      const v=Math.hypot(s.vx,s.vz)||1;foeHurtFoe(g,s.dmg,s.from,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;break;}}
     if((s.k==='fire'||s.k==='hellfire')&&Math.random()<(s.k==='fire'?0.6:1))spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
     if(gone){if(s.k==='fire'||s.k==='hellfire')for(let k=0;k<(s.k==='fire'?8:24);k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
       else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
@@ -374,7 +474,8 @@ function foeCall(f,what){
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
   else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
-    else{if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
+    else{if(what==='alert'&&k[0]==='e'&&(k==='ecapt'||Math.random()<0.35)){tone(440,440,1.1,0.07,0,'triangle',at);tone(660,660,1.8,0.06,0.9,'triangle',at);} // the elves' horn, clear and high
+      else if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
       else if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn
       if(FOES[k].mount&&what!=='blow'&&Math.random()<0.5)voice(420*p,260,0.7,0.06,{form:900,q:2,vib:16,vd:0.18},at); // the horse whinnies
       voice(150*p,120,what==='alert'?0.45:0.3,0.07,{form:700,q:1.3,vib:5,vd:0.04},at);}}
@@ -402,6 +503,7 @@ function foeAct(btn){
   f.hp-=dmg;f.hurt=1;const kx=f.x-PL.x,kz=f.z-PL.z,kd=Math.hypot(kx,kz)||1;f.kvx=kx/kd*5*F.mass;f.kvz=kz/kd*5*F.mass;if(F.mass>0.3)f.vy=2.5;
   wearHeld(1);for(let k=0;k<6;k++)spawnP(f.x,f.y+f.m.box[4]*0.6,f.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,f.kind==='ember'?[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
   if(F.folk)folkProvoke(f,90);
+  if(f.foe&&foeTarget()&&!F.civ&&(!F.folk||folkWrath(f))){f.foe=null;f.st='chase';f.seen=0;f.vis=true;} // it turns from the creature it fought to the player
   if(f.st!=='chase'&&f.st!=='flee'&&foeTarget())foeAlert(f);if(f.st==='sleep'){f.st='idle';}foeCall(f,'hurt');
   if(f.hp<=0)foeSlain(f);
   return true;
@@ -410,8 +512,9 @@ function foeSlain(f){
   const F=FOES[f.kind],got=[];f.dead=0.001;f.st='dead';f.sp=0;f.atk=0;if(F.folk)folkProvoke(f,180);
   if(SURV())for(const [id,lo,hi,ch] of F.drops)if(Math.random()<ch){const n=lo+Math.floor(Math.random()*(hi-lo+1)),left=addItem(id,n);if(left)toast('No room for '+nameOf(id));got.push(n+' '+nameOf(id));}
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
-  if(f.lordOf){fallenLords.add(f.lordOf);saveDirty=true;showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
-    burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
+  if(f.lordOf)lordFalls(f);
 }
+function lordFalls(f){fallenLords.add(f.lordOf);saveDirty=true;showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
+  burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
 // armour (D-052): a coat in the body slot takes a share of every blow from a foe, and wears
 function armourCut(n){const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[q.id];q.d=(q.d||0)+1;if(q.d>=it.dur){equip.body=null;toast('Your '+it.n+' is worn through');}return Math.max(1,Math.round(n*(1-it.armor)));}

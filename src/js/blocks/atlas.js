@@ -404,6 +404,51 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   // a rail fence: posts at the sides, two rails, open between
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const post=x<=1||x>=14,rail=(y>=3&&y<=5)||(y>=10&&y<=12);if(post||rail)P(304,x,y,sh([124,90,56],(post?(x===0||x===15?-14:4):(y===3||y===10?12:y===5||y===12?-14:0))+(hn(x,y,405)-.5)*12));
     if(x<=1&&y<=1||x>=14&&y>=14||x<=1&&y>=14||x>=14&&y<=1||(y>=7&&y<=8))P(305,x,y,sh([124,90,56],(hn(x,y,406)-.5)*12));}
+  // the high elves (D-062): elvenstone, a warm ivory with faint veins; its courses, long and fine-jointed; carved elvenstone, a
+  // vine with leaves running in relief between two fillets; a slender fluted column and its round top; tracery, a pointed arch
+  // with a mullion and leaf loops, open between; stained glass, pale aqua with leaf veins in gold-dark lead; a verdigris roof in
+  // scalloped rows; dark shingles; gilt filigree in scrolls, open between; the elven lamp, a silver cage round a pale white
+  // light; the elves' banner, a silver star of six rays over two upswept leaves on deep blue; golden wood in carved panels;
+  // a mosaic floor, a star of blue-grey and gold in pale stone
+  for(const t of [311,312,316,317,318])clear(t);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const vein=Math.abs(Math.sin((x*0.7+y*0.35)+fbm2(x/6,y/6,2,410.1)*3))<0.06;
+    P(306,x,y,sh([228,218,194],(hn(x>>1,y>>1,411)-.5)*8+(hn(x,y,412)-.5)*6+(vein?-16:0)-y*0.4));
+    const cy=y>>2,off=(cy%2)*7+Math.floor(hn(0,cy,413)*4),jx=((x+off)%16)===0,jy=y%4===3,top=y%4===0,tint=(hn(Math.floor((x+off)/16),cy,414)-.5)*14;
+    P(307,x,y,jy||jx?sh([196,186,162],(hn(x,y,415)-.5)*6):sh([226,216,190],tint+(top?10:0)+(y%4===2?-5:0)+(hn(x,y,416)-.5)*6));
+    const fil=y<=1||y>=14,wv=7.5+Math.sin(x*0.785)*3,stem=Math.abs(y-wv)<0.8,lf=[1,5,9,13].some((k,i)=>{const c=7.5+Math.sin(k*0.785)*3+(i%2?2.6:-2.6);return ((x-k)/1.8)**2+((y-c)/1.05)**2<1;});
+    P(308,x,y,fil?sh([214,204,178],(y===0||y===14?14:-14)):stem||lf?sh([238,230,206],(stem?6:12)+(hn(x,y,417)-.5)*6):sh([190,180,156],(hn(x,y,418)-.5)*8));
+    const fl=x%4,edge=x===0||x===15;P(309,x,y,sh([230,222,198],(fl===0?-22:fl===1?12:fl===2?4:-6)+(edge?-10:0)+(hn(x,y,419)-.5)*5));
+    const r=Math.hypot(x-7.5,y-7.5);P(310,x,y,sh([230,222,198],(r>7?-26:Math.floor(r)%3===0?-10:4)+(hn(x,y,420)-.5)*5));
+    // tracery: a stone frame, a pointed arch (two arcs meeting at the top), a mullion, a loop like a leaf in the arch's head
+    const fr=x===0||x===15||y===15,arcL=Math.abs(Math.hypot(x-15,y-15)-13.2)<0.75&&x<=8,arcR=Math.abs(Math.hypot(x,y-15)-13.2)<0.75&&x>=7,
+      mul=(x===7||x===8)&&y>=7,loop=Math.abs(Math.hypot(x-7.5,(y-5.5)*0.75)-2.2)<0.6;
+    if(fr||arcL||arcR||mul||loop)P(311,x,y,sh([226,216,190],(fr?-8:6)+(hn(x,y,421)-.5)*6));
+    // stained glass: leaf veins in lead, panes tinted aqua and pale gold
+    const lead=x===0||y===0||x===15||y===15||Math.abs(x-7.5-(y-8)*0.0)<0.6&&y>3||Math.abs((y-4)-Math.abs(x-7.5)*0.9)<0.6||Math.abs((y-10)-Math.abs(x-7.5)*0.9)<0.6;
+    P(312,x,y,lead?[70,62,44]:sh((x+y)%7<3?[214,206,150]:[170,214,206],(hn(x,y,422)-.5)*12+(y<8?8:0)),lead?255:130);
+    // verdigris: scalloped rows of copper tiles, each lit at its rounded foot and dark at its head under the row above
+    const ry=y%5,rx=(x+(Math.floor(y/5)%2)*4)%8,sc=Math.hypot(rx-3.5,ry-1)<4.2;
+    P(313,x,y,sh([88,150,132],(ry===4?-30:ry===0?-14:ry===3?16:0)+(rx===0?-18:0)+(hn(x,y,423)-.5)*14+(hn(x>>2,y,424)<.08?-24:0)+(sc?0:-6)));
+    const sy=y%4,sx=(x+(Math.floor(y/4)%2)*2)%4;P(315,x,y,sh([88,80,100],(sy===3?-26:sy===0?12:0)+(sx===0?-16:0)+(hn(x,y,425)-.5)*10));
+    // gilt filigree: rails top and bottom, two spirals between, open elsewhere
+    const rail=y<=1||y>=14,sp1=Math.abs(Math.hypot(x-4,y-7.5)-2.6-Math.atan2(y-7.5,x-4)*0.35)<0.6,sp2=Math.abs(Math.hypot(x-11.5,y-7.5)-2.6+Math.atan2(y-7.5,x-11.5)*0.35)<0.6,link=(y===4||y===11)&&x>=6&&x<=9;
+    if(rail||sp1||sp2||link||x===0||x===15)P(316,x,y,sh([222,182,84],(y===0||y===14?20:0)+(hn(x,y,426)-.5)*16+(x%3===0?-10:0)));
+    // the elven lamp: a silver cage (four ribs, a pointed cap, a foot) round a pale light
+    const cage=(x===3||x===12)&&y>=4&&y<=13||(y===4||y===13)&&x>=3&&x<=12,cap=y<4&&Math.abs(x-7.5)<=y+0.6,foot=y>=14&&x>=5&&x<=10,glow=x>3&&x<12&&y>4&&y<13;
+    if(cage||cap||foot)P(317,x,y,sh([196,204,214],(cap?14:0)+(x+y)%3*4));else if(glow)P(317,x,y,sh([236,244,255],-Math.hypot(x-7.5,y-8.5)*3));
+    // the elves' banner on its rod
+    if(y===0){P(318,x,y,[200,204,214]);}else{const sw=y>=13&&Math.abs(x-7.5)<(y-12)*1.6;if(!sw){
+      const cx=x-7.5,cy2=y-6,ang=Math.atan2(cy2,cx),rr=Math.hypot(cx,cy2),ray=rr<(Math.abs(Math.cos(ang*3))>0.97?5.5:Math.abs(Math.cos(ang*3))>0.9?3:1.4),
+        lfL=x>2&&x<7&&Math.abs(y-(11-(7-x)*0.6))<0.9,lfR=x>8&&x<13&&Math.abs(y-(11-(x-8)*0.6))<0.9,brd=x<=1||x>=14||y===1;
+      P(318,x,y,brd?sh([200,204,214],(hn(x,y,427)-.5)*8):ray?sh([238,240,246],(rr<1?10:0)):lfL||lfR?sh([214,180,90],(hn(x,y,428)-.5)*8):sh([30,52,104],(hn(x,y,429)-.5)*10+(x%4===0?-6:0)));}}
+    // golden wood: panels framed in raised stiles, a carved leaf in each
+    const stile=x<=1||x>=14||y<=1||y>=14||y===7||y===8,leafc=Math.abs((x-7.5)*(x-7.5)/9+((y%8)-3.5)*(y%8-3.5)/4-1)<0.35;
+    P(319,x,y,sh([198,152,84],(stile?(x===0||y===0?16:x===15||y===15?-20:6):-8)+(leafc?18:0)+(hn(x,y>>2,430)-.5)*10));
+    // mosaic: pale stone, a star of blue-grey and gold about the corner, so four blocks make one
+    const mx=Math.min(x,15-x),my=Math.min(y,15-y),cr=Math.hypot(x-(x<8?0:15),y-(y<8?0:15)),ma=Math.atan2(Math.abs(y-(y<8?0:15)),Math.abs(x-(x<8?0:15)));
+    P(320,x,y,cr<6&&Math.abs(Math.sin(ma*4))>0.6-cr*0.05?sh(cr<3?[214,180,90]:[96,112,132],(hn(x,y,431)-.5)*8):(mx===7||my===7)?sh([180,170,150],(hn(x,y,432)-.5)*6):sh([224,216,196],(hn(x,y,433)-.5)*8));
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

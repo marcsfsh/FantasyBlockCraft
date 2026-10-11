@@ -200,6 +200,16 @@ def(GILDED,'Gilded Oak',[303,303,302],{snd:'wood'});def(FENCE,'Rail Fence',[305,
 setH([GTHATCH,TURF],0.6,'soft');setH([WATTLE,CTIMBER,GILDED,SHIELDS,FENCE],2,'wood');setH([FSTONE,HEARTH],3,'stone',1);setH([STAKES],1,'wood');setH([HBANNER,TAPESTRY,HORNS],0,'soft');setH([SLATE],2.5,'stone',1);setH([PLASTER,TIMBER],2,'wood');setH([THATCH,HAYBALE],0.6,'soft');setH([RBANNER],0,'soft');setH([LGLASS],0.5,'misc');
 setH([BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR],5,'stone',1);setH([OBSBRICK],20,'stone',7);setH([CHAIN,SPIKES],1.5,'metal',2);setH([BRAZIER],3,'metal',2);
 const isWetId=id=>id===WATER||!!(BL[id]&&BL[id].wet);
+// the high elves (D-062): elvenstone and its courses, carved elvenstone (a vine in relief), slender columns, tracery and stained
+// glass for their arched windows, roofs of verdigris copper and of dark shingles, gilt filigree for rails and screens, their
+// lamps, their banner (a silver star over two leaves on deep blue), golden wood, and mosaic floors
+const EVSTONE=1134,EVBRICK=1135,EVCARVE=1136,EVPILLAR=1137,EVTRACERY=1138,EVGLASS=1139,EVROOF=1140,EVSHINGLE=1141,EVGOLD=1142,EVLAMP=1143,EVBANNER=1144,EVWOOD=1145,EVMOSAIC=1146;
+def(EVSTONE,'Elvenstone',[306,306,306]);def(EVBRICK,'Elvenstone Courses',[307,307,307]);def(EVCARVE,'Carved Elvenstone',[306,306,308]);def(EVPILLAR,'Elven Column',[310,310,309]);
+def(EVTRACERY,'Elven Tracery',[311,311,311],{opq:false,occ:false});def(EVGLASS,'Elven Glass',[312,312,312],{opq:false,occ:false,snd:'glass'});
+def(EVROOF,'Verdigris Roof',[313,313,313]);def(EVSHINGLE,'Elven Shingles',[315,315,315]);def(EVGOLD,'Gilt Filigree',[316,316,316],{opq:false,occ:false});
+def(EVLAMP,'Elven Lamp',[317,317,317],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});def(EVBANNER,'Banner of the Elves',[318,318,318],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});
+def(EVWOOD,'Golden Wood',[319,319,319],{snd:'wood'});def(EVMOSAIC,'Elven Mosaic',[320,320,320]);
+setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
 // Ore tiers follow the metal ladder (M4, Q19): each pickaxe is the first that can mine the next metal's ore

@@ -89,6 +89,10 @@ const AMB_EV={
   whinny:at=>{voice(620,300,0.9,0.045,{form:900,q:2,vib:18,vd:0.2},at);burst(0.25,'lowpass',300,0.8,0.02,0.8,at);},
   hooves:at=>{const n=6+(Math.random()*6|0),gap=0.13+Math.random()*0.08;for(let i=0;i<n;i++)burst(0.05,'bandpass',300+Math.random()*80,3,0.05,i*gap+(i%3===2?0.08:0),at);},
   horn:at=>{const far=[at[0]+(at[0]-PL.x)*3,at[1]+6,at[2]+(at[2]-PL.z)*3];tone(147,147,1.6,0.05,0,'sawtooth',far);tone(196,196,2.2,0.04,1.4,'triangle',far);},
+  // the high elves (D-062): a harp played somewhere above, a rising run of plucked notes, and voices singing far off
+  harp:at=>{const far=[at[0]+(at[0]-PL.x)*1.5,at[1]+5,at[2]+(at[2]-PL.z)*1.5],sc=[392,440,523,587,659,784,880,1047],n=5+(Math.random()*4|0),st=Math.random()*3|0;
+    for(let i=0;i<n;i++){const f=sc[Math.min(sc.length-1,st+i)];tone(f,f,1.4,0.025,i*0.17,'triangle',far);tone(f*2,f*2,0.6,0.006,i*0.17,null,far);}},
+  song:at=>{const far=[at[0]+(at[0]-PL.x)*3,at[1]+10,at[2]+(at[2]-PL.z)*3],ph=[[523,659],[587,698],[659,784],[523,659]];for(let i=0;i<ph.length;i++)for(const f of ph[i])voice(f,f*1.01,1.1,0.012,{type:'sine',form:1400,q:1.2,vib:5,vd:0.02,delay:i*1.05},far);},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -107,7 +111,9 @@ const AMB_LAND={
   farmstead:{wind:0.03,day:{bird:10,dog:1,voices:1.5},night:{cricket:14,dog:1}},
   // in a hill town, hold or steading of the riders (D-061): voices, horses, a forge and a horn; the wind over the grass
   riders:{wind:0.05,day:{voices:8,whinny:3,hooves:3,hammer:2,horn:0.4,bird:4,dog:1},night:{cricket:8,whinny:1,dog:1,voices:1}},
-  stud:{wind:0.05,day:{whinny:5,hooves:2,bird:8,voices:1},night:{cricket:12,whinny:1}}
+  stud:{wind:0.05,day:{whinny:5,hooves:2,bird:8,voices:1},night:{cricket:12,whinny:1}},
+  // in the high elves' cities, fastnesses and refuges (D-062): a harp, singing far off, chimes in the wind, birds, a few voices
+  elves:{wind:0.05,day:{harp:3,song:0.8,chime:1.5,bird:8,voices:3},night:{harp:2,song:1,chime:2,cricket:5}}
 };
 const AMB_OF={sea:'sea',isles:'sea',kelp:'sea',chalk:'sea',fjord:'sea',blacksand:'sea',willow:'wet',bog:'wet',moors:'high',mtn:'high',alpine:'high',glacier:'high',tundra:'high',karst:'high',cloud:'wet',
   dry:'dry',steppe:'dry',petrified:'dry',volcanic:'fire',blight:'grey',shadow:'grey',barrow:'grey',crystal:'ring',starfall:'ring',glowcap:'ring'};
@@ -128,7 +134,7 @@ function ambProfile(){
     if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
     if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
-  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
+  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
   return {surf:P.surf||0,rumble:P.rumble||0,lava:P.lava||0,wind:(P.wind||0)*(1+Math.max(0,yy-SEA-40)/80),ev:ev,under:false};
 }
