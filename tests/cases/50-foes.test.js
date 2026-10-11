@@ -56,11 +56,11 @@ put();clearFoes();{const e=near('ember',-16);e.st='chase';e.vis=true;e.losT=9;e.
 // spans, spread wider than it is tall; a gait: its stride swings its legs (the walk's swing once never grew, a bug)
 {const K=AM_KINDS.ember,px=K.scale/16,part=n=>K.parts.find(q=>q[0]===n);
   const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[2]),s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[0]);s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];return [x,y,z];};
-  const box=n=>{const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9],b=part(n)[3];for(let i=0;i<8;i++){let v=[b[0]+(i&1?b[3]:0),b[1]+(i&2?b[4]:0),b[2]+(i&4?b[5]:0)];
+  const box=n=>{const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9],Q=amCorners(part(n)[3],(part(n)[5]||{}).tp);for(let i=0;i<8;i++){let v=Q[i].slice();
     for(let p=part(n);p;p=p[1]?part(p[1]):null){v=rotP(v,p[4]||[0,0,0]);v=[v[0]+p[2][0],v[1]+p[2][1],v[2]+p[2][2]];}for(let k=0;k<3;k++){lo[k]=Math.min(lo[k],v[k]*px);hi[k]=Math.max(hi[k],v[k]*px);}}return {lo:lo,hi:hi};};
   const head=box('head'),hips=part('body')[2],chest=box('chest'),wl=box('wingL2'),wr=box('wingR2'),tall=amBuild('ember',0,{}).box[4],span=wr.hi[0]-wl.lo[0],ahead=(head.lo[2]+head.hi[2])/2-hips[2]*px;
   info('the Emberlord: head',ahead.toFixed(1),'blocks ahead of its hips, its top',head.hi[1].toFixed(1),'against the shoulders',chest.hi[1].toFixed(1),'; wings',span.toFixed(1),'across, it stands',tall.toFixed(1));
-  assert(ahead>3&&head.hi[1]<chest.hi[1]&&['wingL','wingL2','wingR','wingR2','maneA','maneB','hornL','tipL','jaw','brow','tail','whip1','wpn'].every(part)&&span>tall*1.5,'the Emberlord is hunched, head low and forward, horned, maned with flame, on wings wider than it is tall');
+  assert(ahead>3&&head.hi[1]<chest.hi[1]&&['wingL','wingL2','wingR','wingR2','maneA','maneB','hornL','tipL','jaw','browL','eyeL','fangL','tail','whip1','wpn'].every(part)&&span>tall*1.5,'the Emberlord is hunched, head low and forward, horned, maned with flame, on wings wider than it is tall');
   put();clearFoes();const e=near('ember',-20);e.hold=1;e.holdSp=FOES.ember.walk;let amp=0,legs=new Set();run(2,()=>{amp=Math.max(amp,e.amp);legs.add(Math.round(e.m.parts.legL.rotation.x*20));return false;});
   info('walking: the stride',amp.toFixed(2),'; leg positions seen',legs.size);assert(amp>0.4&&legs.size>3,'an Emberlord walks with a swinging stride');clearFoes();}
 // places are peopled: a goblin warren's halls, and a fortress's lord (not once fallen)

@@ -42,7 +42,7 @@ let fireBoltT=3;
 function strike(storm,ahead){
   const X=PL.x+OX,Z=PL.z+OZ;let X1,Y1,Z1,top;
   const vs=storm||ahead?[]:volcanoesNear(X,Z,170);
-  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],a=Math.random()*6.28,r=Math.random()*v.rc;X1=v.X+Math.cos(a)*r;Z1=v.Z+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
+  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],S=volcShape(v),a=Math.random()*6.28,r=Math.random()*v.rc;X1=S.cx+Math.cos(a)*r;Z1=S.cz+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
   else{const yaw=PL.yaw+(ahead?0.15:(Math.random()-0.5)*2.6),d=ahead?70:35+Math.random()*110;X1=X-Math.sin(yaw)*d;Z1=Z-Math.cos(yaw)*d;Y1=hAt(Math.round(X1),Math.round(Z1))+1;top=Math.min(H-4,Y1+60+Math.random()*40);}
   const b=makeBolt(X1+(Math.random()-0.5)*20,top,Z1+(Math.random()-0.5)*20,X1,Y1,Z1,storm);b.at=[X1-OX,Y1,Z1-OZ];
   const dist=Math.hypot(X1-X,Z1-Z);flash=Math.max(flash,Math.min(1,1.3-dist/180));
@@ -61,7 +61,7 @@ function puffTexture(){if(puffTex)return puffTex;const cv=document.createElement
   for(let k=0;k<7;k++){const x=20+Math.random()*24,y=20+Math.random()*24,r=12+Math.random()*12,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);}
   puffTex=new THREE.CanvasTexture(cv);return puffTex;}
 const plumes=new Map(),PUFFS=34,smokeC=new THREE.Color(0.15,0.12,0.11),fireC=new THREE.Color(0.85,0.3,0.1);
-function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
+function newPuff(p,v,age){const S=volcShape(v);p.age=age;p.life=36+Math.random()*24;p.X=S.cx+(Math.random()-0.5)*v.rc;p.Z=S.cz+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
   for(let t=0;t<age;t+=0.5)movePuff(p,0.5);}
 function movePuff(p,dt){p.Y+=p.vy*dt;p.vy=Math.max(1.2,p.vy-dt*0.15);p.X+=1.6*dt;p.Z+=0.6*dt;}
 function updPlumes(dt){
@@ -90,9 +90,11 @@ function farWasteRay(F,k){
   const e=hi,cd=e+WB_IN+WB_CR/2,cX=g.X+ux*cd,cZ=g.Z+uz*cd,rg=1-Math.abs(fbm2(cX/70,cZ/70,2,9203.1)),cr=SEA+78+rg*rg*rg*42-sstep(0.2,0.5,fbm2(cX/300,cZ/300,1,9205.7))*30-g.base;
   let flow=0;for(const f of g.fl)if(Math.round(((f.a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)flow=Math.max(flow,f.len);
   let old=false;for(const a of g.old)if(Math.round(((a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)old=true;
-  const cone=d=>{if(d<g.rc){const b=g.Hv-(g.cd+3)+(g.cd+3)*Math.pow(d/g.rc,4);return b<g.lake-g.base?[g.lake-g.base,1]:[b,0];}if(d<g.R){const q=1-(d-g.rc)/(g.R-g.rc);return [Math.pow(q,1.35)*g.Hv,0];}return [0,0];};
-  for(const d of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.08,0.2,0.33,0.46,0.6,0.74,0.88,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R,g.R*1.3])){const [h,lk]=cone(d),q=Math.min(1,h/g.Hv);
-    const gl=lk?1:flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0;out.push(d,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
+  // the cone through its own shape (volcShape): its warped foot, leaning top, scar, gullies and shoulder cones
+  const S=volcShape(g),cone=D=>{const X=g.X+ux*D,Z=g.Z+uz*D,[d,th]=volcFrame(g,S,X,Z);if(d>=g.R)return [0,0,d,th];const b=volcCone(g,S,d,th,X,Z);return d<g.rc&&b<g.lake-g.base?[g.lake-g.base,1,d,th]:[b,0,d,th];};
+  for(const D of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.04,0.08,0.14,0.2,0.27,0.33,0.4,0.46,0.53,0.6,0.67,0.74,0.81,0.88,0.94,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R*1.12,g.R*1.3])){const [h,lk,d,th]=cone(D),q=Math.max(0,Math.min(1,h/g.Hv));
+    let fw=0;for(const f of g.fl)if(d>=g.rc&&d<=g.R*f.len&&Math.abs(angDiffV(th,f.a+0.33*Math.sin(d/11)))*d<4)fw=0.85;
+    const gl=lk?1:fw||(flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0);out.push(D,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
   out.push(e,0,0.1,0.085,0.08,0);
   for(const t of [0.25,0.5,0.75,1]){const p=t*t*(3-2*t)*0.7+t*0.3;out.push(e+WB_IN*t,cr*p,0.13+0.04*t,0.11+0.04*t,0.1+0.04*t,0);}
   out.push(e+WB_IN+WB_CR,cr,0.19,0.17,0.16,0,e+WB_END,SEA+8-g.base,0.16,0.14,0.13,0);
@@ -144,7 +146,7 @@ function fireTick(dt){
   for(let k=0;k<lavaSpots.length*dt*0.6;k++){const s=lavaSpots[Math.random()*lavaSpots.length|0];spawnP(s[0]+Math.random(),s[1]+1.05,s[2]+Math.random(),(Math.random()-0.5)*0.8+0.4,1.2+Math.random()*2.2,(Math.random()-0.5)*0.8,[1,0.35+Math.random()*0.35,0.08],1.2+Math.random()*2,-0.5);}
   for(let k=0;k<12*dt*b;k++)spawnP(PL.x+(Math.random()-0.5)*30,PL.y+Math.random()*8-2,PL.z+(Math.random()-0.5)*30,0.6+Math.random()*0.4,0.4+Math.random()*0.8,(Math.random()-0.5)*0.5,[1,0.42,0.1],2+Math.random()*2,-0.15); // embers on the wind
   for(const s of ventSpots)if(Math.random()<dt*2.5)ventPuff(s);
-  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const at=[v.X-OX,v.lake+1,v.Z-OZ];
+  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const S=volcShape(v),at=[S.cx-OX,v.lake+1,S.cz-OZ];
       for(let k=0;k<14;k++){const a=Math.random()*6.28,s=2+Math.random()*5;spawnP(at[0]+(Math.random()-0.5)*v.rc*0.8,at[1],at[2]+(Math.random()-0.5)*v.rc*0.8,Math.cos(a)*s,12+Math.random()*12,Math.sin(a)*s,[1,0.5+Math.random()*0.3,0.1],3.5,9);}
       burst(1.2,'lowpass',110,0.6,0.4*Math.max(0.1,1-Math.hypot(v.X-PL.x-OX,v.Z-PL.z-OZ)/200),0,at);}}
 }

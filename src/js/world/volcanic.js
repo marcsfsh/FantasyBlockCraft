@@ -71,16 +71,44 @@ function volcanoesNear(X,Z,r){const out=[],n=Math.ceil(r/VOLC_C)+1,ci=Math.floor
   for(const g of greatNear(X,Z,r))if(Math.hypot(g.X-X,g.Z-Z)<r+g.R)out.push(g);
   for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const v=volcAt(ci+a,cj+b);if(v&&Math.hypot(v.X-X,v.Z-Z)<r+v.R)out.push(v);}return out;}
 const angDiffV=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d;};
+// The shape of a volcano (D-056): no cone is round or upright. Its foot is warped by angle, its upper part leans so the crater
+// stands off its middle, it is steeper on some sides than others, gullies of uneven spacing and depth score it, its rim is
+// jagged; a great one has a scar where a flank fell away (its first flow runs down it) and lesser cones on its shoulders.
+function volcShape(v){
+  if(v.shp)return v.shp;const r=k=>hsh(v.i,9301+k,v.j),G=!!v.great;
+  const S={a:G?[0.1+0.08*r(1),0.06+0.06*r(2),0.04+0.04*r(3)]:[0.07+0.05*r(1),0.04+0.04*r(2),0.03+0.03*r(3)],p:[r(4)*6.2832,r(5)*6.2832,r(6)*6.2832],
+    e0:1.1+0.3*r(7),e1:G?0.2+0.25*r(8):0.25*r(8),ep:r(9)*6.2832,rv:G?22:6,thc:v.fl.length?v.fl[0].a:r(12)*6.2832,col:G?0.2+0.1*r(13):0,par:[]};
+  const oa=r(10)*6.2832,om=(G?0.1+0.05*r(11):0.03+0.03*r(11))*v.R;S.ox=Math.cos(oa)*om;S.oz=Math.sin(oa)*om;S.cx=v.X+S.ox;S.cz=v.Z+S.oz;
+  // a great one has a second summit high on one shoulder and a lesser cone lower on another
+  if(G){const a1=S.thc+1.6+r(20)*1.2,a2=a1+2+r(21)*1.5;
+    S.par.push({x:v.X+Math.cos(a1)*v.R*(0.33+0.12*r(22)),z:v.Z+Math.sin(a1)*v.R*(0.33+0.12*r(22)),r:v.R*(0.2+0.05*r(24)),h:v.Hv*(0.18+0.08*r(26))});
+    S.par.push({x:v.X+Math.cos(a2)*v.R*(0.52+0.12*r(23)),z:v.Z+Math.sin(a2)*v.R*(0.52+0.12*r(23)),r:v.R*(0.12+0.04*r(25)),h:v.Hv*(0.08+0.04*r(27))});}
+  return v.shp=S;}
+// a point in the cone's own frame, [distance as on a round upright cone, angle]: the warp of its foot and the lean of its top undone
+function volcFrame(v,S,X,Z){
+  const w0=th=>1+S.a[0]*Math.sin(th+S.p[0])+S.a[1]*Math.sin(2*th+S.p[1])+S.a[2]*Math.sin(3*th+S.p[2]);
+  let dx=X-v.X,dz=Z-v.Z,th=Math.atan2(dz,dx);const d0=Math.hypot(dx,dz)/w0(th),s0=d0<v.rc?1:d0<v.R?1-(d0-v.rc)/(v.R-v.rc):0,lw=Math.pow(s0,1.5);
+  dx-=S.ox*lw;dz-=S.oz*lw;th=Math.atan2(dz,dx);return [Math.hypot(dx,dz)/w0(th),th];}
+// the cone's height over its base at a point of its frame (without the flows)
+function volcCone(v,S,d,th,X,Z){
+  const rv=S.rv*Math.max(0,0.7*Math.sin(2*th+S.p[2])+0.5*Math.sin(5*th+S.p[0])+0.2*Math.sin(11*th+S.p[1]));
+  if(d<v.rc){const q=d/v.rc;return v.Hv-(v.cd+3)+(v.cd+3)*Math.pow(q,4)+rv*Math.pow(q,8);}
+  if(d>=v.R)return 0;
+  const s=1-(d-v.rc)/(v.R-v.rc),e=S.e0+S.e1*Math.sin(th+S.ep),gn=fbm2(Math.cos(th)*3+v.i*0.37,Math.sin(th)*3+v.j*0.37,2,9311.3),gul=Math.abs(Math.sin(th*(v.great?9:6)+gn*5)),deep=Math.max(10,v.R*0.17)*4*s*(1-s);
+  let hh=Math.pow(s,e)*v.Hv+rv*sstep(0.86,1,s)-(1-gul)*(1-gul)*(1-gul)*deep+fbm2(X/29,Z/29,2,9315.7)*(v.great?7:3)*4*s*(1-s)+fbm2(X/11,Z/11,1,9119.3)*1.8;
+  if(S.col){const k=sstep(0.55,0.2,Math.abs(angDiffV(th,S.thc)))*sstep(0.1,0.32,s)*sstep(0.96,0.78,s);hh-=k*S.col*v.Hv;} // the fallen flank
+  for(const p of S.par){const dp=Math.hypot(X-p.x,Z-p.z);if(dp<p.r){const u=1-dp/p.r;hh+=p.h*Math.pow(u,1.3)-(u>0.78?p.h*0.4*(u-0.78)/0.22:0);}} // shoulder cones
+  return hh;}
 // The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
   const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);
-  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z;if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(Math.abs(dx)>=v.reach||Math.abs(dz)>=v.reach)continue;const d=Math.hypot(dx,dz);if(d>=v.reach)continue;
+  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z;
+    if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));const rx=v.reach*1.3+v.R*0.1;if(Math.abs(dx)>=rx||Math.abs(dz)>=rx||Math.hypot(dx,dz)>=rx)continue;
+    const S=volcShape(v),[d,th]=volcFrame(v,S,X,Z);if(d>=v.reach)continue;
     // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
-    const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;const th=Math.atan2(dz,dx);if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
-    if(d<v.rc){const q=d/v.rc;hh=v.rimTop-(v.cd+3)+(v.cd+3)*Math.pow(q,4);o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}
-    else if(d<v.R){const s=1-(d-v.rc)/(v.R-v.rc),gul=Math.abs(Math.sin(th*6+fbm2(X/40,Z/40,1,9117.1)*2.5));
-      hh+=Math.pow(s,1.35)*v.Hv-(1-gul)*(1-gul)*s*(1-s)*Math.max(12,v.R*0.15)+fbm2(X/13,Z/13,1,9119.3)*2.2*Math.min(1,s*2+0.2);o.vs=s;}
+    const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
+    if(d<v.R){hh+=volcCone(v,S,d,th,X,Z);if(d<v.rc){o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}else o.vs=1-(d-v.rc)/(v.R-v.rc);}
     // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
     if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
       const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=(0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0))*(v.great?1.6:1);

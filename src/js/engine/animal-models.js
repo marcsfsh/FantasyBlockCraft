@@ -5,22 +5,36 @@
 // where they stand, the lamp, the glow of caves, fog, and a darker shade on the sides and underneath.
 //   part: [name, parent, pivot [x,y,z] (from the parent's pivot, or the feet), box [x,y,z,w,h,d] (from the pivot),
 //          rest rotation [x,y,z] in radians, options {m: share the texture of another part, only/not: a coat flag,
-//          dyn: shown only while a state is on (shorn, pack), head: part of the head (bigger on the young)}]
+//          dyn: shown only while a state is on (shorn, pack), head: part of the head (bigger on the young),
+//          tp: [axis, a, b, c, d] a straight-edged taper (D-056): the box's end face on that axis ('x','y','z', or '-x','-y','-z'
+//          for the near end) is scaled about its middle by a and b along the other two axes (in x, y, z order) and moved by c and
+//          d, so a box becomes a frustum, a wedge (a or b 0) or a spike (both 0)}]
 // Faces of a box on its texture: L (-x), F (+z, the front), R (+x), B (-z), T (top), D (underneath). On a side face s runs left
 // to right as seen from outside and t from the top down.
 const AM_TEX=128,AM_PX=1/16;
 const AM_FACES={L:[-1,0,0],R:[1,0,0],T:[0,1,0],D:[0,-1,0],F:[0,0,1],B:[0,0,-1]};
 // the rectangle of one face of a box w x h x d placed at (u,v) on the texture
 function amRect(f,u,v,w,h,d){return f==='T'?[u+d,v,w,d]:f==='D'?[u+d+w,v,w,d]:f==='L'?[u,v+d,d,h]:f==='F'?[u+d,v+d,w,h]:f==='R'?[u+d+w,v+d,d,h]:[u+2*d+w,v+d,w,h];}
-// a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture)
-function amBoxGeo(b,u,v,TX){
-  TX=TX||AM_TEX;const [x0,y0,z0,w,h,d]=b,x1=x0+w,y1=y0+h,z1=z0+d,pos=[],nor=[],uv=[],idx=[];
+// The eight corners of a box (index: 1 for x1, 2 for y1, 4 for z1), its end face on the taper's axis scaled and moved (tp)
+function amCorners(b,tp){
+  const [x0,y0,z0,w,h,d]=b,P=[];for(let i=0;i<8;i++)P.push([i&1?x0+w:x0,i&2?y0+h:y0,i&4?z0+d:z0]);if(!tp)return P;
+  const [ax,a,s,c,e]=tp,k='xyz'.indexOf(ax.slice(-1)),far=ax[0]!=='-',o=[0,1,2].filter(q=>q!==k),mid=[x0+w/2,y0+h/2,z0+d/2],bit=[1,2,4][k];
+  for(let i=0;i<8;i++){if(!!(i&bit)!==far)continue;const p=P[i];p[o[0]]=mid[o[0]]+(p[o[0]]-mid[o[0]])*a+c;p[o[1]]=mid[o[1]]+(p[o[1]]-mid[o[1]])*s+e;}
+  return P;
+}
+// a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture); a tapered
+// box keeps the same mapping, each face's normal taken from its corners
+function amBoxGeo(b,u,v,TX,tp){
+  TX=TX||AM_TEX;const [,,,w,h,d]=b,K=amCorners(b,tp),pos=[],nor=[],uv=[],idx=[];
   // for each face: four corners in image order (top left, top right, bottom left, bottom right)
-  const C={L:[[x0,y1,z0],[x0,y1,z1],[x0,y0,z0],[x0,y0,z1]],F:[[x0,y1,z1],[x1,y1,z1],[x0,y0,z1],[x1,y0,z1]],R:[[x1,y1,z1],[x1,y1,z0],[x1,y0,z1],[x1,y0,z0]],
-    B:[[x1,y1,z0],[x0,y1,z0],[x1,y0,z0],[x0,y0,z0]],T:[[x0,y1,z0],[x1,y1,z0],[x0,y1,z1],[x1,y1,z1]],D:[[x0,y0,z1],[x1,y0,z1],[x0,y0,z0],[x1,y0,z0]]};
-  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n=AM_FACES[f],k=pos.length/3;
+  const C={L:[2,6,0,4],F:[6,7,4,5],R:[7,3,5,1],B:[3,2,1,0],T:[2,3,6,7],D:[4,5,0,1]};
+  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n0=AM_FACES[f],k=pos.length/3,q=C[f].map(i=>K[i]);
+    // the normal from the diagonals (sound when an edge has shrunk to a point), turned to face outward
+    const d1=[q[3][0]-q[0][0],q[3][1]-q[0][1],q[3][2]-q[0][2]],d2=[q[2][0]-q[1][0],q[2][1]-q[1][1],q[2][2]-q[1][2]];
+    let n=[d1[1]*d2[2]-d1[2]*d2[1],d1[2]*d2[0]-d1[0]*d2[2],d1[0]*d2[1]-d1[1]*d2[0]];const l=Math.hypot(n[0],n[1],n[2]);
+    n=l<1e-9?n0:n.map(t=>t/l);if(n[0]*n0[0]+n[1]*n0[1]+n[2]*n0[2]<0)n=n.map(t=>-t);
     const T=[[ru,rv],[ru+rw,rv],[ru,rv+rh],[ru+rw,rv+rh]];
-    C[f].forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/TX,1-T[i][1]/TX);});
+    q.forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/TX,1-T[i][1]/TX);});
     idx.push(k,k+2,k+1,k+1,k+2,k+3);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeBoundingSphere();return g;
@@ -219,7 +233,7 @@ const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
-    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex);amGeoC.set(gk,geo);}
+    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex,o.tp);amGeoC.set(gk,geo);}
     const grp=new THREE.Group();grp.position.x=piv[0]*AM_PX;grp.position.y=piv[1]*AM_PX;grp.position.z=piv[2]*AM_PX;const r=rot||[0,0,0];grp.rotation.x=r[0];grp.rotation.y=r[1];grp.rotation.z=r[2];grp.userData.rest=r.slice();
     const m=new THREE.Mesh(geo,mat);m.frustumCulled=false;grp.add(m);(par&&parts[par]?parts[par]:root).add(grp);parts[n]=grp;if(o.dyn)dyn.push([grp,o.dyn]);}
   // the young: smaller, with a bigger head (the head's own root grows; what hangs from it grows with it)
@@ -238,8 +252,8 @@ function amBounds(K,flags,sc,big){
   const chain=n=>{const out=[];let p=K.parts.find(q=>q[0]===n);while(p){out.push(p);p=p[1]?K.parts.find(q=>q[0]===p[1]):null;}return out;};
   const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
   for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||o.nb||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
-    const b=p[3],ch=chain(p[0]);
-    for(let i=0;i<8;i++){let v=[b[0]+(i&1?b[3]:0),b[1]+(i&2?b[4]:0),b[2]+(i&4?b[5]:0)];
+    const ch=chain(p[0]),Q=amCorners(p[3],o.tp);
+    for(let i=0;i<8;i++){let v=Q[i].slice();
       for(const q of ch){if(big[q[0]])v=v.map(t=>t*1.3);v=rotP(v,q[4]||[0,0,0]);v=[v[0]+q[2][0],v[1]+q[2][1],v[2]+q[2][2]];}
       for(let k=0;k<3;k++){lo[k]=Math.min(lo[k],v[k]);hi[k]=Math.max(hi[k],v[k]);}}}
   const f=AM_PX*sc;return [lo[0]*f,Math.max(0,lo[1]*f),lo[2]*f,hi[0]*f,hi[1]*f,hi[2]*f];

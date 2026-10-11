@@ -1166,12 +1166,14 @@ function landSpawn(){
     if(o.h<SEA+3||o.wet||o.lake||o.river||o.b===0||o.b===9)continue;const d=Math.hypot(X,Z);if(d<bd){bd=d;best=[X,Z];}}
   return best||[0,0];
 }
-// The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells
+// The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells; a cell whose
+// middle another land has taken (the sunken wastes spread over their neighbours, D-055) is passed over
+const TNL={};
 function nearestLand(k,X,Z,rmax){
   const ci=Math.floor(X/LS),cj=Math.floor(Z/LS);let best=null,bd=Infinity;
   for(let r=0;r<=rmax;r++){
     for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
-      if(cellLand(c)!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
+      if(cellLand(c)!==k||landsAt(c.x,c.z,TNL).land!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
     if(best&&bd<(r-1)*LS)break;}
   return best?{X:Math.round(best.x),Z:Math.round(best.z),d:Math.round(bd)}:null;
 }
@@ -4100,16 +4102,44 @@ function volcanoesNear(X,Z,r){const out=[],n=Math.ceil(r/VOLC_C)+1,ci=Math.floor
   for(const g of greatNear(X,Z,r))if(Math.hypot(g.X-X,g.Z-Z)<r+g.R)out.push(g);
   for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const v=volcAt(ci+a,cj+b);if(v&&Math.hypot(v.X-X,v.Z-Z)<r+v.R)out.push(v);}return out;}
 const angDiffV=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d;};
+// The shape of a volcano (D-056): no cone is round or upright. Its foot is warped by angle, its upper part leans so the crater
+// stands off its middle, it is steeper on some sides than others, gullies of uneven spacing and depth score it, its rim is
+// jagged; a great one has a scar where a flank fell away (its first flow runs down it) and lesser cones on its shoulders.
+function volcShape(v){
+  if(v.shp)return v.shp;const r=k=>hsh(v.i,9301+k,v.j),G=!!v.great;
+  const S={a:G?[0.1+0.08*r(1),0.06+0.06*r(2),0.04+0.04*r(3)]:[0.07+0.05*r(1),0.04+0.04*r(2),0.03+0.03*r(3)],p:[r(4)*6.2832,r(5)*6.2832,r(6)*6.2832],
+    e0:1.1+0.3*r(7),e1:G?0.2+0.25*r(8):0.25*r(8),ep:r(9)*6.2832,rv:G?22:6,thc:v.fl.length?v.fl[0].a:r(12)*6.2832,col:G?0.2+0.1*r(13):0,par:[]};
+  const oa=r(10)*6.2832,om=(G?0.1+0.05*r(11):0.03+0.03*r(11))*v.R;S.ox=Math.cos(oa)*om;S.oz=Math.sin(oa)*om;S.cx=v.X+S.ox;S.cz=v.Z+S.oz;
+  // a great one has a second summit high on one shoulder and a lesser cone lower on another
+  if(G){const a1=S.thc+1.6+r(20)*1.2,a2=a1+2+r(21)*1.5;
+    S.par.push({x:v.X+Math.cos(a1)*v.R*(0.33+0.12*r(22)),z:v.Z+Math.sin(a1)*v.R*(0.33+0.12*r(22)),r:v.R*(0.2+0.05*r(24)),h:v.Hv*(0.18+0.08*r(26))});
+    S.par.push({x:v.X+Math.cos(a2)*v.R*(0.52+0.12*r(23)),z:v.Z+Math.sin(a2)*v.R*(0.52+0.12*r(23)),r:v.R*(0.12+0.04*r(25)),h:v.Hv*(0.08+0.04*r(27))});}
+  return v.shp=S;}
+// a point in the cone's own frame, [distance as on a round upright cone, angle]: the warp of its foot and the lean of its top undone
+function volcFrame(v,S,X,Z){
+  const w0=th=>1+S.a[0]*Math.sin(th+S.p[0])+S.a[1]*Math.sin(2*th+S.p[1])+S.a[2]*Math.sin(3*th+S.p[2]);
+  let dx=X-v.X,dz=Z-v.Z,th=Math.atan2(dz,dx);const d0=Math.hypot(dx,dz)/w0(th),s0=d0<v.rc?1:d0<v.R?1-(d0-v.rc)/(v.R-v.rc):0,lw=Math.pow(s0,1.5);
+  dx-=S.ox*lw;dz-=S.oz*lw;th=Math.atan2(dz,dx);return [Math.hypot(dx,dz)/w0(th),th];}
+// the cone's height over its base at a point of its frame (without the flows)
+function volcCone(v,S,d,th,X,Z){
+  const rv=S.rv*Math.max(0,0.7*Math.sin(2*th+S.p[2])+0.5*Math.sin(5*th+S.p[0])+0.2*Math.sin(11*th+S.p[1]));
+  if(d<v.rc){const q=d/v.rc;return v.Hv-(v.cd+3)+(v.cd+3)*Math.pow(q,4)+rv*Math.pow(q,8);}
+  if(d>=v.R)return 0;
+  const s=1-(d-v.rc)/(v.R-v.rc),e=S.e0+S.e1*Math.sin(th+S.ep),gn=fbm2(Math.cos(th)*3+v.i*0.37,Math.sin(th)*3+v.j*0.37,2,9311.3),gul=Math.abs(Math.sin(th*(v.great?9:6)+gn*5)),deep=Math.max(10,v.R*0.17)*4*s*(1-s);
+  let hh=Math.pow(s,e)*v.Hv+rv*sstep(0.86,1,s)-(1-gul)*(1-gul)*(1-gul)*deep+fbm2(X/29,Z/29,2,9315.7)*(v.great?7:3)*4*s*(1-s)+fbm2(X/11,Z/11,1,9119.3)*1.8;
+  if(S.col){const k=sstep(0.55,0.2,Math.abs(angDiffV(th,S.thc)))*sstep(0.1,0.32,s)*sstep(0.96,0.78,s);hh-=k*S.col*v.Hv;} // the fallen flank
+  for(const p of S.par){const dp=Math.hypot(X-p.x,Z-p.z);if(dp<p.r){const u=1-dp/p.r;hh+=p.h*Math.pow(u,1.3)-(u>0.78?p.h*0.4*(u-0.78)/0.22:0);}} // shoulder cones
+  return hh;}
 // The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
   const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);
-  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z;if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(Math.abs(dx)>=v.reach||Math.abs(dz)>=v.reach)continue;const d=Math.hypot(dx,dz);if(d>=v.reach)continue;
+  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z;
+    if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));const rx=v.reach*1.3+v.R*0.1;if(Math.abs(dx)>=rx||Math.abs(dz)>=rx||Math.hypot(dx,dz)>=rx)continue;
+    const S=volcShape(v),[d,th]=volcFrame(v,S,X,Z);if(d>=v.reach)continue;
     // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
-    const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;const th=Math.atan2(dz,dx);if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
-    if(d<v.rc){const q=d/v.rc;hh=v.rimTop-(v.cd+3)+(v.cd+3)*Math.pow(q,4);o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}
-    else if(d<v.R){const s=1-(d-v.rc)/(v.R-v.rc),gul=Math.abs(Math.sin(th*6+fbm2(X/40,Z/40,1,9117.1)*2.5));
-      hh+=Math.pow(s,1.35)*v.Hv-(1-gul)*(1-gul)*s*(1-s)*Math.max(12,v.R*0.15)+fbm2(X/13,Z/13,1,9119.3)*2.2*Math.min(1,s*2+0.2);o.vs=s;}
+    const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
+    if(d<v.R){hh+=volcCone(v,S,d,th,X,Z);if(d<v.rc){o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}else o.vs=1-(d-v.rc)/(v.R-v.rc);}
     // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
     if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
       const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=(0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0))*(v.great?1.6:1);
@@ -6409,22 +6439,36 @@ function isBox(id){return id===CHEST||id===CRATE||id===DWCHEST||id===BARREL;}
 // where they stand, the lamp, the glow of caves, fog, and a darker shade on the sides and underneath.
 //   part: [name, parent, pivot [x,y,z] (from the parent's pivot, or the feet), box [x,y,z,w,h,d] (from the pivot),
 //          rest rotation [x,y,z] in radians, options {m: share the texture of another part, only/not: a coat flag,
-//          dyn: shown only while a state is on (shorn, pack), head: part of the head (bigger on the young)}]
+//          dyn: shown only while a state is on (shorn, pack), head: part of the head (bigger on the young),
+//          tp: [axis, a, b, c, d] a straight-edged taper (D-056): the box's end face on that axis ('x','y','z', or '-x','-y','-z'
+//          for the near end) is scaled about its middle by a and b along the other two axes (in x, y, z order) and moved by c and
+//          d, so a box becomes a frustum, a wedge (a or b 0) or a spike (both 0)}]
 // Faces of a box on its texture: L (-x), F (+z, the front), R (+x), B (-z), T (top), D (underneath). On a side face s runs left
 // to right as seen from outside and t from the top down.
 const AM_TEX=128,AM_PX=1/16;
 const AM_FACES={L:[-1,0,0],R:[1,0,0],T:[0,1,0],D:[0,-1,0],F:[0,0,1],B:[0,0,-1]};
 // the rectangle of one face of a box w x h x d placed at (u,v) on the texture
 function amRect(f,u,v,w,h,d){return f==='T'?[u+d,v,w,d]:f==='D'?[u+d+w,v,w,d]:f==='L'?[u,v+d,d,h]:f==='F'?[u+d,v+d,w,h]:f==='R'?[u+d+w,v+d,d,h]:[u+2*d+w,v+d,w,h];}
-// a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture)
-function amBoxGeo(b,u,v,TX){
-  TX=TX||AM_TEX;const [x0,y0,z0,w,h,d]=b,x1=x0+w,y1=y0+h,z1=z0+d,pos=[],nor=[],uv=[],idx=[];
+// The eight corners of a box (index: 1 for x1, 2 for y1, 4 for z1), its end face on the taper's axis scaled and moved (tp)
+function amCorners(b,tp){
+  const [x0,y0,z0,w,h,d]=b,P=[];for(let i=0;i<8;i++)P.push([i&1?x0+w:x0,i&2?y0+h:y0,i&4?z0+d:z0]);if(!tp)return P;
+  const [ax,a,s,c,e]=tp,k='xyz'.indexOf(ax.slice(-1)),far=ax[0]!=='-',o=[0,1,2].filter(q=>q!==k),mid=[x0+w/2,y0+h/2,z0+d/2],bit=[1,2,4][k];
+  for(let i=0;i<8;i++){if(!!(i&bit)!==far)continue;const p=P[i];p[o[0]]=mid[o[0]]+(p[o[0]]-mid[o[0]])*a+c;p[o[1]]=mid[o[1]]+(p[o[1]]-mid[o[1]])*s+e;}
+  return P;
+}
+// a box with its faces mapped onto the texture (24 corners; three.js's own box maps every face to the whole texture); a tapered
+// box keeps the same mapping, each face's normal taken from its corners
+function amBoxGeo(b,u,v,TX,tp){
+  TX=TX||AM_TEX;const [,,,w,h,d]=b,K=amCorners(b,tp),pos=[],nor=[],uv=[],idx=[];
   // for each face: four corners in image order (top left, top right, bottom left, bottom right)
-  const C={L:[[x0,y1,z0],[x0,y1,z1],[x0,y0,z0],[x0,y0,z1]],F:[[x0,y1,z1],[x1,y1,z1],[x0,y0,z1],[x1,y0,z1]],R:[[x1,y1,z1],[x1,y1,z0],[x1,y0,z1],[x1,y0,z0]],
-    B:[[x1,y1,z0],[x0,y1,z0],[x1,y0,z0],[x0,y0,z0]],T:[[x0,y1,z0],[x1,y1,z0],[x0,y1,z1],[x1,y1,z1]],D:[[x0,y0,z1],[x1,y0,z1],[x0,y0,z0],[x1,y0,z0]]};
-  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n=AM_FACES[f],k=pos.length/3;
+  const C={L:[2,6,0,4],F:[6,7,4,5],R:[7,3,5,1],B:[3,2,1,0],T:[2,3,6,7],D:[4,5,0,1]};
+  for(const f in C){const [ru,rv,rw,rh]=amRect(f,u,v,w,h,d),n0=AM_FACES[f],k=pos.length/3,q=C[f].map(i=>K[i]);
+    // the normal from the diagonals (sound when an edge has shrunk to a point), turned to face outward
+    const d1=[q[3][0]-q[0][0],q[3][1]-q[0][1],q[3][2]-q[0][2]],d2=[q[2][0]-q[1][0],q[2][1]-q[1][1],q[2][2]-q[1][2]];
+    let n=[d1[1]*d2[2]-d1[2]*d2[1],d1[2]*d2[0]-d1[0]*d2[2],d1[0]*d2[1]-d1[1]*d2[0]];const l=Math.hypot(n[0],n[1],n[2]);
+    n=l<1e-9?n0:n.map(t=>t/l);if(n[0]*n0[0]+n[1]*n0[1]+n[2]*n0[2]<0)n=n.map(t=>-t);
     const T=[[ru,rv],[ru+rw,rv],[ru,rv+rh],[ru+rw,rv+rh]];
-    C[f].forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/TX,1-T[i][1]/TX);});
+    q.forEach((p,i)=>{pos.push(p[0]*AM_PX,p[1]*AM_PX,p[2]*AM_PX);nor.push(n[0],n[1],n[2]);uv.push(T[i][0]/TX,1-T[i][1]/TX);});
     idx.push(k,k+2,k+1,k+1,k+2,k+3);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeBoundingSphere();return g;
@@ -6623,7 +6667,7 @@ const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
-    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex);amGeoC.set(gk,geo);}
+    const gk=kind+':'+n,u=uv[o.m||n];let geo=amGeoC.get(gk);if(!geo){geo=amBoxGeo(b,u[0],u[1],K.tex,o.tp);amGeoC.set(gk,geo);}
     const grp=new THREE.Group();grp.position.x=piv[0]*AM_PX;grp.position.y=piv[1]*AM_PX;grp.position.z=piv[2]*AM_PX;const r=rot||[0,0,0];grp.rotation.x=r[0];grp.rotation.y=r[1];grp.rotation.z=r[2];grp.userData.rest=r.slice();
     const m=new THREE.Mesh(geo,mat);m.frustumCulled=false;grp.add(m);(par&&parts[par]?parts[par]:root).add(grp);parts[n]=grp;if(o.dyn)dyn.push([grp,o.dyn]);}
   // the young: smaller, with a bigger head (the head's own root grows; what hangs from it grows with it)
@@ -6642,8 +6686,8 @@ function amBounds(K,flags,sc,big){
   const chain=n=>{const out=[];let p=K.parts.find(q=>q[0]===n);while(p){out.push(p);p=p[1]?K.parts.find(q=>q[0]===p[1]):null;}return out;};
   const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
   for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||o.nb||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
-    const b=p[3],ch=chain(p[0]);
-    for(let i=0;i<8;i++){let v=[b[0]+(i&1?b[3]:0),b[1]+(i&2?b[4]:0),b[2]+(i&4?b[5]:0)];
+    const ch=chain(p[0]),Q=amCorners(p[3],o.tp);
+    for(let i=0;i<8;i++){let v=Q[i].slice();
       for(const q of ch){if(big[q[0]])v=v.map(t=>t*1.3);v=rotP(v,q[4]||[0,0,0]);v=[v[0]+q[2][0],v[1]+q[2][1],v[2]+q[2][2]];}
       for(let k=0;k<3;k++){lo[k]=Math.min(lo[k],v[k]);hi[k]=Math.max(hi[k],v[k]);}}}
   const f=AM_PX*sc;return [lo[0]*f,Math.max(0,lo[1]*f),lo[2]*f,hi[0]*f,hi[1]*f,hi[2]*f];
@@ -6712,64 +6756,84 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
       coats:[[{hide:[70,66,64],crack:[255,130,30]},3],[{hide:[84,72,62],crack:[255,90,26]},2]],
       paint(P,c){P.coat(['body','head','jaw','nose','legL','armL'],c.hide,18);P.spots('body',['T','L','R','B'],[c.hide[0]+30,c.hide[1]+30,c.hide[2]+28],0.12);P.cracks(['body','armL','legL'],c.crack,0.06);
         P.coat(['tuskL'],[220,206,176],8);P.coat(['club'],[46,44,48],14);P.cracks(['club'],c.crack,0.05);P.coat(['sp1'],[50,48,50],12);P.glowEyes('head',2,3,[255,170,50]);P.rows('jaw',['F'],0,1,[30,22,20]);}},
-    // the Emberlord (D-054, D-055): a towering demon of shadow and flame, hunched over great digitigrade legs, its shoulders a
-    // hump of black hide split by fire, its head thrust low and forward under a heavy brow, eyes and maw burning, horns curving
-    // out and up, a mane of flame streaming back over its shoulders, and vast wings of bone and ragged membrane spread behind
-    // it. A burning blade in the right hand, a whip of fire in the left, a long tail.
+    // the Emberlord (D-054, D-055, D-056): a towering demon of shadow and flame, built of straight-edged tapering shapes. Hunched over
+    // great digitigrade legs, its torso a wedge broad at the shoulders and narrow at the waist, spines down its back; a horned
+    // skull thrust low and forward, narrowing to the muzzle, with a heavy angled brow over two slanted burning slits, cheek spurs,
+    // fangs and an open burning maw; tapering arms with elbow spurs and claws; a mane of flame streaming back; vast wings of
+    // tapering bones with a torn membrane between them. A burning blade in the right hand, a whip of fire in the left.
     ember:{scale:4.4,tex:256,parts:[
-      ['legL',null,[-6,22.5,0],[-3.5,-13,-3.5,7,14,7],[-0.6,0,0.06]],['legR',null,[6,22.5,0],[-3.5,-13,-3.5,7,14,7],[-0.6,0,-0.06],{m:'legL'}],
-      ['shinL','legL',[0,-12,0],[-2.5,-13,-2.5,5,13,5],[1.15,0,0]],['shinR','legR',[0,-12,0],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{m:'shinL'}],
-      ['footL','shinL',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0]],['footR','shinR',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{m:'footL'}],
-      ['body',null,[0,22.5,0],[-6.5,-2,-5,13,15,10],[0.7,0,0]],['chest','body',[0,12,1],[-11,-1,-6.5,22,13,13],[0.25,0,0]],
-      ['head','chest',[0,11,4],[-4.5,-3,-2,9,8,10],[-1.05,0,0],{head:1}],['brow','head',[0,3,2],[-5,0,0,10,2,9],0,{head:1}],
-      ['jaw','head',[0,-2,1],[-3.5,-3,0,7,3,9],[0.3,0,0],{head:1}],
-      ['hornL','head',[-4,3,3],[-1.5,0,-1.5,3,8,3],[0.3,0,1.1],{head:1}],['tipL','hornL',[0,8,0],[-1,0,-1,2,8,2],[0.9,0,-0.9],{head:1}],['tip2L','tipL',[0,8,0],[-0.5,0,-0.5,1,5,1],[0.6,0,-0.4],{head:1}],
-      ['hornR','head',[4,3,3],[-1.5,0,-1.5,3,8,3],[0.3,0,-1.1],{head:1,m:'hornL'}],['tipR','hornR',[0,8,0],[-1,0,-1,2,8,2],[0.9,0,0.9],{head:1,m:'tipL'}],['tip2R','tipR',[0,8,0],[-0.5,0,-0.5,1,5,1],[0.6,0,0.4],{head:1,m:'tip2L'}],
+      ['legL',null,[-6,22.5,0],[-4,-13,-4,8,14,8],[-0.6,0,0.06],{tp:['-y',0.65,0.65,0,0.6]}],['legR',null,[6,22.5,0],[-4,-13,-4,8,14,8],[-0.6,0,-0.06],{m:'legL',tp:['-y',0.65,0.65,0,0.6]}],
+      ['shinL','legL',[0,-12,0.3],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{tp:['-y',0.7,0.8,0,0]}],['shinR','legR',[0,-12,0.3],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{m:'shinL',tp:['-y',0.7,0.8,0,0]}],
+      ['spurL','shinL',[0,-10,-2],[-1,-1,-4,2,2,4],[0.6,0,0],{tp:['-z',0,0,0,0]}],['spurR','shinR',[0,-10,-2],[-1,-1,-4,2,2,4],[0.6,0,0],{m:'spurL',tp:['-z',0,0,0,0]}],
+      ['footL','shinL',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{tp:['z',0.6,0.5,0,-0.6]}],['footR','shinR',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{m:'footL',tp:['z',0.6,0.5,0,-0.6]}],
+      ['toeL1','footL',[-1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,-0.2,0],{tp:['z',0,0,0,-0.6]}],['toeL2','footL',[0,-1,8],[-1,-1,0,2,2,4],[0.25,0,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],['toeL3','footL',[1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,0.2,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],
+      ['toeR1','footR',[-1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,-0.2,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],['toeR2','footR',[0,-1,8],[-1,-1,0,2,2,4],[0.25,0,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],['toeR3','footR',[1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,0.2,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],
+      ['body',null,[0,22.5,0],[-6,-2,-5,12,15,10],[0.7,0,0],{tp:['y',1.45,1.15,0,0]}],['chest','body',[0,12,1],[-9,-1,-6.5,18,13,13],[0.25,0,0],{tp:['y',1.3,0.8,0,-1.2]}],
+      ['spn1','chest',[0,3,-6.6],[-1,0,-1,2,7,2],[-1.25,0,0],{nb:1,tp:['y',0,0,0,0]}],['spn2','chest',[0,7,-6.4],[-1,0,-1,2,8,2],[-1.15,0,0],{nb:1,m:'spn1',tp:['y',0,0,0,0]}],
+      ['spn3','chest',[0,11,-6],[-1,0,-1,2,6,2],[-1.05,0,0],{nb:1,m:'spn1',tp:['y',0,0,0,0]}],['spn4','body',[0,6,-5.4],[-1,0,-1,2,5,2],[-1.3,0,0],{nb:1,m:'spn1',tp:['y',0,0,0,0]}],
+      ['shL','chest',[-11,11,-1],[-2,0,-2,4,7,4],[-0.5,0,0.75],{nb:1,tp:['y',0,0,0,0]}],['shR','chest',[11,11,-1],[-2,0,-2,4,7,4],[-0.5,0,-0.75],{nb:1,m:'shL',tp:['y',0,0,0,0]}],
+      ['neck','chest',[0,10,2.5],[-3.5,-1,-3.5,7,6,7],[-0.35,0,0],{tp:['y',0.8,0.8,0,0.8]}],
+      ['head','neck',[0,4.5,1],[-4,-2.5,-3,8,6,9],[-0.7,0,0],{head:1,tp:['z',0.55,0.7,0,-0.6]}],
+      ['browL','head',[-2,2.6,3.2],[-2.5,-1,-1,5,2,5],[0.15,0.25,-0.32],{head:1,tp:['z',0.6,0.5,0,-0.4]}],['browR','head',[2,2.6,3.2],[-2.5,-1,-1,5,2,5],[0.15,-0.25,0.32],{head:1,m:'browL',tp:['z',0.6,0.5,0,-0.4]}],
+      ['eyeL','head',[-1.35,1.3,4.1],[-1,-0.5,-0.5,2,1,1],[0,0.3,-0.3],{head:1,tp:['-x',1,0.5,0,-0.2]}],['eyeR','head',[1.35,1.3,4.1],[-1,-0.5,-0.5,2,1,1],[0,-0.3,0.3],{head:1,m:'eyeL',tp:['x',1,0.5,0,-0.2]}],
+      ['jaw','head',[0,-2.5,-1],[-3.5,-2,0,7,2,8],[0.4,0,0],{head:1,tp:['z',0.6,0.8,0,0.2]}],
+      ['fangL','head',[-1.4,-2.3,4.8],[-0.5,-2,-0.5,1,2,1],0,{head:1,tp:['-y',0,0,0,0]}],['fangR','head',[1.4,-2.3,4.8],[-0.5,-2,-0.5,1,2,1],0,{head:1,m:'fangL',tp:['-y',0,0,0,0]}],
+      ['tuskL','jaw',[-1.8,0,6],[-0.5,0,-0.5,1,2,1],0,{head:1,m:'fangL',tp:['y',0,0,0,0]}],['tuskR','jaw',[1.8,0,6],[-0.5,0,-0.5,1,2,1],0,{head:1,m:'fangL',tp:['y',0,0,0,0]}],
+      ['chkL','head',[-3.6,-0.5,0.5],[-1,-1,-5,2,2,5],[0.1,-0.5,0],{head:1,tp:['-z',0,0,0,0]}],['chkR','head',[3.6,-0.5,0.5],[-1,-1,-5,2,2,5],[0.1,0.5,0],{head:1,m:'chkL',tp:['-z',0,0,0,0]}],
+      ['hornL','head',[-3.2,2.5,1],[-2,0,-2,4,8,4],[0.25,0,1.15],{head:1,tp:['y',0.65,0.65,0,0]}],['tipL','hornL',[0,8,0],[-1.5,0,-1.5,3,8,3],[0.9,0,-0.95],{head:1,tp:['y',0.5,0.5,0,0]}],['tip2L','tipL',[0,8,0],[-1,0,-1,2,7,2],[0.55,0,-0.45],{head:1,tp:['y',0,0,0,0]}],
+      ['hornR','head',[3.2,2.5,1],[-2,0,-2,4,8,4],[0.25,0,-1.15],{head:1,m:'hornL',tp:['y',0.65,0.65,0,0]}],['tipR','hornR',[0,8,0],[-1.5,0,-1.5,3,8,3],[0.9,0,0.95],{head:1,m:'tipL',tp:['y',0.5,0.5,0,0]}],['tip2R','tipR',[0,8,0],[-1,0,-1,2,7,2],[0.55,0,0.45],{head:1,m:'tip2L',tp:['y',0,0,0,0]}],
       ['maneA','chest',[0,11,-2],[-10,0,-0.5,20,16,1],[-1.2,0,0],{nb:1}],['maneB','chest',[0,11,-2],[-0.5,0,-8,1,16,16],[-1.2,0,0],{nb:1}],
       ['crest','chest',[0,5,-6.5],[-0.5,-6,-7,1,14,7],0,{nb:1}],
-      ['armL','chest',[-11,8,0],[-6,-15,-3.5,6,16,7],[-1.25,0,-0.2]],['armR','chest',[11,8,0],[0,-15,-3.5,6,16,7],[-1.25,0,0.2],{m:'armL'}],
-      ['foreL','armL',[-3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0]],['foreR','armR',[3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{m:'foreL'}],
-      ['handL','foreL',[0,-16,0],[-3.5,-5,-2.5,7,5,6],0],['handR','foreR',[0,-16,0],[-3.5,-5,-2.5,7,5,6],0,{m:'handL'}],
-      ['wpn','handR',[0,-3,0],[-1,-1.5,-3,2,3,34],[0.55,0,0],{nb:1}],['guard','wpn',[0,0,1],[-4,-1,0,8,2,2],0,{nb:1}],
+      ['armL','chest',[-11,9,0],[-6,-15,-3.5,6,16,7],[-1.25,0,-0.2],{tp:['-y',0.7,0.75,0.5,0]}],['armR','chest',[11,9,0],[0,-15,-3.5,6,16,7],[-1.25,0,0.2],{m:'armL',tp:['-y',0.7,0.75,-0.5,0]}],
+      ['foreL','armL',[-3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{tp:['-y',0.7,0.7,0,0.4]}],['foreR','armR',[3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{m:'foreL',tp:['-y',0.7,0.7,0,0.4]}],
+      ['elbL','foreL',[0,-1,-2.5],[-1,-1,-5,2,2,5],[0.3,0,0],{nb:1,tp:['-z',0,0,0,0]}],['elbR','foreR',[0,-1,-2.5],[-1,-1,-5,2,2,5],[0.3,0,0],{nb:1,m:'elbL',tp:['-z',0,0,0,0]}],
+      ['handL','foreL',[0,-16,0.3],[-3,-4,-2.5,6,4,5],0,{tp:['-y',0.85,0.9,0,0.3]}],['handR','foreR',[0,-16,0.3],[-3,-4,-2.5,6,4,5],0,{m:'handL',tp:['-y',0.85,0.9,0,0.3]}],
+      ['clL1','handL',[-2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,tp:['-y',0,0,0,0.6]}],['clL2','handL',[0,-4,1.3],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],['clL3','handL',[2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],
+      ['clR1','handR',[-2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],['clR2','handR',[0,-4,1.3],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],['clR3','handR',[2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],
+      ['wpn','handR',[0,-3,0],[-1,-1.5,-3,2,3,34],[0.55,0,0],{nb:1,tp:['z',0.5,0.15,0,0]}],['guard','wpn',[0,0,1],[-5,-1,0,10,2,2],0,{nb:1,tp:['x',0.6,0.6,0,0]}],
       ['whip1','handL',[0,-4,0],[-0.5,-0.5,0,1,1,12],[1.2,0,0],{nb:1}],['whip2','whip1',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.35,0,0],{nb:1,m:'whip1'}],
       ['whip3','whip2',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.35,0,0],{nb:1,m:'whip1'}],['whip4','whip3',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.3,0,0],{nb:1,m:'whip1'}],
-      ['tail','body',[0,0,-5],[-1.5,-1.5,-14,3,3,14],[-0.9,0,0],{nb:1}],['tail2','tail',[0,0,-14],[-1,-1,-12,2,2,12],[-0.4,0,0],{nb:1}],
-      ['wingL','chest',[-5,9,-6.5],[-28,-30,-0.5,28,34,1],[-0.85,-0.6,-0.55],{nb:1}],['wingR','chest',[5,9,-6.5],[0,-30,-0.5,28,34,1],[-0.85,0.6,0.55],{nb:1,m:'wingL'}],
-      ['wingL2','wingL',[-28,4,0],[-32,-36,-0.5,32,40,1],[0,-0.35,-0.35],{nb:1}],['wingR2','wingR',[28,4,0],[0,-36,-0.5,32,40,1],[0,0.35,0.35],{nb:1,m:'wingL2'}]],
-      coats:[[{hide:[38,22,20],dark:[20,12,12],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],memb:[74,22,18]},1]],
+      ['tail','body',[0,0,-5],[-2,-2,-14,4,4,14],[-0.9,0,0],{nb:1,tp:['-z',0.55,0.55,0,0]}],['tail2','tail',[0,0,-14],[-1,-1,-12,2,2,12],[-0.4,0,0],{nb:1,tp:['-z',0.25,0.25,0,0]}],
+      ['wingL','chest',[-5,9,-6.5],[-28,-30,-0.5,28,34,1],[-0.85,-0.6,-0.55],{nb:1}],['wbL','wingL',[0,3,0],[-28,-1,-1,28,3,2],0,{nb:1,tp:['-x',0.45,0.5,0,0]}],
+      ['wingL2','wingL',[-28,4,0],[-32,-36,-0.5,32,40,1],[0,-0.35,-0.35],{nb:1}],['wcL','wingL2',[-0.5,3.5,0],[-1,0,-1,2,5,2],[0,0,0.5],{nb:1,tp:['y',0,0,0,0]}],['fL0','wingL2',[-0.5,3.5,0],[-32,-1,-1,32,2,2],0,{nb:1,tp:['-x',0.35,0.4,0,0]}],['fL1','wingL2',[-0.5,3.5,0],[-30,-0.5,-0.5,30,1,1],[0,0,0.44],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL2','wingL2',[-0.5,3.5,0],[-38,-0.5,-0.5,38,1,1],[0,0,0.942],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL3','wingL2',[-0.5,3.5,0],[-40,-0.5,-0.5,40,1,1],[0,0,1.351],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL4','wingL2',[-0.5,3.5,0],[-36,-0.5,-0.5,36,1,1],[0,0,1.571],{nb:1,tp:['-x',0.3,0.3,0,0]}],
+      ['wingR','chest',[5,9,-6.5],[0,-30,-0.5,28,34,1],[-0.85,0.6,0.55],{nb:1}],['wbR','wingR',[0,3,0],[0,-1,-1,28,3,2],0,{nb:1,m:'wbL',tp:['x',0.45,0.5,0,0]}],
+      ['wingR2','wingR',[28,4,0],[0,-36,-0.5,32,40,1],[0,0.35,0.35],{nb:1}],['wcR','wingR2',[0.5,3.5,0],[-1,0,-1,2,5,2],[0,0,-0.5],{nb:1,m:'wcL',tp:['y',0,0,0,0]}],['fR0','wingR2',[0.5,3.5,0],[0,-1,-1,32,2,2],0,{nb:1,m:'fL0',tp:['x',0.35,0.4,0,0]}],['fR1','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,30,1,1],[0,0,-0.44],{nb:1,m:'fL1',tp:['x',0.3,0.3,0,0]}],['fR2','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,38,1,1],[0,0,-0.942],{nb:1,m:'fL2',tp:['x',0.3,0.3,0,0]}],['fR3','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,40,1,1],[0,0,-1.351],{nb:1,m:'fL3',tp:['x',0.3,0.3,0,0]}],['fR4','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,36,1,1],[0,0,-1.571],{nb:1,m:'fL4',tp:['x',0.3,0.3,0,0]}]],
+      coats:[[{hide:[36,21,19],dark:[18,11,11],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],ivory:[206,192,164],memb:[74,22,18]},1]],
       paint(P,c){
-        P.coat(['body','chest','head','jaw','legL','shinL','footL','armL','foreL','handL','tail','tail2'],c.hide,12);
-        P.cracks(['legL','shinL','armL','foreL','tail'],c.fire,0.022);P.cracks(['body','chest'],c.fire,0.018);
-        // the burning heart in the chest, its ribs glowing through the hide (the chest leans far forward: its top and front face you)
-        for(const f of ['T','F']){P.glowRect('chest',f,8,f==='T'?4:3,6,5,c.fire);P.glowRect('chest',f,9,f==='T'?5:4,4,3,c.hot);P.glowRect('chest',f,10,f==='T'?6:5,2,1,c.white);
-          for(let k=0;k<4;k++){const t=f==='T'?2+k*3:1+k*3;P.glowRect('chest',f,2,t,5,1,c.fire);P.glowRect('chest',f,15,t,5,1,c.fire);}}
-        P.glowRect('body','F',5,2,3,9,c.fire);P.glowRect('body','F',6,4,1,5,c.hot);
-        // the head: a dark brow over two burning eyes, a mouth full of fire, fangs
-        P.coat(['brow'],c.dark,6);P.rows('head',['F'],0,2,c.dark);P.glowRect('head','F',1,2,2,2,c.hot);P.glowRect('head','F',6,2,2,2,c.hot);P.glow('head','F',1,2,c.white);P.glow('head','F',7,2,c.white);
-        P.rect('head','F',3,2,3,2,c.dark);P.glowRect('head','D',1,1,7,8,c.fire);P.glowRect('jaw','T',1,1,5,8,c.hot);P.glowRect('jaw','F',1,0,5,1,c.fire);
-        for(const s of [0,2,4,6])P.px('jaw','F',s,0,[226,210,180]);for(const s of [0,8])P.px('head','F',s,7,[226,210,180]);
-        P.coat(['hornL'],[70,58,50],10);P.coat(['tipL'],[46,38,34],8);P.coat(['tip2L'],[22,18,18],4);
-        // claws
-        P.rows('handL',['L','F','R','B','D'],3,5,[200,188,166]);P.rows('footL',['F'],0,3,[200,188,166]);P.face('footL','D',c.dark,4);
+        P.coat(['body','chest','neck','legL','shinL','footL','armL','foreL','handL','tail','tail2'],c.hide,12);
+        P.cracks(['legL','shinL','armL','foreL','tail'],c.fire,0.014);P.cracks(['body','chest','neck'],c.fire,0.012);
+        // the burning heart in the chest, a few ribs glowing through the hide
+        P.glowRect('chest','F',7,3,4,4,c.fire);P.glowRect('chest','F',8,4,2,2,c.hot);P.glowRect('chest','T',8,8,2,3,c.fire);
+        for(let k=0;k<3;k++){const t=2+k*4;P.glowRect('chest','F',3,t,3,1,[200,70,20]);P.glowRect('chest','F',12,t,3,1,[200,70,20]);}
+        P.glowRect('body','F',5,2,2,9,c.fire);P.glowRect('body','F',5,4,1,5,c.hot);
+        // the skull: near black, a seam of fire along the muzzle, the brow darker still; burning slits for eyes; the maw on fire
+        P.coat(['head','jaw'],[30,18,16],8);P.cracks(['head'],c.fire,0.02);P.coat(['browL'],c.dark,4);P.glowFaces(['eyeL'],[255,238,160]);
+        P.glowRect('head','D',1,2,6,7,c.fire);P.glowRect('jaw','T',1,1,5,7,c.hot);P.glowRect('jaw','F',1,0,5,1,c.fire);P.glow('head','F',1,3,c.fire);P.glow('head','F',6,3,c.fire);
+        P.coat(['fangL','chkL','clL1','toeL1','spurL','elbL'],c.ivory,10);P.rows('chkL',['L','R','T','D'],0,1,c.bone);
+        P.coat(['hornL'],[72,58,50],10);P.coat(['tipL'],[46,38,34],8);P.coat(['tip2L'],[22,18,18],4);
+        P.coat(['spn1','shL'],[40,26,22],8);P.rows('spn1',['L','F','R','B'],0,3,c.fire);P.rows('shL',['L','F','R','B'],0,2,c.fire);
+        P.rows('handL',['L','F','R','B'],3,4,c.bone);P.face('footL','D',c.dark,4);
         // the flames: crossed sheets, white at the root to red at the tips, cut into tongues
         const flame=(w,h,salt)=>(a,b)=>{const top=h*(0.35+0.65*Math.abs(Math.sin(a*0.85+salt)*Math.cos(a*0.37+salt*2)));const up=h-1-b;if(up>top)return 'cut';const q=up/Math.max(1,top);
-          return q<0.25?[255,236,170,200]:q<0.55?[255,170,50,200]:q<0.8?[250,96,26,200]:[200,40,20,200];};
+          return q<0.25?[255,196,90,200]:q<0.55?[255,150,44,200]:q<0.8?[240,90,24,200]:[190,38,18,200];};
         P.sheet('maneA','z',flame(20,16,1.3));P.sheet('maneB','x',flame(16,16,2.9));P.sheet('crest','x',(a,b)=>{const top=14*(0.3+0.7*Math.abs(Math.sin(a*1.3+0.7)));return b<14-top?'cut':flame(7,14,4.1)(a,b);});
         // the blade burns, the whip is fire, the tail ends in flame
-        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',3,0,2,2,c.fire);
+        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',4,0,2,2,c.fire);
         P.glowFaces(['whip1'],[255,120,30]);P.glowRect('tail2','L',8,0,4,2,c.fire);P.glowRect('tail2','R',0,0,4,2,c.fire);P.glowRect('tail2','B',0,0,2,2,c.hot);
-        // the wings: an arm of bone along the top, fingers fanning from the wrist, a dark membrane between them hung in scallops,
-        // torn here and there, veined with fire
+        // the wings: bones of their own over a dark membrane hung in scallops between the fingers, torn here and there, the torn
+        // edges smouldering. Each side is painted in its own frame (the wrist is at the far end of the left wing's texture)
         const H=(a,b,k)=>((Math.sin(a*12.9898+b*78.233+k)*43758.5453)%1+1)%1;
-        P.sheet('wingL','z',(a,b)=>{const w=28,body=a/(w-1),lim=33-10*body-5*Math.abs(Math.sin(body*Math.PI*2));
+        const inner=(a,b)=>{const w=28,body=a/(w-1),lim=33-10*body-5*Math.abs(Math.sin(body*Math.PI*2));
           if(b>lim)return 'cut';if(b>lim-6&&H(a>>1,b>>1,3)<0.12)return 'cut';if(b<=1)return c.bone;if(a>w-3)return c.bone;
-          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [255,96,26,200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];});
+          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [255,96,26,200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];};
         const FING=[[Math.PI*1.0,32],[Math.PI*0.86,30],[Math.PI*0.7,38],[Math.PI*0.57,40],[Math.PI*0.5,36]];
-        P.sheet('wingL2','z',(a,b)=>{const dx=a-31,dy=b,r=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);if(ang>Math.PI+0.01||ang<FING[FING.length-1][0]-0.01)return 'cut';
+        const outer=(a,b)=>{const dx=a-31,dy=b,r=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);if(ang>Math.PI+0.01||ang<FING[FING.length-1][0]-0.01)return 'cut';
           let lim=0,bone=false;for(let k=0;k+1<FING.length;k++){const [a0,l0]=FING[k],[a1,l1]=FING[k+1];if(ang<=a0+0.001&&ang>=a1-0.001){const u=(a0-ang)/(a0-a1);lim=l0+(l1-l0)*u-7*Math.sin(Math.PI*u);}}
           for(const [fa,fl] of FING)if(r<=fl+0.5&&Math.abs(Math.sin(ang-fa))*r<0.8)bone=true;
-          if(bone)return r<4?[200,188,166]:c.bone;if(r>lim)return 'cut';if(r>lim-7&&H(a>>1,b>>1,5)<0.14)return 'cut';
-          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [255,96,26,200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];});}}
+          if(bone)return r<4?c.ivory:c.bone;if(r>lim)return 'cut';if(r>lim-7&&H(a>>1,b>>1,5)<0.14)return 'cut';
+          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [255,96,26,200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];};
+        P.sheet('wingL','z',inner);P.sheet('wingR','z',(a,b)=>inner(27-a,b));P.sheet('wingL2','z',outer);P.sheet('wingR2','z',(a,b)=>outer(31-a,b));
+        P.coat(['wbL','fL0','fL1','fL2','fL3','fL4'],c.bone,8);P.coat(['wcL'],c.ivory,8);}}
   });
 })();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
@@ -8292,7 +8356,7 @@ let fireBoltT=3;
 function strike(storm,ahead){
   const X=PL.x+OX,Z=PL.z+OZ;let X1,Y1,Z1,top;
   const vs=storm||ahead?[]:volcanoesNear(X,Z,170);
-  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],a=Math.random()*6.28,r=Math.random()*v.rc;X1=v.X+Math.cos(a)*r;Z1=v.Z+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
+  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],S=volcShape(v),a=Math.random()*6.28,r=Math.random()*v.rc;X1=S.cx+Math.cos(a)*r;Z1=S.cz+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
   else{const yaw=PL.yaw+(ahead?0.15:(Math.random()-0.5)*2.6),d=ahead?70:35+Math.random()*110;X1=X-Math.sin(yaw)*d;Z1=Z-Math.cos(yaw)*d;Y1=hAt(Math.round(X1),Math.round(Z1))+1;top=Math.min(H-4,Y1+60+Math.random()*40);}
   const b=makeBolt(X1+(Math.random()-0.5)*20,top,Z1+(Math.random()-0.5)*20,X1,Y1,Z1,storm);b.at=[X1-OX,Y1,Z1-OZ];
   const dist=Math.hypot(X1-X,Z1-Z);flash=Math.max(flash,Math.min(1,1.3-dist/180));
@@ -8311,7 +8375,7 @@ function puffTexture(){if(puffTex)return puffTex;const cv=document.createElement
   for(let k=0;k<7;k++){const x=20+Math.random()*24,y=20+Math.random()*24,r=12+Math.random()*12,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);}
   puffTex=new THREE.CanvasTexture(cv);return puffTex;}
 const plumes=new Map(),PUFFS=34,smokeC=new THREE.Color(0.15,0.12,0.11),fireC=new THREE.Color(0.85,0.3,0.1);
-function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
+function newPuff(p,v,age){const S=volcShape(v);p.age=age;p.life=36+Math.random()*24;p.X=S.cx+(Math.random()-0.5)*v.rc;p.Z=S.cz+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
   for(let t=0;t<age;t+=0.5)movePuff(p,0.5);}
 function movePuff(p,dt){p.Y+=p.vy*dt;p.vy=Math.max(1.2,p.vy-dt*0.15);p.X+=1.6*dt;p.Z+=0.6*dt;}
 function updPlumes(dt){
@@ -8340,9 +8404,11 @@ function farWasteRay(F,k){
   const e=hi,cd=e+WB_IN+WB_CR/2,cX=g.X+ux*cd,cZ=g.Z+uz*cd,rg=1-Math.abs(fbm2(cX/70,cZ/70,2,9203.1)),cr=SEA+78+rg*rg*rg*42-sstep(0.2,0.5,fbm2(cX/300,cZ/300,1,9205.7))*30-g.base;
   let flow=0;for(const f of g.fl)if(Math.round(((f.a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)flow=Math.max(flow,f.len);
   let old=false;for(const a of g.old)if(Math.round(((a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)old=true;
-  const cone=d=>{if(d<g.rc){const b=g.Hv-(g.cd+3)+(g.cd+3)*Math.pow(d/g.rc,4);return b<g.lake-g.base?[g.lake-g.base,1]:[b,0];}if(d<g.R){const q=1-(d-g.rc)/(g.R-g.rc);return [Math.pow(q,1.35)*g.Hv,0];}return [0,0];};
-  for(const d of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.08,0.2,0.33,0.46,0.6,0.74,0.88,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R,g.R*1.3])){const [h,lk]=cone(d),q=Math.min(1,h/g.Hv);
-    const gl=lk?1:flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0;out.push(d,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
+  // the cone through its own shape (volcShape): its warped foot, leaning top, scar, gullies and shoulder cones
+  const S=volcShape(g),cone=D=>{const X=g.X+ux*D,Z=g.Z+uz*D,[d,th]=volcFrame(g,S,X,Z);if(d>=g.R)return [0,0,d,th];const b=volcCone(g,S,d,th,X,Z);return d<g.rc&&b<g.lake-g.base?[g.lake-g.base,1,d,th]:[b,0,d,th];};
+  for(const D of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.04,0.08,0.14,0.2,0.27,0.33,0.4,0.46,0.53,0.6,0.67,0.74,0.81,0.88,0.94,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R*1.12,g.R*1.3])){const [h,lk,d,th]=cone(D),q=Math.max(0,Math.min(1,h/g.Hv));
+    let fw=0;for(const f of g.fl)if(d>=g.rc&&d<=g.R*f.len&&Math.abs(angDiffV(th,f.a+0.33*Math.sin(d/11)))*d<4)fw=0.85;
+    const gl=lk?1:fw||(flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0);out.push(D,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
   out.push(e,0,0.1,0.085,0.08,0);
   for(const t of [0.25,0.5,0.75,1]){const p=t*t*(3-2*t)*0.7+t*0.3;out.push(e+WB_IN*t,cr*p,0.13+0.04*t,0.11+0.04*t,0.1+0.04*t,0);}
   out.push(e+WB_IN+WB_CR,cr,0.19,0.17,0.16,0,e+WB_END,SEA+8-g.base,0.16,0.14,0.13,0);
@@ -8394,7 +8460,7 @@ function fireTick(dt){
   for(let k=0;k<lavaSpots.length*dt*0.6;k++){const s=lavaSpots[Math.random()*lavaSpots.length|0];spawnP(s[0]+Math.random(),s[1]+1.05,s[2]+Math.random(),(Math.random()-0.5)*0.8+0.4,1.2+Math.random()*2.2,(Math.random()-0.5)*0.8,[1,0.35+Math.random()*0.35,0.08],1.2+Math.random()*2,-0.5);}
   for(let k=0;k<12*dt*b;k++)spawnP(PL.x+(Math.random()-0.5)*30,PL.y+Math.random()*8-2,PL.z+(Math.random()-0.5)*30,0.6+Math.random()*0.4,0.4+Math.random()*0.8,(Math.random()-0.5)*0.5,[1,0.42,0.1],2+Math.random()*2,-0.15); // embers on the wind
   for(const s of ventSpots)if(Math.random()<dt*2.5)ventPuff(s);
-  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const at=[v.X-OX,v.lake+1,v.Z-OZ];
+  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const S=volcShape(v),at=[S.cx-OX,v.lake+1,S.cz-OZ];
       for(let k=0;k<14;k++){const a=Math.random()*6.28,s=2+Math.random()*5;spawnP(at[0]+(Math.random()-0.5)*v.rc*0.8,at[1],at[2]+(Math.random()-0.5)*v.rc*0.8,Math.cos(a)*s,12+Math.random()*12,Math.sin(a)*s,[1,0.5+Math.random()*0.3,0.1],3.5,9);}
       burst(1.2,'lowpass',110,0.6,0.4*Math.max(0.1,1-Math.hypot(v.X-PL.x-OX,v.Z-PL.z-OZ)/200),0,at);}}
 }

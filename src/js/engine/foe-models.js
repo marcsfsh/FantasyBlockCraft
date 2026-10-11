@@ -60,63 +60,83 @@
       coats:[[{hide:[70,66,64],crack:[255,130,30]},3],[{hide:[84,72,62],crack:[255,90,26]},2]],
       paint(P,c){P.coat(['body','head','jaw','nose','legL','armL'],c.hide,18);P.spots('body',['T','L','R','B'],[c.hide[0]+30,c.hide[1]+30,c.hide[2]+28],0.12);P.cracks(['body','armL','legL'],c.crack,0.06);
         P.coat(['tuskL'],[220,206,176],8);P.coat(['club'],[46,44,48],14);P.cracks(['club'],c.crack,0.05);P.coat(['sp1'],[50,48,50],12);P.glowEyes('head',2,3,[255,170,50]);P.rows('jaw',['F'],0,1,[30,22,20]);}},
-    // the Emberlord (D-054, D-055): a towering demon of shadow and flame, hunched over great digitigrade legs, its shoulders a
-    // hump of black hide split by fire, its head thrust low and forward under a heavy brow, eyes and maw burning, horns curving
-    // out and up, a mane of flame streaming back over its shoulders, and vast wings of bone and ragged membrane spread behind
-    // it. A burning blade in the right hand, a whip of fire in the left, a long tail.
+    // the Emberlord (D-054, D-055, D-056): a towering demon of shadow and flame, built of straight-edged tapering shapes. Hunched over
+    // great digitigrade legs, its torso a wedge broad at the shoulders and narrow at the waist, spines down its back; a horned
+    // skull thrust low and forward, narrowing to the muzzle, with a heavy angled brow over two slanted burning slits, cheek spurs,
+    // fangs and an open burning maw; tapering arms with elbow spurs and claws; a mane of flame streaming back; vast wings of
+    // tapering bones with a torn membrane between them. A burning blade in the right hand, a whip of fire in the left.
     ember:{scale:4.4,tex:256,parts:[
-      ['legL',null,[-6,22.5,0],[-3.5,-13,-3.5,7,14,7],[-0.6,0,0.06]],['legR',null,[6,22.5,0],[-3.5,-13,-3.5,7,14,7],[-0.6,0,-0.06],{m:'legL'}],
-      ['shinL','legL',[0,-12,0],[-2.5,-13,-2.5,5,13,5],[1.15,0,0]],['shinR','legR',[0,-12,0],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{m:'shinL'}],
-      ['footL','shinL',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0]],['footR','shinR',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{m:'footL'}],
-      ['body',null,[0,22.5,0],[-6.5,-2,-5,13,15,10],[0.7,0,0]],['chest','body',[0,12,1],[-11,-1,-6.5,22,13,13],[0.25,0,0]],
-      ['head','chest',[0,11,4],[-4.5,-3,-2,9,8,10],[-1.05,0,0],{head:1}],['brow','head',[0,3,2],[-5,0,0,10,2,9],0,{head:1}],
-      ['jaw','head',[0,-2,1],[-3.5,-3,0,7,3,9],[0.3,0,0],{head:1}],
-      ['hornL','head',[-4,3,3],[-1.5,0,-1.5,3,8,3],[0.3,0,1.1],{head:1}],['tipL','hornL',[0,8,0],[-1,0,-1,2,8,2],[0.9,0,-0.9],{head:1}],['tip2L','tipL',[0,8,0],[-0.5,0,-0.5,1,5,1],[0.6,0,-0.4],{head:1}],
-      ['hornR','head',[4,3,3],[-1.5,0,-1.5,3,8,3],[0.3,0,-1.1],{head:1,m:'hornL'}],['tipR','hornR',[0,8,0],[-1,0,-1,2,8,2],[0.9,0,0.9],{head:1,m:'tipL'}],['tip2R','tipR',[0,8,0],[-0.5,0,-0.5,1,5,1],[0.6,0,0.4],{head:1,m:'tip2L'}],
+      ['legL',null,[-6,22.5,0],[-4,-13,-4,8,14,8],[-0.6,0,0.06],{tp:['-y',0.65,0.65,0,0.6]}],['legR',null,[6,22.5,0],[-4,-13,-4,8,14,8],[-0.6,0,-0.06],{m:'legL',tp:['-y',0.65,0.65,0,0.6]}],
+      ['shinL','legL',[0,-12,0.3],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{tp:['-y',0.7,0.8,0,0]}],['shinR','legR',[0,-12,0.3],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{m:'shinL',tp:['-y',0.7,0.8,0,0]}],
+      ['spurL','shinL',[0,-10,-2],[-1,-1,-4,2,2,4],[0.6,0,0],{tp:['-z',0,0,0,0]}],['spurR','shinR',[0,-10,-2],[-1,-1,-4,2,2,4],[0.6,0,0],{m:'spurL',tp:['-z',0,0,0,0]}],
+      ['footL','shinL',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{tp:['z',0.6,0.5,0,-0.6]}],['footR','shinR',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{m:'footL',tp:['z',0.6,0.5,0,-0.6]}],
+      ['toeL1','footL',[-1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,-0.2,0],{tp:['z',0,0,0,-0.6]}],['toeL2','footL',[0,-1,8],[-1,-1,0,2,2,4],[0.25,0,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],['toeL3','footL',[1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,0.2,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],
+      ['toeR1','footR',[-1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,-0.2,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],['toeR2','footR',[0,-1,8],[-1,-1,0,2,2,4],[0.25,0,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],['toeR3','footR',[1.6,-1,7.5],[-1,-1,0,2,2,4],[0.25,0.2,0],{m:'toeL1',tp:['z',0,0,0,-0.6]}],
+      ['body',null,[0,22.5,0],[-6,-2,-5,12,15,10],[0.7,0,0],{tp:['y',1.45,1.15,0,0]}],['chest','body',[0,12,1],[-9,-1,-6.5,18,13,13],[0.25,0,0],{tp:['y',1.3,0.8,0,-1.2]}],
+      ['spn1','chest',[0,3,-6.6],[-1,0,-1,2,7,2],[-1.25,0,0],{nb:1,tp:['y',0,0,0,0]}],['spn2','chest',[0,7,-6.4],[-1,0,-1,2,8,2],[-1.15,0,0],{nb:1,m:'spn1',tp:['y',0,0,0,0]}],
+      ['spn3','chest',[0,11,-6],[-1,0,-1,2,6,2],[-1.05,0,0],{nb:1,m:'spn1',tp:['y',0,0,0,0]}],['spn4','body',[0,6,-5.4],[-1,0,-1,2,5,2],[-1.3,0,0],{nb:1,m:'spn1',tp:['y',0,0,0,0]}],
+      ['shL','chest',[-11,11,-1],[-2,0,-2,4,7,4],[-0.5,0,0.75],{nb:1,tp:['y',0,0,0,0]}],['shR','chest',[11,11,-1],[-2,0,-2,4,7,4],[-0.5,0,-0.75],{nb:1,m:'shL',tp:['y',0,0,0,0]}],
+      ['neck','chest',[0,10,2.5],[-3.5,-1,-3.5,7,6,7],[-0.35,0,0],{tp:['y',0.8,0.8,0,0.8]}],
+      ['head','neck',[0,4.5,1],[-4,-2.5,-3,8,6,9],[-0.7,0,0],{head:1,tp:['z',0.55,0.7,0,-0.6]}],
+      ['browL','head',[-2,2.6,3.2],[-2.5,-1,-1,5,2,5],[0.15,0.25,-0.32],{head:1,tp:['z',0.6,0.5,0,-0.4]}],['browR','head',[2,2.6,3.2],[-2.5,-1,-1,5,2,5],[0.15,-0.25,0.32],{head:1,m:'browL',tp:['z',0.6,0.5,0,-0.4]}],
+      ['eyeL','head',[-1.35,1.3,4.1],[-1,-0.5,-0.5,2,1,1],[0,0.3,-0.3],{head:1,tp:['-x',1,0.5,0,-0.2]}],['eyeR','head',[1.35,1.3,4.1],[-1,-0.5,-0.5,2,1,1],[0,-0.3,0.3],{head:1,m:'eyeL',tp:['x',1,0.5,0,-0.2]}],
+      ['jaw','head',[0,-2.5,-1],[-3.5,-2,0,7,2,8],[0.4,0,0],{head:1,tp:['z',0.6,0.8,0,0.2]}],
+      ['fangL','head',[-1.4,-2.3,4.8],[-0.5,-2,-0.5,1,2,1],0,{head:1,tp:['-y',0,0,0,0]}],['fangR','head',[1.4,-2.3,4.8],[-0.5,-2,-0.5,1,2,1],0,{head:1,m:'fangL',tp:['-y',0,0,0,0]}],
+      ['tuskL','jaw',[-1.8,0,6],[-0.5,0,-0.5,1,2,1],0,{head:1,m:'fangL',tp:['y',0,0,0,0]}],['tuskR','jaw',[1.8,0,6],[-0.5,0,-0.5,1,2,1],0,{head:1,m:'fangL',tp:['y',0,0,0,0]}],
+      ['chkL','head',[-3.6,-0.5,0.5],[-1,-1,-5,2,2,5],[0.1,-0.5,0],{head:1,tp:['-z',0,0,0,0]}],['chkR','head',[3.6,-0.5,0.5],[-1,-1,-5,2,2,5],[0.1,0.5,0],{head:1,m:'chkL',tp:['-z',0,0,0,0]}],
+      ['hornL','head',[-3.2,2.5,1],[-2,0,-2,4,8,4],[0.25,0,1.15],{head:1,tp:['y',0.65,0.65,0,0]}],['tipL','hornL',[0,8,0],[-1.5,0,-1.5,3,8,3],[0.9,0,-0.95],{head:1,tp:['y',0.5,0.5,0,0]}],['tip2L','tipL',[0,8,0],[-1,0,-1,2,7,2],[0.55,0,-0.45],{head:1,tp:['y',0,0,0,0]}],
+      ['hornR','head',[3.2,2.5,1],[-2,0,-2,4,8,4],[0.25,0,-1.15],{head:1,m:'hornL',tp:['y',0.65,0.65,0,0]}],['tipR','hornR',[0,8,0],[-1.5,0,-1.5,3,8,3],[0.9,0,0.95],{head:1,m:'tipL',tp:['y',0.5,0.5,0,0]}],['tip2R','tipR',[0,8,0],[-1,0,-1,2,7,2],[0.55,0,0.45],{head:1,m:'tip2L',tp:['y',0,0,0,0]}],
       ['maneA','chest',[0,11,-2],[-10,0,-0.5,20,16,1],[-1.2,0,0],{nb:1}],['maneB','chest',[0,11,-2],[-0.5,0,-8,1,16,16],[-1.2,0,0],{nb:1}],
       ['crest','chest',[0,5,-6.5],[-0.5,-6,-7,1,14,7],0,{nb:1}],
-      ['armL','chest',[-11,8,0],[-6,-15,-3.5,6,16,7],[-1.25,0,-0.2]],['armR','chest',[11,8,0],[0,-15,-3.5,6,16,7],[-1.25,0,0.2],{m:'armL'}],
-      ['foreL','armL',[-3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0]],['foreR','armR',[3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{m:'foreL'}],
-      ['handL','foreL',[0,-16,0],[-3.5,-5,-2.5,7,5,6],0],['handR','foreR',[0,-16,0],[-3.5,-5,-2.5,7,5,6],0,{m:'handL'}],
-      ['wpn','handR',[0,-3,0],[-1,-1.5,-3,2,3,34],[0.55,0,0],{nb:1}],['guard','wpn',[0,0,1],[-4,-1,0,8,2,2],0,{nb:1}],
+      ['armL','chest',[-11,9,0],[-6,-15,-3.5,6,16,7],[-1.25,0,-0.2],{tp:['-y',0.7,0.75,0.5,0]}],['armR','chest',[11,9,0],[0,-15,-3.5,6,16,7],[-1.25,0,0.2],{m:'armL',tp:['-y',0.7,0.75,-0.5,0]}],
+      ['foreL','armL',[-3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{tp:['-y',0.7,0.7,0,0.4]}],['foreR','armR',[3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{m:'foreL',tp:['-y',0.7,0.7,0,0.4]}],
+      ['elbL','foreL',[0,-1,-2.5],[-1,-1,-5,2,2,5],[0.3,0,0],{nb:1,tp:['-z',0,0,0,0]}],['elbR','foreR',[0,-1,-2.5],[-1,-1,-5,2,2,5],[0.3,0,0],{nb:1,m:'elbL',tp:['-z',0,0,0,0]}],
+      ['handL','foreL',[0,-16,0.3],[-3,-4,-2.5,6,4,5],0,{tp:['-y',0.85,0.9,0,0.3]}],['handR','foreR',[0,-16,0.3],[-3,-4,-2.5,6,4,5],0,{m:'handL',tp:['-y',0.85,0.9,0,0.3]}],
+      ['clL1','handL',[-2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,tp:['-y',0,0,0,0.6]}],['clL2','handL',[0,-4,1.3],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],['clL3','handL',[2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],
+      ['clR1','handR',[-2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],['clR2','handR',[0,-4,1.3],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],['clR3','handR',[2,-4,1],[-0.5,-4,-0.5,1,4,1],[0.35,0,0],{nb:1,m:'clL1',tp:['-y',0,0,0,0.6]}],
+      ['wpn','handR',[0,-3,0],[-1,-1.5,-3,2,3,34],[0.55,0,0],{nb:1,tp:['z',0.5,0.15,0,0]}],['guard','wpn',[0,0,1],[-5,-1,0,10,2,2],0,{nb:1,tp:['x',0.6,0.6,0,0]}],
       ['whip1','handL',[0,-4,0],[-0.5,-0.5,0,1,1,12],[1.2,0,0],{nb:1}],['whip2','whip1',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.35,0,0],{nb:1,m:'whip1'}],
       ['whip3','whip2',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.35,0,0],{nb:1,m:'whip1'}],['whip4','whip3',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.3,0,0],{nb:1,m:'whip1'}],
-      ['tail','body',[0,0,-5],[-1.5,-1.5,-14,3,3,14],[-0.9,0,0],{nb:1}],['tail2','tail',[0,0,-14],[-1,-1,-12,2,2,12],[-0.4,0,0],{nb:1}],
-      ['wingL','chest',[-5,9,-6.5],[-28,-30,-0.5,28,34,1],[-0.85,-0.6,-0.55],{nb:1}],['wingR','chest',[5,9,-6.5],[0,-30,-0.5,28,34,1],[-0.85,0.6,0.55],{nb:1,m:'wingL'}],
-      ['wingL2','wingL',[-28,4,0],[-32,-36,-0.5,32,40,1],[0,-0.35,-0.35],{nb:1}],['wingR2','wingR',[28,4,0],[0,-36,-0.5,32,40,1],[0,0.35,0.35],{nb:1,m:'wingL2'}]],
-      coats:[[{hide:[38,22,20],dark:[20,12,12],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],memb:[74,22,18]},1]],
+      ['tail','body',[0,0,-5],[-2,-2,-14,4,4,14],[-0.9,0,0],{nb:1,tp:['-z',0.55,0.55,0,0]}],['tail2','tail',[0,0,-14],[-1,-1,-12,2,2,12],[-0.4,0,0],{nb:1,tp:['-z',0.25,0.25,0,0]}],
+      ['wingL','chest',[-5,9,-6.5],[-28,-30,-0.5,28,34,1],[-0.85,-0.6,-0.55],{nb:1}],['wbL','wingL',[0,3,0],[-28,-1,-1,28,3,2],0,{nb:1,tp:['-x',0.45,0.5,0,0]}],
+      ['wingL2','wingL',[-28,4,0],[-32,-36,-0.5,32,40,1],[0,-0.35,-0.35],{nb:1}],['wcL','wingL2',[-0.5,3.5,0],[-1,0,-1,2,5,2],[0,0,0.5],{nb:1,tp:['y',0,0,0,0]}],['fL0','wingL2',[-0.5,3.5,0],[-32,-1,-1,32,2,2],0,{nb:1,tp:['-x',0.35,0.4,0,0]}],['fL1','wingL2',[-0.5,3.5,0],[-30,-0.5,-0.5,30,1,1],[0,0,0.44],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL2','wingL2',[-0.5,3.5,0],[-38,-0.5,-0.5,38,1,1],[0,0,0.942],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL3','wingL2',[-0.5,3.5,0],[-40,-0.5,-0.5,40,1,1],[0,0,1.351],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL4','wingL2',[-0.5,3.5,0],[-36,-0.5,-0.5,36,1,1],[0,0,1.571],{nb:1,tp:['-x',0.3,0.3,0,0]}],
+      ['wingR','chest',[5,9,-6.5],[0,-30,-0.5,28,34,1],[-0.85,0.6,0.55],{nb:1}],['wbR','wingR',[0,3,0],[0,-1,-1,28,3,2],0,{nb:1,m:'wbL',tp:['x',0.45,0.5,0,0]}],
+      ['wingR2','wingR',[28,4,0],[0,-36,-0.5,32,40,1],[0,0.35,0.35],{nb:1}],['wcR','wingR2',[0.5,3.5,0],[-1,0,-1,2,5,2],[0,0,-0.5],{nb:1,m:'wcL',tp:['y',0,0,0,0]}],['fR0','wingR2',[0.5,3.5,0],[0,-1,-1,32,2,2],0,{nb:1,m:'fL0',tp:['x',0.35,0.4,0,0]}],['fR1','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,30,1,1],[0,0,-0.44],{nb:1,m:'fL1',tp:['x',0.3,0.3,0,0]}],['fR2','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,38,1,1],[0,0,-0.942],{nb:1,m:'fL2',tp:['x',0.3,0.3,0,0]}],['fR3','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,40,1,1],[0,0,-1.351],{nb:1,m:'fL3',tp:['x',0.3,0.3,0,0]}],['fR4','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,36,1,1],[0,0,-1.571],{nb:1,m:'fL4',tp:['x',0.3,0.3,0,0]}]],
+      coats:[[{hide:[36,21,19],dark:[18,11,11],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],ivory:[206,192,164],memb:[74,22,18]},1]],
       paint(P,c){
-        P.coat(['body','chest','head','jaw','legL','shinL','footL','armL','foreL','handL','tail','tail2'],c.hide,12);
-        P.cracks(['legL','shinL','armL','foreL','tail'],c.fire,0.022);P.cracks(['body','chest'],c.fire,0.018);
-        // the burning heart in the chest, its ribs glowing through the hide (the chest leans far forward: its top and front face you)
-        for(const f of ['T','F']){P.glowRect('chest',f,8,f==='T'?4:3,6,5,c.fire);P.glowRect('chest',f,9,f==='T'?5:4,4,3,c.hot);P.glowRect('chest',f,10,f==='T'?6:5,2,1,c.white);
-          for(let k=0;k<4;k++){const t=f==='T'?2+k*3:1+k*3;P.glowRect('chest',f,2,t,5,1,c.fire);P.glowRect('chest',f,15,t,5,1,c.fire);}}
-        P.glowRect('body','F',5,2,3,9,c.fire);P.glowRect('body','F',6,4,1,5,c.hot);
-        // the head: a dark brow over two burning eyes, a mouth full of fire, fangs
-        P.coat(['brow'],c.dark,6);P.rows('head',['F'],0,2,c.dark);P.glowRect('head','F',1,2,2,2,c.hot);P.glowRect('head','F',6,2,2,2,c.hot);P.glow('head','F',1,2,c.white);P.glow('head','F',7,2,c.white);
-        P.rect('head','F',3,2,3,2,c.dark);P.glowRect('head','D',1,1,7,8,c.fire);P.glowRect('jaw','T',1,1,5,8,c.hot);P.glowRect('jaw','F',1,0,5,1,c.fire);
-        for(const s of [0,2,4,6])P.px('jaw','F',s,0,[226,210,180]);for(const s of [0,8])P.px('head','F',s,7,[226,210,180]);
-        P.coat(['hornL'],[70,58,50],10);P.coat(['tipL'],[46,38,34],8);P.coat(['tip2L'],[22,18,18],4);
-        // claws
-        P.rows('handL',['L','F','R','B','D'],3,5,[200,188,166]);P.rows('footL',['F'],0,3,[200,188,166]);P.face('footL','D',c.dark,4);
+        P.coat(['body','chest','neck','legL','shinL','footL','armL','foreL','handL','tail','tail2'],c.hide,12);
+        P.cracks(['legL','shinL','armL','foreL','tail'],c.fire,0.014);P.cracks(['body','chest','neck'],c.fire,0.012);
+        // the burning heart in the chest, a few ribs glowing through the hide
+        P.glowRect('chest','F',7,3,4,4,c.fire);P.glowRect('chest','F',8,4,2,2,c.hot);P.glowRect('chest','T',8,8,2,3,c.fire);
+        for(let k=0;k<3;k++){const t=2+k*4;P.glowRect('chest','F',3,t,3,1,[200,70,20]);P.glowRect('chest','F',12,t,3,1,[200,70,20]);}
+        P.glowRect('body','F',5,2,2,9,c.fire);P.glowRect('body','F',5,4,1,5,c.hot);
+        // the skull: near black, a seam of fire along the muzzle, the brow darker still; burning slits for eyes; the maw on fire
+        P.coat(['head','jaw'],[30,18,16],8);P.cracks(['head'],c.fire,0.02);P.coat(['browL'],c.dark,4);P.glowFaces(['eyeL'],[255,238,160]);
+        P.glowRect('head','D',1,2,6,7,c.fire);P.glowRect('jaw','T',1,1,5,7,c.hot);P.glowRect('jaw','F',1,0,5,1,c.fire);P.glow('head','F',1,3,c.fire);P.glow('head','F',6,3,c.fire);
+        P.coat(['fangL','chkL','clL1','toeL1','spurL','elbL'],c.ivory,10);P.rows('chkL',['L','R','T','D'],0,1,c.bone);
+        P.coat(['hornL'],[72,58,50],10);P.coat(['tipL'],[46,38,34],8);P.coat(['tip2L'],[22,18,18],4);
+        P.coat(['spn1','shL'],[40,26,22],8);P.rows('spn1',['L','F','R','B'],0,3,c.fire);P.rows('shL',['L','F','R','B'],0,2,c.fire);
+        P.rows('handL',['L','F','R','B'],3,4,c.bone);P.face('footL','D',c.dark,4);
         // the flames: crossed sheets, white at the root to red at the tips, cut into tongues
         const flame=(w,h,salt)=>(a,b)=>{const top=h*(0.35+0.65*Math.abs(Math.sin(a*0.85+salt)*Math.cos(a*0.37+salt*2)));const up=h-1-b;if(up>top)return 'cut';const q=up/Math.max(1,top);
-          return q<0.25?[255,236,170,200]:q<0.55?[255,170,50,200]:q<0.8?[250,96,26,200]:[200,40,20,200];};
+          return q<0.25?[255,196,90,200]:q<0.55?[255,150,44,200]:q<0.8?[240,90,24,200]:[190,38,18,200];};
         P.sheet('maneA','z',flame(20,16,1.3));P.sheet('maneB','x',flame(16,16,2.9));P.sheet('crest','x',(a,b)=>{const top=14*(0.3+0.7*Math.abs(Math.sin(a*1.3+0.7)));return b<14-top?'cut':flame(7,14,4.1)(a,b);});
         // the blade burns, the whip is fire, the tail ends in flame
-        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',3,0,2,2,c.fire);
+        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',4,0,2,2,c.fire);
         P.glowFaces(['whip1'],[255,120,30]);P.glowRect('tail2','L',8,0,4,2,c.fire);P.glowRect('tail2','R',0,0,4,2,c.fire);P.glowRect('tail2','B',0,0,2,2,c.hot);
-        // the wings: an arm of bone along the top, fingers fanning from the wrist, a dark membrane between them hung in scallops,
-        // torn here and there, veined with fire
+        // the wings: bones of their own over a dark membrane hung in scallops between the fingers, torn here and there, the torn
+        // edges smouldering. Each side is painted in its own frame (the wrist is at the far end of the left wing's texture)
         const H=(a,b,k)=>((Math.sin(a*12.9898+b*78.233+k)*43758.5453)%1+1)%1;
-        P.sheet('wingL','z',(a,b)=>{const w=28,body=a/(w-1),lim=33-10*body-5*Math.abs(Math.sin(body*Math.PI*2));
+        const inner=(a,b)=>{const w=28,body=a/(w-1),lim=33-10*body-5*Math.abs(Math.sin(body*Math.PI*2));
           if(b>lim)return 'cut';if(b>lim-6&&H(a>>1,b>>1,3)<0.12)return 'cut';if(b<=1)return c.bone;if(a>w-3)return c.bone;
-          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [255,96,26,200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];});
+          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [255,96,26,200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];};
         const FING=[[Math.PI*1.0,32],[Math.PI*0.86,30],[Math.PI*0.7,38],[Math.PI*0.57,40],[Math.PI*0.5,36]];
-        P.sheet('wingL2','z',(a,b)=>{const dx=a-31,dy=b,r=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);if(ang>Math.PI+0.01||ang<FING[FING.length-1][0]-0.01)return 'cut';
+        const outer=(a,b)=>{const dx=a-31,dy=b,r=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);if(ang>Math.PI+0.01||ang<FING[FING.length-1][0]-0.01)return 'cut';
           let lim=0,bone=false;for(let k=0;k+1<FING.length;k++){const [a0,l0]=FING[k],[a1,l1]=FING[k+1];if(ang<=a0+0.001&&ang>=a1-0.001){const u=(a0-ang)/(a0-a1);lim=l0+(l1-l0)*u-7*Math.sin(Math.PI*u);}}
           for(const [fa,fl] of FING)if(r<=fl+0.5&&Math.abs(Math.sin(ang-fa))*r<0.8)bone=true;
-          if(bone)return r<4?[200,188,166]:c.bone;if(r>lim)return 'cut';if(r>lim-7&&H(a>>1,b>>1,5)<0.14)return 'cut';
-          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [255,96,26,200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];});}}
+          if(bone)return r<4?c.ivory:c.bone;if(r>lim)return 'cut';if(r>lim-7&&H(a>>1,b>>1,5)<0.14)return 'cut';
+          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [255,96,26,200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];};
+        P.sheet('wingL','z',inner);P.sheet('wingR','z',(a,b)=>inner(27-a,b));P.sheet('wingL2','z',outer);P.sheet('wingR2','z',(a,b)=>outer(31-a,b));
+        P.coat(['wbL','fL0','fL1','fL2','fL3','fL4'],c.bone,8);P.coat(['wcL'],c.ivory,8);}}
   });
 })();

@@ -20,14 +20,21 @@ assert(great.length>=stretches.size-2&&great.every(v=>v.Hv>=80&&v.R>=80&&v.rimTo
 assert(lesser.length>=great.length*2&&lesser.every(v=>v.Hv>=18&&v.Hv<great[0].Hv*0.5&&v.rimTop-v.lake>=7&&!isBlockedName(v.name)),'lesser volcanoes rise about them, at most half as high, each with a crater deeper than its lake');
 assert(great.filter(g=>g.sats.length+lesser.filter(v=>!v.sat&&Math.hypot(v.X-g.X,v.Z-g.Z)<420).length>=2).length>=great.length*0.6,'most stretches hold several volcanoes about the great one');
 const vs=great;
-{const v=vs[0];gen(v.X,v.Z);const at=(X,y,Z)=>get(X-OX,y,Z-OZ);let lake=0,flank=0,rimLow=0,rimN=0;
-  for(let dx=-v.R;dx<=v.R;dx++)for(let dz=-v.R;dz<=v.R;dz++){const d=Math.hypot(dx,dz);if(d>v.R)continue;
+// (measured in the cone's own frame, D-056: its foot is warped and its crater stands off its middle)
+{const v=vs[0],S=volcShape(v);gen(v.X,v.Z);const at=(X,y,Z)=>get(X-OX,y,Z-OZ);let lake=0,flank=0,rimLow=0,rimN=0;
+  for(let dx=-v.R;dx<=v.R;dx++)for(let dz=-v.R;dz<=v.R;dz++){if(Math.hypot(dx,dz)>v.R*1.1)continue;const d=volcFrame(v,S,v.X+dx,v.Z+dz)[0];if(d>v.R)continue;
     if(d<v.rc*0.7&&at(v.X+dx,v.lake,v.Z+dz)===LAVA)lake++;
     if(d>v.rc*1.3){for(let y=v.base-6;y<=v.rimTop;y++)if(at(v.X+dx,y,v.Z+dz)===LAVA){flank++;break;}}
     if(d>=v.rc*1.05&&d<v.rc*1.25){rimN++;if(ground[(v.X+dx-OX)+W*(v.Z+dz-OZ)]<v.lake+1)rimLow++;}}
   const u=unsoundLava(),name=surfaceName(v.X,v.lake,v.Z);
   info(v.name,': lake lava',lake,'; flank columns with lava',flank,'; rim columns at or below the lake',rimLow,'of',rimN,'(the breaches); unsound lava',u);
   assert(lake>30&&flank>40&&rimLow<rimN*0.25&&u===0,v.name+' holds a lake of lava in its crater, spills it through breaches down its flanks, and its lava is held');
+  // no great volcano is a perfect cone: its foot is warped, its crater off its middle, its flanks uneven
+  const o={},foot=[],mid=[];for(let k=0;k<32;k++){const a=k/32*6.2832;let fd=0;for(let r=v.R*0.4;r<v.R*1.5;r+=3){colInfo(Math.round(v.X+Math.cos(a)*r),Math.round(v.Z+Math.sin(a)*r),o);if(o.h<v.base+v.Hv*0.15){fd=r;break;}}foot.push(fd);
+    colInfo(Math.round(v.X+Math.cos(a)*v.R*0.5),Math.round(v.Z+Math.sin(a)*v.R*0.5),o);mid.push(o.h);}
+  const fr=Math.max(...foot)/Math.max(1,Math.min(...foot)),mr=(Math.max(...mid)-Math.min(...mid))/v.Hv,off=Math.hypot(S.ox,S.oz);
+  info(v.name,': the foot reaches',Math.min(...foot),'to',Math.max(...foot),'from the middle; halfway out the flanks stand',Math.min(...mid),'to',Math.max(...mid),'; the crater',off.toFixed(1),'off the middle');
+  assert(fr>1.2&&mr>0.2&&off>v.R*0.04,v.name+' is no perfect cone: its foot warped, its flanks uneven, its crater off its middle');
   assert(name===v.name,'the volcano is a place of its own name ('+name+')');
   const c=count([BLACKASH,CINDER,LAVACRUST,CHARWOOD,SMOULDER,VENT,SULFUR,ASH,LAVA]);info('around it',Object.entries(c).map(([k,n])=>nameOf(+k)+' '+n).join(', '));
   assert(c[BLACKASH]>5000&&c[CINDER]>2000&&c[LAVACRUST]>500&&c[CHARWOOD]>40&&c[LAVA]>500,'the land around is black ash and cinder, crusted lava, lava and charred trees');}

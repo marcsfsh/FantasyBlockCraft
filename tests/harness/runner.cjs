@@ -1,6 +1,6 @@
 // Runs one prepared game bundle headlessly: the DOM, three.js and audio are replaced by
 // do-nothing stand-ins, so world generation, lighting, meshing and game logic all run for real.
-const mk=()=>{const f=function(){};return new Proxy(f,{get:(t,k)=>{if(k===Symbol.toPrimitive)return()=>1;if(k==='then')return undefined;if(k==='length')return 0;if(k==='matches')return false;if(k==='data')return t.__d||(t.__d=new Uint8ClampedArray(128*128*4));if(k==='forEach')return()=>{};if(k==='getChannelData')return()=>new Float32Array(10);if(k==='querySelectorAll')return()=>[];return t[k]!==undefined?t[k]:(t[k]=mk());},set:(t,k,v)=>{t[k]=v;return true},apply:()=>mk(),construct:()=>mk()});};
+const mk=()=>{const f=function(){};return new Proxy(f,{get:(t,k)=>{if(k===Symbol.toPrimitive)return()=>1;if(k==='then')return undefined;if(k==='length')return 0;if(k==='matches')return false;if(k==='data')return t.__d||(t.__d=new Uint8ClampedArray(256*256*4));if(k==='forEach')return()=>{};if(k==='getChannelData')return()=>new Float32Array(10);if(k==='querySelectorAll')return()=>[];return t[k]!==undefined?t[k]:(t[k]=mk());},set:(t,k,v)=>{t[k]=v;return true},apply:()=>mk(),construct:()=>mk()});};
 global.window=mk();global.document=mk();global.THREE=mk();global.localStorage={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};
 global.addEventListener=()=>{};global.innerWidth=800;global.innerHeight=600;global.requestAnimationFrame=()=>{};global.performance={now:()=>0};global.navigator={};global.location={};
 global.setInterval=()=>{};
