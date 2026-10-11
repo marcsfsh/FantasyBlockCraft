@@ -11,9 +11,11 @@ Saves from 0.27.0 do not carry over (save key v19): the Volcanic Wastes have cha
 
 ### Game
 - **Foes in the Volcanic Wastes, and only there.** Orc warbands roam the wastes and hold the Ashen Citadel: raiders, bowmen who keep their distance, brutes behind shields, and a horned warchief whose war horn brings the band. Ash trolls three blocks tall, lava glowing in the cracks of their hide, swing basalt clubs and throw rocks. In creative they take no notice of you.
-- **Goblin warrens** replace the crawlways and the upper caves under the wastes: halls on two levels cut in black rock seamed with magma, joined by propped tunnels, with hide huts round fire pits, stores, cages, forges, fire shrines, channels of lava and the chief's throne with its hoard. Goblin cutters, slingers and firecallers live there under a chieftain, some asleep in their dens, and keep camp at every way in. A way down leads on to the caves below.
-- **A great volcano** rises near the middle of every stretch of the wastes, up to 140 blocks high with lesser cones about its foot, and more lesser volcanoes stand across the land.
-- **The Ember Throne:** in each great volcano an Emberlord's fortress built to its size, with a gate between towers forty-six blocks high, a broad way in past troughs of lava, and under the summit a vast throne hall. There waits the Emberlord, a horned demon of fire and shadow eleven blocks tall with a burning blade, a whip of fire and wings of smoke; the ground shakes as it walks, and it never leaves its fortress. Once fallen, it stays fallen. (You asked for balrogs; that name is Tolkien's, so these are the Emberlords.)
+- **Goblin warrens** replace the crawlways and the upper caves under the wastes' sunken floor: halls on two levels cut in black rock seamed with magma, joined by propped tunnels, with hide huts round fire pits, stores, cages, forges, fire shrines, channels of lava and the chief's throne with its hoard. Goblin cutters, slingers and firecallers live there under a chieftain, some asleep in their dens, and keep camp at every way in. A way down leads on to the caves below.
+- **The wastes are sunken.** Each stretch lies in a basin at least 800 blocks across, its floor about 90 below the lands around, walled by a ring of black ash mountains about 90 above them: climb some 90 blocks to the jagged crest, then go down some 180 by cliffs and shelves to the floor. Its rivers run with lava, and nothing inside the ring is water.
+- **A grand volcano** rises near the middle of every basin, about 250 blocks high and 500 across, its burning crater some 70 blocks above the ring, with lesser cones about its foot and more lesser volcanoes across the floor. From afar a hazed stand-in of the basin and its volcano shows beyond the loaded world, crater and flows glowing.
+- **The Ember Throne:** in each great volcano an Emberlord's fortress built to its size, with a gate between towers fifty-eight blocks high, a long broad way in past troughs of lava, and under the summit a throne hall eighty blocks wide and fifty high. There waits the Emberlord, a demon of shadow and flame twelve blocks tall: hunched over great legs, head thrust forward under a dark brow, eyes and mouth burning, horns curving out, a mane of flame, and vast torn wings of bone and membrane smouldering at their edges. It walks with a heavy rolling stride that shakes the ground, wings beating slowly, a burning blade in one hand and a whip of fire in the other, and it never leaves its fortress. Once fallen, it stays fallen. (You asked for balrogs; that name is Tolkien's, so these are the Emberlords.)
+- **Foes walk:** their legs never swung before (a bug); now every foe strides.
 - **Warholds:** the lesser volcanoes' fortresses are held by orcs under a warchief.
 - **Fighting back:** swords from wood to moonsilver, and armour for a new body slot (Hide Jerkin, Iron Mail, Steel Plate, Moonsilver Mail). Foes leave iron, coal, leather, sulphur, troll hide and gold; the Emberlord leaves the Flamebrand and the Emberheart.
 - **Lava flows like water:** break into it and it spreads, slowly, up to four blocks and falls down holes. Where it meets water it hardens into obsidian or basalt.
@@ -21,7 +23,8 @@ Saves from 0.27.0 do not carry over (save key v19): the Volcanic Wastes have cha
 - New blocks: hide canvas, iron grate, basalt bricks, ember bricks, skull totem, war banner.
 
 ### Tooling
-- `tools/shot.mjs --foes[=kinds]` lines foes up (winding up, walking or asleep).
+- `tools/shot.mjs --foes[=kinds]` lines foes up (winding up, walking or asleep; turned by degrees, and `--far=` for an Emberlord).
+- `tools/map.mjs` draws dry ground below the sea's level as land and the air above the ground as sky.
 - New tests `48-lava-flow`, `49-warrens` (warrens and fortresses) and `50-foes`.
 
 ## 0.27.0 (2026-10-10): the Volcanic Wastes remade

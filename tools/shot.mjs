@@ -6,7 +6,8 @@
 //   node tools/shot.mjs --view=gate:824,330,1700,3.1,-0.6,0.3     name:X,Y,Z,yaw,pitch[,time of day 0 to 1]
 //   node tools/shot.mjs --view=... --animals[=deer.s,sheep.y,horse.2,hen.w]   animals lined up in front of the camera (E1), held
 //   node tools/shot.mjs --view=... --bolt     a lightning bolt strikes just before the shot (the Volcanic Wastes, D-051)
-//   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep
+//   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep;
+//        a third part turns it (ember.w.90: side on), and --far=30 stands an Emberlord further off
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
 // Uses the Playwright that is installed globally on the cloud VM (no project dependency, D-026). Builds a copy of the game
@@ -43,9 +44,9 @@ const HOOK=`window.__fbc={
   stageFoes(kinds,sec){
     foeT=999;for(const f of [...foes])removeFoe(f);const ks=kinds.length?kinds:Object.keys(FOES),cols=Math.ceil(ks.length/2);
     const fx=-Math.sin(PL.yaw),fz=-Math.cos(PL.yaw),rx=Math.cos(PL.yaw),rz=-Math.sin(PL.yaw);
-    ks.forEach((k,i)=>{const [kk,md]=k.split('.'),big=FOES[kk].tall>2,huge=FOES[kk].tall>6,row=ks.length<4?0:i%2,col=ks.length<4?i:Math.floor(i/2),n=ks.length<4?ks.length:cols,side=(col-(n-1)/2)*(big?4.2:2.2),d=(huge?20:big?7:3.6)+row*3;
+    ks.forEach((k,i)=>{const [kk,md,turn]=k.split('.'),big=FOES[kk].tall>2,huge=FOES[kk].tall>6,row=ks.length<4?0:i%2,col=ks.length<4?i:Math.floor(i/2),n=ks.length<4?ks.length:cols,side=(col-(n-1)/2)*(big?4.2:2.2),d=(huge?${Number(args.far||20)}:big?7:3.6)+row*3;
       const x=PL.x+fx*d+rx*side,z=PL.z+fz*d+rz*side,g=ground[Math.floor(x)+W*Math.floor(z)],y=foeStand(x,PL.y<g-3?PL.y-1:g+1,z,FOES[kk].tall||2);if(y<0)return; // underground, on the floor near the camera
-      const f=addFoe(kk,x,y,z,md==='z'?{st:'sleep',t:999}:{});f.yaw=f.hd=PL.yaw+((i%3)-1)*0.45;f.hold=1;if(md==='w')f.holdSp=FOES[kk].walk;if(md==='a'){f.atkK=FOES[kk].shot&&kk!=='troll'?'shot':'blow';f.holdAtk=(FOES[kk].wind||0.4)*0.35;}});
+      const f=addFoe(kk,x,y,z,md==='z'?{st:'sleep',t:999}:{});f.yaw=f.hd=PL.yaw+(turn!==undefined?+turn*Math.PI/180:((i%3)-1)*0.45);f.hold=1;if(md==='w')f.holdSp=FOES[kk].walk;if(md==='a'){f.atkK=FOES[kk].shot&&kk!=='troll'?'shot':'blow';f.holdAtk=(FOES[kk].wind||0.4)*0.35;}});
     for(let i=0;i<Math.round((sec||0.5)/0.02);i++)updFoes(0.02);return foes.length;
   },
   // animals in two rows ahead of the camera, side on or three-quarter, still; then a few frames of their update

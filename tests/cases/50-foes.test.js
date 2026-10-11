@@ -13,7 +13,7 @@ info('heights in blocks: goblin',hgt('goblin').toFixed(2),'orc',hgt('raider').to
 assert(hgt('goblin')<hgt('raider')&&hgt('raider')<hgt('brute')&&hgt('brute')<hgt('troll')&&hgt('troll')<hgt('ember')&&hgt('ember')>3.5,'goblins are small, orcs tall, brutes taller, trolls huge and an Emberlord towers over all');
 // an open flat spot on the wastes
 gen(3010,800);playing=true;settings.time='day';
-let sx=-1,sz=-1;for(let k=0;k<(W-60)*(D-20)&&sx<0;k+=3){const x=30+(k%(W-60)),z=10+Math.floor(k/(W-60)),g=ground[x+W*z];let ok=g>SEA;
+let sx=-1,sz=-1;for(let k=0;k<(W-60)*(D-20)&&sx<0;k+=3){const x=30+(k%(W-60)),z=10+Math.floor(k/(W-60)),g=ground[x+W*z];let ok=g>SEA-WB_DEP&&biome[x+W*z]===4;
   for(let a=-14;a<=14&&ok;a++)for(let b=-3;b<=3&&ok;b++){const gg=ground[x+a+W*(z+b)];if(Math.abs(gg-g)>1||world[I(x+a,gg,z+b)]===LAVA||SOLID[world[I(x+a,gg+1,z+b)]]||SOLID[world[I(x+a,gg+2,z+b)]])ok=false;}if(ok){sx=x;sz=z;}}
 assert(sx>0,'an open place on the wastes for the test');
 const put=()=>{PL.x=sx+0.5;PL.z=sz+0.5;PL.y=ground[sx+W*sz]+1;PL.vx=PL.vy=PL.vz=0;PL.yaw=Math.PI/2;PL.pitch=0;};
@@ -52,6 +52,17 @@ dead=false;hp=20;$('death').style.display='none';playing=true;
 // the Emberlord: fire in threes
 put();clearFoes();{const e=near('ember',-16);e.st='chase';e.vis=true;e.losT=9;e.shotT=0;let most=0;run(3,()=>{e.vis=true;e.losT=9;most=Math.max(most,shots.length);return most>=3;});
   info('an Emberlord sixteen blocks off: fire in flight',most);assert(most>=3,'an Emberlord throws its fire in threes');}
+// the Emberlord's form (D-055): hunched, its head thrust well forward of its hips and lower than its shoulders; wings of two
+// spans, spread wider than it is tall; a gait: its stride swings its legs (the walk's swing once never grew, a bug)
+{const K=AM_KINDS.ember,px=K.scale/16,part=n=>K.parts.find(q=>q[0]===n);
+  const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[2]),s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[0]);s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];return [x,y,z];};
+  const box=n=>{const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9],b=part(n)[3];for(let i=0;i<8;i++){let v=[b[0]+(i&1?b[3]:0),b[1]+(i&2?b[4]:0),b[2]+(i&4?b[5]:0)];
+    for(let p=part(n);p;p=p[1]?part(p[1]):null){v=rotP(v,p[4]||[0,0,0]);v=[v[0]+p[2][0],v[1]+p[2][1],v[2]+p[2][2]];}for(let k=0;k<3;k++){lo[k]=Math.min(lo[k],v[k]*px);hi[k]=Math.max(hi[k],v[k]*px);}}return {lo:lo,hi:hi};};
+  const head=box('head'),hips=part('body')[2],chest=box('chest'),wl=box('wingL2'),wr=box('wingR2'),tall=amBuild('ember',0,{}).box[4],span=wr.hi[0]-wl.lo[0],ahead=(head.lo[2]+head.hi[2])/2-hips[2]*px;
+  info('the Emberlord: head',ahead.toFixed(1),'blocks ahead of its hips, its top',head.hi[1].toFixed(1),'against the shoulders',chest.hi[1].toFixed(1),'; wings',span.toFixed(1),'across, it stands',tall.toFixed(1));
+  assert(ahead>3&&head.hi[1]<chest.hi[1]&&['wingL','wingL2','wingR','wingR2','maneA','maneB','hornL','tipL','jaw','brow','tail','whip1','wpn'].every(part)&&span>tall*1.5,'the Emberlord is hunched, head low and forward, horned, maned with flame, on wings wider than it is tall');
+  put();clearFoes();const e=near('ember',-20);e.hold=1;e.holdSp=FOES.ember.walk;let amp=0,legs=new Set();run(2,()=>{amp=Math.max(amp,e.amp);legs.add(Math.round(e.m.parts.legL.rotation.x*20));return false;});
+  info('walking: the stride',amp.toFixed(2),'; leg positions seen',legs.size);assert(amp>0.4&&legs.size>3,'an Emberlord walks with a swinging stride');clearFoes();}
 // places are peopled: a goblin warren's halls, and a fortress's lord (not once fallen)
 setMode('creative');clearFoes();
 {let B=null;for(let rx=5;rx<30&&!B;rx++)for(let rz=-10;rz<10&&!B;rz++)if(warRegion(rx,rz)){const b=caveBase(rx,rz);if(b.war&&b.war.halls.some(ni=>b.ch[b.nodes[ni].ch].wk==='chief'))B=b;}
@@ -80,6 +91,6 @@ clearFoes();
 {const find=kind=>{for(let r=0;r<40;r++)for(let i=-r;i<=r;i++)for(let j=-r;j<=r;j++){if(Math.max(Math.abs(i),Math.abs(j))!==r)continue;const s=sigOf(stretchCell(landSite(i,j)));if(s&&s.kind===kind)return s;}return null;};
   const s=find('citadel');clearFoes();gen(s.X,s.Z);PL.x=s.X-OX+20;PL.z=s.Z-OZ;PL.y=ground[Math.floor(PL.x)+W*Math.floor(PL.z)]+1;foeSpots.clear();foeSpawnTick();
   const kinds={};for(const f of foes)kinds[f.kind]=(kinds[f.kind]||0)+1;info(s.name,'at X',s.X,'Z',s.Z,':',JSON.stringify(kinds));
-  assert(kinds.ochief===1&&foes.length>=4,'the Ashen Citadel is held by orcs under a warchief');clearFoes();}
+  assert(kinds.ochief>=1&&foes.length>=4,'the Ashen Citadel is held by orcs under a warchief');clearFoes();} // (a warhold near it brings its own warchief)
 // they move with the window
 {clearFoes();put();const a=near('raider',4),x0=a.x;shiftEntities(16,0);assert(Math.abs(a.x-(x0-16))<1e-9,'foes move with the window when it slides');shiftEntities(-16,0);clearFoes();}

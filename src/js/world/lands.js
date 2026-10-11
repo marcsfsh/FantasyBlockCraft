@@ -138,6 +138,7 @@ function landsAt(X,Z,o){
   // the cell the column's land comes from (the nearest of that land), for its name and climate
   let bc=null,bd=Infinity;for(let k=0;k<n;k++){const s=LSC[k];if(s.c.L===o.land&&s.d<bd){bd=s.d;bc=s.c;}}
   o.lcell=landKey(bc.i,bc.j);o.tb=bc.cl.tb;
+  wasteAt(wx,wz,o);if(o.bs<WB_END)wasteLand(X,Z,o); // the sunken wastes and their ring take over (D-055)
   return o;
 }
 // ---- Stretch names (Q131): each stretch of a land has its own name in its people's style. Neighbouring cells of the same land

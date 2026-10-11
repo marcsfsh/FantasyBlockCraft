@@ -12,7 +12,7 @@ const T={},T2={},T3={},TTP={},TP={},TGC={};
 function colInfoBase(X,Z,o){
   // Lands (M6a, D-039) come from the land layout (lands.js): the weights of nearby lands by look shape the ground below, so each
   // old land keeps its look and lands blend across their borders.
-  landsAt(X,Z,o);o.X=X;o.Z=Z;
+  landsAt(X,Z,o);o.X=X;o.Z=Z;o.sl=SEA; // o.sl: the level water (or lava) lies at in this column; lower in the sunken wastes (D-055)
   const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),rid=fbm2(X/40,Z/40,2,91.4);
   // Most land is gentle: rolling hills only where the "hilliness" field allows them
   const rough=sstep(-0.05,0.22,fbm2(X/420,Z/420,2,881.3));
@@ -52,37 +52,39 @@ function colInfoBase(X,Z,o){
     if(is>0){const n=fbm2(X/70,Z/70,2,8305.7),ih=n>0.08?Math.min(SEA+22,SEA-4+(n-0.08)*140):sf;sf=sf*(1-is)+Math.max(sf,ih)*is;}
     const soft=h*(1-o.wS)+sf*o.wS,cl=Math.min(1,o.wChalk+o.wFjord);
     if(cl>0){const t=0.5+fbm2(X/30,Z/30,1,8307.9)*0.15;h=soft*(1-cl)+(o.wS<t?h:sf)*cl;}else h=soft;}
+  if(o.bs<WB_END)h=wasteTerrain(X,Z,o,h); // the sunken wastes and their ring of ash mountains (D-055)
+  const SL=o.sl,ring=o.bs<WB_END?wasteRing(o.bs):0;
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
-  const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SEA-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief)),vw=rw+Math.min(0.24,relief*0.0075);
+  const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SL-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief))*(1-ring),vw=rw+Math.min(0.24,relief*0.0075);
   o.river=false;o.bank=false;
-  if(on>0&&rv2<vw&&h>SEA-3){
+  if(on>0&&rv2<vw&&h>SL-3){
     // the channel shelves up into its bank, and the bank slopes up to the land
-    const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
-    h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
+    const c=Math.max(0,1-rv2/rw),bed=SL-2-Math.round(3*c),bankH=SL+1+(h-SL-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
+    h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SL-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
   o.vflow=o.vcrust=o.vfis=o.vcr=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
-  h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
+  h=Math.max(SL-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
   const cold=o.tb===0,lk=LANDS[o.land].look;
   let b;
-  if(lk===11&&h>=SEA-2)b=11;else if(h<SEA)b=0;else if(lk===4||lk===7)b=lk;else if(lk===5&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;
+  if(lk===11&&h>=SEA-2)b=11;else if(h<SL)b=0;else if(lk===4||lk===7)b=lk;else if(lk===5&&h>=SEA+8)b=5;else if(h<=SL+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;
   else if(lk===0||lk===5)b=cold?6:2;else b=lk;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
-  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SEA+3;o.mf=mf;
+  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SL+3;o.mf=mf;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   // Gorges (M6a, Q137; once the hairline ravines of M2b): fewer and wider, along a slow noise line where the land allows them.
   // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
   // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
   o.rvBot=999;
-  if(!o.wet&&!o.river&&o.gz>0.05){
+  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01){
     const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
     if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
       // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
       const gx=(fbm2((X+2)/150,Z/150,2,401.1)-fbm2((X-2)/150,Z/150,2,401.1))/4,gzz=(fbm2(X/150,(Z+2)/150,2,401.1)-fbm2(X/150,(Z-2)/150,2,401.1))/4,g2=Math.max(1e-9,gx*gx+gzz*gzz);
       const d=av/Math.sqrt(g2),cX=X-gv*gx/g2,cZ=Z-gv*gzz/g2;landsAt(cX,cZ,TGC);
-      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SEA+4,SEA+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
+      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SL+4,SL+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
       if(rf>0){const WT=8+12*rf,WF=3.5,Dm=8+52*rf;
-        if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SEA-56,h-dep);}}}}
+        if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SL-56,h-dep);}}}}
   return o;
 }
 const colCache=new Map();

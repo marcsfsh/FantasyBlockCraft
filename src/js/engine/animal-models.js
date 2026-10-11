@@ -178,6 +178,14 @@ function amTexture(kind,ci,flags){
       if(Math.abs(Math.sin(x*0.9+amHash(x>>2,y>>2,seed+41)*6)+Math.cos(y*0.7+amHash(x>>3,y>>1,seed+43)*5))<dens)set(x,y,noisy(col,30,x,y),200);}}},
     // eyes that glow, on the front face of the head: two pixels `row` down, `gap` apart about the middle
     glowEyes(n,row,gap,col){const R=rect(n,'F');if(!R)return;const m=(R[2]-1)/2;set(R[0]+Math.floor(m-gap/2),R[1]+row,col,200);set(R[0]+Math.ceil(m+gap/2),R[1]+row,col,200);},
+    // a thin sheet (one pixel thick: across z, or across x when ax is 'x'): fn(s,t) gets every pixel of every face as the place on
+    // the sheet's front (F, or L) it lies over, and returns a colour [r,g,b] (with a fourth value, 200, to glow), 'cut' for a hole
+    // (alpha 1: the shader drops it), or nothing to leave it. Ragged wings, flames and holes read the same from both sides.
+    sheet(n,ax,fn){const u=uv[src(n)];if(!u)return;const [,,,w,h,d]=u[2];
+      for(const f in AM_FACES){const R=rect(n,f);for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){let a,b;
+        if(ax==='x'){a=f==='L'?s:f==='R'?d-1-s:f==='T'?t:f==='D'?d-1-t:f==='F'?d-1:0;b=f==='T'?0:f==='D'?h-1:t;}
+        else{a=f==='F'||f==='T'||f==='D'?s:f==='B'?w-1-s:f==='L'?0:w-1;b=f==='T'?0:f==='D'?h-1:t;}
+        const v=fn(a,b);if(v==='cut')set(R[0]+s,R[1]+t,[0,0,0],1);else if(v)set(R[0]+s,R[1]+t,noisy(v,6,R[0]+s,R[1]+t),v[3]);}}},
     // stripes along the body (wild piglets)
     stripes(n,col,base){for(const f of ['L','R','T']){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++)if(((f==='T'?s:t)>>1)%2===0)set(R[0]+s,R[1]+t,noisy(col,10,R[0]+s,R[1]+t));}}
   };
@@ -223,10 +231,10 @@ function amBuild(kind,ci,flags){
   const bx=amBounds(K,flags,sc,big);
   return {grp:body,root:root,parts:parts,mat:mat,dyn:dyn,shadow:shadow,box:bx,sc:sc};
 }
-// The bounds of a model at rest: every box's corners carried through its parts' pivots and rotations (x, then y, then z, as
-// three.js turns them), ears, horns, antlers, tails and packs left out
+// The bounds of a model at rest: every box's corners carried through its parts' pivots and rotations (z, then y, then x: three.js's
+// XYZ order turns a point about z first), ears, horns, antlers, tails and packs left out
 function amBounds(K,flags,sc,big){
-  const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[0]),s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[2]);s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];return [x,y,z];};
+  const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[2]),s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[0]);s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];return [x,y,z];};
   const chain=n=>{const out=[];let p=K.parts.find(q=>q[0]===n);while(p){out.push(p);p=p[1]?K.parts.find(q=>q[0]===p[1]):null;}return out;};
   const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
   for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||o.nb||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;

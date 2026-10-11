@@ -17,7 +17,7 @@ const sum=B=>{const H2=B.war.halls.map(ni=>B.ch[B.nodes[ni].ch]);return B.war.na
 plans.slice(0,5).forEach(B=>info(sum(B)));
 const good=plans.filter(B=>B.war.halls.length>=4&&B.war.ents.length>=1&&B.war.down>=0);
 assert(good.length>=plans.length*0.75,'nearly every warren has at least four halls, a way in and a way down ('+good.length+' of '+plans.length+')');
-assert(plans.every(B=>B.war.halls.every(ni=>{const c=B.ch[B.nodes[ni].ch];return c.f>=212&&c.f+c.h<=hAt(Math.floor(c.x),Math.floor(c.z))-10;})),'every hall lies between y 212 and ten blocks under the ground');
+assert(plans.every(B=>B.war.halls.every(ni=>{const c=B.ch[B.nodes[ni].ch];return c.f>=130&&c.f+c.h<=hAt(Math.floor(c.x),Math.floor(c.z))-10;})),'every hall lies between y 130 and ten blocks under the ground');
 assert(plans.every(B=>B.edges.every(e=>e.war||e.pts.every((v,k)=>k%4!==1||v<WAR_Y0-8))),'no other cave passage climbs into a warren\'s band');
 assert(plans.some(B=>B.war.halls.some(ni=>B.ch[B.nodes[ni].ch].chan)),'some halls have a channel of lava');
 assert(!isBlockedName(plans[0].war.name.replace('The Warrens of ','')),'warrens have goblin names');

@@ -79,7 +79,7 @@ function foeSpawnTick(){
   // the wastes: a warband (sometimes led by a warchief) or a troll, out of sight, on open ground of the volcanic land
   const roam=foes.filter(f=>!f.spot&&!f.dead).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
   const a=PL.yaw+Math.PI+(Math.random()-0.5)*Math.PI*1.4,d=38+Math.random()*28,x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
-  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA-WB_DEP||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
   colInfo(bx+OX,bz+OZ,TFO);if(TFO.wVolc<0.55||TFO.vflow||TFO.vfis||TFO.vlake)return;const top=get(bx,g,bz);if(!SOLID[top]||top===LAVA)return;
   if(Math.random()<0.2)spawnGroup('band',1,x,g,z,2,{lead:'troll'});
   else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),x,g,z,5,{lead:Math.random()<0.12?'ochief':null});
@@ -189,7 +189,8 @@ function updShots(dt){
 function placeFoe(f,dt){
   const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
   const ph0=f.ph;f.ph+=sp*dt/(F.stride||(big?1.6:F.walk>1.4?0.9:1.1))*6.2832;
-  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the groundf.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
+  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the ground
+  f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
   if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
@@ -209,6 +210,7 @@ function placeFoe(f,dt){
   if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;
   if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
   if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
+  if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
@@ -219,6 +221,32 @@ function placeFoe(f,dt){
   const vis=dist<U.fogFar.value+10;M.grp.visible=vis;sh.visible=vis&&sh.material.opacity>0.01;
   // an Emberlord sheds embers
   if(f.kind==='ember'&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
+}
+// The Emberlord's gait (D-055): hunched and heavy, its body rolling over each stride and dipping as a foot comes down, the shins
+// folding under it on the back swing, arms swaying low, the head thrust forward and bobbing; the wings beat slowly (harder in the
+// chase, flung wide as it strikes), the outer wing lagging the inner; its flames, whip and tail never rest.
+function emberPose(f,P,root,prog){
+  const rest=g=>g.userData.rest[0],ph=f.ph,s=Math.sin(ph),c=Math.cos(ph),a=Math.min(1,f.amp*1.6),t=foeClock+f.id*1.7,chase=f.st==='chase',up=f.atk>0?Math.min(1,prog*1.4):0;
+  P.legL.rotation.x=rest(P.legL)+s*0.42*a;P.legR.rotation.x=rest(P.legR)-s*0.42*a;
+  P.shinL.rotation.x=rest(P.shinL)+Math.max(0,c)*0.7*a;P.shinR.rotation.x=rest(P.shinR)+Math.max(0,-c)*0.7*a;
+  P.footL.rotation.x=rest(P.footL)-Math.max(0,c)*0.35*a+Math.max(0,-s)*0.2*a;P.footR.rotation.x=rest(P.footR)-Math.max(0,-c)*0.35*a+Math.max(0,s)*0.2*a;
+  root.position.y=-Math.abs(s)*0.4*a;const br=Math.sin(t*0.8);
+  P.body.rotation.z=s*0.08*a;P.body.rotation.x=rest(P.body)+Math.abs(c)*0.06*a+br*0.02;P.chest.rotation.y=-s*0.14*a;P.chest.rotation.x=rest(P.chest)+br*0.035;
+  P.head.rotation.x=rest(P.head)-Math.abs(c)*0.06*a-br*0.02;P.head.rotation.y=f.lk*0.7;P.jaw.rotation.x=rest(P.jaw)+(chase?0.15:0)+Math.max(0,Math.sin(t*0.6))*0.12+up*0.25;
+  P.armL.rotation.x=rest(P.armL)-s*0.3*a;P.armR.rotation.x=rest(P.armR)+s*0.3*a;P.armL.rotation.z=P.armL.userData.rest[2];P.armR.rotation.z=P.armR.userData.rest[2];
+  P.foreL.rotation.x=rest(P.foreL)-Math.max(0,s)*0.25*a;P.foreR.rotation.x=rest(P.foreR)-Math.max(0,-s)*0.25*a;
+  // its blows: the blade raised high over the shoulder through the wind-up, brought down; the whip drawn back and cracked
+  if(f.atk>0){if(f.atkK==='blow'||f.atkK==='shot'){P.armR.rotation.x=rest(P.armR)-2.5*up;P.foreR.rotation.x=rest(P.foreR)+0.5*up;P.chest.rotation.y+=0.35*up;}
+    else if(f.atkK==='whip'){P.armL.rotation.x=rest(P.armL)-2*up;P.armL.rotation.z=P.armL.userData.rest[2]-0.7*up;P.foreL.rotation.x=rest(P.foreL)+0.4*up;P.chest.rotation.y-=0.3*up;}}
+  else if(f.swing>0){P.armR.rotation.x=rest(P.armR)+0.6*f.swing;P.foreR.rotation.x=rest(P.foreR)-0.3*f.swing;}
+  const rate=chase?2.1:0.85,bt=Math.sin(t*rate),bt2=Math.sin(t*rate-0.9),fl=f.atk>0?up:0,amp1=chase?0.3:0.13;
+  for(const [w,w2,k] of [[P.wingL,P.wingL2,1],[P.wingR,P.wingR2,-1]]){const r=w.userData.rest,r2=w2.userData.rest;
+    w.rotation.z=r[2]-k*(amp1*bt+0.25*fl);w.rotation.y=r[1]-k*(0.08*bt-0.3*fl);w.rotation.x=r[0]+0.05*bt;w2.rotation.z=r2[2]-k*(amp1*1.3*bt2+0.2*fl);w2.rotation.y=r2[1]-k*0.12*bt2;}
+  const fk=1+0.13*Math.sin(t*9.3)+0.07*Math.sin(t*23.7);P.maneA.scale.y=fk;P.maneB.scale.y=2-fk;P.crest.scale.y=1+0.15*Math.sin(t*11.1+1);
+  const wk=f.atkK==='whip'&&f.atk>0?up:0,lash=f.atkK==='whip'&&f.atk<=0&&f.swing>0?f.swing:0;
+  P.whip1.rotation.x=rest(P.whip1)+0.18*Math.sin(t*1.9)-1.6*wk+0.8*lash;P.whip2.rotation.x=rest(P.whip2)+0.28*Math.sin(t*1.9-0.8)-0.6*wk+0.7*lash;
+  P.whip3.rotation.x=rest(P.whip3)+0.35*Math.sin(t*1.9-1.6)+0.5*wk;P.whip4.rotation.x=rest(P.whip4)+0.4*Math.sin(t*1.9-2.4)+0.6*wk;P.whip2.rotation.y=0.2*Math.sin(t*1.3);
+  P.tail.rotation.y=0.35*Math.sin(t*1.1);P.tail2.rotation.y=0.45*Math.sin(t*1.1-0.8);P.tail.rotation.x=rest(P.tail)+0.08*Math.sin(t*0.7);
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);

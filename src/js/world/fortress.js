@@ -11,13 +11,14 @@
 const FORT_P={
   hold:{gw:3,gh:10,cw:3,ch:9,hw:14,Lhs:[26,22],Hmin:14,Hmax:18,tv:11,ts:2,th:22,fw:14,fh:18,tz:12,td:12,pv:9,ps:1,pg:6,lv:5,dw:7,steps:3,k:1,bw:1},
   throne:{gw:8,gh:22,cw:9,ch:24,hw:32,Lhs:[60,50,42],Hmin:28,Hmax:36,tv:24,ts:4,th:46,fw:30,fh:40,tz:28,td:24,pv:20,ps:2,pg:10,lv:11,dw:16,steps:5,k:2,bw:3},
-  // a narrower throne hall for the smaller great volcanoes
+  // the grandest, for the great volcanoes of the sunken wastes (D-055), and a narrower hall for the smaller ones
+  throneL:{gw:9,gh:26,cw:10,ch:28,hw:40,Lhs:[84,72,60],Hmin:34,Hmax:50,tv:28,ts:5,th:58,fw:36,fh:50,tz:32,td:28,pv:24,ps:3,pg:12,lv:14,dw:20,steps:6,k:3,bw:4},
   throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:24,td:20,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
 const FORT_C=new Map();
 // The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across.
 function fortOf(v){
   const key=v.key||v.i+','+v.j;if(FORT_C.has(key))return FORT_C.get(key);let F=null;
-  for(const P of v.great?[FORT_P.throne,FORT_P.throneS]:v.Hv>=34&&hsh(v.i,9171,v.j)<0.85?[FORT_P.hold]:[]){if(F)break;
+  for(const P of v.great?(v.R>=200?[FORT_P.throneL,FORT_P.throne,FORT_P.throneS]:[FORT_P.throne,FORT_P.throneS]):v.Hv>=34&&hsh(v.i,9171,v.j)<0.85?[FORT_P.hold]:[]){if(F)break;
     const quarters=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
       for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);quarters.push({th:th,m:m});}
     quarters.sort((a,b)=>b.m-a.m);

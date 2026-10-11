@@ -59,7 +59,7 @@ const cl=v=>v<0?0:v>255?255:v|0,put=(px,w,x,y,r,g,b)=>{const i=(y*w+x)*3;px[i]=c
 // height: hillshade from the north-west over an elevation tint; sea and lakes blue
 {const px=Buffer.alloc(N*N*3);
   for(let z=0;z<N;z++)for(let x=0;x<N;x++){const c=x+N*z,g=gr[c];
-    if(g<SEA){const d=Math.min(1,(SEA-g)/30);put(px,N,x,z,40-25*d,90-50*d,170-60*d);continue;}
+    if(g<SEA&&bio[c]!==4){const d=Math.min(1,(SEA-g)/30);put(px,N,x,z,40-25*d,90-50*d,170-60*d);continue;} // (the floors of the sunken wastes lie dry below the sea's level)
     if(bio[c]===9&&g<=SEA+40){put(px,N,x,z,60,110,190);continue;}
     const gx=gr[Math.min(N-1,x+1)+N*z]-gr[Math.max(0,x-1)+N*z],gz=gr[x+N*Math.min(N-1,z+1)]-gr[x+N*Math.max(0,z-1)],sh=Math.max(0.35,Math.min(1.25,1-0.12*(gx+gz)));
     const e=Math.min(1,(g-SEA)/170),r=(90+120*e)*sh,gg=(140+60*e-60*e*e)*sh,b=(70+130*e*e)*sh;put(px,N,x,z,Math.min(255,r),Math.min(255,gg),Math.min(255,b));}
@@ -76,9 +76,9 @@ const cl=v=>v<0?0:v>255?255:v|0,put=(px,w,x,y,r,g,b)=>{const i=(y*w+x)*3;px[i]=c
   console.log('     panels: top left '+names[0]+', top right '+names[1]+', bottom left '+names[2]+', bottom right '+names[3]);}
 // sections: rock grey (darker deeper), sky pale, water blue, lava orange, open cave black
 {const w=N,h=H*2+4,px=Buffer.alloc(w*h*3,255);
-  const col=(id,y)=>{if(id===AIR)return y>=SEA?[200,225,245]:[0,0,0];if(id===WATER)return [40,90,220];if(id===LAVA)return [255,120,20];if(id===BEDROCK)return [30,30,30];
+  const col=(id,y,g)=>{if(id===AIR)return y>g?[200,225,245]:[0,0,0];if(id===WATER)return [40,90,220];if(id===LAVA)return [255,120,20];if(id===BEDROCK)return [30,30,30];
     if(!SOLID[id])return [120,200,120];const d=y/H;return id===DEEP?[70+40*d,70+40*d,85+40*d]:[110+70*d,105+70*d,100+70*d];};
-  for(let s=0;s<2;s++){const sec=s?secZ:secX,oy=s*(H+4);for(let x=0;x<N;x++)for(let y=0;y<H;y++){const [r,g,b]=col(sec[x*H+y],y);put(px,w,x,oy+(H-1-y),r,g,b);}
+  for(let s=0;s<2;s++){const sec=s?secZ:secX,oy=s*(H+4);for(let x=0;x<N;x++){const gg=gr[s?(N>>1)+N*x:x+N*(N>>1)];for(let y=0;y<H;y++){const [r,g,b]=col(sec[x*H+y],y,gg);put(px,w,x,oy+(H-1-y),r,g,b);}}
     for(let x=0;x<N;x++)for(let y=0;y<4&&s===0;y++)put(px,w,x,H+y,255,255,255);}
   png(seed+'-'+label+'-section.png',w,h,px);
   console.log('     sections: top runs west to east along Z '+(Z0+(N>>1))+', bottom north to south along X '+(X0+(N>>1))+'; area X '+X0+' to '+(X0+N-1)+', Z '+Z0+' to '+(Z0+N-1));}

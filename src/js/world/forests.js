@@ -76,10 +76,10 @@ function sigOf(c){
     if(mode){const t=coastSite(c,L,R,mode);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else if(kind==='sinkhole'){const t=sinkholeSite(c,L,R);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else
-    for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?12+k*3:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
+    for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?(12+k*3)*(L.k==='volcanic'?3:1):0, /* the wastes' great volcano fills the middle of the basin (D-055) */X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
       const low=L.k==='willow'||L.k==='bog'; // the vales' pools and stilt house stand on the low wet ground itself
-      if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=SEA+(low?0:2))continue;
-      let ok=true,lo=TSG.h;for(let m=0;m<8&&ok;m++){const e=colInfo(X+Math.round(Math.cos(m*0.785)*R),Z+Math.round(Math.sin(m*0.785)*R),TSG2);if(Math.abs(e.h-TSG.h)>3||(e.wet&&!low)||e.h<SEA||e.lake||e.river||e.rvBot<999)ok=false;lo=Math.min(lo,e.h);}
+      if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=TSG.sl+(low?0:2))continue;
+      let ok=true,lo=TSG.h;for(let m=0;m<8&&ok;m++){const e=colInfo(X+Math.round(Math.cos(m*0.785)*R),Z+Math.round(Math.sin(m*0.785)*R),TSG2);if(Math.abs(e.h-TSG.h)>3||(e.wet&&!low)||e.h<e.sl||e.lake||e.river||e.rvBot<999)ok=false;lo=Math.min(lo,e.h);}
       if(ok&&!surfTaken(X,Z,R+4))s={kind:kind,name:name,land:L.k,X:X,Z:Z,g:TSG.h,lo:lo,R:R,seed:hsh(c.i,8143,c.j)};}}
   sigC.set(key,s);return s;
 }

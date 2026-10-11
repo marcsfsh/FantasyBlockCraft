@@ -25,9 +25,9 @@ function notePlace(n,X,Z){
 const WM_PAL=[[52,92,150],[186,176,146],[112,158,82],[62,112,58],[138,112,122],[132,132,138],[196,204,210],[122,148,92],[46,76,52],[60,104,170],[168,166,104],[88,118,88]];
 const wmRegions=new Map(),wmDirty=new Set(),TW={};
 function wmColor(X,Z){
-  colInfo(X,Z,TW);const h=TW.h;
-  if(TW.lake||h<SEA||TW.b===0||TW.b===9){const d=Math.min(1,(SEA-h)/30);return[46-20*d,96-40*d,170-50*d];}
-  if(TW.river&&h<=SEA+1)return[70,120,200];
+  colInfo(X,Z,TW);const h=TW.h,sl=TW.sl;
+  if(TW.lake||h<sl||TW.b===0||TW.b===9){const d=Math.min(1,(sl-h)/30);if(TW.wVolc>0.5&&TW.wS<0.04)return[200+30*(1-d),70+30*(1-d),20];return[46-20*d,96-40*d,170-50*d];} // lava in the wastes
+  if(TW.river&&h<=sl+1)return TW.wVolc>0.5?[230,96,24]:[70,120,200];
   const c=(TW.b!==1&&LANDS[TW.land].col)||WM_PAL[TW.b]||[120,140,100],e=Math.max(0,Math.min(1,(h-SEA)/160));
   if(TW.b===5&&h>SEA+110||TW.b===6)return[214+30*e,218+30*e,224+28*e];
   const k=0.8+0.45*e;return[c[0]*k,c[1]*k,c[2]*k];

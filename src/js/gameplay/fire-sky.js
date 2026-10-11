@@ -73,6 +73,49 @@ function updPlumes(dt){
       p.s.material.opacity=0.82*Math.min(1,p.age/3)*Math.min(1,(p.life-p.age)/8)*(1-sstep(U.fogFar.value*2.2,U.fogFar.value*3.2,d));}}
   for(const [k,pl] of plumes)if(!keep.has(k)){for(const p of pl.puffs){scene.remove(p.s);p.s.material.dispose();}plumes.delete(k);}
 }
+// ---- The wastes from afar (D-055). The world loaded about you is 224 blocks across, too small for a basin 800 wide and a great
+// volcano 500 across, so a stand-in of each basin near you is drawn behind everything (the ground draws over it wherever it is
+// loaded): the floor, the ring of ash mountains, and the great volcano with its burning crater and flows, hazed by distance.
+// It is built a few rays a frame from the plan, and scaled toward the eye (which leaves the picture unchanged) to stay inside
+// the far plane. Cosmetic, never saved.
+const FARW_K=160,farW=new Map(),TFW={},
+  FARW_VS='uniform float scl;attribute vec3 acol;attribute float agl;varying vec3 vC;varying float vG;varying float vT;void main(){vC=acol;vG=agl;vec4 mv=modelViewMatrix*vec4(position,1.0);vT=length(mv.xyz)/scl;gl_Position=projectionMatrix*mv;}',
+  FARW_FS='uniform vec3 fogColor;uniform float skyMul;varying vec3 vC;varying float vG;varying float vT;void main(){float hz=clamp(0.1+vT/1600.0,0.1,0.8);vec3 c=mix(vC*(0.45+0.55*skyMul),fogColor,hz);gl_FragColor=vec4(mix(c,vec3(1.0,0.42,0.1),vG*(1.0-hz*0.55)),1.0);}'; // hazed by the true distance (vT)
+let farWT=0;
+// one ray out from the great volcano's heart: [distance, height above its foot, r, g, b, glow] for each point
+function farWasteRay(F,k){
+  const g=F.g,th=k/FARW_K*6.2832,ux=Math.cos(th),uz=Math.sin(th),o=TFW,out=[];
+  let lo=g.R*1.3,hi=-1;for(let d=lo;d<1500;d+=24){landsAt(Math.round(g.X+ux*d),Math.round(g.Z+uz*d),o);if(o.bs>=0){hi=d;break;}lo=d;}
+  if(hi<0)hi=1500;for(let q=0;q<4;q++){const m=(lo+hi)/2;landsAt(Math.round(g.X+ux*m),Math.round(g.Z+uz*m),o);if(o.bs>=0)hi=m;else lo=m;}
+  const e=hi,cd=e+WB_IN+WB_CR/2,cX=g.X+ux*cd,cZ=g.Z+uz*cd,rg=1-Math.abs(fbm2(cX/70,cZ/70,2,9203.1)),cr=SEA+78+rg*rg*rg*42-sstep(0.2,0.5,fbm2(cX/300,cZ/300,1,9205.7))*30-g.base;
+  let flow=0;for(const f of g.fl)if(Math.round(((f.a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)flow=Math.max(flow,f.len);
+  let old=false;for(const a of g.old)if(Math.round(((a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)old=true;
+  const cone=d=>{if(d<g.rc){const b=g.Hv-(g.cd+3)+(g.cd+3)*Math.pow(d/g.rc,4);return b<g.lake-g.base?[g.lake-g.base,1]:[b,0];}if(d<g.R){const q=1-(d-g.rc)/(g.R-g.rc);return [Math.pow(q,1.35)*g.Hv,0];}return [0,0];};
+  for(const d of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.08,0.2,0.33,0.46,0.6,0.74,0.88,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R,g.R*1.3])){const [h,lk]=cone(d),q=Math.min(1,h/g.Hv);
+    const gl=lk?1:flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0;out.push(d,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
+  out.push(e,0,0.1,0.085,0.08,0);
+  for(const t of [0.25,0.5,0.75,1]){const p=t*t*(3-2*t)*0.7+t*0.3;out.push(e+WB_IN*t,cr*p,0.13+0.04*t,0.11+0.04*t,0.1+0.04*t,0);}
+  out.push(e+WB_IN+WB_CR,cr,0.19,0.17,0.16,0,e+WB_END,SEA+8-g.base,0.16,0.14,0.13,0);
+  F.rays[k]={ux:ux,uz:uz,p:out};
+}
+function farWasteMesh(F){
+  const N=F.rays[0].p.length/6,pos=[],col=[],gl=[],idx=[];let ext=0;
+  for(let k=0;k<FARW_K;k++){const r=F.rays[k];for(let i=0;i<N;i++){const q=r.p,j=i*6;pos.push(r.ux*q[j],q[j+1],r.uz*q[j]);col.push(q[j+2],q[j+3],q[j+4]);gl.push(q[j+5]);ext=Math.max(ext,q[j]);}}
+  for(let k=0;k<FARW_K;k++){const k2=(k+1)%FARW_K;for(let i=0;i+1<N;i++){const a=k*N+i,b=k2*N+i;idx.push(a,b,a+1,a+1,b,b+1);}}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('acol',new THREE.Float32BufferAttribute(col,3));geo.setAttribute('agl',new THREE.Float32BufferAttribute(gl,1));geo.setIndex(idx);
+  const m=new THREE.Mesh(geo,new THREE.ShaderMaterial({uniforms:{fogColor:U.fogColor,skyMul:U.skyMul,scl:{value:1}},vertexShader:FARW_VS,fragmentShader:FARW_FS,side:THREE.DoubleSide,depthWrite:false}));
+  m.renderOrder=-4;m.frustumCulled=false;scene.add(m);F.mesh=m;F.ext=ext;F.rays=null;
+}
+function updFarWastes(dt){
+  farWT-=dt;const X=PL.x+OX,Z=PL.z+OZ;
+  if(farWT<=0){farWT=1.5;const keep=new Set();for(const g of greatNear(X,Z,1500))if(g.great&&Math.hypot(g.X-X,g.Z-Z)<1700){keep.add(g.key);if(!farW.has(g.key))farW.set(g.key,{g:g,k:0,rays:[],mesh:null});}
+    for(const [k,F] of farW)if(!keep.has(k)){if(F.mesh){scene.remove(F.mesh);F.mesh.geometry.dispose();F.mesh.material.dispose();}farW.delete(k);}}
+  const bx=Math.floor(PL.x),bz=Math.floor(PL.z),under=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y<ground[bx+W*bz]-6;
+  for(const F of farW.values()){
+    if(!F.mesh){for(let n=0;n<24&&F.k<FARW_K;n++)farWasteRay(F,F.k++);if(F.k>=FARW_K)farWasteMesh(F);continue;}
+    const g=F.g,m=F.mesh,c=camera.position,px=g.X-OX,pz=g.Z-OZ,d=Math.hypot(px-c.x,pz-c.z),k=Math.min(1,560/(d+F.ext));m.visible=!under;
+    m.position.set(c.x+(px-c.x)*k,c.y+(g.base-c.y)*k,c.z+(pz-c.z)*k);m.scale.setScalar(k);m.material.uniforms.scl.value=k;}
+}
 // vent smoke: a pool of small soft puffs that rise, spread and fade
 const vpuffs=[];
 function ventPuff(s){let p=vpuffs.find(q=>q.age>=q.life);if(!p){if(vpuffs.length>=60)return;p={s:new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:new THREE.Color(0.5,0.47,0.42)}))};scene.add(p.s);vpuffs.push(p);}
@@ -94,7 +137,7 @@ function warGlowTick(dt){
   if(warF>0.3&&playing)for(let k=0;k<6*dt*warF;k++)spawnP(PL.x+(Math.random()-0.5)*20,PL.y+Math.random()*5-1,PL.z+(Math.random()-0.5)*20,(Math.random()-0.5)*0.3,0.25+Math.random()*0.4,(Math.random()-0.5)*0.3,[1,0.4,0.1],2.5+Math.random()*2,-0.05);
 }
 function fireTick(dt){
-  if(!ready)return;updBolts(dt);updPlumes(dt);updVentPuffs(dt);warGlowTick(dt);
+  if(!ready)return;updBolts(dt);updPlumes(dt);updFarWastes(dt);updVentPuffs(dt);warGlowTick(dt);
   const b=LWX.burn;if(b<0.05||!playing)return;
   fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=1.5+Math.random()*5;if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
   fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}

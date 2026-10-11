@@ -34,6 +34,10 @@
       "about": "Lands (M6a): the registry, the transition map of which lands may border which, the cell layout, blend weights and stretch names"
     },
     {
+      "path": "world/wastes.js",
+      "about": "The sunken wastes (D-055): the basins of the Volcanic Wastes, their ring of ash mountains, their land and ground"
+    },
+    {
       "path": "world/caves.js",
       "about": "Cave systems (D-029): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes"
     },

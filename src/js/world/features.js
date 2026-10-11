@@ -107,7 +107,7 @@ function stairwayAt(WCX,WCZ){
   let s=null;
   if(hsh(WCX,6301,WCZ)<0.15){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
     let rise=0;for(let k=0;k<8;k++){const a=k*0.785;rise=Math.max(rise,hAt(Math.round(X+Math.cos(a)*9),Math.round(Z+Math.sin(a)*9))-o.h);} // at the foot of a slope
-    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>o.sl+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
       const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
   stairwayC.set(key,s);return s;
 }
@@ -150,7 +150,7 @@ function dungeonAt(WCX,WCZ){
   if(hsh(WCX,6401,WCZ)<0.14){const a=caveAnchor(WCX,WCZ,106,196,6402);
     if(a){const ang=hsh(WCX,6403,WCZ)*6.283,X=a.x+Math.round(Math.cos(ang)*9),Z=a.z+Math.round(Math.sin(ang)*9),y=a.y-2;
       let clash=false;for(let c=-2;c<=2&&!clash;c++)for(let e=-2;e<=2&&!clash;e++){const q=poiFor(WCX+c,WCZ+e);if(q&&Math.abs(q.x-X)<20&&Math.abs(q.z-Z)<20&&Math.abs(q.y-y)<16)clash=true;} // places come first
-      if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
+      if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))&&!warBand(X,y+8,Z))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
   dungC.set(key,d);return d;
 }
 function dungeonNear(X,Y,Z){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const d=dungeonAt(cx+a,cz+b);if(d&&Math.abs(X-d.X)<=d.hw&&Math.abs(Z-d.Z)<=d.hw&&Y>=d.y&&Y<=d.y+d.hh)return d;}return null;}

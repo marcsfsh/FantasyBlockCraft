@@ -76,7 +76,7 @@ function findSpawn(){
     const x=Math.floor(W/2+Math.cos(a/24*6.2832)*r),z=Math.floor(D/2+Math.sin(a/24*6.2832)*r);
     if(x<1||z<1||x>=W-1||z>=D-1)continue;
     const g=ground[x+W*z];
-    if(g>SEA&&biome[x+W*z]!==0&&biome[x+W*z]!==9&&SOLID[get(x,g,z)]&&!SOLID[get(x,g+1,z)]&&!SOLID[get(x,g+2,z)])return[x+0.5,g+1,z+0.5];
+    if(g>SEA-WB_DEP&&biome[x+W*z]!==0&&biome[x+W*z]!==9&&SOLID[get(x,g,z)]&&!BL[get(x,g,z)].liquid&&!SOLID[get(x,g+1,z)]&&!SOLID[get(x,g+2,z)])return[x+0.5,g+1,z+0.5];
   }
   return[W/2+0.5,H-4,D/2+0.5];
 }

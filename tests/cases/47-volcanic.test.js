@@ -32,11 +32,35 @@ const vs=great;
   const c=count([BLACKASH,CINDER,LAVACRUST,CHARWOOD,SMOULDER,VENT,SULFUR,ASH,LAVA]);info('around it',Object.entries(c).map(([k,n])=>nameOf(+k)+' '+n).join(', '));
   assert(c[BLACKASH]>5000&&c[CINDER]>2000&&c[LAVACRUST]>500&&c[CHARWOOD]>40&&c[LAVA]>500,'the land around is black ash and cinder, crusted lava, lava and charred trees');}
 // ---- rivers of lava, and no lava touching water
-{const o={};let rv=null;for(let d=0;d<4000&&!rv;d+=16)for(let a=0;a<48&&!rv;a++){const X=Math.round(vs[0].X+Math.cos(a/48*6.283)*d),Z=Math.round(vs[0].Z+Math.sin(a/48*6.283)*d);colInfo(X,Z,o);if(o.river&&o.wVolc>0.7&&o.h<SEA-1)rv=[X,Z];}
-  gen(rv[0],rv[1]);let lavaR=0,water=0,touch=0;
-  for(let z=1;z<D-1;z++)for(let x=1;x<W-1;x++)for(let y=SEA-8;y<=SEA;y++){const id=world[I(x,y,z)];if(id===WATER)water++;if(id!==LAVA)continue;if(y===SEA)lavaR++;for(const j of [I(x+1,y,z),I(x-1,y,z),I(x,y,z+1),I(x,y,z-1),I(x,y+1,z)])if(world[j]===WATER)touch++;}
+// (in the sunken wastes, D-055, the rivers' level o.sl lies WB_DEP below the sea's)
+{const o={};let rv=null;for(let d=0;d<4000&&!rv;d+=16)for(let a=0;a<48&&!rv;a++){const X=Math.round(vs[0].X+Math.cos(a/48*6.283)*d),Z=Math.round(vs[0].Z+Math.sin(a/48*6.283)*d);colInfo(X,Z,o);if(o.river&&o.wVolc>0.7&&o.h<o.sl-1)rv=[X,Z,o.sl];}
+  gen(rv[0],rv[1]);let lavaR=0,water=0,touch=0;const SL=rv[2];
+  for(let z=1;z<D-1;z++)for(let x=1;x<W-1;x++)for(let y=SL-8;y<=SL;y++){const id=world[I(x,y,z)];if(id===WATER)water++;if(id!==LAVA)continue;if(y===SL)lavaR++;for(const j of [I(x+1,y,z),I(x-1,y,z),I(x,y,z+1),I(x,y,z-1),I(x,y+1,z)])if(world[j]===WATER)touch++;}
   info('lava river near X',rv[0],'Z',rv[1],': lava at the surface',lavaR,'; water in the window',water,'; lava touching water',touch,'; unsound lava',unsoundLava());
   assert(lavaR>100&&touch===0&&unsoundLava()===0,'the rivers of the Volcanic Wastes run with lava, which never touches water and is held');}
+// ---- the sunken wastes (D-055): each basin at least 750 across, its floor about 90 below the lands about it, walled by a ring of
+// ash mountains about 90 above them; nothing in it is water, and its lava is held
+{const o={},med=a=>{a.sort((p,q)=>p-q);return a[a.length>>1];};const rows=[];
+  for(const g of great.slice(0,6)){const edge=[];let fl=[],cr=[],out=[];
+    for(let k=0;k<16;k++){const th=k/16*6.2832,ux=Math.cos(th),uz=Math.sin(th);let e=-1,top=0,ok=true;
+      for(let d=0;d<1400;d+=6){colInfo(Math.round(g.X+ux*d),Math.round(g.Z+uz*d),o);
+        if(e<0){if(o.bs>=0)e=d;else if(d>g.R*1.35&&o.vs===0&&!o.river&&!o.vflow)fl.push(o.h);}
+        else if(d<e+WB_IN+WB_CR+30)top=Math.max(top,o.h);
+        else if(d>e+WB_END+30&&d<e+WB_END+150&&o.wS<0.05&&o.wVolc<0.2)out.push(o.h);
+        if(e<0&&d>=1394)ok=false;}
+      edge.push(e<0?1400:e);if(ok&&e>=0)cr.push(top);}
+    let across=1e9;for(let k=0;k<8;k++)across=Math.min(across,edge[k]+edge[k+8]);
+    rows.push({n:g.name,across:across,floor:med(fl),crest:med(cr),out:out.length?med(out):null});}
+  info('basins:',rows.map(q=>q.n.replace('The Burning Mountain of ','')+' '+q.across+' across, floor '+q.floor+', crest '+q.crest+', lands about '+q.out).join('; '));
+  assert(rows.every(q=>q.across>=750),'every basin of the wastes is at least 750 blocks across its floor');
+  const wo=rows.filter(q=>q.out!==null);
+  const dn=med(wo.map(q=>q.out-q.floor)),up=med(wo.map(q=>q.crest-q.out));info('median: the floor',dn,'below the lands about, the crest',up,'above them');
+  assert(wo.length>=3&&dn>=75&&dn<=105&&up>=70&&up<=125&&wo.every(q=>q.out-q.floor>=60&&q.crest-q.out>=35&&q.crest-q.floor>=150),'the floor lies about 90 below the lands about it, the ring about 90 above them: up some 90 to the crest and down some 180 to the floor');
+  // a window on the ring's inner wall: no water on the ground inside the ring (water in the caves under it is held as anywhere), lava held
+  const g=great[0];let wx=0,wz=0;for(let d=0;d<1400;d+=4){colInfo(g.X+d,g.Z,o);if(o.bs>=WB_IN*0.5){wx=g.X+d;wz=g.Z;break;}}
+  gen(wx,wz);let water=0,dry=0;for(let z=0;z<D;z++)for(let x=0;x<W;x++){colInfo(x+OX,z+OZ,o);if(o.sl>=SEA)continue;dry++;for(let y=ground[x+W*z]-2;y<ground[x+W*z]+40;y++)if(world[I(x,y,z)]===WATER)water++;}
+  const u=unsoundLava();info('on the ring near X',wx,'Z',wz,': columns inside the ring',dry,'; water there',water,'; unsound lava',u);
+  assert(dry>1000&&water===0&&u===0,'inside the ring nothing on the ground is water, and the lava is held');}
 // ---- fissures
 {const o={};let n=0;for(let X=-6000;X<6000;X+=7)for(let Z=-200;Z<200;Z+=7){colInfo(X,Z,o);if(o.vfis)n++;}assert(n>0,'fissures split the plains ('+n+' columns sampled)');}
 // ---- the citadel and the rift

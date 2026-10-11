@@ -896,7 +896,7 @@ const T={},T2={},T3={},TTP={},TP={},TGC={};
 function colInfoBase(X,Z,o){
   // Lands (M6a, D-039) come from the land layout (lands.js): the weights of nearby lands by look shape the ground below, so each
   // old land keeps its look and lands blend across their borders.
-  landsAt(X,Z,o);o.X=X;o.Z=Z;
+  landsAt(X,Z,o);o.X=X;o.Z=Z;o.sl=SEA; // o.sl: the level water (or lava) lies at in this column; lower in the sunken wastes (D-055)
   const cont=fbm2(X/480,Z/480,3,11.3),hill=fbm2(X/110,Z/110,2,37.7),rid=fbm2(X/40,Z/40,2,91.4);
   // Most land is gentle: rolling hills only where the "hilliness" field allows them
   const rough=sstep(-0.05,0.22,fbm2(X/420,Z/420,2,881.3));
@@ -936,37 +936,39 @@ function colInfoBase(X,Z,o){
     if(is>0){const n=fbm2(X/70,Z/70,2,8305.7),ih=n>0.08?Math.min(SEA+22,SEA-4+(n-0.08)*140):sf;sf=sf*(1-is)+Math.max(sf,ih)*is;}
     const soft=h*(1-o.wS)+sf*o.wS,cl=Math.min(1,o.wChalk+o.wFjord);
     if(cl>0){const t=0.5+fbm2(X/30,Z/30,1,8307.9)*0.15;h=soft*(1-cl)+(o.wS<t?h:sf)*cl;}else h=soft;}
+  if(o.bs<WB_END)h=wasteTerrain(X,Z,o,h); // the sunken wastes and their ring of ash mountains (D-055)
+  const SL=o.sl,ring=o.bs<WB_END?wasteRing(o.bs):0;
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
-  const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SEA-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief)),vw=rw+Math.min(0.24,relief*0.0075);
+  const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SL-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief))*(1-ring),vw=rw+Math.min(0.24,relief*0.0075);
   o.river=false;o.bank=false;
-  if(on>0&&rv2<vw&&h>SEA-3){
+  if(on>0&&rv2<vw&&h>SL-3){
     // the channel shelves up into its bank, and the bank slopes up to the land
-    const c=Math.max(0,1-rv2/rw),bed=SEA-2-Math.round(3*c),bankH=SEA+1+(h-SEA-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
-    h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SEA-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
+    const c=Math.max(0,1-rv2/rw),bed=SL-2-Math.round(3*c),bankH=SL+1+(h-SL-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
+    h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SL-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
   o.vflow=o.vcrust=o.vfis=o.vcr=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
-  h=Math.max(SEA-56,Math.min(H-14,Math.round(h)));
+  h=Math.max(SL-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
   const cold=o.tb===0,lk=LANDS[o.land].look;
   let b;
-  if(lk===11&&h>=SEA-2)b=11;else if(h<SEA)b=0;else if(lk===4||lk===7)b=lk;else if(lk===5&&h>=SEA+8)b=5;else if(h<=SEA+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;
+  if(lk===11&&h>=SEA-2)b=11;else if(h<SL)b=0;else if(lk===4||lk===7)b=lk;else if(lk===5&&h>=SEA+8)b=5;else if(h<=SL+1+Math.round(1.2+1.2*fbm2(X/40,Z/40,1,2601.3)))b=1;
   else if(lk===0||lk===5)b=cold?6:2;else b=lk;
   o.dw=dw;o.bw=bw;o.pw=pw;o.fen=fen;o.sw=sw;o.fwd=fwd;o.dn=fbm2(X/11,Z/11,1,4501.7);
-  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SEA+3;o.mf=mf;
+  o.h=h;o.b=b;o.cold=cold;o.hill=hill;o.rid=b===5?ridge*0.6-0.1:rid;o.wet=h<SL+3;o.mf=mf;
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   // Gorges (M6a, Q137; once the hairline ravines of M2b): fewer and wider, along a slow noise line where the land allows them.
   // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
   // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
   o.rvBot=999;
-  if(!o.wet&&!o.river&&o.gz>0.05){
+  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01){
     const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
     if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
       // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
       const gx=(fbm2((X+2)/150,Z/150,2,401.1)-fbm2((X-2)/150,Z/150,2,401.1))/4,gzz=(fbm2(X/150,(Z+2)/150,2,401.1)-fbm2(X/150,(Z-2)/150,2,401.1))/4,g2=Math.max(1e-9,gx*gx+gzz*gzz);
       const d=av/Math.sqrt(g2),cX=X-gv*gx/g2,cZ=Z-gv*gzz/g2;landsAt(cX,cZ,TGC);
-      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SEA+4,SEA+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
+      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SL+4,SL+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
       if(rf>0){const WT=8+12*rf,WF=3.5,Dm=8+52*rf;
-        if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SEA-56,h-dep);}}}}
+        if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SL-56,h-dep);}}}}
   return o;
 }
 const colCache=new Map();
@@ -1139,6 +1141,7 @@ function landsAt(X,Z,o){
   // the cell the column's land comes from (the nearest of that land), for its name and climate
   let bc=null,bd=Infinity;for(let k=0;k<n;k++){const s=LSC[k];if(s.c.L===o.land&&s.d<bd){bd=s.d;bc=s.c;}}
   o.lcell=landKey(bc.i,bc.j);o.tb=bc.cl.tb;
+  wasteAt(wx,wz,o);if(o.bs<WB_END)wasteLand(X,Z,o); // the sunken wastes and their ring take over (D-055)
   return o;
 }
 // ---- Stretch names (Q131): each stretch of a land has its own name in its people's style. Neighbouring cells of the same land
@@ -1171,6 +1174,52 @@ function nearestLand(k,X,Z,rmax){
       if(cellLand(c)!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
     if(best&&bd<(r-1)*LS)break;}
   return best?{X:Math.round(best.x),Z:Math.round(best.z),d:Math.round(bd)}:null;
+}
+// ---- The sunken wastes (D-055): the Volcanic Wastes lie in basins sunk about 90 blocks below the lands around them, walled by
+// a ring of ash mountains about 90 blocks above those lands, so the way in climbs some 90 blocks to a crest and falls some 180 to
+// the floor. A basin is the union of discs WB_R across about the centres of the volcanic cells, so each is at least 800 wide and
+// neighbouring stretches of the wastes share one; its edge is warped. Inside the ring the land is wholly volcanic, and the
+// level that is the sea elsewhere lies WB_DEP lower (o.sl): rivers there run with lava at that level, and nothing below it is
+// water. Pure functions of the seed and the land layout. landsAt reads the basin (wasteAt, wasteLand); colInfoBase shapes the
+// ground (wasteTerrain).
+const WB_R=430,WB_IN=125,WB_CR=18,WB_OUT=105,WB_DEP=90,WB_END=WB_IN+WB_CR+WB_OUT,WB_K=40,WB_FAR=950,wasteTC=new Map();
+// the volcanic cells whose basins may reach a 64-block tile (every one within WB_FAR of any of its columns)
+function wasteCells(X,Z){
+  const tk=(X>>6)*65536+(Z>>6);let L=wasteTC.get(tk);if(L)return L;if(wasteTC.size>20000)wasteTC.clear();
+  L=[];const cx=(X>>6)*64+32,cz=(Z>>6)*64+32,ci=Math.floor(cx/LS),cj=Math.floor(cz/LS);
+  for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++){const c=landSite(ci+a,cj+b);if(LANDS[cellLand(c)].k==='volcanic'&&Math.hypot(c.x-cx,c.z-cz)<WB_FAR+50)L.push(c);}
+  wasteTC.set(tk,L);return L;
+}
+// The basin at a column, from the warped coordinates landsAt reads cells by: o.bs, how far outside the edge of the basin's
+// floor (negative inside it), and o.bc, the nearest volcanic cell; o.bs is 1e9 where no basin reaches. The distance is a soft
+// minimum over the cells (each fading out by WB_FAR, so it never jumps), which rounds the joins between their discs.
+function wasteAt(wx,wz,o){
+  o.bs=1e9;o.bc=null;const L=wasteCells(Math.floor(wx),Math.floor(wz));if(!L.length)return;
+  let d1=1e9,bc=null;for(const c of L){const d=Math.hypot(wx-c.x,wz-c.z);if(d<d1){d1=d;bc=c;}}
+  if(d1>=WB_FAR)return;let s=0;for(const c of L){const d=Math.hypot(wx-c.x,wz-c.z);if(d<WB_FAR)s+=Math.exp(-(d-d1)/WB_K)*sstep(WB_FAR,WB_FAR-120,d);}
+  o.bs=d1-WB_K*Math.log(Math.max(1e-9,s))-WB_R-fbm2(wx/260,wz/260,2,9201.3)*40;o.bc=bc;
+}
+// Inside the ring (and down the top of its outer slope) the land is the wastes': their weights take over from the layout's
+function wasteLand(X,Z,o){
+  const wb=sstep(WB_IN+WB_CR+WB_OUT*0.8,WB_IN+WB_CR,o.bs);if(wb<=0)return;const k=1-wb,V=LAND_I.volcanic;
+  o.wS*=k;o.wKelp*=k;o.wIsle*=k;o.wChalk*=k;o.wFjord*=k;o.wDry*=k;o.wStar*=k;o.wTerr*=k;o.wVolc=o.wVolc*k+wb;
+  o.w2*=k;o.w3*=k;o.w5*=k;o.w6*=k;o.w7*=k;o.w8*=k;o.w10*=k;o.w11*=k;o.w4=o.w4*k+wb;o.gz=o.gz*k+LANDS[V].gorge*wb;
+  if(o.land!==V&&wb>0.5+fbm2(X/16,Z/16,1,2711.3)*0.4){o.land=V;o.lcell=landKey(o.bc.i,o.bc.j);o.tb=o.bc.cl.tb;}
+}
+// How much of the ring a column is on (1 from just before the foot of the inner wall to partway down the outer slope): no
+// rivers, gorges or lakes there
+const wasteRing=s=>sstep(-40,-12,s)*(1-sstep(WB_IN+WB_CR+WB_OUT*0.5,WB_END,s));
+// The ground: the floor is the wastes' own ground sunk WB_DEP; the inner wall climbs from it in cliffs and shelves to a jagged
+// crest with lower saddles here and there; the outer slope falls to the lands around. Sets o.sl, the column's liquid level.
+function wasteTerrain(X,Z,o,h){
+  const s=o.bs;if(s>=WB_END)return h;const fl=h-WB_DEP;
+  if(s<WB_IN+WB_CR*0.5)o.sl=SEA-WB_DEP;
+  if(s<=0)return fl;
+  const rg=1-Math.abs(fbm2(X/70,Z/70,2,9203.1)),cr=SEA+78+rg*rg*rg*42-sstep(0.2,0.5,fbm2(X/300,Z/300,1,9205.7))*30+fbm2(X/23,Z/23,1,9207.3)*5;
+  if(s<WB_IN){const t=s/WB_IN,p=t*t*(3-2*t)*0.7+t*0.3,y=fl+(cr-fl)*p,st=13,q=(y-fl+fbm2(X/40,Z/40,1,9209.9)*5)/st,led=fl+(Math.floor(q)+sstep(0.5,0.92,q-Math.floor(q)))*st;
+    return y*0.4+led*0.6+fbm2(X/9,Z/9,1,9211.3)*1.5;}
+  if(s<WB_IN+WB_CR)return cr;
+  const u=(s-WB_IN-WB_CR)/WB_OUT,p=1-u*u*(3-2*u);return Math.max(h,h+(cr-h)*p);
 }
 // ---- Cave systems (M3.5a, D-028): planned in place of noise. Each region of CR x CR chunks holds one main system and sometimes
 // a smaller one: a trunk that winds down from an entrance on a hillside, through the depths, to the Fire Below, with branches
@@ -1287,7 +1336,7 @@ function caveStep(B,ni,dir,kind,r,o){
 function caveEntrance(B,r,mx){
   let best=null,flat=null;const o={};
   for(let k=0;k<28;k++){const X=B.x0+mx+Math.floor(r()*(CRB-2*mx)),Z=B.z0+mx+Math.floor(r()*(CRB-2*mx)),h=hAt(X,Z);
-    if(h<SEA+3)continue;colInfo(X,Z,o);if(o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))continue;
+    colInfo(X,Z,o);if(h<o.sl+3||o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,ux=Math.cos(a),uz=Math.sin(a),rise=hAt(Math.round(X+ux*7),Math.round(Z+uz*7))-h;sl=Math.max(sl,Math.abs(rise));
       if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
@@ -1487,7 +1536,7 @@ function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const
 // open one cell, unless it must stay: bedrock, fluids, what holds up water above, the shores of surface lakes, or (away from
 // entrances) the last seven blocks under the ground
 function caveCut(X,Y,Z,gh,open){
-  if(Y<1||Y>H-2||(!open&&Y>gh-7)||(gh<SEA+2&&Y>gh-5))return;
+  if(Y<1||Y>H-2||(!open&&Y>gh-7)||(gh<SEA+2&&Y>gh-5&&!(gh<SEA-40&&biome[(X-OX)+W*(Z-OZ)]===4)))return; // (not the floors of the sunken wastes, D-055)
   const i=I(X-OX,Y,Z-OZ),id=world[i];if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)return;
   if(Y+1<H&&world[i+W*D]===WATER)return;if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))return;
   world[i]=AIR;lvl[i]=0;
@@ -2330,7 +2379,7 @@ function holdGates(h){
   const cand=[],R=Math.ceil(h.R*1.4);
   for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){const cx=h.cx+a,cz=h.cz+b,d=holdReach(h,cx,cz);if(d<0.5||d>=0.95)continue;
     if(!isAvenue(cx,cz)||isPlaza(cx,cz)||inDelf(cx,cz)||stairAt(cx,cz))continue;
-    colInfo(cx*CS+8,cz*CS+8,TG);if(TG.wet||TG.lake||TG.river||TG.h<=SEA+2||TG.rvBot<999)continue;
+    colInfo(cx*CS+8,cz*CS+8,TG);if(TG.wet||TG.lake||TG.river||TG.h<=TG.sl+2||TG.rvBot<999)continue;
     cand.push({cx:cx,cz:cz,s:TG.h+hsh(cx,1401,cz)*30});}
   cand.sort((p,q)=>q.s-p.s);out=[];
   for(const c of cand){if(out.length>=3)break;if(out.every(o=>Math.hypot(o.cx-c.cx,o.cz-c.cz)>=8))out.push(c);}
@@ -2815,10 +2864,11 @@ function caveLife(X0,Z0,r2){
 }
 function topBlock(o){
   const b=o.b,h=o.h,F=forestOf(o);
-  if(F&&F.shore&&(b===1||(b===0&&h>=SEA-12)))return F.shore(o); // the coasts' own beaches and shallows (M6d)
-  if(F&&F.top&&b!==0&&b!==1&&!(o.bank&&h<=SEA+3&&!F.banks))return F.top(o); // the forests' floors (M6b)
-  if(o.bank&&h<=SEA+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
-  if(b===0)return o.hill>0.08?GRAVEL:(h>SEA-5?SAND:DIRT);
+  const sl=o.sl;
+  if(F&&F.shore&&(b===1||(b===0&&h>=sl-12)))return F.shore(o); // the coasts' own beaches and shallows (M6d)
+  if(F&&F.top&&b!==0&&b!==1&&!(o.bank&&h<=sl+3&&!F.banks))return F.top(o); // the forests' floors (M6b)
+  if(o.bank&&h<=sl+3&&b!==6&&b!==7)return (o.hill>0.1)?GRAVEL:SAND;
+  if(b===0)return o.hill>0.08?GRAVEL:(h>sl-5?SAND:DIRT);
   if(b===1)return o.hill>0.12?GRAVEL:SAND;
   if(b===11)return h<=SEA||o.dn>0.25?DIRT:GRASS;
   if(b===4&&o.rid>0.22)return STONE;
@@ -2840,7 +2890,7 @@ function fillCol(x,z,X,Z,o){
     else if(sl>=2&&F&&F.wall)wallS=F.wall; // the terraces' retaining walls (M6g)
     else if(sl>=3&&(b===5||b===6)){top=hsh(X,9,Z)<0.5?GRAVEL:STONE;soil=1;}}
   if(b===5&&top===GRASS&&h>=SEA+33+Math.floor(hsh(X,10,Z)*6)&&!forestOf(o))top=SNOWG; // lands with their own floors decide their snow
-  const wl=Math.max(SEA,o.lake),liq=o.wVolc>0.3&&h<wl?liquidOf(o):WATER;if(liq===OBSID){h=wl;top=OBSID;} // lava rivers and lakes; obsidian where they would meet water (D-051)
+  const wl=Math.max(o.sl,o.lake),liq=o.wVolc>0.3&&h<wl?liquidOf(o):WATER;if(liq===OBSID){h=wl;top=OBSID;} // lava rivers and lakes; obsidian where they would meet water (D-051)
   biome[ci]=o.lake?9:b;ground[ci]=h;entCol[ci]=o.ent?1:0;
   let dl=0; // deepstone line, constant per column: computed once, on first use
   for(let y=0;y<H;y++){
@@ -2849,8 +2899,8 @@ function fillCol(x,z,X,Z,o){
       if(y===0||(y<3&&hsh(X,y,Z)<0.5))id=BEDROCK;
       else{
         if(y===h)id=top;
-        else if(y>h-1-soil)id=wallS||shoreS||(b===1?SAND:(b===0?(h>SEA-5?SAND:DIRT):F&&F.soil||DIRT));
-        else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:(rock&&y>SEA-30?rock:STONE);}
+        else if(y>h-1-soil)id=wallS||shoreS||(b===1?SAND:(b===0?(h>o.sl-5?SAND:DIRT):F&&F.soil||DIRT));
+        else{if(!dl)dl=DEEPY+Math.round(fbm2(X/40,Z/40,1,3401.7)*6);id=y<dl-1||(y<=dl+1&&hsh(X,y,Z)<0.5)?DEEP:(rock&&y>o.sl-30?rock:STONE);}
         if(carved(X,y,Z,o))id=y<=7?LAVA:AIR;else if(y===o.rvBot-1&&o.wVolc>0.5)id=LAVACRUST; // gorge floors in the burnt land glow
       }
     }else if(o.vlake&&y<=o.vlake)id=LAVA; // a crater's lake
@@ -2967,7 +3017,7 @@ function stairwayAt(WCX,WCZ){
   let s=null;
   if(hsh(WCX,6301,WCZ)<0.15){const X=WCX*CS+8,Z=WCZ*CS+8,o=colInfo(X,Z,{});
     let rise=0;for(let k=0;k<8;k++){const a=k*0.785;rise=Math.max(rise,hAt(Math.round(X+Math.cos(a)*9),Math.round(Z+Math.sin(a)*9))-o.h);} // at the foot of a slope
-    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>SEA+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
+    if(rise>=2&&!o.wet&&!o.lake&&!o.river&&o.rvBot===999&&o.b!==0&&o.b!==1&&o.b!==5&&o.h>o.sl+2&&!ruinZone(WCX,WCZ)&&flatOK(X,Z,o.h)){
       const a=caveAnchor(WCX,WCZ,o.h-90,o.h-24,6302);if(a&&Math.max(Math.abs(a.x-X),Math.abs(a.z-Z))>=4)s={X:X,Z:Z,g:o.h,a:a};}}
   stairwayC.set(key,s);return s;
 }
@@ -3010,7 +3060,7 @@ function dungeonAt(WCX,WCZ){
   if(hsh(WCX,6401,WCZ)<0.14){const a=caveAnchor(WCX,WCZ,106,196,6402);
     if(a){const ang=hsh(WCX,6403,WCZ)*6.283,X=a.x+Math.round(Math.cos(ang)*9),Z=a.z+Math.round(Math.sin(ang)*9),y=a.y-2;
       let clash=false;for(let c=-2;c<=2&&!clash;c++)for(let e=-2;e<=2&&!clash;e++){const q=poiFor(WCX+c,WCZ+e);if(q&&Math.abs(q.x-X)<20&&Math.abs(q.z-Z)<20&&Math.abs(q.y-y)<16)clash=true;} // places come first
-      if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
+      if(!clash&&hAt(X,Z)-y>=16&&!ruinZone(Math.floor(X/CS),Math.floor(Z/CS))&&!warBand(X,y+8,Z))d={kind:DUNGEON_KINDS[hsh(WCX,6404,WCZ)*4|0],X:X,Z:Z,y:y,hw:3+(hsh(WCX,6405,WCZ)*3|0),hh:4+(hsh(WCX,6406,WCZ)*2|0),a:a};}}
   dungC.set(key,d);return d;
 }
 function dungeonNear(X,Y,Z){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const d=dungeonAt(cx+a,cz+b);if(d&&Math.abs(X-d.X)<=d.hw&&Math.abs(Z-d.Z)<=d.hw&&Y>=d.y&&Y<=d.y+d.hh)return d;}return null;}
@@ -3044,7 +3094,7 @@ function siteAt(rx,rz){
     for(let t=0;t<14;t++){
       const X=rx*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0),Z=rz*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0);
       let lo=1e9,hi=-1e9,bad=false;
-      for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=SEA+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
+      for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=TS2.sl+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
       if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4))continue;
       let ring=0,river=0;for(let k=0;k<8;k++){const a=k*0.785;ring+=hAt(Math.round(X+Math.cos(a)*36),Math.round(Z+Math.sin(a)*36));
         for(const d of [20,40]){colInfo(Math.round(X+Math.cos(a)*d),Math.round(Z+Math.sin(a)*d),TS2);if(TS2.river||TS2.bank)river=1;}}
@@ -3099,7 +3149,7 @@ const ROAD_GROUND=new Set([LITTER,NEEDLES,FMOSS,TMOSS,LIMESTONE,PSNOW,CHALK,BLAC
 function applyRoads(lcx,lcz){
   const WCX=OX/CS+lcx,WCZ=OZ/CS+lcz;if(!roadSegs(WCX,WCZ).length)return;
   for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){const X=WCX*CS+x,Z=WCZ*CS+z;if(!oldRoadAt(X,Z))continue;
-    colInfo(X,Z,TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.h<=SEA)continue;const g=TS2.h;if(slopeAt(X,Z,g)>=3||siteNear(X,Z,0)||gateNear(X,Z,0))continue;
+    colInfo(X,Z,TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.h<=TS2.sl)continue;const g=TS2.h;if(slopeAt(X,Z,g)>=3||siteNear(X,Z,0)||gateNear(X,Z,0))continue;
     const lx=lcx*CS+x,lz=lcz*CS+z,i=I(lx,g,lz),top=world[i];if(![GRASS,DIRT,SNOWG,SAND,GRAVEL,STONE,PATH].includes(top)&&!ROAD_GROUND.has(top))continue;
     const q=hsh(X,6702,Z);world[i]=q<0.1?COBBLE:q<0.22?GRAVEL:PATH;lvl[i]=0;
     const up=world[i+W*D];if(up&&BL[up].cross){world[i+W*D]=AIR;}}
@@ -3261,10 +3311,10 @@ function sigOf(c){
     if(mode){const t=coastSite(c,L,R,mode);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else if(kind==='sinkhole'){const t=sinkholeSite(c,L,R);if(t)s=Object.assign(t,{kind:kind,name:name,land:L.k,R:R,seed:hsh(c.i,8143,c.j)});}
     else
-    for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?12+k*3:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
+    for(let k=0;k<40&&!s;k++){const a=k*2.4,d=k?(12+k*3)*(L.k==='volcanic'?3:1):0, /* the wastes' great volcano fills the middle of the basin (D-055) */X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);colInfo(X,Z,TSG);
       const low=L.k==='willow'||L.k==='bog'; // the vales' pools and stilt house stand on the low wet ground itself
-      if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=SEA+(low?0:2))continue;
-      let ok=true,lo=TSG.h;for(let m=0;m<8&&ok;m++){const e=colInfo(X+Math.round(Math.cos(m*0.785)*R),Z+Math.round(Math.sin(m*0.785)*R),TSG2);if(Math.abs(e.h-TSG.h)>3||(e.wet&&!low)||e.h<SEA||e.lake||e.river||e.rvBot<999)ok=false;lo=Math.min(lo,e.h);}
+      if(TSG.area!==L.i||TSG.land!==L.i||(TSG.wet&&!low)||TSG.lake||TSG.river||TSG.bank||TSG.rvBot<999||TSG.h<=TSG.sl+(low?0:2))continue;
+      let ok=true,lo=TSG.h;for(let m=0;m<8&&ok;m++){const e=colInfo(X+Math.round(Math.cos(m*0.785)*R),Z+Math.round(Math.sin(m*0.785)*R),TSG2);if(Math.abs(e.h-TSG.h)>3||(e.wet&&!low)||e.h<e.sl||e.lake||e.river||e.rvBot<999)ok=false;lo=Math.min(lo,e.h);}
       if(ok&&!surfTaken(X,Z,R+4))s={kind:kind,name:name,land:L.k,X:X,Z:Z,g:TSG.h,lo:lo,R:R,seed:hsh(c.i,8143,c.j)};}}
   sigC.set(key,s);return s;
 }
@@ -3769,9 +3819,9 @@ function smallAt(WCX,WCZ){
   if(hsh(WCX,8711,WCZ)<0.03){const X=WCX*CS+8,Z=WCZ*CS+8;colInfo(X,Z,TSM);const L=LANDS[TSM.land].k,q=hsh(WCX,8713,WCZ);
     if(!surfTaken(X,Z,14)&&!sigNear(X,Z,14)&&TSM.rvBot===999){
       // a river through the middle of the chunk: a bridge across it, or a mill on its bank
-      if(TSM.river){for(const [dx,dz] of [[1,0],[0,1]]){let a=0,b=0;for(let t=1;t<14&&!a;t++)if(!colInfo(X+dx*t,Z+dz*t,TSM2).river&&TSM2.h>=SEA)a=t;for(let t=1;t<14&&!b;t++)if(!colInfo(X-dx*t,Z-dz*t,TSM2).river&&TSM2.h>=SEA)b=t;
-        if(a&&b&&a+b<=18){s=q<0.75||L==='volcanic'?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
-      else if(TSM.h>SEA+2&&!TSM.wet&&!TSM.lake&&!TSM.bank){
+      if(TSM.river){for(const [dx,dz] of [[1,0],[0,1]]){let a=0,b=0;for(let t=1;t<14&&!a;t++)if(!colInfo(X+dx*t,Z+dz*t,TSM2).river&&TSM2.h>=TSM2.sl)a=t;for(let t=1;t<14&&!b;t++)if(!colInfo(X-dx*t,Z-dz*t,TSM2).river&&TSM2.h>=TSM2.sl)b=t;
+        if(a&&b&&a+b<=18){s=q<0.75||L==='volcanic'?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b,sl:TSM.sl}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
+      else if(TSM.h>TSM.sl+2&&!TSM.wet&&!TSM.lake&&!TSM.bank){
         // a lake within a few blocks: a jetty out over it
         let lake=null;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){colInfo(X+dx*10,Z+dz*10,TSM2);if(TSM2.lake&&!lake)lake=[dx,dz];}
         if(lake&&L!=='volcanic')s={kind:'jetty',X:X,Z:Z,dx:lake[0],dz:lake[1],g:TSM.h};
@@ -3786,9 +3836,9 @@ function smallBuild(s){
   const r=mkRng(1+Math.floor(hsh(s.X,8715,s.Z)*2147483000)),X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){
     case 'bridge':{ // a bridge of stone and planks across the river, its ends on the banks
-      const dx=s.dx,dz=s.dz,y=SEA+2;for(let t=-s.b-1;t<=s.a+1;t++)for(let c=-1;c<=1;c++){const px=X+dx*t-dz*c,pz=Z+dz*t+dx*c;
+      const dx=s.dx,dz=s.dz,y=s.sl+2;for(let t=-s.b-1;t<=s.a+1;t++)for(let c=-1;c<=1;c++){const px=X+dx*t-dz*c,pz=Z+dz*t+dx*c;
         PW(px,y,pz,Math.abs(c)===1&&(t===-s.b-1||t===s.a+1)?COBBLE:PLANKS,MODE_SET);if(Math.abs(c)===1&&t%2===0)PW(px,y+1,pz,PLANKS,MODE_SET);
-        if(t%4===0&&c===0)for(let yy=SEA-4;yy<y;yy++)PW(px,yy,pz,COBBLE,MODE_SET);for(let yy=y+1;yy<=y+3;yy++)if(c===0)PW(px,yy,pz,AIR,MODE_SET);}break;}
+        if(t%4===0&&c===0)for(let yy=s.sl-4;yy<y;yy++)PW(px,yy,pz,COBBLE,MODE_SET);for(let yy=y+1;yy<=y+3;yy++)if(c===0)PW(px,yy,pz,AIR,MODE_SET);}break;}
     case 'mill':{ // a mill on the bank: a stone house, a wheel of planks dipping into the river
       sigFloor(X-3,Z-3,X+3,Z+3,g,COBBLE,8);
       for(let ddx=-3;ddx<=3;ddx++)for(let ddz=-3;ddz<=3;ddz++){const e=Math.abs(ddx)===3||Math.abs(ddz)===3;if(!e)continue;for(let y=g+1;y<=g+4;y++)if(!(ddx===0&&ddz===3&&y<=g+2))PW(X+ddx,y,Z+ddz,y===g+4?PLANKS:COBBLE,MODE_SET);}
@@ -3983,29 +4033,38 @@ function keptBuild(s,r){
 // obsidian where they meet the water of other lands. The ground is black ash and cinder, with charred trees (some still
 // smouldering), basalt spires, obsidian shards and fumaroles ringed with sulphur. All pure functions of the seed.
 const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
-// ---- The great volcano (D-054): every stretch of the wastes has one near its middle, far larger than the rest, the seat of an
-// Emberlord's fortress. Placed where the land is wholly volcanic for its whole width (the widest that fits, searched outward from
-// the stretch's middle); the lesser volcanoes keep clear of it.
+// ---- The great volcano (D-054, D-055): every stretch of the wastes has one near its middle, far larger than the rest, the seat
+// of an Emberlord's fortress, rising from the sunken floor high over the ring of ash mountains about it. Placed where the floor
+// holds its whole foot with room to spare (the widest that fits, searched outward from the middle of the stretch's cells), clear
+// of the great volcanoes of stronger stretches that share the basin; the lesser volcanoes keep clear of it.
+const GREAT_R=[250,225,200,175,150,125];
 function greatOf(c){
-  const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;
+  const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;greatC.set(key,null);
   if(LANDS[cellLand(c)].k==='volcanic'){
-    // the widest cone that fits and still leaves room for two lesser cones about its foot; failing that, the widest that fits
-    for(const R of [118,104,92,80]){const g=greatTry(c,R);if(g&&(!v||g.sats.length>v.sats.length))v=g;if(v&&v.sats.length>=2)break;}}
+    // the middle of the stretch, and the stronger stretches' great volcanoes nearby
+    let mx=0,mz=0,n=0;const others=[];
+    for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const d=landSite(c.i+a,c.j+b);if(LANDS[cellLand(d)].k!=='volcanic')continue;const sc=stretchCell(d);
+      if(sc===c){mx+=d.x;mz+=d.z;n++;}else if(sc.pr>c.pr&&!others.includes(sc))others.push(sc);}
+    const G=[];for(const sc of others){const g=greatOf(sc);if(g){G.push(g);for(const t of g.sats)G.push(t);}}
+    for(const R of GREAT_R){v=greatTry(c,R,mx/n,mz/n,G);if(v)break;}}
   greatC.set(key,v);return v;
 }
-function greatTry(c,R){
-  for(let k=0;k<16;k++){const a=k*2.4,d=k?k*7:0,X=Math.round(c.x+Math.cos(a)*d),Z=Math.round(c.z+Math.sin(a)*d);
-    landsAt(X,Z,TVC);if(TVC.wVolc<0.9||TVC.wS>0.01)continue;let ok=true;
-    for(let m=0;m<12&&ok;m++){const aa=m*0.5236;landsAt(X+Math.round(Math.cos(aa)*R),Z+Math.round(Math.sin(aa)*R),TVC2);if(TVC2.wVolc<0.6||TVC2.wS>0.02)ok=false;}
-    if(!ok)continue;volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<SEA+2||o.river||o.rvBot!==999)continue;
-      const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-50-o.h,Math.round(R*(1.0+r()*0.18))),rc=Math.round(R*0.16)+4,cd=10+Math.floor(r()*5);
-      const fl=[],nf=4+Math.floor(r()*2),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.7,len:0.85+r()*0.45});const old=[];for(let q=0;q<4;q++)old.push(r()*6.283);
+// Is a disc of radius m about (X,Z) on the floor of a basin, and not over the sea?
+function onFloor(X,Z,m,k){landsAt(X,Z,TVC);if(TVC.bs>-m-8||TVC.wVolc<0.95)return false;
+  for(let q=0;q<k;q++){const a=q*6.2832/k;landsAt(X+Math.round(Math.cos(a)*m),Z+Math.round(Math.sin(a)*m),TVC2);if(TVC2.bs>-8)return false;}return true;}
+function greatTry(c,R,cx,cz,G){
+  const foot=Math.round(R*1.3)+40;
+  for(let k=0;k<30;k++){const a=k*2.4,d=k?k*9:0,X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
+    if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24))continue;if(!onFloor(X,Z,foot,16))continue;
+    volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)continue;
+      const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);
+      const fl=[],nf=4+Math.floor(r()*3),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.6,len:0.85+r()*0.4});const old=[];for(let q=0;q<5;q++)old.push(r()*6.283);
       const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
-      // lesser cones about its foot, where the land holds them, clear of each other
-      const s0=r()*6.283;for(let q=0;q<14&&v.sats.length<4;q++){const sa=s0+q*0.9+(r()-0.5)*0.3,sR=30+Math.floor(r()*26),sd=R*1.12+sR*0.9+8+(q%2)*26+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
-        landsAt(sX,sZ,TVC);if(TVC.wVolc<0.7||TVC.wS>0.01)continue;let sok=true;for(let m=0;m<8&&sok;m++){landsAt(sX+Math.round(Math.cos(m*0.785)*sR),sZ+Math.round(Math.sin(m*0.785)*sR),TVC2);if(TVC2.wVolc<0.45||TVC2.wS>0.02)sok=false;}
-        if(!sok||v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12))continue;const so={};colInfoBase(sX,sZ,so);if(so.h<SEA+2||so.river||so.rvBot!==999)continue;
-        const sHv=Math.min(H-50-so.h,Math.round(sR*(0.58+sh*0.24))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
+      // lesser cones about its foot, where the floor holds them, clear of each other and of the stronger great volcanoes
+      const s0=r()*6.283;for(let q=0;q<18&&v.sats.length<4;q++){const sa=s0+q*0.75+(r()-0.5)*0.3,sR=30+Math.floor(r()*28),sd=R*1.15+sR*1.1+10+(q%2)*20+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
+        if(v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8))continue;
+        const so={};colInfoBase(sX,sZ,so);if(so.h<so.sl+2||so.river||so.rvBot!==999)continue;
+        const sHv=Math.min(H-50-so.h,Math.round(sR*(0.62+sh*0.26))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
         v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
       return v;}finally{volcSkip=false;}}
   return null;
@@ -4013,16 +4072,15 @@ function greatTry(c,R){
 // the great volcanoes whose works may reach within r of (X,Z) (cached by 32-block tile for the terrain)
 function greatNear(X,Z,r){
   const tk=(X>>5)*65536+(Z>>5)+(r>200?0.5:0);if(r<=200){const c=greatNC.get(tk);if(c)return c;}if(greatNC.size>40000)greatNC.clear();
-  const out=[],seen=new Set(),ci=Math.floor(X/LS),cj=Math.floor(Z/LS),n=r>200?2:1;
-  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);const g=greatOf(c);if(g&&Math.hypot(g.X-X,g.Z-Z)<Math.max(r,200)+g.R*1.4){out.push(g);for(const t of g.sats)out.push(t);}}
+  const out=[],seen=new Set(),ci=Math.floor(X/LS),cj=Math.floor(Z/LS),n=r>200?Math.min(6,Math.ceil(r/LS)+1):2;
+  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);const g=greatOf(c);if(g&&Math.hypot(g.X-X,g.Z-Z)<Math.max(r,200)+g.R*1.45+120){out.push(g);for(const t of g.sats)out.push(t);}}
   if(r<=200)greatNC.set(tk,out);return out;
 }
 // a candidate: one per grid cell where the land is wholly volcanic for its whole width (no base height yet)
 function volcCand(i,j){
   const key=i*65536+j;if(volcCandC.has(key))return volcCandC.get(key);let v=null;
   if(hsh(i,9101,j)<0.95){const X=Math.floor((i+0.15+hsh(i,9103,j)*0.7)*VOLC_C),Z=Math.floor((j+0.15+hsh(i,9105,j)*0.7)*VOLC_C),R=34+Math.floor(hsh(i,9107,j)*30);
-    landsAt(X,Z,TVC);let ok=TVC.wVolc>0.85&&TVC.wS<0.01;
-    for(let k=0;k<8&&ok;k++){const a=k*0.785;landsAt(X+Math.round(Math.cos(a)*R),Z+Math.round(Math.sin(a)*R),TVC2);if(TVC2.wVolc<0.55||TVC2.wS>0.02)ok=false;}
+    let ok=onFloor(X,Z,Math.round(R*1.3)+6,8); // on a basin's floor, its foot and flows too (D-055)
     if(ok)for(const g of greatNear(X,Z,200))if(Math.hypot(g.X-X,g.Z-Z)<(g.great?g.R*1.15+R*0.9+8:(g.R+R)*1.3+12))ok=false; // clear of the great volcano
     if(ok)v={i:i,j:j,key:i+','+j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
   volcCandC.set(key,v);return v;
@@ -4032,7 +4090,7 @@ function volcAt(i,j){
   const key=i*65536+j;if(volcC.has(key))return volcC.get(key);let v=null;const c=volcCand(i,j);
   if(c){let ok=true;for(let a=-1;a<=1&&ok;a++)for(let b=-1;b<=1&&ok;b++){if(!a&&!b)continue;const n=volcCand(i+a,j+b);if(n&&n.pri>c.pri&&Math.hypot(n.X-c.X,n.Z-c.Z)<(n.R+c.R)*1.3+12)ok=false;}
     if(ok){volcSkip=true;const o={};colInfoBase(c.X,c.Z,o);volcSkip=false;
-      if(o.h>=SEA+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.58+hsh(i,9109,j)*0.24))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
+      if(o.h>=o.sl+2&&!o.river&&o.rvBot===999){const Hv=Math.min(H-50-o.h,Math.round(c.R*(0.58+hsh(i,9109,j)*0.24))),rc=Math.round(c.R*0.15)+3,cd=7+Math.floor(hsh(i,9111,j)*5),r=rngAt(i,9115,j);
         const fl=[],nf=2+Math.floor(r()*3),a0=r()*6.283;for(let k=0;k<nf;k++)fl.push({a:a0+k*6.283/nf+(r()-0.5)*0.9,len:0.8+r()*0.55});
         const old=[];for(let k=0;k<3;k++)old.push(r()*6.283);
         v=Object.assign({},c,{base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'Mount '+fullName('drow',r,false)});}}}
@@ -4046,21 +4104,21 @@ const angDiffV=(a,b)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
   const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);
-  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z,d=Math.hypot(dx,dz),reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(d>=reach)continue;
+  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z;if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));if(Math.abs(dx)>=v.reach||Math.abs(dz)>=v.reach)continue;const d=Math.hypot(dx,dz);if(d>=v.reach)continue;
     // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
     const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;const th=Math.atan2(dz,dx);if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
     if(d<v.rc){const q=d/v.rc;hh=v.rimTop-(v.cd+3)+(v.cd+3)*Math.pow(q,4);o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}
     else if(d<v.R){const s=1-(d-v.rc)/(v.R-v.rc),gul=Math.abs(Math.sin(th*6+fbm2(X/40,Z/40,1,9117.1)*2.5));
-      hh+=Math.pow(s,1.35)*v.Hv-(1-gul)*(1-gul)*s*(1-s)*12+fbm2(X/13,Z/13,1,9119.3)*2.2*Math.min(1,s*2+0.2);o.vs=s;}
+      hh+=Math.pow(s,1.35)*v.Hv-(1-gul)*(1-gul)*s*(1-s)*Math.max(12,v.R*0.15)+fbm2(X/13,Z/13,1,9119.3)*2.2*Math.min(1,s*2+0.2);o.vs=s;}
     // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
     if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
-      const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0);
+      const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=(0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0))*(v.great?1.6:1);
       if(lat<w&&d<dmax){hh=Math.min(Math.round(hh)-1,Math.round(v.lake-Math.max(0,d-v.rc)*0.55));o.vflow=true;o.vlake=0;break;}
       if(lat<w+2.2)o.vcrust=true;}
     if(!o.vflow&&d>v.rc&&d<v.R*0.95)for(const a0 of v.old)if(Math.abs(angDiffV(th,a0+0.2*Math.sin(d/9)))*d<1.4+d/v.R*1.6)o.vcrust=true; // old flows, cooled
     return hh;}
   // fissures across the plains: narrow, a few blocks deep, lava at the bottom
-  if(o.wVolc>0.55&&h>SEA+3){const q=Math.abs(fbm2(X/85,Z/85,2,9121.3));if(q<0.0075+0.006*(o.wVolc-0.55)){o.vfis=true;return h-4-Math.floor(hsh(X>>2,9123,Z>>2)*4);}}
+  if(o.wVolc>0.55&&h>o.sl+3){const q=Math.abs(fbm2(X/85,Z/85,2,9121.3));if(q<0.0075+0.006*(o.wVolc-0.55)){o.vfis=true;return h-4-Math.floor(hsh(X>>2,9123,Z>>2)*4);}}
   return h;
 }
 // Fumaroles: here and there a smoking vent, sulphur round it
@@ -4141,13 +4199,14 @@ function volcBuild(s,r){
 const FORT_P={
   hold:{gw:3,gh:10,cw:3,ch:9,hw:14,Lhs:[26,22],Hmin:14,Hmax:18,tv:11,ts:2,th:22,fw:14,fh:18,tz:12,td:12,pv:9,ps:1,pg:6,lv:5,dw:7,steps:3,k:1,bw:1},
   throne:{gw:8,gh:22,cw:9,ch:24,hw:32,Lhs:[60,50,42],Hmin:28,Hmax:36,tv:24,ts:4,th:46,fw:30,fh:40,tz:28,td:24,pv:20,ps:2,pg:10,lv:11,dw:16,steps:5,k:2,bw:3},
-  // a narrower throne hall for the smaller great volcanoes
+  // the grandest, for the great volcanoes of the sunken wastes (D-055), and a narrower hall for the smaller ones
+  throneL:{gw:9,gh:26,cw:10,ch:28,hw:40,Lhs:[84,72,60],Hmin:34,Hmax:50,tv:28,ts:5,th:58,fw:36,fh:50,tz:32,td:28,pv:24,ps:3,pg:12,lv:14,dw:20,steps:6,k:3,bw:4},
   throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:24,td:20,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
 const FORT_C=new Map();
 // The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across.
 function fortOf(v){
   const key=v.key||v.i+','+v.j;if(FORT_C.has(key))return FORT_C.get(key);let F=null;
-  for(const P of v.great?[FORT_P.throne,FORT_P.throneS]:v.Hv>=34&&hsh(v.i,9171,v.j)<0.85?[FORT_P.hold]:[]){if(F)break;
+  for(const P of v.great?(v.R>=200?[FORT_P.throneL,FORT_P.throne,FORT_P.throneS]:[FORT_P.throne,FORT_P.throneS]):v.Hv>=34&&hsh(v.i,9171,v.j)<0.85?[FORT_P.hold]:[]){if(F)break;
     const quarters=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
       for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);quarters.push({th:th,m:m});}
     quarters.sort((a,b)=>b.m-a.m);
@@ -4233,18 +4292,20 @@ function fortBuild(F){
 }
 function applyFortresses(WCX,WCZ){const X=WCX*CS+8,Z=WCZ*CS+8;for(const F of fortsNear(X,Z,12))fortBuild(F);}
 // ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
-// dug in hot black rock. Halls on two levels (the upper among the crawlways, the lower in the upper caves) are joined by low
+// dug in hot black rock. Halls on two levels under the sunken floor of the wastes (D-055: the upper at y 168 to 192, the lower
+// at 130 to 154, the levels the crawlways and the upper caves keep under the lands about) are joined by low
 // tunnels propped with charred timber and lit by torches, magma seams and channels of lava held in the floor. The halls hold
 // huts of hide, stores, pens, a forge, a fire shrine and the chief's hall with its hoard. Ways in open on the surface, a goblin
 // camp before each; a way down joins the caves below, which begin under the warrens. The warren is planned with the cave
 // systems of its region (caveBase), so everything planned after it keeps clear; it is dressed per chunk from the plan (pure).
-const WAR_Y0=206,warRegC=new Map(),WAR_KINDS=['den','den','den','store','forge','pen','shrine','lava'],TWR={};
+const WAR_Y0=124,warRegC=new Map(),WAR_KINDS=['den','den','den','store','forge','pen','shrine','lava'],TWR={};
 const WAR_ROCK=new Set([STONE,DEEP,DIRT,GRAVEL]);
-// Is cave region (rx,rz) a warren? Most of it lies under the wastes, and no hold is near.
+// Is cave region (rx,rz) a warren? Most of it lies under the wastes, a third at least under the sunken floor or the foot of the
+// ring's wall (D-055), and no hold is near.
 function warRegion(rx,rz){
   const k=ckey(rx,rz);if(warRegC.has(k))return warRegC.get(k);if(warRegC.size>4000)warRegC.clear();
-  let n=0;for(let a=0;a<5;a++)for(let b=0;b<5;b++){colInfo(rx*CRB+16+a*32,rz*CRB+16+b*32,TWR);if(TWR.wVolc>0.6)n++;}
-  const ccx=rx*CR+CR/2,ccz=rz*CR+CR/2,ok=n>=10&&holdReach(holdNear(ccx,ccz),ccx,ccz)>=3.6;
+  let n=0,m=0;for(let a=0;a<5;a++)for(let b=0;b<5;b++){colInfo(rx*CRB+16+a*32,rz*CRB+16+b*32,TWR);if(TWR.wVolc>0.6)n++;if(TWR.bs<WB_IN*0.5)m++;}
+  const ccx=rx*CR+CR/2,ccz=rz*CR+CR/2,ok=n>=10&&m>=8&&holdReach(holdNear(ccx,ccz),ccx,ccz)>=3.6;
   warRegC.set(k,ok);return ok;
 }
 // the warren of the region holding (X,Z), or null
@@ -4272,7 +4333,7 @@ function warJoin(B,ci,cj,r){
 function warEntrance(B,r){
   let best=null,flat=null;
   for(let k=0;k<36;k++){const X=B.x0+24+Math.floor(r()*(CRB-48)),Z=B.z0+24+Math.floor(r()*(CRB-48)),h=hAt(X,Z);
-    if(h<SEA+3)continue;colInfo(X,Z,TWR);if(TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
+    colInfo(X,Z,TWR);if(h<TWR.sl+3||TWR.bs>0||TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
     let hot=false;for(let d=0;d<8&&!hot;d++)for(const rr of [5,10,15]){colInfo(X+Math.round(Math.cos(d*0.785)*rr),Z+Math.round(Math.sin(d*0.785)*rr),TWR);if(TWR.vflow||TWR.vfis||TWR.vlake||TWR.river||TWR.lake){hot=true;break;}}
     if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,rise=hAt(Math.round(X+Math.cos(a)*7),Math.round(Z+Math.sin(a)*7))-h;sl=Math.max(sl,Math.abs(rise));if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
@@ -4289,7 +4350,7 @@ function warrenPlan(B){
     const X=B.x0+R+12+r()*(CRB-2*R-24),Z=B.z0+R+12+r()*(CRB-2*R-24);
     colInfo(X,Z,TWR);if(TWR.wVolc<0.6)continue;
     let gmin=1e9;for(const [px,pz] of [[0,0],[R,0],[-R,0],[0,R],[0,-R],[R*0.7,R*0.7],[-R*0.7,R*0.7],[R*0.7,-R*0.7],[-R*0.7,-R*0.7]])gmin=Math.min(gmin,hAt(Math.floor(X+px),Math.floor(Z+pz)));
-    let f=lower?212+Math.floor(r()*24):250+Math.floor(r()*24);const fTop=Math.floor(gmin-h-12);if(f>fTop)f=fTop;if(f<(lower?212:246))continue;
+    let f=lower?130+Math.floor(r()*24):168+Math.floor(r()*24);const fTop=Math.floor(gmin-h-12);if(f>fTop)f=fTop;if(f<(lower?130:164))continue;
     if(fortZone(X,f,Z,R+10))continue;
     const c={t:0,a:a,b:b,h:h,ang:r()*6.283,x:X,z:Z,f:f,seed:Math.floor(r()*1e6),war:1,wk:chief?'chief':WAR_KINDS[Math.floor(r()*WAR_KINDS.length)],doors:[]};
     const s=chSphere(c);let ok=true;for(const q of B.ch){const t2=chSphere(q);if(Math.hypot(s.x-t2.x,s.y-t2.y,s.z-t2.z)<s.r+t2.r+6){ok=false;break;}}
@@ -4304,7 +4365,7 @@ function warrenPlan(B){
   for(const [d,i,j] of pairs){const join=find(i)!==find(j);if(!join&&(loops<=0||d>110))continue;if(warJoin(B,HC[i],HC[j],r)){if(join)par[find(i)]=find(j);else loops--;}}
   // ways in: a mouth or a pit, then a tunnel to the nearest hall it can reach (the upper halls first), through a spiral down
   // when the way is too steep
-  const ne=1+(r()<0.6?1:0)+(r()<0.25?1:0),near=N=>HC.slice().sort((p,q)=>Math.hypot(B.ch[p].x-N.x,B.ch[p].z-N.z)+(B.ch[p].f<246?60:0)-Math.hypot(B.ch[q].x-N.x,B.ch[q].z-N.z)-(B.ch[q].f<246?60:0));
+  const ne=1+(r()<0.6?1:0)+(r()<0.25?1:0),near=N=>HC.slice().sort((p,q)=>Math.hypot(B.ch[p].x-N.x,B.ch[p].z-N.z)+(B.ch[p].f<164?60:0)-Math.hypot(B.ch[q].x-N.x,B.ch[q].z-N.z)-(B.ch[q].f<164?60:0));
   const toHall=from=>{const N=B.nodes[from];for(const ci of near(N).slice(0,4)){const c=B.ch[ci],n1=B.nodes.length,dr=warDoor(B,ci,Math.atan2(N.z-c.z,N.x-c.x));if(warLink(B,from,dr,r,1.8)){c.doors.push(dr);return true;}B.nodes.length=n1;}return false;};
   for(let k=0;k<ne+4&&W0.ents.length<ne&&HC.length;k++){const ent=warEntrance(B,r);if(!ent)continue;
     const n0=B.nodes.length,e0=B.edges.length,c0=B.caps.length;let inner=-1,en;
@@ -4312,18 +4373,20 @@ function warrenPlan(B){
       for(let t=0;t<4&&inner<0;t++){const hd=14+r()*8,a=ent.a+(r()-0.5)*0.6;inner=caveStep(B,en,a,'ramp',r,{open:true,to:{x:ent.X+Math.cos(a)*hd,y:ent.h-4-r()*4,z:ent.Z+Math.sin(a)*hd}});}}
     else{en=caveNode(B,ent.X+0.5,ent.h+1,ent.Z+0.5);for(let t=0;t<3&&inner<0;t++)inner=caveStep(B,en,ent.a+t*2,'spiral',r,{open:true,drop:16+r()*10});}
     let ok=false;
-    if(inner>=0){for(let e=e0;e<B.edges.length;e++)B.edges[e].war=1;ok=toHall(inner);
-      for(let t=0;t<3&&!ok;t++){const n1=B.nodes.length,e1=B.edges.length,c1=B.caps.length,N=B.nodes[inner],tg=B.ch[near(N)[0]],drop=Math.max(10,Math.min(46,N.y-tg.f-4));
-        const sp=caveStep(B,inner,ent.a+t*2.1+(r()-0.5)*0.5,'spiral',r,{drop:drop});if(sp>=0){B.edges[B.edges.length-1].war=1;ok=toHall(sp);}
-        if(!ok){B.nodes.length=n1;B.edges.length=e1;B.caps.length=c1;}}}
+    // down to a hall: straight if it can, else down a spiral, and another below it from high ground (the ring's wall, D-055)
+    const down=(from,dp)=>{if(toHall(from))return true;const N=B.nodes[from],tg=B.ch[near(N)[0]];if(dp>=3||N.y-tg.f<14)return false;
+      for(let t=0;t<3;t++){const n1=B.nodes.length,e1=B.edges.length,c1=B.caps.length,sp=caveStep(B,from,ent.a+t*2.1+(r()-0.5)*0.5,'spiral',r,{drop:Math.max(10,Math.min(46,N.y-tg.f-4))});
+        if(sp>=0){B.edges[B.edges.length-1].war=1;if(down(sp,dp+1))return true;}B.nodes.length=n1;B.edges.length=e1;B.caps.length=c1;}
+      return false;};
+    if(inner>=0){for(let e=e0;e<B.edges.length;e++)B.edges[e].war=1;ok=down(inner,0);}
     if(ok){const cx=ent.flat?ent.X:ent.X-Math.cos(ent.a)*8,cz=ent.flat?ent.Z:ent.Z-Math.sin(ent.a)*8;W0.ents.push({X:ent.X,Z:ent.Z,h:ent.h,a:ent.a,flat:!!ent.flat,ni:en,cx:cx,cz:cz,cy:hAt(Math.floor(cx),Math.floor(cz))+1});B.ents.push(en);}
     else{B.nodes.length=n0;B.edges.length=e0;B.caps.length=c0;}
   }
   // the way down from the lowest hall, to where the caves below begin
   if(HC.length){const ci=HC.reduce((p,q)=>B.ch[q].f<B.ch[p].f?q:p),c=B.ch[ci],a0=r()*6.283;
     for(let t=0;t<10&&W0.down<0;t++){const dir=a0+t*0.63,n0=B.nodes.length,e0=B.edges.length,c0=B.caps.length,dr=warDoor(B,ci,dir),D0=B.nodes[dr];
-      if(t<7){const hd=(D0.y-194)/0.62+4,T=caveNode(B,D0.x+Math.cos(dir)*hd,194,D0.z+Math.sin(dir)*hd);if(warLink(B,dr,T,r,2)){c.doors.push(dr);W0.down=T;break;}}
-      else{const nx=caveStep(B,dr,dir,'spiral',r,{drop:D0.y-194});if(nx>=0){B.edges[B.edges.length-1].war=1;c.doors.push(dr);W0.down=nx;break;}}
+      if(t<7){const hd=(D0.y-112)/0.62+4,T=caveNode(B,D0.x+Math.cos(dir)*hd,112,D0.z+Math.sin(dir)*hd);if(warLink(B,dr,T,r,2)){c.doors.push(dr);W0.down=T;break;}}
+      else{const nx=caveStep(B,dr,dir,'spiral',r,{drop:D0.y-112});if(nx>=0){B.edges[B.edges.length-1].war=1;c.doors.push(dr);W0.down=nx;break;}}
       B.nodes.length=n0;B.edges.length=e0;B.caps.length=c0;}}
 }
 // After the region's cave systems: channels of lava across some halls' floors, and lava falls in their walls. A channel is one
@@ -5025,7 +5088,7 @@ function meshBand(){
   const px=Math.floor(PL.x),pz=Math.floor(PL.z),g=(px>=0&&pz>=0&&px<W&&pz<D)?ground[px+W*pz]:SEA;
   const surf=MB.surf?PL.y>g-6:PL.y>g-2,half=surf?120:[48,72,118][settings.cave||0],c=Math.round(PL.y/16)*16;
   if(surf===MB.surf&&Math.abs(c-MB.c)<half*0.4)return;
-  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
+  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60-WB_DEP?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
 }
 function meshFloor(x0,z0){
   let lo=MB.lo;if(!MB.surf)return lo;let ms=H;
@@ -6519,6 +6582,14 @@ function amTexture(kind,ci,flags){
       if(Math.abs(Math.sin(x*0.9+amHash(x>>2,y>>2,seed+41)*6)+Math.cos(y*0.7+amHash(x>>3,y>>1,seed+43)*5))<dens)set(x,y,noisy(col,30,x,y),200);}}},
     // eyes that glow, on the front face of the head: two pixels `row` down, `gap` apart about the middle
     glowEyes(n,row,gap,col){const R=rect(n,'F');if(!R)return;const m=(R[2]-1)/2;set(R[0]+Math.floor(m-gap/2),R[1]+row,col,200);set(R[0]+Math.ceil(m+gap/2),R[1]+row,col,200);},
+    // a thin sheet (one pixel thick: across z, or across x when ax is 'x'): fn(s,t) gets every pixel of every face as the place on
+    // the sheet's front (F, or L) it lies over, and returns a colour [r,g,b] (with a fourth value, 200, to glow), 'cut' for a hole
+    // (alpha 1: the shader drops it), or nothing to leave it. Ragged wings, flames and holes read the same from both sides.
+    sheet(n,ax,fn){const u=uv[src(n)];if(!u)return;const [,,,w,h,d]=u[2];
+      for(const f in AM_FACES){const R=rect(n,f);for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++){let a,b;
+        if(ax==='x'){a=f==='L'?s:f==='R'?d-1-s:f==='T'?t:f==='D'?d-1-t:f==='F'?d-1:0;b=f==='T'?0:f==='D'?h-1:t;}
+        else{a=f==='F'||f==='T'||f==='D'?s:f==='B'?w-1-s:f==='L'?0:w-1;b=f==='T'?0:f==='D'?h-1:t;}
+        const v=fn(a,b);if(v==='cut')set(R[0]+s,R[1]+t,[0,0,0],1);else if(v)set(R[0]+s,R[1]+t,noisy(v,6,R[0]+s,R[1]+t),v[3]);}}},
     // stripes along the body (wild piglets)
     stripes(n,col,base){for(const f of ['L','R','T']){const R=rect(n,f);if(!R)continue;for(let t=0;t<R[3];t++)for(let s=0;s<R[2];s++)if(((f==='T'?s:t)>>1)%2===0)set(R[0]+s,R[1]+t,noisy(col,10,R[0]+s,R[1]+t));}}
   };
@@ -6564,10 +6635,10 @@ function amBuild(kind,ci,flags){
   const bx=amBounds(K,flags,sc,big);
   return {grp:body,root:root,parts:parts,mat:mat,dyn:dyn,shadow:shadow,box:bx,sc:sc};
 }
-// The bounds of a model at rest: every box's corners carried through its parts' pivots and rotations (x, then y, then z, as
-// three.js turns them), ears, horns, antlers, tails and packs left out
+// The bounds of a model at rest: every box's corners carried through its parts' pivots and rotations (z, then y, then x: three.js's
+// XYZ order turns a point about z first), ears, horns, antlers, tails and packs left out
 function amBounds(K,flags,sc,big){
-  const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[0]),s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[2]);s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];return [x,y,z];};
+  const rotP=(v,r)=>{let [x,y,z]=v;let c=Math.cos(r[2]),s=Math.sin(r[2]);[x,y]=[x*c-y*s,x*s+y*c];c=Math.cos(r[1]);s=Math.sin(r[1]);[x,z]=[x*c+z*s,-x*s+z*c];c=Math.cos(r[0]);s=Math.sin(r[0]);[y,z]=[y*c-z*s,y*s+z*c];return [x,y,z];};
   const chain=n=>{const out=[];let p=K.parts.find(q=>q[0]===n);while(p){out.push(p);p=p[1]?K.parts.find(q=>q[0]===p[1]):null;}return out;};
   const lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
   for(const p of K.parts){const o=p[5]||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;if(o.dyn==='pack'||o.nb||/^ear|^horn|^tip|^ant|^tine|^tail|^tuft|^comb|^tusk/.test(p[0]))continue;
@@ -6641,21 +6712,64 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
       coats:[[{hide:[70,66,64],crack:[255,130,30]},3],[{hide:[84,72,62],crack:[255,90,26]},2]],
       paint(P,c){P.coat(['body','head','jaw','nose','legL','armL'],c.hide,18);P.spots('body',['T','L','R','B'],[c.hide[0]+30,c.hide[1]+30,c.hide[2]+28],0.12);P.cracks(['body','armL','legL'],c.crack,0.06);
         P.coat(['tuskL'],[220,206,176],8);P.coat(['club'],[46,44,48],14);P.cracks(['club'],c.crack,0.05);P.coat(['sp1'],[50,48,50],12);P.glowEyes('head',2,3,[255,170,50]);P.rows('jaw',['F'],0,1,[30,22,20]);}},
-    // the Emberlord: a demon of fire and shadow, horned, maned with flame, on wings of smoke, a burning blade and a whip of fire
-    ember:{scale:3.8,parts:[...legs(20,6,6,4),['body',null,[0,20,0],[-8,0,-5,16,20,10],[0.1,0,0]],['head','body',[0,20,1],[-4,0,-4,8,8,8],[-0.1,0,0],{head:1}],
-      ['jaw','head',[0,1,4],[-3,-1,-1,6,3,4],0,{head:1}],['hornL','head',[-4,6,0],[-1,0,-1,2,6,2],[0.2,0,-1],{head:1}],['tipL','hornL',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,0.6],{head:1}],
-      ['hornR','head',[4,6,0],[-1,0,-1,2,6,2],[0.2,0,1],{head:1,m:'hornL'}],['tipR','hornR',[0,6,0],[-1,0,-1,2,5,2],[-0.6,0,-0.6],{head:1,m:'tipL'}],
-      ['mane','head',[0,4,-2],[-6,0,-4,12,10,5],[-0.3,0,0],{head:1,nb:1}],
-      ['armL','body',[-8,19,0],[-6,-20,-3,6,20,6],[0,0,0.1]],['armR','body',[8,19,0],[0,-20,-3,6,20,6],[0,0,-0.1],{m:'armL'}],
-      ['wingL','body',[-5,17,-5],[-28,-16,-0.5,28,26,1],[0,0.6,0.25],{nb:1}],['wingR','body',[5,17,-5],[0,-16,-0.5,28,26,1],[0,-0.6,-0.25],{nb:1,m:'wingL'}],
-      ['wpn','armR',[3,-19,0],[-1,-1,-2,2,3,26],0,{nb:1}],['whip1','armL',[-3,-19,0],[-0.5,-0.5,0,1,1,10],[0.6,0,0],{nb:1}],['whip2','whip1',[0,0,10],[-0.5,-0.5,0,1,1,10],[0.3,0,0],{nb:1,m:'whip1'}],
-      ['whip3','whip2',[0,0,10],[-0.5,-0.5,0,1,1,10],[0.3,0,0],{nb:1,m:'whip1'}],['tail','body',[0,2,-5],[-1,-1,-14,2,2,14],[0.5,0,0],{nb:1}]],
-      coats:[[{hide:[44,24,22],crack:[255,140,30],flame:[255,190,60]},1]],
-      paint(P,c){P.coat(['body','head','jaw','legL','armL','tail'],c.hide,14);P.cracks(['body','armL','legL','head','tail'],c.crack,0.09);P.rows('legL',['L','F','R','B'],17,20,[24,16,16]);
-        P.coat(['hornL','tipL'],[34,26,24],10);P.coat(['mane'],[40,18,14],10);P.cracks(['mane'],[255,120,26],0.55);P.cracks(['mane'],c.flame,0.22);
-        P.coat(['wingL'],[46,26,26],14);for(const f of ['F','B'])for(let k=0;k<4;k++)for(let t=0;t<26;t++)P.px('wingL',f,Math.max(0,Math.min(27,(f==='F'?27-Math.round(t*(0.3+k*0.25)):Math.round(t*(0.3+k*0.25))))),t,[22,14,14]);P.spots('wingL',['F','B'],[255,110,30],0.015);
-        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],[255,250,200],0.2);P.rect('wpn','L',0,0,4,3,[40,30,28]);P.rect('wpn','R',22,0,4,3,[40,30,28]);P.glowFaces(['whip1'],[255,120,30]);
-        P.glowEyes('head',3,3,[255,250,200]);P.glowRect('jaw','F',1,1,4,1,[255,160,40]);}}
+    // the Emberlord (D-054, D-055): a towering demon of shadow and flame, hunched over great digitigrade legs, its shoulders a
+    // hump of black hide split by fire, its head thrust low and forward under a heavy brow, eyes and maw burning, horns curving
+    // out and up, a mane of flame streaming back over its shoulders, and vast wings of bone and ragged membrane spread behind
+    // it. A burning blade in the right hand, a whip of fire in the left, a long tail.
+    ember:{scale:4.4,tex:256,parts:[
+      ['legL',null,[-6,22.5,0],[-3.5,-13,-3.5,7,14,7],[-0.6,0,0.06]],['legR',null,[6,22.5,0],[-3.5,-13,-3.5,7,14,7],[-0.6,0,-0.06],{m:'legL'}],
+      ['shinL','legL',[0,-12,0],[-2.5,-13,-2.5,5,13,5],[1.15,0,0]],['shinR','legR',[0,-12,0],[-2.5,-13,-2.5,5,13,5],[1.15,0,0],{m:'shinL'}],
+      ['footL','shinL',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0]],['footR','shinR',[0,-12.5,0],[-3,-2,-2,6,3,10],[-0.55,0,0],{m:'footL'}],
+      ['body',null,[0,22.5,0],[-6.5,-2,-5,13,15,10],[0.7,0,0]],['chest','body',[0,12,1],[-11,-1,-6.5,22,13,13],[0.25,0,0]],
+      ['head','chest',[0,11,4],[-4.5,-3,-2,9,8,10],[-1.05,0,0],{head:1}],['brow','head',[0,3,2],[-5,0,0,10,2,9],0,{head:1}],
+      ['jaw','head',[0,-2,1],[-3.5,-3,0,7,3,9],[0.3,0,0],{head:1}],
+      ['hornL','head',[-4,3,3],[-1.5,0,-1.5,3,8,3],[0.3,0,1.1],{head:1}],['tipL','hornL',[0,8,0],[-1,0,-1,2,8,2],[0.9,0,-0.9],{head:1}],['tip2L','tipL',[0,8,0],[-0.5,0,-0.5,1,5,1],[0.6,0,-0.4],{head:1}],
+      ['hornR','head',[4,3,3],[-1.5,0,-1.5,3,8,3],[0.3,0,-1.1],{head:1,m:'hornL'}],['tipR','hornR',[0,8,0],[-1,0,-1,2,8,2],[0.9,0,0.9],{head:1,m:'tipL'}],['tip2R','tipR',[0,8,0],[-0.5,0,-0.5,1,5,1],[0.6,0,0.4],{head:1,m:'tip2L'}],
+      ['maneA','chest',[0,11,-2],[-10,0,-0.5,20,16,1],[-1.2,0,0],{nb:1}],['maneB','chest',[0,11,-2],[-0.5,0,-8,1,16,16],[-1.2,0,0],{nb:1}],
+      ['crest','chest',[0,5,-6.5],[-0.5,-6,-7,1,14,7],0,{nb:1}],
+      ['armL','chest',[-11,8,0],[-6,-15,-3.5,6,16,7],[-1.25,0,-0.2]],['armR','chest',[11,8,0],[0,-15,-3.5,6,16,7],[-1.25,0,0.2],{m:'armL'}],
+      ['foreL','armL',[-3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0]],['foreR','armR',[3,-15,0],[-3,-16,-3,6,16,6],[-0.6,0,0],{m:'foreL'}],
+      ['handL','foreL',[0,-16,0],[-3.5,-5,-2.5,7,5,6],0],['handR','foreR',[0,-16,0],[-3.5,-5,-2.5,7,5,6],0,{m:'handL'}],
+      ['wpn','handR',[0,-3,0],[-1,-1.5,-3,2,3,34],[0.55,0,0],{nb:1}],['guard','wpn',[0,0,1],[-4,-1,0,8,2,2],0,{nb:1}],
+      ['whip1','handL',[0,-4,0],[-0.5,-0.5,0,1,1,12],[1.2,0,0],{nb:1}],['whip2','whip1',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.35,0,0],{nb:1,m:'whip1'}],
+      ['whip3','whip2',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.35,0,0],{nb:1,m:'whip1'}],['whip4','whip3',[0,0,12],[-0.5,-0.5,0,1,1,12],[0.3,0,0],{nb:1,m:'whip1'}],
+      ['tail','body',[0,0,-5],[-1.5,-1.5,-14,3,3,14],[-0.9,0,0],{nb:1}],['tail2','tail',[0,0,-14],[-1,-1,-12,2,2,12],[-0.4,0,0],{nb:1}],
+      ['wingL','chest',[-5,9,-6.5],[-28,-30,-0.5,28,34,1],[-0.85,-0.6,-0.55],{nb:1}],['wingR','chest',[5,9,-6.5],[0,-30,-0.5,28,34,1],[-0.85,0.6,0.55],{nb:1,m:'wingL'}],
+      ['wingL2','wingL',[-28,4,0],[-32,-36,-0.5,32,40,1],[0,-0.35,-0.35],{nb:1}],['wingR2','wingR',[28,4,0],[0,-36,-0.5,32,40,1],[0,0.35,0.35],{nb:1,m:'wingL2'}]],
+      coats:[[{hide:[38,22,20],dark:[20,12,12],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],memb:[74,22,18]},1]],
+      paint(P,c){
+        P.coat(['body','chest','head','jaw','legL','shinL','footL','armL','foreL','handL','tail','tail2'],c.hide,12);
+        P.cracks(['legL','shinL','armL','foreL','tail'],c.fire,0.022);P.cracks(['body','chest'],c.fire,0.018);
+        // the burning heart in the chest, its ribs glowing through the hide (the chest leans far forward: its top and front face you)
+        for(const f of ['T','F']){P.glowRect('chest',f,8,f==='T'?4:3,6,5,c.fire);P.glowRect('chest',f,9,f==='T'?5:4,4,3,c.hot);P.glowRect('chest',f,10,f==='T'?6:5,2,1,c.white);
+          for(let k=0;k<4;k++){const t=f==='T'?2+k*3:1+k*3;P.glowRect('chest',f,2,t,5,1,c.fire);P.glowRect('chest',f,15,t,5,1,c.fire);}}
+        P.glowRect('body','F',5,2,3,9,c.fire);P.glowRect('body','F',6,4,1,5,c.hot);
+        // the head: a dark brow over two burning eyes, a mouth full of fire, fangs
+        P.coat(['brow'],c.dark,6);P.rows('head',['F'],0,2,c.dark);P.glowRect('head','F',1,2,2,2,c.hot);P.glowRect('head','F',6,2,2,2,c.hot);P.glow('head','F',1,2,c.white);P.glow('head','F',7,2,c.white);
+        P.rect('head','F',3,2,3,2,c.dark);P.glowRect('head','D',1,1,7,8,c.fire);P.glowRect('jaw','T',1,1,5,8,c.hot);P.glowRect('jaw','F',1,0,5,1,c.fire);
+        for(const s of [0,2,4,6])P.px('jaw','F',s,0,[226,210,180]);for(const s of [0,8])P.px('head','F',s,7,[226,210,180]);
+        P.coat(['hornL'],[70,58,50],10);P.coat(['tipL'],[46,38,34],8);P.coat(['tip2L'],[22,18,18],4);
+        // claws
+        P.rows('handL',['L','F','R','B','D'],3,5,[200,188,166]);P.rows('footL',['F'],0,3,[200,188,166]);P.face('footL','D',c.dark,4);
+        // the flames: crossed sheets, white at the root to red at the tips, cut into tongues
+        const flame=(w,h,salt)=>(a,b)=>{const top=h*(0.35+0.65*Math.abs(Math.sin(a*0.85+salt)*Math.cos(a*0.37+salt*2)));const up=h-1-b;if(up>top)return 'cut';const q=up/Math.max(1,top);
+          return q<0.25?[255,236,170,200]:q<0.55?[255,170,50,200]:q<0.8?[250,96,26,200]:[200,40,20,200];};
+        P.sheet('maneA','z',flame(20,16,1.3));P.sheet('maneB','x',flame(16,16,2.9));P.sheet('crest','x',(a,b)=>{const top=14*(0.3+0.7*Math.abs(Math.sin(a*1.3+0.7)));return b<14-top?'cut':flame(7,14,4.1)(a,b);});
+        // the blade burns, the whip is fire, the tail ends in flame
+        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',3,0,2,2,c.fire);
+        P.glowFaces(['whip1'],[255,120,30]);P.glowRect('tail2','L',8,0,4,2,c.fire);P.glowRect('tail2','R',0,0,4,2,c.fire);P.glowRect('tail2','B',0,0,2,2,c.hot);
+        // the wings: an arm of bone along the top, fingers fanning from the wrist, a dark membrane between them hung in scallops,
+        // torn here and there, veined with fire
+        const H=(a,b,k)=>((Math.sin(a*12.9898+b*78.233+k)*43758.5453)%1+1)%1;
+        P.sheet('wingL','z',(a,b)=>{const w=28,body=a/(w-1),lim=33-10*body-5*Math.abs(Math.sin(body*Math.PI*2));
+          if(b>lim)return 'cut';if(b>lim-6&&H(a>>1,b>>1,3)<0.12)return 'cut';if(b<=1)return c.bone;if(a>w-3)return c.bone;
+          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [255,96,26,200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];});
+        const FING=[[Math.PI*1.0,32],[Math.PI*0.86,30],[Math.PI*0.7,38],[Math.PI*0.57,40],[Math.PI*0.5,36]];
+        P.sheet('wingL2','z',(a,b)=>{const dx=a-31,dy=b,r=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);if(ang>Math.PI+0.01||ang<FING[FING.length-1][0]-0.01)return 'cut';
+          let lim=0,bone=false;for(let k=0;k+1<FING.length;k++){const [a0,l0]=FING[k],[a1,l1]=FING[k+1];if(ang<=a0+0.001&&ang>=a1-0.001){const u=(a0-ang)/(a0-a1);lim=l0+(l1-l0)*u-7*Math.sin(Math.PI*u);}}
+          for(const [fa,fl] of FING)if(r<=fl+0.5&&Math.abs(Math.sin(ang-fa))*r<0.8)bone=true;
+          if(bone)return r<4?[200,188,166]:c.bone;if(r>lim)return 'cut';if(r>lim-7&&H(a>>1,b>>1,5)<0.14)return 'cut';
+          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [255,96,26,200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];});}}
   });
 })();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
@@ -6968,7 +7082,7 @@ function foeSpawnTick(){
   // the wastes: a warband (sometimes led by a warchief) or a troll, out of sight, on open ground of the volcanic land
   const roam=foes.filter(f=>!f.spot&&!f.dead).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
   const a=PL.yaw+Math.PI+(Math.random()-0.5)*Math.PI*1.4,d=38+Math.random()*28,x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
-  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3)return;const g=ground[bx+W*bz];if(g<=SEA-WB_DEP||!genDone[(bx>>4)+(bz>>4)*NCX]||PL.y<g-14)return;
   colInfo(bx+OX,bz+OZ,TFO);if(TFO.wVolc<0.55||TFO.vflow||TFO.vfis||TFO.vlake)return;const top=get(bx,g,bz);if(!SOLID[top]||top===LAVA)return;
   if(Math.random()<0.2)spawnGroup('band',1,x,g,z,2,{lead:'troll'});
   else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),x,g,z,5,{lead:Math.random()<0.12?'ochief':null});
@@ -7078,7 +7192,8 @@ function updShots(dt){
 function placeFoe(f,dt){
   const F=FOES[f.kind],M=f.m,P=M.parts,root=M.root,rest=g=>g.userData.rest,sp=f.sp,big=F.mass<0.2;
   const ph0=f.ph;f.ph+=sp*dt/(F.stride||(big?1.6:F.walk>1.4?0.9:1.1))*6.2832;
-  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the groundf.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
+  if(F.stride&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.3){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<48){burst(0.5,'lowpass',90,0.8,0.4*(1-d/48),0,[f.x,f.y,f.z]);shake=Math.max(shake,0.35*(1-d/48));}} // its footfalls shake the ground
+  f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
   if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
@@ -7098,6 +7213,7 @@ function placeFoe(f,dt){
   if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;
   if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
   if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
+  if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
@@ -7108,6 +7224,32 @@ function placeFoe(f,dt){
   const vis=dist<U.fogFar.value+10;M.grp.visible=vis;sh.visible=vis&&sh.material.opacity>0.01;
   // an Emberlord sheds embers
   if(f.kind==='ember'&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
+}
+// The Emberlord's gait (D-055): hunched and heavy, its body rolling over each stride and dipping as a foot comes down, the shins
+// folding under it on the back swing, arms swaying low, the head thrust forward and bobbing; the wings beat slowly (harder in the
+// chase, flung wide as it strikes), the outer wing lagging the inner; its flames, whip and tail never rest.
+function emberPose(f,P,root,prog){
+  const rest=g=>g.userData.rest[0],ph=f.ph,s=Math.sin(ph),c=Math.cos(ph),a=Math.min(1,f.amp*1.6),t=foeClock+f.id*1.7,chase=f.st==='chase',up=f.atk>0?Math.min(1,prog*1.4):0;
+  P.legL.rotation.x=rest(P.legL)+s*0.42*a;P.legR.rotation.x=rest(P.legR)-s*0.42*a;
+  P.shinL.rotation.x=rest(P.shinL)+Math.max(0,c)*0.7*a;P.shinR.rotation.x=rest(P.shinR)+Math.max(0,-c)*0.7*a;
+  P.footL.rotation.x=rest(P.footL)-Math.max(0,c)*0.35*a+Math.max(0,-s)*0.2*a;P.footR.rotation.x=rest(P.footR)-Math.max(0,-c)*0.35*a+Math.max(0,s)*0.2*a;
+  root.position.y=-Math.abs(s)*0.4*a;const br=Math.sin(t*0.8);
+  P.body.rotation.z=s*0.08*a;P.body.rotation.x=rest(P.body)+Math.abs(c)*0.06*a+br*0.02;P.chest.rotation.y=-s*0.14*a;P.chest.rotation.x=rest(P.chest)+br*0.035;
+  P.head.rotation.x=rest(P.head)-Math.abs(c)*0.06*a-br*0.02;P.head.rotation.y=f.lk*0.7;P.jaw.rotation.x=rest(P.jaw)+(chase?0.15:0)+Math.max(0,Math.sin(t*0.6))*0.12+up*0.25;
+  P.armL.rotation.x=rest(P.armL)-s*0.3*a;P.armR.rotation.x=rest(P.armR)+s*0.3*a;P.armL.rotation.z=P.armL.userData.rest[2];P.armR.rotation.z=P.armR.userData.rest[2];
+  P.foreL.rotation.x=rest(P.foreL)-Math.max(0,s)*0.25*a;P.foreR.rotation.x=rest(P.foreR)-Math.max(0,-s)*0.25*a;
+  // its blows: the blade raised high over the shoulder through the wind-up, brought down; the whip drawn back and cracked
+  if(f.atk>0){if(f.atkK==='blow'||f.atkK==='shot'){P.armR.rotation.x=rest(P.armR)-2.5*up;P.foreR.rotation.x=rest(P.foreR)+0.5*up;P.chest.rotation.y+=0.35*up;}
+    else if(f.atkK==='whip'){P.armL.rotation.x=rest(P.armL)-2*up;P.armL.rotation.z=P.armL.userData.rest[2]-0.7*up;P.foreL.rotation.x=rest(P.foreL)+0.4*up;P.chest.rotation.y-=0.3*up;}}
+  else if(f.swing>0){P.armR.rotation.x=rest(P.armR)+0.6*f.swing;P.foreR.rotation.x=rest(P.foreR)-0.3*f.swing;}
+  const rate=chase?2.1:0.85,bt=Math.sin(t*rate),bt2=Math.sin(t*rate-0.9),fl=f.atk>0?up:0,amp1=chase?0.3:0.13;
+  for(const [w,w2,k] of [[P.wingL,P.wingL2,1],[P.wingR,P.wingR2,-1]]){const r=w.userData.rest,r2=w2.userData.rest;
+    w.rotation.z=r[2]-k*(amp1*bt+0.25*fl);w.rotation.y=r[1]-k*(0.08*bt-0.3*fl);w.rotation.x=r[0]+0.05*bt;w2.rotation.z=r2[2]-k*(amp1*1.3*bt2+0.2*fl);w2.rotation.y=r2[1]-k*0.12*bt2;}
+  const fk=1+0.13*Math.sin(t*9.3)+0.07*Math.sin(t*23.7);P.maneA.scale.y=fk;P.maneB.scale.y=2-fk;P.crest.scale.y=1+0.15*Math.sin(t*11.1+1);
+  const wk=f.atkK==='whip'&&f.atk>0?up:0,lash=f.atkK==='whip'&&f.atk<=0&&f.swing>0?f.swing:0;
+  P.whip1.rotation.x=rest(P.whip1)+0.18*Math.sin(t*1.9)-1.6*wk+0.8*lash;P.whip2.rotation.x=rest(P.whip2)+0.28*Math.sin(t*1.9-0.8)-0.6*wk+0.7*lash;
+  P.whip3.rotation.x=rest(P.whip3)+0.35*Math.sin(t*1.9-1.6)+0.5*wk;P.whip4.rotation.x=rest(P.whip4)+0.4*Math.sin(t*1.9-2.4)+0.6*wk;P.whip2.rotation.y=0.2*Math.sin(t*1.3);
+  P.tail.rotation.y=0.35*Math.sin(t*1.1);P.tail2.rotation.y=0.45*Math.sin(t*1.1-0.8);P.tail.rotation.x=rest(P.tail)+0.08*Math.sin(t*0.7);
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
@@ -7240,9 +7382,9 @@ function notePlace(n,X,Z){
 const WM_PAL=[[52,92,150],[186,176,146],[112,158,82],[62,112,58],[138,112,122],[132,132,138],[196,204,210],[122,148,92],[46,76,52],[60,104,170],[168,166,104],[88,118,88]];
 const wmRegions=new Map(),wmDirty=new Set(),TW={};
 function wmColor(X,Z){
-  colInfo(X,Z,TW);const h=TW.h;
-  if(TW.lake||h<SEA||TW.b===0||TW.b===9){const d=Math.min(1,(SEA-h)/30);return[46-20*d,96-40*d,170-50*d];}
-  if(TW.river&&h<=SEA+1)return[70,120,200];
+  colInfo(X,Z,TW);const h=TW.h,sl=TW.sl;
+  if(TW.lake||h<sl||TW.b===0||TW.b===9){const d=Math.min(1,(sl-h)/30);if(TW.wVolc>0.5&&TW.wS<0.04)return[200+30*(1-d),70+30*(1-d),20];return[46-20*d,96-40*d,170-50*d];} // lava in the wastes
+  if(TW.river&&h<=sl+1)return TW.wVolc>0.5?[230,96,24]:[70,120,200];
   const c=(TW.b!==1&&LANDS[TW.land].col)||WM_PAL[TW.b]||[120,140,100],e=Math.max(0,Math.min(1,(h-SEA)/160));
   if(TW.b===5&&h>SEA+110||TW.b===6)return[214+30*e,218+30*e,224+28*e];
   const k=0.8+0.45*e;return[c[0]*k,c[1]*k,c[2]*k];
@@ -7945,7 +8087,7 @@ function findSpawn(){
     const x=Math.floor(W/2+Math.cos(a/24*6.2832)*r),z=Math.floor(D/2+Math.sin(a/24*6.2832)*r);
     if(x<1||z<1||x>=W-1||z>=D-1)continue;
     const g=ground[x+W*z];
-    if(g>SEA&&biome[x+W*z]!==0&&biome[x+W*z]!==9&&SOLID[get(x,g,z)]&&!SOLID[get(x,g+1,z)]&&!SOLID[get(x,g+2,z)])return[x+0.5,g+1,z+0.5];
+    if(g>SEA-WB_DEP&&biome[x+W*z]!==0&&biome[x+W*z]!==9&&SOLID[get(x,g,z)]&&!BL[get(x,g,z)].liquid&&!SOLID[get(x,g+1,z)]&&!SOLID[get(x,g+2,z)])return[x+0.5,g+1,z+0.5];
   }
   return[W/2+0.5,H-4,D/2+0.5];
 }
@@ -8181,6 +8323,49 @@ function updPlumes(dt){
       p.s.material.opacity=0.82*Math.min(1,p.age/3)*Math.min(1,(p.life-p.age)/8)*(1-sstep(U.fogFar.value*2.2,U.fogFar.value*3.2,d));}}
   for(const [k,pl] of plumes)if(!keep.has(k)){for(const p of pl.puffs){scene.remove(p.s);p.s.material.dispose();}plumes.delete(k);}
 }
+// ---- The wastes from afar (D-055). The world loaded about you is 224 blocks across, too small for a basin 800 wide and a great
+// volcano 500 across, so a stand-in of each basin near you is drawn behind everything (the ground draws over it wherever it is
+// loaded): the floor, the ring of ash mountains, and the great volcano with its burning crater and flows, hazed by distance.
+// It is built a few rays a frame from the plan, and scaled toward the eye (which leaves the picture unchanged) to stay inside
+// the far plane. Cosmetic, never saved.
+const FARW_K=160,farW=new Map(),TFW={},
+  FARW_VS='uniform float scl;attribute vec3 acol;attribute float agl;varying vec3 vC;varying float vG;varying float vT;void main(){vC=acol;vG=agl;vec4 mv=modelViewMatrix*vec4(position,1.0);vT=length(mv.xyz)/scl;gl_Position=projectionMatrix*mv;}',
+  FARW_FS='uniform vec3 fogColor;uniform float skyMul;varying vec3 vC;varying float vG;varying float vT;void main(){float hz=clamp(0.1+vT/1600.0,0.1,0.8);vec3 c=mix(vC*(0.45+0.55*skyMul),fogColor,hz);gl_FragColor=vec4(mix(c,vec3(1.0,0.42,0.1),vG*(1.0-hz*0.55)),1.0);}'; // hazed by the true distance (vT)
+let farWT=0;
+// one ray out from the great volcano's heart: [distance, height above its foot, r, g, b, glow] for each point
+function farWasteRay(F,k){
+  const g=F.g,th=k/FARW_K*6.2832,ux=Math.cos(th),uz=Math.sin(th),o=TFW,out=[];
+  let lo=g.R*1.3,hi=-1;for(let d=lo;d<1500;d+=24){landsAt(Math.round(g.X+ux*d),Math.round(g.Z+uz*d),o);if(o.bs>=0){hi=d;break;}lo=d;}
+  if(hi<0)hi=1500;for(let q=0;q<4;q++){const m=(lo+hi)/2;landsAt(Math.round(g.X+ux*m),Math.round(g.Z+uz*m),o);if(o.bs>=0)hi=m;else lo=m;}
+  const e=hi,cd=e+WB_IN+WB_CR/2,cX=g.X+ux*cd,cZ=g.Z+uz*cd,rg=1-Math.abs(fbm2(cX/70,cZ/70,2,9203.1)),cr=SEA+78+rg*rg*rg*42-sstep(0.2,0.5,fbm2(cX/300,cZ/300,1,9205.7))*30-g.base;
+  let flow=0;for(const f of g.fl)if(Math.round(((f.a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)flow=Math.max(flow,f.len);
+  let old=false;for(const a of g.old)if(Math.round(((a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)old=true;
+  const cone=d=>{if(d<g.rc){const b=g.Hv-(g.cd+3)+(g.cd+3)*Math.pow(d/g.rc,4);return b<g.lake-g.base?[g.lake-g.base,1]:[b,0];}if(d<g.R){const q=1-(d-g.rc)/(g.R-g.rc);return [Math.pow(q,1.35)*g.Hv,0];}return [0,0];};
+  for(const d of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.08,0.2,0.33,0.46,0.6,0.74,0.88,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R,g.R*1.3])){const [h,lk]=cone(d),q=Math.min(1,h/g.Hv);
+    const gl=lk?1:flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0;out.push(d,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
+  out.push(e,0,0.1,0.085,0.08,0);
+  for(const t of [0.25,0.5,0.75,1]){const p=t*t*(3-2*t)*0.7+t*0.3;out.push(e+WB_IN*t,cr*p,0.13+0.04*t,0.11+0.04*t,0.1+0.04*t,0);}
+  out.push(e+WB_IN+WB_CR,cr,0.19,0.17,0.16,0,e+WB_END,SEA+8-g.base,0.16,0.14,0.13,0);
+  F.rays[k]={ux:ux,uz:uz,p:out};
+}
+function farWasteMesh(F){
+  const N=F.rays[0].p.length/6,pos=[],col=[],gl=[],idx=[];let ext=0;
+  for(let k=0;k<FARW_K;k++){const r=F.rays[k];for(let i=0;i<N;i++){const q=r.p,j=i*6;pos.push(r.ux*q[j],q[j+1],r.uz*q[j]);col.push(q[j+2],q[j+3],q[j+4]);gl.push(q[j+5]);ext=Math.max(ext,q[j]);}}
+  for(let k=0;k<FARW_K;k++){const k2=(k+1)%FARW_K;for(let i=0;i+1<N;i++){const a=k*N+i,b=k2*N+i;idx.push(a,b,a+1,a+1,b,b+1);}}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('acol',new THREE.Float32BufferAttribute(col,3));geo.setAttribute('agl',new THREE.Float32BufferAttribute(gl,1));geo.setIndex(idx);
+  const m=new THREE.Mesh(geo,new THREE.ShaderMaterial({uniforms:{fogColor:U.fogColor,skyMul:U.skyMul,scl:{value:1}},vertexShader:FARW_VS,fragmentShader:FARW_FS,side:THREE.DoubleSide,depthWrite:false}));
+  m.renderOrder=-4;m.frustumCulled=false;scene.add(m);F.mesh=m;F.ext=ext;F.rays=null;
+}
+function updFarWastes(dt){
+  farWT-=dt;const X=PL.x+OX,Z=PL.z+OZ;
+  if(farWT<=0){farWT=1.5;const keep=new Set();for(const g of greatNear(X,Z,1500))if(g.great&&Math.hypot(g.X-X,g.Z-Z)<1700){keep.add(g.key);if(!farW.has(g.key))farW.set(g.key,{g:g,k:0,rays:[],mesh:null});}
+    for(const [k,F] of farW)if(!keep.has(k)){if(F.mesh){scene.remove(F.mesh);F.mesh.geometry.dispose();F.mesh.material.dispose();}farW.delete(k);}}
+  const bx=Math.floor(PL.x),bz=Math.floor(PL.z),under=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y<ground[bx+W*bz]-6;
+  for(const F of farW.values()){
+    if(!F.mesh){for(let n=0;n<24&&F.k<FARW_K;n++)farWasteRay(F,F.k++);if(F.k>=FARW_K)farWasteMesh(F);continue;}
+    const g=F.g,m=F.mesh,c=camera.position,px=g.X-OX,pz=g.Z-OZ,d=Math.hypot(px-c.x,pz-c.z),k=Math.min(1,560/(d+F.ext));m.visible=!under;
+    m.position.set(c.x+(px-c.x)*k,c.y+(g.base-c.y)*k,c.z+(pz-c.z)*k);m.scale.setScalar(k);m.material.uniforms.scl.value=k;}
+}
 // vent smoke: a pool of small soft puffs that rise, spread and fade
 const vpuffs=[];
 function ventPuff(s){let p=vpuffs.find(q=>q.age>=q.life);if(!p){if(vpuffs.length>=60)return;p={s:new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:new THREE.Color(0.5,0.47,0.42)}))};scene.add(p.s);vpuffs.push(p);}
@@ -8202,7 +8387,7 @@ function warGlowTick(dt){
   if(warF>0.3&&playing)for(let k=0;k<6*dt*warF;k++)spawnP(PL.x+(Math.random()-0.5)*20,PL.y+Math.random()*5-1,PL.z+(Math.random()-0.5)*20,(Math.random()-0.5)*0.3,0.25+Math.random()*0.4,(Math.random()-0.5)*0.3,[1,0.4,0.1],2.5+Math.random()*2,-0.05);
 }
 function fireTick(dt){
-  if(!ready)return;updBolts(dt);updPlumes(dt);updVentPuffs(dt);warGlowTick(dt);
+  if(!ready)return;updBolts(dt);updPlumes(dt);updFarWastes(dt);updVentPuffs(dt);warGlowTick(dt);
   const b=LWX.burn;if(b<0.05||!playing)return;
   fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=1.5+Math.random()*5;if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
   fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}

@@ -1,16 +1,18 @@
 // ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
-// dug in hot black rock. Halls on two levels (the upper among the crawlways, the lower in the upper caves) are joined by low
+// dug in hot black rock. Halls on two levels under the sunken floor of the wastes (D-055: the upper at y 168 to 192, the lower
+// at 130 to 154, the levels the crawlways and the upper caves keep under the lands about) are joined by low
 // tunnels propped with charred timber and lit by torches, magma seams and channels of lava held in the floor. The halls hold
 // huts of hide, stores, pens, a forge, a fire shrine and the chief's hall with its hoard. Ways in open on the surface, a goblin
 // camp before each; a way down joins the caves below, which begin under the warrens. The warren is planned with the cave
 // systems of its region (caveBase), so everything planned after it keeps clear; it is dressed per chunk from the plan (pure).
-const WAR_Y0=206,warRegC=new Map(),WAR_KINDS=['den','den','den','store','forge','pen','shrine','lava'],TWR={};
+const WAR_Y0=124,warRegC=new Map(),WAR_KINDS=['den','den','den','store','forge','pen','shrine','lava'],TWR={};
 const WAR_ROCK=new Set([STONE,DEEP,DIRT,GRAVEL]);
-// Is cave region (rx,rz) a warren? Most of it lies under the wastes, and no hold is near.
+// Is cave region (rx,rz) a warren? Most of it lies under the wastes, a third at least under the sunken floor or the foot of the
+// ring's wall (D-055), and no hold is near.
 function warRegion(rx,rz){
   const k=ckey(rx,rz);if(warRegC.has(k))return warRegC.get(k);if(warRegC.size>4000)warRegC.clear();
-  let n=0;for(let a=0;a<5;a++)for(let b=0;b<5;b++){colInfo(rx*CRB+16+a*32,rz*CRB+16+b*32,TWR);if(TWR.wVolc>0.6)n++;}
-  const ccx=rx*CR+CR/2,ccz=rz*CR+CR/2,ok=n>=10&&holdReach(holdNear(ccx,ccz),ccx,ccz)>=3.6;
+  let n=0,m=0;for(let a=0;a<5;a++)for(let b=0;b<5;b++){colInfo(rx*CRB+16+a*32,rz*CRB+16+b*32,TWR);if(TWR.wVolc>0.6)n++;if(TWR.bs<WB_IN*0.5)m++;}
+  const ccx=rx*CR+CR/2,ccz=rz*CR+CR/2,ok=n>=10&&m>=8&&holdReach(holdNear(ccx,ccz),ccx,ccz)>=3.6;
   warRegC.set(k,ok);return ok;
 }
 // the warren of the region holding (X,Z), or null
@@ -38,7 +40,7 @@ function warJoin(B,ci,cj,r){
 function warEntrance(B,r){
   let best=null,flat=null;
   for(let k=0;k<36;k++){const X=B.x0+24+Math.floor(r()*(CRB-48)),Z=B.z0+24+Math.floor(r()*(CRB-48)),h=hAt(X,Z);
-    if(h<SEA+3)continue;colInfo(X,Z,TWR);if(TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
+    colInfo(X,Z,TWR);if(h<TWR.sl+3||TWR.bs>0||TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
     let hot=false;for(let d=0;d<8&&!hot;d++)for(const rr of [5,10,15]){colInfo(X+Math.round(Math.cos(d*0.785)*rr),Z+Math.round(Math.sin(d*0.785)*rr),TWR);if(TWR.vflow||TWR.vfis||TWR.vlake||TWR.river||TWR.lake){hot=true;break;}}
     if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,rise=hAt(Math.round(X+Math.cos(a)*7),Math.round(Z+Math.sin(a)*7))-h;sl=Math.max(sl,Math.abs(rise));if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
@@ -55,7 +57,7 @@ function warrenPlan(B){
     const X=B.x0+R+12+r()*(CRB-2*R-24),Z=B.z0+R+12+r()*(CRB-2*R-24);
     colInfo(X,Z,TWR);if(TWR.wVolc<0.6)continue;
     let gmin=1e9;for(const [px,pz] of [[0,0],[R,0],[-R,0],[0,R],[0,-R],[R*0.7,R*0.7],[-R*0.7,R*0.7],[R*0.7,-R*0.7],[-R*0.7,-R*0.7]])gmin=Math.min(gmin,hAt(Math.floor(X+px),Math.floor(Z+pz)));
-    let f=lower?212+Math.floor(r()*24):250+Math.floor(r()*24);const fTop=Math.floor(gmin-h-12);if(f>fTop)f=fTop;if(f<(lower?212:246))continue;
+    let f=lower?130+Math.floor(r()*24):168+Math.floor(r()*24);const fTop=Math.floor(gmin-h-12);if(f>fTop)f=fTop;if(f<(lower?130:164))continue;
     if(fortZone(X,f,Z,R+10))continue;
     const c={t:0,a:a,b:b,h:h,ang:r()*6.283,x:X,z:Z,f:f,seed:Math.floor(r()*1e6),war:1,wk:chief?'chief':WAR_KINDS[Math.floor(r()*WAR_KINDS.length)],doors:[]};
     const s=chSphere(c);let ok=true;for(const q of B.ch){const t2=chSphere(q);if(Math.hypot(s.x-t2.x,s.y-t2.y,s.z-t2.z)<s.r+t2.r+6){ok=false;break;}}
@@ -70,7 +72,7 @@ function warrenPlan(B){
   for(const [d,i,j] of pairs){const join=find(i)!==find(j);if(!join&&(loops<=0||d>110))continue;if(warJoin(B,HC[i],HC[j],r)){if(join)par[find(i)]=find(j);else loops--;}}
   // ways in: a mouth or a pit, then a tunnel to the nearest hall it can reach (the upper halls first), through a spiral down
   // when the way is too steep
-  const ne=1+(r()<0.6?1:0)+(r()<0.25?1:0),near=N=>HC.slice().sort((p,q)=>Math.hypot(B.ch[p].x-N.x,B.ch[p].z-N.z)+(B.ch[p].f<246?60:0)-Math.hypot(B.ch[q].x-N.x,B.ch[q].z-N.z)-(B.ch[q].f<246?60:0));
+  const ne=1+(r()<0.6?1:0)+(r()<0.25?1:0),near=N=>HC.slice().sort((p,q)=>Math.hypot(B.ch[p].x-N.x,B.ch[p].z-N.z)+(B.ch[p].f<164?60:0)-Math.hypot(B.ch[q].x-N.x,B.ch[q].z-N.z)-(B.ch[q].f<164?60:0));
   const toHall=from=>{const N=B.nodes[from];for(const ci of near(N).slice(0,4)){const c=B.ch[ci],n1=B.nodes.length,dr=warDoor(B,ci,Math.atan2(N.z-c.z,N.x-c.x));if(warLink(B,from,dr,r,1.8)){c.doors.push(dr);return true;}B.nodes.length=n1;}return false;};
   for(let k=0;k<ne+4&&W0.ents.length<ne&&HC.length;k++){const ent=warEntrance(B,r);if(!ent)continue;
     const n0=B.nodes.length,e0=B.edges.length,c0=B.caps.length;let inner=-1,en;
@@ -78,18 +80,20 @@ function warrenPlan(B){
       for(let t=0;t<4&&inner<0;t++){const hd=14+r()*8,a=ent.a+(r()-0.5)*0.6;inner=caveStep(B,en,a,'ramp',r,{open:true,to:{x:ent.X+Math.cos(a)*hd,y:ent.h-4-r()*4,z:ent.Z+Math.sin(a)*hd}});}}
     else{en=caveNode(B,ent.X+0.5,ent.h+1,ent.Z+0.5);for(let t=0;t<3&&inner<0;t++)inner=caveStep(B,en,ent.a+t*2,'spiral',r,{open:true,drop:16+r()*10});}
     let ok=false;
-    if(inner>=0){for(let e=e0;e<B.edges.length;e++)B.edges[e].war=1;ok=toHall(inner);
-      for(let t=0;t<3&&!ok;t++){const n1=B.nodes.length,e1=B.edges.length,c1=B.caps.length,N=B.nodes[inner],tg=B.ch[near(N)[0]],drop=Math.max(10,Math.min(46,N.y-tg.f-4));
-        const sp=caveStep(B,inner,ent.a+t*2.1+(r()-0.5)*0.5,'spiral',r,{drop:drop});if(sp>=0){B.edges[B.edges.length-1].war=1;ok=toHall(sp);}
-        if(!ok){B.nodes.length=n1;B.edges.length=e1;B.caps.length=c1;}}}
+    // down to a hall: straight if it can, else down a spiral, and another below it from high ground (the ring's wall, D-055)
+    const down=(from,dp)=>{if(toHall(from))return true;const N=B.nodes[from],tg=B.ch[near(N)[0]];if(dp>=3||N.y-tg.f<14)return false;
+      for(let t=0;t<3;t++){const n1=B.nodes.length,e1=B.edges.length,c1=B.caps.length,sp=caveStep(B,from,ent.a+t*2.1+(r()-0.5)*0.5,'spiral',r,{drop:Math.max(10,Math.min(46,N.y-tg.f-4))});
+        if(sp>=0){B.edges[B.edges.length-1].war=1;if(down(sp,dp+1))return true;}B.nodes.length=n1;B.edges.length=e1;B.caps.length=c1;}
+      return false;};
+    if(inner>=0){for(let e=e0;e<B.edges.length;e++)B.edges[e].war=1;ok=down(inner,0);}
     if(ok){const cx=ent.flat?ent.X:ent.X-Math.cos(ent.a)*8,cz=ent.flat?ent.Z:ent.Z-Math.sin(ent.a)*8;W0.ents.push({X:ent.X,Z:ent.Z,h:ent.h,a:ent.a,flat:!!ent.flat,ni:en,cx:cx,cz:cz,cy:hAt(Math.floor(cx),Math.floor(cz))+1});B.ents.push(en);}
     else{B.nodes.length=n0;B.edges.length=e0;B.caps.length=c0;}
   }
   // the way down from the lowest hall, to where the caves below begin
   if(HC.length){const ci=HC.reduce((p,q)=>B.ch[q].f<B.ch[p].f?q:p),c=B.ch[ci],a0=r()*6.283;
     for(let t=0;t<10&&W0.down<0;t++){const dir=a0+t*0.63,n0=B.nodes.length,e0=B.edges.length,c0=B.caps.length,dr=warDoor(B,ci,dir),D0=B.nodes[dr];
-      if(t<7){const hd=(D0.y-194)/0.62+4,T=caveNode(B,D0.x+Math.cos(dir)*hd,194,D0.z+Math.sin(dir)*hd);if(warLink(B,dr,T,r,2)){c.doors.push(dr);W0.down=T;break;}}
-      else{const nx=caveStep(B,dr,dir,'spiral',r,{drop:D0.y-194});if(nx>=0){B.edges[B.edges.length-1].war=1;c.doors.push(dr);W0.down=nx;break;}}
+      if(t<7){const hd=(D0.y-112)/0.62+4,T=caveNode(B,D0.x+Math.cos(dir)*hd,112,D0.z+Math.sin(dir)*hd);if(warLink(B,dr,T,r,2)){c.doors.push(dr);W0.down=T;break;}}
+      else{const nx=caveStep(B,dr,dir,'spiral',r,{drop:D0.y-112});if(nx>=0){B.edges[B.edges.length-1].war=1;c.doors.push(dr);W0.down=nx;break;}}
       B.nodes.length=n0;B.edges.length=e0;B.caps.length=c0;}}
 }
 // After the region's cave systems: channels of lava across some halls' floors, and lava falls in their walls. A channel is one

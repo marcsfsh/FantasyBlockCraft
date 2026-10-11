@@ -35,9 +35,9 @@ function smallAt(WCX,WCZ){
   if(hsh(WCX,8711,WCZ)<0.03){const X=WCX*CS+8,Z=WCZ*CS+8;colInfo(X,Z,TSM);const L=LANDS[TSM.land].k,q=hsh(WCX,8713,WCZ);
     if(!surfTaken(X,Z,14)&&!sigNear(X,Z,14)&&TSM.rvBot===999){
       // a river through the middle of the chunk: a bridge across it, or a mill on its bank
-      if(TSM.river){for(const [dx,dz] of [[1,0],[0,1]]){let a=0,b=0;for(let t=1;t<14&&!a;t++)if(!colInfo(X+dx*t,Z+dz*t,TSM2).river&&TSM2.h>=SEA)a=t;for(let t=1;t<14&&!b;t++)if(!colInfo(X-dx*t,Z-dz*t,TSM2).river&&TSM2.h>=SEA)b=t;
-        if(a&&b&&a+b<=18){s=q<0.75||L==='volcanic'?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
-      else if(TSM.h>SEA+2&&!TSM.wet&&!TSM.lake&&!TSM.bank){
+      if(TSM.river){for(const [dx,dz] of [[1,0],[0,1]]){let a=0,b=0;for(let t=1;t<14&&!a;t++)if(!colInfo(X+dx*t,Z+dz*t,TSM2).river&&TSM2.h>=TSM2.sl)a=t;for(let t=1;t<14&&!b;t++)if(!colInfo(X-dx*t,Z-dz*t,TSM2).river&&TSM2.h>=TSM2.sl)b=t;
+        if(a&&b&&a+b<=18){s=q<0.75||L==='volcanic'?{kind:'bridge',X:X,Z:Z,dx:dx,dz:dz,a:a,b:b,sl:TSM.sl}:{kind:'mill',X:X+dx*(a+3),Z:Z+dz*(a+3),dx:dx,dz:dz,g:hAt(X+dx*(a+3),Z+dz*(a+3))};break;}}}
+      else if(TSM.h>TSM.sl+2&&!TSM.wet&&!TSM.lake&&!TSM.bank){
         // a lake within a few blocks: a jetty out over it
         let lake=null;for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){colInfo(X+dx*10,Z+dz*10,TSM2);if(TSM2.lake&&!lake)lake=[dx,dz];}
         if(lake&&L!=='volcanic')s={kind:'jetty',X:X,Z:Z,dx:lake[0],dz:lake[1],g:TSM.h};
@@ -52,9 +52,9 @@ function smallBuild(s){
   const r=mkRng(1+Math.floor(hsh(s.X,8715,s.Z)*2147483000)),X=s.X,Z=s.Z,g=s.g;
   switch(s.kind){
     case 'bridge':{ // a bridge of stone and planks across the river, its ends on the banks
-      const dx=s.dx,dz=s.dz,y=SEA+2;for(let t=-s.b-1;t<=s.a+1;t++)for(let c=-1;c<=1;c++){const px=X+dx*t-dz*c,pz=Z+dz*t+dx*c;
+      const dx=s.dx,dz=s.dz,y=s.sl+2;for(let t=-s.b-1;t<=s.a+1;t++)for(let c=-1;c<=1;c++){const px=X+dx*t-dz*c,pz=Z+dz*t+dx*c;
         PW(px,y,pz,Math.abs(c)===1&&(t===-s.b-1||t===s.a+1)?COBBLE:PLANKS,MODE_SET);if(Math.abs(c)===1&&t%2===0)PW(px,y+1,pz,PLANKS,MODE_SET);
-        if(t%4===0&&c===0)for(let yy=SEA-4;yy<y;yy++)PW(px,yy,pz,COBBLE,MODE_SET);for(let yy=y+1;yy<=y+3;yy++)if(c===0)PW(px,yy,pz,AIR,MODE_SET);}break;}
+        if(t%4===0&&c===0)for(let yy=s.sl-4;yy<y;yy++)PW(px,yy,pz,COBBLE,MODE_SET);for(let yy=y+1;yy<=y+3;yy++)if(c===0)PW(px,yy,pz,AIR,MODE_SET);}break;}
     case 'mill':{ // a mill on the bank: a stone house, a wheel of planks dipping into the river
       sigFloor(X-3,Z-3,X+3,Z+3,g,COBBLE,8);
       for(let ddx=-3;ddx<=3;ddx++)for(let ddz=-3;ddz<=3;ddz++){const e=Math.abs(ddx)===3||Math.abs(ddz)===3;if(!e)continue;for(let y=g+1;y<=g+4;y++)if(!(ddx===0&&ddz===3&&y<=g+2))PW(X+ddx,y,Z+ddz,y===g+4?PLANKS:COBBLE,MODE_SET);}

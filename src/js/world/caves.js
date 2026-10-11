@@ -113,7 +113,7 @@ function caveStep(B,ni,dir,kind,r,o){
 function caveEntrance(B,r,mx){
   let best=null,flat=null;const o={};
   for(let k=0;k<28;k++){const X=B.x0+mx+Math.floor(r()*(CRB-2*mx)),Z=B.z0+mx+Math.floor(r()*(CRB-2*mx)),h=hAt(X,Z);
-    if(h<SEA+3)continue;colInfo(X,Z,o);if(o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))continue;
+    colInfo(X,Z,o);if(h<o.sl+3||o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS)))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,ux=Math.cos(a),uz=Math.sin(a),rise=hAt(Math.round(X+ux*7),Math.round(Z+uz*7))-h;sl=Math.max(sl,Math.abs(rise));
       if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
@@ -313,7 +313,7 @@ function lakeNear(X,Z,Y){for(const d of [[0,0],[1,0],[-1,0],[0,1],[0,-1]]){const
 // open one cell, unless it must stay: bedrock, fluids, what holds up water above, the shores of surface lakes, or (away from
 // entrances) the last seven blocks under the ground
 function caveCut(X,Y,Z,gh,open){
-  if(Y<1||Y>H-2||(!open&&Y>gh-7)||(gh<SEA+2&&Y>gh-5))return;
+  if(Y<1||Y>H-2||(!open&&Y>gh-7)||(gh<SEA+2&&Y>gh-5&&!(gh<SEA-40&&biome[(X-OX)+W*(Z-OZ)]===4)))return; // (not the floors of the sunken wastes, D-055)
   const i=I(X-OX,Y,Z-OZ),id=world[i];if(id===AIR||id===BEDROCK||id===WATER||id===LAVA)return;
   if(Y+1<H&&world[i+W*D]===WATER)return;if(Y>=SEA&&Y>gh-12&&lakeNear(X,Z,Y))return;
   world[i]=AIR;lvl[i]=0;

@@ -14,7 +14,7 @@ function meshBand(){
   const px=Math.floor(PL.x),pz=Math.floor(PL.z),g=(px>=0&&pz>=0&&px<W&&pz<D)?ground[px+W*pz]:SEA;
   const surf=MB.surf?PL.y>g-6:PL.y>g-2,half=surf?120:[48,72,118][settings.cave||0],c=Math.round(PL.y/16)*16;
   if(surf===MB.surf&&Math.abs(c-MB.c)<half*0.4)return;
-  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
+  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60-WB_DEP?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
 }
 function meshFloor(x0,z0){
   let lo=MB.lo;if(!MB.surf)return lo;let ms=H;
