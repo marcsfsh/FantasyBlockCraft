@@ -130,11 +130,13 @@ function fireScan(){lavaSpots=[];ventSpots=[];const px=Math.floor(PL.x),pz=Math.
   for(let dz=-22;dz<=22;dz+=2)for(let dx=-22;dx<=22;dx+=2){const x=px+dx,z=pz+dz;if(x<0||z<0||x>=W||z>=D)continue;const ci=x+W*z,y=hm[ci],id=world[I(x,y,z)];
     if(id===LAVA)lavaSpots.push([x,y,z]);else if(id===VENT||world[I(x,ground[ci],z)]===VENT)ventSpots.push([x,ground[ci],z]);}}
 // Underground in the goblin warrens or an Emberlord's fortress (D-052) the dark glows red: the cave fog and the cave's own dim
-// light warm to fire, and embers drift in the air (warF, eased; main-loop's cave light reads it)
-let warF=0,warT=0,warIn=false;
+// light warm to fire, and embers drift in the air (warF, eased; main-loop's cave light reads it). A fortress's halls are lit by
+// their fires, so their dim light is stronger (fortF), enough to show the relief of their walls and vaults (D-058).
+let warF=0,warT=0,warIn=false,fortF=0,fortIn=false;
 function warGlowTick(dt){
-  warT-=dt;if(warT<=0){warT=0.5;const bx=Math.floor(PL.x),bz=Math.floor(PL.z),yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;warIn=bx>=0&&bz>=0&&bx<W&&bz<D&&yy<ground[bx+W*bz]-3&&!!(warrenName(X,yy,Z)||fortName(X,yy,Z));}
-  warF+=((warIn?1:0)-warF)*Math.min(1,dt*0.8);
+  warT-=dt;if(warT<=0){warT=0.5;const bx=Math.floor(PL.x),bz=Math.floor(PL.z),yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ,under=bx>=0&&bz>=0&&bx<W&&bz<D&&yy<ground[bx+W*bz]-3;
+    fortIn=under&&!!fortName(X,yy,Z);warIn=fortIn||(under&&!!warrenName(X,yy,Z));}
+  warF+=((warIn?1:0)-warF)*Math.min(1,dt*0.8);fortF+=((fortIn?1:0)-fortF)*Math.min(1,dt*0.8);
   caveDark.setRGB(0.035+0.085*warF,0.04-0.012*warF,0.06-0.038*warF);U.caveTint.value.setRGB(0.55+0.45*warF,0.66-0.18*warF,0.9-0.64*warF);
   if(warF>0.3&&playing)for(let k=0;k<6*dt*warF;k++)spawnP(PL.x+(Math.random()-0.5)*20,PL.y+Math.random()*5-1,PL.z+(Math.random()-0.5)*20,(Math.random()-0.5)*0.3,0.25+Math.random()*0.4,(Math.random()-0.5)*0.3,[1,0.4,0.1],2.5+Math.random()*2,-0.05);
 }

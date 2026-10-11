@@ -17,6 +17,11 @@ Saves from 0.28.0 do not carry over (save key v20): the fortresses in the volcan
   - **The towers:** battered feet, fluted corners, slits lit from within, machicolations, spiked battlements, horns at the corners, pools of fire on their roofs and banners down their faces.
   - **The way in:** a pointed vault on ribs of fire, with fire baskets, skulls in niches under burning script, and fire hung on chains.
   - **The throne hall:** pointed vaults over the nave and aisles, ribbed with fire, and pillars on obsidian bases ringed with burning script, joined by arcades. Cages of fire hang on chains, and the rivers of fire are kerbed and bridged. Guardians stand in the aisles, and the dais's steps are written in fire. The throne is peaked and horned, with the hoard heaped about it. Behind it are the lord's burning sign and columns of lava behind grates.
+- **No flat walls or ceilings:**
+  - The vaults over the hall and the way in are coffered, with fire set into every other coffer, and cornices with fire baskets run along their springings.
+  - The hall's side walls are lined with carved blind arches with a fire at each foot, and its end walls with sunk lancets. A deep arch behind the throne frames the lord's sign.
+  - The towers are grooved, the way in's walls are coursed, and the facade carries ledges and panels.
+  - The halls are a little brighter, so the relief shows.
 - New blocks: cracked basalt bricks, basalt tiles, carved basalt, ember script, obsidian bricks, basalt pillar, iron chain (climbable), fire basket and iron spikes (creative, Building).
 
 ### Tooling

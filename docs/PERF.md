@@ -138,4 +138,4 @@ Same VM type, `npm run bench`, one run per seed, the Near area.
 | 123456789 | 2487 | 10.47 / 10.1 / 12.79 / 20.62 | 13.73 / 13.33 / 16.18 / 38.05 | 0.62 / 0.42 / 2.19 / 5.02 | 2.31 / 1.98 / 5.39 / 6.7 | 207 |
 | 4242 | 2732 | 12.48 / 11.37 / 19.56 / 27.64 | 15.53 / 14.25 / 24.6 / 30.2 | 0.68 / 0.46 / 2.51 / 4.37 | 1.59 / 1.33 / 3.49 / 4.8 | 209 |
 
-Within the noise of 0.28.0 at spawn, where no fortress stands. In the window about the nearest Ember Throne (77 chunks touch it), rebuilding the fortress costs 0.40 ms a chunk on average (`fortBuild`, D-058), against 13.2 ms for the whole chunk there.
+Within the noise of 0.28.0 at spawn, where no fortress stands. In the window about the nearest Ember Throne (77 chunks touch it), rebuilding the fortress with its relief costs 0.47 ms a chunk on average (`fortBuild`, D-058), against 13.5 ms for the whole chunk there, and relighting the whole window there takes 232 ms (its vaults hold some 300 fire baskets more than before the relief).

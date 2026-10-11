@@ -31,7 +31,7 @@ function fortOf(v){
       for(const Lh of P.Lhs){const U1=Math.round(dg+4-Lh);if(U1<10)continue;let cov=1e9;
         for(let u=U1;u<=U1+Lh;u+=3)for(let w=-P.hw-2;w<=P.hw+2;w+=4)cov=Math.min(cov,hAt(GX-ox*u+px*w,GZ-oz*u+pz*w));
         for(let Dd=0;Dd<=Math.min(20,Math.floor((U1-8)/2));Dd+=2){const Fh=Fy-Dd,Hh=Math.min(P.Hmax,cov-Fh-6);if(Hh<P.Hmin)continue;
-          const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),E=U1+Lh,xs=[GX+ox*(P.td+8),GX-ox*(E+1)],zs=[GZ+oz*(P.td+8),GZ-oz*(E+1)],wd=Math.max(P.hw+2,P.fw+1,P.tz,P.tv+P.ts+1+2*P.k)+1;
+          const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),E=U1+Lh,xs=[GX+ox*(P.td+8),GX-ox*(E+1)],zs=[GZ+oz*(P.td+8),GZ-oz*(E+1)],wd=Math.max(P.hw+3,P.fw+1,P.tz,P.tv+P.ts+1+2*P.k)+1;
           for(const w of [-wd,wd]){xs.push(GX+px*w);zs.push(GZ+pz*w);}
           F={v:v,P:P,great:!!v.great,GX:GX,GZ:GZ,Fy:Fy,Fh:Fh,Dd:Dd,ox:ox,oz:oz,px:px,pz:pz,U1:U1,Lh:Lh,Hh:Hh,lord:lord,id:'f'+key,
             name:v.great?'The Ember Throne of '+lord:'The Warhold of '+v.name,box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Math.min(Fh-8,Fy-30),Fy+Math.max(P.th+7*P.k+4,P.fh+14*P.k+4)],seed:Math.floor(r()*1e6)};break;}
@@ -75,10 +75,23 @@ function fortD(F){if(F.d)return F.d;const P=F.P,k=P.k,Hh=F.Hh,d={E:F.U1+F.Lh,top
     um0:-P.td+2,um1:-P.td+2+k,sw:2*k+1,ph:k+1,mo:2*k,HH:4*k+2,pw:P.gw+4*k,kr:Math.max(1,Math.round(k*0.67)),lfH:Math.round(Hh*0.7),
     hc:Math.round((P.pv-P.ps)/2),dc:Math.round(Hh*0.3),rsg:2*k+1,statues:P.hw-P.pv-P.ps>=9};
   d.sG=P.gh-d.rG;d.sC=P.ch-d.rC;d.rN=Hh-d.sN-1;d.rA=Math.round(d.wa*1.4);d.us=d.um1+1+d.sw;d.vs=P.gw+2+d.sw;d.clr=Math.max(P.gh+6,d.ph+13*k+3);
+  d.RN=(d.rN*d.rN+d.nw*d.nw)/(2*d.nw);d.cN=d.RN-d.nw;d.RA=(d.rA*d.rA+d.wa*d.wa)/(2*d.wa);d.cA=d.RA-d.wa;d.RC=(d.rC*d.rC+P.cw*P.cw)/(2*P.cw);d.cC=d.RC-P.cw;
+  d.wB=P.lv-2;d.sB=2*k;d.rB=Math.max(d.wB,Hh-6-P.steps-2*k);d.sb=Math.round(d.sA*0.5);d.hbw=P.pg/2-2;
   d.np=Math.max(0,Math.floor((F.Lh-d.dz-2-P.ps-4-P.ps)/P.pg)+1);d.hb=P.pg/2-P.ps-0.5;d.yc=F.Fh+Hh-2-d.rsg-k;return F.d=d;}
 // A pointed arch of half-span w, springing s above its floor and rising r above that: how far outside its curve a cell lies (a
 // across from the arch's middle, dy up; negative inside)
 function archD(a,dy,w,s,r){if(dy<=s)return a-w;const R=(r*r+w*w)/(2*w),c=R-w;return Math.hypot(a+c,dy-s)-R;}
+// The relief of the big walls and vaults (D-058), so no face of the fortress is a flat sheet. fortPanel lays a wall out in
+// tiers of blind lancets: 'L' a ledge (a course standing out), 'P' a pier standing out between the lancets, 'R' a lancet sunk a
+// block into the wall, '' plain (p across the wall, t up from the tiers' foot). fortCoffer says whether a cell one block beyond a
+// vault's curve is a coffer: sunk between a grid of ribs (al along the vault with ribs every pal, the arc measured up from the
+// springing with ribs every k+2), never at the springing.
+function fortPanel(k,p,t){const T=3*k+3,PW=k>1?5:4,tr=((t%T)+T)%T,q=((p%PW)+PW)%PW;if(t<0)return '';if(tr===0)return 'L';if(q===0)return 'P';
+  return (tr>=2&&tr<=T-3)||(tr===T-2&&Math.abs(q-PW/2)<=0.6)?'R':'';}
+function fortCoffer(a,dy,s,R,c,al,pal,k){return dy>s+1&&((al%pal)+pal)%pal!==0&&(R*Math.atan2(dy-s,a+c))%(k+2)>=1;}
+// the middle of a coffer's back: a fire basket set in every other coffer (they light the vault) and an ember brick in the rest
+function fortCofferMid(a,dy,s,R,c,al,pal,k){if(dy<=s+2||((al%pal)+pal)%pal!==pal>>1)return 0;const arc=R*Math.atan2(dy-s,a+c);if(Math.floor(arc%(k+2))!==(k+2)>>1)return 0;
+  return (Math.floor(al/pal)+Math.floor(arc/(k+2)))%2===0?BRAZIER:EMBRICK;}
 // the fortress's stone: basalt bricks, cracked in patches, here and there rough, a few seams still aglow
 function fortStone(X,y,Z){const r=hsh(X+y*7919,9181,Z),p=hsh(X>>2,(y>>2)+9183,Z>>2)<0.3?0.34:0.08;return r<p?BASCRACK:r<p+0.03?BASALT:r>0.994?EMBRICK:BASBRICK;}
 // A guardian in its lord's likeness, about 13s tall: hands on the pommel of a great sword set point down before it, wings folded
@@ -150,7 +163,7 @@ function fortTerrace(F,d,X,Z,u,v,av,h){const P=F.P,k=P.k,Fy=F.Fy,S=(y,id)=>PW(X,
 // burning eyes, a ridge of nose from the keystone, a jaw round the arch and horns rising over the battlements. A line of burning
 // script runs across the wall at the gate's springing; the battlements carry spikes, and a peak at the middle.
 function fortFacade(F,d,X,Z,u,v,av){const P=F.P,k=P.k,Fy=F.Fy,S=(y,id)=>PW(X,y,Z,id,MODE_SET),apex=Fy+P.gh,yb=a=>3*k+Math.round(0.55*a),ring=0.45+3*d.kr;
-  const topY=Fy+P.fh+Math.max(0,Math.round((d.pw-av)*0.6));
+  const topY=Fy+P.fh+Math.max(0,Math.round((d.pw-av)*0.6)),rel=(av,dy,dA,ad,y)=>dy<=2*k+2||y>=topY-1||ad<=ring+1.5||(av<=7*k+2&&dA>=-2&&dA<=yb(av)+k+1)||(dy>=d.sG-1&&dy<=d.sG+k)?'':fortPanel(k,av,dy-2*k-2);
   if(u>=0&&u<=2&&av<=P.fw){
     for(let y=Fy-1;y<=topY;y++){const dy=y-Fy,ad=archD(av,dy,P.gw,d.sG,d.rG);let id;
       if(dy>=0&&ad<=0.45){const tl=av>=P.gw?0:av%3===1?2*k:av%3===2?k:0;id=u===0&&dy>d.sG&&ad>=-tl?OBSID:u===1&&ad>-3*k?GRATE:AIR;}
@@ -160,6 +173,7 @@ function fortFacade(F,d,X,Z,u,v,av){const P=F.P,k=P.k,Fy=F.Fy,S=(y,id)=>PW(X,y,Z
         else if(u===0&&dy>=d.sG&&dy<d.sG+k)id=EMGLYPH;
         else if(y===topY)id=topY>Fy+P.fh?OBSBRICK:fortStone(X,y,Z);
         else if(u===0&&y===Fy+P.fh-1&&av>d.pw)id=BASCARVE;
+        else if(u===0&&rel(av,dy,dA,ad,y)==='R')id=AIR;
         else id=fortStone(X,y,Z);}
       S(y,id);}
     if(u===0){if(topY===Fy+P.fh){if(av%3!==0){for(let y=topY+1;y<=topY+k;y++)S(y,fortStone(X,y,Z));if(av%3===1)S(topY+k+1,SPIKES);}}else if(av%2===0)S(topY+1,SPIKES);
@@ -169,6 +183,7 @@ function fortFacade(F,d,X,Z,u,v,av){const P=F.P,k=P.k,Fy=F.Fy,S=(y,id)=>PW(X,y,Z
     else if(u===-1&&av<=Math.max(0,k-2)&&dA>=1&&dA<yb(0))id=OBSBRICK; // the nose
     else if(u===-1&&dy>=d.sG&&ad>ring&&ad<=ring+1)id=OBSBRICK; // the jaw
     else if(u===-1&&dy<=2*k+1&&(dy<0||ad>ring))id=dy===2*k+1?OBSBRICK:fortStone(X,y,Z); // the wall's foot
+    else if(u===-1){const r=rel(av,dy,dA,ad,y);if(r==='L')id=OBSBRICK;else if(r==='P')id=fortStone(X,y,Z);} // ledges and piers
     if(id)S(y,id);}
   // the horns: tubes along a curve from the ends of the brow, out, up and in at the tips
   if(av>=4*k-2&&av<=7*k+2){const hb=yb(5*k),HP=[[5*k,hb+k-1],[6.2*k,hb+3.5*k],[6.2*k,hb+6.5*k],[5.6*k,hb+9*k]],du=u-(k>1?-1:0);
@@ -186,6 +201,7 @@ function fortTower(F,d,X,Z,a,b){const P=F.P,k=P.k,Fy=F.Fy,ts=P.ts,th=P.th,aa=Mat
       if(hy===th&&m<=ts-2)id=LAVA;
       else if(ring&&mid&&slit&&half===ts)id=AIR;
       else if(m===ts-1&&mid&&slit&&half===ts)id=MAGMA;
+      else if(ring&&half===ts&&!mid&&aa!==ab&&((aa===half?ab:aa)&1)&&hy>=ts+2&&hy<=th-5&&hy%band!==band-1)id=AIR; // grooves down the faces
       else if(ring&&aa===half&&ab===half)id=BASPILLAR;
       else if(ring&&(hy===ts||hy===th-2))id=OBSBRICK;
       else if(ring&&hy===th-4)id=BASCARVE;
@@ -209,11 +225,15 @@ function fortWay(F,d,X,Z,u,v,av){const P=F.P,k=P.k,fl=fortFloor(F,u),S=(y,id)=>P
       if(u===F.U1-3&&dy>=P.ch-2*k)id=GRATE;
       else if(rib&&ad>0.45-d.rt)id=dy>d.sC?EMBRICK:BASPILLAR;
       else if(rib&&av===P.cw-d.rt&&!lava&&dy<=k+1)id=dy===k+1?BRAZIER:OBSBRICK;
-      else if(c===mb&&av===0&&((u-3)/d.rs|0)%2===0&&dy>d.sC)id=dy===d.sC+1?BRAZIER:CHAIN;}
+      else if(c===mb&&av===0&&((u-3)/d.rs|0)%2===0&&dy>d.sC)id=dy===d.sC+1?BRAZIER:CHAIN;
+      else if(av===P.cw&&!rib&&(dy===d.sC||dy===0))id=OBSBRICK;}
+    else if(ad<=1.45&&!rib&&av>(k>1?1:0)&&fortCoffer(av,dy,d.sC,d.RC,d.cC,u-3,mb,k))id=AIR;
+    else if(ad<=2.45&&!rib&&av>(k>1?1:0)&&fortCofferMid(av,dy,d.sC,d.RC,d.cC,u-3,mb,k))id=fortCofferMid(av,dy,d.sC,d.RC,d.cC,u-3,mb,k);
     else if(bay&&av===P.cw+1&&dy>=1&&dy<=2*k+1)id=AIR;
     else if(bay&&av===P.cw+1&&dy===0)id=OBSBRICK;
     else if(bay&&av===P.cw+1&&dy===2*k+2)id=EMGLYPH;
     else if(bay&&av===P.cw+2&&dy<=2*k+2)id=OBSBRICK;
+    else if(!bay&&!rib&&av===P.cw+1&&dy>=2&&dy<d.sC&&dy%3===1)id=AIR;
     else id=fortStone(X,y,Z);
     S(y,id);}
   if(c===mb&&av===P.cw+1)S(fl+1,SKULLS);
@@ -225,13 +245,20 @@ function fortWay(F,d,X,Z,u,v,av){const P=F.P,k=P.k,fl=fortFloor(F,u),S=(y,id)=>P
 // of lava behind grates. The front wall's door is framed in burning script.
 function fortHall(F,d,X,Z,u,v,av,h){const P=F.P,k=P.k,Fh=F.Fh,top=d.top,pu=u-F.U1,pd=d.E-u,S=(y,id)=>PW(X,y,Z,id,MODE_SET);
   S(Fh-3,BASBRICK);S(Fh-2,BASBRICK);
-  if(av>P.hw||pu<=1||pd<=1){
-    for(let y=Fh-1;y<=top+1;y++){const dy=y-Fh;let id=dy%6===5&&av>P.hw?EMBRICK:fortStone(X,y,Z);
-      if(pu<=1&&av<=P.cw+3){const ad=archD(av,dy,P.cw,d.sC,d.rC);if(dy>=0&&ad<=0.45)id=AIR;else if(pu===1&&dy>=0&&ad<=1.45)id=EMGLYPH;else if(pu===1&&dy>=0&&ad<=2.45)id=OBSBRICK;}
+  const vis=(a,dy)=>Math.abs(a-P.pv)>P.ps&&(a<P.pv-P.ps?archD(a,dy,d.nw,d.sN,d.rN):archD(Math.abs(a-d.vc),dy,d.wa,d.sA,d.rA))<=-0.55; // a cell of wall that the hall's open space faces
+  if(av>P.hw||pu<=1||pd<=1){const q=((pu-4-P.ps)%P.pg+P.pg)%P.pg,side=av>P.hw&&pu>=2&&pd>=2;
+    for(let y=Fh-1;y<=top+1;y++){const dy=y-Fh;let id=dy%6===5&&av===P.hw+1?EMBRICK:fortStone(X,y,Z);
+      if(side&&av<=P.hw+2&&dy>=1&&archD(Math.abs(q-P.pg/2),dy-1,d.hbw,d.sb-1,d.sA-1-d.sb)<=0.45)id=av===P.hw+1?(dy===1&&Math.abs(q-P.pg/2)<0.6?BRAZIER:AIR):dy===d.sb?EMGLYPH:BASCARVE; // a blind arch in every bay, a fire in its foot
+      else if(pu<=1&&av<=P.cw+3){const ad=archD(av,dy,P.cw,d.sC,d.rC);if(dy>=0&&ad<=0.45)id=AIR;else if(pu===1&&dy>=0&&ad<=1.45)id=EMGLYPH;else if(pu===1&&dy>=0&&ad<=2.45)id=OBSBRICK;}
+      else if(pu===1&&av<=P.hw&&dy>=1&&vis(av,dy)&&fortPanel(k,av-P.cw-4,dy-1)==='R')id=AIR; // lancets in the front wall
       else if(pd>=0&&pd<=1&&av<=P.hw){
+        const bd=dy>=P.steps?archD(av,dy-P.steps,d.wB,d.sB,d.rB):9,inN=archD(av,dy,d.nw,d.sN,d.rN)<=-1,rec=bd<=0.45&&inN;
         if(fortLava(F,u,v,y))id=LAVA;
         else if(pd===1&&av>=P.lv&&av<P.lv+k&&dy>=0&&dy<=d.lfH)id=GRATE;
-        else if(pd===1){const sg=fortSigil(d,av,y-d.yc);if(sg)id=sg;}}
+        else if(pd===1&&rec)id=AIR; // a deep arch behind the throne
+        else if(pd===1&&bd<=1.45&&inN)id=OBSBRICK;
+        else if(pd===1&&av>P.lv+k&&dy>=(av<=P.dw?P.steps+1:1)&&vis(av,dy)&&fortPanel(k,av-P.lv-k-1,dy-1)==='R')id=AIR; // lancets beside it
+        else if(pd===(rec?0:1)){const sg=fortSigil(d,av,y-d.yc);if(sg)id=sg;}}
       S(y,id);}
     return;}
   const sv=av-P.pv,inBand=Math.abs(sv)<=P.ps,nave=av<P.pv-P.ps,n=Math.max(0,Math.min(d.np-1,Math.round((pu-4-P.ps)/P.pg))),du=pu-(4+P.ps+n*P.pg),hasP=d.np>0&&Math.abs(du)<=P.ps;
@@ -247,30 +274,34 @@ function fortHall(F,d,X,Z,u,v,av,h){const P=F.P,k=P.k,Fh=F.Fh,top=d.top,pu=u-F.U
         if(cap||core||sh){S(y,dy<k?fortStone(X,y,Z):dy===k||dy===d.sA?OBSBRICK:dy>d.sA-k&&dy<d.sA?BASCARVE:sh?(dy===Math.round(d.sA/2)?EMGLYPH:BASPILLAR):fortStone(X,y,Z));continue;}
         open=dy<d.sA;}
       else open=inBay&&archD(Math.abs(pu-bcf),dy,d.hb,d.sA,d.sN-d.sA)<=0.45;}
-    else{ad=nave?archD(av,dy,d.nw,d.sN,d.rN):archD(Math.abs(av-d.vc),dy,d.wa,d.sA,d.rA);open=ad<=0.45;}
+    else{ad=nave?archD(av,dy,d.nw,d.sN,d.rN):archD(Math.abs(av-d.vc),dy,d.wa,d.sA,d.rA);open=ad<=0.45;
+      if(!open&&ad<=2.45&&!rib&&(!nave||av>(k>1?2:1))){const pal=Math.floor(P.pg/2),al=pu-4-P.ps,cf=nave?[av,dy,d.sN,d.RN,d.cN,al,pal,k]:[Math.abs(av-d.vc),dy,d.sA,d.RA,d.cA,al,pal,k];
+        if(ad<=1.45&&fortCoffer(...cf)){S(y,AIR);continue;}if(ad>1.45){const cm=fortCofferMid(...cf);if(cm){S(y,cm);continue;}}}}
     if(!open){S(y,fortStone(X,y,Z));continue;}
     id=AIR;
     if(rib&&!inBand&&ad>0.45-d.rt)id=(nave?dy>d.sN:dy>d.sA)?EMBRICK:BASPILLAR;
     else if(nave&&av<=(k>1?1:0)&&ad>-0.55)id=OBSBRICK;
     else if(dy===0&&curb)id=OBSBRICK;
+    else if(!rib&&((nave&&av===d.nw&&dy>=d.sN-(k>1?1:0)&&dy<=d.sN)||(!nave&&!inBand&&(av===P.hw||av===P.pv+P.ps+1)&&dy===d.sA)||(!nave&&!inBand&&av===P.hw&&dy===0)))id=OBSBRICK; // cornices at the springings, a base along the walls
     else if(d.np>0&&du===0&&dy<=k&&((nave&&av===d.nw-d.rt&&av>P.lv+k)||(!nave&&!inBand&&av===P.hw-d.rt)))id=dy===k?BRAZIER:OBSBRICK; // fire baskets before the pillars and the wall's
+    else if(inBay&&pu===bci&&((nave&&av===d.nw&&dy===d.sN+1)||(!nave&&!inBand&&av===P.hw&&dy===d.sA+1)))id=BRAZIER; // fire baskets on the cornices
     else if(nave&&inBay&&Math.abs(av-d.hc)<=(k>1?1:0)&&Math.abs(pu-bci)<=(k>1?1:0)&&dy>=d.dc-1){const ce=av===d.hc&&pu===bci; // a cage of fire on a chain
       id=dy===d.dc-1?(k>1||ce?GRATE:AIR):dy===d.dc?(ce?BRAZIER:GRATE):ce?CHAIN:AIR;}
     else if(!nave&&!inBand&&inBay&&d.statues&&nb%2===0&&Math.abs(pu-bci)<=3&&Math.abs(av-(P.hw-3))<=3){const sf=P.hw-3-av,sa=Math.abs(pu-bci);
       id=dy<2?(dy===1?OBSBRICK:fortStone(X,y,Z)):fortStatue(sf,sa,dy-2,1,X,y,Z)||AIR;}
-    else if(!nave&&!inBand&&inBay&&(!d.statues||nb%2===1)&&av===P.hw&&Math.abs(pu-bci)<=(k>1?1:0)&&dy>=d.sA-3*k&&dy<=d.sA)id=BANNER;
+    else if(!nave&&!inBand&&inBay&&(!d.statues||nb%2===1)&&av===P.hw&&Math.abs(pu-bci)<=(k>1?1:0)&&dy>=d.sA-3*k&&dy<d.sA)id=BANNER;
     else if(dy===0&&!onDais&&av>k+1&&!(av>=P.lv&&av<P.lv+k)&&h<0.02)id=h<0.007?SKULLS:BONES;
     S(y,id);}
 }
 function fortBuild(F){
-  const P=F.P,d=fortD(F),U1=F.U1,E=d.E,span=Math.max(P.hw+2,P.fw+1,P.tz,P.tv+P.ts+1+d.mo);
+  const P=F.P,d=fortD(F),U1=F.U1,E=d.E,span=Math.max(P.hw+3,P.fw+1,P.tz,P.tv+P.ts+1+d.mo);
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,[u,v]=fortUV(F,X,Z),av=Math.abs(v),h=hsh(X,9175,Z);
     if(u<-P.td-8||u>E+1||av>span)continue;
     if(u<-P.td)fortStairs(F,X,Z,u,av);else if(u<0&&av<=P.tz)fortTerrace(F,d,X,Z,u,v,av,h);
     if(u>=-2*P.k-1&&u<=2*P.k+2&&av<=P.fw+1)fortFacade(F,d,X,Z,u,v,av);
     {const a=av-P.tv,b=u+P.ts,R=P.ts+1+d.mo;if(Math.abs(a)<=R&&Math.abs(b)<=R)fortTower(F,d,X,Z,a,b);}
     if(u>=3&&u<U1&&av<=P.cw+2)fortWay(F,d,X,Z,u,v,av);
-    if(u>=U1&&av<=P.hw+2)fortHall(F,d,X,Z,u,v,av,h);
+    if(u>=U1&&av<=P.hw+3)fortHall(F,d,X,Z,u,v,av,h);
   }
 }
 function applyFortresses(WCX,WCZ){const X=WCX*CS+8,Z=WCZ*CS+8;for(const F of fortsNear(X,Z,12))fortBuild(F);}
