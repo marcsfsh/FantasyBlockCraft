@@ -22,11 +22,14 @@ Saves from 0.27.0 do not carry over (save key v19): the Volcanic Wastes have cha
 - The warrens and fortresses glow red inside, with war drums and goblin chatter in the rock.
 - New blocks: hide canvas, iron grate, basalt bricks, ember bricks, skull totem, war banner.
 
+- **See farther:** a new Loaded area setting in the pause menu (Near, Far, Farthest: 224, 320 or 416 blocks of world kept about you) lets the view reach up to 200 blocks, with two new view distances, Farther and Farthest. Auto picks Far on desktops and handhelds with 8 cores or more. Changing it saves and starts the game again.
+
 ### Tooling
 - `tools/shot.mjs --foes[=kinds]` lines foes up (winding up, walking or asleep; turned by degrees, and `--far=` for an Emberlord).
 - `tools/map.mjs` draws dry ground below the sea's level as land and the air above the ground as sky.
 - Model parts can taper (frustums, wedges, spikes) through a `tp` option.
 - The creative land tour no longer sends you to a cell the sunken wastes have taken.
+- A test case can set the loaded area (`// @area 1`); new case `51-area`. `tools/shot.mjs --area= --viewd=`.
 - New tests `48-lava-flow`, `49-warrens` (warrens and fortresses) and `50-foes`.
 
 ## 0.27.0 (2026-10-10): the Volcanic Wastes remade

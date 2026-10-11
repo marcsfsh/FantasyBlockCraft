@@ -76,6 +76,8 @@ body.surv .crea-only{display:none!important}
 .seg{display:flex;align-items:center;gap:4px}
 .seg button,#sndbtn,#ctlbtn,#ctl button{font:inherit;font-size:19px;background:#2a241a;color:var(--ink);border:2px solid #463a28;padding:1px 8px;cursor:pointer}
 .seg button.on{border-color:var(--sel);color:var(--sel)}
+.seg button:disabled{opacity:.35;cursor:default}
+.seg .note{font-size:15px;opacity:.7;margin-left:4px}
 .btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 button.big{font:inherit;font-size:26px;padding:6px 18px;background:var(--dirt);color:var(--ink);border:3px solid #3b2a1a;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.18);cursor:pointer}
 button:focus-visible,.slot:focus-visible{outline:3px solid var(--sel);outline-offset:2px}

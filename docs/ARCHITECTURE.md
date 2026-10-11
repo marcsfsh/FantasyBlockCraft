@@ -14,7 +14,7 @@ Consequences:
 
 | File | Contents |
 |---|---|
-| `src/js/core/config.js` | Grid size, sea level, keys, settings and save data |
+| `src/js/core/config.js` | Grid size (the loaded area `AREA`, chosen at start from the setting or `autoArea`, D-057), sea level, keys, settings and save data, view distances (`VIEWS`, `VIEW_MAX`, `viewFog`, `AUTO_VIEW`) |
 | `src/js/core/noise.js` | Seeded random numbers, hashing and fractal noise |
 | `src/js/core/names.js` | Names per people (dwarf first, others drafts) and the Tolkien-name blocklist |
 | `src/js/blocks/blocks.js` | Block ids, block definitions, hardness and sounds |

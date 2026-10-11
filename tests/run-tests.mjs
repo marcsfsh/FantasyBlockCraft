@@ -2,6 +2,7 @@
 // Each tests/cases/*.test.js file is pasted into the game at the /*@test-hook*/ marker, so it runs
 // inside the game's own scope right after the starting world is ready. Use assert(cond,'what').
 // A case may pin its seed with a comment: // @seed 777   (several seeds, "// @seed 1 2", run it once per seed)
+// A case may set the loaded area with a comment: // @area 1   (0 Near 224, 1 Far 320, 2 Farthest 416; Near when absent, D-057)
 // snapshot('name',value) compares value with tests/snapshots/<case>.json; --update-snapshots rewrites it instead.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +22,8 @@ for(const f of files){
     runs++;
     const src=prepare(bundle,'try{'+pre+'\n'+code+'\n;__fbcDone(__fails.length?1:0);}catch(e){console.log("FAIL exception "+(e&&e.stack||e));__fbcDone(1);}',seed);
     const file=path.join(tmp,f.replace('.test.js',(seeds.length>1?'-'+seed:'')+'.bundle.js'));fs.writeFileSync(file,src);
-    const env={...process.env,FBC_SEED:seed,FBC_SNAPSHOT:path.join(ROOT,'tests/snapshots',f.replace('.test.js','.json')),FBC_UPDATE_SNAPSHOTS:update?'1':''};
+    const area=(code.match(/^\/\/ @area (\d)/m)||[])[1]||'';
+    const env={...process.env,FBC_AREA:area,FBC_SEED:seed,FBC_SNAPSHOT:path.join(ROOT,'tests/snapshots',f.replace('.test.js','.json')),FBC_UPDATE_SNAPSHOTS:update?'1':''};
     const t0=Date.now(),r=spawnSync(process.execPath,['--max-old-space-size=4096',path.join(ROOT,'tests/harness/runner.cjs'),file],{encoding:'utf8',timeout:600000,env});
     const out=(r.stdout||'')+(r.stderr||''),ok=r.status===0&&out.includes('FBC_DONE 0');if(!ok)failed++;
     console.log((ok?'ok   ':'FAIL ')+f+'  seed '+seed+'  '+((Date.now()-t0)/1000).toFixed(1)+'s');

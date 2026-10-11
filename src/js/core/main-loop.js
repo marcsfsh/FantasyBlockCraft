@@ -58,7 +58,7 @@ function autoView(raw,work){
   if(med<A.refresh||A.fast)A.refresh=Math.min(A.fast?1:A.refresh,med);A.fast=0;
   // slow: pull the view in to 72 blocks first, then lower the resolution, then the view to 56; smooth: resolution back first
   if(med>A.refresh*1.15){if(A.far>72)A.far=Math.max(72,A.far-6);else if(!resStep(-0.25)&&A.far>56)A.far=Math.max(56,A.far-6);}
-  else if(med<A.refresh*1.05&&A.work<A.refresh*500){if(!resStep(0.25)&&A.far<104)A.far=Math.min(104,A.far+3);}
+  else if(med<A.refresh*1.05&&A.work<A.refresh*500){if(!resStep(0.25)&&A.far<VIEW_MAX)A.far=Math.min(VIEW_MAX,A.far+Math.max(3,Math.round(VIEW_MAX/35)));} // out to the edge of the loaded area (D-057)
   A.t=A.work=0;if(settings.view<0){FOGF=A.far;FOGN=FOGF*0.55;}
 }
 let fmax=0,fwork=0;

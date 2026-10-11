@@ -3,6 +3,7 @@
 `npm test` runs every file in `tests/cases/`. The harness (`tests/harness/runner.cjs`) stands in for the DOM, three.js and audio; its image data is 256 by 256, the largest model texture (D-056). Each case is pasted into the game bundle at the `/*@test-hook*/` marker (in `src/js/engine/world-streaming.js`), so it runs inside the game's own scope right after the starting world is ready. The browser, three.js and audio are replaced by do-nothing stand-ins (`tests/harness/runner.cjs`); world generation, lighting, meshing, streaming and game logic run for real.
 
 - `assert(condition, 'description')` records a pass or a failure. `info(...)` prints a metric.
+- `// @area 1` near the top of a case starts it with that loaded area (0 Near 224, 1 Far 320, 2 Farthest 416; D-057); without it a case runs in the Near area, as the snapshots expect.
 - `// @seed 777` near the top of a case pins its world seed. Otherwise the seed is 123456789, or `--seed=N`. `// @seed 123456789 4242` runs the case once per seed, each in its own process.
 - `snapshot('name', value)` compares `value` with the value recorded in `tests/snapshots/<case>.json` for the current seed. A missing or different value is a failure that prints both values.
 - `npm test -- doorways` runs only cases whose file name contains `doorways`.
@@ -60,6 +61,7 @@
 | 48-lava-flow | Lava flows like water (D-053): a source spreads four blocks across a floor in levels 1 to 4, slower than water, and only the source is saved; flowed lava draws lower; it falls through a hole; water meeting it hardens it (a source to obsidian) |
 | 49-warrens | The goblin warrens and the Emberlords' fortresses (D-052): warren regions under the wastes; nearly every warren has four halls or more, a way in and a way down; halls lie between y 130 and ten under the ground; no other passage climbs into the band; channels of lava; goblin names; the nearest warren cut in volcanic rock, lit and furnished, the chief's throne and hoard, its lava held, the readout's name, a camp before its way in; channels in several warrens held; every great volcano holds an Ember Throne (its hall 26 high or more), some lesser ones a warhold; the nearest Ember Throne built with room for its lord, its throne, its lava held, named; a warhold built, its lava held |
 | 50-foes | Foes (D-052): every kind builds, sizes in order; in creative no chase, shot or harm in 15 s; in survival a raider closes in and strikes, a bowman shoots; an iron sword fells a goblin and wears; a brute's shield takes most of a frontal blow; blows no faster than the weapon; a hurt goblin flees; steel plate takes its share; death by an orc names it; an Emberlord's fire in threes; the Emberlord's form (measured through its tapered shapes: head well forward of its hips and below its shoulders, horns, mane, jaw, brow, eyes, fangs, tail, whip, blade, two-span wings wider than it is tall) and its stride; warren halls peopled (a chieftain in the chief's hall); the Ember Throne's lord towers over ten blocks, comes out after the player only as far as its leash and turns back, once fallen stays fallen; a warhold is held by orcs under a warchief; foes shift with the window |
+| 51-area | The loaded area (D-057), run in the Far area (`// @area 1`, 320 blocks): every world array sized from it; Auto picks Far on 8-core desktops and handhelds, Near on phones and smaller machines; the whole starting area generates; a slide of the window keeps what it held (and its time); the view reaches eight blocks short of the edge |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 
@@ -92,6 +94,8 @@ The hashes are identical on Node 20, 21 and 22 (checked on 2026-10-07). If a Nod
 `--bolt` throws a lightning strike ahead of each view and holds it still for the shot (D-051), so the bolts can be judged from the PNGs.
 
 `--foes[=kinds]` lines foes up in front of each view and holds them still (D-052): after a dot `a` winding up a blow or a shot, `w` walking, `z` asleep; a third part turns a foe by degrees (`ember.w.90` stands side on), and `--far=` sets how far off an Emberlord stands (20 by default); underground they stand on the floor near the camera.
+
+`--area=0|1|2` starts the game with the loaded area Near, Far or Farthest (D-057), and `--viewd=0..4` picks the view distance (Far, 2, by default); together they show what a wider area lets you see.
 
 ## Benchmark
 

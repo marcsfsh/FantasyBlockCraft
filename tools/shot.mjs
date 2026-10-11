@@ -8,6 +8,7 @@
 //   node tools/shot.mjs --view=... --bolt     a lightning bolt strikes just before the shot (the Volcanic Wastes, D-051)
 //   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep;
 //        a third part turns it (ember.w.90: side on), and --far=30 stands an Emberlord further off
+//   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
 // Uses the Playwright that is installed globally on the cloud VM (no project dependency, D-026). Builds a copy of the game
@@ -32,7 +33,7 @@ const {chromium}=require('playwright');
 const HOOK=`window.__fbc={
   go(X,Y,Z,yaw,pitch,t){
     if(Math.abs(X-(OX+W/2))>40||Math.abs(Z-(OZ+D/2))>40)regenerateAll(X,Z);
-    if(SURV())setMode('creative');fallTop=null;hp=20;dead=false;$('death').style.display='none';settings.view=2;drawView();
+    if(SURV())setMode('creative');fallTop=null;hp=20;dead=false;$('death').style.display='none';settings.view=${Number(args.viewd??2)};drawView();
     if(!PL.fly)toggleFly();PL.x=X-OX+0.5;PL.y=Y;PL.z=Z-OZ+0.5;PL.yaw=yaw;PL.pitch=pitch;PL.vx=PL.vy=PL.vz=0;
     if(t!==undefined){settings.time='fixed';tod=t;}settings.weather=false;rainAmt=0;raining=false;
     playing=true;$('overlay').style.display='none';setPhoto(true);landWeatherNow();
@@ -69,6 +70,7 @@ const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader',
 const p=await b.newPage({viewport:{width:Number(args.w||960),height:Number(args.h||540)}});
 const errors=[];p.on('pageerror',e=>errors.push('page error: '+e.message));
 p.on('console',m=>{const t=m.text();if(m.type()==='error'||/shader|WebGLProgram|GL_INVALID/i.test(t))errors.push(m.type()+': '+t.slice(0,400));});
+if(args.area!==undefined)await p.addInitScript(a=>{try{localStorage.setItem('blockcraft-settings-v1',JSON.stringify({area:a}));}catch(e){}},Number(args.area)); // the loaded area (D-057), read at start
 await p.goto('file://'+html);
 await p.waitForFunction(()=>window.__fbc,null,{timeout:180000});
 for(const [name,X,Y,Z,yaw,pitch,t] of views){

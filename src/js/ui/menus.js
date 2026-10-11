@@ -38,9 +38,15 @@ $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
-function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));if(settings.view<0){FOGF=AUTO_VIEW.far;FOGN=FOGF*0.55;}else{FOGN=VIEWS[settings.view][0];FOGF=VIEWS[settings.view][1];}}
+function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));if(settings.view<0){FOGF=AUTO_VIEW.far;FOGN=FOGF*0.55;}else{[FOGN,FOGF]=viewFog(settings.view);}
+  [...$('viewseg').querySelectorAll('button')].forEach(b=>{b.disabled=+b.dataset.v>=0&&VIEWS[+b.dataset.v][1]>VIEW_MAX+20;});} // the farthest views need a wider loaded area
 $('viewseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings.view=+v;lsSet(SET_KEY,settings);drawView();});
 drawView();
+// The loaded area (D-057): kept in the settings and used from the next start, so the game saves and starts again at once
+{const el=$('areaseg'),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.area));draw();
+  el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined||+v===settings.area)return;settings.area=+v;lsSet(SET_KEY,settings);draw();
+    const want=settings.area>=0?AREAS[settings.area]:autoArea(navigator);if(want!==AREA){toast('Loading the world again with the new area');saveNow();setTimeout(()=>location.reload(),300);}});
+  $('areanote').textContent='now '+AREA+' blocks across';}
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
