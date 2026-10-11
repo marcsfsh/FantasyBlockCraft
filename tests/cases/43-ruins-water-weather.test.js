@@ -33,10 +33,10 @@ function unsound(){let n=0;for(let z=1;z<D-1;z++)for(let x=1;x<W-1;x++){const g=
   const bog=at('bog'),tun=at('tundra'),green=at('green'),dry=at('dry');
   info('weather: bog',JSON.stringify(bog),'; dry',JSON.stringify(dry),'; tundra',JSON.stringify(tun),'; green',JSON.stringify(green));
   assert(bog.fog>0.4&&dry.dust>0.4&&dry.ta>0.2&&tun.snow===1&&green.fog<0.05,'mist lies on the bogs, dust blows and the sky warms in the drylands, snow falls on the tundra, the green hills stay clear');}
-// ---- caves near the surface by land (Q132): ferns and earth under the woods
-{const c=nearestLand(LAND_I.birch,0,0,48);gen(c.X,c.Z);let fern=0; // ferns grow nowhere else below the ground
+// ---- caves near the surface by land (Q132): ferns and earth under the woods (wild woods: a realm's site keeps cave mouths off it, D-065)
+{const c=nearestLand(LAND_I.birch,0,0,48,c=>!realmHeld(stretchCell(c)));gen(c.X,c.Z);let fern=0; // ferns grow nowhere else below the ground
   for(let z=0;z<D;z++)for(let x=0;x<W;x++){const g=ground[x+W*z];for(let y=g-60;y<g-6;y++)if(world[I(x,y,z)]===FERN)fern++;}
-  info('ferns in the caves under the Birch Glades',fern);assert(fern>=10,'the caves under a wood are earthy and grow ferns');}
+  info('ferns in the caves under the wild Birch Glades',fern);assert(fern>=10,'the caves under a wood are earthy and grow ferns');}
 // ---- the old kept lands' landmarks and features
 const find=kind=>{for(let r=0;r<50;r++)for(let i=-r;i<=r;i++)for(let j=-r;j<=r;j++){if(Math.max(Math.abs(i),Math.abs(j))!==r)continue;const s=sigOf(stretchCell(landSite(i,j)));if(s&&s.kind===kind)return s;}return null;};
 const fd=s=>{const f=Math.floor(s.seed*4);return [[1,0,-1,0][f],[0,1,0,-1][f]];},at=(s,dx,y,dz)=>get(s.X+dx-OX,y,s.Z+dz-OZ),stone=id=>id===STONE||id===MOSSY||id===COBBLE;
