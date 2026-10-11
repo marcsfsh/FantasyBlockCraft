@@ -139,3 +139,16 @@ Same VM type, `npm run bench`, one run per seed, the Near area.
 | 4242 | 2732 | 12.48 / 11.37 / 19.56 / 27.64 | 15.53 / 14.25 / 24.6 / 30.2 | 0.68 / 0.46 / 2.51 / 4.37 | 1.59 / 1.33 / 3.49 / 4.8 | 209 |
 
 Within the noise of 0.28.0 at spawn, where no fortress stands. In the window about the nearest Ember Throne (77 chunks touch it), rebuilding the fortress with its relief costs 0.47 ms a chunk on average (`fortBuild`, D-058), against 13.5 ms for the whole chunk there, and relighting the whole window there takes 232 ms (its vaults hold some 300 fire baskets more than before the relief).
+
+## The realms of men (2026-10-11, 0.30.0)
+
+Same VM type, `npm run bench`, one run per seed, the Near area.
+
+| Seed | Startup | genChunk | Stream 1 chunk | Stream step (one frame) | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 123456789 | 3239 | 11.13 / 10.61 / 15.04 / 21.48 | 14.81 / 14.1 / 21.01 / 23.08 | 0.65 / 0.42 / 2.66 / 5.12 | 2.16 / 1.96 / 4.76 / 7.18 | 202 |
+| 4242 | 3335 | 13.15 / 11.73 / 22.27 / 30.5 | 15.3 / 14.6 / 23.47 / 27.84 | 0.73 / 0.43 / 2.66 / 5.59 | 1.67 / 1.35 / 3.83 / 4.47 | 197 |
+
+Generating a chunk at spawn costs about a twentieth more than in 0.29.0 (median 10.6 against 10.1 on the default seed): every column now asks whether a realm's site or road levels it (`realmGround`), and every chunk has the realms' planning step and building pass. Startup grows by about three quarters of a second, most of it planning the provinces about the spawn (D-060).
+
+Planning a province (`planProvince`, measured in a scratch case over the nine held stretches nearest spawn) takes 5 to 150 ms in all: about a third reading the raw ground on its grid, the rest searching for sites and checking their cores. It runs in slices: the planner yields after every row it reads or searches, and the streaming step (`realmPrep`) spends at most 6 ms a frame on it, so the longest single slice measured is 7.5 ms; a plan made in slices is the same as one made at once (checked for all nine). Building the realms per chunk (`applyRealms`, with the relief) costs 0.6 ms at the median over the 81 chunks of the royal city of Thalarin (mean 0.8, at most 5 ms where the citadel and the white tower stand) and 0.3 ms over a village's 36.
