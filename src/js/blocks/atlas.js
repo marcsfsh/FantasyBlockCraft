@@ -303,6 +303,52 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
   // spikes on a bar, their tips rusted dark
   for(const [cx,top] of [[3,5],[8,2],[12,6]])for(let y=top;y<16;y++){const w=(y-top)/(15-top)*1.6;for(let x=Math.floor(cx-w);x<=Math.ceil(cx+w);x++)if(Math.abs(x-cx)<=w+0.2)P(269,x,y,y<top+3?[96,40,30]:sh([66,64,70],(x<cx?14:-6)+(hn(x,y,261)-.5)*10));}
   for(let x=1;x<15;x++){P(269,x,12,[52,50,56]);P(269,x,13,[40,38,44]);}
+  // The realms of men (D-060): dressed whitestone with faint veins and an edge to every block; whitestone ashlar in long courses,
+  // bevelled; the realm's sign (an eight-pointed star over a tower) raised on a sunk panel; a fluted pillar; overlapping slate
+  // scales; white plaster in dark timbers, plain and braced; thatch; the realm's banner (black, a silver border, the star and
+  // tower in white, swallow-tailed); hay bound with cord; flagstones; leaded glass in diamonds
+  clear(280);clear(284);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const vein=Math.abs(fbm2((x+3)/5,(y+hn(x>>2,0,320)*3)/5,1,9301.7))<0.06;
+    P(270,x,y,sh([214,210,198],(hn(x,y,321)-.5)*10+(vein?-14:0)+(x===0||y===0?8:x===15||y===15?-18:0)+(hn(x>>2,y>>2,322)-.5)*6));
+    const row=y>>2,off=row%2?8:0,jx=(x+off)%16,mort=y%4===3||jx===15;
+    P(271,x,y,mort?sh([150,146,136],(hn(x,y,323)-.5)*6):sh([208,204,192],(hn(x,y,324)-.5)*8+(hn((x+off)>>4,row,325)-.5)*12+(y%4===0?12:y%4===2?-8:0)+(jx===0?8:jx===14?-8:0)));
+    const r=Math.hypot(x-7.5,y-7.5);P(273,x,y,r>7?sh([176,172,160],(hn(x,y,326)-.5)*6):sh([214,210,198],(Math.abs(r-5)<0.6?-26:0)+(r<1.5?-8:0)+(hn(x,y,327)-.5)*8));
+    P(274,x,y,sh([212,208,196],(x%4===0?-34:x%4===1?14:x%4===3?-8:0)+(y<=1?(y===0?-10:12):y>=14?(y===15?-22:6):0)+(hn(x,y,328)-.5)*6));
+    // slate: rows of scales four high, staggered, lit along their upper edge and shaded along the lower
+    const sr=y>>2,sx=(x+(sr%2?2:0))%4,sy=y%4;P(275,x,y,sh([74,82,96],(hn((x+(sr%2?2:0))>>2,sr,329)-.5)*18+(sy===0?16:sy===3?-22:0)+(sx===0?-12:0)+(hn(x,y,330)-.5)*6));
+    const beam=y<=1||y>=14||x<=1||x>=14,wood=sh([88,60,38],(hn(x,y>>1,331)-.5)*14+(y===1||x===1?-10:0)),plas=sh([228,222,206],(hn(x,y,332)-.5)*10+(hn(x>>2,y>>2,333)<.15?-10:0));
+    P(276,x,y,beam?wood:plas);const br=Math.abs((x-1)-(14-y))<=1.2&&x>1&&x<14&&y>1&&y<14;P(277,x,y,beam||br?wood:plas);
+    // thatch: straws laid at a slant, darker in bands; the side shows the cut ends in rows
+    P(278,x,y,sh([198,166,88],(hn(x,(x+y*2)>>1,334)-.5)*26+((x+2*y)%5===0?-22:0)+(hn(x>>2,y,335)-.5)*10));
+    P(279,x,y,sh([190,158,82],(hn(x,y>>2,336)-.5)*20+(y%4===3?-30:y%4===0?12:0)+(x%2?-6:4)+(hn(x,y,337)-.5)*10));
+    const band=x===4||x===11,rim=x===0||y===0||x===15||y===15;
+    P(281,x,y,band?[96,70,40]:sh([206,176,96],(Math.floor(Math.hypot(x-7.5,y-7.5))%2?-14:6)+(hn(x,y,338)-.5)*20+(rim?-12:0)));
+    P(282,x,y,band?[96,70,40]:sh([200,170,90],(y%2?-10:6)+(hn(x>>1,y,339)-.5)*24));
+    // leaded glass: lead in a lattice of diamonds round pale panes
+    const lead=x===0||y===0||x===15||y===15||(x+y)%6===2||(x-y+18)%6===2;P(284,x,y,lead?[66,66,72]:sh([196,220,214],(hn(x,y,345)-.5)*12+((x+y)%6===3?18:0)),lead?255:120);
+  }
+  // the realm's sign, drawn pixel by pixel: an eight-pointed star (a square core, long rays up, down and across, short ones on the
+  // diagonals) over a tower with two merlons, a lit window and a wider footing
+  const SIGN=(x,y)=>{if(x>=7&&x<=8&&y>=3&&y<=4)return 1;if(x>=7&&x<=8&&(y===1||y===2||y===5))return 1;if((y===3||y===4)&&((x>=4&&x<=6)||(x>=9&&x<=11)))return 1;
+    if((x===6||x===9)&&(y===2||y===5))return 1;if((x===5||x===10)&&(y===1||y===6))return 1;
+    if(y>=8&&y<=13&&x>=6&&x<=9)return y>=10&&y<=11&&x>=7&&x<=8?2:1;if(y===7&&(x===6||x===9))return 1;if(y===14&&x>=5&&x<=10)return 1;return 0;};
+  // carved on whitestone: a sunk panel, the sign raised, shadowed below and to the right, the window cut dark
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const fr=x===0||y===0||x===15||y===15,f=SIGN(x,y);let c;
+    if(fr)c=sh([214,210,198],(x===0||y===0?10:-18)+(hn(x,y,346)-.5)*6);
+    else if(f===2)c=[120,116,108];else if(f===1)c=sh([242,238,228],(hn(x,y,347)-.5)*6);
+    else if(SIGN(x-1,y)===1||SIGN(x,y-1)===1)c=[148,144,134];
+    else c=sh([184,180,168],(hn(x,y,348)-.5)*8+(x===1||y===1?-16:x===14||y===14?8:0));
+    P(272,x,y,c);}
+  // the banner: a pole at the left, the black cloth with its silver border, swallow-tailed, the sign in white
+  for(let y=0;y<16;y++)P(280,1,y,sh([110,84,52],(hn(1,y,349)-.5)*12));for(let x=1;x<16;x++)P(280,x,0,[150,140,110]);
+  for(let y=1;y<16;y++)for(let x=2;x<16;x++){const cut=y>12&&Math.abs(x-8.5)<(y-12)*1.5;if(cut)continue;
+    const edge=x===2||x===15||y===1||(y>12&&Math.abs(Math.abs(x-8.5)-(y-12)*1.5)<1)||(y===15),f=SIGN(x-1,y+(y>=8?0:0));
+    P(280,x,y,edge?[200,204,212]:f===1?[238,240,244]:f===2?[60,64,80]:sh([24,26,40],(hn(x,y,350)-.5)*8));}
+  // flagstones, laid: five stones to a face, each its own tone, in dark joints
+  {const FS=[[0,0,6,5],[7,0,15,7],[0,6,6,15],[7,8,10,15],[11,8,15,15]];
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){let k=0;for(;k<FS.length;k++){const q=FS[k];if(x>=q[0]&&x<=q[2]&&y>=q[1]&&y<=q[3])break;}const q=FS[k];
+      const joint=x===q[0]||y===q[1],lip=x===q[2]||y===q[3];P(283,x,y,joint?sh([100,98,92],(hn(x,y,341)-.5)*8):sh([176,172,160],(hn(k,0,342)-.5)*24+(hn(x,y,343)-.5)*10+(lip?-10:x===q[0]+1||y===q[1]+1?8:0)));}}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

@@ -12,6 +12,9 @@ const PEOPLES={
   highelf:{a:['Aen','Cal','Ilm','Ith','Nar','Qua','Sel','Tar','Vae','Ys'],b:['adir','enor','idel','oriel','uvar','esse','ander','ithra']},
   drow:{a:['Dra','Ilv','Jhar','Mal','Nhel','Vel','Xun','Zar','Quar','Shy'],b:['aeth','dra','ith','lyn','ryn','vex','zith','nyss','ra']},
   fiend:{a:['Vor','Kael','Azh','Ghul','Skar','Thra','Ulm','Zhar','Ruuk','Xal'],b:['gath','rax','zul','thar','vex','okk','dun','ash','ruun']}, // the Emberlords (D-052)
+  // the high men of the southern realms (D-060): their kings, cities and strongholds; their country folk name villages in the human style
+  realm:{a:['Aur','Cal','Cael','Orn','Pel','Mer','Val','Vael','Tor','Lin','Ser','Eld','Ar','Bel','Cor','Fal','Hal','Ir','Nim','Ros','Tar','Thal','Ves','Alm'],
+         b:['arel','amar','ennar','aris','ehan','elin','emir','ethil','iand','iel','ost','ovar','uin','avel','esse','iorn','orin','ustan','arin','oval']},
   beastfolk:{a:['Arr','Fang','Grr','Hoof','Mar','Rha','Tusk','Whis','Brin','Ska'],b:['ka','mane','rek','tail','th','uun','rro','hide']}
 };
 // Proper names from Tolkien's works (lowercase, letters only). Exact matches, near misses (one letter off) and the roots below are refused.

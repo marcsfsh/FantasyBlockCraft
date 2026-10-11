@@ -30,6 +30,7 @@ const HINTS={
   f_brute:()=>'An orc brute. Its shield takes most of a blow from the front: strike it from the side or behind.',
   f_ochief:()=>'An orc warchief. When it sounds its horn the whole warband comes.',
   f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
+  p_folk:()=>'Folk of the realm. They mean you no harm: walk among them, and they will greet you. Strike one, and the guards near by take up arms while the townsfolk flee.',
   f_ember:()=>'An Emberlord: a towering demon of fire and shadow, lord of the Ember Throne in the great volcano. Its whip reaches far, its fire comes in threes, and it never leaves its fortress. Few survive it.'
 };
 let hintT=0,darkT=0;
@@ -45,7 +46,7 @@ function hintTick(dt,hit){
   if(food<=14)hint('hunger');
   if(PL.climb)hint('climb');
   {const an=animalHit(8);if(an)hint('a_'+an.kind);} // the first time you look at each kind of animal (E1)
-  {const fo=foeHit(14);if(fo)hint('f_'+fo.kind);} // and each kind of foe (D-052)
+  {const fo=foeHit(14);if(fo)hint(FOES[fo.kind].folk?'p_folk':'f_'+fo.kind);} // and each kind of foe (D-052)
   if(hit){if(hit.id===LECTERN)hint('lectern');else if(hit.id===WAYSTONE)hint('waystone');else if(isBox(hit.id))hint('box');}
   if(lampLevel()[0]===0&&lampDark()){darkT+=dt;if(darkT>3)hint('dark');}else darkT=0;
 }

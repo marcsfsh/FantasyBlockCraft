@@ -5,6 +5,32 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.30.0 (2026-10-11): the realms of men
+
+Saves from 0.29.0 do not carry over (save key v21): the realms of men are new to the world.
+
+### Game
+- **The realms of men.** About half the stretches of Green Hills, Overgrown Farmland, Wild Orchards, Flower Meadows and Old Terraces are held by kingdoms of high men, in white stone and black livery under their sign of a star over a tower. Each held stretch is a province:
+  - **City:** a walled city in tiers (the royal city in three), its avenue climbing by stairs under arches to the citadel. It has a market square with a fountain and stalls, whitestone and timbered houses under slate, gardens, barracks and a training yard, a smithy and stables, the domed Hall of Lamps, and in the citadel a great hall, a statue of a king of old and the white tower.
+  - **Castle:** a castle on the border.
+  - **Villages:** thatched cottages round a green and well, an inn, a chapel with a bell tower, a smithy.
+  - **Farmsteads:** farmsteads with hedged fields of wheat, potatoes, turnips and beans.
+  - **Watchtowers:** watchtowers with beacons on the heights.
+  - **Roads:** paved king's roads with lamp-topped milestones, country lanes, and bridges over the rivers.
+- **Their folk:**
+  - **Soldiers:** spearmen and swordsmen with kite shields, archers with longbows, captains in black cloaks, all in black surcoats over mail with the white sign, and tall crested helms.
+  - **Townsfolk:** townsmen and townswomen, merchants, smiths, farmers and lords of the realm, each dressed by their trade.
+  - **Behaviour:** they go about their places, patrol the king's roads, stop and turn to you, and greet you by the name of their town and kingdom. They are neutral: strike one and the guards near by take up arms while the townsfolk flee, until their wrath passes. Never in creative.
+- The readout names the place and the kingdom that holds it. Places of the realms and the folk you meet go in the journal. Towns have their own sounds: voices, carts, a bell, a forge, dogs at night.
+- New blocks (creative, Building):
+  - Whitestone, Whitestone Bricks, Carved Whitestone, Whitestone Pillar.
+  - Slate Roof, Timbered Plaster, Braced Timber Frame, Thatch.
+  - Banner of the Realm, Hay Bale, Paving Stones, Leaded Glass.
+- Creative: the land tour takes you to the nearest royal city, city, castle, village, watchtower or farmstead.
+
+### Tooling
+- New test case `52-realms`. Province planning runs in a streaming step of its own, one province a step.
+
 ## 0.29.0 (2026-10-11): the Ember Throne, built with care
 
 Saves from 0.28.0 do not carry over (save key v20): the fortresses in the volcanoes are rebuilt.

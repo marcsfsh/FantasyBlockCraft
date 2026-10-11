@@ -63,6 +63,7 @@ function colInfoBase(X,Z,o){
     const c=Math.max(0,1-rv2/rw),bed=SL-2-Math.round(3*c),bankH=SL+1+(h-SL-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SL-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
   o.vflow=o.vcrust=o.vfis=o.vcr=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
+  h=realmGround(X,Z,o,h); // the realms of men level the ground under their cities, castles, villages and farms (D-060)
   h=Math.max(SL-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
   const cold=o.tb===0,lk=LANDS[o.land].look;
@@ -76,7 +77,7 @@ function colInfoBase(X,Z,o){
   // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
   // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
   o.rvBot=999;
-  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01){
+  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01&&!o.town){
     const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
     if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
       // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
@@ -100,17 +101,20 @@ function lakeAt(X,Z){
   const gx=Math.floor(X/LG),gz=Math.floor(Z/LG),key=ckey(gx,gz);if(lakeC.has(key))return lakeC.get(key);if(lakeC.size>20000)lakeC.clear();
   let lk=null;const r=rngAt(gx,2501,gz);
   if(r()<0.4){
+    const was=realmSkip;realmSkip=true; // lakes are sited on the ground before any realm levels it, whoever asks first (D-060)
+    try{
     const cx=gx*LG+24+(r()*48|0),cz=gz*LG+24+(r()*48|0),R=8+r()*10,b=colInfoBase(cx,cz,TL),L=b.h-1;
     if(![0,1,5,7].includes(b.b)&&!b.river&&b.rvBot===999&&b.h>=SEA+3&&b.h<=SEA+40&&(b.b!==4||r()<0.5)){
       let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283;{const e=colInfoBase(cx+Math.round(Math.cos(a)*(R+3)),cz+Math.round(Math.sin(a)*(R+3)),TL);if(e.h<L||e.rvBot<999)ok=false;}}
       if(ok)lk={cx:cx,cz:cz,R:b.b===4?R*0.6:R,L:L};
     }
+    }finally{realmSkip=was;}
   }
   lakeC.set(key,lk);return lk;
 }
 function colInfoCompute(X,Z,o){
   colInfoBase(X,Z,o);o.lake=0;
-  const lk=lakeAt(X,Z);
+  const lk=o.town?null:lakeAt(X,Z);
   if(lk){const d=Math.hypot(X-lk.cx,(Z-lk.cz)*1.15)+fbm2(X/9,Z/9,1,2503.1)*3;
     if(d<lk.R){const f=1-d/lk.R,bottom=lk.L-1-Math.round(f*f*5+f*2);if(o.h>bottom)o.h=bottom;o.lake=lk.L;o.b=0;o.wet=true;o.river=false;o.rvBot=999;o.ent=false;}
     else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}}

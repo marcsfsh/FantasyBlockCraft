@@ -478,3 +478,50 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **Elsewhere:** basalt, obsidian and black sand are lighter wherever they lie (the coasts, the highlands, crafted blocks); nothing else changes outside the wastes. No generation change: the world-hash snapshot is unchanged.
 - **Tests:** `47-volcanic` checks that every dark block of the wastes averages 50 or more (40 for obsidian and its bricks) with a spread of 8 or more inside a face, and that the burning sky's strength (`skyMul`) stays at 0.7 or more of daylight by day and 0.3 or more by night (its red tint is a three.js colour, which the harness stands in for, so it is judged in screenshots). The harness's stand-in image data is now the size of the whole atlas (128 by 1024), so tiles past 255 are painted in tests too.
 
+### D-060 The realms of men: the first living kingdoms (2026-10-11)
+- **The owner:** "Next we are building the kingdoms of men. Start with the first archetype - the Gondor-Esquire kingdoms. They have a 50% chance of fully inhabiting a select few 'vanilla' biome types. They have military outposts, fortresses, cities, villages, farms, etc in the biomes. This includes NPCs. They're neutral (become hostile if attacked). Make detailed, well designed, and cleanly implemented aesthetics for this faction, including its civilization & inhabitation of the biome & architecture designs, the npc design including outfits & weapons & armor, and overall attention to detail."
+- **The people:** high men of a southern realm, in white stone and black livery, their sign an eight-pointed star over a white tower. They are original: no Tolkien name, emblem or heraldry. Names come from a new naming style, `realm` (`core/names.js`), for kings, cities, castles and watchtowers; the country folk name their villages and farms in the human style. Nothing in the 480 syllable pairs is refused by the blocklist.
+- **Which lands (`world/realms.js`):** the gentle old lands, namely Green Hills, Overgrown Farmland, Wild Orchards, Flower Meadows and Old Terraces. Each stretch of them is held one time in two (`realmHeld`, a hash of the stretch). A held stretch is a province and is wholly the kingdom's. Its readout name takes the realm's style. Kingdoms gather the held stretches of a square of 8 x 8 land cells (some 2,500 blocks). The oldest province among them holds the royal city.
+- **Planning a province (`planProvince`, pure, cached by stretch):**
+  - The raw ground (`realmRaw`: `colInfoBase` with the realm switched off, never cached) is sampled every 16 blocks over the province's own cells. Samples are marked good, poor (river, bank, low wet ground) or outside (including near a lake).
+  - Sites are placed in order, each the best fit of its kind (a hash breaks ties):
+    1. the city: near the middle, on the levellest ground that will take it, gently raised where it can be; 80 to 128 across, smaller towns where no city fits;
+    2. a castle on high ground toward the border, well away from the city;
+    3. two to eight villages, spread out;
+    4. watchtowers on the heights;
+    5. farmsteads near the villages and the city.
+  - A chosen site's core is then checked on a grid of four for a river that slipped between the samples.
+  - Where the ground is too rough for any village, a hamlet; a few small, rough provinces hold no site at all (3 of 41 on the default seed).
+  - Roads join them: a king's road (paved, kerbed in whitestone, with a lamp-topped milestone every 72 blocks) from the city to the castle and the watchtowers, and lanes to the villages and farmsteads. A walled site faces the way its first road leaves it, and a road for a place behind a city goes round its flank. Where a road crosses water it bridges it, in whitestone or planks.
+- **The ground (`realmGround`, in `colInfoBase` after the rivers and volcanoes):** each site's core is levelled to its height, a city's in tiers five blocks apart, easing back to the land over a margin of 8 to 20 blocks. A river or its bank in a margin is left as it runs. Lakes keep off sites and are sited on the raw ground (`lakeAt` switches the realm off), and gorges never cut a site.
+- **Keeping off:** `realmNear` joins `surfTaken`, so trees, boulders, barrows, ice spikes, ponds, falls, signatures and small structures keep off sites, their fields and the roads. The old ruined sites, stairways, cave mouths, hold gates, the old roads, dry-stone walls and hedgerows also keep off.
+- **Building (`world/realm-build.js`):** each site has a layout of parts, each a box in the site's own frame with a column builder (`RB`). A chunk builds its own columns only, the parts in order, lamps lit (`genLit`).
+  - **City:**
+    - Walls eleven high round it, with towers along them and banners on the corner towers.
+    - A gatehouse with its portcullis drawn up, the realm's sign carved over the arch and banners beside it.
+    - An avenue climbing through the tiers by stairs under arches.
+    - A market square astride the avenue: a fountain with the sign on its column, striped stalls, lamps.
+    - Houses on lots between lanes: whitestone or timbered plaster, two and three storeys under slate, glazed, with chimneys and lamps by their doors. Inside they have floors, ladders, lamps, barrels, crates and books.
+    - Narrow houses in pairs, gardens with fruit trees and box hedges, barracks with pillars, a training yard with straw targets, a smithy with its forge and anvil, stables.
+    - The Hall of Lamps: a domed hall of white stone.
+    - In the citadel: a court with a statue of a king of old, the great hall with its pillared porch, and the white tower (up to 40 above its tier), spired in slate and bannered.
+  - **Castle:** a curtain wall with towers and a gatehouse, a four-storey keep with turrets, barracks, stables, a training yard and a well.
+  - **Village:** a green with a thatched well, cottages round it (plaster and timber on cobble, thatched), a timbered inn, a chapel of whitestone with a bell tower, a smithy, haystacks; fields about it.
+  - **Farmstead:** a farmhouse and a barn across a yard, a well, haystacks, fields of wheat, potatoes, turnips and beans in hedged plots.
+  - **Watchtower:** a tall hollow tower (floors, a ladder, lamps) with a beacon on its roof inside a low walled yard, and a guardhouse.
+- **New blocks** (1107 to 1118, tiles 270 to 284, creative under Building):
+  - Whitestone; Whitestone Bricks (bevelled ashlar); Carved Whitestone (the sign in relief); Whitestone Pillar (fluted).
+  - Slate Roof; Timbered Plaster; Braced Timber Frame; Thatch.
+  - Banner of the Realm (black, a silver border, the sign in white, swallow-tailed); Hay Bale; Paving Stones (flagstones); Leaded Glass.
+- **The folk (`engine/folk-models.js`, `gameplay/foes.js`):** kinds of the foes' system, flagged `folk` (and `civ` for townsfolk), so they share its movement, combat, arrows and calls.
+  - **Soldiers** wear the realm's livery: a black surcoat over mail, the white sign on the breast, a silver hem, a tall tapered helm with a white crest and cheek guards, steel pauldrons. There are spearmen and swordsmen with black kite shields bearing the sign, archers with longbows and quivers, and captains with a black cloak bearing the sign and a white plume.
+  - **Townsfolk** dress by their trade: townsmen in tunic and hose (some bearded), townswomen in gowns with aprons and long hair, merchants in trimmed robes and hats with a purse, smiths in leather aprons with a hammer, farmers in smocks and straw hats with a hoe, and lords of the realm in black and silver robes with a white mantle and a circlet.
+  - **Where they are:** each layout's spots are peopled while the player is within 46 blocks: guards at the gates, soldiers at the barracks and drilling in the yard, merchants and townsfolk at the market and in the streets, the smith at the forge, lords and guards in the citadel, villagers on the green, farmers at the farms and in the fields, guards at the watchtowers. Patrols walk the king's roads. Fewer townsfolk are out at night. They have their own cap (34) and leave sooner than foes, so a city fills again as the player moves through it.
+  - **Neutral:** they take no notice until one is struck. They stop and turn to a passer-by, and greet one who comes close and looks at them, naming the place and the kingdom.
+  - **Wrath:** a blow sets the province's wrath (90 seconds, 180 for a death). Its guards within 40 blocks take up arms and its townsfolk flee, a silver horn sounds, and the wrath fades. Never in creative.
+  - **Drops and voices:** bread, iron and steel from soldiers; wheat, apples, gold or iron by trade. They have their own synthesized voices.
+- **Around them:** the readout names the site and, under it, "a city of the Kingdom of X" (or "held by the Kingdom of X" on open land in a province). Roads read "The King's Road" and "A Country Lane". Sites are places on the world map, and discoveries in two new journal categories (places of the realms, folk of the realms). Cities, castles and villages have their own soundscape (voices, carts, a bell, a forge, dogs by night), farmsteads and watchtowers a quieter one. A one-time hint explains the folk, and the creative land tour gains the realms (a royal city, a city, a castle, a village, a watchtower, a farmstead).
+- **Streaming:** a province is planned once (21 ms at the median, up to about 120 ms for the largest on the cloud VM), in a generation step of its own before a chunk's columns (`realmPrep`, one province a step), so no frame plans more than one.
+- **Generation change:** the save key is now v21 (`SAVE_V` 21). The world-hash snapshot's `plan:terrain-16k` changed on both seeds; every block, column and light hash of the spawn windows is unchanged.
+- **Tests:** `52-realms` covers which stretches are held, the provinces, pure plans, level ground, the city and a village built, the folk's neutrality and wrath, and the readout. `15-names` covers the new style. The harness's stand-in image data already covers the whole atlas (D-059).
+
