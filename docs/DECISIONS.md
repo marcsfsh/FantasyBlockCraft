@@ -426,3 +426,55 @@ Constrains: a family's lands get a `FOREST`-like table entry (trees, top, plant)
 - **What it costs:** memory, at five bytes a block, is 123 MB Near, 250 MB Far and 423 MB Farthest; a slide of the window (every 16 blocks walked) moves all of it, about 14, 30 and 49 ms on the cloud VM; the starting area has 196, 400 or 676 chunks to generate, and more meshes to draw. The owner's device is the judge.
 - **The stand-in from afar (D-055) stays** for what lies beyond even the widest area: with Farthest the real ground of the grand volcano shows from the basin's floor to 200 blocks, and the stand-in only fills in above and beyond.
 - **Tests:** a case may set its area (`// @area 1`); `51-area` runs in the Far area. `tools/shot.mjs --area= --viewd=` shows the wider views. No generation change.
+
+### D-058 The Emberlords' fortresses built with detail (2026-10-11)
+- **The owner:** "The balrog fortress could do with a lot more detail, texture, and attention overall".
+- **Where it stood:** one flat facade with a square gate and two specks of magma for eyes, plain box towers, a rectangular tunnel for the way in, and a box of a hall with square pillars, all in one brick.
+- **New masonry** (blocks 1098 to 1106, tiles 258 to 269): Cracked Basalt Bricks, Basalt Tiles, Carved Basalt (a flame between horns cut into the stone), Ember Script (angular signs that burn), Obsidian Bricks, Basalt Pillar (fluted), Iron Chain (hangs and can be climbed), Fire Basket (an iron basket of coals and flame, light 14) and Iron Spikes. All are in the creative menu under Building. Fortress walls mix their bricks by hash: cracked in patches, here and there rough basalt, now and then a seam that still glows (`fortStone`).
+- **The plan, part by part** (`world/fortress.js`, every part a function of the fortress's own frame, so each chunk builds its share alone):
+  - **The approach:** a stair between low walls with skulls on them.
+  - **The terrace:** deeper than before (40 blocks for the grandest). The way to the gate is paved between obsidian edges, with chevrons pointing in and a burning line down its middle. A moat of fire crosses the terrace, bridged by the way, with fire baskets at the bridge's ends and along the way. Parapets carry skulls and spikes, an obelisk stands at each outer corner, and a foundation runs down to the ground beneath.
+  - **The guardians:** two of them, statues in the lord's likeness, 13 times the fortress's scale (42 blocks at the Ember Throne). Each rests its hands on a great sword set point down, its wings folded and edged with fire, horned, with burning eyes and maw, on a plinth written round with burning script (`fortStatue`).
+  - **The facade:** a pointed gate in three rings (obsidian, fire, carving), with fangs at its mouth and the portcullis drawn up into it. Above it a demon's face: a heavy V of brow over slanted burning eyes, a ridge of nose from the keystone and a jaw round the arch. Horns rise over battlements that carry spikes and a peak. A line of burning script runs across the wall.
+  - **The towers:** a battered foot capped in obsidian, fluted corners and bands of fire. Slits are lit from within, under a carved frieze and machicolations on corbels. The battlements carry spikes, horns sweep out from the corners, a pool of fire lies on the roof, and banners hang down the outer face.
+  - **The way in:** a pointed vault on ribs of fire, standing on pillars against the walls with fire baskets before them. Between the ribs are niches with skulls under lintels of burning script, and fire hangs on chains in every other bay. A runner with burning lines runs down the floor, and an inner portcullis is drawn up.
+  - **The throne hall:**
+    - Vaults: a tall pointed vault over the nave and lower ones over the aisles, ribs of fire over both, and an obsidian ridge.
+    - Pillars: compound, on obsidian bases, with carved capitals and a ring of burning script, joined by pointed arcades. Fire baskets stand before the pillars and the wall's.
+    - Hung fire: cages of fire on chains in every bay.
+    - Floor: the rivers of fire are now kerbed and bridged in every bay, either side of a burning runner.
+    - Aisles: guardians stand in the aisles where they are wide enough, with banners between them.
+    - Dais and throne: the dais's steps are written in fire. The throne is peaked, horned and holds a burning sign, with skulls on its arms, and the hoard is heaped beside and behind it.
+    - Back wall: the lord's sign (a ring of fire round a flame, with spikes) between columns of lava behind iron grates.
+- **Relief on the big faces** (the owner, after a first look: "When I said texture, I meant texture to the big walls and ceilings so it's not just all flat panels"):
+  - `fortPanel` lays a wall out in tiers of blind lancets: ledges stand out a course, piers stand out between the lancets, and the lancets are sunk a block. `fortCoffer` sinks coffers between a grid of ribs one block into a vault's curve. In every other coffer a fire basket is set in its back, and an ember brick in the rest (`fortCofferMid`).
+  - The vaults over the nave, the aisles and the way in are coffered. Cornices of obsidian bricks run at their springings, with a fire basket on them in every bay, and a base course runs along the aisle walls.
+  - The hall's side walls carry a blind pointed arch in every bay, sunk a block, carved and written with burning script, with a fire basket in its foot.
+  - The hall's front wall and the back wall beside the throne carry the lancets. Behind the throne a deep pointed arch is sunk into the back wall, framed in obsidian, and the lord's sign burns at its back.
+  - The way in's walls are grooved in courses between the bays, the towers have grooves down their faces, and the facade carries ledges, piers and lancets where the face and the towers leave it bare.
+  - The fortresses' halls are lit by their fires, so their dim light is stronger than a warren's (`fortF` in `gameplay/fire-sky.js`: the cave light floor is 0.34 there, against 0.15 in the warrens), enough to show the relief.
+- **The lava stays held:** every block of it (the moat, the troughs and rivers, the tower pools, the columns behind the grates) lies in rock or behind iron on every side and below. `fortLava` answers for all of it, and `fortLavaAt` trusts it at chunk edges. On the default seed the nearest Ember Throne has no unsound lava, at its front or in its hall.
+- **Sizes:** the terraces are deeper (`td` 16, 34, 40, 30) and wide enough for the towers (`tz`). The dais is deeper by the throne's scale. The hall's guards stand between the kerbs and the pillars. The fortress's box reaches the horns, the foundation and the back wall's rock; the warrens keep out of it as before.
+- **Warholds** share the plan at their small size: they gain the same pointed gate, face, towers, statues, vaults, cages, dais and sign. The hall's guardians stand only where the aisles are wide enough.
+- **Generation change:** the fortresses and, through their larger boxes, the warrens near them change. The save key is now v20 (`SAVE_V` 20), and old saves do not carry over (D-019). The world-hash snapshot is unchanged, since no fortress lies in the spawn windows.
+- **Tools:** `tools/shot.mjs --tiles=` draws atlas tiles enlarged, to judge a texture.
+
+### D-059 The Volcanic Wastes keep their definition: lighter dark rock, and a burning sky that dims without blacking out (2026-10-11)
+- **The owner:** "Much of the darker blocks in the biome are so dark that they have no definition. It's just black space", and that it applies to the whole of the wastes, the fortresses with it.
+- **Why it was black:** the wastes' dark blocks were painted at 22 to 46 out of 255 on average (stone is 126): black ash 39, cinder 46, basalt bricks 46, obsidian 26, obsidian bricks 22, cracked bricks 33, charred bark 36. The burning sky then took daylight down to about 43% of plain daylight (`skyMul` cut by 42% and a strong red tint), and to about 16% by night. Black ash came out at about 17 on screen, with nothing inside a face to show its edges.
+- **The textures, repainted lighter with edges** (`blocks/atlas.js`): every dark block of the wastes now averages 58 to 83 (obsidian and obsidian bricks about 42 to 58), with a spread inside each face so its pattern shows.
+  - Black ash is rippled by the wind and flecked with grey.
+  - Cinder's pits have lighter rims.
+  - Lava crust plates are lighter in their middles.
+  - Charred bark has a grain, and its rings show.
+  - Basalt columns have lit and shaded edges and cross-joints.
+  - Black sand, scorched stone and magma stone's rock are lighter.
+  - All the bricks (basalt, ember, cracked, obsidian) and the tiles are bevelled: lit on the top and left of each brick, shaded on the bottom and right, in dark mortar.
+  - Obsidian is black glass with a purple sheen, glassy streaks and curved fracture lines. Its first painting draws from the atlas's shared stream (`tr`), which must not change, so it is painted again at the end with hashes only.
+- **The light:**
+  - By day the burning sky dims daylight by 22% (was 42%) and reddens it less (tint 1, 0.66, 0.54 at 70%, was 1, 0.52, 0.4 at 75%), about 64% of plain daylight in all.
+  - By night the burning smoke keeps the land lit a dull red, at no less than about a third of daylight (`burnSkyTick`), so the wastes never sink into black. The night tint leans further to red.
+  - The goblin warrens' dim light rises from 0.15 to 0.22. The fortresses keep theirs at 0.34 (D-058).
+- **Elsewhere:** basalt, obsidian and black sand are lighter wherever they lie (the coasts, the highlands, crafted blocks); nothing else changes outside the wastes. No generation change: the world-hash snapshot is unchanged.
+- **Tests:** `47-volcanic` checks that every dark block of the wastes averages 50 or more (40 for obsidian and its bricks) with a spread of 8 or more inside a face, and that the burning sky's strength (`skyMul`) stays at 0.7 or more of daylight by day and 0.3 or more by night (its red tint is a three.js colour, which the harness stands in for, so it is judged in screenshots). The harness's stand-in image data is now the size of the whole atlas (128 by 1024), so tiles past 255 are painted in tests too.
+

@@ -5,6 +5,36 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.29.0 (2026-10-11): the Ember Throne, built with care
+
+Saves from 0.28.0 do not carry over (save key v20): the fortresses in the volcanoes are rebuilt.
+
+### Game
+- **The Ember Throne rebuilt in detail**, and the orcs' warholds with it:
+  - **The approach:** a stair between skull-topped walls climbs to a deep terrace. A moat of fire crosses it under a bridge lined with fire baskets, the paved way has a burning line down its middle, and obelisks stand at the corners.
+  - **The guardians:** two of them flank the way, 42 blocks tall, in the Emberlord's likeness. Each rests its hands on a great sword set point down, its wings folded and edged with fire, horned, its eyes burning.
+  - **The gate:** a pointed arch in rings of obsidian, fire and carving, with fangs at its mouth and the portcullis drawn up into it. Above it is the face of a demon, with a heavy brow over slanted burning eyes and horns rising over the battlements.
+  - **The towers:** battered feet, fluted corners, slits lit from within, machicolations, spiked battlements, horns at the corners, pools of fire on their roofs and banners down their faces.
+  - **The way in:** a pointed vault on ribs of fire, with fire baskets, skulls in niches under burning script, and fire hung on chains.
+  - **The throne hall:** pointed vaults over the nave and aisles, ribbed with fire, and pillars on obsidian bases ringed with burning script, joined by arcades. Cages of fire hang on chains, and the rivers of fire are kerbed and bridged. Guardians stand in the aisles, and the dais's steps are written in fire. The throne is peaked and horned, with the hoard heaped about it. Behind it are the lord's burning sign and columns of lava behind grates.
+- **No flat walls or ceilings:**
+  - The vaults over the hall and the way in are coffered, with fire set into every other coffer, and cornices with fire baskets run along their springings.
+  - The hall's side walls are lined with carved blind arches with a fire at each foot, and its end walls with sunk lancets. A deep arch behind the throne frames the lord's sign.
+  - The towers are grooved, the way in's walls are coursed, and the facade carries ledges and panels.
+  - The halls are a little brighter, so the relief shows.
+- **The Volcanic Wastes are no longer black.**
+  - The dark rock (black ash, cinder, basalt, obsidian, charred wood, lava crust and every kind of basalt brick) is painted lighter and with edges: wind ripples in the ash, rims round the cinder's pits, bevelled bricks, and glassy streaks in the obsidian.
+  - The burning sky dims the day less.
+  - By night the burning smoke lights the land a dull red, so it never sinks into black.
+  - The goblin warrens are a little brighter.
+  - Basalt, obsidian and black sand are lighter wherever they lie.
+- New blocks: cracked basalt bricks, basalt tiles, carved basalt, ember script, obsidian bricks, basalt pillar, iron chain (climbable), fire basket and iron spikes (creative, Building).
+
+### Tooling
+- `tools/shot.mjs --tiles=` draws atlas tiles enlarged side by side.
+- The test harness paints the whole atlas (its stand-in image data was 256 by 256). `47-volcanic` checks that the wastes' dark blocks keep their definition and that the burning sky leaves enough light.
+- `49-warrens` checks the fortress's detail: its masonry, the pointed gate, the guardians, the tower pools and the lava behind the grates.
+
 ## 0.28.0 (2026-10-10): foes in the fire
 
 Saves from 0.27.0 do not carry over (save key v19): the Volcanic Wastes have changed underground and in their volcanoes.
