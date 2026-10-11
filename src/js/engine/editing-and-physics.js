@@ -20,37 +20,50 @@ function undo(){
   toast('Undid '+(a.length/2)+' block'+(a.length>2?'s':''));tone(500,700,0.12,0.15);
 }
 function nbLight(x,y,z,A=BLK){let m=0;for(const F of FACES){const X=x+F.d[0],Y=y+F.d[1],Z=z+F.d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const L=A[I(X,Y,Z)];if(L>m)m=L;}return m;}
-// Water flows: sources (level 0) spread up to 7 blocks sideways and fall without limit
-const lvl=new Uint8Array(VOL),flowQ=new Set();let flowT=0;
-const WD=W*D,flowInto=id=>id===AIR||BL[id].cross||BL[id].torch;
+// Water and lava flow (lava since 0.28.0, D-053): sources (level 0) spread sideways, water up to 7 blocks and lava up to 4,
+// and fall without limit; lava moves at a third of water's pace and never makes new sources. Where they meet, lava hardens:
+// a source into obsidian, flowing lava into basalt, with a hiss of steam.
+const lvl=new Uint8Array(VOL),flowQ=new Set(),lavaQ=new Set();let flowT=0,lavaN=0;
+const WD=W*D,flowInto=id=>id===AIR||BL[id].cross||BL[id].torch,FLOW_MAX={[WATER]:7,[LAVA]:4},LAVA_LV=900; // saved levels: water 101 to 107, lava 901 to 904
 function wakeWater(x,y,z){
   for(let k=-1;k<6;k++){const X=k<0?x:x+FACES[k].d[0],Y=k<0?y:y+FACES[k].d[1],Z=k<0?z:z+FACES[k].d[2];
-    if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const j=I(X,Y,Z);if(world[j]===WATER)flowQ.add(j);}
+    if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;const j=I(X,Y,Z),v=world[j];if(v===WATER)flowQ.add(j);else if(v===LAVA)lavaQ.add(j);}
 }
-function setLvl(i,L){lvl[i]=L;recordEdit(i,L?100+L:WATER);const x=i%W,t=(i/W)|0;dirty.add(((x/CS)|0)+(((t%D)/CS)|0)*NCX);wakeWater(x,(t/D)|0,t%D);}
-function waterAt(x,y,z,L){setBlock(x,y,z,WATER,true);const i=I(x,y,z);if(world[i]===WATER&&L)setLvl(i,L);}
-function flowStep(){autoEdit=true;try{flowWork();}finally{autoEdit=false;}}
-function flowWork(){
-  let n=0;const q=[];for(const i of flowQ){q.push(i);if(++n>=600)break;}
-  for(const i of q)flowQ.delete(i);
+function setLvl(i,L){const F=world[i];lvl[i]=L;recordEdit(i,L?(F===LAVA?LAVA_LV:100)+L:F);const x=i%W,t=(i/W)|0;dirty.add(((x/CS)|0)+(((t%D)/CS)|0)*NCX);wakeWater(x,(t/D)|0,t%D);}
+function fluidAt(x,y,z,F,L){setBlock(x,y,z,F,true);const i=I(x,y,z);if(world[i]===F&&L)setLvl(i,L);}
+function waterAt(x,y,z,L){fluidAt(x,y,z,WATER,L);}
+function flowStep(){autoEdit=true;try{flowWork(flowQ,WATER);if(++lavaN>=3){lavaN=0;flowWork(lavaQ,LAVA);}}finally{autoEdit=false;}}
+function flowWork(Q,F){
+  const MX=FLOW_MAX[F];let n=0;const q=[];for(const i of Q){q.push(i);if(++n>=600)break;}
+  for(const i of q)Q.delete(i);
   for(const i of q){
-    if(world[i]!==WATER)continue;
+    if(world[i]!==F)continue;
     const x=i%W,t=(i/W)|0,z=t%D,y=(t/D)|0;let L=lvl[i];
-    const above=y+1<H&&world[i+WD]===WATER,below=y>0?world[i-WD]:BEDROCK;
+    if(F===LAVA&&lavaQuench(i,x,y,z))continue;
+    const above=y+1<H&&world[i+WD]===F,below=y>0?world[i-WD]:BEDROCK;
     if(L>0){
       let best=99,src=0;
-      for(let k=0;k<6;k++){if(FACES[k].d[1])continue;const X=x+FACES[k].d[0],Z=z+FACES[k].d[2];if(X<0||Z<0||X>=W||Z>=D)continue;const j=I(X,y,Z);if(world[j]===WATER){if(lvl[j]<best)best=lvl[j];if(lvl[j]===0)src++;}}
-      if(src>=2&&(SOLID[below]||(below===WATER&&lvl[i-WD]===0))){setLvl(i,0);L=0;}
-      else{const want=above?1:best+1;if(want>7){setBlock(x,y,z,AIR,true);continue;}if(want!==L){setLvl(i,want);L=want;}}
+      for(let k=0;k<6;k++){if(FACES[k].d[1])continue;const X=x+FACES[k].d[0],Z=z+FACES[k].d[2];if(X<0||Z<0||X>=W||Z>=D)continue;const j=I(X,y,Z);if(world[j]===F){if(lvl[j]<best)best=lvl[j];if(lvl[j]===0)src++;}}
+      if(F===WATER&&src>=2&&(SOLID[below]||(below===WATER&&lvl[i-WD]===0))){setLvl(i,0);L=0;}
+      else{const want=above?1:best+1;if(want>MX){setBlock(x,y,z,AIR,true);continue;}if(want!==L){setLvl(i,want);L=want;}}
     }
-    if(y>0&&flowInto(below)){waterAt(x,y-1,z,1);continue;}
-    if(y>0&&below===WATER&&lvl[i-WD]>0)continue;
-    if(L<7)for(let k=0;k<6;k++){
+    if(y>0&&flowInto(below)){fluidAt(x,y-1,z,F,1);continue;}
+    if(y>0&&below===F&&lvl[i-WD]>0)continue;
+    if(L<MX)for(let k=0;k<6;k++){
       if(FACES[k].d[1])continue;const X=x+FACES[k].d[0],Z=z+FACES[k].d[2];if(X<0||Z<0||X>=W||Z>=D)continue;
       const j=I(X,y,Z),id=world[j];
-      if(flowInto(id))waterAt(X,y,Z,L+1);else if(id===WATER&&lvl[j]>L+1)setLvl(j,L+1);
+      if(flowInto(id))fluidAt(X,y,Z,F,L+1);else if(id===F&&lvl[j]>L+1)setLvl(j,L+1);
     }
   }
+}
+// lava touching water (or a water plant) on any face hardens where it stands
+function lavaQuench(i,x,y,z){
+  for(let k=0;k<6;k++){const X=x+FACES[k].d[0],Y=y+FACES[k].d[1],Z=z+FACES[k].d[2];if(X<0||Z<0||Y<0||X>=W||Z>=D||Y>=H)continue;
+    if(!isWetId(world[I(X,Y,Z)]))continue;
+    setBlock(x,y,z,lvl[i]?BASALT:OBSID,true);burst(0.6,'highpass',2400,0.7,0.22,0,[x+0.5,y+0.5,z+0.5]);
+    for(let p=0;p<8;p++)spawnP(x+Math.random(),y+1,z+Math.random(),(Math.random()-.5)*0.6,1.2+Math.random(),(Math.random()-.5)*0.6,[0.85,0.85,0.85],1.2,-0.6);
+    return true;}
+  return false;
 }
 function setBlock(x,y,z,v,force){
   if(x<0||z<0||y<0||x>=W||z>=D||y>=H)return;

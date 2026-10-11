@@ -1,5 +1,5 @@
 // Texture atlas, drawn pixel by pixel
-const TS=16,AC=8,AR=32,AW=TS*AC,AH=TS*AR;
+const TS=16,AC=8,AR=64,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
 const actx=atlas.getContext('2d'),im=actx.createImageData(AW,AH),dat=im.data;
 const cl=v=>v<0?0:v>255?255:v|0;
@@ -251,6 +251,22 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     // fumarole: cinder round a glowing throat
     const t=Math.hypot(x-7.5,y-7.5);P(251,x,y,t<2.6?sh([255,150,40],(hn(x,y,201)-.5)*40):t<4?sh([200,170,60],(hn(x,y,202)-.5)*30):sh([56,50,50],(hn(x,y,203)-.5)*22));
   }
+  // The foes' places (D-052): hide canvas stitched in panels, an iron grate, basalt bricks, the same with glowing mortar, a pole
+  // of skulls and a ragged war banner (the last two drawn like plants)
+  clear(253);clear(256);clear(257);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const seam=x===7||y===7,stitch=(x===6||x===8)&&y%3===0||(y===6||y===8)&&x%3===0;
+    P(252,x,y,seam?[78,52,32]:stitch?[196,170,128]:sh([150,108,70],(hn(x,y,210)-.5)*18+(hn(x>>2,y>>2,211)<.25?-16:0)+(hn(x,y,212)<.05?-26:0)));
+    const bar=(x%5===1||x%5===2),band=y===3||y===12;if(bar||band)P(253,x,y,sh([66,64,70],(x%5===1&&!band?18:0)+(hn(x,y,213)-.5)*14+(hn(x,y,214)<.1?-20:0)));
+    const row=y>>2,off=row%2?4:0,mort=y%4===3||(x+off)%8===7;
+    P(254,x,y,mort?sh([26,24,26],(hn(x,y,215)-.5)*8):sh([58,55,60],(hn(x,y,216)-.5)*16+(hn((x+off)>>3,row,217)-.5)*18));
+    P(255,x,y,mort?sh([250,(hn(x,y,218)<.5?120:170),34],(hn(x,y,219)-.5)*30):sh([46,42,46],(hn(x,y,220)-.5)*14+(hn((x+off)>>3,row,221)-.5)*16));
+  }
+  for(let y=0;y<16;y++){P(256,7,y,sh([60,44,32],(hn(7,y,222)-.5)*14));P(256,8,y,sh([44,32,24],(hn(8,y,222)-.5)*14));}
+  for(const sy of [1,8])for(let y=0;y<5;y++)for(let x=5;x<11;x++){const eye=y===2&&(x===6||x===9),jaw=y===4&&(x===5||x===10);if(jaw)continue;P(256,x,sy+y,eye?[20,14,12]:sh([222,214,190],(hn(x,y+sy,223)-.5)*24-(y===4?30:0)));}
+  for(let y=0;y<16;y++)P(257,2,y,sh([58,40,28],(hn(2,y,224)-.5)*12));
+  for(let y=1;y<13;y++)for(let x=3;x<14;x++){if(y>9&&hn(x,0,225)<(y-9)/4)continue;const em=Math.abs(x-8)+Math.abs(y-5)*1.3<3.2&&!(Math.abs(x-8)+Math.abs(y-5)*1.3<1.4);
+    P(257,x,y,em?[24,20,20]:sh([148,30,24],(hn(x,y,226)-.5)*22+(x===3?-20:0)));}
   clear(243);for(let f=0;f<5;f++){const ox=2+f*3,h=8+Math.floor(hn(f,6,174)*6);for(let k=0;k<h;k++)P(243,ox,15-k,k>h-5?sh([150,110,210],(hn(f,k,175)-.5)*30):[90,130,80]);}
   actx.putImageData(im,0,0);
 })();

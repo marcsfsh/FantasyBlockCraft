@@ -1,6 +1,6 @@
 // ---- what to call a place underground, by depth
 function layerName(y,X,Z){
-  const m=mineName(X,y,Z);if(m)return m;
+  const m=mineName(X,y,Z);if(m)return m;const fn=fortName(X,y,Z)||warrenName(X,y,Z);if(fn)return fn; // the Emberlords' fortresses and the goblin warrens (D-052)
   if(y<12)return 'The Fire Below';
   if(y<100){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(y>=58&&ruinZone(cx,cz))return 'The Deeps of '+holdOf(cx,cz).name;return mineZone(cx,cz)?'The Mines of '+holdOf(cx,cz).name:DEEP_NAMES[caveRegion(X,Z)];}
   return y<152?'The Great Caverns':y<204?'The Old Workings':y<260?CAVE_NAMES[caveRegion(X,Z)]:'Crawlways';
@@ -14,7 +14,7 @@ function meshBand(){
   const px=Math.floor(PL.x),pz=Math.floor(PL.z),g=(px>=0&&pz>=0&&px<W&&pz<D)?ground[px+W*pz]:SEA;
   const surf=MB.surf?PL.y>g-6:PL.y>g-2,half=surf?120:[48,72,118][settings.cave||0],c=Math.round(PL.y/16)*16;
   if(surf===MB.surf&&Math.abs(c-MB.c)<half*0.4)return;
-  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
+  MB.surf=surf;MB.c=c;MB.lo=c-half;MB.hi=surf&&c>=SEA-60-WB_DEP?H-1:c+half;for(let i=0;i<NCX*NCZ;i++)dirty.add(i);
 }
 function meshFloor(x0,z0){
   let lo=MB.lo;if(!MB.surf)return lo;let ms=H;
@@ -72,12 +72,13 @@ function buildChunk(cx,cz){
       continue;
     }
     const isW=id===WATER||!!b.wet,M=isW?Wt:O,bw=b.wet?BL[WATER]:b;
-    const drop=isW?wDrop(x,y,z):0;
+    const drop=isW?wDrop(x,y,z):id===LAVA?lDrop(x,y,z):0;
     for(let f=0;f<6;f++){
       const F=FACES[f],d=F.d,nx=x+d[0],ny=y+d[1],nz=z+d[2],nid=gid(nx,ny,nz);
       let draw;
       if(isW)draw=(!isWetId(nid)&&!OPQ[nid])||(isWetId(nid)&&!d[1]&&wDrop(nx,ny,nz)>drop+0.01);
-      else if(b.opq)draw=!OPQ[nid];
+      else if(id===LAVA)draw=(!OPQ[nid]&&nid!==LAVA)||(nid===LAVA&&!d[1]&&lDrop(nx,ny,nz)>drop+0.01);
+      else if(b.opq)draw=!OPQ[nid]||(nid===LAVA&&lDrop(nx,ny,nz)>0); // a face beside lava shows above its lowered top
       else draw=!OPQ[nid]&&!(nid===id&&id===GLASS);
       if(!draw)continue;
       const L=b.emit?1:gsky(nx,ny,nz),Bk=b.emit?2:gbl(nx,ny,nz),t=bw.t[F.tf],base=M.p.length/3,ao=[3,3,3,3];

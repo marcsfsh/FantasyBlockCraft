@@ -12,8 +12,11 @@ assert(LANDS.every(L=>Array.isArray(WILD_OF[L.k]))&&Object.values(ANIMALS).every
       if(!(h>0.2&&h<2.8)||!Object.keys(m.parts).length||!m.mat.uniforms.map.value)bad.push(k+' '+ci+(yg?' young':'')+' height '+h.toFixed(2));if(yg&&!(h<ht[k]))bad.push(k+' young is not smaller');}}
   info('models built',built,'; heights',Object.entries(ht).map(([k,h])=>k+' '+h.toFixed(2)).join(', '));
   assert(!bad.length&&ht.horse>ht.deer&&ht.deer>ht.sheep&&ht.sheep>ht.hen&&ht.hen>0,'every kind and coat builds, the young smaller, a horse taller than a deer than a sheep than a hen '+bad.join('; '));
-  // every face of every part painted: no pixel left clear inside the layout
-  let holes=0;for(const k in AM_KINDS){const L=amLayout(AM_KINDS[k]),Dt=amTexture(k,0,{}).amData;for(const n in L){const [u,v,b]=L[n];for(const f of ['L','F','R','B','T','D']){const R=amRect(f,u,v,b[3],b[4],b[5]);for(let t=0;t<R[3];t++)for(let q=0;q<R[2];q++)if(Dt[((R[1]+t)*AM_TEX+R[0]+q)*4+3]!==255)holes++;}}}
+  // every face of every part painted: no pixel left clear inside the layout. The foes' models (D-052) may also glow (alpha 200)
+  // or be cut away on purpose (alpha 1, D-055); each texture is read at its own size
+  const foeM=new Set(Object.values(FOES).map(F=>F.m));
+  let holes=0;for(const k in AM_KINDS){const K=AM_KINDS[k],TX=K.tex||AM_TEX,L=amLayout(K),Dt=amTexture(k,0,{}).amData,ok=a=>a===255||(foeM.has(k)&&(a===200||a===1));
+    for(const n in L){const [u,v,b]=L[n];for(const f of ['L','F','R','B','T','D']){const R=amRect(f,u,v,b[3],b[4],b[5]);for(let t=0;t<R[3];t++)for(let q=0;q<R[2];q++)if(!ok(Dt[((R[1]+t)*TX+R[0]+q)*4+3]))holes++;}}}
   assert(holes===0&&amTexture('horse',0,{})===amTexture('horse',0,{}),'each coat is painted whole on its own texture, made once and shared');}
 const standAt=k=>{const c=nearestLand(LAND_I[k],0,0,48);gen(c.X,c.Z);let bx=c.X-OX,bz=c.Z-OZ;PL.x=bx+0.5;PL.z=bz+0.5;PL.y=ground[bx+W*bz]+1;PL.vx=PL.vz=0;LWX.t=0;landWeather(0.1);return c;};
 const clearAll=()=>{for(const a of [...animals])removeAnimal(a);};

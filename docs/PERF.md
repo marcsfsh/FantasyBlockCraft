@@ -117,3 +117,14 @@ Same VM, `npm run bench`, one run per seed.
 | 4242 | 2073 | 11.02 / 10.62 / 15.26 / 18.3 | 16.52 / 15.28 / 25.42 / 33.41 | 0.77 / 0.57 / 2.85 / 6.43 | 3.68 / 2.37 / 10.88 / 21.89 | 222 |
 
 Within the noise of 0.9.0. The surface work adds a few hash and noise lookups per column and per placed feature; meshing at the surface is a little cheaper with smoother ground.
+
+## The sunken wastes and the loaded area (2026-10-11, 0.28.0)
+
+Same VM type (Intel Xeon 2.80GHz, 4 cores), `npm run bench`, one run per seed, the Near area (224) as before.
+
+| Seed | Startup | genChunk | Stream 1 chunk | Stream step (one frame) | buildChunk | lightAll |
+|---|---|---|---|---|---|---|
+| 123456789 | 2460 | 11.08 / 10.49 / 16.41 / 19.61 | 14.52 / 13.93 / 19.03 / 26.2 | 0.63 / 0.44 / 2.43 / 4.83 | 2.45 / 1.65 / 6.81 / 13.2 | 240 |
+| 4242 | 2624 | 11.55 / 11.02 / 15.4 / 23.06 | 14.11 / 13.33 / 23.16 / 26.99 | 0.68 / 0.46 / 2.61 / 6.28 | 1.61 / 1.36 / 3.13 / 3.87 | 211 |
+
+Generating a chunk at spawn (no wastes near) costs about a tenth more than in 0.10.0 (median 10.5 to 11.0 ms against 9.6 to 10.6): every lookup of the land now also asks whether a sunken basin reaches the column (D-055), and the lands since 0.10.0 add their own work. Streaming steps and meshing are unchanged or cheaper. Inside the wastes a column costs about twice what it did (13 against 6 microseconds). A wider loaded area (D-057) does not change these per-chunk costs, but multiplies the chunks to generate (400 in Far, 676 in Farthest, against 196) and the slide of the window every 16 blocks walked (about 30 and 49 ms, against 14).

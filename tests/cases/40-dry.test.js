@@ -10,9 +10,11 @@ for(const k of DRY){const c=nearestLand(LAND_I[k],0,0,48);regenerateAll(c.X,c.Z)
   if(k==='volcanic'){let mag=0,loose=0;const WD=W*D;for(let i=0;i<VOL;i++){if(world[i]===MAGMA)mag++;}
     info('magma stone in the volcanic window',mag);assert(mag>1000,'the deep under the Volcanic Wastes glows with magma stone');}}
 // signatures
-{const st={none:0,placed:0,missed:0},kinds=new Set(),roots=new Set();
+// (a stretch whose middle the sunken wastes have taken, D-055, has no landmark of its own; it is counted apart)
+{const st={none:0,placed:0,missed:0,taken:0},kinds=new Set(),roots=new Set(),o={};
   for(let i=-40;i<40;i++)for(let j=-40;j<40;j++){const c=stretchCell(landSite(i,j)),L=LANDS[cellLand(c)];if(!DRY.includes(L.k))continue;const key=landKey(c.i,c.j);if(roots.has(key))continue;roots.add(key);
+    if(landsAt(c.x,c.z,o).land!==L.i){st.taken++;continue;}
     const q=hsh(c.i,8141,c.j),s=sigOf(c);if(q<0.4)st.none++;else if(s){st.placed++;kinds.add(s.kind);}else st.missed++;}
   info('dry stretches',roots.size,JSON.stringify(st),'; kinds',[...kinds].sort().join(' '));
-  assert(st.missed<=roots.size*0.1&&kinds.size===8,'nearly every dry stretch that should have a landmark or feature has one, and all 8 kinds appear');}
+  assert(st.missed<=(roots.size-st.taken)*0.1&&kinds.size===8,'nearly every dry stretch that should have a landmark or feature has one, and all 8 kinds appear');}
 assert(RECIPES.some(r=>r[0]===PLANKS&&[].concat(r[2][0][0]).includes(DEADWOOD)),'dead wood makes planks');

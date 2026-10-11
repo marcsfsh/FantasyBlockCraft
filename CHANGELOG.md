@@ -5,6 +5,33 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.28.0 (2026-10-10): foes in the fire
+
+Saves from 0.27.0 do not carry over (save key v19): the Volcanic Wastes have changed underground and in their volcanoes.
+
+### Game
+- **Foes in the Volcanic Wastes, and only there.** Orc warbands roam the wastes and hold the Ashen Citadel: raiders, bowmen who keep their distance, brutes behind shields, and a horned warchief whose war horn brings the band. Ash trolls three blocks tall, lava glowing in the cracks of their hide, swing basalt clubs and throw rocks. In creative they take no notice of you.
+- **Goblin warrens** replace the crawlways and the upper caves under the wastes' sunken floor: halls on two levels cut in black rock seamed with magma, joined by propped tunnels, with hide huts round fire pits, stores, cages, forges, fire shrines, channels of lava and the chief's throne with its hoard. Goblin cutters, slingers and firecallers live there under a chieftain, some asleep in their dens, and keep camp at every way in. A way down leads on to the caves below.
+- **The wastes are sunken.** Each stretch lies in a basin at least 800 blocks across, its floor about 90 below the lands around, walled by a ring of black ash mountains about 90 above them: climb some 90 blocks to the jagged crest, then go down some 180 by cliffs and shelves to the floor. Its rivers run with lava, and nothing inside the ring is water.
+- **A grand volcano** rises near the middle of every basin, about 250 blocks high and 500 across, its burning crater some 70 blocks above the ring, with lesser cones about its foot and more lesser volcanoes across the floor. No volcano is a perfect cone: each is lopsided, its crater off its middle, steeper on some sides, scored by uneven gullies, its rim toothed; a great one has a scar where a flank fell away, a second summit on one shoulder and a lesser cone on another. From afar a hazed stand-in of the basin and its volcano shows beyond the loaded world, crater and flows glowing.
+- **The Ember Throne:** in each great volcano an Emberlord's fortress built to its size, with a gate between towers fifty-eight blocks high, a long broad way in past troughs of lava, and under the summit a throne hall eighty blocks wide and fifty high. There waits the Emberlord, a demon of shadow and flame twelve blocks tall, built of angled, tapering shapes: hunched over great clawed legs, shoulders broad over a narrow waist, spines down its back; a horned skull thrust forward, narrowing to the muzzle, slanted burning eyes under a heavy brow, fangs and a burning maw; a mane of flame; and vast wings of tapering bones and torn membrane smouldering at their edges. It walks with a heavy rolling stride that shakes the ground, wings beating slowly, a burning blade in one hand and a whip of fire in the other, and it never leaves its fortress. Once fallen, it stays fallen. (You asked for balrogs; that name is Tolkien's, so these are the Emberlords.)
+- **Foes walk:** their legs never swung before (a bug); now every foe strides.
+- **Warholds:** the lesser volcanoes' fortresses are held by orcs under a warchief.
+- **Fighting back:** swords from wood to moonsilver, and armour for a new body slot (Hide Jerkin, Iron Mail, Steel Plate, Moonsilver Mail). Foes leave iron, coal, leather, sulphur, troll hide and gold; the Emberlord leaves the Flamebrand and the Emberheart.
+- **Lava flows like water:** break into it and it spreads, slowly, up to four blocks and falls down holes. Where it meets water it hardens into obsidian or basalt.
+- The warrens and fortresses glow red inside, with war drums and goblin chatter in the rock.
+- New blocks: hide canvas, iron grate, basalt bricks, ember bricks, skull totem, war banner.
+
+- **See farther:** a new Loaded area setting in the pause menu (Near, Far, Farthest: 224, 320 or 416 blocks of world kept about you) lets the view reach up to 200 blocks, with two new view distances, Farther and Farthest. Auto picks Far on desktops and handhelds with 8 cores or more. Changing it saves and starts the game again.
+
+### Tooling
+- `tools/shot.mjs --foes[=kinds]` lines foes up (winding up, walking or asleep; turned by degrees, and `--far=` for an Emberlord).
+- `tools/map.mjs` draws dry ground below the sea's level as land and the air above the ground as sky.
+- Model parts can taper (frustums, wedges, spikes) through a `tp` option.
+- The creative land tour no longer sends you to a cell the sunken wastes have taken.
+- A test case can set the loaded area (`// @area 1`); new case `51-area`. `tools/shot.mjs --area= --viewd=`.
+- New tests `48-lava-flow`, `49-warrens` (warrens and fortresses) and `50-foes`.
+
 ## 0.27.0 (2026-10-10): the Volcanic Wastes remade
 
 Saves from 0.26.0 do not carry over (save key v18): the world has changed.

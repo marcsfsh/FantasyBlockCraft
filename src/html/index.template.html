@@ -45,7 +45,8 @@
   <div class="set">
     <label>Look speed <input type="range" id="sens" min="0.3" max="2.5" step="0.1"></label>
     <label>Field of view <input type="range" id="fovr" min="60" max="100" step="1"></label>
-    <div class="seg" id="viewseg">View <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button></div>
+    <div class="seg" id="viewseg">View <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Normal</button><button data-v="2">Far</button><button data-v="3">Farther</button><button data-v="4">Farthest</button></div>
+    <div class="seg" id="areaseg">Loaded area <button data-v="-1">Auto</button><button data-v="0">Near</button><button data-v="1">Far</button><button data-v="2">Farthest</button> <span id="areanote" class="note"></span></div>
     <div class="seg" id="resseg">Resolution <button data-v="auto">Auto</button><button data-v="sharp">Sharp</button><button data-v="fast">Fast</button></div>
     <div class="seg" id="modeseg">Mode <button data-v="survival">Survival</button><button data-v="creative">Creative</button></div>
     <div class="seg" id="clipseg">Noclip <button data-v="0">Off</button><button data-v="1">On</button></div>
@@ -57,6 +58,7 @@
     <div class="seg crea-only" id="gotoseg">Go to <input id="gox" placeholder="X" size="6" autocomplete="off"><input id="goz" placeholder="Z" size="6" autocomplete="off"><input id="goy" placeholder="Y (optional)" size="9" autocomplete="off"><button id="gobtn">Go</button></div>
     <div class="seg crea-only" id="tourseg">Land tour <select id="toursel"></select><button id="tourbtn">Go to the nearest</button></div>
     <div class="seg crea-only" id="animseg">Animal <select id="animsel"></select><button id="animbtn">Bring one here</button></div>
+    <div class="seg crea-only" id="foeseg">Foe <select id="foesel"></select><button id="foebtn">Bring one here</button></div>
     <div class="seg crea-only" id="stampseg">Test structure <select id="stampsel"></select><button id="stampbtn">Build where you look</button></div>
     <div class="seg" id="hudseg">Readout <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="hintseg">Hints <button data-v="1">On</button><button data-v="0">Off</button></div>

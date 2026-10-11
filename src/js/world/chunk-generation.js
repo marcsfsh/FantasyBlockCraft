@@ -113,10 +113,12 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
   (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
+    applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
+  (lcx,lcz,WCX,WCZ)=>warrenDress(WCX,WCZ), // the goblin warrens under the wastes: their rock, halls, tunnels and camps (D-052)
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
     const m=editsByChunk.get(ckey(WCX,WCZ));
-    if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
+    if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(v>LAVA_LV&&v<LAVA_LV+5){world[i]=LAVA;lvl[i]=v-LAVA_LV;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
     for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
       const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
       for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
@@ -139,7 +141,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;

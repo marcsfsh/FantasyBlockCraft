@@ -138,6 +138,7 @@ function landsAt(X,Z,o){
   // the cell the column's land comes from (the nearest of that land), for its name and climate
   let bc=null,bd=Infinity;for(let k=0;k<n;k++){const s=LSC[k];if(s.c.L===o.land&&s.d<bd){bd=s.d;bc=s.c;}}
   o.lcell=landKey(bc.i,bc.j);o.tb=bc.cl.tb;
+  wasteAt(wx,wz,o);if(o.bs<WB_END)wasteLand(X,Z,o); // the sunken wastes and their ring take over (D-055)
   return o;
 }
 // ---- Stretch names (Q131): each stretch of a land has its own name in its people's style. Neighbouring cells of the same land
@@ -162,12 +163,14 @@ function landSpawn(){
     if(o.h<SEA+3||o.wet||o.lake||o.river||o.b===0||o.b===9)continue;const d=Math.hypot(X,Z);if(d<bd){bd=d;best=[X,Z];}}
   return best||[0,0];
 }
-// The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells
+// The nearest cell centre of a land to a point (for the land tour), searching outward ring by ring up to rmax cells; a cell whose
+// middle another land has taken (the sunken wastes spread over their neighbours, D-055) is passed over
+const TNL={};
 function nearestLand(k,X,Z,rmax){
   const ci=Math.floor(X/LS),cj=Math.floor(Z/LS);let best=null,bd=Infinity;
   for(let r=0;r<=rmax;r++){
     for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
-      if(cellLand(c)!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
+      if(cellLand(c)!==k||landsAt(c.x,c.z,TNL).land!==k)continue;const d=Math.hypot(c.x-X,c.z-Z);if(d<bd){bd=d;best=c;}}
     if(best&&bd<(r-1)*LS)break;}
   return best?{X:Math.round(best.x),Z:Math.round(best.z),d:Math.round(bd)}:null;
 }

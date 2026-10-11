@@ -20,6 +20,11 @@ TOOL_LADDER.forEach((m,i)=>{const o={tier:i+1,speed:m[2],dur:m[3]};
 // Gold and platinum are for special tools (Q68): a platinum pickaxe is very fast but soon worn; the runeforged one is a relic
 item(247,'Platinum Pickaxe','pick',[226,240,248],{tool:'pick',tier:5,speed:14,dur:150});item(255,'Runeforged Pickaxe','pick',[110,220,250],{tool:'pick',tier:7,speed:18,dur:4000});
 ITEMS[251].tool='hoe';ITEMS[251].dur=150;
+// Swords and armour (D-052), for the foes of the Volcanic Wastes: a sword on every step of the ladder, coats for the body slot
+TOOL_LADDER.forEach((m,i)=>item(370+i,m[0]+' Sword','sword',m[1],{tool:'sword',tier:i+1,dur:Math.round(m[3]*0.8)}));
+item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(378,'Emberheart','heart',[255,110,40]);item(386,'Troll Hide','hide',[96,90,86]);
+item(380,'Hide Jerkin','mail',[150,108,70],{equip:'body',armor:0.15,dur:120,one:true});item(381,'Iron Mail','mail',[200,200,196],{equip:'body',armor:0.3,dur:260,one:true});
+item(382,'Steel Plate','mail',[124,134,152],{equip:'body',armor:0.45,dur:420,one:true});item(383,'Moonsilver Mail','mail',[170,176,206],{equip:'body',armor:0.55,dur:800,one:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -104,10 +109,14 @@ function itemIcon(id){
   else if(it.kind==='lantern'){for(let y=3;y<14;y++)for(let x=4;x<12;x++){const e=x===4||x===11||y===3||y===13;px(x,y,e?-10:0);}g.fillStyle='#ffd27a';g.fillRect(6,5,4,7);g.fillStyle='#fff3c4';g.fillRect(7,7,2,3);g.fillStyle='#3a2a1a';g.fillRect(7,1,2,2);}
   else if(it.kind==='pack'||it.kind==='satchel'){const sat=it.kind==='satchel';for(let y=sat?6:3;y<14;y++)for(let x=3;x<13;x++)px(x,y,(x===3||y===(sat?6:3)?20:x===12||y===13?-30:0)+((x+y)%4===0?-10:0));
     g.fillStyle='#4a3420';g.fillRect(3,sat?8:6,10,1);g.fillRect(7,sat?8:6,2,3);if(sat){g.fillRect(4,2,1,4);g.fillRect(11,2,1,4);g.fillRect(4,2,8,1);}}
+  else if(it.kind==='sword'){for(let k=0;k<11;k++)for(let w=0;w<2;w++)px(4+k+w,11-k,k===10?10:w?-30:24);g.fillStyle='#634422';g.fillRect(2,12,2,2);g.fillRect(3,11,2,2);g.fillStyle='#8a6036';g.fillRect(1,13,2,2);
+    g.fillStyle='#4a3a2a';for(let k=-2;k<=2;k++)g.fillRect(4+k,10+k,2,2);if(id===377){g.fillStyle='rgba(255,220,120,0.9)';for(let k=2;k<10;k+=2)g.fillRect(6+k,9-k,1,1);}}
+  else if(it.kind==='mail'){for(let y=2;y<15;y++)for(let x=2;x<14;x++){const sl=y<6&&(x<4||x>11),neck=y<4&&x>5&&x<10;if(sl&&y<3||neck)continue;if(y>6&&(x<4||x>11))continue;px(x,y,(x===2||x===13||y===2?18:y===14?-30:0)+((x+y)%2&&id!==380?-14:0));}}
+  else if(it.kind==='heart'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const a=Math.hypot(x-5.5,y-5.5)<3.2||Math.hypot(x-10.5,y-5.5)<3.2||(y>=6&&Math.abs(x-8)<(14-y)*0.75);if(a)px(x,y,(y<5?40:0)+(r()-.5)*30);}g.fillStyle='rgba(255,240,180,0.9)';g.fillRect(5,4,2,1);}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE]); // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378]); // relics for the discovery log (M7)

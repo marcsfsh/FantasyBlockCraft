@@ -29,7 +29,7 @@ const tex=new THREE.CanvasTexture(gpuAtlas);tex.magFilter=THREE.NearestFilter;te
 // No anisotropic filtering (0.12.2, D-035): on Windows, WebGL runs on Direct3D 11, whose anisotropic filter also smooths textures
 // close up, so the nearest-pixel look was lost on desktops while phones (OpenGL ES) kept it
 tex.anisotropy=1;
-let FOGF=settings.view<0?AUTO_VIEW.far:VIEWS[settings.view][1],FOGN=settings.view<0?FOGF*0.55:VIEWS[settings.view][0];
+let FOGF=settings.view<0?AUTO_VIEW.far:viewFog(settings.view)[1],FOGN=settings.view<0?FOGF*0.55:viewFog(settings.view)[0];
 const U={caveMin:{value:0},lampR:{value:13},caveTint:{value:new THREE.Color(0.55,0.66,0.9)},skyTint:{value:new THREE.Color(1,1,1)},skyMul:{value:1},map:{value:tex},fogColor:{value:new THREE.Color(SKY)},fogNear:{value:FOGN},fogFar:{value:FOGF},lamp:{value:0.78},time:{value:0}};
 // Vertex shader. The tops of plants (aov 0.93) sway in the wind (M3b).
 const VS='attribute float light;attribute float blk;attribute float aov;uniform float time;varying vec2 vUv;varying float vL;varying float vB;varying float vA;varying float vD;varying vec3 vW;'+
@@ -141,3 +141,5 @@ class FB{constructor(T){this.T=T;this.a=new T(1024);this.n=0;}
 function newM(){return{p:new FB(Float32Array),u:new FB(Float32Array),l:new FB(Float32Array),b:new FB(Float32Array),a:new FB(Float32Array),i:new FB(Uint32Array)};}
 function mkGeo(m){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(m.p.view().slice(),3));g.setAttribute('uv',new THREE.BufferAttribute(m.u.view().slice(),2));g.setAttribute('light',new THREE.BufferAttribute(m.l.view().slice(),1));g.setAttribute('blk',new THREE.BufferAttribute(m.b.view().slice(),1));g.setAttribute('aov',new THREE.BufferAttribute(m.a.view().slice(),1));g.setIndex(new THREE.BufferAttribute(m.i.view().slice(),1));g.computeBoundingSphere();return g;}
 function wDrop(x,y,z){if(isWetId(get(x,y+1,z)))return 0;return 0.12+lvl[I(x,y,z)]*0.1;}
+// lava's top lies a little low too, and lower the further it has flowed (0.28.0); under a solid block it stays full
+function lDrop(x,y,z){const a=get(x,y+1,z);if(a===LAVA||OPQ[a])return 0;return 0.12+lvl[I(x,y,z)]*0.17;}

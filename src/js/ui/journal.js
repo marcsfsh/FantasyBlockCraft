@@ -15,10 +15,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
-const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below'];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size]];
+const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below','The Goblin Warrens'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{a:[],l:[],y:[],h:[],r:[],q:[]}};
+const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -37,7 +37,7 @@ function discoverTick(dt){
   discT-=dt;if(discT>0||!ready)return;discT=1;
   if(LWX.k)discover('l',LWX.k);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;
-  if(yy<ground[bx+W*bz]-3){discover('y',LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
+  if(yy<ground[bx+W*bz]-3){discover('y',warrenName(X,yy,Z)?LAYER_BANDS[6]:LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
     if(yy<100&&ruinZone(cx,cz))discover('h',holdOf(cx,cz).name);const m=remainsNear(X,yy,Z);if(m)discover('r',m.name);}
 }
 // The journal: chronicle pages by hold (pages not yet found are marked), the tablets read, and the discovery log

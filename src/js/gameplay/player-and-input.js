@@ -69,7 +69,7 @@ const HEADINGS=['north','north-west','west','south-west','south','south-east','e
 const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 // Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
 // its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
-const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag'},equip={belt:null,pack:null,bag:null};
+const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag',body:'Body'},equip={belt:null,pack:null,bag:null,body:null}; // body: armour (D-052)
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
 function invCap(s,id){let n=36;for(const k of ['pack','bag']){const q=k===s?(id?{id:id}:null):equip[k];if(q&&ITEMS[q.id].slots)n+=ITEMS[q.id].slots;}return n;} // with slot s holding id instead, if given

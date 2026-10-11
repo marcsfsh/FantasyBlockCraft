@@ -77,6 +77,9 @@ const AMB_EV={
   creak:at=>{tone(150,95,0.7,0.035,0,'sawtooth',at);},
   wind:at=>{burst(1.6,'bandpass',300+Math.random()*200,0.8,0.08,0,at);},
   crackle:at=>{for(let i=0;i<2+(Math.random()*3|0);i++)burst(0.03,'highpass',2600+Math.random()*2400,0.7,0.05,i*0.05+Math.random()*0.04,at);},
+  // the goblin warrens (D-052): war drums far off in the rock, and goblin chatter
+  drums:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1],at[2]+(at[2]-PL.z)*2],beat=[0,0.36,0.72,1.44,1.8,2.16,2.88];for(const t of beat){burst(0.16,'lowpass',110,0.9,0.24,t,far);tone(70,52,0.18,0.12,t,null,far);}},
+  chatter:at=>{for(let i=0;i<3+(Math.random()*4|0);i++)voice(560+Math.random()*320,700+Math.random()*200,0.09,0.035,{type:'square',form:1300,q:2.2,delay:i*0.13+Math.random()*0.06},at);},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -106,6 +109,8 @@ const ambNight=()=>{const t=curT();return t<0.23||t>0.77;};
 function ambProfile(){
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z),yy=Math.floor(PL.y),inside=bx>=0&&bz>=0&&bx<W&&bz<D,g=inside?ground[bx+W*bz]:yy;
   if(yy<g-4){const X=bx+OX,Z=bz+OZ,cx=Math.floor(X/CS),cz=Math.floor(Z/CS),hold=yy<100&&yy>=20&&ruinZone(cx,cz),L=ambLayer(yy,hold,hold&&holdNear(cx,cz).inhabited);
+    if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
+    if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
   const P=ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;

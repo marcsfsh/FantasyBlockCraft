@@ -17,8 +17,8 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
-    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,BASBRICK,EMBRICK,HIDE,GRATE,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
   CATS.forEach(([title,ids])=>{const h=document.createElement('div');h.className='inv-h';h.textContent=title;g.appendChild(h);
@@ -38,9 +38,15 @@ $('inv').addEventListener('click',e=>{if(e.target.id==='inv')closeInv();});
 updateKeysHelp();
 const fovr=$('fovr');fovr.value=settings.fov;fovr.addEventListener('input',()=>{settings.fov=+fovr.value;lsSet(SET_KEY,settings);});
 const sens=$('sens');sens.value=settings.sens;sens.addEventListener('input',()=>{settings.sens=+sens.value;lsSet(SET_KEY,settings);});
-function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));if(settings.view<0){FOGF=AUTO_VIEW.far;FOGN=FOGF*0.55;}else{FOGN=VIEWS[settings.view][0];FOGF=VIEWS[settings.view][1];}}
+function drawView(){[...$('viewseg').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.view));if(settings.view<0){FOGF=AUTO_VIEW.far;FOGN=FOGF*0.55;}else{[FOGN,FOGF]=viewFog(settings.view);}
+  [...$('viewseg').querySelectorAll('button')].forEach(b=>{b.disabled=+b.dataset.v>=0&&VIEWS[+b.dataset.v][1]>VIEW_MAX+20;});} // the farthest views need a wider loaded area
 $('viewseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings.view=+v;lsSet(SET_KEY,settings);drawView();});
 drawView();
+// The loaded area (D-057): kept in the settings and used from the next start, so the game saves and starts again at once
+{const el=$('areaseg'),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',+b.dataset.v===settings.area));draw();
+  el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined||+v===settings.area)return;settings.area=+v;lsSet(SET_KEY,settings);draw();
+    const want=settings.area>=0?AREAS[settings.area]:autoArea(navigator);if(want!==AREA){toast('Loading the world again with the new area');saveNow();setTimeout(()=>location.reload(),300);}});
+  $('areanote').textContent='now '+AREA+' blocks across';}
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
@@ -52,6 +58,8 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
 ['gox','goy','goz'].forEach(id=>$(id).addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('gobtn').click();}));
 {const sel=$('animsel');for(const k in ANIMALS){for(const yg of [0,1]){if(yg&&!ANIMALS[k].youngP)continue;const o=document.createElement('option');o.value=k+(yg?'.y':'');o.textContent=yg?'  young '+ANIMALS[k].n.toLowerCase():ANIMALS[k].n;sel.appendChild(o);}}
   $('animbtn').addEventListener('click',()=>{if(bringAnimal(sel.value))lockOrPlay();});}
+{const sel=$('foesel');for(const k in FOES){const o=document.createElement('option');o.value=k;o.textContent=FOES[k].n;sel.appendChild(o);}
+  $('foebtn').addEventListener('click',()=>{if(bringFoe(sel.value))lockOrPlay();});}
 {const sel=$('stampsel');for(const k in STAMPS){const o=document.createElement('option');o.value=k;o.textContent=STAMPS[k];sel.appendChild(o);}
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];

@@ -42,7 +42,7 @@ let fireBoltT=3;
 function strike(storm,ahead){
   const X=PL.x+OX,Z=PL.z+OZ;let X1,Y1,Z1,top;
   const vs=storm||ahead?[]:volcanoesNear(X,Z,170);
-  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],a=Math.random()*6.28,r=Math.random()*v.rc;X1=v.X+Math.cos(a)*r;Z1=v.Z+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
+  if(vs.length&&Math.random()<0.5){const v=vs[Math.random()*vs.length|0],S=volcShape(v),a=Math.random()*6.28,r=Math.random()*v.rc;X1=S.cx+Math.cos(a)*r;Z1=S.cz+Math.sin(a)*r;Y1=v.rimTop-2;top=Y1+30+Math.random()*30;}
   else{const yaw=PL.yaw+(ahead?0.15:(Math.random()-0.5)*2.6),d=ahead?70:35+Math.random()*110;X1=X-Math.sin(yaw)*d;Z1=Z-Math.cos(yaw)*d;Y1=hAt(Math.round(X1),Math.round(Z1))+1;top=Math.min(H-4,Y1+60+Math.random()*40);}
   const b=makeBolt(X1+(Math.random()-0.5)*20,top,Z1+(Math.random()-0.5)*20,X1,Y1,Z1,storm);b.at=[X1-OX,Y1,Z1-OZ];
   const dist=Math.hypot(X1-X,Z1-Z);flash=Math.max(flash,Math.min(1,1.3-dist/180));
@@ -61,17 +61,62 @@ function puffTexture(){if(puffTex)return puffTex;const cv=document.createElement
   for(let k=0;k<7;k++){const x=20+Math.random()*24,y=20+Math.random()*24,r=12+Math.random()*12,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,0.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);}
   puffTex=new THREE.CanvasTexture(cv);return puffTex;}
 const plumes=new Map(),PUFFS=34,smokeC=new THREE.Color(0.15,0.12,0.11),fireC=new THREE.Color(0.85,0.3,0.1);
-function newPuff(p,v,age){p.age=age;p.life=36+Math.random()*24;p.X=v.X+(Math.random()-0.5)*v.rc;p.Z=v.Z+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;p.vy=4+Math.random()*2;p.s0=10+Math.random()*6;p.s1=42+Math.random()*24;
+function newPuff(p,v,age){const S=volcShape(v);p.age=age;p.life=36+Math.random()*24;p.X=S.cx+(Math.random()-0.5)*v.rc;p.Z=S.cz+(Math.random()-0.5)*v.rc;p.Y=v.lake+2;const gs=v.great?1.8:1;p.vy=(4+Math.random()*2)*gs;p.s0=(10+Math.random()*6)*gs;p.s1=(42+Math.random()*24)*gs; // the great volcano's plume is the greatest
   for(let t=0;t<age;t+=0.5)movePuff(p,0.5);}
 function movePuff(p,dt){p.Y+=p.vy*dt;p.vy=Math.max(1.2,p.vy-dt*0.15);p.X+=1.6*dt;p.Z+=0.6*dt;}
 function updPlumes(dt){
   const X=PL.x+OX,Z=PL.z+OZ,near=LWX.burn>0.05||plumes.size?volcanoesNear(X,Z,300):[],keep=new Set();
-  for(const v of near){const k=v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
+  for(const v of near){const k=v.key||v.i+','+v.j;keep.add(k);let pl=plumes.get(k);
     if(!pl){pl={v:v,puffs:[]};for(let n=0;n<PUFFS;n++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:puffTexture(),transparent:true,depthWrite:false,color:smokeC.clone()}));scene.add(s);const p={s:s};newPuff(p,v,Math.random()*50);pl.puffs.push(p);}plumes.set(k,pl);}
     for(const p of pl.puffs){p.age+=dt;movePuff(p,dt);if(p.age>p.life)newPuff(p,v,0);const f=p.age/p.life,sz=p.s0+(p.s1-p.s0)*Math.sqrt(f),d=Math.hypot(p.X-X,p.Z-Z);
       p.s.position.set(p.X-OX,p.Y,p.Z-OZ);p.s.scale.set(sz,sz,1);p.s.material.color.copy(smokeC).lerp(fireC,Math.max(0,1-p.age/7)).multiplyScalar(0.55+0.45*U.skyMul.value+0.3*Math.max(0,1-p.age/7));
       p.s.material.opacity=0.82*Math.min(1,p.age/3)*Math.min(1,(p.life-p.age)/8)*(1-sstep(U.fogFar.value*2.2,U.fogFar.value*3.2,d));}}
   for(const [k,pl] of plumes)if(!keep.has(k)){for(const p of pl.puffs){scene.remove(p.s);p.s.material.dispose();}plumes.delete(k);}
+}
+// ---- The wastes from afar (D-055). The world loaded about you is 224 blocks across, too small for a basin 800 wide and a great
+// volcano 500 across, so a stand-in of each basin near you is drawn behind everything (the ground draws over it wherever it is
+// loaded): the floor, the ring of ash mountains, and the great volcano with its burning crater and flows, hazed by distance.
+// It is built a few rays a frame from the plan, and scaled toward the eye (which leaves the picture unchanged) to stay inside
+// the far plane. Cosmetic, never saved.
+const FARW_K=160,farW=new Map(),TFW={},
+  FARW_VS='uniform float scl;attribute vec3 acol;attribute float agl;varying vec3 vC;varying float vG;varying float vT;void main(){vC=acol;vG=agl;vec4 mv=modelViewMatrix*vec4(position,1.0);vT=length(mv.xyz)/scl;gl_Position=projectionMatrix*mv;}',
+  FARW_FS='uniform vec3 fogColor;uniform float skyMul;varying vec3 vC;varying float vG;varying float vT;void main(){float hz=clamp(0.1+vT/1600.0,0.1,0.8);vec3 c=mix(vC*(0.45+0.55*skyMul),fogColor,hz);gl_FragColor=vec4(mix(c,vec3(1.0,0.42,0.1),vG*(1.0-hz*0.55)),1.0);}'; // hazed by the true distance (vT)
+let farWT=0;
+// one ray out from the great volcano's heart: [distance, height above its foot, r, g, b, glow] for each point
+function farWasteRay(F,k){
+  const g=F.g,th=k/FARW_K*6.2832,ux=Math.cos(th),uz=Math.sin(th),o=TFW,out=[];
+  let lo=g.R*1.3,hi=-1;for(let d=lo;d<1500;d+=24){landsAt(Math.round(g.X+ux*d),Math.round(g.Z+uz*d),o);if(o.bs>=0){hi=d;break;}lo=d;}
+  if(hi<0)hi=1500;for(let q=0;q<4;q++){const m=(lo+hi)/2;landsAt(Math.round(g.X+ux*m),Math.round(g.Z+uz*m),o);if(o.bs>=0)hi=m;else lo=m;}
+  const e=hi,cd=e+WB_IN+WB_CR/2,cX=g.X+ux*cd,cZ=g.Z+uz*cd,rg=1-Math.abs(fbm2(cX/70,cZ/70,2,9203.1)),cr=SEA+78+rg*rg*rg*42-sstep(0.2,0.5,fbm2(cX/300,cZ/300,1,9205.7))*30-g.base;
+  let flow=0;for(const f of g.fl)if(Math.round(((f.a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)flow=Math.max(flow,f.len);
+  let old=false;for(const a of g.old)if(Math.round(((a%6.2832)+6.2832)%6.2832/6.2832*FARW_K)%FARW_K===k)old=true;
+  // the cone through its own shape (volcShape): its warped foot, leaning top, scar, gullies and shoulder cones
+  const S=volcShape(g),cone=D=>{const X=g.X+ux*D,Z=g.Z+uz*D,[d,th]=volcFrame(g,S,X,Z);if(d>=g.R)return [0,0,d,th];const b=volcCone(g,S,d,th,X,Z);return d<g.rc&&b<g.lake-g.base?[g.lake-g.base,1,d,th]:[b,0,d,th];};
+  for(const D of [0,g.rc*0.5,g.rc*0.9,g.rc*1.05].concat([0.04,0.08,0.14,0.2,0.27,0.33,0.4,0.46,0.53,0.6,0.67,0.74,0.81,0.88,0.94,0.97].map(t=>g.rc+(g.R-g.rc)*t),[g.R*1.12,g.R*1.3])){const [h,lk,d,th]=cone(D),q=Math.max(0,Math.min(1,h/g.Hv));
+    let fw=0;for(const f of g.fl)if(d>=g.rc&&d<=g.R*f.len&&Math.abs(angDiffV(th,f.a+0.33*Math.sin(d/11)))*d<4)fw=0.85;
+    const gl=lk?1:fw||(flow&&d>=g.rc&&d<=g.R*flow?0.85:old&&d>g.rc*1.5&&d<g.R*0.95?0.25:d>=g.rc*0.9&&d<=g.rc*1.1?0.2:0);out.push(D,h,0.12+0.08*q,0.1+0.05*q,0.09+0.04*q,gl);}
+  out.push(e,0,0.1,0.085,0.08,0);
+  for(const t of [0.25,0.5,0.75,1]){const p=t*t*(3-2*t)*0.7+t*0.3;out.push(e+WB_IN*t,cr*p,0.13+0.04*t,0.11+0.04*t,0.1+0.04*t,0);}
+  out.push(e+WB_IN+WB_CR,cr,0.19,0.17,0.16,0,e+WB_END,SEA+8-g.base,0.16,0.14,0.13,0);
+  F.rays[k]={ux:ux,uz:uz,p:out};
+}
+function farWasteMesh(F){
+  const N=F.rays[0].p.length/6,pos=[],col=[],gl=[],idx=[];let ext=0;
+  for(let k=0;k<FARW_K;k++){const r=F.rays[k];for(let i=0;i<N;i++){const q=r.p,j=i*6;pos.push(r.ux*q[j],q[j+1],r.uz*q[j]);col.push(q[j+2],q[j+3],q[j+4]);gl.push(q[j+5]);ext=Math.max(ext,q[j]);}}
+  for(let k=0;k<FARW_K;k++){const k2=(k+1)%FARW_K;for(let i=0;i+1<N;i++){const a=k*N+i,b=k2*N+i;idx.push(a,b,a+1,a+1,b,b+1);}}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('acol',new THREE.Float32BufferAttribute(col,3));geo.setAttribute('agl',new THREE.Float32BufferAttribute(gl,1));geo.setIndex(idx);
+  const m=new THREE.Mesh(geo,new THREE.ShaderMaterial({uniforms:{fogColor:U.fogColor,skyMul:U.skyMul,scl:{value:1}},vertexShader:FARW_VS,fragmentShader:FARW_FS,side:THREE.DoubleSide,depthWrite:false}));
+  m.renderOrder=-4;m.frustumCulled=false;scene.add(m);F.mesh=m;F.ext=ext;F.rays=null;
+}
+function updFarWastes(dt){
+  farWT-=dt;const X=PL.x+OX,Z=PL.z+OZ;
+  if(farWT<=0){farWT=1.5;const keep=new Set();for(const g of greatNear(X,Z,1500))if(g.great&&Math.hypot(g.X-X,g.Z-Z)<1700){keep.add(g.key);if(!farW.has(g.key))farW.set(g.key,{g:g,k:0,rays:[],mesh:null});}
+    for(const [k,F] of farW)if(!keep.has(k)){if(F.mesh){scene.remove(F.mesh);F.mesh.geometry.dispose();F.mesh.material.dispose();}farW.delete(k);}}
+  const bx=Math.floor(PL.x),bz=Math.floor(PL.z),under=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y<ground[bx+W*bz]-6;
+  for(const F of farW.values()){
+    if(!F.mesh){for(let n=0;n<24&&F.k<FARW_K;n++)farWasteRay(F,F.k++);if(F.k>=FARW_K)farWasteMesh(F);continue;}
+    const g=F.g,m=F.mesh,c=camera.position,px=g.X-OX,pz=g.Z-OZ,d=Math.hypot(px-c.x,pz-c.z),k=Math.min(1,560/(d+F.ext));m.visible=!under;
+    m.position.set(c.x+(px-c.x)*k,c.y+(g.base-c.y)*k,c.z+(pz-c.z)*k);m.scale.setScalar(k);m.material.uniforms.scl.value=k;}
 }
 // vent smoke: a pool of small soft puffs that rise, spread and fade
 const vpuffs=[];
@@ -84,15 +129,24 @@ let fireScanT=0,lavaSpots=[],ventSpots=[],bombT=4;
 function fireScan(){lavaSpots=[];ventSpots=[];const px=Math.floor(PL.x),pz=Math.floor(PL.z);
   for(let dz=-22;dz<=22;dz+=2)for(let dx=-22;dx<=22;dx+=2){const x=px+dx,z=pz+dz;if(x<0||z<0||x>=W||z>=D)continue;const ci=x+W*z,y=hm[ci],id=world[I(x,y,z)];
     if(id===LAVA)lavaSpots.push([x,y,z]);else if(id===VENT||world[I(x,ground[ci],z)]===VENT)ventSpots.push([x,ground[ci],z]);}}
+// Underground in the goblin warrens or an Emberlord's fortress (D-052) the dark glows red: the cave fog and the cave's own dim
+// light warm to fire, and embers drift in the air (warF, eased; main-loop's cave light reads it)
+let warF=0,warT=0,warIn=false;
+function warGlowTick(dt){
+  warT-=dt;if(warT<=0){warT=0.5;const bx=Math.floor(PL.x),bz=Math.floor(PL.z),yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;warIn=bx>=0&&bz>=0&&bx<W&&bz<D&&yy<ground[bx+W*bz]-3&&!!(warrenName(X,yy,Z)||fortName(X,yy,Z));}
+  warF+=((warIn?1:0)-warF)*Math.min(1,dt*0.8);
+  caveDark.setRGB(0.035+0.085*warF,0.04-0.012*warF,0.06-0.038*warF);U.caveTint.value.setRGB(0.55+0.45*warF,0.66-0.18*warF,0.9-0.64*warF);
+  if(warF>0.3&&playing)for(let k=0;k<6*dt*warF;k++)spawnP(PL.x+(Math.random()-0.5)*20,PL.y+Math.random()*5-1,PL.z+(Math.random()-0.5)*20,(Math.random()-0.5)*0.3,0.25+Math.random()*0.4,(Math.random()-0.5)*0.3,[1,0.4,0.1],2.5+Math.random()*2,-0.05);
+}
 function fireTick(dt){
-  if(!ready)return;updBolts(dt);updPlumes(dt);updVentPuffs(dt);
+  if(!ready)return;updBolts(dt);updPlumes(dt);updFarWastes(dt);updVentPuffs(dt);warGlowTick(dt);
   const b=LWX.burn;if(b<0.05||!playing)return;
   fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=1.5+Math.random()*5;if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
   fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}
   for(let k=0;k<lavaSpots.length*dt*0.6;k++){const s=lavaSpots[Math.random()*lavaSpots.length|0];spawnP(s[0]+Math.random(),s[1]+1.05,s[2]+Math.random(),(Math.random()-0.5)*0.8+0.4,1.2+Math.random()*2.2,(Math.random()-0.5)*0.8,[1,0.35+Math.random()*0.35,0.08],1.2+Math.random()*2,-0.5);}
   for(let k=0;k<12*dt*b;k++)spawnP(PL.x+(Math.random()-0.5)*30,PL.y+Math.random()*8-2,PL.z+(Math.random()-0.5)*30,0.6+Math.random()*0.4,0.4+Math.random()*0.8,(Math.random()-0.5)*0.5,[1,0.42,0.1],2+Math.random()*2,-0.15); // embers on the wind
   for(const s of ventSpots)if(Math.random()<dt*2.5)ventPuff(s);
-  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const at=[v.X-OX,v.lake+1,v.Z-OZ];
+  bombT-=dt;if(bombT<=0){bombT=3+Math.random()*6;for(const v of volcanoesNear(PL.x+OX,PL.z+OZ,130)){const S=volcShape(v),at=[S.cx-OX,v.lake+1,S.cz-OZ];
       for(let k=0;k<14;k++){const a=Math.random()*6.28,s=2+Math.random()*5;spawnP(at[0]+(Math.random()-0.5)*v.rc*0.8,at[1],at[2]+(Math.random()-0.5)*v.rc*0.8,Math.cos(a)*s,12+Math.random()*12,Math.sin(a)*s,[1,0.5+Math.random()*0.3,0.1],3.5,9);}
       burst(1.2,'lowpass',110,0.6,0.4*Math.max(0.1,1-Math.hypot(v.X-PL.x-OX,v.Z-PL.z-OZ)/200),0,at);}}
 }

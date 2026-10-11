@@ -6,6 +6,9 @@
 //   node tools/shot.mjs --view=gate:824,330,1700,3.1,-0.6,0.3     name:X,Y,Z,yaw,pitch[,time of day 0 to 1]
 //   node tools/shot.mjs --view=... --animals[=deer.s,sheep.y,horse.2,hen.w]   animals lined up in front of the camera (E1), held
 //   node tools/shot.mjs --view=... --bolt     a lightning bolt strikes just before the shot (the Volcanic Wastes, D-051)
+//   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep;
+//        a third part turns it (ember.w.90: side on), and --far=30 stands an Emberlord further off
+//   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
 // Uses the Playwright that is installed globally on the cloud VM (no project dependency, D-026). Builds a copy of the game
@@ -30,7 +33,7 @@ const {chromium}=require('playwright');
 const HOOK=`window.__fbc={
   go(X,Y,Z,yaw,pitch,t){
     if(Math.abs(X-(OX+W/2))>40||Math.abs(Z-(OZ+D/2))>40)regenerateAll(X,Z);
-    if(SURV())setMode('creative');fallTop=null;hp=20;dead=false;$('death').style.display='none';settings.view=2;drawView();
+    if(SURV())setMode('creative');fallTop=null;hp=20;dead=false;$('death').style.display='none';settings.view=${Number(args.viewd??2)};drawView();
     if(!PL.fly)toggleFly();PL.x=X-OX+0.5;PL.y=Y;PL.z=Z-OZ+0.5;PL.yaw=yaw;PL.pitch=pitch;PL.vx=PL.vy=PL.vz=0;
     if(t!==undefined){settings.time='fixed';tod=t;}settings.weather=false;rainAmt=0;raining=false;
     playing=true;$('overlay').style.display='none';setPhoto(true);landWeatherNow();
@@ -38,6 +41,15 @@ const HOOK=`window.__fbc={
     return {fog:FOGF,surf:MB.surf,queued:genQ.length,dirty:dirty.size};
   },
   bolt(){flash=0;const b=strike(false,true);b.hold=1;flash=0.2;},
+  // foes in a row (or two) ahead of the camera, three-quarter on, held still: walking, winding up, asleep (D-052)
+  stageFoes(kinds,sec){
+    foeT=999;for(const f of [...foes])removeFoe(f);const ks=kinds.length?kinds:Object.keys(FOES),cols=Math.ceil(ks.length/2);
+    const fx=-Math.sin(PL.yaw),fz=-Math.cos(PL.yaw),rx=Math.cos(PL.yaw),rz=-Math.sin(PL.yaw);
+    ks.forEach((k,i)=>{const [kk,md,turn]=k.split('.'),big=FOES[kk].tall>2,huge=FOES[kk].tall>6,row=ks.length<4?0:i%2,col=ks.length<4?i:Math.floor(i/2),n=ks.length<4?ks.length:cols,side=(col-(n-1)/2)*(big?4.2:2.2),d=(huge?${Number(args.far||20)}:big?7:3.6)+row*3;
+      const x=PL.x+fx*d+rx*side,z=PL.z+fz*d+rz*side,g=ground[Math.floor(x)+W*Math.floor(z)],y=foeStand(x,PL.y<g-3?PL.y-1:g+1,z,FOES[kk].tall||2);if(y<0)return; // underground, on the floor near the camera
+      const f=addFoe(kk,x,y,z,md==='z'?{st:'sleep',t:999}:{});f.yaw=f.hd=PL.yaw+(turn!==undefined?+turn*Math.PI/180:((i%3)-1)*0.45);f.hold=1;if(md==='w')f.holdSp=FOES[kk].walk;if(md==='a'){f.atkK=FOES[kk].shot&&kk!=='troll'?'shot':'blow';f.holdAtk=(FOES[kk].wind||0.4)*0.35;}});
+    for(let i=0;i<Math.round((sec||0.5)/0.02);i++)updFoes(0.02);return foes.length;
+  },
   // animals in two rows ahead of the camera, side on or three-quarter, still; then a few frames of their update
   stage(kinds,sec){
     for(const a of [...animals])removeAnimal(a);const ks=kinds.length?kinds:Object.keys(ANIMALS),cols=Math.ceil(ks.length/2);
@@ -58,6 +70,7 @@ const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader',
 const p=await b.newPage({viewport:{width:Number(args.w||960),height:Number(args.h||540)}});
 const errors=[];p.on('pageerror',e=>errors.push('page error: '+e.message));
 p.on('console',m=>{const t=m.text();if(m.type()==='error'||/shader|WebGLProgram|GL_INVALID/i.test(t))errors.push(m.type()+': '+t.slice(0,400));});
+if(args.area!==undefined)await p.addInitScript(a=>{try{localStorage.setItem('blockcraft-settings-v1',JSON.stringify({area:a}));}catch(e){}},Number(args.area)); // the loaded area (D-057), read at start
 await p.goto('file://'+html);
 await p.waitForFunction(()=>window.__fbc,null,{timeout:180000});
 for(const [name,X,Y,Z,yaw,pitch,t] of views){
@@ -65,6 +78,7 @@ for(const [name,X,Y,Z,yaw,pitch,t] of views){
   if(args.animals!==undefined)await p.evaluate(k=>window.__fbc.stage(k?k.split(','):[],1),args.animals);
   await p.waitForTimeout(1500);
   if(args.bolt!==undefined)await p.evaluate(()=>window.__fbc.bolt());
+  if(args.foes!==undefined)await p.evaluate(k=>window.__fbc.stageFoes(k?k.split(','):[],1),args.foes);
   const file=path.join(out,seed+'-'+name+'.png');await p.screenshot({path:file});
   console.log('shot '+path.relative(ROOT,file)+'  fog '+Math.round(r.fog)+(r.surf?' surface':' cave')+' mode');
 }

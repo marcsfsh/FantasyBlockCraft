@@ -34,6 +34,10 @@
       "about": "Lands (M6a): the registry, the transition map of which lands may border which, the cell layout, blend weights and stretch names"
     },
     {
+      "path": "world/wastes.js",
+      "about": "The sunken wastes (D-055): the basins of the Volcanic Wastes, their ring of ash mountains, their land and ground"
+    },
+    {
       "path": "world/caves.js",
       "about": "Cave systems (D-029): plans per region (trunks, branches, loops, chambers, descents, links, gorges, lava falls, stream pools), carving, cave anchors, lakes"
     },
@@ -118,6 +122,14 @@
       "about": "The Volcanic Wastes (D-051): volcanoes in the terrain, lava flows, rivers and fissures, the burnt ground, charred trees, the citadel and the rift"
     },
     {
+      "path": "world/fortress.js",
+      "about": "The Emberlords' fortresses cut into the great volcanoes (D-052): plan per volcano (fortOf), trusted lava troughs, names, spawn spots, per-chunk building"
+    },
+    {
+      "path": "world/warrens.js",
+      "about": "The goblin warrens under the Volcanic Wastes (D-052): halls, tunnels, ways in and down planned with the cave systems, lava channels, per-chunk dressing and camps, spawn spots"
+    },
+    {
       "path": "world/chunk-generation.js",
       "about": "Per-chunk features, ores, plants, the underground water drain and the genChunk pipeline"
     },
@@ -190,8 +202,16 @@
       "about": "Animal models (E1 refined): boxes in pixels with their own textures painted per coat, a shader lit like the world, shadows"
     },
     {
+      "path": "engine/foe-models.js",
+      "about": "The foes' models (D-052): goblins, orcs, the ash troll and the Emberlord as pixel-box kinds of the animal models, with glowing eyes, cracks and flames"
+    },
+    {
       "path": "gameplay/wildlife.js",
       "about": "Animals (E1): kinds by land, wandering and fleeing, hunting, wool, milk and eggs, riding, a hound and a pack mule that follow you"
+    },
+    {
+      "path": "gameplay/foes.js",
+      "about": "Foes of the Volcanic Wastes (D-052): orcs, trolls, goblins and the Emberlords; places they live, spawning, sight, chase, blows, shots, the player striking them, drops, armour"
     },
     {
       "path": "input/touch.js",
