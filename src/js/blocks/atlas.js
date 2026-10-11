@@ -457,6 +457,30 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     const ex=x%8-3.5,ey=y%8-3.5,er=Math.hypot(ex,ey);P(322,x,y,er>3.9?sh([58,48,42],(hn(x,y,445)-.5)*14):sh([132,104,78],(er>3?-38:Math.floor(er)%2?-14:6)+(hn(x,y,446)-.5)*14));
     const px=x%8,py=y%8,seam=px===0||py===0,rv=(px===2||px===6)&&(py===2||py===6),rust=hn(x,0,447)<0.3&&hn(x,y>>2,448)<0.6;
     P(323,x,y,seam?sh([72,72,78],(hn(x,y,449)-.5)*10):rv?sh([168,166,170],(px===2&&py===2?14:0)):rust?sh([132,86,56],(hn(x,y,450)-.5)*22):sh([112,112,120],(py===1?14:py===7?-10:0)+(hn(x,y,451)-.5)*14));}
+  // the wood elves (D-065): goldbough bark, smooth and silver-grey, streaked and pricked with pale lenticels; its end, pale gold
+  // rings in a grey rim; its planks, pale gold, four to a face, finely grained; its leaves, gold with paler tips, open between;
+  // the woodland lamp, a pale light in a cage of curling silver; the woven rail, two rails of withies with a twist between;
+  // carved wood, warm brown with flowing lines like roots and leaves; rootstone, grey stone carved in twisting roots; a
+  // clipped hedge, dense small leaves; the banner of the wood, a golden leaf on green under a carved rod; leaf thatch, rows of
+  // overlapping leaves in green and gold
+  for(const t of [327,328,329,333])clear(t);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const st=hn(x,0,461)<0.3?-10:0,len=hn(x>>1,y>>2,462)<0.07&&y%4===1;
+    P(324,x,y,len?[228,226,214]:sh([170,172,170],st+(hn(x,y>>3,463)-.5)*10+(hn(x,y,464)-.5)*8+(x%5===0?-8:0)));
+    const rr=Math.hypot(x-7.5,y-7.5);P(325,x,y,rr>7?sh([150,152,150],(hn(x,y,465)-.5)*10):sh([216,200,156],(Math.floor(rr*1.3)%2?-14:6)+(hn(x,y,466)-.5)*8));
+    const bd=y%4,sm=(hn(0,y>>2,467)*8)|0,jt=((x+sm)%16)===0;P(326,x,y,bd===3||jt?sh([150,136,100],(hn(x,y,468)-.5)*8):sh([206,192,150],(bd===0?8:0)+(hn(x,y>>2,469)-.5)*12+((x+y*3)%7===0?-6:0)));
+    const lf=hn(x,y,470);if(lf>0.2)P(327,x,y,sh(lf>0.85?[248,222,120]:lf>0.5?[226,182,62]:[188,140,40],(hn(x,y,471)-.5)*24));
+    const cage=(Math.abs(x-7.5)>4.5&&Math.abs(x-7.5)<5.6&&y>3&&y<14)||(y===3||y===14)&&x>=3&&x<=12,curl=y<3&&Math.abs(Math.hypot(x-7.5,y-3)-2.6)<0.6;
+    if(cage||curl)P(328,x,y,sh([206,214,222],(hn(x,y,472)-.5)*14));else if(x>3&&x<12&&y>3&&y<14)P(328,x,y,sh([226,240,255],-Math.hypot(x-7.5,y-8.5)*3.5));
+    const rail=(y>=2&&y<=3)||(y>=11&&y<=12),post=x<=1||x>=14,tw=y>3&&y<11&&Math.abs(((x+y*0.8)%6)-3)<0.8;
+    if(rail||post||tw)P(329,x,y,sh([164,132,84],(rail&&(y===2||y===11)?12:0)+(post&&(x===0||x===15)?-14:0)+(hn(x,y,473)-.5)*14));
+    const fl=Math.sin(x*0.6+Math.sin(y*0.45)*2.2),fl2=Math.sin(y*0.5+Math.cos(x*0.4)*2);P(330,x,y,sh([142,98,60],(Math.abs(fl)<0.18?-30:Math.abs(fl2)<0.15?-20:fl>0?8:0)+(hn(x,y,474)-.5)*10));
+    const rt=Math.abs(Math.sin(x*0.5+Math.sin(y*0.35+x*0.2)*1.8))<0.22,rt2=Math.abs(Math.sin(y*0.7+x*0.15))<0.12;P(331,x,y,sh([150,144,132],(rt?-30:rt2?-18:6)+(hn(x>>1,y>>1,475)-.5)*14+(hn(x,y,476)-.5)*6));
+    P(332,x,y,sh(hn(x,y,477)<0.3?[52,104,40]:[76,132,56],(hn(x,y,478)-.5)*26+((x+y)%4===0?10:0)));
+    if(y===0)P(333,x,y,[150,112,70]);else{const lfx=x-7.5,lfy=y-7,inLeaf=(lfx*lfx)/8+(lfy*lfy)/26<1&&lfy<6,vein=Math.abs(lfx)<0.6&&inLeaf,sw=y>=13&&Math.abs(x-7.5)<(y-12)*1.5;
+      if(!sw)P(333,x,y,x<=1||x>=14?sh([196,160,64],(hn(x,y,479)-.5)*10):vein?[150,110,30]:inLeaf?sh([232,190,70],(hn(x,y,480)-.5)*12+(lfy<0?8:0)):sh([40,86,48],(hn(x,y,481)-.5)*10+(x%4===0?-6:0)));}
+    const ry=y%4,rx=(x+(Math.floor(y/4)%2)*3)%6;P(334,x,y,sh(Math.floor(y/4)%2?[118,140,60]:[176,150,64],(ry===3?-26:ry===0?12:0)+(rx===0?-14:0)+(hn(x,y,482)-.5)*14));
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

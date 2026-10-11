@@ -146,6 +146,10 @@
       "about": "Building the high elves of the elder realms (D-062): hidden cities terraced into the mountainside, fastnesses, refuges, watch-spires and gardens; halls with arched windows under swept roofs, slender towers, pavilions, walls and gates, statues, the elven ways"
     },
     {
+      "path": "world/wood-build.js",
+      "about": "Building the wood elves of the forest kingdoms (D-065): cities in the goldboughs (platforms, winding stairs, houses round the trunks, bridges, golden crowns), the king's halls under a hill, tree-villages round feasting glades, watch-trees, glades; the hedge and gate, paths and lamps, the woodland roads"
+    },
+    {
       "path": "world/warrens.js",
       "about": "The goblin warrens under the Volcanic Wastes (D-052): halls, tunnels, ways in and down planned with the cave systems, lava channels, per-chunk dressing and camps, spawn spots"
     },
@@ -236,6 +240,10 @@
     {
       "path": "engine/elf-models.js",
       "about": "The folk of the high elves (D-062): spearwardens, bladewardens, archers, lord-captains and knights in gilded leaf-scale armour over wine-red robes, and lords, ladies, loremasters and smiths, with FOLK_KIT's painters"
+    },
+    {
+      "path": "engine/wood-models.js",
+      "about": "The folk of the wood elves (D-065), with FOLK_KIT's painters: wardens with hoods, cloaks and long bows, blades with two knives, guards of the halls in copper leaves with glaives, captains, the king with a crown of autumn leaves, lords, ladies, the folk of the glades"
     },
     {
       "path": "gameplay/wildlife.js",

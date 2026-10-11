@@ -226,7 +226,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v24',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v25',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -239,7 +239,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=24,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=25,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
@@ -313,7 +313,9 @@ const TOLKIEN=('aragorn arathorn arda arnor arwen azog bagend balin balrog bard 
  // the Noldor and the other elves of the elder days, their kings, cities and lands, so the elder style (D-062) can never draw one
  'hithlum dorthonion eldamar vanyar teleri noldor sindar avari quenya sindarin hollin lindon himring nevrast vinyamar finarfin fingon turgon '+
  'aredhel maeglin idril ecthelion melian doriath menegroth cirdan gildor rumil orophin gilgalad amanyar calacirya taniquetil formenos aman '+
- 'ossiriand maedhros celegorm curufin caranthir amrod amras angrod aegnor orodreth gwindor beleg mablung elwe olwe ingwe finwe indis').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
+ 'ossiriand maedhros celegorm curufin caranthir amrod amras angrod aegnor orodreth gwindor beleg mablung elwe olwe ingwe finwe indis '+
+ // the elves of the woods in the late age, their kings, captains and cities, so the wood elves (D-065) can never draw one
+ 'carasgaladhon galadhrim egladil cerinamroth tauriel oropher galion lasgalen nimloth celebrant silverlode').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
 const TOLKIEN_SET=new Set(TOLKIEN);
 const TOLKIEN_ROOTS=['khaz','durin','moria','mordor','gondor','erebor','sauron','morgoth','thror','thrain','thorin','smaug','rivendell','lorien','isengard','numenor','mithril','nazgul','silmaril','gandalf','aragorn','galadriel','legolas','gimli'];
 const normName=s=>s.toLowerCase().replace(/[^a-z]/g,'');
@@ -547,6 +549,16 @@ def(EVWOOD,'Golden Wood',[319,319,319],{snd:'wood'});def(EVMOSAIC,'Elven Mosaic'
 const ORCLOG=1147,ORCIRON=1148;
 def(ORCLOG,'Black Palisade',[322,322,321],{snd:'wood'});def(ORCIRON,'Riveted Iron',[323,323,323],{snd:'stone'});
 setH([ORCLOG],2,'wood');setH([ORCIRON],6,'metal',2);
+// The wood elves (D-065): the goldbough, their great tree, its silver bark, pale planks and golden leaves; their lamps of pale
+// light, woven rails, wood carved in flowing lines, rootstone (stone carved like roots, for the king's halls), clipped hedges,
+// the banner of the wood (a golden leaf on green), and leaf thatch for their roofs
+const WBARK=1149,WPLANK=1150,WLEAF=1151,WLAMP=1152,WRAIL=1153,WCARVE=1154,WROOT=1155,WHEDGE=1156,WBANNER=1157,WTHATCH=1158;
+def(WBARK,'Goldbough Bark',[325,325,324],{snd:'wood'});def(WPLANK,'Goldbough Planks',[326,326,326],{snd:'wood'});def(WLEAF,'Goldbough Leaves',[327,327,327],LEAFD);
+def(WLAMP,'Woodland Lamp',[328,328,328],{opq:false,occ:false,emit:true,lum:14,snd:'glass'});def(WRAIL,'Woven Rail',[329,329,329],{opq:false,occ:false,snd:'wood'});
+def(WCARVE,'Carved Wood',[326,326,330],{snd:'wood'});def(WROOT,'Rootstone',[331,331,331]);def(WHEDGE,'Clipped Hedge',[332,332,332],{snd:'soft'});
+def(WBANNER,'Banner of the Wood',[333,333,333],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(WTHATCH,'Leaf Thatch',[334,334,334],{snd:'soft'});
+NEW_LOGS.push(WBARK);NEW_PLANKS.push(WPLANK);NEW_LEAVES.push(WLEAF);
+setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
@@ -1142,6 +1154,30 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     const ex=x%8-3.5,ey=y%8-3.5,er=Math.hypot(ex,ey);P(322,x,y,er>3.9?sh([58,48,42],(hn(x,y,445)-.5)*14):sh([132,104,78],(er>3?-38:Math.floor(er)%2?-14:6)+(hn(x,y,446)-.5)*14));
     const px=x%8,py=y%8,seam=px===0||py===0,rv=(px===2||px===6)&&(py===2||py===6),rust=hn(x,0,447)<0.3&&hn(x,y>>2,448)<0.6;
     P(323,x,y,seam?sh([72,72,78],(hn(x,y,449)-.5)*10):rv?sh([168,166,170],(px===2&&py===2?14:0)):rust?sh([132,86,56],(hn(x,y,450)-.5)*22):sh([112,112,120],(py===1?14:py===7?-10:0)+(hn(x,y,451)-.5)*14));}
+  // the wood elves (D-065): goldbough bark, smooth and silver-grey, streaked and pricked with pale lenticels; its end, pale gold
+  // rings in a grey rim; its planks, pale gold, four to a face, finely grained; its leaves, gold with paler tips, open between;
+  // the woodland lamp, a pale light in a cage of curling silver; the woven rail, two rails of withies with a twist between;
+  // carved wood, warm brown with flowing lines like roots and leaves; rootstone, grey stone carved in twisting roots; a
+  // clipped hedge, dense small leaves; the banner of the wood, a golden leaf on green under a carved rod; leaf thatch, rows of
+  // overlapping leaves in green and gold
+  for(const t of [327,328,329,333])clear(t);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const st=hn(x,0,461)<0.3?-10:0,len=hn(x>>1,y>>2,462)<0.07&&y%4===1;
+    P(324,x,y,len?[228,226,214]:sh([170,172,170],st+(hn(x,y>>3,463)-.5)*10+(hn(x,y,464)-.5)*8+(x%5===0?-8:0)));
+    const rr=Math.hypot(x-7.5,y-7.5);P(325,x,y,rr>7?sh([150,152,150],(hn(x,y,465)-.5)*10):sh([216,200,156],(Math.floor(rr*1.3)%2?-14:6)+(hn(x,y,466)-.5)*8));
+    const bd=y%4,sm=(hn(0,y>>2,467)*8)|0,jt=((x+sm)%16)===0;P(326,x,y,bd===3||jt?sh([150,136,100],(hn(x,y,468)-.5)*8):sh([206,192,150],(bd===0?8:0)+(hn(x,y>>2,469)-.5)*12+((x+y*3)%7===0?-6:0)));
+    const lf=hn(x,y,470);if(lf>0.2)P(327,x,y,sh(lf>0.85?[248,222,120]:lf>0.5?[226,182,62]:[188,140,40],(hn(x,y,471)-.5)*24));
+    const cage=(Math.abs(x-7.5)>4.5&&Math.abs(x-7.5)<5.6&&y>3&&y<14)||(y===3||y===14)&&x>=3&&x<=12,curl=y<3&&Math.abs(Math.hypot(x-7.5,y-3)-2.6)<0.6;
+    if(cage||curl)P(328,x,y,sh([206,214,222],(hn(x,y,472)-.5)*14));else if(x>3&&x<12&&y>3&&y<14)P(328,x,y,sh([226,240,255],-Math.hypot(x-7.5,y-8.5)*3.5));
+    const rail=(y>=2&&y<=3)||(y>=11&&y<=12),post=x<=1||x>=14,tw=y>3&&y<11&&Math.abs(((x+y*0.8)%6)-3)<0.8;
+    if(rail||post||tw)P(329,x,y,sh([164,132,84],(rail&&(y===2||y===11)?12:0)+(post&&(x===0||x===15)?-14:0)+(hn(x,y,473)-.5)*14));
+    const fl=Math.sin(x*0.6+Math.sin(y*0.45)*2.2),fl2=Math.sin(y*0.5+Math.cos(x*0.4)*2);P(330,x,y,sh([142,98,60],(Math.abs(fl)<0.18?-30:Math.abs(fl2)<0.15?-20:fl>0?8:0)+(hn(x,y,474)-.5)*10));
+    const rt=Math.abs(Math.sin(x*0.5+Math.sin(y*0.35+x*0.2)*1.8))<0.22,rt2=Math.abs(Math.sin(y*0.7+x*0.15))<0.12;P(331,x,y,sh([150,144,132],(rt?-30:rt2?-18:6)+(hn(x>>1,y>>1,475)-.5)*14+(hn(x,y,476)-.5)*6));
+    P(332,x,y,sh(hn(x,y,477)<0.3?[52,104,40]:[76,132,56],(hn(x,y,478)-.5)*26+((x+y)%4===0?10:0)));
+    if(y===0)P(333,x,y,[150,112,70]);else{const lfx=x-7.5,lfy=y-7,inLeaf=(lfx*lfx)/8+(lfy*lfy)/26<1&&lfy<6,vein=Math.abs(lfx)<0.6&&inLeaf,sw=y>=13&&Math.abs(x-7.5)<(y-12)*1.5;
+      if(!sw)P(333,x,y,x<=1||x>=14?sh([196,160,64],(hn(x,y,479)-.5)*10):vein?[150,110,30]:inLeaf?sh([232,190,70],(hn(x,y,480)-.5)*12+(lfy<0?8:0)):sh([40,86,48],(hn(x,y,481)-.5)*10+(x%4===0?-6:0)));}
+    const ry=y%4,rx=(x+(Math.floor(y/4)%2)*3)%6;P(334,x,y,sh(Math.floor(y/4)%2?[118,140,60]:[176,150,64],(ry===3?-26:ry===0?12:0)+(rx===0?-14:0)+(hn(x,y,482)-.5)*14));
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
@@ -1549,7 +1585,16 @@ const REALM_CULTS={
     site:{city:{M:24,spread:72,wall:1,terr:5},fort:{M:14,spread:48,wall:1,terr:4},village:{M:14,spread:48,terr:4},outpost:{M:10,spread:64,wall:1,terr:4},farm:{M:12,spread:36,terr:3}},
     R:{city:42,cap:52,cmax:62,small:32,fort:22,village:24,hamlet:18,outpost:8,farm:20},w:{spread:0.08,prom:0.4,pmax:24},
     label:{fort:'% Fastness',outpost:'% Spire',farm:'% Gardens'},kind:{city:'a hidden city of',fort:'a fastness of',village:'a refuge of',outpost:'a watch-spire of',farm:'the gardens of'},
-    capital:'the high seat of',roads:['The Elven Way','A Hidden Path']}};
+    capital:'the high seat of',roads:['The Elven Way','A Hidden Path']},
+  // the wood elves of the forest kingdoms (D-065): cities in the great trees, the king's halls under a hill, tree-villages,
+  // watch-trees and feasting glades, in the Elder Wood, Autumn Woods, Birch Glades, Ancient Giant Wood, Yew Wood and Silverwood.
+  // Their ground is left as it lies (raw), save the platforms their layout asks for (pads) and the hill over the halls (mound);
+  // the forest's own trees grow on among their works
+  wood:{k:'wood',lands:new Set(['elder','autumn','birch','giant','yew','silver']),names:'woodelf',folkNames:'woodelf',kingdom:'The Forest Kingdom of ',ks:9451,fp:'w_',
+    site:{city:{M:16,spread:48,wall:1,raw:1},fort:{M:14,spread:30,wall:1,raw:1},village:{M:12,spread:36,raw:1},outpost:{M:8,spread:48,raw:1},farm:{M:10,spread:16,raw:1}},
+    R:{city:46,cap:56,cmax:64,small:34,fort:24,village:26,hamlet:18,outpost:8,farm:16},w:{spread:0.1,prom:0.2,pmax:10},
+    label:{fort:'The Halls of %',outpost:'% Watch-tree',farm:'% Glade'},kind:{city:'a city in the trees of',fort:'the halls of',village:'a tree-village of',outpost:'a watch-tree of',farm:'a glade of'},
+    capital:'the king\'s wood of',roads:['The Lamplit Way','A Woodland Path']}};
 const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands]));
 function* planProvince(root,key){
   const L=LANDS[cellLand(root)],cells=[root],seen=new Set([key]),r=rngAt(root.i,9405,root.j);
@@ -1585,7 +1630,7 @@ function* planProvince(root,key){
   function* clean(X,Z,K,R){const rr=R+4;for(let dz=-rr;dz<=rr;dz+=4){yield;for(let dx=-rr;dx<=rr;dx+=4){if((K.sq?Math.max(Math.abs(dx),Math.abs(dz)):Math.hypot(dx,dz))>rr)continue;
     const o=realmRaw(X+dx,Z+dz);if(o.river||o.bank||o.wet||o.h<o.sl+3||o.rvBot<999)return false;}}return true;}
   function* pick(K,R,score,need){for(let k=0;k<6;k++){const t=yield* best(K,R,score,need);if(!t)return null;if(yield* clean(t.X,t.Z,K,R))return t;ok[Math.round((t.X/S)-gx0)+Math.round((t.Z/S)-gz0)*nx]=1;}return null;}
-  const add=(k,R,t)=>{const K=SK[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,wall:!!(K.sq||K.wall),terr:K.terr||0,prov:P,id:C.k[0]+k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
+  const add=(k,R,t)=>{const K=SK[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,wall:!!(K.sq||K.wall),terr:K.terr||0,raw:K.raw||0,prov:P,id:C.k[0]+k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
   // the city (the riders' hill town): in the middle of the province's good ground, raised if the land allows (the riders want a
   // hill under their hall); the capital the largest
   const n=cells.length,Z_=C.R,Rc=Math.min(Z_.cmax,(P.capital?Z_.cap:Z_.city)+Math.min(3,n-1)*5);
@@ -1601,8 +1646,8 @@ function* planProvince(root,key){
   const no=Math.max(1,Math.min(6,n));for(let k=0;k<no;k++){const t=yield* pick(SK.outpost,Z_.outpost,(f)=>Math.min(20,f.prom)-f.spread*0.2-f.bd/200,(X,Z)=>far(X,Z,110));if(!t)break;add('outpost',Z_.outpost,t);}
   // farmsteads (the riders' horse farms), near the villages and the city
   const nf=Math.max(2,Math.min(14,n*2));for(let k=0;k<nf;k++){const t=yield* pick(SK.farm,Z_.farm,(f)=>-f.spread*0.5+hsh(k,9415,root.j),(X,Z)=>far(X,Z,60)&&P.sites.some(s=>(s.k==='village'||s.k==='city')&&Math.hypot(s.X-X,s.Z-Z)<s.R+170));if(!t)break;add('farm',Z_.farm,t);}
-  // a terraced site's raw ground, every eight blocks over its core and margin (elfRaw reads it between the samples)
-  for(const s of P.sites)if(s.terr){const E=s.R+s.M+8,n=Math.ceil(2*E/8)+1,a=new Float32Array(n*n);
+  // a terraced or raw site's ground, every eight blocks over its core and margin (elfRaw reads it between the samples)
+  for(const s of P.sites)if(s.terr||s.raw){const E=s.R+s.M+8,n=Math.ceil(2*E/8)+1,a=new Float32Array(n*n);
     for(let b=0;b<n;b++){yield;for(let q=0;q<n;q++)a[q+b*n]=realmRaw(Math.round(s.X-E+q*8),Math.round(s.Z-E+b*8)).h;}s.hg={a:a,n:n,E:E};}
   // names (in the people's styles, no two alike in a province), the way each site faces (toward its road), the roads
   const used=new Set();for(const s of P.sites){const rs=rngAt(Math.round(s.X),9417,Math.round(s.Z));let w='';
@@ -1675,12 +1720,13 @@ function realmRoadAt(X,Z,m){if(realmSkip)return null;
     if(Math.abs(off)<=rd.w+0.5+(m||0))return {rd:rd,off:off,t:t,along:along};}
   return null;}
 // Is a surface column taken by the realm (a site's core or margin, or a road)? Trees, boulders, ruins and the like keep off
-function realmNear(X,Z,m){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(s.k==='village'||s.k==='farm'||(s.k==='city'&&s.prov.cult.k==='horse')?s.M+30:s.M*0.6)+(m||0))return s;return realmRoadAt(X,Z,m);}
+// (tree: a tree asks; in the wood elves' sites the forest grows on, off their works: woodBusy)
+function realmNear(X,Z,m,tree){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(s.k==='village'||s.k==='farm'||(s.k==='city'&&s.prov.cult.k==='horse')?s.M+30:s.M*0.6)+(m||0)){if(tree&&s.raw&&!woodBusy(s,X,Z,m||0))continue;return s;}return realmRoadAt(X,Z,m);}
 // ---- The ground: each site's core levelled to its height (a city's to its tiers), easing back to the land over its margin.
 // Sets o.town (0 or 1) and o.tsite.
 function realmGround(X,Z,o,h){
   o.town=0;o.tsite=null;if(realmSkip)return h;
-  for(const s of realmTile(X,Z).sites){const d=siteDist(s,X,Z);if(d>=s.R+s.M)continue;const w=(o.river||o.bank)&&d>s.R?0:sstep(s.R+s.M,s.R,d),tg=s.terr?elfGround(s,X,Z):s.k==='city'?cityGround(s,X,Z):s.T;if(!w)continue;
+  for(const s of realmTile(X,Z).sites){const d=siteDist(s,X,Z);if(d>=s.R+s.M)continue;const w=(o.river||o.bank)&&d>s.R?0:sstep(s.R+s.M,s.R,d),tg=s.terr?elfGround(s,X,Z):s.raw?woodGround(s,X,Z,h):s.k==='city'?cityGround(s,X,Z):s.T;if(!w)continue;
     h=h+(tg-h)*w;o.town=1;o.tsite=s;}
   return h;
 }
@@ -1695,6 +1741,15 @@ function cityFrame(s){if(s.cf)return s.cf;const d=DIRS[s.dir],R=s.R,f={fx:-d[0],
 const cityUV=(s,X,Z)=>{const f=cityFrame(s),dx=X-s.X,dz=Z-s.Z;return [dx*f.fx+dz*f.fz,dx*f.sx+dz*f.sz];};
 function cityTier(s,u,v){const f=cityFrame(s),d=f.round?Math.hypot(u-f.cu,v):Math.max(Math.abs(u-f.cu),Math.abs(v));return f.r2>=0&&d<=f.r2?2:d<=f.r1?1:0;}
 function cityGround(s,X,Z){const [u,v]=cityUV(s,X,Z),f=cityFrame(s);if((f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))>s.R)return s.T;return s.T+cityTier(s,u,v)*f.step;}
+// ---- The wood elves' ground (D-065): as it lies, save a platform of the layout (pads, level) and the hill raised over the king's
+// halls (L.mound: a dome about (cu, cv) cut off at u = face; within gw of the middle a sheer face for the gate, beyond it the
+// hill's sides slope up from the forecourt), so a layout reads no colInfo
+function woodGround(s,X,Z,h){const [u,v]=siteUV(s,X,Z),L=siteLayout(s);for(const p of L.pads)if(u>=p.u0&&u<=p.u1&&v>=p.v0&&v<=p.v1)return p.y;
+  const m=L.mound;if(m&&u>=m.face){const d=Math.hypot(u-m.cu,v-m.cv)/m.R;if(d<1){let k=m.H*Math.pow(1-d*d,0.7);if(Math.abs(v)>m.gw)k=Math.min(k,(u-m.face)*2.2+(Math.abs(v)-m.gw)*0.6);return Math.max(h,s.T+Math.round(k));}}return h;}
+// is (X,Z) on or by (m) a work of a wood elves' site that wants the forest clear (a part flagged clear)?
+// is (X,Z) on one of a wood site's paths (no plants grow on them)?
+function woodPath(s,X,Z){const L=siteLayout(s);if(!L.paths)return false;const [u,v]=siteUV(s,X,Z);for(const q of L.paths){const ux=q[2]-q[0],vx=q[3]-q[1],l=Math.hypot(ux,vx)||1,t=Math.max(0,Math.min(l,((u-q[0])*ux+(v-q[1])*vx)/l));if(Math.hypot(u-q[0]-ux*t/l,v-q[1]-vx*t/l)<=q[4]+1)return true;}return false;}
+function woodBusy(s,X,Z,m){const [u,v]=siteUV(s,X,Z),L=siteLayout(s);for(const p of L.parts)if(p.clear&&u>=p.bu0-m&&u<=p.bu1+m&&v>=p.bv0-m&&v<=p.bv1+m)return true;return !!(L.busy&&L.busy(u,v,m));}
 // ---- The elves' terraces (D-062): the raw ground under a terraced site, read between its samples, cut into steps of s.terr
 // about the site's level, so the terraces follow the lie of the land; a building's platform (its layout's pads, each a box in the
 // site's frame grown by one) holds its own level
@@ -3510,7 +3565,7 @@ function stairwayAt(WCX,WCZ){
 }
 function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
 // Surface columns that structures have claimed: trees, boulders and other surface features keep off them
-function surfTaken(X,Z,m){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m)||!!realmNear(X,Z,m);}
+function surfTaken(X,Z,m,tree){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m)||!!realmNear(X,Z,m,tree);}
 const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
 function stairwayP(s,r){
   const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};
@@ -5176,7 +5231,7 @@ function siteFrame(s){if(s.fr)return s.fr;const d=DIRS[s.dir];return s.fr={fx:-d
 const siteUV=(s,X,Z)=>{const f=siteFrame(s),dx=X-s.X,dz=Z-s.Z;return [dx*f.fx+dz*f.fz,dx*f.sx+dz*f.sz];};
 const siteXZ=(s,u,v)=>{const f=siteFrame(s);return [s.X+u*f.fx+v*f.sx,s.Z+u*f.fz+v*f.sz];};
 // the ground of a site at local (u, v): its level, a city's by tier
-const siteG=(s,u,v)=>{if(s.terr){const [X,Z]=siteXZ(s,u,v);return elfGround(s,X,Z);}if(s.k!=='city')return s.T;const f=cityFrame(s);return (f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))<=s.R?s.T+cityTier(s,u,v)*f.step:s.T;};
+const siteG=(s,u,v)=>{if(s.terr){const [X,Z]=siteXZ(s,u,v);return elfGround(s,X,Z);}if(s.raw){const [X,Z]=siteXZ(s,u,v);return Math.round(woodGround(s,X,Z,elfRaw(s,X,Z)));}if(s.k!=='city')return s.T;const f=cityFrame(s);return (f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))<=s.R?s.T+cityTier(s,u,v)*f.step:s.T;};
 // A part's own frame: a across its front, b back from its front; f is the side its front faces (0 toward -u, 1 +u, 2 -v, 3 +v)
 function partAB(p,u,v){switch(p.f){case 0:return [v-p.v0,u-p.u0,p.v1-p.v0+1,p.u1-p.u0+1];case 1:return [p.v1-v,p.u1-u,p.v1-p.v0+1,p.u1-p.u0+1];
   case 2:return [p.u1-u,v-p.v0,p.u1-p.u0+1,p.v1-p.v0+1];default:return [u-p.u0,p.v1-v,p.u1-p.u0+1,p.v1-p.v0+1];}}
@@ -5461,7 +5516,7 @@ const TRB={};
 // ---- Layouts
 function siteLayout(s){if(s.lay)return s.lay;const L={parts:[],spots:[],pads:[]};s.lay=L;
   const r=rngAt(Math.round(s.X),9521,Math.round(s.Z));
-  if(s.prov.cult.k==='elf')elfLayout(s,L,r);else if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
+  if(s.prov.cult.k==='wood')woodLayout(s,L,r);else if(s.prov.cult.k==='elf')elfLayout(s,L,r);else if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
   // the margins about houses, towers and walls, where their relief stands
   for(const p of L.parts){if(p.k==='house'){if(!p.mg){const o=p.ov||0;p.mg=[o,o,o,o];}if(p.gnd===undefined)p.gnd=s.k!=='city';}
     else if(p.k==='tower'){const e=p.mg===undefined?1:p.mg;p.u0-=e;p.u1+=e;p.v0-=e;p.v1+=e;}else if(p.k==='cwall'){p.u0--;p.u1++;p.v0--;p.v1++;}}
@@ -5622,7 +5677,7 @@ RB.ring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>=p.r-1.5&&d<p.r+0.5)RBP(X,p
 // ---- Roads: paved with flagstones between kerbs of white stone (the king's roads), lanes of beaten earth; a bridge of stone
 // or planks where a road crosses water; on the king's roads a white milestone with a lamp every 72 blocks
 function realmRoadCol(X,Z,x,z){
-  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
+  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
     if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}
@@ -6138,6 +6193,238 @@ function elfRoadCol(X,Z,x,z,rr){
   RBP(X,g,Z,hi?(ao>rd.w-0.5?EVBRICK:EVSTONE):hsh(X,9731,Z)<0.18?EVSTONE:GRAVEL);
   for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
 }
+// ---- Building the wood elves of the forest kingdoms (D-065), in the frame and parts of realm-build.js. They build in and under
+// the trees, on the ground as it lies: their cities stand in goldboughs (great trees of silver bark and golden leaves) with
+// platforms of pale planks about the trunks at the same heights across the city, stairs winding up the trunks, houses wrapped
+// round the trunks under cones of leaf thatch, bridges with woven rails from tree to tree, lamps of pale light everywhere; a
+// clipped hedge rings a city, its gate between two trees joined by a bridge over the way; the king's halls lie under a hill,
+// a gate of rootstone in its face over a stream, a great hall within on pillars like trees, the king's seat crowned with
+// branching antlers of wood, a cellar of casks; tree-villages gather round a feasting glade; watch-trees stand alone with a high
+// platform; the glades have long tables under lamps, a fire and casks. The forest's own trees grow on between their works
+// (woodBusy keeps them off what the layout marks clear, its paths and hedge, and the goldboughs and bridges overhead).
+// Columns build on their own ground (hAt: as it lies, or a pad, or the halls' hill); a layout reads only the raw samples (elfRaw).
+const WTAU=6.2832;
+const wvRaw=(s,u,v)=>{const [X,Z]=siteXZ(s,u,v);return Math.round(elfRaw(s,X,Z));};
+const wAng=(a,b)=>{let d=(a-b)%WTAU;if(d<-Math.PI)d+=WTAU;if(d>Math.PI)d-=WTAU;return d;};
+const wFrac=(a,a0)=>((((a-a0)%WTAU)+WTAU)%WTAU)/WTAU;
+// A goldbough: the trunk (p.tr across its middle) flaring into roots at its foot; platforms p.fl ({y, r, house, hall}) of planks
+// about it, each edged in carved wood with a woven rail and lamps at its quarters, or a house wrapped round the trunk (walls of
+// carved wood with windows and a door toward the stair, a cone of leaf thatch, lamps within); a stair winding up the trunk from
+// its foot to the highest platform (p.P blocks a turn, from angle p.a0) with a carved edge and a rail, lamps at every quarter
+// turn; above, boughs into a crown of golden leaves (p.cr wide, from p.c0 to p.c1)
+RB.wtree=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.ext)return;const a=Math.atan2(dv,du),g=hAt(X,Z),top=p.c1-2;
+  if(d<=p.tr){for(let y=Math.min(g,p.base)-2;y<=top;y++)RBP(X,y,Z,WBARK);return;}
+  if(d<=p.tr+2.6&&Math.abs(Math.sin(a*p.nr+p.ph))>0.55){const rh=p.base+Math.round(3-(d-p.tr)*1.3);for(let y=Math.min(g,p.base)-1;y<=rh;y++)RBP(X,y,Z,WBARK);}
+  for(const f of p.fl){if(d>f.r+0.5)continue;
+    RBP(X,f.y,Z,d>f.r-0.7?WCARVE:WPLANK);
+    if(f.house){const hr=f.r-1.5,ry=f.y+5+Math.round((f.r+0.5-d)*(f.hall?0.7:0.55));
+      if(d<=f.r+0.5&&d>p.tr)RBP(X,ry,Z,WTHATCH);
+      if(d<hr+0.5)for(let y=f.y+1;y<ry;y++)RBP(X,y,Z,AIR);
+      if(d>hr-0.5&&d<=hr+0.5){const door=Math.abs(wAng(a,p.a0))*d<1.3,win=Math.abs(Math.sin(a*(f.hall?6:4)+p.ph*2))<0.3;
+        for(let y=f.y+1;y<=f.y+4;y++)RBP(X,y,Z,door&&y<=f.y+3?AIR:win&&y>=f.y+2&&y<=f.y+3&&!door?AIR:y===f.y+4?WPLANK:WCARVE);}
+      else if(d>f.r-0.7)RBP(X,f.y+1,Z,(wFrac(a,p.ph)*8|0)%2===0&&wFrac(a,p.ph)*8%1<0.15?WLAMP:WRAIL);
+      else if(d>p.tr+3.1&&d<hr-0.5&&Math.abs(wAng(a,p.a0+Math.PI))*d<0.8)RBP(X,f.y+1,Z,WLAMP);
+      if(f.hall&&d<hr-1&&d>p.tr+3.1&&Math.abs(wAng(a,p.a0+Math.PI))*d<1.5){RBP(X,f.y+1,Z,WCARVE);RBP(X,f.y+2,Z,WPLANK);} // the lord's seat, across from the door
+      continue;}
+    if(d>f.r-0.7){const q=wFrac(a,p.ph)*4;RBP(X,f.y+1,Z,q%1<0.08?WLAMP:WRAIL);}}
+  // the stair: a plank step on each turn at this angle, headroom over it; its carved edge and rail outside
+  if(p.P&&d>p.tr+0.5&&d<p.tr+3.1){const t=wFrac(a,p.a0),edge=d>=p.tr+2.3;
+    for(let y=p.base+1+Math.round(t*p.P);y<=p.sy1;y+=p.P){if(edge){if(!p.fl.some(f=>Math.abs(f.y-y)<=1&&d<=f.r)){RBP(X,y,Z,WCARVE);RBP(X,y+1,Z,(Math.round(t*16)%4===0)?WLAMP:WRAIL);}}
+      else{RBP(X,y,Z,WPLANK);RBS(X,Z,y+1,y+3,AIR);}}}
+  // boughs into the crown, and the crown of golden leaves (a shell three deep, its edge ragged)
+  if(d<p.cr*0.8)for(const b of p.bough){if(Math.abs(wAng(a,b))*d<1.1){const y=Math.round(p.c0-2+(d-p.tr)/(p.cr*0.8-p.tr)*((p.c0+p.c1)/2-p.c0+2));RBP(X,y,Z,WBARK);RBP(X,y+1,Z,WBARK);}}
+  const cy=(p.c0+p.c1)/2,ch=(p.c1-p.c0)/2,hd=d/(p.cr*(1+0.12*Math.sin(a*5+p.ph)));if(hd<1){const e=ch*Math.sqrt(1-hd*hd),th=3/ch;
+    for(let y=Math.round(cy-e);y<=Math.round(cy+e);y++){const q=Math.hypot(hd,(y-cy)/ch);if(q>1-th-(hsh(X,y*13,Z)<0.2?0.08:0))RBP(X,y,Z,WLEAF);}}
+};
+// A bridge from platform to platform at p.y: planks a block either side of its line, a carved edge and a woven rail beside them,
+// lamps on the rail at its middle; the way above it cleared (so it opens a door where it meets a house)
+RB.wbridge=(s,p,u,v,X,Z)=>{const ux=p.ub-p.ua,vx=p.vb-p.va,L=Math.hypot(ux,vx)||1,t=((u-p.ua)*ux+(v-p.va)*vx)/L,off=Math.abs(-(u-p.ua)*vx+(v-p.va)*ux)/L;
+  if(t<p.ia||t>L-p.ib||off>1.9)return;if(off<=1.1){RBP(X,p.y,Z,WPLANK);RBS(X,Z,p.y+1,p.y+3,AIR);return;}
+  if(t>=p.ra-0.5&&t<=L-p.rb+0.5){RBP(X,p.y,Z,WCARVE);RBP(X,p.y+1,Z,Math.abs(t-L/2)<0.8?WLAMP:WRAIL);}};
+// The ground of a city or village: its paths (L.paths: segments of leaf litter with a mossy edge) with carved posts bearing lamps
+// along them; flowers and ferns elsewhere, left as the forest grows them
+RB.wground=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>s.R+2)return;let best=9,along=0;
+  for(const q of p.paths){const ux=q[2]-q[0],vx=q[3]-q[1],L=Math.hypot(ux,vx)||1,t=Math.max(0,Math.min(L,((u-q[0])*ux+(v-q[1])*vx)/L)),pu=q[0]+ux*t/L,pv=q[1]+vx*t/L,o=Math.hypot(u-pu,v-pv)-q[4];
+    if(o<best){best=o;along=t;}}
+  if(best>1.6)return;const g=hAt(X,Z);
+  if(best<=0){RBP(X,g,Z,hsh(X,9741,Z)<0.25?FMOSS:LITTER);RBS(X,Z,g+1,g+4,AIR);return;}
+  if(best<=1){RBP(X,g,Z,FMOSS);if(Math.round(along)%10===5&&hsh(Math.round(along),9743,Math.round(u+v))<0.6){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}}};
+// The hedge round a city (p.r its outer edge): two thick and three high, clipped flat, a gap for the gate at u = -R
+RB.whedge=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d<p.r-1.8||d>p.r||(u<0&&Math.abs(v)<=3))return;const g=hAt(X,Z);RBS(X,Z,g+1,g+3,WHEDGE);RBP(X,g+4,Z,AIR);};
+// The gate: two carved posts with lamps either side of the way, a carved beam over it hung with the banner of the wood
+RB.wgate=(s,p,u,v,X,Z)=>{const av=Math.abs(v),g=hAt(X,Z),gy=p.y;if(av===3){RBS(X,Z,g+1,gy+6,WCARVE);RBP(X,gy+7,Z,WLAMP);return;}
+  if(av<3){RBP(X,gy+6,Z,WCARVE);if(av===0)RBP(X,gy+5,Z,WBANNER);}};
+// A spring: a round pool held in rootstone on its pad, a lamp on a rootstone post in its middle
+RB.wpool=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),y=p.y;if(d>p.rp+1)return;
+  if(d<0.8){RBS(X,Z,y-2,y+1,WROOT);RBP(X,y+2,Z,WLAMP);return;}
+  if(d<p.rp){RBP(X,y-2,Z,WROOT);RBP(X,y-1,Z,WATER);RBP(X,y,Z,WATER);RBS(X,Z,y+1,y+3,AIR);return;}
+  RBP(X,y,Z,WROOT);if(hsh(X,9745,Z)<0.25)RBP(X,y+1,Z,[FERN,BLUEB,FLOWY][(hsh(X,9747,Z)*3)|0]);};
+// An archery range on its pad: a mossy lawn, a woven rail at the shooting line, three targets (hay on carved stands)
+RB.wrange=(s,p,u,v,X,Z)=>{const y=p.y,[a,b]=[u-p.u0,v-p.v0];RBP(X,y,Z,b%5===2?FMOSS:GRASS);RBS(X,Z,y+1,y+4,AIR);
+  if(a===1&&b%2===0)RBP(X,y+1,Z,WRAIL);
+  if(a===p.u1-p.u0-1&&b%5===2){RBP(X,y+1,Z,WCARVE);RBP(X,y+2,Z,HAYBALE);RBP(X,y+3,Z,WCARVE);}};
+// A glade for feasting: lamps on carved posts round its edge (p.rr), long tables of planks on carved trestles with benches of
+// rails, a fire on rootstone in the middle, casks by the tables; the ground mossy
+RB.wglade=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rr+0.6)return;const g=hAt(X,Z);
+  if(d>p.rr-0.6){if(Math.round(Math.atan2(dv,du)/WTAU*p.nl*4)%4===0){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}return;}
+  RBP(X,g,Z,hsh(X,9749,Z)<0.4?FMOSS:GRASS);RBS(X,Z,g+1,g+4,AIR);
+  if(d<1.2){RBP(X,g,Z,WROOT);RBP(X,g+1,Z,HEARTH);return;}if(d<2.2){RBP(X,g,Z,WROOT);return;}
+  for(const t of p.tables){const a=du*Math.cos(t)+dv*Math.sin(t),b=-du*Math.sin(t)+dv*Math.cos(t);
+    if(a>=p.ti&&a<=p.to){if(Math.abs(b)<0.5){RBP(X,g+1,Z,(Math.round(a)%3===0)?WCARVE:WPLANK);return;}if(Math.abs(Math.abs(b)-1.5)<0.5){RBP(X,g+1,Z,WRAIL);return;}}
+    if(Math.abs(a-p.to-1.5)<0.6&&Math.abs(b)<1.6&&Math.abs(b)>0.5){RBP(X,g+1,Z,BARREL);return;}}};
+// A small house of carved wood on the ground: round, its door toward the glade, windows, a cone of leaf thatch, a lamp inside
+RB.whut=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rh+1)return;const y=p.y,a=Math.atan2(dv,du),ry=y+5+Math.round((p.rh+1-d)*0.7);
+  if(d<=p.rh+1){RBP(X,ry,Z,WTHATCH);}
+  if(d<p.rh+0.5){RBP(X,y,Z,WPLANK);for(let yy=y+1;yy<ry;yy++)RBP(X,yy,Z,AIR);for(let yy=hAt(X,Z)+1;yy<y;yy++)RBP(X,yy,Z,WROOT);}
+  if(d>p.rh-0.5&&d<p.rh+0.5){const door=Math.abs(wAng(a,p.da))*d<1,win=Math.abs(Math.sin(a*3+1))<0.25;for(let yy=y+1;yy<=y+4;yy++)RBP(X,yy,Z,door&&yy<=y+3?AIR:win&&yy===y+2?AIR:yy===y+4?WPLANK:WCARVE);}
+  if(d<0.8)RBP(X,y+1,Z,WLAMP);};
+// ---- The king's halls: a hill raised over them (L.mound in realms.js), its face cut where the way arrives (u = m.face); the
+// forecourt on its pad before it, crossed by a stream held in rootstone under a bridge; the gate a pointed arch of rootstone in
+// the face between carved pillars, lamps either side, the banner over it, carved doors standing open; within, a great hall
+// (p.hu0 to p.hu1, p.hw either side, its vault p.hh high) floored in rootstone on pillars like trees that branch into the vault,
+// lamps on them; at its back a dais and the king's seat of carved wood crowned with branching antlers; to one side a cellar of
+// casks, to the other a guardroom, each through a door in the hall's side
+RB.whalls=(s,p,u,v,X,Z)=>{const T=s.T,av=Math.abs(v),g=hAt(X,Z),m=siteLayout(s).mound;
+  // the stream across the forecourt, and the bridge over it
+  if(u>=p.su0&&u<=p.su1&&av<=p.sw){if(av<=2){RBP(X,T,Z,WROOT);RBS(X,Z,T+1,T+4,AIR);if(av===2)RBP(X,T+1,Z,WRAIL);}else{RBP(X,T-3,Z,WROOT);RBP(X,T-2,Z,WATER);RBP(X,T-1,Z,WATER);RBS(X,Z,T,T+3,AIR);}
+    if(av===p.sw)for(let y=T-3;y<=T;y++)RBP(X,y,Z,WROOT);return;}
+  if(u>=p.su0-1&&u<=p.su1+1&&av<=p.sw&&(u===p.su0-1||u===p.su1+1)){for(let y=T-3;y<=T;y++)RBP(X,y,Z,WROOT);return;}
+  // the forecourt: a path of rootstone to the gate, moss either side, lamps on posts along it
+  if(u<m.face&&u>=-s.R){if(av<=2)RBP(X,T,Z,WROOT);else if(av<=8)RBP(X,T,Z,FMOSS);if(av<=8)RBS(X,Z,T+1,T+5,AIR);if(av===4&&(((u-m.face)%5)+5)%5===2){RBS(X,Z,T+1,T+2,WCARVE);RBP(X,T+3,Z,WLAMP);}return;}
+  // the face and the gate: rootstone carved about a pointed arch, pillars either side, the doors open, lamps and the banner
+  const gw=3,gh=7,ah=y=>{const k=y-T-4;return k<=0?gw:Math.max(0,gw-Math.round(k*k*0.35));};
+  if(u>=m.face&&u<m.face+3){const gate=av<=gw;
+    for(let y=T;y<=T+12;y++){const open=gate&&y>T&&y<=T+gh&&av<=ah(y);if(open){RBP(X,y,Z,AIR);continue;}
+      if(u===m.face&&av<=gw+3)RBP(X,y,Z,(av===gw+1||av===gw+2)&&y<=T+10?WCARVE:y===T+11&&av<=gw+2?WCARVE:WROOT);
+      else if(av<=gw+3&&y<=T+9)RBP(X,y,Z,WROOT);}
+    if(u===m.face&&av===gw+2){RBP(X,T+11,Z,WLAMP);}if(u===m.face&&av===0)RBP(X,T+10,Z,WBANNER);
+    if(u===m.face+2&&av===gw&&g>T)RBS(X,Z,T+1,T+gh-2,WCARVE); // the doors, folded back
+    if(gate)RBP(X,T,Z,WROOT);return;}
+  // within: the passage from the gate, the great hall and its vault
+  const inHall=u>=p.hu0&&u<=p.hu1&&av<=p.hw,vault=y=>T+p.hh-Math.round((av/p.hw)*(av/p.hw)*3);
+  if(u>=m.face+3&&u<p.hu0&&av<=gw+1){RBP(X,T,Z,WROOT);RBS(X,Z,T+1,T+gh,av<=gw?AIR:WROOT);RBP(X,T+gh+1,Z,WROOT);return;}
+  if((u===p.hu0-1||u===p.hu1+1)&&av<=p.hw+1){RBS(X,Z,T,vault(Math.min(av,p.hw))+1,WROOT);return;} // the hall's end walls
+  if(av===p.hw+1&&u>=p.hu0&&u<=p.hu1){const door=u>=p.du-1&&u<=p.du+1;RBP(X,T,Z,WROOT);RBS(X,Z,T+1,vault(p.hw)+1,WROOT);if(door)RBS(X,Z,T+1,T+3,AIR);return;} // its side walls, doors through them
+  if(inHall){const top=vault(0),vt=vault(av);RBP(X,T-1,Z,WROOT);RBP(X,T,Z,(u+av)%4===0?WCARVE:WROOT);RBS(X,Z,T+1,vt,AIR);RBP(X,vt+1,Z,WROOT);
+    // the pillars: trunks of carved wood two square, branching into the vault in boughs of bark, a lamp on each
+    for(const [pu,pv] of p.pil){const dd=Math.max(Math.abs(u-pu),Math.abs(av-pv));
+      if(dd===0){RBS(X,Z,T+1,vt,WCARVE);}
+      else if(dd===1&&((u-pu)===0||(av-pv)===0)){RBP(X,T+1,Z,WCARVE);RBP(X,vt,Z,WBARK);RBP(X,vt-1,Z,WBARK);if(u-pu===-1&&av===pv)RBP(X,T+4,Z,WLAMP);}
+      else if(dd===2&&((u-pu)===0||(av-pv)===0))RBP(X,vt,Z,WBARK);}
+    // the dais and the king's seat with its antlers
+    if(u>=p.hu1-4){RBP(X,T+1,Z,WROOT);if(u>=p.hu1-2)RBP(X,T+2,Z,WROOT);
+      if(u===p.hu1&&av<=1){RBS(X,Z,T+3,T+5,WCARVE);}
+      if(u===p.hu1-1&&av===0){RBP(X,T+3,Z,WPLANK);}
+      if(u===p.hu1-1&&av===1)RBP(X,T+3,Z,WCARVE);
+      if(u===p.hu1&&av>=1&&av<=4){const tine=av===2?T+7:av===3?T+8:av===4?T+9:T+6;RBS(X,Z,T+6,tine,WPLANK);if(av===3)RBP(X,T+10,Z,WPLANK);}
+      if(u===p.hu1-3&&av===3){RBP(X,T+2,Z,WLAMP);}}
+    if(av===p.hw&&u===p.du+3)RBP(X,T+3,Z,WLAMP);
+    return;}
+  // the cellar (v < 0) and the guardroom (v > 0): low rooms through the doors, casks along the cellar's walls, lamps
+  if(u>=p.du-4&&u<=p.du+4&&av>p.hw+1&&av<=p.hw+8){const side=v<0,wall=av===p.hw+8||u===p.du-4||u===p.du+4;RBP(X,T,Z,WROOT);
+    if(wall){RBS(X,Z,T+1,T+5,WROOT);return;}RBS(X,Z,T+1,T+4,AIR);RBP(X,T+5,Z,WROOT);
+    if(side&&(av===p.hw+7||((u===p.du-3||u===p.du+3)&&av>p.hw+3))){RBP(X,T+1,Z,BARREL);if(av===p.hw+7&&u%2===0)RBP(X,T+2,Z,BARREL);}
+    if(!side&&av===p.hw+7&&Math.abs(u-p.du)<=2&&u%2===0)RBP(X,T+1,Z,WCARVE);
+    if(u===p.du&&av===p.hw+4)RBP(X,T+4,Z,WLAMP);}
+};
+// ---- Layouts
+function woodLayout(s,L,r){if(s.k==='city')woodCity(s,L,r);else if(s.k==='fort')woodHalls(s,L,r);else if(s.k==='village')woodVillage(s,L,r);else if(s.k==='farm')woodGlade(s,L,r);else woodWatch(s,L,r);}
+// the kit: goldboughs and bridges between them, the ground's paths, pads, spots
+function woodKit(s,L,r){
+  const P=L.parts,trees=[],R=s.R;L.paths=[];
+  // a goldbough at (cu, cv): trunk tr across its middle, its platforms at the levels given (above the site's level T) where they
+  // stand six or more over its foot; its stair begins toward the site's way
+  const tree=(cu,cv,tr,lv,o)=>{o=o||{};const base=wvRaw(s,cu,cv),fl=[];
+    for(const q of lv){const y=s.T+q.y;if(y<base+6)continue;fl.push({y:y,r:tr+(q.house?(q.hall?9:6):4),house:!!q.house,hall:!!q.hall});}
+    if(!fl.length)return null;const sy1=Math.max(...fl.map(f=>f.y)),cr=o.cr||Math.round(tr*3+4),c0=sy1+(fl.some(f=>f.y===sy1&&f.hall)?14:fl.some(f=>f.y===sy1&&f.house)?10:5),c1=Math.max(c0+Math.round(cr*0.9),base+(o.H||0));
+    const a0=Math.atan2(-cv,-cu-R*0.3),ext=Math.ceil(Math.max(cr*1.15,...fl.map(f=>f.r+1),tr+3.2))+1,bough=[];for(let k=0;k<5;k++)bough.push(r()*WTAU);
+    const p={k:'wtree',u0:cu-ext,u1:cu+ext,v0:cv-ext,v1:cv+ext,cu:cu,cv:cv,tr:tr,base:base,fl:fl,sy1:sy1,P:Math.max(10,Math.round(WTAU*(tr+1.5)*0.62)),a0:a0,
+      cr:cr,c0:c0,c1:c1,ext:ext,nr:5+(r()*3|0),ph:r()*WTAU,bough:bough,keep:Math.max(...fl.map(f=>f.r))+2};P.push(p);trees.push(p);return p;};
+  const far=(cu,cv,m)=>trees.every(t=>Math.hypot(t.cu-cu,t.cv-cv)>=m);
+  // bridges: each tree to its nearest neighbours that share a level, rim to rim
+  const bridges=(maxD,per)=>{const n=new Map();for(const a of trees)for(const b of trees){if(a===b||(n.get(a)||0)>=per||(n.get(b)||0)>=per)continue;if(trees.indexOf(b)<trees.indexOf(a))continue;
+    const D=Math.hypot(a.cu-b.cu,a.cv-b.cv);if(D>maxD)continue;const lv=a.fl.find(f=>b.fl.some(g=>g.y===f.y));if(!lv)continue;const fb=b.fl.find(g=>g.y===lv.y);if(D<lv.r+fb.r+3)continue;
+    P.push({k:'wbridge',u0:Math.min(a.cu,b.cu)-2,u1:Math.max(a.cu,b.cu)+2,v0:Math.min(a.cv,b.cv)-2,v1:Math.max(a.cv,b.cv)+2,ua:a.cu,va:a.cv,ub:b.cu,vb:b.cv,y:lv.y,ra:lv.r,rb:fb.r,ia:lv.r-(lv.house?2.2:1.2),ib:fb.r-(fb.house?2.2:1.2)});
+    n.set(a,(n.get(a)||0)+1);n.set(b,(n.get(b)||0)+1);}};
+  const path=(u0,v0,u1,v1,w)=>L.paths.push([u0,v0,u1,v1,w||1]);
+  // a path to each tree's stair from the nearest point of the main way (v = 0, from the gate to uEnd)
+  const toStairs=(uEnd)=>{for(const t of trees){const sx=t.cu+Math.cos(t.a0)*(t.tr+1.5),sz=t.cv+Math.sin(t.a0)*(t.tr+1.5);path(Math.max(-R,Math.min(uEnd,Math.round(sx))),0,Math.round(sx),Math.round(sz),0.6);}};
+  const ground=()=>{P.unshift({k:'wground',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,paths:L.paths});};
+  const pad=(u0,u1,v0,v1,y)=>L.pads.push({u0:u0,u1:u1,v0:v0,v1:v1,y:y});
+  const spot=(kind,u,v,y,o)=>L.spots.push(Object.assign({kind:kind,u:u,v:v,y:y},o||{}));
+  // the forest keeps off the paths, the hedge, the goldboughs out to their platforms' rims and the bridges (woodBusy)
+  const seg=(u,v,q)=>{const ux=q[2]-q[0],vx=q[3]-q[1],l=Math.hypot(ux,vx)||1,t=Math.max(0,Math.min(l,((u-q[0])*ux+(v-q[1])*vx)/l));return Math.hypot(u-q[0]-ux*t/l,v-q[1]-vx*t/l);};
+  L.busy=(u,v,m)=>{if(L.hedge&&Math.abs(Math.hypot(u,v)-L.hedge+1)<2+m)return true;for(const q of L.paths)if(seg(u,v,q)<q[4]+2+m)return true;
+    for(const t of trees)if(Math.hypot(u-t.cu,v-t.cv)<t.keep+m)return true;for(const b of P)if(b.k==='wbridge'&&seg(u,v,[b.ua,b.va,b.ub,b.vb])<3+m)return true;return false;};
+  return {P:P,R:R,trees:trees,tree:tree,far:far,bridges:bridges,path:path,toStairs:toStairs,ground:ground,pad:pad,spot:spot};}
+// The city in the trees: a clipped hedge round it with its gate between two goldboughs joined by a bridge over the way; the
+// king's tree at the back, greatest of all, with an open platform, a house and his hall high in it; goldboughs about the city
+// on a loose grid, their platforms at three heights, bridges between them; a spring and an archery range by the way
+function woodCity(s,L,r){const K=woodKit(s,L,r),R=s.R,big=s.prov.capital;L.hedge=R;
+  K.P.push({k:'whedge',u0:-R,u1:R,v0:-R,v1:R,r:R});
+  // the gate trees and their bridge over the way
+  const g1=K.tree(-R+3,-6,2,[{y:14}],{cr:8}),g2=K.tree(-R+3,6,2,[{y:14}],{cr:8});
+  if(g1&&g2&&g1.fl[0].y===g2.fl[0].y)K.P.push({k:'wbridge',u0:-R,u1:-R+6,v0:-8,v1:8,ua:-R+3,va:-6,ub:-R+3,vb:6,y:g1.fl[0].y,ra:g1.fl[0].r,rb:g2.fl[0].r,ia:g1.fl[0].r-1.2,ib:g2.fl[0].r-1.2,clear:1});
+  K.P.push({k:'wgate',u0:-R-1,u1:-R+1,v0:-3,v1:3,y:wvRaw(s,-R,0)});
+  // the king's tree
+  const ku=Math.round(R*0.45),king=K.tree(ku,0,big?4:3,[{y:18},{y:30,house:1},{y:44,house:1,hall:1}],{cr:big?17:14,H:big?78:66});
+  // goldboughs on a loose grid, off the way and clear of each other
+  const sp=21,n0=Math.ceil(R/sp);for(let a=-n0;a<=n0;a++)for(let b=-n0;b<=n0;b++){const cu=a*sp+Math.round((r()-0.5)*6),cv=b*sp+Math.round((r()-0.5)*6),tr=r()<0.3?3:2;
+    if(Math.hypot(cu,cv)>R-12||(Math.abs(cv)<9&&cu<ku+6)||!K.far(cu,cv,19))continue;
+    const lv=[{y:16},{y:26,house:r()<0.55},{y:36,house:r()<0.4}].filter(()=>r()<0.8);if(!lv.length)lv.push({y:26,house:1});K.tree(cu,cv,tr,lv);}
+  K.bridges(30,3);
+  // the way from the gate to the king's tree, paths to every stair; the spring and the range beside the way
+  K.path(-R-2,0,ku-6,0,1.5);K.toStairs(ku-6);
+  const pu=Math.round(-R*0.4),pv=10;if(K.far(pu,pv,9)){K.P.push({k:'wpool',u0:pu-5,u1:pu+5,v0:pv-5,v1:pv+5,cu:pu,cv:pv,rp:3,y:s.T,clear:1});K.pad(pu-5,pu+5,pv-5,pv+5,s.T);K.path(pu,1,pu,pv-4,0.6);K.spot('garden',pu,pv-6,s.T);}
+  const ru=Math.round(-R*0.4),rv=-14;if(K.far(ru+5,rv-3,10)){K.P.push({k:'wrange',u0:ru,u1:ru+12,v0:rv-8,v1:rv,y:s.T,clear:1});K.pad(ru,ru+12,rv-8,rv,s.T);K.spot('range',ru+2,rv-4,s.T);}
+  K.ground();
+  // where the folk are: the gate, its bridge, the way, the platforms, the king's hall
+  K.spot('gate',-R+2,0,wvRaw(s,-R+2,0));if(g1)K.spot('deck',-R+3,0,g1.fl[0].y,{R:2});K.spot('street',Math.round(-R*0.15),0,wvRaw(s,Math.round(-R*0.15),0));
+  if(king){const h=king.fl[king.fl.length-1];K.spot('hall',ku+Math.round(Math.cos(king.a0)*(king.tr+3)),Math.round(Math.sin(king.a0)*(king.tr+3)),h.y,{R:2});K.spot('deck',ku+Math.round(Math.cos(king.a0)*(king.tr+3)),Math.round(Math.sin(king.a0)*(king.tr+3)),king.fl[0].y,{R:2});}
+  for(const t of K.trees.filter(t=>t!==king&&t!==g1&&t!==g2).slice(0,big?4:3)){const f=t.fl[0];K.spot('deck',t.cu+Math.round(Math.cos(t.a0+1)*(t.tr+2.5)),t.cv+Math.round(Math.sin(t.a0+1)*(t.tr+2.5)),f.y,{R:1.5});}
+}
+// The king's halls under the hill: the hill's face toward the way, the forecourt with its stream and bridge, the gate, the hall,
+// the cellar and the guardroom; goldboughs on the hill's shoulders
+function woodHalls(s,L,r){const K=woodKit(s,L,r),R=s.R,face=-Math.round(R*0.45);
+  L.mound={cu:2,cv:0,R:R,H:Math.min(20,Math.round(R*0.75)),face:face,gw:7};
+  K.pad(-R-2,face-1,-9,9,s.T);
+  const hu0=face+7,hu1=Math.min(Math.round(R*0.6),face+30),pil=[];for(let u=hu0+3;u<=hu1-6;u+=5)pil.push([u,5]);
+  K.P.push({k:'whalls',u0:-R-2,u1:hu1+2,v0:-19,v1:19,su0:face-11,su1:face-9,sw:7,hu0:hu0,hu1:hu1,hw:9,hh:9,pil:pil,du:Math.round((hu0+hu1)/2),clear:0});
+  // keep the forest off the forecourt
+  K.P.push({k:'wnone',u0:-R-2,u1:face+2,v0:-10,v1:10,clear:1});
+  K.tree(Math.round(R*0.3),-Math.round(R*0.7),2,[{y:L.mound.H+10}],{cr:9});K.tree(Math.round(R*0.3),Math.round(R*0.7),2,[{y:L.mound.H+10}],{cr:9});
+  K.spot('gate',face-4,0,s.T);K.spot('keep',Math.round((hu0+hu1)/2),0,s.T,{R:3});K.spot('cellar',Math.round((hu0+hu1)/2),-(9+5),s.T,{R:2});
+}
+RB.wnone=()=>{};
+// A tree-village: goldboughs in a ring round a feasting glade, platforms at two heights with houses on the higher, bridges
+// between neighbours; a house or two of carved wood on the ground by the glade
+function woodVillage(s,L,r){const K=woodKit(s,L,r),R=s.R,n=4+(r()*2|0),gr=Math.round(R*0.32),a0=r()*WTAU;
+  for(let k=0;k<n;k++){const a=a0+k*WTAU/n+(r()-0.5)*0.2,d=R*0.78+(r()-0.5)*3;K.tree(Math.round(Math.cos(a)*d),Math.round(Math.sin(a)*d),2,[{y:13},{y:22,house:1}],{cr:9});}
+  K.bridges(R*1.2,2);
+  K.P.push({k:'wglade',u0:-gr-1,u1:gr+1,v0:-gr-1,v1:gr+1,cu:0,cv:0,rr:gr,nl:6,tables:[0.4,0.4+Math.PI],ti:3,to:gr-3,clear:1});
+  for(const [hu,hv] of [[Math.round(-gr-6),Math.round(gr*0.6)],[Math.round(gr*0.3),-gr-6]])if(K.far(hu,hv,8)){const y=wvRaw(s,hu,hv);K.P.push({k:'whut',u0:hu-4,u1:hu+4,v0:hv-4,v1:hv+4,cu:hu,cv:hv,rh:3,y:y+1,da:Math.atan2(-hv,-hu),clear:1});}
+  K.path(-R,0,-gr,0,1);K.toStairs(-gr);K.ground();
+  K.spot('glade',0,2,wvRaw(s,0,2),{R:3});for(const t of K.trees.slice(0,2)){const f=t.fl[t.fl.length-1];K.spot('deck',t.cu+Math.round(Math.cos(t.a0+1)*(t.tr+2.5)),t.cv+Math.round(Math.sin(t.a0+1)*(t.tr+2.5)),f.y,{R:1.5});}
+}
+// A watch-tree: one goldbough with a platform low and a watch platform high, its stair, a lamp
+function woodWatch(s,L,r){const K=woodKit(s,L,r),t=K.tree(0,0,2,[{y:14},{y:28}],{cr:9,H:42});K.path(-s.R-6,0,0,0,0.6);K.ground();
+  if(t){const f=t.fl[t.fl.length-1];K.spot('post',Math.round(Math.cos(t.a0+1)*(t.tr+2.5)),Math.round(Math.sin(t.a0+1)*(t.tr+2.5)),f.y,{R:1.5});}}
+// A glade: lamps round a clearing, long tables with benches and casks, a fire; a house of carved wood at its edge, a goldbough
+function woodGlade(s,L,r){const K=woodKit(s,L,r),R=s.R,gr=R-3;
+  K.P.push({k:'wglade',u0:-gr-1,u1:gr+1,v0:-gr-1,v1:gr+1,cu:0,cv:0,rr:gr,nl:9,tables:[0.3,0.3+2.094,0.3+4.189],ti:3,to:gr-3,clear:1});
+  const hu=Math.round(gr*0.2),hv=gr+5;K.P.push({k:'whut',u0:hu-4,u1:hu+4,v0:hv-4,v1:hv+4,cu:hu,cv:hv,rh:3,y:wvRaw(s,hu,hv)+1,da:Math.atan2(-hv,-hu),clear:1});
+  K.path(-R-4,0,-gr,0,1);K.ground();K.spot('glade',0,2,wvRaw(s,0,2),{R:3});}
+// ---- The wood elves' roads: the lamplit way of leaf litter edged in moss, a lamp on a carved post beside it every 32 blocks;
+// woodland paths of litter; bridges of planks with woven rails on posts of bark
+function woodRoadCol(X,Z,x,z,rr){
+  const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%32===16){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}return;}
+  if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?WCARVE:WPLANK);if(edge)RBP(X,y+1,Z,WRAIL);RBS(X,Z,y+(edge?2:1),y+3,AIR);
+    if(Math.floor(rr.along)%6===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,WBARK);return;}
+  const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
+  RBP(X,g,Z,hi&&ao>rd.w-0.5?FMOSS:hsh(X,9751,Z)<0.2?FMOSS:LITTER);
+  for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
+}
 // ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
 // dug in hot black rock. Halls on two levels under the sunken floor of the wastes (D-055: the upper at y 168 to 192, the lower
 // at 130 to 154, the levels the crawlways and the upper caves keep under the lands about) are joined by low
@@ -6432,7 +6719,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -6467,7 +6754,7 @@ function plants(WCX,WCZ){let F0=null;
     if(g+12<H&&world[I(x,g+1,z)]===AIR&&(world[I(x,g,z)]===GRASS||world[I(x,g,z)]===FARM_D)&&stoneWallAt(X,Z,colInfo(X,Z,TP))&&!smallNear(X,Z,0)&&!sigNear(X,Z,0)&&!realmNear(X,Z,1)){world[I(x,g+1,z)]=hsh(X,8723,Z)<0.3?MOSSY:COBBLE;if(hsh(X,8725,Z)<0.35)world[I(x,g+2,z)]=COBBLE;} // dry-stone walls (M6g)
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
-      if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);const F=forestOf(TP); // mountains and fells only where their land has its own plants
+      if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);if(TP.tsite&&TP.tsite.raw&&woodPath(TP.tsite,X,Z))continue;const F=forestOf(TP); // mountains and fells only where their land has its own plants; none on the wood elves' paths
         const tn=TP.town?0:1,heath=tn*(b===4?1:Math.max(0,(TP.dw-0.2)*1.6)),reed=tn*(b===11?1:Math.max(0,(TP.fen-0.25)*1.6)),dark=tn*(b===8?1:Math.max(0,(TP.sw-0.25)*1.6)); // none of the wild growth on a realm's sites (D-061)
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
@@ -7289,6 +7576,8 @@ const AMB_EV={
   harp:at=>{const far=[at[0]+(at[0]-PL.x)*1.5,at[1]+5,at[2]+(at[2]-PL.z)*1.5],sc=[392,440,523,587,659,784,880,1047],n=5+(Math.random()*4|0),st=Math.random()*3|0;
     for(let i=0;i<n;i++){const f=sc[Math.min(sc.length-1,st+i)];tone(f,f,1.4,0.025,i*0.17,'triangle',far);tone(f*2,f*2,0.6,0.006,i*0.17,null,far);}},
   song:at=>{const far=[at[0]+(at[0]-PL.x)*3,at[1]+10,at[2]+(at[2]-PL.z)*3],ph=[[523,659],[587,698],[659,784],[523,659]];for(let i=0;i<ph.length;i++)for(const f of ph[i])voice(f,f*1.01,1.1,0.012,{type:'sine',form:1400,q:1.2,vib:5,vd:0.02,delay:i*1.05},far);},
+  // the wood elves (D-065): an owl in the high trees by night
+  owl:at=>{const far=[at[0],at[1]+12,at[2]];tone(410,370,0.32,0.04,0,null,far);tone(400,350,0.55,0.04,0.42,null,far);},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -7309,7 +7598,9 @@ const AMB_LAND={
   riders:{wind:0.05,day:{voices:8,whinny:3,hooves:3,hammer:2,horn:0.4,bird:4,dog:1},night:{cricket:8,whinny:1,dog:1,voices:1}},
   stud:{wind:0.05,day:{whinny:5,hooves:2,bird:8,voices:1},night:{cricket:12,whinny:1}},
   // in the high elves' cities, fastnesses and refuges (D-062): a harp, singing far off, chimes in the wind, birds, a few voices
-  elves:{wind:0.05,day:{harp:3,song:0.8,chime:1.5,bird:8,voices:3},night:{harp:2,song:1,chime:2,cricket:5}}
+  elves:{wind:0.05,day:{harp:3,song:0.8,chime:1.5,bird:8,voices:3},night:{harp:2,song:1,chime:2,cricket:5}},
+  // among the wood elves (D-065): birds all about, singing in the trees, a harp, voices and laughter; by night the songs go on
+  woodelves:{wind:0.06,day:{bird:14,song:1.4,harp:2,voices:4},night:{song:1.8,harp:1.5,cricket:6,owl:1.5,voices:1}}
 };
 const AMB_OF={sea:'sea',isles:'sea',kelp:'sea',chalk:'sea',fjord:'sea',blacksand:'sea',willow:'wet',bog:'wet',moors:'high',mtn:'high',alpine:'high',glacier:'high',tundra:'high',karst:'high',cloud:'wet',
   dry:'dry',steppe:'dry',petrified:'dry',volcanic:'fire',blight:'grey',shadow:'grey',barrow:'grey',crystal:'ring',starfall:'ring',glowcap:'ring'};
@@ -7330,7 +7621,7 @@ function ambProfile(){
     if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
     if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
-  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
+  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='wood'?'woodelves':rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
   return {surf:P.surf||0,rumble:P.rumble||0,lava:P.lava||0,wind:(P.wind||0)*(1+Math.max(0,yy-SEA-40)/80),ev:ev,under:false};
 }
@@ -9239,6 +9530,122 @@ const FOLK_KIT=(function(){
       shieldPaint(P,BLUE);P.map('lance',ALL,(s,t)=>t%10===0?sh(GOLD,10):sh([230,226,214],hz(s,t>>2,557)*8));plate(P,['ltip'],[220,226,234]);
       P.sheet('flag','x',(a,b)=>{if(a<8&&Math.abs(b-5.5)<(8-a)*0.7)return 'cut';return b===5||b===6?sh(GOLD,0):sh(BLUE,hz(a,b,559)*8);});}};
 })();
+// ---- The folk of the wood elves (D-065), built and painted like the other folk (FOLK_KIT): boxes measured in pixels, two texels
+// to a pixel, a little taller than men, pointed ears, long hair, beardless. Their wardens go as the forest's own: hooded cloaks of
+// grey-green that blur against the trees over jerkins of soft leather, leaf-shaped plates of copper at the shoulder and the
+// forearm, long bows of pale wood and quivers at the back; the blades carry two long knives curving like leaves; the guards of
+// the king's halls wear armour of overlapping copper leaves over long robes of deep green, helms with a leaf crest swept back,
+// and glaives; captains a green cloak with the golden leaf of the wood over their armour. The king goes in long robes of silver
+// and moss under a crown of autumn leaves and red berries, a staff of pale wood in hand; lords in green with silver leaves at the
+// brow; ladies in gowns of white, silver or pale green, their hair long and braided; the folk of the glades in tunics of green
+// and brown with hoods thrown back.
+(function(){
+  const {ALL,SIDE,sh,hz,man,cloth,mail,plate,leather,band,rivets,boots,hands,face}=FOLK_KIT;
+  const COP=[168,120,76],GOLD=[222,184,92],SILV=[214,218,226],DEEP=[34,64,44],MOSS=[86,104,70],CLOAK=[104,116,98],BARKC=[96,70,46];
+  const WSKIN=[[236,214,194],[226,200,176],[218,190,164],[240,224,206]],WHAIR=[[232,214,160],[206,208,210],[150,84,40],[44,32,26],[240,228,186],[176,120,64]];
+  const coats=b=>WSKIN.map((s,i)=>[{skin:s,hair:WHAIR[(i*2+b)%WHAIR.length],eye:[[100,130,96],[110,124,136],[120,104,70]][(i+b)%3]},i===3?1:2]);
+  // the leaf of the wood: a pointed oval with a midrib and veins (13 by 16 texels), for cloaks and shields
+  const LEAF=(x,y)=>{const cx=x-6,cy=y-8;if((cx*cx)/18+(cy*cy)/50>1||cy>6.5)return 0;if(Math.abs(cx)<0.6&&cy<7)return 2;if(Math.abs(Math.abs(cx)-(cy+8)*0.15-0.3)<0.4&&Math.abs(cx)>1)return 2;return 1;};
+  const leafSign=(P,n,f,s0,t0,c1,c2)=>P.map(n,[f],(s,t)=>{const q=LEAF(s-s0,t-t0);return q===1?sh(c1,hz(s,t,601)*8):q===2?sh(c2,hz(s,t,603)*6):null;});
+  // overlapping copper leaves: rows of pointed scales lit at their tips, every other row offset
+  const leaves=(P,ns,col)=>{for(const n of ns)P.map(n,ALL,(s,t,w,h,f)=>{if(f==='T')return sh(col,12);if(f==='D')return sh(col,-34);
+    const r=t%4,c=(s+((t>>2)%2)*2)%4,inn=Math.abs(c-1.5)<=(r<2?2:3.6-r);return inn?sh(col,(r===3?-14:r===2?4:16)+(c===1?6:0)+hz(s,t,605)*6):sh([90,56,30],hz(s,t,607)*8);});};
+  // a vine of leaves embroidered along a band of rows
+  const vine=(P,n,fs,t0,t1,col,ground)=>P.map(n,fs,(s,t)=>{if(t<t0||t>=t1)return null;const m=(t1-t0-1)/2,wv=t0+m+Math.sin(s*0.8)*m*0.8,on=Math.abs(t-wv)<0.7||(s%4===1&&Math.abs(t-(wv+(s%8<4?-1:1)))<0.8);
+    return on?sh(col,hz(s,t,609)*8):sh(ground,-14+hz(s,t,611)*6);});
+  const ears=()=>[['earL','head',[-3,3.2,0.5],[-0.5,0,-0.5,1,3,1.5],[-0.35,0,0.45],{head:1,nb:1,tp:['y',1,0.2,0,-0.5]}],['earR','head',[3,3.2,0.5],[-0.5,0,-0.5,1,3,1.5],[-0.35,0,-0.45],{head:1,nb:1,m:'earL',tp:['y',1,0.2,0,-0.5]}]];
+  const hairB=len=>[['hairB','head',[0,1,-3],[-3,-len,-1,6,len+5,1],0,{head:1,nb:1}]];
+  const elfFace=(P,c,o)=>{face(P,c,Object.assign({long:1},o||{}));P.map('earL',ALL,(s,t)=>sh(c.skin,hz(s,t,613)*6-(t>3?0:4)));P.map('hairB',ALL,(s,t,w,h)=>sh(c.hair,hz(s,0,615)*20+(t%4===0?-6:0)-(t>h-3?10:0)));};
+  // a hood (up) and a cloak falling from it to the calf
+  const hood=()=>[['hood','head',[0,0,0],[-3.75,0,-3.75,7.5,7.75,7.5],0,{head:1,tp:['y',0.85,0.8,0,-0.3]}],['cloak','body',[0,10.5,-2.9],[-4.75,-20,-0.5,9.5,20,1],[0.07,0,0],{nb:1}]];
+  const hoodPaint=(P,col)=>{P.map('hood',ALL,(s,t,w,h,f)=>f==='F'&&t<h-1&&s>1&&s<w-2?null:sh(col,hz(s,t,617)*10+(t===h-1?-12:0)+(f==='T'?6:0)));cloth(P,['cloak'],col,{off:2});
+    P.map('cloak',SIDE,(s,t,w,h)=>t>h-4?sh(col,-16+hz(s,t,619)*8):null);};
+  // a long bow of pale wood, recurved at its tips, and a quiver at the back
+  const bow=()=>[['bowU','armL',[-1.5,-10,1.5],[-0.5,0,-0.5,1,12,1],[-0.16,0,0],{nb:1,tp:['y',0.6,0.6,0,0]}],['bowUt','bowU',[0,12,0],[-0.5,0,-0.5,1,2,1],[0.8,0,0],{nb:1}],
+    ['bowD','armL',[-1.5,-10,1.5],[-0.5,-12,-0.5,1,12,1],[0.16,0,0],{nb:1,tp:['-y',0.6,0.6,0,0]}],['bowDt','bowD',[0,-12,0],[-0.5,-2,-0.5,1,2,1],[-0.8,0,0],{nb:1}],
+    ['bgrip','armL',[-1.5,-10,1.5],[-1,-1,-1,2,2,2],0,{nb:1}],['bstr','armL',[-1.5,-10,-0.4],[-0.5,-11,-0.5,1,22,1],0,{nb:1}],
+    ['quiver','body',[2,5,-3.4],[-1,-2,-1,2,10,2],[0,0,0.4],{nb:1}],['fletch','quiver',[0,8,0],[-1,0,-1,2,3,2],0,{nb:1}]];
+  const bowPaint=P=>{for(const n of ['bowU','bowD'])P.map(n,ALL,(s,t)=>t%5===0?sh(COP,10):sh([214,196,150],hz(s,t>>1,621)*10+(s===0?10:0)));
+    P.map('bowUt',ALL,()=>sh(COP,10));P.map('bowDt',ALL,()=>sh(COP,10));P.map('bgrip',ALL,(s,t)=>(s+t)%2?[70,50,34]:sh(COP,0));P.map('bstr',ALL,()=>[236,232,220]);
+    leather(P,['quiver'],[110,74,44]);band(P,'quiver',SIDE,0,2,COP);P.map('fletch',ALL,(s,t)=>(s+t)%2?[230,230,220]:[96,120,84]);};
+  // a long knife curving like a leaf, its hilt bound in leather, a little guard of copper (len in half blocks)
+  const knife=(side,len)=>{const a=side==='L'?'armL':'armR',x=side==='L'?-1.5:1.5,n=side==='L'?'kL':'kR',sw=side==='L'?0.25:-0.25;
+    return [[n+'g',a,[x,-10.5,0.5],[-0.5,-0.5,-1.5,1,1,3],0,{nb:1}],[n+'x',n+'g',[0,0,1.5],[-0.5,-1.5,0,1,3,1],0,{nb:1}],
+      [n+'1',n+'g',[0,0,2],[-0.5,-1,0,1,2,len],0,{nb:1}],[n+'2',n+'1',[0,0,len],[-0.5,-1,0,1,2,3],[sw,0,0],{nb:1,tp:['z',1,0,0,0.5]}]];};
+  const knifePaint=(P,side)=>{const n=side==='L'?'kL':'kR';P.map(n+'g',ALL,(s,t)=>(s+t)%2?[70,48,32]:[110,80,52]);plate(P,[n+'x'],COP);
+    for(const q of [n+'1',n+'2'])P.map(q,ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([212,218,224],t===0?24:t===h-1?-12:4):sh([226,230,234],10));};
+  // a jerkin of soft leather to the thigh, leaf plates of copper on the shoulders, bracers, a belt
+  const jerkin=()=>[['jerk','body',[0,0,0],[-4.5,-4,-2.5,9,15,5]],['pL','armL',[0,0.5,0],[-3.75,-3,-2.25,4.5,3.5,4.5],[0,0,0.12],{tp:['-y',1.15,1.1,0,0]}],
+    ['pR','armR',[0,0.5,0],[-0.75,-3,-2.25,4.5,3.5,4.5],[0,0,-0.12],{m:'pL',tp:['-y',1.15,1.1,0,0]}],['vL','armL',[0,-6,0],[-3.5,-4,-2,4,4,4]],['vR','armR',[0,-6,0],[-0.5,-4,-2,4,4,4],0,{m:'vL'}],
+    ['belt','body',[0,0,0],[-5,0.5,-3,10,1,6]]];
+  const jerkinPaint=(P,c,col,o)=>{elfFace(P,c,{eyeRow:4});cloth(P,['armL','body'],o&&o.under||MOSS);hands(P,c,[90,64,42]);P.map('legL',ALL,(s,t)=>sh([72,64,52],hz(s,t,623)*8));boots(P,[86,62,40],21);
+    leather(P,['jerk'],col);P.map('jerk',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1?sh(col,-24):t%6===0?sh(col,10):null);
+    leaves(P,['pL'],COP);plate(P,['vL'],COP);P.map('vL',SIDE,(s,t,w)=>s===(w>>1)?sh(COP,26):null);leather(P,['belt'],[70,48,30]);P.map('belt',['F'],(s,t,w)=>Math.abs(s-w/2+0.5)<1.5?sh(COP,10):null);};
+  // the guards' armour: copper leaves over a long robe of deep green, a helm with a leaf crest swept back, greaves
+  const kit=robeH=>[['robe','body',[0,1,0],[-4.5,-robeH,-2.5,9,robeH+10,5],0,{tp:['-y',1.15,1.2,0,0]}],['cuirass','body',[0,0,0],[-4.75,1,-2.75,9.5,10,5.5]],
+    ['faulds','body',[0,1,0],[-5,-5,-3,10,6,6],0,{tp:['-y',1.12,1.1,0,0]}],
+    ['pL','armL',[0,0.5,0],[-3.75,-3,-2.25,4.5,3.5,4.5],[0,0,0.12],{tp:['-y',1.15,1.1,0,0]}],['pR','armR',[0,0.5,0],[-0.75,-3,-2.25,4.5,3.5,4.5],[0,0,-0.12],{m:'pL',tp:['-y',1.15,1.1,0,0]}],
+    ['vL','armL',[0,-6,0],[-3.5,-4,-2,4,4,4]],['vR','armR',[0,-6,0],[-0.5,-4,-2,4,4,4],0,{m:'vL'}],
+    ['grL','legL',[0,0,0],[-2.5,-10,-2.5,5,6,5]],['grR','legR',[0,0,0],[-2.5,-10,-2.5,5,6,5],0,{m:'grL'}],
+    ['helm','head',[0,3.5,0],[-3.5,0,-3.5,7,4,7],0,{head:1,tp:['y',0.85,0.85,0,0]}],
+    ['crest','helm',[0,3,-0.5],[-0.5,0,-1,1,3,6],[-0.5,0,0],{head:1,nb:1,tp:['y',1,0.2,0,-2]}],
+    ...ears(),...hairB(6)];
+  const guardPaint=(P,c)=>{elfFace(P,c,{eyeRow:4});mail(P,['armL','legL']);hands(P,c,[90,64,42]);boots(P,[86,60,40],20);
+    cloth(P,['robe','body'],DEEP);vine(P,'robe',SIDE,34,38,COP,DEEP);leaves(P,['cuirass'],COP);leaves(P,['faulds'],sh(COP,-10));leaves(P,['pL'],COP);
+    plate(P,['vL','grL'],COP);P.map('grL',SIDE,(s,t,w)=>s===(w>>1)?sh(COP,26):null);
+    plate(P,['helm'],COP);P.map('helm',SIDE,(s,t)=>t===6||t===7?sh(COP,-26):(s*3+t)%7===0&&t<5?sh(COP,22):null);
+    P.map('crest',ALL,(s,t,w,h,f)=>sh(GOLD,(f==='L'||f==='R'?(t%2?-10:8):10)+hz(s,t,625)*6));};
+  const robed=(robeH,hair)=>[...man(),['robe','body',[0,1,0],[-4.5,-robeH,-2.5,9,robeH+1,5],0,{tp:['-y',1.15,1.2,0,0]}],['over','body',[0,0,0],[-4.75,-6,-2.75,9.5,17,5.5]],
+    ['slvL','armL',[0,-5,0],[-3.5,-8,-2,4,8,4],0,{tp:['-y',1.5,1.6,-0.5,0]}],['slvR','armR',[0,-5,0],[-0.5,-8,-2,4,8,4],0,{m:'slvL',tp:['-y',1.5,1.6,0.5,0]}],...ears(),...hairB(hair)];
+  Object.assign(AM_KINDS,{
+    // the warden: hooded, cloaked, a long bow and quiver, knives at the belt
+    wbow:{res:2,tex:256,scale:1.08,parts:[...man(),...jerkin(),...hood(),...bow(),...ears(),...hairB(4)],coats:coats(0),
+      paint(P,c){jerkinPaint(P,c,[110,82,50]);hoodPaint(P,CLOAK);bowPaint(P);P.map('hairB',ALL,(s,t,w,h)=>sh(c.hair,hz(s,0,615)*20-(t>h-3?10:0)));}},
+    // the blade: two long knives, leaf plates, a short cloak
+    wknife:{res:2,tex:256,scale:1.08,parts:[...man(),...jerkin(),['cape','body',[0,10.5,-2.9],[-4.5,-12,-0.5,9,12,1],[0.08,0,0],{nb:1}],...knife('L',4),...knife('R',4),...ears(),...hairB(6)],coats:coats(1),
+      paint(P,c){jerkinPaint(P,c,[96,70,44],{under:DEEP});cloth(P,['cape'],MOSS,{off:2});vine(P,'cape',SIDE,18,22,COP,MOSS);knifePaint(P,'L');knifePaint(P,'R');}},
+    // the guard of the halls: copper leaves over deep green, the leaf-crested helm, a glaive
+    wguard:{res:2,tex:256,scale:1.08,parts:[...man(),...kit(9),['shaft','armR',[1.5,-10,0.5],[-0.5,-9,-0.5,1,30,1],[0.12,0,0],{nb:1}],['sock','shaft',[0,21,0],[-0.75,0,-0.75,1.5,2,1.5],0,{nb:1}],
+        ['gl1','shaft',[0,23,0],[-0.5,0,-1,1,5,2],0,{nb:1}],['gl2','gl1',[0,5,0],[-0.5,0,-1,1,4,2],[-0.35,0,0],{nb:1,tp:['y',1,0,0,-0.6]}]],coats:coats(2),
+      paint(P,c){guardPaint(P,c);P.map('shaft',ALL,(s,t)=>t%8===0?sh(COP,10):sh([86,60,40],hz(s,t>>2,627)*10));plate(P,['sock'],COP);
+        for(const n of ['gl1','gl2'])P.map(n,ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([212,218,224],s===0?-18:s===w-1?24:2):sh([226,230,234],10));}},
+    // the captain: the guard's armour under a green cloak with the leaf of the wood, a knife in each hand
+    wcapt:{res:2,tex:256,scale:1.1,parts:[...man(),...kit(8),['cape','body',[0,10.5,-2.9],[-4.5,-20,-0.5,9,20,1],[0.08,0,0],{nb:1}],...knife('L',5),...knife('R',5)],coats:coats(3),
+      paint(P,c){guardPaint(P,c);cloth(P,['cape'],[40,84,52],{off:2});vine(P,'cape',SIDE,34,38,GOLD,[40,84,52]);leafSign(P,'cape','B',2,10,GOLD,[150,110,40]);knifePaint(P,'L');knifePaint(P,'R');}},
+    // the king: long robes of silver and moss, an open overrobe, a crown of autumn leaves and red berries, a staff of pale wood
+    wking:{res:2,tex:256,scale:1.14,parts:[...robed(13,11),['crown','head',[0,5.5,0],[-3.75,0,-3.75,7.5,1,7.5],0,{head:1}],
+        ['twF','crown',[0,1,3.5],[-3,0,-0.5,6,3,1],0,{head:1,nb:1,tp:['y',1,0.4,0,0]}],['twL','crown',[-3.5,1,0],[-0.5,0,-3,1,3,6],0,{head:1,nb:1,tp:['y',1,0.4,0,0]}],['twR','crown',[3.5,1,0],[-0.5,0,-3,1,3,6],0,{head:1,nb:1,m:'twL',tp:['y',1,0.4,0,0]}],
+        ['staff','armR',[1.5,-10,0.5],[-0.5,-10,-0.5,1,34,1],[0.05,0,0],{nb:1}],['knob','staff',[0,24,0],[-1,0,-1,2,3,2],0,{nb:1}]],
+      coats:[[{skin:WSKIN[3],hair:WHAIR[4],cl:[206,210,214],cl2:[70,86,60]},3],[{skin:WSKIN[0],hair:WHAIR[1],cl:[200,204,196],cl2:[80,60,44]},1]],
+      paint(P,c){elfFace(P,c);cloth(P,['armL','body','robe'],c.cl);hands(P,c);P.map('legL',ALL,()=>[90,90,96]);boots(P,[80,70,60],21);
+        cloth(P,['over','slvL'],c.cl2);vine(P,'over',SIDE,28,34,[196,200,206],c.cl2);vine(P,'slvL',SIDE,10,16,[196,200,206],c.cl2);vine(P,'robe',SIDE,40,46,[150,154,160],c.cl);
+        P.map('crown',ALL,(s,t)=>(s+t)%3===0?[160,40,34]:sh([200,120,50],hz(s,t,629)*16));
+        for(const n of ['twF','twL'])P.map(n,ALL,(s,t,w,h)=>(s*5+t*3)%7===0?[176,30,30]:t>=h-2&&s%2?null:sh(s%3?[214,140,52]:[170,76,40],hz(s,t,631)*14));
+        P.map('staff',ALL,(s,t)=>t%11===0?sh(SILV,0):sh([206,190,150],hz(s,t>>2,633)*10));P.map('knob',ALL,(s,t)=>sh([226,240,255],-t*4));}},
+    // a lord: robes of green, a circlet of silver leaves
+    wlord:{res:2,tex:256,scale:1.08,parts:[...robed(12,8),['circ','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}]],
+      coats:[[{skin:WSKIN[0],hair:WHAIR[0],cl:[54,90,60],cl2:[96,74,50]},2],[{skin:WSKIN[1],hair:WHAIR[3],cl:[70,96,70],cl2:[120,96,60]},2],[{skin:WSKIN[2],hair:WHAIR[2],cl:[60,80,90],cl2:[80,100,60]},1]],
+      paint(P,c){elfFace(P,c);cloth(P,['armL','body','robe'],c.cl2);hands(P,c);P.map('legL',ALL,()=>[60,52,44]);boots(P,[70,54,40],21);
+        cloth(P,['over','slvL'],c.cl);vine(P,'over',SIDE,28,34,[206,210,216],c.cl);vine(P,'slvL',SIDE,10,16,[206,210,216],c.cl);
+        plate(P,['circ'],SILV);P.map('circ',SIDE,(s)=>s%3===1?sh(SILV,20):null);}},
+    // a lady: a gown of white, silver or pale green with trailing sleeves, a silver circlet, hair to the waist and braided
+    wlady:{res:2,tex:256,scale:1.06,parts:[...man(),['gown','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.3,1.35,0,0]}],['girdle','body',[0,0,0],[-5,1.5,-3,10,1,6]],
+        ['slvL','armL',[0,-5,0],[-3.5,-10,-2,4,10,4],0,{tp:['-y',1.7,1.8,-0.6,0]}],['slvR','armR',[0,-5,0],[-0.5,-10,-2,4,10,4],0,{m:'slvL',tp:['-y',1.7,1.8,0.6,0]}],
+        ['circ','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}],...ears(),...hairB(12),
+        ['braidL','head',[-2.5,1,1.5],[-1,-9,-0.5,2,9,1.5],[0,0,0.05],{head:1,nb:1}],['braidR','head',[2.5,1,1.5],[-1,-9,-0.5,2,9,1.5],[0,0,-0.05],{head:1,nb:1,m:'braidL'}]],
+      coats:[[{skin:WSKIN[3],hair:WHAIR[0],cl:[236,236,240]},3],[{skin:WSKIN[0],hair:WHAIR[4],cl:[200,208,214]},2],[{skin:WSKIN[1],hair:WHAIR[5],cl:[176,200,170]},2],[{skin:WSKIN[2],hair:WHAIR[3],cl:[214,206,180]},1]],
+      paint(P,c){elfFace(P,c);P.map('braidL',ALL,(s,t)=>sh(c.hair,((t+s)%3===0?-18:6)+hz(s,t,635)*8));
+        cloth(P,['armL','body','gown','slvL'],c.cl);hands(P,c);P.map('legL',ALL,()=>[190,186,176]);boots(P,[180,176,166],22);
+        vine(P,'gown',SIDE,46,52,[176,196,150],c.cl);vine(P,'slvL',SIDE,14,18,[176,196,150],c.cl);
+        P.map('body',['F'],(s,t,w)=>t<4&&Math.abs(s-w/2+0.5)<(4-t)+1?sh(c.skin,-4):t===4&&Math.abs(s-w/2+0.5)<5?sh(SILV,(s%2?10:-6)):null);
+        plate(P,['girdle'],SILV);plate(P,['circ'],SILV);P.map('circ',['F'],(s)=>s===6||s===7?[200,240,220]:null);}},
+    // the folk of the glades: a tunic of green or brown, the hood thrown back on the shoulders, a belt, soft boots
+    wfolk:{res:2,tex:256,scale:1.06,parts:[...man(),['tunic','body',[0,0,0],[-4.5,-5,-2.5,9,16,5]],['hoodB','body',[0,10,-2.75],[-4,-3,-1,8,4,2]],['belt','body',[0,0,0],[-5,0.5,-3,10,1,6]],...ears(),...hairB(7)],
+      coats:[[{skin:WSKIN[0],hair:WHAIR[0],cl:[76,104,60]},2],[{skin:WSKIN[1],hair:WHAIR[2],cl:[110,84,54]},2],[{skin:WSKIN[2],hair:WHAIR[3],cl:[90,110,90]},2],[{skin:WSKIN[3],hair:WHAIR[5],cl:[120,100,60]},1]],
+      paint(P,c){elfFace(P,c);cloth(P,['armL','body','tunic'],c.cl);hands(P,c);P.map('legL',ALL,(s,t)=>sh([84,74,60],hz(s,t,637)*8));boots(P,[96,70,46],21);
+        vine(P,'tunic',SIDE,26,30,[200,170,90],c.cl);cloth(P,['hoodB'],sh(c.cl,-14));leather(P,['belt'],[80,56,34]);}}
+  });
+})();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
 // they give wool, milk and eggs, meat and hides to the hunter; wild horses can be ridden, a stray hound fed meat follows you, and
 // a wild mule fed crops carries a pack. Animals are not part of generation: they come and go around the player (Math.random is
@@ -9526,12 +9933,23 @@ const FOES={
   elord:{n:'Elf-lord',m:'elord',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'elf'},
   elady:{n:'Elf-lady',m:'elady',hp:18,dmg:1,reach:1.6,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'elf'},
   elore:{n:'Loremaster',m:'elore',hp:16,dmg:1,reach:1.6,walk:1.05,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[224,1,1,0.3]],cause:'elf'},
-  esmith:{n:'Elven Smith',m:'esmith',hp:20,dmg:2,reach:1.8,walk:1.1,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,3,0.6]],cause:'elf'}
+  esmith:{n:'Elven Smith',m:'esmith',hp:20,dmg:2,reach:1.8,walk:1.1,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[223,1,3,0.6]],cause:'elf'},
+  // the wood elves (D-065): wardens with long bows and the longest sight of any folk, blades with two long knives who strike
+  // quickly, guards of the halls with glaives, captains; the king and the lords, the ladies, the folk of the glades
+  wbow:{n:'Warden of the Wood',m:'wbow',hp:24,dmg:3,reach:2,walk:1.5,run:5.4,sight:44,cd:1.1,wind:0.35,shot:{dmg:4,v:34,lo:5,hi:38,cd:1.4,k:'arrow'},keep:12,mass:0.55,folk:1,say:'wguard',drops:[[201,2,5,0.7],[206,1,1,0.4]],cause:'warrow'},
+  wknife:{n:'Blade of the Wood',m:'wknife',hp:26,dmg:5,reach:2,walk:1.5,run:5.6,sight:34,cd:0.6,wind:0.22,block:0.25,mass:0.5,folk:1,say:'wguard',drops:[[223,1,1,0.4],[206,1,2,0.5]],cause:'wood'},
+  wguard:{n:'Guard of the Halls',m:'wguard',hp:30,dmg:5,reach:3,walk:1.4,run:5,sight:32,cd:1.1,wind:0.4,block:0.35,mass:0.5,folk:1,say:'wguard',drops:[[223,1,2,0.4],[206,1,2,0.5]],cause:'wood'},
+  wcapt:{n:'Captain of the Wood',m:'wcapt',hp:54,dmg:8,reach:2.4,walk:1.5,run:5.5,sight:40,cd:0.8,wind:0.3,block:0.35,mass:0.4,folk:1,drops:[[227,1,2,0.6],[224,1,2,0.5]],cause:'wood'},
+  wking:{n:'King of the Wood',m:'wking',hp:30,dmg:3,reach:2,walk:1.1,run:4.6,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'wood'},
+  wlord:{n:'Lord of the Wood',m:'wlord',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[224,1,2,0.5]],cause:'wood'},
+  wlady:{n:'Lady of the Wood',m:'wlady',hp:18,dmg:1,reach:1.6,walk:1.15,run:4.8,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,drops:[[207,1,2,0.5]],cause:'wood'},
+  wfolk:{n:'Wood-elf',m:'wfolk',hp:16,dmg:1,reach:1.6,walk:1.2,run:5,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[206,1,2,0.5],[202,1,2,0.4]],cause:'wood'}
 };
 Object.assign(DEATH,{goblin:'A goblin got the better of you',stone:'A goblin’s sling stone found you',fire:'Goblin fire burned you',orc:'An orc cut you down',arrow:'An orc arrow found you',
   troll:'A troll crushed you',rock:'A troll’s thrown rock crushed you',ember:'An Emberlord burned you to ash',guard:'The guards of the realm cut you down',rarrow:'An archer of the realm shot you',
   rider:'The riders cut you down',harrow:'A bowman of the riders shot you',horse:'A horseman of the riders rode you down',
-  elf:'The warriors of the elves struck you down',earrow:'An elven archer shot you',eknight:'A knight of the elves rode you down'});
+  elf:'The warriors of the elves struck you down',earrow:'An elven archer shot you',eknight:'A knight of the elves rode you down',
+  wood:'The elves of the wood struck you down',warrow:'A warden of the wood shot you'});
 // who lives where: weights by place (warren halls by kind, camps before the ways in, warbands and trolls on the surface)
 const FOE_HOME={den:[['goblin',3],['gslinger',1.5]],store:[['goblin',2],['gslinger',1]],forge:[['goblin',2],['gfire',1.5]],pen:[['goblin',2],['gslinger',1]],shrine:[['gfire',3],['goblin',1]],
   lava:[['goblin',2],['gslinger',2]],chief:[['goblin',2],['gslinger',1],['gfire',1]],camp:[['goblin',3],['gslinger',2]],band:[['raider',5],['bowman',3],['brute',1.5]],gate:[['raider',3],['bowman',2],['brute',1]],
@@ -9553,11 +9971,15 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   e_drill:[['esword',2],['ebow',2],['espear',1]],e_smithy:[['elore',1]],e_keep:[['esword',2],['espear',1],['ebow',1]],e_green:[['elord',1],['elady',2],['elore',1]],
   e_lane:[['elady',1],['elord',1]],e_farm:[['elady',1],['elord',1]],e_field:[['elady',1],['elore',1]],e_post:[['espear',2],['ebow',2]],e_patrol:[['eknight',1]],
   // a host of each people that marches through the Volcanic Wastes against its creatures (D-063)
-  r_host:[['rsword',2],['rspear',2],['rbow',1.5]],h_host:[['hrider',3],['hbow',1],['hspear',0.5]],e_host:[['esword',2],['espear',2],['ebow',2],['eknight',1]]});
+  r_host:[['rsword',2],['rspear',2],['rbow',1.5]],h_host:[['hrider',3],['hbow',1],['hspear',0.5]],e_host:[['esword',2],['espear',2],['ebow',2],['eknight',1]],
+  // the wood elves' places (D-065): wardens on the gate, the platforms and the watch-trees; the halls kept by guards; folk in the glades
+  w_gate:[['wbow',2],['wguard',2]],w_deck:[['wbow',2],['wlady',0.6],['wlord',0.4]],w_street:[['wfolk',2],['wlady',1],['wbow',0.6]],w_hall:[['wguard',1],['wlady',1]],
+  w_garden:[['wlady',1.5],['wfolk',1.5]],w_range:[['wbow',3]],w_keep:[['wguard',3],['wbow',1]],w_cellar:[['wfolk',1]],w_glade:[['wfolk',2],['wlady',1.5],['wlord',0.6],['wbow',0.5]],
+  w_post:[['wbow',2]],w_patrol:[['wbow',1],['wknife',1]],w_host:[['wbow',3],['wknife',2],['wguard',1.5]]});
 const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
-    stable:[1,2],paddock:[1,1]},
+    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5]},
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
-    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt'};
+    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -9690,6 +10112,13 @@ const FOLK_SAY={
   elady:['The fountains of {p} sing at night, if you listen.','You have come far. Sit a while by the water.','There is much beauty yet in the world.'],
   elore:['The histories of {k} fill a hundred halls. I have read but a few.','Every stone here was laid with a song.','Ask, and I will tell you what I know of the elder days.'],
   esmith:['Steel that sings is steel well made.','A blade from these forges never dulls in a worthy hand.','The forges of {p} burn white, not red.'],
+  // the wood elves (D-065)
+  wguard:['The trees saw you coming long before we did.','You walk under the boughs of {k}. Tread lightly.','Stay on the lamplit ways, stranger, and none will trouble you.','Our bows are quick, but our welcome is quicker, for those who mean no harm.'],
+  wcapt:['I keep the ways of {p}. Few pass that I do not see.','The spiders and the dark things keep to the old woods. We keep them there.','You are welcome in {k}, while the lamps are lit.'],
+  wking:['Few walk freely in my halls. You may count yourself among them.','The wood remembers every king. It will remember me a little while yet.','Be welcome in {p}, traveller. There is wine, and song, if you will stay.'],
+  wlord:['The leaves turn gold here every year, and every year it is new to us.','Have you heard the singing in the high trees? It goes on all night.','Welcome to {p}.'],
+  wlady:['Walk softly. The trees are listening.','The lamps of {p} were lit before your grandfather\'s grandfather was born.','There is a spring under the great tree. Drink, if you are weary.'],
+  wfolk:['Come and sit by the fire, there is room.','The feast lasts till the stars go out.','We have not had a stranger at our tables for many a year.','Mind the roots in the dark.'],
   // a host in the wastes (D-063)
   host:['We march against the creatures of the ash, for {k}.','Keep close, traveller. The ash hides many foes.','The orcs grow bold. {k} will not wait for them at its gates.','If the horns sound, stand behind our line.','Not all who march out of {k} march home again.']};
 function folkGreet(){
@@ -9950,7 +10379,8 @@ function foeCall(f,what){
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
   else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
-    else{if(what==='alert'&&k[0]==='e'&&(k==='ecapt'||Math.random()<0.35)){tone(440,440,1.1,0.07,0,'triangle',at);tone(660,660,1.8,0.06,0.9,'triangle',at);} // the elves' horn, clear and high
+    else{if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
+      else if(what==='alert'&&k[0]==='e'&&(k==='ecapt'||Math.random()<0.35)){tone(440,440,1.1,0.07,0,'triangle',at);tone(660,660,1.8,0.06,0.9,'triangle',at);} // the elves' horn, clear and high
       else if(what==='alert'&&k[0]==='h'&&(k==='hcapt'||Math.random()<0.35)){tone(147,147,1.1,0.1,0,'sawtooth',at);tone(196,196,1.4,0.09,0.9,'triangle',at);} // the riders' horn, low and long
       else if(what==='alert'&&(k==='rcapt'||Math.random()<0.3)){tone(392,392,0.5,0.08,0,'triangle',at);tone(523,523,0.9,0.08,0.45,'triangle',at);} // a silver horn
       if(FOES[k].mount&&what!=='blow'&&Math.random()<0.5)voice(420*p,260,0.7,0.06,{form:900,q:2,vib:16,vd:0.18},at); // the horse whinnies
@@ -10511,7 +10941,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -10560,9 +10990,10 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
     for(const L of LANDS)if(L.fam===f){const o=document.createElement('option');o.value=L.i;o.textContent=L.n+(L.built?'':' (planned)');g.appendChild(o);}sel.appendChild(g);}
   for(const [pre,label,list] of [['r','The realms of men',[['capital','A royal city'],['city','A city'],['fort','A castle'],['village','A village'],['outpost','A watchtower'],['farm','A farmstead']]],
     ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm']]],
-    ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves']]]]){
+    ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves']]],
+    ['w','The wood elves',[['capital','The king\'s wood'],['city','A city in the trees'],['fort','The king\'s halls'],['village','A tree-village'],['outpost','A watch-tree'],['farm','A glade']]]]){
     const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='r:'||rk==='h:'||rk==='e:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf'}[rk]):landTour(+v))lockOrPlay();});}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood'}[rk]):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});

@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.35.0 (2026-10-11): the wood elves
+
+Saves from 0.34.0 do not carry over (save key v25): the wood elves are new to the world.
+
+### Game
+- **The wood elves.** The forest kingdoms hold about half the stretches of the Elder Wood, Autumn Woods, Birch Glades, Ancient Giant Wood, Yew Wood and Silverwood. They build in and under the trees on the ground as it lies, and the forest grows on between their works.
+  - **Cities in the trees:** great goldboughs with silver bark and golden crowns, platforms of pale planks round their trunks at shared heights, houses wrapped round the trunks under leaf thatch, stairs winding up, bridges with woven rails from tree to tree, lamps of pale light everywhere. A clipped hedge rings the city, its gate between two goldboughs under a bridge; the king's tree stands at the back with his hall high in it. A spring and an archery range lie by the way.
+  - **The king's halls** under a hill: a forecourt over a stream, a gate of rootstone in the hill's face, a great hall on pillars like trees, the king's seat crowned with antlers, a cellar of casks and a guardroom.
+  - **Tree-villages** round feasting glades, **watch-trees** standing alone, **glades** with long tables, casks and a fire; lamplit ways between them.
+  - **Their folk:** wardens in hooded grey-green cloaks with long bows (they see and shoot farthest of any folk), blades with two long knives, guards of the halls in copper leaf armour with glaives, captains, the king under a crown of autumn leaves, lords, ladies and the folk of the glades. Neutral until one is struck, never hostile in creative; their horn sounds three rising notes. Their hosts march into the wastes like the other peoples'.
+  - Their places sound of birds, distant singing and a harp by day, and of singing, crickets and owls by night.
+- New blocks (creative, under Building and Wood and plants): Goldbough Bark, Goldbough Planks, Goldbough Leaves, Woodland Lamp, Woven Rail, Carved Wood, Rootstone, Clipped Hedge, Banner of the Wood, Leaf Thatch.
+- The creative land tour gains the wood elves' places.
+
+### Tooling
+- New test case `57-woodelves`.
+
 ## 0.34.0 (2026-10-11): lava down the gullies, and the orcs' places
 
 Saves from 0.33.0 do not carry over (save key v24): the volcanoes' gullies and the orcs' places are new to the world.

@@ -213,6 +213,16 @@ def(EVWOOD,'Golden Wood',[319,319,319],{snd:'wood'});def(EVMOSAIC,'Elven Mosaic'
 const ORCLOG=1147,ORCIRON=1148;
 def(ORCLOG,'Black Palisade',[322,322,321],{snd:'wood'});def(ORCIRON,'Riveted Iron',[323,323,323],{snd:'stone'});
 setH([ORCLOG],2,'wood');setH([ORCIRON],6,'metal',2);
+// The wood elves (D-065): the goldbough, their great tree, its silver bark, pale planks and golden leaves; their lamps of pale
+// light, woven rails, wood carved in flowing lines, rootstone (stone carved like roots, for the king's halls), clipped hedges,
+// the banner of the wood (a golden leaf on green), and leaf thatch for their roofs
+const WBARK=1149,WPLANK=1150,WLEAF=1151,WLAMP=1152,WRAIL=1153,WCARVE=1154,WROOT=1155,WHEDGE=1156,WBANNER=1157,WTHATCH=1158;
+def(WBARK,'Goldbough Bark',[325,325,324],{snd:'wood'});def(WPLANK,'Goldbough Planks',[326,326,326],{snd:'wood'});def(WLEAF,'Goldbough Leaves',[327,327,327],LEAFD);
+def(WLAMP,'Woodland Lamp',[328,328,328],{opq:false,occ:false,emit:true,lum:14,snd:'glass'});def(WRAIL,'Woven Rail',[329,329,329],{opq:false,occ:false,snd:'wood'});
+def(WCARVE,'Carved Wood',[326,326,330],{snd:'wood'});def(WROOT,'Rootstone',[331,331,331]);def(WHEDGE,'Clipped Hedge',[332,332,332],{snd:'soft'});
+def(WBANNER,'Banner of the Wood',[333,333,333],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(WTHATCH,'Leaf Thatch',[334,334,334],{snd:'soft'});
+NEW_LOGS.push(WBARK);NEW_PLANKS.push(WPLANK);NEW_LEAVES.push(WLEAF);
+setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);
