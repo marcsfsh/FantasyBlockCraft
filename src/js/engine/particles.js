@@ -37,7 +37,7 @@ function prime(x,y,z,fuse){
   primed.push({x:x+.5,y:y,z:z+.5,vx:(Math.random()-.5)*1.2,vy:3.2,vz:(Math.random()-.5)*1.2,fuse:fuse,m:m});
   burst(0.7,'highpass',4200,0.8,0.14);
 }
-function explode(cx,cy,cz){
+function explode(cx,cy,cz){emberBlast(cx,cy,cz); // an Emberlord near its end, cast down (W7b)
   const R=4,bx=Math.floor(cx),by=Math.floor(cy),bz=Math.floor(cz);
   const pdx=PL.x-cx,pdy=PL.y+0.9-cy,pdz=PL.z-cz,pd=Math.hypot(pdx,pdy,pdz)||0.01;
   sfxBoom(pd,[cx,cy,cz]);shake=Math.max(shake,Math.min(1.2,1.4*(1-pd/45)));buzz(pd<20?60:20);

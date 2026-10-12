@@ -240,7 +240,7 @@ function warTick(){
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
   const w=WARS.get(P.id),last=w&&w.s!==2&&warAll(w);if(last&&!busy&&st.army>45)st.army=45; // the last assault on the gate (W2)
-  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=last||Math.random()<(st.al?0.3:0.7);const A=warArmy(P,st.al);
+  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=last||Math.random()<(st.al?0.3:0.7);const A=warArmy(P,st.al);if(!A.al)emberDrive(A);
     if(last){A.last=1;toast('The last assault: the hosts come against '+P.name.replace(/^The /,'the ')+' with all their strength');}}
   else if(st.raid<=0){st.raid=50+Math.random()*60;warRaid(P);}
   else if(st.scout<=0){st.scout=70+Math.random()*80;warScout(P);}}

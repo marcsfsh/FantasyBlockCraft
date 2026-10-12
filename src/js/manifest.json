@@ -326,6 +326,10 @@
       "about": "The Emberlords remade (W7a, D-074): each lord's identity, temper and story (emberLord, ek), its powers (cleaving blade, dragging whip, leaps, breath, fissures, walls of fire, eruptions, summons) in three phases, its hall flooding with lava and cooling when it falls"
     },
     {
+      "path": "gameplay/ember-war.js",
+      "about": "The Emberlords in the war and their fates (W7b, D-075): each war's lord (warLord, w.el), showing itself at the height of assaults, driving the warhosts, its mountain's rumbles, eruptions and ash, the darker sky, its taunts; the last battles (the vents, its sally, the loremasters' rite) and the five fates"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

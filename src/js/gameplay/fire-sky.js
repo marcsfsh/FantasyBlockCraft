@@ -8,7 +8,7 @@ function burnSkyTick(d){
   const b=LWX.burn;flashC.setHex(0xdfe6ff).lerp(blueFlash,b);if(b<0.002)return;
   // dimmed and reddened by day, but not so far that dark rock goes black; by night the burning smoke still lights the land a dull
   // red, about a third of daylight, so the wastes never sink into black (D-059)
-  U.skyMul.value=Math.max(U.skyMul.value*(1-0.22*b),0.34*b*(1-0.3*rainAmt));U.skyTint.value.lerp(burnTint,(0.7+0.3*(1-d))*b);
+  U.skyMul.value=Math.max(U.skyMul.value*(1-0.22*b),0.34*b*(1-0.3*rainAmt))*(1-0.3*emberSkyK*b);U.skyTint.value.lerp(burnTint,(0.7+0.3*(1-d))*b);
   skyC.lerp(burnSky.setRGB(0.17,0.05,0.035).multiplyScalar(0.4+0.6*d),0.9*b);
   stars.material.opacity*=1-b;clouds.material.color.lerp(burnCloud.setRGB(0.2,0.09,0.07).multiplyScalar(0.5+0.5*d),0.85*b);
   sun.material.color.lerp(burnSun,0.85*b);if(b>0.5)halo.visible=false;
@@ -145,7 +145,7 @@ function warGlowTick(dt){
 function fireTick(dt){
   if(!ready)return;updBolts(dt);updPlumes(dt);updFarWastes(dt);updVentPuffs(dt);warGlowTick(dt);
   const b=LWX.burn;if(b<0.05||!playing)return;
-  fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=1.5+Math.random()*5;if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
+  fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=(1.5+Math.random()*5)/(1+2*emberSkyK);if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
   fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}
   for(let k=0;k<lavaSpots.length*dt*0.6;k++){const s=lavaSpots[Math.random()*lavaSpots.length|0];spawnP(s[0]+Math.random(),s[1]+1.05,s[2]+Math.random(),(Math.random()-0.5)*0.8+0.4,1.2+Math.random()*2.2,(Math.random()-0.5)*0.8,[1,0.35+Math.random()*0.35,0.08],1.2+Math.random()*2,-0.5);}
   for(let k=0;k<12*dt*b;k++)spawnP(PL.x+(Math.random()-0.5)*30,PL.y+Math.random()*8-2,PL.z+(Math.random()-0.5)*30,0.6+Math.random()*0.4,0.4+Math.random()*0.8,(Math.random()-0.5)*0.5,[1,0.42,0.1],2+Math.random()*2,-0.15); // embers on the wind

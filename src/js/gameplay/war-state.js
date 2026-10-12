@@ -36,6 +36,7 @@ function warStateTick(){
     if(last||w!==near&&warPlay-w.allT>600||w===near&&warPlay-w.allT>1800)warFall(w,w===near,w===near?P:null);}
   if(near)warWorksTick(P,near);else{const bw=warBasinWar(X,Z);if(bw){wgSite(bw.P);warFrontTick(bw.P,bw.w);}} // (out on the basin's floor: its forward camps, W5)
   warRaidsTick(); // the raids on the bordering realms (W6)
+  emberWarTick(); // the Emberlords in the war (W7b)
   warPanel(near);}
 // how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
 function warOutcome(A){
@@ -56,7 +57,7 @@ function warPanel(w){
   let al=0,orc=0;const X=PL.x,Z=PL.z;for(const f of foes){if(f.dead||Math.hypot(f.x-X,f.z-Z)>160)continue;if(FOES[f.kind].folk){if(!FOES[f.kind].civ)al++;}else orc++;}
   const bar=v=>'<span class="wb"><i style="width:'+Math.round(v*100)+'%"></i></span>';
   el.innerHTML='<b>'+w.n+'</b><div>'+warStage(w)+'</div>'+WAR_EFF.map(([k,lab])=>'<div class="we">'+lab+' '+bar(warEff(w,k))+' '+Math.round(warEff(w,k)*100)+'%</div>').join('')+
-    '<div>The hosts '+al+', the wastes '+orc+'</div>'+warRaidPanel(w)+(w.s>=2?warFrontPanel(wasteGateAt(w.X,w.Z,10)||{},w):'')+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
+    '<div>The hosts '+al+', the wastes '+orc+'</div>'+emberPanel(w)+warRaidPanel(w)+(w.s>=2?warFrontPanel(wasteGateAt(w.X,w.Z,10)||{},w):'')+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
 // ---- On the world map: each found gate's war, its stage and how far the siege has come, and the two lines across the pass
 function warMapDraw(g,sx,sz){
   for(const w of WARS.values()){const P=wasteGateAt(w.X,w.Z,10);const x=sx(w.X),y=sz(w.Z);

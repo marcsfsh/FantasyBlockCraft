@@ -38,7 +38,7 @@ function emberStory(L){return [L.n+' rose from the deep '+L.age+', when the fire
 // the lords the player has seen (saved as ek: id -> [the hour first seen, its name])
 const emberKnown=new Map(saved&&Array.isArray(saved.ek)?saved.ek:[]),emberSave=()=>({ek:[...emberKnown.entries()]});
 // a fortress's lord in its hall (from foeSpawnTick)
-function emberSpawn(F,x,y,z,o){const L=emberLord(F),f=addFoe(L.kind,x,y,z,Object.assign({ci:L.ci},o));f.L=L;f.ph3=1;return f;}
+function emberSpawn(F,x,y,z,o){const L=emberLord(F),f=addFoe(L.kind,x,y,z,Object.assign({ci:L.ci},o));f.L=L;f.ph3=1;f.mhp=f.hp=Math.round(FOES[L.kind].hp*(1-0.12*emberVents(F)));return f;} // (weaker for each vent the dwarves have broken, W7b)
 // ---- its powers: chosen in its chase (from stepFoe), struck as the wind-up ends (from foeStrike), and carried on each frame
 const EMB_CD={l:14,b:10,s:26,fi:9,e:12,w:16},EMB_WIND={leap:0.7,breath:0.9,summon:1.2,fissure:0.8,erupt:1,wall:1};
 const emberPhase=f=>f.hp>f.mhp*2/3?1:f.hp>f.mhp/3?2:3;
@@ -96,9 +96,10 @@ function emberHazards(dt){for(let i=EMB_HZ.length-1;i>=0;i--){const h=EMB_HZ[i],
     if(h.t>=h.T)EMB_HZ.splice(i,1);}}
 // ---- every frame (from updFoes): each lord's phase, breath and leap, the hazards, its flooding hall; the lords seen
 let emberT=0;
-function emberFrame(dt){emberHazards(dt);emberFloodTick(dt);emberT-=dt;const sec=emberT<=0;if(sec)emberT=1;
+function emberFrame(dt){emberHazards(dt);emberFloodTick(dt);emberAsh(dt);emberRiteTick(dt);emberT-=dt;const sec=emberT<=0;if(sec)emberT=1;
   for(const f of foes){if(!isLord(f))continue;
     if(f.dead){if(!f.emberDone){f.emberDone=1;emberFalls(f);}continue;}
+    if(f.sink>0){f.sink-=dt;f.y-=4*dt;f.gy=f.y;if(Math.random()<dt*30)spawnP(f.x+(Math.random()-.5)*8,f.y+Math.random()*4,f.z+(Math.random()-.5)*8,0,3+Math.random()*3,0,f.fc||[1,0.5,0.1],1,-0.3);if(f.sink<=0){f.hp=0;f.dead=0.001;f.st='dead';if(f.lordOf)lordFalls(f);}continue;} // cast down (W7b)
     if(!f.fc&&f.L)f.fc=AM_KINDS.ember.coats[f.L.ci][0].fire.map(v=>v/255);
     if(f.ec)for(const k in f.ec)f.ec[k]-=dt;
     // seen
@@ -134,7 +135,7 @@ function emberFloodTick(dt){for(const f of foes){if(!isLord(f)||f.dead||!f.L)con
 const emberCooled=new Set();
 function emberFalls(f){for(const g of foes)if(g.sum===f.id&&!g.dead){g.hp=0;g.dead=0.001;g.st='dead';for(let k=0;k<10;k++)spawnP(g.x,g.y+1,g.z,(Math.random()-.5)*2,Math.random()*3,(Math.random()-.5)*2,f.fc||[1,0.5,0.1],0.5,1);}
   for(let i=EMB_HZ.length-1;i>=0;i--)if(EMB_HZ[i].f===f)EMB_HZ.splice(i,1);
-  if(f.L){showName(f.L.n+' has fallen');if(f.L.F.flood)f.L.F.flood.u=-1e9;emberCool(f.L.F);}}
+  emberFateOnDeath(f);if(f.L&&!f.show){if(f.L.F.flood)f.L.F.flood.u=-1e9;emberCool(f.L.F);}}
 function emberCool(F){const P=F.P,E=F.U1+F.Lh;let all=true;
   for(let u=F.U1-8;u<E;u++)for(let v=-P.hw;v<=P.hw;v++){const X=F.GX-F.ox*u+F.px*v,Z=F.GZ-F.oz*u+F.pz*v,x=X-OX,z=Z-OZ;if(x<0||z<0||x>=W||z>=D||!genDone[(x>>4)+(z>>4)*NCX]){all=false;continue;}
     for(let y=F.Fh;y<=F.Fh+2;y++)if(get(x,y,z)===LAVA)setBlock(x,y,z,lvl[I(x,y,z)]?LAVACRUST:OBSID,true);}
@@ -142,4 +143,4 @@ function emberCool(F){const P=F.P,E=F.U1+F.Lh;let all=true;
 function emberCoolTick(){if(!fallenLords.size)return;for(const F of fortsNear(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),60))if(F.great&&fallenLords.has(F.id)&&!emberCooled.has(F.id))emberCool(F);}
 // ---- the journal: the lords the player has seen, their stories, the fallen
 function emberJournal(out){if(!emberKnown.size)return;out.push('','THE EMBERLORDS');
-  for(const [id,[t,n]] of emberKnown){const F=[...FORT_C.values()].find(F=>F&&F.id===id),fell=fallenLords.has(id);out.push('',n+(fell?' (fallen)':'')+', first seen in hour '+(t/3600).toFixed(1)+'.');if(F)out.push(...emberStory(emberLord(F)));}}
+  for(const [id,[t,n,fate]] of emberKnown){const F=[...FORT_C.values()].find(F=>F&&F.id===id),fell=fallenLords.has(id);out.push('',n+(fell?' (fallen)':'')+', '+(t==null?'known by report':'first seen in hour '+(t/3600).toFixed(1))+'.');if(F)out.push(...emberStory(emberLord(F)));if(fate&&F)out.push(EMBER_FATE[fate](emberLord(F)));}}

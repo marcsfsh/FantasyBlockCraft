@@ -19,7 +19,7 @@ function warBasinAt(X,Z){const o={};wasteAt(X,Z,o);return o.bc&&o.bs<40?wasteBas
 function warBasinWar(X,Z){let any=false;for(const w of WARS.values())if(w.s>=2)any=true;if(!any)return null;const B=warBasinAt(X,Z),P=B&&wasteGateOf(B);if(!P)return null;
   const w=WARS.get(P.id);return w&&w.s>=2?{P:P,w:w}:null;}
 // how far the front has come
-function warFront(w){if(w.s<2)return 0;const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
+function warFront(w){if(!(w.s>=2))return 0;const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
 const warFrontAt=(P,w)=>{const F=warFrontPath(P);return F[Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1)))];};
 // ---- the forward camps: where each stands (the path's point, moved along it to dry ground), and its cells
 function warCampAt(P,k){P.fcs=P.fcs||[];if(P.fcs[k]!==undefined)return P.fcs[k];const F=warFrontPath(P),i0=Math.round(WAR_CAMPS[k]*(F.length-1));let r=null;
@@ -38,7 +38,7 @@ function warCampCells(P,k){const C=warCampAt(P,k);if(!C)return [];const [X,Z,i]=
   const fy=top(X,Z)+1;if(fy>0){put(X,fy,Z,HEARTH);for(const [a,b,id] of [[2,2,RBANNER],[-2,2,DBANNER],[2,-2,EVBANNER]])for(let y=fy;y<fy+3;y++)put(X+a,y,Z+b,id);}
   return out;}
 // ---- every second (from warWorksTick, for the war near): the forward camps the front has passed, built where loaded
-function warFrontTick(P,w){if(w.s<2||WJ.length)return;if(!w.ap)w.ap={leaf:0,me:0,cm:0,lad:0,gr:0,fall:0,ban:0,fire:0};const A=w.ap,fr=warFront(w),n=WAR_CAMPS.filter(f=>fr>=f-0.05).length;A.fc=A.fc||0;
+function warFrontTick(P,w){if(!(w.s>=2)||WJ.length)return;if(!w.ap)w.ap={leaf:0,me:0,cm:0,lad:0,gr:0,fall:0,ban:0,fire:0};const A=w.ap,fr=warFront(w),n=WAR_CAMPS.filter(f=>fr>=f-0.05).length;A.fc=A.fc||0;
   if(n>A.fc&&!(A.wt&&A.wt.fc>warPlay)){const k=A.fc,C=warCampAt(P,k);if(!C){A.fc++;return;}const x=C[0]-OX,z=C[1]-OZ;if(x<20||z<20||x>=W-20||z>=D-20||!genDone[(x>>4)+(z>>4)*NCX])return;
     warJob(warCampCells(P,k),300,ok=>{if(ok){A.fc=k+1;warLog(w,'The hosts raised their '+['first','second','third','fourth'][k]+' forward camp on the floor of the wastes.');if(Math.hypot(x-PL.x,z-PL.z)<160)toast('The hosts raise a forward camp');}
       else{A.wt=A.wt||{};A.wt.fc=warPlay+20;}saveDirty=true;});}
@@ -84,7 +84,8 @@ function warFollow(tag,n,tables,said){const mine=foes.filter(f=>f.follow===tag&&
 // ---- the armies' ways once the gate has fallen: the hosts' down the Long Descent to the front and on; the warhosts' from the
 // volcano at the front
 function warFrontWays(P,w){const F=warFrontPath(P),i=Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1))),W2=warWays(P);
-  return {inA:W2.inB.concat(F.slice(0,Math.min(F.length,i+4)).map(q=>[q[0]+0.5,q[1]+0.5])),out:F.slice(Math.max(0,i-2)).reverse().map(q=>[q[0]+0.5,q[1]+0.5])};}
+  const inA=W2.inB.concat(F.slice(0,Math.min(F.length,i+4)).map(q=>[q[0]+0.5,q[1]+0.5]));if(warFront(w)>=1)inA.push(...emberWayIn(w,F[F.length-1])); // on to its gate (W7b)
+  return {inA:inA,out:F.slice(Math.max(0,i-2)).reverse().map(q=>[q[0]+0.5,q[1]+0.5])};}
 // the panel and the map
-function warFrontPanel(P,w){if(w.s<2)return '';return '<div>The front '+Math.round(warFront(w)*100)+'%, forward camps '+(w.ap&&w.ap.fc||0)+', places taken '+(w.tk||0)+'</div>';}
-function warFrontMap(g,sx,sz,P,w){if(w.s<2||!w.ap||!w.ap.fc)return;g.fillStyle='#2a4c9c';for(let k=0;k<w.ap.fc;k++){const C=warCampAt(P,k);if(C)g.fillRect(sx(C[0])-4,sz(C[1])-4,8,8);}}
+function warFrontPanel(P,w){if(!(w.s>=2))return '';return '<div>The front '+Math.round(warFront(w)*100)+'%, forward camps '+(w.ap&&w.ap.fc||0)+', places taken '+(w.tk||0)+'</div>';}
+function warFrontMap(g,sx,sz,P,w){if(!(w.s>=2)||!w.ap||!w.ap.fc)return;g.fillStyle='#2a4c9c';for(let k=0;k<w.ap.fc;k++){const C=warCampAt(P,k);if(C)g.fillRect(sx(C[0])-4,sz(C[1])-4,8,8);}}

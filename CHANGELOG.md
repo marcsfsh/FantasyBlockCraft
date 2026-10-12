@@ -5,6 +5,20 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.45.0 (2026-10-12): W7b, the Emberlords in the war and their fates
+
+Saves from 0.44.0 do not carry over (save key v35): each war keeps its lord's vents and fate.
+
+### Game
+- **The lord of each basin takes part in its war.** At the height of an assault it shows itself on the Ashen Gate's wall (or on its crater's rim once the gate has fallen) and its servants fight bolder. Before every warhost it roars from the mountain and drives them on.
+- **While it lives** its mountain rumbles and erupts, ash falls after each eruption, the sky over its basin grows darker and the lightning comes oftener near it, and its voice taunts the hosts and you.
+- **The last battles:** once the front stands at the foot of its mountain the hosts march on to the terrace before its gate, and the lord comes out to meet them. The dwarves break the mountain's five great vents one by one, each one weakening the lord. If you are sworn to the alliance and stand at its gate, the loremasters of the elves and the dwarves come to bind it: hold their ring against its servants until the rite is done.
+- **Five fates:** slain in the hosts' final assault, slain by you alone, bound by the loremasters' rite, cast down into the lava sea through the mountain's heart when a blasting keg bursts beside it near its end, or its fire put out when the last vent breaks. The chronicle and the journal tell which, and the war panel shows the lord and the vents.
+- **Fixed:** the front no longer moves, and no forward camp rises in the basin, before a gate has fallen (W5); the raids now lay siege to cities and castles while the gate stands, at their quicker pace (W6).
+
+### Tooling
+- New test case `67-ember-war`. `tools/shot.mjs --siege=lord` shows the lord on the gate's wall.
+
 ## 0.44.0 (2026-10-12): W7a, the Emberlords remade
 
 Saves from 0.43.0 do not carry over (save key v34): the Ember Thrones' gates are rebuilt to let their lords out, and the lords you have seen are saved.

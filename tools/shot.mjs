@@ -12,7 +12,7 @@
 //   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al), the wastes' (orc) or both (W1),
 //        marched on that many seconds before the shot
 //   node tools/shot.mjs --view=... --siege=0.55,0.6,0.55   the works of the war at the gate about the camera (W2): the ram's, the mine's and the
-//        walls' efforts (0 to 1), --siege=fall for the gate fallen, --siege=front for its first forward camp on the basin's floor (W5), or --siege=raid for the nearest farmstead of its border burned by a raid (W6)
+//        walls' efforts (0 to 1), --siege=fall for the gate fallen, --siege=front for its first forward camp on the basin's floor (W5), --siege=raid for the nearest farmstead of its border burned by a raid (W6), or --siege=lord for its Emberlord showing itself on the gate's wall (W7b)
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
@@ -63,6 +63,7 @@ const HOOK=`window.__fbc={
   // the works of the war at the gate about the camera (W2): its efforts set (the ram, the mine, the walls, each 0 to 1) or its fall,
   // and the works made at once, the siege tower in place
   siege(spec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;const w=warFound(P);
+    if(spec==='lord'){const R=warLord(w),f=R&&emberShow(w,R);updateEntities(0.01);for(let i=0;i<10;i++)updFoes(0.02);const r2=performance.now;performance.now=()=>0;try{for(let k=0;k<6;k++)flush();}finally{performance.now=r2;}return f?1:0;}
     if(spec==='raid'){let B=null;for(let k=0;k<20000&&!B;k++)B=warBorder(w);const e=B&&B.S.find(e=>e.s.k==='farm')||B&&B.S.find(e=>RAID_MAX[e.s.k]>0);if(!e)return -2;const s=e.s,R=w.rd||(warRaidsTick(),w.rd);
       R.bs.push({s:s.id,t:Math.round(warPlay),b:RAID_MAX[s.k]});const gen=X=>{const real=performance.now;performance.now=()=>0;try{while(genQ.length||genJob)processGenQ();}finally{performance.now=real;}};regenerateAll(s.X,s.Z);gen();
       raidApply(w,B,R);PL.x=s.X-OX+18.5;PL.z=s.Z-OZ+18.5;PL.y=ground[Math.floor(PL.x)+W*Math.floor(PL.z)]+10;PL.yaw=Math.atan2(18,18);PL.pitch=-0.4;
