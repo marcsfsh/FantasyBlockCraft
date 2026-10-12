@@ -297,4 +297,43 @@ These are planned now so refinements leave room for them.
 - **E4 Magic (Q49).** Player magic: runes, enchanting, spells. Gold and platinum become ingredients (Q68).
 - **E5 New lands (Q23).** For example a desert; more to be chosen.
 
+## The War of the Wastes (W1 to W7; planned 2026-10-12 from Q138 to Q190, awaiting the owner's approval)
+
+The war between the alliance (men, riders, high elves, wood elves, dwarves) and the wastes (orcs, goblins, trolls, the Emberlords), widened from the gates (0.37.0, D-067) to the whole of the wastes, the ground beneath them and the realms that border them. The settled answers: constant fighting (Q141); every found gate has its own war, saved and moving on with play time even while the player is elsewhere (Q144, Q165), a few hours of play from siege to the fall of its great volcano (Q164); the gate falls to four efforts at once (Q142, Q146), and every war ends well for the alliance (Q139); after the gate the hosts push into the basin, under it and up the great volcano (Q138, Q143); the player can swear to the alliance or stay a spectator (Q140, Q145, Q166). Each stage is one release with its tests, both builds, its docs, a "Check in-game" list, and the HTML sent to the owner.
+
+- **W1 The war at the gate: its state and its battles (first, Q190).**
+  - Subtitles last 7 seconds or more (longer lines longer) and stack, up to four, each fading on its own timer (Q163, Q167).
+  - Each found gate keeps its war in the save: its stage and its four efforts (the ram's work on the barred leaf, the dwarves' mine under the ring, the assaults on the walls, the orcs' sallies broken before the lines), moved on by play time near and away and by battles won (Q144, Q146, Q164, Q165).
+  - Battles in formation: the hosts in lines (shields and spears in front, archers behind, horse on the flanks) that hold and close up; the orcs charging in a mass before the lines break into melee (Q152). Archers loose massed volleys at a captain's call at range, then shoot on their own once the fight is joined (Q153).
+  - The engines strike: trebuchet stones and the orcs' throwers hit soldiers and works where they land (Q156).
+  - Sound designed by hand: each people's horn signals (muster, advance, volley, retreat), war cries on the charge, a massed din that grows with the fight, and battle music (drums and horns rising with a battle and fading after, synthesized like the rest; this changes Q57, no music, and is logged) (Q160).
+  - The war panel near a gate (its stage, the gate's damage, how many stand on each side), the gates' wars and their fronts on the world map, and each gate's chronicle in the journal (Q158).
+- **W2 The war at the gate: the siege works and the gate's fall.**
+  - The ram rolled up under its shed in assaults and swung by its crew: each blow booms, shakes the ground and throws dust, and the barred leaf cracks a step at a time; the orcs try to burn it and kill its crew (Q155).
+  - Siege towers wheeled to the gate's wall, ladders thrown up, soldiers onto the walk; orcs pouring burning pitch and dropping stones (Q156).
+  - Mines and countermines: dwarven sappers dig from behind the lines under the ring toward a tower, goblins dig to meet them, fights in the tunnels; the mine fired brings the tower down (Q149).
+  - The world changes and keeps it (Q154): the leaf breaks, towers fall, walls are breached, tents, palisades and engines burn (and are rebuilt as the war moves on). Fires and smoke; the fallen lie for minutes with their shields and banners; crows; graves and cairns filling the ground behind the lines (Q157).
+  - The gate falls when the four efforts come together: the hosts storm the pass and hold the yard, and the Leaguer celebrates.
+- **W3 The soldiers and their heroes.**
+  - New soldiers of the alliance (Q150): knights and lancers who charge in a wedge, sappers and engineers, healers and bearers who carry the wounded to the hospital, standard bearers whose banner steadies those near, the lords' elite guards (elven blade masters, dwarven ironclads, household knights); and two more for each people, designed in its style (Q170), for example pikemen and crossbowmen of men, horse archers and outriders of the riders, mounted archers and glaive wardens of the high elves, skirmishers and longbow sharpshooters of the wood elves, axe throwers and shieldbreakers of the dwarves.
+  - New foes of the wastes (Q151): wolf riders, goblin fire-pot throwers, war drummers and fire shamans who drive the orcs on, armoured siege trolls carrying rams or tearing at walls, and war beasts in chains; and four more designed in the wastes' style (Q171), for example iron-shielded orc lines, goblin swarms, troll drivers with whips, and orc crossbowmen.
+  - Named heroes (Q159, Q174): captains, lords and warchiefs with names, who lead armies again and again; their deeds and deaths are announced; the fallen stay dead, a cairn is raised, the journal remembers them and a new captain takes their place.
+- **W4 Sworn to the alliance.**
+  - Join by swearing to the lords in the Pavilion of the Three Banners, or earn it by fighting beside the hosts (Q166); only the alliance (Q145); otherwise a spectator (Q140).
+  - Ranks and titles from levy to champion of the three peoples, named by the heralds; each people's quartermasters give their arms and armour as you rise; a squad and later a company follow you and fight at your side; supplies from the stores (food, arrows, kegs), no coin (Q168, Q172).
+  - Fallen while sworn, you are carried by bearers to the field hospital and wake there (Q169).
+- **W5 Into the basin and beneath it.**
+  - After the gate: the hosts hold the yard, and forward camps with palisades and towers rise along the Long Descent and on the basin floor as the front moves (built, saved; Q143, Q175). Battles on the open floor; the orcs' war camps, watchtowers, forges and pits, and the warholds of the lesser volcanoes, stormed (Q138).
+  - Beneath: companies clearing the goblin warrens hall by hall, battles in the deep caves under the basin, and the Ember Stair stormed chamber by chamber up to the Ember Throne (Q149).
+- **W6 Raids on the bordering realms.**
+  - Only the provinces nearest each gate (Q148): warbands raid villages, farms and outposts, burning and looting (burned buildings are rebuilt over time, saved); now and then a warhost lays siege to a city or hold; warbands and wolf riders roam the borderlands; ambushes on the roads (Q147).
+  - The realm answers (Q173): beacon fires lit from hill to hill, militia and knights riding out, refugees on the roads.
+  - This changes the pillar that hostile creatures stay in the wastes (logged): in survival the raiders are hostile near the borders; never in creative.
+- **W7 The Emberlords overhauled.**
+  - Risen from the deep to become the dark lords of the wastes and lay waste to the mortal realms; each answers to something still in the lava sea, never seen (Q176, Q180). One kind, each varied: its own name, colours, horns, arms and temper, and its story in the journal (Q179, Q187).
+  - About 20 blocks tall (Q181), its fortress's gate and way in rebuilt to let it out; long leaps on its wings (Q182); fire breath, a whip that drags and a blade that cleaves wide, fissures, walls of lava and eruptions, and summoned fire spirits, flame hounds and lesser demons (Q183); three phases: blade and whip; wings and fire; tearing at the mountain with its hall flooding with lava (Q184).
+  - In the war (Q178): it keeps its throne, shows itself on the Ashen Gate's wall or the crater's rim at the height of an assault, drives its servants (bolder near it, its roar before great assaults), and in the last battles walks out and sallies from the gate. While it lives (Q185) its mountain rumbles and erupts and ash falls, the sky darkens and the lightning grows near it, and its voice taunts the hosts and you.
+  - Its fates (Q161, Q177): the hosts' final assault, slain by you alone, bound by a rite of elven and dwarven loremasters that you protect, cast down into the lava sea through the mountain's heart (and perhaps to return), or its fire put out as the dwarves break the mountain's vents.
+  - After (Q186): its mountain dies (the lava cools to obsidian and crust, saved), the sky over its basin clears, its servants scatter, and the land slowly heals. It leaves (Q187) greater relics (its crown or horns, a cloak of its wing and more, each with a use), its name and story, a monument on the crater's rim, a stirring below, and a few more: a victory feast in the Leaguer, the three banners raised over the Ashen Gate, the heralds' songs.
+
 The order of E2 to E5 is not yet decided; confirm it before E1 ends.

@@ -611,3 +611,215 @@ Options (several allowed): land tour in creative; map pictures; screenshot tour;
 
 **Q137. (Owner's note after the interview, with a screenshot near X 9, Z -599 in the Barrow Hills.)**
 **Answer:** "Something else to address in M6, I keep seeing these cracks in the landscape." They are the M2b ravines (`terrain.js`, the `rvBot` noise line): on seed 123456789 about 0.28% of land columns, half of them 1 block wide and nine in ten 3 or less, with a median depth of 27 and a deepest of 66. Planned for M6a: fewer, wider gorges with stepped walls and sloping ends, still ways down (D-038).
+
+## Round 22: the War of the Wastes (2026-10-12, after the massive-armies build of 0.37.0)
+
+The owner: "Subtitles go away too fast. I want you to significantly expand on the warfare between men/elves/dwarves v orcs/goblins/trolls." Asked in rounds of four; after the 24th the owner asked for more, and for three rounds on the Emberlord. The plan built from these answers is in `docs/MILESTONES.md` (the War of the Wastes, W1 to W7).
+
+**Q138. Where should the fighting happen?**
+Options (several allowed): at the gates; across the basin floor; up the great volcano; outside the wastes.
+**Answer:** All four, and "Inside the caves and underground".
+
+**Q139. Should the war change over time, or stay a standing siege?**
+Options: a moving front; standing siege; scripted campaign.
+**Answer:** "3 scripted ways it plays out - all favorable for the alliance".
+
+**Q140. What is the player's part in the war?**
+Options: join a side and fight; lead troops; tasks from captains; mostly a spectator.
+**Answer:** "You can either Join a side and fight, or be mostly a spectator".
+
+**Q141. How should the fighting be paced?**
+Options: lulls and great assaults; constant fighting; night belongs to orcs; pace set in settings.
+**Answer:** Constant fighting.
+
+**Q142. Which ways should the war play out?**
+Options (several allowed): the ram breaks the gate; undermined from below; over the walls; sallies broken, camp falls.
+**Answer:** All four.
+
+**Q143. Once the alliance wins a gate, what comes next?**
+Options: push on into the basin; hold the gate; the orcs retake it later.
+**Answer:** Push on into the basin: hold the yard, a forward camp, down the Long Descent, across the floor, and at last the great volcano.
+
+**Q144. Should the war's progress be saved and move on while you are away?**
+Options: saved, moves while away; saved, moves only near; not saved.
+**Answer:** Saved, moves while away.
+
+**Q145. Which sides can you join?**
+Options: only the alliance; either side; the alliance, by choice.
+**Answer:** Only the alliance.
+
+**Q146. The four ways the gate can fall: how should they work?**
+Options: all four, one per gate; all four in one war; random each time.
+**Answer:** "All four in one war, usually simultaneous".
+
+**Q147. Outside the wastes, what should the orcs do?**
+Options (several allowed): raid border villages; besiege a city; roam the borderlands; ambush the roads.
+**Answer:** All four.
+
+**Q148. How far beyond the wastes should orcs reach?**
+Options: bordering realms only; anywhere; grows with the war.
+**Answer:** Bordering realms only.
+
+**Q149. What fighting should happen underground?**
+Options (several allowed): mines and countermines; clearing the warrens; storming the Ember Stair; battles in the deep.
+**Answer:** All four.
+
+**Q150. Which new kinds of soldier should the alliance field?**
+Options (several allowed): knights and lancers; sappers and engineers; healers and bearers; elite guards.
+**Answer:** All four, and "2 more per faction".
+
+**Q151. Which new kinds of foe should the wastes field?**
+Options (several allowed): wolf riders; fire pot throwers; drummers and shamans; siege trolls.
+**Answer:** All four, and "4 more".
+
+**Q152. How should armies fight when they meet?**
+Options: in formation; open melee; formation for the hosts only.
+**Answer:** In formation: shield walls and spear lines in front, archers behind, horsemen on the flanks; the orcs charge in a mass.
+
+**Q153. Should archers loose massed volleys?**
+Options: yes, on command; each on their own; both.
+**Answer:** Both: volleys at range, then each archer on their own once the fight is joined.
+
+**Q154. Should the fighting change the world's blocks?**
+Options: yes, and it is saved; set changes only; looks only.
+**Answer:** Yes, and it is saved.
+
+**Q155. How should the ram work?**
+Options: crewed and swinging; rolled up for assaults; both.
+**Answer:** Both.
+
+**Q156. Which siege works should be used in the assaults?**
+Options (several allowed): siege towers; ladders; fire from the walls; engines that strike.
+**Answer:** All four.
+
+**Q157. Fires, smoke and the fallen: how much should linger?**
+Options (several allowed): fires and smoke; the fallen stay; crows and carrion; graves and cairns.
+**Answer:** All four.
+
+**Q158. How should you be able to tell how the war at a gate stands?**
+Options (several allowed): a war panel; on the world map; in the journal; heralds only.
+**Answer:** A war panel, on the world map, and in the journal.
+
+**Q159. Should there be named heroes and champions?**
+Options: yes, recurring; yes, plus duels; no.
+**Answer:** Yes, recurring.
+
+**Q160. What should the war sound like?**
+Options (several allowed): battle music; horn signals; war cries; louder din.
+**Answer:** All four, and "Design these sounds carefully, by hand". (Battle music changes Q57, no music.)
+
+**Q161. When the alliance takes the great volcano at last, what happens?**
+Options: the Emberlord falls; the hosts hold the throne; you strike the last blow.
+**Answer:** "The ember lord falls. More on the ember lord later - that is not its only way to meet its fate and as a creature it will be overhauled".
+
+**Q162. More questions before starting?**
+**Answer:** Yes, keep asking.
+
+**Q163. Subtitles last 1.3 seconds and a new one replaces the last. How should they behave?**
+Options: longer, by length; fixed 5 seconds, stacked; a setting.
+**Answer:** "6-8 seconds or more".
+
+**Q164. How long should one gate's whole war take?**
+Options: a few hours of play; many in-game days; a long campaign; a setting.
+**Answer:** A few hours of play.
+
+**Q165. Should all the gates' wars run at once?**
+Options: all at once; one great war at a time; the ones you've found.
+**Answer:** The ones you've found.
+
+**Q166. How do you join the alliance?**
+Options: swear at the pavilion; by your deeds; either.
+**Answer:** Either.
+
+**Q167. When several subtitles come close together?**
+Options: stack them; queue them; replace.
+**Answer:** Stack them: up to four, newest at the bottom, each on its own timer.
+
+**Q168. What should fighting for the alliance earn you?**
+Options (several allowed): ranks and titles; arms and armour; soldiers who follow you; supplies and coin.
+**Answer:** All four (coin settled by Q172).
+
+**Q169. If you fall in battle while sworn to the alliance?**
+Options: carried to the hospital; as now.
+**Answer:** Carried to the field hospital.
+
+**Q170. The two more kinds of soldier per people: who designs them?**
+**Answer:** Claude designs them.
+
+**Q171. The four more kinds of foe: who designs them?**
+**Answer:** "Design them yourself. And ask me 3 rounds of 4 questions each for the ember lord changes".
+
+**Q172. Trading was removed; what should coin be?**
+Options: no coin, supplies only; pay at the quartermasters; bring trading back.
+**Answer:** No coin, supplies only.
+
+**Q173. When orcs raid a border village, how should the realm answer?**
+Options (several allowed): beacon fires; militia and knights; burned and rebuilt; refugees.
+**Answer:** All four.
+
+**Q174. Can named heroes die for good?**
+Options: yes, and are mourned; only orc heroes; you can save them.
+**Answer:** Yes, and are mourned.
+
+**Q175. As the alliance pushes into the basin, should it build new works there?**
+Options: yes, camps rise; tents only; no.
+**Answer:** Yes, camps rise.
+
+**Q176. What is the Emberlord, in the world's story?**
+Options: a fire spirit of old; a fallen servant; risen from the deep; many lords, one kind.
+**Answer:** "Risen from the [deep] to become the dark lord of the volcanic wastes and lay waste to mortal realms".
+
+**Q177. In what other ways can an Emberlord meet its fate?**
+Options (several allowed): slain by you alone; bound by a rite; cast into the deep; its fire put out.
+**Answer:** All four.
+
+**Q178. What part does the Emberlord take in the war?**
+Options (several allowed): stays on its throne; shows itself on the gate; walks out to battle; drives its servants.
+**Answer:** All four, and "Sallies forth from the gate".
+
+**Q179. How alike should the Emberlords be?**
+Options: each its own; one kind, varied; all the same; fewer lords.
+**Answer:** One kind, varied.
+
+**Q180. Is one of them the dark lord over all the wastes?**
+Options: yes, one above all; each lord of its basin; lords answer to the deep.
+**Answer:** The lords answer to the deep.
+
+**Q181. How big should an Emberlord be?**
+Options: about 20; 30 or more; keep about 12; grows as it rages.
+**Answer:** Bigger, about 20.
+
+**Q182. Should its wings carry it?**
+Options: yes, it flies; short leaps only; no.
+**Answer:** "Long leaps".
+
+**Q183. What should it be able to do in a fight?**
+Options (several allowed): fire breath; whip and blade; earth and lava; summons.
+**Answer:** All four.
+
+**Q184. Should the fight go in phases?**
+Options: three phases; two phases; no phases.
+**Answer:** Three phases.
+
+**Q185. While an Emberlord lives, how should it mark its basin?**
+Options (several allowed): the mountain answers; darker sky near it; bolder servants; its voice.
+**Answer:** All four.
+
+**Q186. When an Emberlord meets its fate, what happens to its basin?**
+Options (several allowed): the mountain dies; the sky clears; the orcs scatter; the land heals.
+**Answer:** All four.
+
+**Q187. What should it leave, and what should be remembered?**
+Options (several allowed): greater relics; its name and story; a monument; something stirs below.
+**Answer:** All four, "And a few more".
+
+**Q188. More questions before planning?**
+**Answer:** No, plan it.
+
+**Q189. How to go about it?**
+Options: plan first, then build; just start building.
+**Answer:** Plan first, then build, sending the HTML after each stage.
+
+**Q190. Which should come first?**
+Options: the war at the gate; the units; joining the alliance; the Emberlord.
+**Answer:** The war at the gate.
