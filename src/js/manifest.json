@@ -314,6 +314,10 @@
       "about": "Into the basin and beneath it (W5, D-072): the front beyond a fallen gate, the forward camps and their garrisons, the wastes' places stormed (w.cl) and held by the hosts, the company that goes down with the player, the deep's warbands, the armies' ways to the front"
     },
     {
+      "path": "gameplay/war-raids.js",
+      "about": "Raids on the bordering realms (W6, D-073): the provinces nearest each gate (warBorder), raids and sieges begun, fought out near the player or settled away, burned buildings kept in the war's rb and rebuilt, beacons, the realm riding out, refugees, wolf riders roaming and ambushes on the roads"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

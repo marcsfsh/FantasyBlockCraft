@@ -5,6 +5,22 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.43.0 (2026-10-12): W6, raids on the bordering realms
+
+Saves from 0.42.0 do not carry over (save key v33): the wars keep their raids and what they burned.
+
+### Game
+- **The wastes raid the realms.** Every found gate's war reaches the two or three provinces nearest it. Every eight to fourteen minutes of play a warband rides out against one of their villages, farmsteads or watchtowers; every fourth time, while the gate stands, a warhost lays siege to a city or castle instead.
+- **Near you, a raid is fought out.** The warband marches in from the side of the wastes and sets the buildings alight: timber charred, thatch burned away, slate roofs fallen in. The beacons are lit on the province's watchtowers, its soldiers and knights ride out to meet the raiders, and its folk flee along the road to the nearest town.
+- **Away from you, a raid goes on.** It is settled when the warband would have arrived, written in the war's chronicle, and what it burned is found burned when you come. Burned buildings are rebuilt half an hour of play later.
+- **The borderlands:** wolf riders roam the bordering provinces, and orcs lie in wait on their roads for travellers.
+- **Hostile near the borders:** in survival the raiders hunt you as the wastes' creatures do; in creative they take no notice of you.
+- The war panel and the journal count the raids, and the world map marks burned places and raids under way.
+
+### Tooling
+- New test case `65-raids`. `tools/shot.mjs --siege=raid` burns the nearest farmstead of a gate's border and frames it.
+- `55-strife` places its warband where it can stand along the way between the host and the player (it could spawn none).
+
 ## 0.42.0 (2026-10-12): W5, into the basin and beneath it
 
 Saves from 0.41.0 do not carry over (save key v32): the wars keep their front, their forward camps and the places they have taken.

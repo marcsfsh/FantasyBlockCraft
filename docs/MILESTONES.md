@@ -325,7 +325,7 @@ The war between the alliance (men, riders, high elves, wood elves, dwarves) and 
 - **W5 Into the basin and beneath it (done in 0.42.0, D-072).**
   - After the gate: the hosts hold the yard, and forward camps with palisades and towers rise along the Long Descent and on the basin floor as the front moves (built, saved; Q143, Q175). Battles on the open floor; the orcs' war camps, watchtowers, forges and pits, and the warholds of the lesser volcanoes, stormed (Q138).
   - Beneath: companies clearing the goblin warrens hall by hall, battles in the deep caves under the basin, and the Ember Stair stormed chamber by chamber up to the Ember Throne (Q149).
-- **W6 Raids on the bordering realms.**
+- **W6 Raids on the bordering realms (done in 0.43.0, D-073).**
   - Only the provinces nearest each gate (Q148): warbands raid villages, farms and outposts, burning and looting (burned buildings are rebuilt over time, saved); now and then a warhost lays siege to a city or hold; warbands and wolf riders roam the borderlands; ambushes on the roads (Q147).
   - The realm answers (Q173): beacon fires lit from hill to hill, militia and knights riding out, refugees on the roads.
   - This changes the pillar that hostile creatures stay in the wastes (logged): in survival the raiders are hostile near the borders; never in creative.

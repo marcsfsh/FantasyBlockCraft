@@ -72,7 +72,7 @@ setMode('survival');put(0);clearFoes();hp=20;
   assert(host.length>=4&&host.every(f=>f.kind[0]===H.C.fp[0]&&f.prov===H.key&&f.st==='return')&&back&&Math.hypot(c[0]-PL.x,c[1]-PL.z)>40,'a host of that people comes from out of sight and marches past the player to the far side');
   const again=foes.length;hostT=0;foeSpawnTick();assert(foes.filter(f=>f.host).length===host.length,'one host at a time');
   // a warband between them
-  const mx=(c[0]+PL.x)/2,mz=(c[1]+PL.z)/2,band=spawnGroup('band',4,mx,ground[Math.floor(mx)+W*Math.floor(mz)],mz,4,{});
+  const band=[];for(let q=0.5;q<0.95&&!band.length;q+=0.05){const mx=c[0]+(PL.x-c[0])*q,mz=c[1]+(PL.z-c[1])*q;band.push(...spawnGroup('band',4,mx,ground[Math.floor(mx)+W*Math.floor(mz)],mz,4,{}));} // (between them, where it can stand)
   let fought=0;run(60,()=>{if(host.some(f=>f.foe)&&band.some(f=>f.foe))fought=1;return band.every(f=>f.dead)||host.every(f=>f.dead);});
   info('the host and a warband of',band.length,':',host.filter(f=>!f.dead).length,'of the host stand,',band.filter(f=>!f.dead).length,'of the warband');
   assert(fought&&(band.some(f=>f.dead)||host.some(f=>f.dead)),'the host and a warband of orcs fall upon each other');}

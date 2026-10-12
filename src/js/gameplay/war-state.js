@@ -35,6 +35,7 @@ function warStateTick(){
     const last=w===near&&warArmies.some(A=>A.last&&A.P===P&&A.m.some(f=>!f.dead&&!f.gone&&wgUV(P,f.x+OX,f.z+OZ)[0]<4));
     if(last||w!==near&&warPlay-w.allT>600||w===near&&warPlay-w.allT>1800)warFall(w,w===near,w===near?P:null);}
   if(near)warWorksTick(P,near);else{const bw=warBasinWar(X,Z);if(bw){wgSite(bw.P);warFrontTick(bw.P,bw.w);}} // (out on the basin's floor: its forward camps, W5)
+  warRaidsTick(); // the raids on the bordering realms (W6)
   warPanel(near);}
 // how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
 function warOutcome(A){
@@ -55,17 +56,17 @@ function warPanel(w){
   let al=0,orc=0;const X=PL.x,Z=PL.z;for(const f of foes){if(f.dead||Math.hypot(f.x-X,f.z-Z)>160)continue;if(FOES[f.kind].folk){if(!FOES[f.kind].civ)al++;}else orc++;}
   const bar=v=>'<span class="wb"><i style="width:'+Math.round(v*100)+'%"></i></span>';
   el.innerHTML='<b>'+w.n+'</b><div>'+warStage(w)+'</div>'+WAR_EFF.map(([k,lab])=>'<div class="we">'+lab+' '+bar(warEff(w,k))+' '+Math.round(warEff(w,k)*100)+'%</div>').join('')+
-    '<div>The hosts '+al+', the wastes '+orc+'</div>'+(w.s>=2?warFrontPanel(wasteGateAt(w.X,w.Z,10)||{},w):'')+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
+    '<div>The hosts '+al+', the wastes '+orc+'</div>'+warRaidPanel(w)+(w.s>=2?warFrontPanel(wasteGateAt(w.X,w.Z,10)||{},w):'')+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
 // ---- On the world map: each found gate's war, its stage and how far the siege has come, and the two lines across the pass
 function warMapDraw(g,sx,sz){
   for(const w of WARS.values()){const P=wasteGateAt(w.X,w.Z,10);const x=sx(w.X),y=sz(w.Z);
     if(P){const line=(u,c)=>{const [ax,az]=wgXZ(P,u,-wgHalf(P,u)+4),[bx,bz]=wgXZ(P,u,wgHalf(P,u)-4);g.strokeStyle=c;g.lineWidth=4;g.beginPath();g.moveTo(sx(ax),sz(az));g.lineTo(sx(bx),sz(bz));g.stroke();};
-      line(P.uL+4,'#2a4c9c');line(-22,'#a82a1a');warFrontMap(g,sx,sz,P,w);}
+      line(P.uL+4,'#2a4c9c');line(-22,'#a82a1a');warFrontMap(g,sx,sz,P,w);}warRaidMap(g,sx,sz,w);
     g.strokeStyle='#5a0e06';g.lineWidth=3;g.beginPath();g.moveTo(x-7,y-7);g.lineTo(x+7,y+7);g.moveTo(x+7,y-7);g.lineTo(x-7,y+7);g.stroke();
     const p=Math.round(WAR_EFF.reduce((a,e)=>a+warEff(w,e[0]),0)/4*100);g.fillStyle='#5a0e06';g.fillText(warStage(w)+' of '+w.n.replace(/^The /,'the ')+', '+p+'%',x,y+22);}}
 // ---- In the journal: each found war's chronicle, oldest first
 function warJournal(out){
   out.push('','THE WARS OF THE WASTES');if(!WARS.size)out.push('None found yet. The Ashen Gates stand in the rings of ash mountains about the Volcanic Wastes.');
   for(const w of WARS.values()){out.push('','The War at '+w.n+' ('+warStage(w).toLowerCase()+'; '+WAR_EFF.map(([k,lab])=>lab.toLowerCase()+' '+Math.round(warEff(w,k)*100)+'%').join(', ')+'; battles won '+w.w[0]+', lost '+w.w[1]+')');
-    warHeroJournal(w,out);for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}
+    warHeroJournal(w,out);warRaidJournal(w,out);for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}
   warSwornJournal(out);}

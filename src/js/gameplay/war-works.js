@@ -85,14 +85,14 @@ function warIgnite(w,x,y,z,r,cap){if(!w)return 0;if(!w.bn)w.bn=[];let n=0;const 
 // long ago
 let warFireT=0;
 function warFireFrame(dt){warFireT-=dt;const tick=warFireT<=0;if(tick)warFireT=1;
-  for(const w of WARS.values()){if(!w.bn||!w.bn.length)continue;
-    for(let i=w.bn.length-1;i>=0;i--){const e=w.bn[i],[X,Y,Z]=e.c||(e.c=e[0].split(',').map(Number)),x=X-OX,z=Z-OZ,inW=x>=0&&z>=0&&x<W&&z<D,age=warPlay-e[2];
+  for(const w of WARS.values())for(const B of [w.bn,w.rb]){if(!B||!B.length)continue; // (the works' fires, and the raids' on the realms, W6)
+    for(let i=B.length-1;i>=0;i--){const e=B[i],[X,Y,Z]=e.c||(e.c=e[0].split(',').map(Number)),x=X-OX,z=Z-OZ,inW=x>=0&&z>=0&&x<W&&z<D,age=warPlay-e[2];if(age<0)continue; // (not yet caught)
       if(inW&&Math.hypot(x-PL.x,z-PL.z)<90){if(!e[3]&&Math.random()<dt*6){spawnP(x+Math.random(),Y+0.8,z+Math.random(),(Math.random()-.5)*0.4,1.6+Math.random(),(Math.random()-.5)*0.4,[1,0.45+Math.random()*0.35,0.08],0.6,-1.2);
           if(Math.random()<0.5)spawnP(x+0.5,Y+1.6,z+0.5,(Math.random()-.5)*0.3,0.9,(Math.random()-.5)*0.3,[0.28,0.27,0.26],2.6,-0.25);if(Math.random()<dt*0.6)AMB_EV.crackle([x,Y,z]);}
         else if(e[3]&&age<e[3]+120&&Math.random()<dt*0.5)spawnP(x+0.5,Y+0.6,z+0.5,(Math.random()-.5)*0.2,0.6,(Math.random()-.5)*0.2,[0.3,0.3,0.3],3,-0.15);}
       if(!tick||!inW||!genDone[(x>>4)+(z>>4)*NCX])continue;
       if(!e[3]&&age>25+(X*7+Z*3+Y)%15){e[3]=Math.max(1,Math.round(warPlay)-e[2]);if(get(x,Y,z)===e[1])setBlock(x,Y,z,WAR_CLOTH.has(e[1])?AIR:CHARWOOD,true);saveDirty=true;}
-      else if(e[3]&&age>(e.q?300:900)){const c=get(x,Y,z);if(c===AIR||c===CHARWOOD)setBlock(x,Y,z,e[1],true);w.bn.splice(i,1);saveDirty=true;}}}}
+      else if(e[3]&&age>(B===w.rb?RAID_REB:e.q?300:900)){const c=get(x,Y,z);if(c===AIR||c===CHARWOOD)setBlock(x,Y,z,e[1],true);B.splice(i,1);saveDirty=true;}}}}
 // ---- The ram (Q155): while its crew stands by it and the war at its gate goes on, a blow every three and a half seconds: the crew
 // heave together, the beam booms on the leaf, the ground shakes near, dust and splinters fly from the leaf
 let warRamT=0,warRamBlow=-9;

@@ -16,7 +16,7 @@ const WAR_SQUAD=[0,0,4,10,10,12,14],WAR_LORDS=new Set(['rnoble','elord','dlord',
 let SW=saved&&saved.sw&&typeof saved.sw==='object'?saved.sw:null;if(!SW)SW={on:0,r:0,m:0,p:0,k:0,b:0,sup:-1e9,t:0};
 const warSwornSave=()=>({sw:SW}),warSworn=()=>!!SW.on;
 // is the player at war (near a gate's works or in the volcanic lands)?
-function warZone(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);return !!wasteGateAt(X,Z,300)||!!warBasinAt(X,Z);}
+function warZone(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);return !!wasteGateAt(X,Z,300)||!!warBasinAt(X,Z)||raidZone();}
 // sworn: the oath, the first rank and its gifts
 function warSwear(how){if(SW.on)return;SW.on=1;SW.r=0;SW.t=Math.round(warPlay);saveDirty=true;
   showText('The Oath of the Three Banners',(how==='deeds'?'The captains of the hosts have watched you fight beside them, and they call you to the Pavilion of the Three Banners. ':'You kneel in the Pavilion of the Three Banners before the lords of men, elves and dwarves. ')+
