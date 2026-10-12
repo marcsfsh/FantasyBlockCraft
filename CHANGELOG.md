@@ -14,6 +14,7 @@ Saves from 0.45.0 do not carry over (save key v36): a fallen lord's mountain, it
 - **Its war is won.** Its servants scatter (most of the wastes' places in its basin stand empty), the warhosts, raids and engines stop, and the war panel says the war is won.
 - **The land heals** where you go in its basin: grass and flowers come up through the ash, more as time passes.
 - **Relics:** its horn or its crown (sound or raise it and the creatures of the wastes near flee), the Cloak of the Ember Wing (armour that no fire or lava burns through), its blade and its heart (which now glows in the hand). They drop to the one who slays it; otherwise the lords of the hosts keep them for you and give them to you in any Leaguer.
+- **Fixed:** the warbands of the deep under a fallen basin (W5) and the servants that come against the loremasters' ring (W7b) seldom appeared; they now do.
 - **Remembered:** the three peoples raise a monument on its crater's rim; the three banners are raised over the Ashen Gate; a victory feast is held in the Leaguer and the heralds sing of its fall. Deep under its basin, now and then, something stirs in the lava sea.
 
 ### Tooling

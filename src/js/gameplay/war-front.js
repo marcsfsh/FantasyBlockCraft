@@ -67,7 +67,7 @@ function warDeepTick(){const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz
   warFollow(2,bw?6:0,['d_host','d_sap','d_host','r_host'],'A company of the hosts goes down with you');
   if(!bw||(warDeepT-=1)>0)return;warDeepT=150+Math.random()*90;
   for(let k=0;k<10;k++){const a=Math.random()*6.283,d=26+Math.random()*10,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;
-    const y=foeStand(x,PL.y+4,z,2);if(y<0||Math.abs(y-PL.y)>8)continue;const g=spawnGroup('band',5,x,y,z,3,{lead:Math.random()<0.4?'ochief':null});for(const f of g){f.war=bw.w.id;f.foe=null;}
+    const y=foeStand(x,PL.y+2,z,2);if(y<0||Math.abs(y-PL.y)>8)continue;const g=spawnGroup('band',5,x,y,z,3,{lead:Math.random()<0.4?'ochief':null});for(const f of g){f.war=bw.w.id;f.foe=null;}
     if(g.length){toast('A warband of the deep comes at the hosts');foeCall(g[0],'alert');}break;}}
 // followers: a squad (tag 1, war-sworn.js) or a company (tag 2), n of them, each to a place behind the player, fighting what comes
 // near; gone when the player leaves them; the fallen replaced one every five seconds

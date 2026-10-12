@@ -65,7 +65,7 @@ function emberRite(w,R,cx,cy,cz){const E=elOf(w);E.rite=Math.round(warPlay);cons
   emberRiteS={w:w,R:R,L:L,ring:ring,t:150,wave:8,x:cx,y:cy,z:cz};toast('The loremasters of the elves and the dwarves have come to bind '+R.L.name+'. Hold their ring!');return emberRiteS;}
 function emberRiteTick(dt){const S=emberRiteS;if(!S)return;S.t-=dt;S.wave-=dt;const live=S.L.filter(f=>!f.dead&&!f.gone);
   if(Math.random()<dt*3)for(const f of live)spawnP(f.x,f.y+2.2,f.z,(S.x-f.x)*0.4,1.5,(S.z-f.z)*0.4,[0.85,0.92,1],1.2,0);
-  if(S.wave<=0&&S.t>10){S.wave=18+Math.random()*6;const a=Math.random()*6.283,x=S.x+Math.sin(a)*26,z=S.z+Math.cos(a)*26,y=x>=2&&z>=2&&x<W-2&&z<D-2?foeStand(x,S.y+4,z,2):-1;
+  if(S.wave<=0&&S.t>10){S.wave=18+Math.random()*6;let x=0,z=0,y=-1;for(let k=0;k<8&&y<0;k++){const a=Math.random()*6.283;x=S.x+Math.sin(a)*26;z=S.z+Math.cos(a)*26;y=x>=2&&z>=2&&x<W-2&&z<D-2?foeStand(x,S.y+2,z,2):-1;}
     if(y>0){const g=spawnGroup(Math.random()<0.5?'band':'oroused',3+Math.floor(Math.random()*3),x,y,z,3,{});for(const k of ['fhound','fspirit'])g.push(addFoe(k,x+1,y,z+1,{}));for(const f of g){f.foe=live[Math.floor(Math.random()*live.length)]||null;f.st='chase';f.eseen=0;}
       toast('The servants of '+S.R.L.name+' come against the ring');}}
   if(Math.abs(S.t-75)<dt)toast('The chains of light are half woven');
