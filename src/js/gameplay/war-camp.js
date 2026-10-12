@@ -75,8 +75,11 @@ function cnRender(P,w){const el=$('lore');el.innerHTML='';const crea=!SURV(),may
   if(may){const r=row();if(w.s>=2){if(warFront(w)<1)btn(r,'Press the front',()=>{w.cs='fr';w.csT=warPlay+1800;warLog(w,'At your counsel the lords pressed the front.');now('The lords will press the front');});}
     else for(const [k,lab] of WAR_EFF)if(warEff(w,k)<1)btn(r,'Press '+lab.toLowerCase(),()=>{w.cs=k;w.csT=warPlay+1800;warLog(w,'At your counsel the lords pressed '+lab.toLowerCase()+'.');now('The lords will press '+lab.toLowerCase());});}
   else text('From Sergeant the lords will hear your counsel on the war.');
+  if(countOf(415)>=6||crea){const r=row();btn(r,'Have the armourers make drakescale mail (six drake scales)',()=>{now(campArmourer()?'The armourers of the Leaguer rivet your drake scales into a coat of mail':'The armourers need six drake scales');});}
   {const r=row();if(MSN)btn(r,'Give up your task ('+MSN.n+')',()=>{msnEnd(false,'You give up the task');now('');});else if(crea||SW.on)btn(r,'Ask the captains for a task',()=>{const m=msnGive(P,w);now(m?'':'The captains have no task for you now');if(m)closeInv();});
     btn(r,'Leave the council',()=>closeInv());}}
+// the armourers of the Leaguer make drakescale mail of six drake scales (not at the bench: the scales come only from the drakes)
+function campArmourer(){if(SURV()){if(countOf(415)<6)return false;takeItems(415,6);}const left=addItem(416,1);if(left)toast('No room for '+nameOf(416));drawBar(true);saveDirty=true;return !left;}
 // ---- the captains' tasks
 const MSN_K=['chief','captives','hold','word','standard','engines'];
 const dirWord=(dx,dz)=>['north','north-east','east','south-east','south','south-west','west','north-west'][Math.round((Math.atan2(dx,-dz)/(Math.PI/4)+8))%8];

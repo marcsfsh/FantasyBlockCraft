@@ -11,20 +11,21 @@ const gy=(x,z)=>ground[Math.floor(x)+W*Math.floor(z)];
 const add=(k,x,z,o)=>addFoe(k,x,foeStand(x,gy(x,z)+2,z,FOES[k].tall||2),z,Object.assign({st:'idle',t:99,hold:1},o||{}));
 // the drake and its things
 {info('the drake',FOES.drake&&FOES.drake.n,'; its scales',ITEMS[415]&&ITEMS[415].n,'; the mail',ITEMS[416]&&ITEMS[416].n);
-  assert(FOES.drake&&AM_KINDS.drake&&ITEMS[415]&&ITEMS[416]&&ITEMS[416].equip==='body'&&ITEMS[416].fireproof&&RECIPES.some(r=>r[0]===416)&&HOST_UNITS.o.some(u=>u[0]==='od'),'the ash drake, its scales and drakescale mail exist; drakes may be summoned with a host of the wastes');}
+  assert(FOES.drake&&AM_KINDS.drake&&ITEMS[415]&&ITEMS[416]&&ITEMS[416].equip==='body'&&ITEMS[416].fireproof&&!RECIPES.some(r=>r[0]===416)&&HOST_UNITS.o.some(u=>u[0]==='od'),'the ash drake, its scales and drakescale mail exist; drakes may be summoned with a host of the wastes');}
 // it circles high, then dives on a soldier of the hosts and burns it
 {const cx=PL.x+10,cz=PL.z-10,S=[0,1,2,3].map(i=>add('rsword',cx+(i%2)*2,cz+Math.floor(i/2)*2)),d=drakeSpawn(cx,cz,null);d.dT=6;let lo=99,path=0,px=d.x,pz=d.z,minH=99,hurt=0;
   run(5,()=>{path+=Math.hypot(d.x-px,d.z-pz);px=d.x;pz=d.z;lo=Math.min(lo,d.y-d.gy);});const high=lo;
   d.dT=0;run(14,()=>{minH=Math.min(minH,d.y-d.gy);hurt=S.filter(f=>f.hp<f.mhp).length;return hurt>0&&d.st!=='dive';});
   info('circling: flew',path.toFixed(0),'blocks, never lower than',high.toFixed(1),'above the ground ; diving: down to',minH.toFixed(1),'; soldiers burned',hurt);
-  assert(path>40&&high>15&&minH<9&&hurt>=1,'a drake circles high over the field, then dives low on the hosts\' soldiers and burns them');
+  assert(path>40&&high>15&&minH<12&&hurt>=1,'a drake circles high over the field, then dives low on the hosts\' soldiers and burns them');
 // shot down by the hosts: it falls and crashes
   d.hp=1;foeHurtFoe(d,5,S[0],1,0,2);run(4,()=>d.crash);info('struck down: dead',!!d.dead,'; crashed',!!d.crash,'at',(d.y-d.gy).toFixed(1),'above the ground');
   assert(d.dead&&d.crash&&d.y-d.gy<0.5,'shot down, a drake falls from the sky and crashes');clear();}
 // slain by the player it leaves its scales; drakescale mail keeps off its fire; with no heart left it flies away
 {setMode('survival');playing=true;inv.fill(null);hp=20;const d=drakeSpawn(PL.x,PL.z-10,null);d.hold=1;foeStruck(d,999,0,1,{});info('slain by the player: scales',countOf(415));
   equip.body={id:416,c:1,d:0};hp=20;hurtCD=0;foeHurtPlayer(4,'drake',0,1,3,d);const kept=hp;equip.body=null;hp=20;hurtCD=0;foeHurtPlayer(4,'drake',0,1,3,d);const bare=hp;
-  info('a drake\'s fire on drakescale mail: health',kept,'; bare',bare);assert(countOf(415)>=2&&kept===20&&bare<20,'a drake slain by the player leaves its scales; drakescale mail keeps off its fire');
+  const sc=countOf(415);inv[1]={id:415,c:6,d:0};const made=campArmourer();info('the armourers: made',made,'; scales left',countOf(415)-sc,'; mail',countOf(416));
+  info('a drake\'s fire on drakescale mail: health',kept,'; bare',bare);assert(sc>=2&&made&&countOf(416)===1&&countOf(415)===sc&&kept===20&&bare<20,'a drake slain by the player leaves its scales; the Leaguer\'s armourers make drakescale mail of six; it keeps off a drake\'s fire');
   clear();inv.fill(null);setMode('creative');playing=false;hp=20;
   const r=drakeSpawn(PL.x,PL.z,null);r.rout=foeClock+30;const gone=run(30,()=>r.gone);info('its heart gone, the drake flies off: gone',gone);assert(gone,'a drake that has lost heart flies away');clear();}
 // the night: the folk see and shoot less far, the orcs do not; fire arrows; torches

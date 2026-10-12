@@ -9486,7 +9486,7 @@ const LADDER_MAT=[PLANKSET,COBBLE,220,225,223,227,228];
 LADDER_MAT.forEach((m,i)=>RECIPES.push([240+i,1,[[m,3],[201,2]]],[300+i,1,[[m,3],[201,2]]],[310+i,1,[[m,1],[201,2]]],[370+i,1,[[m,2],[201,1]]])); // swords (D-052): two of the material, a stick
 // armour for the body slot (D-052), and a troll's hide cured into leather
 // the soldier's arms (W8a): shields, bows, a crossbow, arrows and bolts, javelins, throwing axes and the lance
-RECIPES.push([414,1,[[225,2],[224,1]]],[416,1,[[415,6],[227,2]]],[BOLTTHR,1,[[PLANKSET,6],[227,2],[ROPE,2]]],[400,1,[[PLANKSET,4],[362,1]]],[401,1,[[227,4],[362,1]]],[402,1,[[228,3],[224,1],[362,1]]],[403,1,[[227,6],[225,2]]],[405,1,[[201,3],[ROPE,1]]],[406,1,[[PLANKSET,2],[201,1],[ROPE,1]]],
+RECIPES.push([414,1,[[225,2],[224,1]]],[BOLTTHR,1,[[PLANKSET,6],[227,2],[ROPE,2]]],[400,1,[[PLANKSET,4],[362,1]]],[401,1,[[227,4],[362,1]]],[402,1,[[228,3],[224,1],[362,1]]],[403,1,[[227,6],[225,2]]],[405,1,[[201,3],[ROPE,1]]],[406,1,[[PLANKSET,2],[201,1],[ROPE,1]]],
   [407,1,[[228,1],[PLANKSET,2],[ROPE,1]]],[408,1,[[227,2],[PLANKSET,2],[ROPE,1]]],[409,8,[[201,2],[223,1],[328,1]]],[410,6,[[201,1],[223,1]]],[411,3,[[201,3],[223,1]]],[412,2,[[223,2],[201,1]]],[413,1,[[PLANKSET,3],[227,1]]]);
 RECIPES.push([380,1,[[362,5]]],[381,1,[[223,6],[362,2]]],[382,1,[[227,8],[362,2]]],[383,1,[[228,6],[362,2]]],[362,3,[[386,1],[200,1]],'f']);
 function nearStation(kind){
@@ -14431,8 +14431,11 @@ function cnRender(P,w){const el=$('lore');el.innerHTML='';const crea=!SURV(),may
   if(may){const r=row();if(w.s>=2){if(warFront(w)<1)btn(r,'Press the front',()=>{w.cs='fr';w.csT=warPlay+1800;warLog(w,'At your counsel the lords pressed the front.');now('The lords will press the front');});}
     else for(const [k,lab] of WAR_EFF)if(warEff(w,k)<1)btn(r,'Press '+lab.toLowerCase(),()=>{w.cs=k;w.csT=warPlay+1800;warLog(w,'At your counsel the lords pressed '+lab.toLowerCase()+'.');now('The lords will press '+lab.toLowerCase());});}
   else text('From Sergeant the lords will hear your counsel on the war.');
+  if(countOf(415)>=6||crea){const r=row();btn(r,'Have the armourers make drakescale mail (six drake scales)',()=>{now(campArmourer()?'The armourers of the Leaguer rivet your drake scales into a coat of mail':'The armourers need six drake scales');});}
   {const r=row();if(MSN)btn(r,'Give up your task ('+MSN.n+')',()=>{msnEnd(false,'You give up the task');now('');});else if(crea||SW.on)btn(r,'Ask the captains for a task',()=>{const m=msnGive(P,w);now(m?'':'The captains have no task for you now');if(m)closeInv();});
     btn(r,'Leave the council',()=>closeInv());}}
+// the armourers of the Leaguer make drakescale mail of six drake scales (not at the bench: the scales come only from the drakes)
+function campArmourer(){if(SURV()){if(countOf(415)<6)return false;takeItems(415,6);}const left=addItem(416,1);if(left)toast('No room for '+nameOf(416));drawBar(true);saveDirty=true;return !left;}
 // ---- the captains' tasks
 const MSN_K=['chief','captives','hold','word','standard','engines'];
 const dirWord=(dx,dz)=>['north','north-east','east','south-east','south','south-west','west','north-west'][Math.round((Math.atan2(dx,-dz)/(Math.PI/4)+8))%8];

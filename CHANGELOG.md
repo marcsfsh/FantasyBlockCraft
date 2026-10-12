@@ -34,7 +34,7 @@ Saves from 0.47.0 do not carry over (save key v38).
 - **The camp's life:** soldiers in the Leaguer sit by the fires, spar in pairs, and sing at night.
 - **Salvage:** search the fallen of the wastes with the use button; bear a fallen standard of the hosts back to the lines.
 - **Your war record and titles:** the hosts keep count of your deeds and give you names for them, shown in the war panel and the journal.
-- **Ash drakes:** winged beasts of the wastes come over the battles with the warhosts, circle high and dive to burn the hosts' lines (and you). Archers can reach them low in a dive; your arrows and the bolt thrower anywhere. Slain, a drake falls burning and leaves its scales: make drakescale mail from them, proof against fire.
+- **Ash drakes:** winged beasts of the wastes come over the battles with the warhosts, circle high and dive to burn the hosts' lines (and you). Archers can reach them low in a dive; your arrows and the bolt thrower anywhere. Slain, a drake falls burning and leaves its scales; at the council of war the Leaguer's armourers make drakescale mail of six, proof against fire.
 - **Night battles:** soldiers carry torches, the folk see and shoot less far in the dark while the orcs do not, and the hosts' archers loose fire arrows.
 - **Weather in war:** rain puts out fire arrows and fire pots and weakens the shamans' fire; fog cuts every archer's reach. Smoke rises in tall columns over what burns. The orcs chant before a charge.
 
