@@ -39,11 +39,11 @@ function warStateTick(){
 function warOutcome(A){
   const w=WARS.get(A.P.id),N=A.m.length;if(!w||A.def||N<10)return;const fell=A.fell||0,reach=A.reach?A.reach.size:0;if(fell+reach<N*0.35)return; // fought out of sight
   const P=A.P,nm=P.name.replace(/^The /,'the ');let s=null;
-  if(A.al){if(reach>=N*0.2){w.b.walls=(w.b.walls||0)+0.05;w.b.ram=(w.b.ram||0)+0.03;w.w[0]++;s='The hosts stormed '+P.yard.replace(/^The /,'the ')+': '+reach+' went in through the gap, '+fell+' fell.';}
+  if(A.al){if(reach>=N*0.2){w.b.walls=(w.b.walls||0)+0.05;w.b.ram=(w.b.ram||0)+0.03;w.w[0]++;warSwornBattle(A);s='The hosts stormed '+P.yard.replace(/^The /,'the ')+': '+reach+' went in through the gap, '+fell+' fell.';}
     else if(fell>=N*0.5){w.w[1]++;s='The hosts were thrown back at the gap of '+nm+'; '+fell+' fell.';}}
   else{if(reach>=N*0.25){w.b.ram=(w.b.ram||0)-0.02;w.b.sally=(w.b.sally||0)-0.02;w.w[1]++;s='A warhost of '+N+' broke through to the siege lines and set fire to the ram\'s shed before it was driven back; '+fell+' of them fell.';
       const [rx,rz]=wgXZ(P,18,P.cs*10);warIgnite(w,rx-OX,P.hG+4,rz-OZ,6,40);}
-    else if(fell>=N*0.55){w.b.sally=(w.b.sally||0)+0.08;w.w[0]++;s='A warhost of '+N+' was broken before the siege lines; '+fell+' of them fell.';}}
+    else if(fell>=N*0.55){w.b.sally=(w.b.sally||0)+0.08;w.w[0]++;warSwornBattle(A);s='A warhost of '+N+' was broken before the siege lines; '+fell+' of them fell.';}}
   if(s){const d=warHeroDeeds(A,w);if(d)s+=' '+d;warLog(w,s);if(Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400)toast(s);}}
 // ---- The war panel (Q158): near a found gate, its stage, the four efforts and how many stand on each side about the player
 function warPanel(w){
@@ -51,7 +51,7 @@ function warPanel(w){
   let al=0,orc=0;const X=PL.x,Z=PL.z;for(const f of foes){if(f.dead||Math.hypot(f.x-X,f.z-Z)>160)continue;if(FOES[f.kind].folk){if(!FOES[f.kind].civ)al++;}else orc++;}
   const bar=v=>'<span class="wb"><i style="width:'+Math.round(v*100)+'%"></i></span>';
   el.innerHTML='<b>'+w.n+'</b><div>'+warStage(w)+'</div>'+WAR_EFF.map(([k,lab])=>'<div class="we">'+lab+' '+bar(warEff(w,k))+' '+Math.round(warEff(w,k)*100)+'%</div>').join('')+
-    '<div>The hosts '+al+', the wastes '+orc+'</div>'+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('');}
+    '<div>The hosts '+al+', the wastes '+orc+'</div>'+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
 // ---- On the world map: each found gate's war, its stage and how far the siege has come, and the two lines across the pass
 function warMapDraw(g,sx,sz){
   for(const w of WARS.values()){const P=wasteGateAt(w.X,w.Z,10);const x=sx(w.X),y=sz(w.Z);
@@ -63,4 +63,5 @@ function warMapDraw(g,sx,sz){
 function warJournal(out){
   out.push('','THE WARS OF THE WASTES');if(!WARS.size)out.push('None found yet. The Ashen Gates stand in the rings of ash mountains about the Volcanic Wastes.');
   for(const w of WARS.values()){out.push('','The War at '+w.n+' ('+warStage(w).toLowerCase()+'; '+WAR_EFF.map(([k,lab])=>lab.toLowerCase()+' '+Math.round(warEff(w,k)*100)+'%').join(', ')+'; battles won '+w.w[0]+', lost '+w.w[1]+')');
-    warHeroJournal(w,out);for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}}
+    warHeroJournal(w,out);for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}
+  warSwornJournal(out);}

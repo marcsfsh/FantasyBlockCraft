@@ -19,6 +19,9 @@ function hurt(n,cause){
 const DEATH={fell:'You fell from a high place',lava:'You tried to swim in lava',drowned:'You drowned',cactus:'You hugged a cactus','blew up':'You were blown up',void:'You fell out of the world'};
 function die(cause){
   dead=true;hold=-1;
+  if(warHospitalWake()){ // sworn at war: carried to the field hospital with their things (W4)
+    $('deathmsg').textContent=(DEATH[cause]||'You died')+'. The bearers of the hosts carried you from the field to the field hospital of the Leaguer, and your things with you.';
+    $('death').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();playing=false;saveDirty=true;return;}
   const items=inv.filter(Boolean).map(q=>[q.id,q.c,q.d||0]);inv.fill(null);
   for(const s in equip)if(equip[s]){items.push([equip[s].id,1,equip[s].d||0]);equip[s]=null;}
   let msg=DEATH[cause]||'You died';
@@ -33,7 +36,7 @@ function die(cause){
   if(document.pointerLockElement)document.exitPointerLock();playing=false;
 }
 function revive(){
-  const hadGrave=/grave/.test($('deathmsg').textContent);hp=20;food=20;exh=0;air=10;fallTop=null;dead=false;$('death').style.display='none';respawn();drawStats();lockOrPlay();if(hadGrave)hint('grave');
+  const hadGrave=/grave/.test($('deathmsg').textContent);hp=20;food=20;exh=0;air=10;fallTop=null;dead=false;$('death').style.display='none';if(warWake)warWakeUp();else respawn();drawStats();lockOrPlay();if(hadGrave)hint('grave');
 }
 function openGrave(X,Y,Z){
   const k=wkey(X+OX,Y,Z+OZ),items=graves.get(k);
@@ -256,6 +259,7 @@ function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
   if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
+  if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)

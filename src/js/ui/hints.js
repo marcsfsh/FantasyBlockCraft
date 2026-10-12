@@ -31,6 +31,7 @@ const HINTS={
   f_ochief:()=>'An orc warchief. When it sounds its horn the whole warband comes.',
   f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
   p_folk:()=>'Folk of the realm. They mean you no harm: walk among them, and they will greet you. Strike one, and the guards near by take up arms while the townsfolk flee.',
+  oath:()=>'A lord of the hosts. Press '+ctl('place')+' to swear the Oath of the Three Banners and fight for the alliance, rising in rank by your deeds; once sworn, the same shows your standing.', // (W4)
   f_ember:()=>'An Emberlord: a towering demon of fire and shadow, lord of the Ember Throne in the great volcano. Its whip reaches far, its fire comes in threes, and it never leaves its fortress. Few survive it.'
 };
 let hintT=0,darkT=0;
@@ -46,7 +47,7 @@ function hintTick(dt,hit){
   if(food<=14)hint('hunger');
   if(PL.climb)hint('climb');
   {const an=animalHit(8);if(an)hint('a_'+an.kind);} // the first time you look at each kind of animal (E1)
-  {const fo=foeHit(14);if(fo)hint(FOES[fo.kind].folk?'p_folk':'f_'+fo.kind);} // and each kind of foe (D-052)
+  {const fo=foeHit(14);if(fo)hint(FOES[fo.kind].folk?(WAR_LORDS.has(fo.kind)&&fo.site&&fo.site.k==='wgate'?'oath':'p_folk'):'f_'+fo.kind);} // and each kind of foe (D-052), the lords of the hosts (W4)
   if(hit){if(hit.id===LECTERN)hint('lectern');else if(hit.id===WAYSTONE)hint('waystone');else if(isBox(hit.id))hint('box');}
   if(lampLevel()[0]===0&&lampDark()){darkT+=dt;if(darkT>3)hint('dark');}else darkT=0;
 }

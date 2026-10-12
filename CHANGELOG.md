@@ -5,6 +5,20 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.41.0 (2026-10-12): W4, sworn to the alliance
+
+Saves from 0.40.0 do not carry over (save key v31): your service is saved.
+
+### Game
+- **Swear the Oath of the Three Banners:** use one of the lords of the hosts in a gate's camp (most stand in the Pavilion of the Three Banners), or fight beside the hosts until their captains name you to the alliance. Until then you are a spectator.
+- **Ranks:** your deeds earn merit (each creature of the wastes slain, each battle won near the hosts) and raise you from Levy of the Hosts through Soldier, Sergeant, Captain, Marshal and Lord to Champion of the Three Peoples, each proclaimed by the heralds under the horns. The quartermasters give swords, armour and more at each rank.
+- **Your squad:** from Sergeant a squad of the hosts follows you at war and fights at your side, a company from Captain; the fallen are replaced.
+- **The stores:** at the Leaguer's wagons the quartermaster gives food, flares, lamp oil and later blasting kegs, once in ten minutes. No coin.
+- **The field hospital:** fallen while sworn at war, you are carried by bearers to the field hospital and wake there with your things.
+
+### Tooling
+- New test case `63-sworn`.
+
 ## 0.40.0 (2026-10-12): W3, the soldiers and their heroes
 
 Saves from 0.39.0 do not carry over (save key v30): the wars keep their heroes.

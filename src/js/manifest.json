@@ -306,6 +306,10 @@
       "about": "The heroes of each war (W3, D-070): captains of the hosts and warchiefs of the wastes by name, saved with the war, leading its armies, their deeds and their falls, cairns and the journal's memory"
     },
     {
+      "path": "gameplay/war-sworn.js",
+      "about": "Sworn to the alliance (W4, D-071): the oath in the Pavilion of the Three Banners or by deeds, ranks by merit proclaimed by the heralds, the quartermasters' gifts, a squad and a company that follow, the stores, waking in the field hospital (saved as sw)"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },
