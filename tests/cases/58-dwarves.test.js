@@ -68,8 +68,8 @@ info('its parts',JSON.stringify(pk),'; its workings',JSON.stringify(hk));
   const kinds0=['daxe','dhammer','dxbow','dcapt','dking','dlord','dlady','dminer','dsmith'];for(const k of kinds0){const K=AM_KINDS[FOES[k].m];for(let ci=0;ci<K.coats.length;ci++)amBuild(FOES[k].m,ci,{});}
   const hb=amBuild('dhammer',0,{}).box,hr=amBuild('rsword',0,{}).box;info('heights: a hammerer',hb[4].toFixed(2),'(a swordsman of men',hr[4].toFixed(2)+')');
   assert(hb[4]<hr[4]*0.85,'every kind and coat of the dwarves builds; they stand a head and more shorter than men');
-  const folkK=Object.keys(FOES).filter(k=>FOES[k].folk&&!FOES[k].civ&&!/capt$/.test(k));
-  assert(folkK.every(k=>FOES[k].dmg<=FOES.dhammer.dmg)&&FOES.daxe.hp>FOES.rsword.hp&&FOES.dxbow.shot.dmg>=FOES.rbow.shot.dmg&&FOES.daxe.mass<FOES.rsword.mass,'their hammerers strike the heaviest blows of any folk under a captain, their axeguards outlast men, their bolts hit hard');
+  const folkK=Object.keys(FOES).filter(k=>FOES[k].folk&&!FOES[k].civ&&!/capt$/.test(k)&&!FOES[k].elite); // (the lords' elite guards hit harder by design, D-070)
+  assert(folkK.every(k=>FOES[k].dmg<=FOES.dhammer.dmg)&&FOES.daxe.hp>FOES.rsword.hp&&FOES.dxbow.shot.dmg>=FOES.rbow.shot.dmg&&FOES.daxe.mass<FOES.rsword.mass,'their hammerers strike the heaviest blows of any folk under a captain and the lords\' guards, their axeguards outlast men, their bolts hit hard');
   const [gx,gz]=siteXZ(C,M.f-6,0);PL.x=gx-OX+0.5;PL.z=gz-OZ+0.5;PL.y=M.y+1;PL.vx=PL.vy=PL.vz=0;setMode('survival');hp=20;dead=false;playing=true;settings.time='day';
   clear();foeSpawnTick();const folk=foes.filter(f=>FOES[f.kind].folk),kinds={};for(const f of folk)kinds[f.kind]=(kinds[f.kind]||0)+1;
   const under=folk.filter(f=>f.y<colInfo(Math.floor(f.x)+OX,Math.floor(f.z)+OZ,{}).h-3).length;

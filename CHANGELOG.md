@@ -14,7 +14,7 @@ Saves from 0.44.0 do not carry over (save key v35): each war keeps its lord's ve
 - **While it lives** its mountain rumbles and erupts, ash falls after each eruption, the sky over its basin grows darker and the lightning comes oftener near it, and its voice taunts the hosts and you.
 - **The last battles:** once the front stands at the foot of its mountain the hosts march on to the terrace before its gate, and the lord comes out to meet them. The dwarves break the mountain's five great vents one by one, each one weakening the lord. If you are sworn to the alliance and stand at its gate, the loremasters of the elves and the dwarves come to bind it: hold their ring against its servants until the rite is done.
 - **Five fates:** slain in the hosts' final assault, slain by you alone, bound by the loremasters' rite, cast down into the lava sea through the mountain's heart when a blasting keg bursts beside it near its end, or its fire put out when the last vent breaks. The chronicle and the journal tell which, and the war panel shows the lord and the vents.
-- **Fixed:** the front no longer moves, and no forward camp rises in the basin, before a gate has fallen (W5); the raids now lay siege to cities and castles while the gate stands, at their quicker pace (W6).
+- **Fixed:** the front no longer moves, and no forward camp rises in the basin, before a gate has fallen (W5); the raids now lay siege to cities and castles while the gate stands, at their quicker pace (W6); the paint of the goblin pot-throwers, war drummers, war beasts, skulkers and crossbowmen is no longer scrambled (W3).
 
 ### Tooling
 - New test case `67-ember-war`. `tools/shot.mjs --siege=lord` shows the lord on the gate's wall.

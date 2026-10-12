@@ -11191,8 +11191,8 @@ const FOLK_KIT=(function(){
   const standardPaint=(P,wood,metal,fn,fringe)=>{P.map('pole',ALL,(s,t)=>t%10===0?sh(metal,10):sh(wood,hz(s,t>>2,911)*10));P.map('bar',ALL,(s,t)=>sh(wood,hz(s,t,913)*10));plate(P,['fin'],metal);
     P.sheet('flag','x',(a,b)=>{if(b>=29&&(a%4===1||a%4===2))return 'cut';if(b>=27)return sh(fringe,(a%2?10:-10));return fn(a,b);});};
   // a crossbow: the stock along the forearm, its steel bow across, the string; a case of bolts at the hip
-  const xbow=(arm,x)=>[['stock',arm||'armR',[x||1.5,-10,0.5],[-0.5,-0.75,-2,1,1.5,11]],['prod','stock',[0,0,8],[-5.5,-0.5,-0.5,11,1,1],[0,0.1,0],{nb:1,tp:['x',1,1,0,0]}],['xstr','stock',[0,0.4,7.4],[-5,-0.25,-0.25,10,0.5,0.5],0,{nb:1}],
-    ['case','body',[4.6,2,-1.5],[-1,-3,-1,2,8,2],[0,0,-0.2],{nb:1}],['bolts','case',[0,5,0],[-0.75,0,-0.75,1.5,2,1.5],0,{nb:1}]];
+  const xbow=(arm,x)=>[['stock',arm||'armR',[x||1.5,-10,0.5],[-0.5,-1,-2,1,2,11]],['prod','stock',[0,0,8],[-5.5,-0.5,-0.5,11,1,1],[0,0.1,0],{nb:1,tp:['x',1,1,0,0]}],['xstr','stock',[0,0.4,7.4],[-5,-0.5,-0.5,10,1,1],0,{nb:1}],
+    ['case','body',[4.6,2,-1.5],[-1,-3,-1,2,8,2],[0,0,-0.2],{nb:1}],['bolts','case',[0,5,0],[-1,0,-1,2,2,2],0,{nb:1}]];
   const xbowPaint=(P,wood,metal,fl)=>{P.map('stock',ALL,(s,t)=>sh(wood,hz(s,t>>1,915)*10+(t%6===0?-12:0)));plate(P,['prod'],metal);P.map('xstr',ALL,()=>[220,214,196]);
     leather(P,['case'],[90,62,38]);P.map('bolts',ALL,(s,t)=>(s+t)%2?[226,220,204]:fl);};
   // a horse's harness of leather with a gilt or bronze stud at each crossing
@@ -11326,10 +11326,10 @@ const FOLK_KIT=(function(){
         P.coat(['harn'],[70,50,34],12);P.rows('harn',['L','R','T'],0,2,[50,46,50]);P.spots('harn',['L','R'],[150,146,150],0.08);
         F.gobPaint(P,c);P.coat(['thL'],c.skin,14);P.rows('thL',['L','F','R','B'],8,12,[50,40,30]);P.coat(['spear'],[80,56,34],8);P.coat(['stip'],[150,146,150],10);P.coat(['pen'],[110,30,26],16);P.spots('pen',['L','R'],[60,20,18],0.3);}},
     // the pot-thrower: a goblin with a wicker basket of clay fire pots on his back and one alight in his hand
-    gpot:{parts:[...F.gob(),['basket','body',[0,4,-2],[-2.5,-3,-3,5,6,3],0,{nb:1}],['pots','basket',[0,3,-1.5],[-2,0,-1.25,4,1.5,2.5],0,{nb:1}],['pot','armR',[1,-6.5,0],[-1,-1,-1,2,2,2],0,{nb:1}],['wick','pot',[0,1,0],[-0.5,0,-0.5,1,1,1],0,{nb:1}]],coats:F.gobCoats,
+    gpot:{parts:[...F.gob(),['basket','body',[0,4,-2],[-2.5,-3,-3,5,6,3],0,{nb:1}],['pots','basket',[0,3,-1.5],[-2,0,-1,4,2,2],0,{nb:1}],['pot','armR',[1,-6.5,0],[-1,-1,-1,2,2,2],0,{nb:1}],['wick','pot',[0,1,0],[-0.5,0,-0.5,1,1,1],0,{nb:1}]],coats:F.gobCoats,
       paint(P,c){F.gobPaint(P,c);P.coat(['basket'],[150,120,70],14);P.rows('basket',['L','F','R','B'],1,2,[110,84,50]);P.rows('basket',['L','F','R','B'],4,5,[110,84,50]);P.coat(['pots','pot'],[150,80,50],12);P.glowFaces(['wick'],[255,170,50]);P.glow('pots','T',1,1,[255,140,40]);P.glow('pots','T',5,2,[255,140,40]);}},
     // the war drummer: an orc with a great drum of hide on a harness at his belly and a bone stick in each hand
-    odrum:{scale:1.08,parts:[...F.orc(),['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['drum','body',[0,2,3],[-4,-4,0,8,8,6],[0.15,0,0],{nb:1}],['skin','drum',[0,0,6],[-3.5,-3.5,0,7,7,0.5],0,{nb:1}],
+    odrum:{scale:1.08,parts:[...F.orc(),['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['drum','body',[0,2,3],[-4,-4,0,8,8,6],[0.15,0,0],{nb:1}],['skin','drum',[0,0,6],[-3.5,-3.5,0,7,7,1],0,{nb:1}],
         ['stL','armL',[-1.5,-10,0],[-0.5,-0.5,-0.5,1,1,7],[0.6,0,0],{nb:1}],['stR','armR',[1.5,-10,0],[-0.5,-0.5,-0.5,1,1,7],[0.6,0,0],{nb:1,m:'stL'}]],coats:F.orcCoats,
       paint(P,c){F.orcPaint(P,c);P.coat(['helm'],c.iron,10);P.coat(['drum'],[90,40,30],12);P.rows('drum',['L','R','F','B'],0,1,c.iron);P.rows('drum',['L','R','F','B'],7,8,c.iron);P.spots('drum',['L','R'],[230,220,190],0.06);
         P.coat(['skin'],[200,184,150],10);P.rect('skin','F',5,5,4,4,[130,30,24]);P.coat(['stL'],[226,216,190],8);P.glow('stL','F',0,0,[255,140,40]);}},
@@ -11349,7 +11349,7 @@ const FOLK_KIT=(function(){
     wbeast:{scale:1.6,parts:[['legL',null,[-3.5,9,-7],[-2,-9,-2,4,9,4]],['legR',null,[3.5,9,-7],[-2,-9,-2,4,9,4],0,{m:'legL'}],['body',null,[0,9,0],[-6,-1,-10,12,12,20]],
         ['armL','body',[-3.5,2,7],[-2,-10,-2,4,10,4]],['armR','body',[3.5,2,7],[-2,-10,-2,4,10,4],0,{m:'armL'}],['head','body',[0,3,10],[-4,-4,0,8,8,7],[0.2,0,0],{head:1}],
         ['snout','head',[0,-2,7],[-2.5,-2,0,5,4,3]],['tuskL','snout',[-2.5,0,1],[-0.5,0,-0.5,1,4,1],[0.4,0,-0.3]],['tuskR','snout',[2.5,0,1],[-0.5,0,-0.5,1,4,1],[0.4,0,0.3],{m:'tuskL'}],
-        ['mask','head',[0,0,7],[-4.25,-1,0,8.5,5,0.5],0,{head:1}],['plates','body',[0,11,0],[-5,0,-9,10,2,18],0,{nb:1}],['spikes','plates',[0,2,0],[-0.5,0,-8,1,3,16],0,{nb:1,tp:['y',0,1,0,0]}],
+        ['mask','head',[0,0,7],[-4.5,-1,0,9,5,1],0,{head:1}],['plates','body',[0,11,0],[-5,0,-9,10,2,18],0,{nb:1}],['spikes','plates',[0,2,0],[-0.5,0,-8,1,3,16],0,{nb:1,tp:['y',0,1,0,0]}],
         ['collar','body',[0,5,9],[-6.5,-3,-1.5,13,8,3]],['chainL','collar',[-6,-3,0],[-0.5,-9,-0.5,1,9,1],[0.3,0,0],{nb:1}],['chainR','collar',[6,-3,0],[-0.5,-9,-0.5,1,9,1],[0.3,0,0],{nb:1,m:'chainL'}],['tail','body',[0,8,-10],[-0.5,-5,-0.5,1,5,1],[0.6,0,0],{nb:1}]],
       coats:[[{hide:[70,56,48],iron:[44,42,46],eye:[255,120,30]},3],[{hide:[86,64,50],iron:[52,48,50],eye:[255,80,30]},1]],
       paint(P,c){P.coat(['body','head','snout','legL','armL'],c.hide,16);P.hair('body');P.spots('body',['L','R','T'],[c.hide[0]-30,c.hide[1]-30,c.hide[2]-30],0.12);P.rows('legL',['L','F','R','B'],15,18,[30,26,24]);P.rows('armL',['L','F','R','B'],15,20,[30,26,24]);
@@ -11361,7 +11361,7 @@ const FOLK_KIT=(function(){
       paint(P,c){F.orcPaint(P,c);P.coat(['helm','tower'],c.iron,10);P.rows('helm',['F'],2,3,[20,18,20]);P.glow('helm','F',2,2,c.eye);P.glow('helm','F',4,2,c.eye);P.rows('tower',['L'],0,1,[70,66,70]);P.rect('tower','L',8,0,4,34,[120,30,26]);
         P.spots('tower',['L'],[110,100,96],0.05);P.coat(['tspk'],[150,146,150],8);P.coat(['spear'],[80,56,34],8);P.coat(['stip'],[150,146,150],10);}},
     // the goblin skulker: small and quick, a knife in each hand, a rag over the face
-    gswarm:{scale:0.85,parts:[...F.gob(),['wpn','armR',[1,-6.5,0],[-0.5,-0.5,-1,1,1,5],0,{nb:1}],['wpnL','armL',[-1,-6.5,0],[-0.5,-0.5,-1,1,1,5],0,{nb:1}],['rag','head',[0,0.5,3],[-3,-0.5,0,6,2,0.5],0,{head:1,nb:1}]],coats:F.gobCoats,
+    gswarm:{scale:0.85,parts:[...F.gob(),['wpn','armR',[1,-6.5,0],[-0.5,-0.5,-1,1,1,5],0,{nb:1}],['wpnL','armL',[-1,-6.5,0],[-0.5,-0.5,-1,1,1,5],0,{nb:1}],['rag','head',[0,0.5,3],[-3,-0.5,0,6,2,1],0,{head:1,nb:1}]],coats:F.gobCoats,
       paint(P,c){F.gobPaint(P,c);P.coat(['wpn','wpnL'],[170,170,176],10);P.coat(['rag'],[60,40,30],10);}},
     // the troll driver: an orc in a long hide coat with a whip of many tails and a goad of iron
     tdriver:{scale:1.1,parts:[...F.orc(),['coatT','body',[0,0,0],[-5,-8,-3,10,18,6]],['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['whip1','armR',[1.5,-10,0],[-0.5,-0.5,-0.5,1,1,6],[0.4,0,0],{nb:1}],
