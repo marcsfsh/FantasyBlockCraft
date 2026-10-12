@@ -115,7 +115,7 @@ function warArmy(P,al){
     toast(A.mus?'The horns of '+P.camp.replace(/^The /,'the ')+' sound: the hosts muster '+(A.mus.sq?'in the square':'on the field'):'The allied hosts come against the gate, '+N+' strong');}
   else{// the orcs mass before the gate when the player is in the yard or on the road and the road is in reach
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
-    if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
+    const wf=WARS.get(P.id);if(near&&warUp(P)>=0&&!(wf&&wf.s>=2)){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
   const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');warHeroLead(A);if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
@@ -128,11 +128,11 @@ function warCompany(A){
     if(!at)return null;const U=at[0],V=at[1],sg=Math.sign(V||side);
     const path=U>154?[[c0+153,0],[c0+153,sg*17],[c0+126,sg*17]]:Math.abs(V)>5?[[c0+125,sg*22]]:[],cu=path.length?125:U;
     if(!A.mus.sq){if(cu>=104)path.push([c0+125,4]);for(const q of [[112,4],[104,4],[100,4],[60,3],[46,0]])if(q[0]<cu)path.push([c0+q[0],q[1]]);}
-    const [X,Z]=siteXZ(s,c0+U,V);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),odd?W2.inB:W2.inA);}
+    const [X,Z]=siteXZ(s,c0+U,V),w=WARS.get(P.id);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),w&&w.s>=2?warFrontWays(P,w).inA:odd?W2.inB:W2.inA);}
   if(A.mus){// up the Long Descent, to the head of the road, along the paved way behind the barricades and through their gap
     const k=warUp(P);if(k<0)return null;const p=P.ramp.pts,up=[];for(let i=k-3;i>=3;i-=3)up.push([p[i][0],p[i][1]]);
     return warSpawn(A,c,p[k][0],p[k][1],up.concat(warW(s,[[P.uY+8,P.side*36],[-40,P.side*37]])),odd?W2.outB:W2.outA);}
-  const route=A.al?(odd?W2.inB:W2.inA):(odd?W2.outB:W2.outA),k=warEntry(route);if(k<0)return null;
+  const w=WARS.get(P.id),FW=w&&w.s>=2?warFrontWays(P,w):null,route=FW?(A.al?FW.inA:FW.out):A.al?(odd?W2.inB:W2.inA):(odd?W2.outB:W2.outA),k=warEntry(route);if(k<0)return null; // (beyond a fallen gate: to the front and from the volcano, W5)
   return warSpawn(A,c,route[k][0],route[k][1],[],route.slice(k+1),true);}
 // a company of the army at (X,Z): each to its place in the ranks (if the army musters), there to wait for the horns, then on along
 // the army's way; at its end it holds a while and marches back the way it came
@@ -235,7 +235,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
+  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)

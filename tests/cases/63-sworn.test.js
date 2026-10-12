@@ -20,7 +20,7 @@ assert(!warSworn(),'a spectator until sworn');
 // merit: the rank rises, with better arms
 {warMerit(30);info('merit',SW.m,'; rank',WAR_RANKS[SW.r][0],'; iron sword',has(374),', iron mail',has(381));assert(SW.r===2&&has(374)&&has(381),'merit raises the rank, proclaimed, and the quartermasters give better arms');}
 // the squad: it comes and follows
-{gen(...at(P.uL+20,40));toPL(P.uL+20,40);let n=0;for(let k=0;k<40;k++){warSqT=0;warSquadTick();run(0.5);n=foes.filter(f=>f.follow&&!f.dead).length;if(n>=4)break;}
+{gen(...at(P.uL+20,40));toPL(P.uL+20,40);let n=0;for(let k=0;k<40;k++){warFolT[1]=0;warSquadTick();run(0.5);n=foes.filter(f=>f.follow&&!f.dead).length;if(n>=4)break;}
   const [x2,z2]=at(P.uL+5,40);PL.x=x2-OX+0.5;PL.z=z2-OZ+0.5;PL.y=ground[Math.floor(PL.x)+W*Math.floor(PL.z)]+1;
   for(let k=0;k<30;k++){warSquadTick();run(0.5);}const near=foes.filter(f=>f.follow&&!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<9).length;
   info('the squad: came',n,'; near after the player moved 15',near);assert(n===4&&near>=3,'a Sergeant\'s squad of four comes and follows');clear();}

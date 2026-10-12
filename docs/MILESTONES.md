@@ -322,7 +322,7 @@ The war between the alliance (men, riders, high elves, wood elves, dwarves) and 
   - Join by swearing to the lords in the Pavilion of the Three Banners, or earn it by fighting beside the hosts (Q166); only the alliance (Q145); otherwise a spectator (Q140).
   - Ranks and titles from levy to champion of the three peoples, named by the heralds; each people's quartermasters give their arms and armour as you rise; a squad and later a company follow you and fight at your side; supplies from the stores (food, arrows, kegs), no coin (Q168, Q172).
   - Fallen while sworn, you are carried by bearers to the field hospital and wake there (Q169).
-- **W5 Into the basin and beneath it.**
+- **W5 Into the basin and beneath it (done in 0.42.0, D-072).**
   - After the gate: the hosts hold the yard, and forward camps with palisades and towers rise along the Long Descent and on the basin floor as the front moves (built, saved; Q143, Q175). Battles on the open floor; the orcs' war camps, watchtowers, forges and pits, and the warholds of the lesser volcanoes, stormed (Q138).
   - Beneath: companies clearing the goblin warrens hall by hall, battles in the deep caves under the basin, and the Ember Stair stormed chamber by chamber up to the Ember Throne (Q149).
 - **W6 Raids on the bordering realms.**

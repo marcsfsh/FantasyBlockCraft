@@ -234,7 +234,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v31',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v32',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -247,7 +247,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=31,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=32,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -11764,6 +11764,7 @@ function foePlaces(){
   for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites){if(Math.hypot(s.X-X,s.Z-Z)>s.R+70)continue;const L=siteLayout(s);
     L.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);if(Math.hypot(x-X,z-Z)>46)return;out.push({id:s.id+':'+i,x:x+0.5,y:p.y>0?p.y+1:hAt(Math.round(x),Math.round(z))+1,z:z+0.5,R:p.kind==='gate'||p.kind==='post'||p.kind==='citgate'?2.5:4,kind:s.prov.cult.fp+p.kind,folk:1,horses:p.horses||0,s:s});});}
   warPlaces(X,Z,out); // the gates of the wastes: the camp of the hosts, the siege works, the orcs' yard (D-067)
+  warFrontPlaces(X,Z,out); // the forward camps beyond a fallen gate (W5)
   stairSpots(X,PL.y,Z,out); // the halls and caverns of the Ember Stair (D-067)
   return out;
 }
@@ -11772,7 +11773,7 @@ function foeSpawnTick(){
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
   const wn=warNear(),live=foes.filter(f=>!f.dead).length; // by a gate of the wastes there are more of both (D-067); (the war's fallen, lying, do not count, W2)
-  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&live>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+  for(const s0 of foePlaces()){const s=warHeld(s0),folk=!!s.folk; /* (a place the hosts have stormed is theirs, W5) */if(foeSpots.has(s.id)||(!folk&&live>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     if(folk&&folkCount()>=FOLK_CAP+(wn?14:0))continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
@@ -12153,6 +12154,7 @@ function updFoes(dt){
   foeDin=Math.min(18,foeDin+dt*12);
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
     if(f.dead&&f.war&&!f.cntW){f.cntW=1;warFallen(f);} // the war's fallen lie a while (W2)
+    if(f.dead&&f.spot&&!f.cntS){f.cntS=1;warSpotFell(f);} // a place of the wastes stormed (W5)
     if(f.dead>(f.war?WAR_LIE:2.6)){removeFoe(f);continue;}
     if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(FOES[f.kind].folk?(f.spot?72:96):f.spot?130:96)){removeFoe(f);continue;}
     stepFoe(f,dt);if(!f.gone)placeFoe(f,dt);}
@@ -12333,7 +12335,7 @@ function warArmy(P,al){
     toast(A.mus?'The horns of '+P.camp.replace(/^The /,'the ')+' sound: the hosts muster '+(A.mus.sq?'in the square':'on the field'):'The allied hosts come against the gate, '+N+' strong');}
   else{// the orcs mass before the gate when the player is in the yard or on the road and the road is in reach
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
-    if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
+    const wf=WARS.get(P.id);if(near&&warUp(P)>=0&&!(wf&&wf.s>=2)){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
   const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');warHeroLead(A);if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
@@ -12346,11 +12348,11 @@ function warCompany(A){
     if(!at)return null;const U=at[0],V=at[1],sg=Math.sign(V||side);
     const path=U>154?[[c0+153,0],[c0+153,sg*17],[c0+126,sg*17]]:Math.abs(V)>5?[[c0+125,sg*22]]:[],cu=path.length?125:U;
     if(!A.mus.sq){if(cu>=104)path.push([c0+125,4]);for(const q of [[112,4],[104,4],[100,4],[60,3],[46,0]])if(q[0]<cu)path.push([c0+q[0],q[1]]);}
-    const [X,Z]=siteXZ(s,c0+U,V);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),odd?W2.inB:W2.inA);}
+    const [X,Z]=siteXZ(s,c0+U,V),w=WARS.get(P.id);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),w&&w.s>=2?warFrontWays(P,w).inA:odd?W2.inB:W2.inA);}
   if(A.mus){// up the Long Descent, to the head of the road, along the paved way behind the barricades and through their gap
     const k=warUp(P);if(k<0)return null;const p=P.ramp.pts,up=[];for(let i=k-3;i>=3;i-=3)up.push([p[i][0],p[i][1]]);
     return warSpawn(A,c,p[k][0],p[k][1],up.concat(warW(s,[[P.uY+8,P.side*36],[-40,P.side*37]])),odd?W2.outB:W2.outA);}
-  const route=A.al?(odd?W2.inB:W2.inA):(odd?W2.outB:W2.outA),k=warEntry(route);if(k<0)return null;
+  const w=WARS.get(P.id),FW=w&&w.s>=2?warFrontWays(P,w):null,route=FW?(A.al?FW.inA:FW.out):A.al?(odd?W2.inB:W2.inA):(odd?W2.outB:W2.outA),k=warEntry(route);if(k<0)return null; // (beyond a fallen gate: to the front and from the volcano, W5)
   return warSpawn(A,c,route[k][0],route[k][1],[],route.slice(k+1),true);}
 // a company of the army at (X,Z): each to its place in the ranks (if the army musters), there to wait for the horns, then on along
 // the army's way; at its end it holds a while and marches back the way it came
@@ -12453,7 +12455,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
+  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
@@ -12509,7 +12511,7 @@ const warSave=()=>({wr:[...WARS.values()],wpc:Math.round(warPlay)});
 // how far an effort has come (0 to 1): its pace at this gate since the war was found, and what the battles have added or taken
 function warEff(w,k){const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));return Math.max(0,Math.min(1,(w.b[k]||0)+(warPlay-w.f)/pace));}
 const warAll=w=>WAR_EFF.every(e=>warEff(w,e[0])>=1);
-function warStage(w){return w.s>=2?'The gate has fallen':warAll(w)?'The gate stands ready to fall':'The siege';}
+function warStage(w){const fr=w.s>=2?warFront(w):0;return w.s>=2?(fr<0.02?'The gate has fallen':fr<1?'The hosts push into the basin':'The hosts stand at the foot of the burning mountain'):warAll(w)?'The gate stands ready to fall':'The siege';}
 function warLog(w,s){w.log.push([Math.round(warPlay),s]);if(w.log.length>80)w.log.splice(1,1);saveDirty=true;}
 // the player comes within 200 of a gate's works: its war is found, and from then on it is kept
 function warFound(P){let w=WARS.get(P.id);if(w)return w;
@@ -12526,11 +12528,15 @@ function warStateTick(){
   for(const w of WARS.values()){if(w.s>=2||!warAll(w))continue;if(!w.allT)w.allT=Math.round(warPlay);
     const last=w===near&&warArmies.some(A=>A.last&&A.P===P&&A.m.some(f=>!f.dead&&!f.gone&&wgUV(P,f.x+OX,f.z+OZ)[0]<4));
     if(last||w!==near&&warPlay-w.allT>600||w===near&&warPlay-w.allT>1800)warFall(w,w===near,w===near?P:null);}
-  if(near)warWorksTick(P,near);warPanel(near);}
+  if(near)warWorksTick(P,near);else{const bw=warBasinWar(X,Z);if(bw){wgSite(bw.P);warFrontTick(bw.P,bw.w);}} // (out on the basin's floor: its forward camps, W5)
+  warPanel(near);}
 // how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
 function warOutcome(A){
   const w=WARS.get(A.P.id),N=A.m.length;if(!w||A.def||N<10)return;const fell=A.fell||0,reach=A.reach?A.reach.size:0;if(fell+reach<N*0.35)return; // fought out of sight
   const P=A.P,nm=P.name.replace(/^The /,'the ');let s=null;
+  if(w.s>=2){if(A.al&&fell<N*0.5){w.b.fr=(w.b.fr||0)+0.04;s='The hosts pushed the front on into the basin; '+fell+' fell.';warSwornBattle(A);}else if(!A.al&&fell>=N*0.55){w.b.fr=(w.b.fr||0)+0.02;s='A warhost of '+N+' was broken before the front; '+fell+' of them fell.';warSwornBattle(A);}
+    else if(!A.al){w.b.fr=Math.max(0,(w.b.fr||0)-0.02);s='A warhost of '+N+' drove the front back a little; '+fell+' of them fell.';}
+    if(s){const d=warHeroDeeds(A,w);if(d)s+=' '+d;warLog(w,s);if(Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400)toast(s);}return;}
   if(A.al){if(reach>=N*0.2){w.b.walls=(w.b.walls||0)+0.05;w.b.ram=(w.b.ram||0)+0.03;w.w[0]++;warSwornBattle(A);s='The hosts stormed '+P.yard.replace(/^The /,'the ')+': '+reach+' went in through the gap, '+fell+' fell.';}
     else if(fell>=N*0.5){w.w[1]++;s='The hosts were thrown back at the gap of '+nm+'; '+fell+' fell.';}}
   else{if(reach>=N*0.25){w.b.ram=(w.b.ram||0)-0.02;w.b.sally=(w.b.sally||0)-0.02;w.w[1]++;s='A warhost of '+N+' broke through to the siege lines and set fire to the ram\'s shed before it was driven back; '+fell+' of them fell.';
@@ -12543,12 +12549,12 @@ function warPanel(w){
   let al=0,orc=0;const X=PL.x,Z=PL.z;for(const f of foes){if(f.dead||Math.hypot(f.x-X,f.z-Z)>160)continue;if(FOES[f.kind].folk){if(!FOES[f.kind].civ)al++;}else orc++;}
   const bar=v=>'<span class="wb"><i style="width:'+Math.round(v*100)+'%"></i></span>';
   el.innerHTML='<b>'+w.n+'</b><div>'+warStage(w)+'</div>'+WAR_EFF.map(([k,lab])=>'<div class="we">'+lab+' '+bar(warEff(w,k))+' '+Math.round(warEff(w,k)*100)+'%</div>').join('')+
-    '<div>The hosts '+al+', the wastes '+orc+'</div>'+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
+    '<div>The hosts '+al+', the wastes '+orc+'</div>'+(w.s>=2?warFrontPanel(wasteGateAt(w.X,w.Z,10)||{},w):'')+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('')+warSwornPanel();}
 // ---- On the world map: each found gate's war, its stage and how far the siege has come, and the two lines across the pass
 function warMapDraw(g,sx,sz){
   for(const w of WARS.values()){const P=wasteGateAt(w.X,w.Z,10);const x=sx(w.X),y=sz(w.Z);
     if(P){const line=(u,c)=>{const [ax,az]=wgXZ(P,u,-wgHalf(P,u)+4),[bx,bz]=wgXZ(P,u,wgHalf(P,u)-4);g.strokeStyle=c;g.lineWidth=4;g.beginPath();g.moveTo(sx(ax),sz(az));g.lineTo(sx(bx),sz(bz));g.stroke();};
-      line(P.uL+4,'#2a4c9c');line(-22,'#a82a1a');}
+      line(P.uL+4,'#2a4c9c');line(-22,'#a82a1a');warFrontMap(g,sx,sz,P,w);}
     g.strokeStyle='#5a0e06';g.lineWidth=3;g.beginPath();g.moveTo(x-7,y-7);g.lineTo(x+7,y+7);g.moveTo(x+7,y-7);g.lineTo(x-7,y+7);g.stroke();
     const p=Math.round(WAR_EFF.reduce((a,e)=>a+warEff(w,e[0]),0)/4*100);g.fillStyle='#5a0e06';g.fillText(warStage(w)+' of '+w.n.replace(/^The /,'the ')+', '+p+'%',x,y+22);}}
 // ---- In the journal: each found war's chronicle, oldest first
@@ -12788,7 +12794,8 @@ function warWorksTick(P,w){if(!P||!w||WJ.length)return;wgSite(P);w.ap=w.ap||{lea
   if(w.s>=2&&A.fall&&!A.ban&&due('ban')&&warLoaded(P,-12,12,-36,36)){const out=[],cs=-P.cs;for(let y=g+30;y<=g+46;y++){warSet(out,P,10,cs*25,y,RBANNER);warSet(out,P,10,cs*31,y,DBANNER);}for(let y=g+20;y<=g+30;y++)warSet(out,P,-10,cs*28,y,EVBANNER);
     warJob(out,400,ok=>{if(done('ban',ok))A.ban=1;});return;}
   const hc=w.hr?w.hr.dead.filter(d=>d.side==='al').length:0;if(hc>(A.hc||0)&&due('hc')&&warLoaded(P,P.uL+24,P.uL+30,-92,92)){const n0=A.hc||0;warJob(warCairnCells(P,w,n0,hc),200,ok=>{if(done('hc',ok))A.hc=hc;});return;}
-  const lit=w.s>=2&&warPlay-(w.fallT||0)<1200;if(w.s>=2&&A.fire!==(lit?1:2)&&due('fire')&&warLoaded(P,P.uC0+26,P.uC0+44,-18,18))warJob(warFireCells(P,lit),100,ok=>{if(done('fire',ok))A.fire=lit?1:2;});}
+  const lit=w.s>=2&&warPlay-(w.fallT||0)<1200;if(w.s>=2&&A.fire!==(lit?1:2)&&due('fire')&&warLoaded(P,P.uC0+26,P.uC0+44,-18,18))warJob(warFireCells(P,lit),100,ok=>{if(done('fire',ok))A.fire=lit?1:2;});
+  warFrontTick(P,w);} // the forward camps beyond the fallen gate (W5)
 // the fallen of the war (counted once each, from updFoes): the hosts' fill the graves; they lie a while (WAR_LIE seconds; past
 // WAR_DEAD of them, the longest fallen are cleared first)
 const WAR_LIE=150,WAR_DEAD=50;
@@ -13005,7 +13012,7 @@ const WAR_SQUAD=[0,0,4,10,10,12,14],WAR_LORDS=new Set(['rnoble','elord','dlord',
 let SW=saved&&saved.sw&&typeof saved.sw==='object'?saved.sw:null;if(!SW)SW={on:0,r:0,m:0,p:0,k:0,b:0,sup:-1e9,t:0};
 const warSwornSave=()=>({sw:SW}),warSworn=()=>!!SW.on;
 // is the player at war (near a gate's works or in the volcanic lands)?
-function warZone(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);if(wasteGateAt(X,Z,300))return true;const c=landSite(Math.floor(X/LS),Math.floor(Z/LS));return LANDS[cellLand(c)].k==='volcanic';}
+function warZone(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);return !!wasteGateAt(X,Z,300)||!!warBasinAt(X,Z);}
 // sworn: the oath, the first rank and its gifts
 function warSwear(how){if(SW.on)return;SW.on=1;SW.r=0;SW.t=Math.round(warPlay);saveDirty=true;
   showText('The Oath of the Three Banners',(how==='deeds'?'The captains of the hosts have watched you fight beside them, and they call you to the Pavilion of the Three Banners. ':'You kneel in the Pavilion of the Three Banners before the lords of men, elves and dwarves. ')+
@@ -13031,17 +13038,8 @@ function warOathAct(){const f=foeHit(4.6);if(!f||f.dead||!FOES[f.kind].folk||!(W
     (WAR_SQUAD[r]?'Your '+(WAR_SQUAD[r]>4?'company':'squad')+' of '+WAR_SQUAD[r]+' follows you in the wastes and at the gates.':'From Sergeant a squad of the hosts will follow you.'));return true;}
 // ---- the squad: as many of the hosts as the rank gives, following the player in the wastes and at the gates, each to a place
 // about them, fighting what comes near; the fallen replaced one at a time
-const WAR_SQ_T=['r_host','d_host','e_host','w_host','h_host'];let warSqT=0;
-function warSquadTick(){const n=SW.on?WAR_SQUAD[SW.r]:0,mine=foes.filter(f=>f.follow&&!f.dead);
-  if(!n||!warZone()||photo){for(const f of mine)if(Math.hypot(f.x-PL.x,f.z-PL.z)>40)removeFoe(f);return;}
-  mine.forEach((f,i)=>{const a=PL.yaw+((i%5)-2)*0.5,r=3+Math.floor(i/5)*2.2,tx=PL.x+Math.sin(a)*r,tz=PL.z+Math.cos(a)*r,d=Math.hypot(f.x-tx,f.z-tz);
-    if(Math.hypot(f.x-PL.x,f.z-PL.z)>60){const y=foeStand(tx,PL.y+2,tz,FOES[f.kind].tall||2);if(y>0){f.x=tx;f.z=tz;f.y=f.gy=y;}}
-    f.hx=tx;f.hz=tz;if(!f.foe&&d>2.5&&f.st!=='chase'){f.st='return';f.t=8;f.pace=d>10?FOES[f.kind].run:FOES[f.kind].walk*1.3;}});
-  if(mine.length>=n||(warSqT-=1)>0)return;warSqT=5;
-  // a new one comes up from behind, out of the way
-  for(let k=0;k<8;k++){const a=PL.yaw+(Math.random()-0.5)*1.4,d=14+Math.random()*8,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;
-    const y=foeStand(x,PL.y+3,z,2);if(y<0)continue;const g=spawnGroup(WAR_SQ_T[(SW.k+mine.length)%WAR_SQ_T.length],1,x,y,z,1,{});
-    for(const f of g){f.follow=1;f.leash=0;f.hx=f.x;f.hz=f.z;}if(g.length){if(!mine.length)toast('Your '+(n>4?'company':'squad')+' of the hosts falls in behind you');break;}}}
+const WAR_SQ_T=['r_host','d_host','e_host','w_host','h_host'];
+function warSquadTick(){const n=SW.on&&warZone()?WAR_SQUAD[SW.r]:0;warFollow(1,n,WAR_SQ_T,'Your '+(n>4?'company':'squad')+' of the hosts falls in behind you');}
 // ---- the stores: at the Leaguer's wagons, once in ten minutes of play
 function warStores(P){if(!SW.on||warPlay-SW.sup<600||!SURV())return;const s=wgSite(P),L=s.lay.parts.filter(p=>p.k==='lgwagon');if(!L.length)return;
   let u=0,v=0;for(const p of L){u+=(p.u0+p.u1)/2;v+=(p.v0+p.v1)/2;}const [X,Z]=siteXZ(s,u/L.length,v/L.length);if(Math.hypot(X-(PL.x+OX),Z-(PL.z+OZ))>18)return;
@@ -13050,7 +13048,7 @@ function warStores(P){if(!SW.on||warPlay-SW.sup<600||!SURV())return;const s=wgSi
 // ---- the hospital: fallen while sworn at war, the player is carried there (from die)
 let warWake=null;
 function warHospitalWake(){if(!SW.on||!SURV())return false;const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);let P=wasteGateAt(X,Z,400);
-  if(!P){const c=landSite(Math.floor(X/LS),Math.floor(Z/LS));if(LANDS[cellLand(c)].k!=='volcanic')return false;const B=wasteBasin(c);P=B&&wasteGateOf(B);}
+  if(!P){const B=warBasinAt(X,Z);P=B&&wasteGateOf(B);}
   if(!P)return false;const [hx,hz]=warHosp(P);warWake=[hx+0.5,hz+0.5];return true;}
 function warWakeUp(){const [X,Z]=warWake;warWake=null;if(Math.abs(X-(PL.x+OX))>W/2-40||Math.abs(Z-(PL.z+OZ))>D/2-40)regenerateAll(X,Z);
   const x=X-OX,z=Z-OZ;let y=H-2;while(y>1&&!SOLID[get(Math.floor(x),y,Math.floor(z))])y--;PL.x=x;PL.z=z;PL.y=y+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H-2)PL.y++;
@@ -13061,6 +13059,96 @@ function warSwornTick(){if(!SW.on)return;warSquadTick();const P=wasteGateAt(Math
 function warSwornJournal(out){if(!SW.on){out.push('','YOUR PART','You have not sworn to the alliance. Use one of the lords of the hosts in the Leaguer of a gate to swear the oath, or fight beside the hosts.');return;}
   out.push('','YOUR PART',WAR_RANKS[SW.r][0]+', sworn in hour '+(SW.t/3600).toFixed(1)+'. Merit '+SW.m+'; battles won beside the hosts '+SW.b+'; creatures of the wastes slain '+SW.k+'.');}
 const warSwornPanel=()=>SW.on?'<div>You: '+WAR_RANKS[SW.r][0]+' (merit '+SW.m+')</div>':'';
+// ---- Into the basin and beneath it (W5, D-072; Q138, Q143, Q149, Q175). Once a gate has fallen its war goes on into its basin.
+// The front (`w.fr`, 0 to 1) moves out from the foot of the Long Descent across the floor toward the great volcano's foot with
+// play time (an hour or so, a little different at each gate) and with battles won; four forward camps rise along that way as the
+// front passes them (a palisade ring with a gate toward the road, a watchtower, tents, the peoples' banners and a fire; made as
+// edits like the works, w.ap.fc), each with its garrison. The hosts' armies march down the Long Descent to the front and on, the
+// warhosts come at it from the volcano. The wastes' places are stormed: when every creature of one of their spots has fallen
+// with a soldier of the hosts near, in a basin whose gate has fallen, the place is the hosts' (`w.cl`) and their garrison holds
+// it; so the war camps, watchtowers, forges and pits on the floor, the warholds of the lesser volcanoes, the goblin warrens hall by
+// hall and the Ember Stair chamber by chamber. Underground in such a basin a company of the hosts goes with the player, and now
+// and then a warband of the deep comes at it.
+const WAR_CAMPS=[0.05,0.35,0.65,0.95];
+// the way of the front: from the foot of the Long Descent to the great volcano's foot, a point every 16 (world), cached
+function warFrontPath(P){if(P.fpth)return P.fpth;const p=P.ramp.pts,a=p[p.length-1],G=P.B&&greatOf(P.B.chief),out=[];
+  if(!G){P.fpth=[[a[0],a[1]]];return P.fpth;}const dx=G.X-a[0],dz=G.Z-a[1],L=Math.hypot(dx,dz)||1,end=Math.max(20,L-(G.R*1.3+24));
+  for(let s=0;s<=end;s+=16)out.push([a[0]+dx/L*s,a[1]+dz/L*s]);return P.fpth=out;}
+// the war of the basin a world point lies in, if its gate has fallen (and the gate)
+// the basin a world point lies in (its floor, or the ring's inner wall), or null
+function warBasinAt(X,Z){const o={};wasteAt(X,Z,o);return o.bc&&o.bs<40?wasteBasin(o.bc):null;}
+function warBasinWar(X,Z){let any=false;for(const w of WARS.values())if(w.s>=2)any=true;if(!any)return null;const B=warBasinAt(X,Z),P=B&&wasteGateOf(B);if(!P)return null;
+  const w=WARS.get(P.id);return w&&w.s>=2?{P:P,w:w}:null;}
+// how far the front has come
+function warFront(w){if(w.s<2)return 0;const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
+const warFrontAt=(P,w)=>{const F=warFrontPath(P);return F[Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1)))];};
+// ---- the forward camps: where each stands (the path's point, moved along it to dry ground), and its cells
+function warCampAt(P,k){P.fcs=P.fcs||[];if(P.fcs[k]!==undefined)return P.fcs[k];const F=warFrontPath(P),i0=Math.round(WAR_CAMPS[k]*(F.length-1));let r=null;
+  for(let d=0;d<F.length&&!r;d++)for(const i of [i0+d,i0-d]){if(i<0||i>=F.length)continue;const [X,Z]=F[i],o={};colInfoBase(Math.round(X),Math.round(Z),o);if(o.h>o.sl+1&&!o.river&&!o.lake){r=[Math.round(X),Math.round(Z),i,Math.round(o.h)];break;}}
+  return P.fcs[k]=r;}
+function warCampCells(P,k){const C=warCampAt(P,k);if(!C)return [];const [X,Z,i]=C,F=warFrontPath(P),[bx,bz]=F[Math.max(0,i-1)],gdx=bx-X,gdz=bz-Z,gl=Math.hypot(gdx,gdz)||1,out=[];
+  const top=(x,z)=>{const lx=x-OX,lz=z-OZ;return lx<0||lz<0||lx>=W||lz>=D?-1:ground[lx+W*lz];},put=(x,y,z,id)=>out.push([x,y,z,id]);
+  // the palisade: a ring of logs nine across, stakes atop, a gate toward the road
+  for(let a=0;a<64;a++){const t=a/64*6.2832,x=Math.round(X+Math.cos(t)*9),z=Math.round(Z+Math.sin(t)*9);if((Math.cos(t)*gdx+Math.sin(t)*gdz)/gl>0.93)continue;const y=top(x,z)+1;if(y<1)continue;
+    put(x,y,z,LOG);put(x,y+1,z,LOG);put(x,y+2,z,STAKES);}
+  // the watchtower at the back: four posts, a platform at six with stakes about it
+  const tx=Math.round(X-gdx/gl*5),tz=Math.round(Z-gdz/gl*5),ty=top(tx,tz)+1;if(ty>0){for(const [a,b] of [[-1,-1],[1,-1],[-1,1],[1,1]])for(let y=ty;y<ty+6;y++)put(tx+a,y,tz+b,LOG);
+    for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){put(tx+a,ty+6,tz+b,PLANKS);if(Math.abs(a)===2||Math.abs(b)===2)put(tx+a,ty+7,tz+b,STAKES);}put(tx,ty+7,tz,RBANNER);put(tx,ty+8,tz,RBANNER);}
+  // two tents of white wool, banners of the three peoples, a fire in the middle
+  for(const sd of [-1,1]){const cx=Math.round(X+gdz/gl*4*sd),cz=Math.round(Z-gdx/gl*4*sd),cy=top(cx,cz)+1;if(cy<1)continue;for(let a=-1;a<=1;a++)for(let b=-2;b<=2;b++){put(cx+a,cy,cz+b,a?WOOLW:AIR);if(!a)put(cx,cy+1,cz+b,WOOLW);}}
+  const fy=top(X,Z)+1;if(fy>0){put(X,fy,Z,HEARTH);for(const [a,b,id] of [[2,2,RBANNER],[-2,2,DBANNER],[2,-2,EVBANNER]])for(let y=fy;y<fy+3;y++)put(X+a,y,Z+b,id);}
+  return out;}
+// ---- every second (from warWorksTick, for the war near): the forward camps the front has passed, built where loaded
+function warFrontTick(P,w){if(w.s<2||WJ.length)return;if(!w.ap)w.ap={leaf:0,me:0,cm:0,lad:0,gr:0,fall:0,ban:0,fire:0};const A=w.ap,fr=warFront(w),n=WAR_CAMPS.filter(f=>fr>=f-0.05).length;A.fc=A.fc||0;
+  if(n>A.fc&&!(A.wt&&A.wt.fc>warPlay)){const k=A.fc,C=warCampAt(P,k);if(!C){A.fc++;return;}const x=C[0]-OX,z=C[1]-OZ;if(x<20||z<20||x>=W-20||z>=D-20||!genDone[(x>>4)+(z>>4)*NCX])return;
+    warJob(warCampCells(P,k),300,ok=>{if(ok){A.fc=k+1;warLog(w,'The hosts raised their '+['first','second','third','fourth'][k]+' forward camp on the floor of the wastes.');if(Math.hypot(x-PL.x,z-PL.z)<160)toast('The hosts raise a forward camp');}
+      else{A.wt=A.wt||{};A.wt.fc=warPlay+20;}saveDirty=true;});}
+  if(fr>=1&&!w.vf){w.vf=1;const G=P.B&&greatOf(P.B.chief);warLog(w,'The front has reached the foot of '+(G?G.name.replace(/^The /,'the '):'the great volcano')+'.');}}
+// the camps' garrisons (from warPlaces)
+function warCampSpots(P,X,Z,out){const w=WARS.get(P.id);if(!w||!w.ap||!w.ap.fc)return;const s=wgSite(P);
+  for(let k=0;k<w.ap.fc;k++){const C=warCampAt(P,k);if(!C||Math.hypot(C[0]-X,C[1]-Z)>60)continue;
+    out.push({id:P.id+':fc'+k,x:C[0]+0.5,y:C[3]+1,z:C[1]+0.5,R:5,kind:['r_lines','e_lines','d_post','r_lines'][k],folk:1,s:s});}}
+function warFrontPlaces(X,Z,out){const bw=warBasinWar(X,Z);if(bw)warCampSpots(bw.P,X,Z,out);}
+// ---- the stormed places: cleared of the wastes with the hosts near, in a fallen basin
+const WAR_CL=new Map(); // spot id -> war id, from every war's w.cl
+function warClIndex(){WAR_CL.clear();for(const w of WARS.values())for(const id of w.cl||[])WAR_CL.set(id,w.id);}
+warClIndex();
+// a creature of the wastes fell (from updFoes): was its spot the last of its place?
+function warSpotFell(f){if(!f.spot||FOES[f.kind].folk||WAR_CL.has(f.spot))return;for(const g of foes)if(g!==f&&!g.dead&&g.spot===f.spot)return;
+  if(!foes.some(g=>!g.dead&&FOES[g.kind].folk&&!FOES[g.kind].civ&&Math.hypot(g.x-f.x,g.z-f.z)<24))return;const bw=warBasinWar(f.x+OX,f.z+OZ);if(!bw)return;
+  const w=bw.w;if(!w.cl)w.cl=[];if(w.cl.length>=600)return;w.cl.push(f.spot);WAR_CL.set(f.spot,w.id);w.tk=(w.tk||0)+1;saveDirty=true;
+  const under=f.y<(ground[Math.floor(f.x)+W*Math.floor(f.z)]||0)-6,what=/^w/.test(f.spot)?'a hall of the goblin warrens':/^o/.test(f.spot)?'a place of the orcs':f.spot.includes(':')&&!/^wg/.test(f.spot)?'a chamber of the Ember Stair':'a hold of the wastes';
+  if(w.tk%5===1)warLog(w,'The hosts have taken '+what+(under?' beneath the basin':' on the floor of the wastes')+' ('+w.tk+' in all).');if(Math.hypot(f.x-PL.x,f.z-PL.z)<60)toast('The hosts have taken '+what);}
+// a place of the wastes that the hosts hold: their garrison stands there instead (from foeSpawnTick)
+function warHeld(s){if(s.folk||!WAR_CL.has(s.id))return s;const w=WARS.get(WAR_CL.get(s.id)),P=w&&wasteGateAt(w.X,w.Z,10);if(!P)return s;
+  const under=s.y<hAt(Math.round(s.x),Math.round(s.z))-6;return {id:s.id+'h',x:s.x,y:s.y,z:s.z,R:Math.max(2,Math.min(5,s.R||4)),kind:under?'d_sap':'r_lines',folk:1,s:wgSite(P)};}
+// ---- underground in a fallen basin: a company of the hosts with the player, and the deep's warbands
+let warDeepT=60;
+function warDeepTick(){const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const under=PL.y<ground[bx+W*bz]-8,bw=under&&warBasinWar(PL.x+OX,PL.z+OZ);
+  warFollow(2,bw?6:0,['d_host','d_sap','d_host','r_host'],'A company of the hosts goes down with you');
+  if(!bw||(warDeepT-=1)>0)return;warDeepT=150+Math.random()*90;
+  for(let k=0;k<10;k++){const a=Math.random()*6.283,d=26+Math.random()*10,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;
+    const y=foeStand(x,PL.y+4,z,2);if(y<0||Math.abs(y-PL.y)>8)continue;const g=spawnGroup('band',5,x,y,z,3,{lead:Math.random()<0.4?'ochief':null});for(const f of g){f.war=bw.w.id;f.foe=null;}
+    if(g.length){toast('A warband of the deep comes at the hosts');foeCall(g[0],'alert');}break;}}
+// followers: a squad (tag 1, war-sworn.js) or a company (tag 2), n of them, each to a place behind the player, fighting what comes
+// near; gone when the player leaves them; the fallen replaced one every five seconds
+const warFolT={};
+function warFollow(tag,n,tables,said){const mine=foes.filter(f=>f.follow===tag&&!f.dead);
+  if(!n||photo){for(const f of mine)if(Math.hypot(f.x-PL.x,f.z-PL.z)>40||!n)removeFoe(f);return;}
+  const off=tag===2?0.35:0;mine.forEach((f,i)=>{const a=PL.yaw+off+((i%5)-2)*0.5,r=3+Math.floor(i/5)*2.2,tx=PL.x+Math.sin(a)*r,tz=PL.z+Math.cos(a)*r,d=Math.hypot(f.x-tx,f.z-tz);
+    if(Math.hypot(f.x-PL.x,f.z-PL.z)>60){const y=foeStand(tx,PL.y+2,tz,FOES[f.kind].tall||2);if(y>0){f.x=tx;f.z=tz;f.y=f.gy=y;}}
+    f.hx=tx;f.hz=tz;if(!f.foe&&d>2.5&&f.st!=='chase'){f.st='return';f.t=8;f.way=null;f.pace=d>10?FOES[f.kind].run:FOES[f.kind].walk*1.3;}});
+  if(mine.length>=n||(warFolT[tag]=(warFolT[tag]||0)-1)>0)return;warFolT[tag]=5;
+  for(let k=0;k<8;k++){const a=PL.yaw+(Math.random()-0.5)*1.4,d=10+Math.random()*10,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;
+    const y=foeStand(x,PL.y+3,z,2);if(y<0)continue;const g=spawnGroup(tables[mine.length%tables.length],1,x,y,z,1,{});
+    for(const f of g){f.follow=tag;f.leash=0;f.hx=f.x;f.hz=f.z;}if(g.length){if(!mine.length)toast(said);break;}}}
+// ---- the armies' ways once the gate has fallen: the hosts' down the Long Descent to the front and on; the warhosts' from the
+// volcano at the front
+function warFrontWays(P,w){const F=warFrontPath(P),i=Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1))),W2=warWays(P);
+  return {inA:W2.inB.concat(F.slice(0,Math.min(F.length,i+4)).map(q=>[q[0]+0.5,q[1]+0.5])),out:F.slice(Math.max(0,i-2)).reverse().map(q=>[q[0]+0.5,q[1]+0.5])};}
+// the panel and the map
+function warFrontPanel(P,w){if(w.s<2)return '';return '<div>The front '+Math.round(warFront(w)*100)+'%, forward camps '+(w.ap&&w.ap.fc||0)+', places taken '+(w.tk||0)+'</div>';}
+function warFrontMap(g,sx,sz,P,w){if(w.s<2||!w.ap||!w.ap.fc)return;g.fillStyle='#2a4c9c';for(let k=0;k<w.ap.fc;k++){const C=warCampAt(P,k);if(C)g.fillRect(sx(C[0])-4,sz(C[1])-4,8,8);}}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};

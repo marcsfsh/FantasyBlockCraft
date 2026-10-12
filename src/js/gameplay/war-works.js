@@ -229,7 +229,8 @@ function warWorksTick(P,w){if(!P||!w||WJ.length)return;wgSite(P);w.ap=w.ap||{lea
   if(w.s>=2&&A.fall&&!A.ban&&due('ban')&&warLoaded(P,-12,12,-36,36)){const out=[],cs=-P.cs;for(let y=g+30;y<=g+46;y++){warSet(out,P,10,cs*25,y,RBANNER);warSet(out,P,10,cs*31,y,DBANNER);}for(let y=g+20;y<=g+30;y++)warSet(out,P,-10,cs*28,y,EVBANNER);
     warJob(out,400,ok=>{if(done('ban',ok))A.ban=1;});return;}
   const hc=w.hr?w.hr.dead.filter(d=>d.side==='al').length:0;if(hc>(A.hc||0)&&due('hc')&&warLoaded(P,P.uL+24,P.uL+30,-92,92)){const n0=A.hc||0;warJob(warCairnCells(P,w,n0,hc),200,ok=>{if(done('hc',ok))A.hc=hc;});return;}
-  const lit=w.s>=2&&warPlay-(w.fallT||0)<1200;if(w.s>=2&&A.fire!==(lit?1:2)&&due('fire')&&warLoaded(P,P.uC0+26,P.uC0+44,-18,18))warJob(warFireCells(P,lit),100,ok=>{if(done('fire',ok))A.fire=lit?1:2;});}
+  const lit=w.s>=2&&warPlay-(w.fallT||0)<1200;if(w.s>=2&&A.fire!==(lit?1:2)&&due('fire')&&warLoaded(P,P.uC0+26,P.uC0+44,-18,18))warJob(warFireCells(P,lit),100,ok=>{if(done('fire',ok))A.fire=lit?1:2;});
+  warFrontTick(P,w);} // the forward camps beyond the fallen gate (W5)
 // the fallen of the war (counted once each, from updFoes): the hosts' fill the graves; they lie a while (WAR_LIE seconds; past
 // WAR_DEAD of them, the longest fallen are cleared first)
 const WAR_LIE=150,WAR_DEAD=50;

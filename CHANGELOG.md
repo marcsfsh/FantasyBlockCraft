@@ -5,6 +5,20 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.42.0 (2026-10-12): W5, into the basin and beneath it
+
+Saves from 0.41.0 do not carry over (save key v32): the wars keep their front, their forward camps and the places they have taken.
+
+### Game
+- **The war goes on past the fallen gate.** The front moves out from the foot of the Long Descent across the basin's floor toward the great volcano over about an hour of play, faster with battles won and set back a little by warhosts that win. The hosts' armies march down the Long Descent to the front and on; the warhosts come at it from the volcano.
+- **Forward camps:** four rise along the way as the front passes, each a ring palisade of logs with a gate toward the road, a watchtower with the realm's banner, two tents, the banners of the three peoples about a fire, and its garrison. They are built into the world and saved like the works at the gate, and marked on the world map.
+- **The wastes' places are stormed:** in a basin whose gate has fallen, a war camp, watchtower, forge or pit of the orcs, a warhold of a lesser volcano, a hall of the goblin warrens or a chamber of the Ember Stair whose creatures all fall with soldiers of the hosts near is taken. The hosts' garrison holds it from then on, and the chronicle counts them.
+- **Beneath the basin:** underground in a fallen basin a company of the hosts goes down with you, and now and then a warband of the deep comes at it.
+- **The war panel** shows the front, the forward camps and the places taken; the war's stage tells how far the hosts have pushed.
+
+### Tooling
+- New test case `64-front`. `tools/shot.mjs --siege=front` stages a fallen gate with its first forward camp built.
+
 ## 0.41.0 (2026-10-12): W4, sworn to the alliance
 
 Saves from 0.40.0 do not carry over (save key v31): your service is saved.

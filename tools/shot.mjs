@@ -12,7 +12,7 @@
 //   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al), the wastes' (orc) or both (W1),
 //        marched on that many seconds before the shot
 //   node tools/shot.mjs --view=... --siege=0.55,0.6,0.55   the works of the war at the gate about the camera (W2): the ram's, the mine's and the
-//        walls' efforts (0 to 1), or --siege=fall for the gate fallen
+//        walls' efforts (0 to 1), --siege=fall for the gate fallen, or --siege=front for its first forward camp on the basin's floor (W5)
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
@@ -63,7 +63,10 @@ const HOOK=`window.__fbc={
   // the works of the war at the gate about the camera (W2): its efforts set (the ram, the mine, the walls, each 0 to 1) or its fall,
   // and the works made at once, the siege tower in place
   siege(spec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;const w=warFound(P);
-    if(spec==='fall'){w.b={ram:1,mine:1,walls:1,sally:1};w.f=warPlay;warFall(w,false,P);}else{const [r,m,l]=spec.split(',').map(Number);w.b={ram:r||0,mine:m||0,walls:l||0,sally:0};w.f=warPlay;}
+    if(spec==='fall'||spec==='front'){w.b={ram:1,mine:1,walls:1,sally:1};w.f=warPlay;warFall(w,false,P);}
+    if(spec==='front'){warPlay+=4000;const C=warCampAt(P,0);regenerateAll(C[0]+16,C[1]+16);const real=performance.now;performance.now=()=>0;try{while(genQ.length||genJob)processGenQ();}finally{performance.now=real;}
+      for(let i=0;i<6;i++){warFrontTick(P,w);let k=0;while(WJ.length&&k++<5000)warJobsFrame();}PL.x=C[0]-OX+16.5;PL.z=C[1]-OZ+16.5;PL.y=C[3]+9;PL.yaw=Math.atan2(16,16);PL.pitch=-0.35;
+      const r2=performance.now;performance.now=()=>0;try{meshBand();for(let k=0;k<6;k++)flush();}finally{performance.now=r2;}return w.ap.fc;}else{const [r,m,l]=spec.split(',').map(Number);w.b={ram:r||0,mine:m||0,walls:l||0,sally:0};w.f=warPlay;}
     for(let i=0;i<24;i++){warWorksTick(P,w);let k=0;while(WJ.length&&k++<5000)warJobsFrame();}for(const T of warTowers)T.k=1;updateEntities(0.01);
     const real=performance.now;performance.now=()=>0;try{for(let k=0;k<6;k++)flush();}finally{performance.now=real;}return edits.size;},
   // animals in two rows ahead of the camera, side on or three-quarter, still; then a few frames of their update
@@ -84,7 +87,7 @@ fs.mkdirSync(out,{recursive:true});const html=path.join(out,'shot-page.html');fs
 
 const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
 const p=await b.newPage({viewport:{width:Number(args.w||960),height:Number(args.h||540)}});
-const errors=[];p.on('pageerror',e=>errors.push('page error: '+e.message));
+const errors=[];p.on('pageerror',e=>errors.push('page error: '+e.message+(process.env.FBC_STACK?' '+e.stack:'')));
 p.on('console',m=>{const t=m.text();if(m.type()==='error'||/shader|WebGLProgram|GL_INVALID/i.test(t))errors.push(m.type()+': '+t.slice(0,400));});
 if(args.area!==undefined)await p.addInitScript(a=>{try{localStorage.setItem('blockcraft-settings-v1',JSON.stringify({area:a}));}catch(e){}},Number(args.area)); // the loaded area (D-057), read at start
 await p.goto('file://'+html);

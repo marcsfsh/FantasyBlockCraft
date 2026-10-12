@@ -16,7 +16,7 @@ const WAR_SQUAD=[0,0,4,10,10,12,14],WAR_LORDS=new Set(['rnoble','elord','dlord',
 let SW=saved&&saved.sw&&typeof saved.sw==='object'?saved.sw:null;if(!SW)SW={on:0,r:0,m:0,p:0,k:0,b:0,sup:-1e9,t:0};
 const warSwornSave=()=>({sw:SW}),warSworn=()=>!!SW.on;
 // is the player at war (near a gate's works or in the volcanic lands)?
-function warZone(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);if(wasteGateAt(X,Z,300))return true;const c=landSite(Math.floor(X/LS),Math.floor(Z/LS));return LANDS[cellLand(c)].k==='volcanic';}
+function warZone(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);return !!wasteGateAt(X,Z,300)||!!warBasinAt(X,Z);}
 // sworn: the oath, the first rank and its gifts
 function warSwear(how){if(SW.on)return;SW.on=1;SW.r=0;SW.t=Math.round(warPlay);saveDirty=true;
   showText('The Oath of the Three Banners',(how==='deeds'?'The captains of the hosts have watched you fight beside them, and they call you to the Pavilion of the Three Banners. ':'You kneel in the Pavilion of the Three Banners before the lords of men, elves and dwarves. ')+
@@ -42,17 +42,8 @@ function warOathAct(){const f=foeHit(4.6);if(!f||f.dead||!FOES[f.kind].folk||!(W
     (WAR_SQUAD[r]?'Your '+(WAR_SQUAD[r]>4?'company':'squad')+' of '+WAR_SQUAD[r]+' follows you in the wastes and at the gates.':'From Sergeant a squad of the hosts will follow you.'));return true;}
 // ---- the squad: as many of the hosts as the rank gives, following the player in the wastes and at the gates, each to a place
 // about them, fighting what comes near; the fallen replaced one at a time
-const WAR_SQ_T=['r_host','d_host','e_host','w_host','h_host'];let warSqT=0;
-function warSquadTick(){const n=SW.on?WAR_SQUAD[SW.r]:0,mine=foes.filter(f=>f.follow&&!f.dead);
-  if(!n||!warZone()||photo){for(const f of mine)if(Math.hypot(f.x-PL.x,f.z-PL.z)>40)removeFoe(f);return;}
-  mine.forEach((f,i)=>{const a=PL.yaw+((i%5)-2)*0.5,r=3+Math.floor(i/5)*2.2,tx=PL.x+Math.sin(a)*r,tz=PL.z+Math.cos(a)*r,d=Math.hypot(f.x-tx,f.z-tz);
-    if(Math.hypot(f.x-PL.x,f.z-PL.z)>60){const y=foeStand(tx,PL.y+2,tz,FOES[f.kind].tall||2);if(y>0){f.x=tx;f.z=tz;f.y=f.gy=y;}}
-    f.hx=tx;f.hz=tz;if(!f.foe&&d>2.5&&f.st!=='chase'){f.st='return';f.t=8;f.pace=d>10?FOES[f.kind].run:FOES[f.kind].walk*1.3;}});
-  if(mine.length>=n||(warSqT-=1)>0)return;warSqT=5;
-  // a new one comes up from behind, out of the way
-  for(let k=0;k<8;k++){const a=PL.yaw+(Math.random()-0.5)*1.4,d=14+Math.random()*8,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;
-    const y=foeStand(x,PL.y+3,z,2);if(y<0)continue;const g=spawnGroup(WAR_SQ_T[(SW.k+mine.length)%WAR_SQ_T.length],1,x,y,z,1,{});
-    for(const f of g){f.follow=1;f.leash=0;f.hx=f.x;f.hz=f.z;}if(g.length){if(!mine.length)toast('Your '+(n>4?'company':'squad')+' of the hosts falls in behind you');break;}}}
+const WAR_SQ_T=['r_host','d_host','e_host','w_host','h_host'];
+function warSquadTick(){const n=SW.on&&warZone()?WAR_SQUAD[SW.r]:0;warFollow(1,n,WAR_SQ_T,'Your '+(n>4?'company':'squad')+' of the hosts falls in behind you');}
 // ---- the stores: at the Leaguer's wagons, once in ten minutes of play
 function warStores(P){if(!SW.on||warPlay-SW.sup<600||!SURV())return;const s=wgSite(P),L=s.lay.parts.filter(p=>p.k==='lgwagon');if(!L.length)return;
   let u=0,v=0;for(const p of L){u+=(p.u0+p.u1)/2;v+=(p.v0+p.v1)/2;}const [X,Z]=siteXZ(s,u/L.length,v/L.length);if(Math.hypot(X-(PL.x+OX),Z-(PL.z+OZ))>18)return;
@@ -61,7 +52,7 @@ function warStores(P){if(!SW.on||warPlay-SW.sup<600||!SURV())return;const s=wgSi
 // ---- the hospital: fallen while sworn at war, the player is carried there (from die)
 let warWake=null;
 function warHospitalWake(){if(!SW.on||!SURV())return false;const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);let P=wasteGateAt(X,Z,400);
-  if(!P){const c=landSite(Math.floor(X/LS),Math.floor(Z/LS));if(LANDS[cellLand(c)].k!=='volcanic')return false;const B=wasteBasin(c);P=B&&wasteGateOf(B);}
+  if(!P){const B=warBasinAt(X,Z);P=B&&wasteGateOf(B);}
   if(!P)return false;const [hx,hz]=warHosp(P);warWake=[hx+0.5,hz+0.5];return true;}
 function warWakeUp(){const [X,Z]=warWake;warWake=null;if(Math.abs(X-(PL.x+OX))>W/2-40||Math.abs(Z-(PL.z+OZ))>D/2-40)regenerateAll(X,Z);
   const x=X-OX,z=Z-OZ;let y=H-2;while(y>1&&!SOLID[get(Math.floor(x),y,Math.floor(z))])y--;PL.x=x;PL.z=z;PL.y=y+1;PL.vx=PL.vy=PL.vz=0;while(collide()&&PL.y<H-2)PL.y++;
