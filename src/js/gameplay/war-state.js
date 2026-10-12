@@ -17,7 +17,7 @@ const warSave=()=>({wr:[...WARS.values()],wpc:Math.round(warPlay)});
 // how far an effort has come (0 to 1): its pace at this gate since the war was found, and what the battles have added or taken
 function warEff(w,k){const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));return Math.max(0,Math.min(1,(w.b[k]||0)+(warPlay-w.f)/pace));}
 const warAll=w=>WAR_EFF.every(e=>warEff(w,e[0])>=1);
-function warStage(w){const fr=w.s>=2?warFront(w):0;return w.s>=2?(fr<0.02?'The gate has fallen':fr<1?'The hosts push into the basin':'The hosts stand at the foot of the burning mountain'):warAll(w)?'The gate stands ready to fall':'The siege';}
+function warStage(w){const fr=w.s>=2?warFront(w):0;if(w.el&&w.el.fate)return 'The war is won';return w.s>=2?(fr<0.02?'The gate has fallen':fr<1?'The hosts push into the basin':'The hosts stand at the foot of the burning mountain'):warAll(w)?'The gate stands ready to fall':'The siege';}
 function warLog(w,s){w.log.push([Math.round(warPlay),s]);if(w.log.length>80)w.log.splice(1,1);saveDirty=true;}
 // the player comes within 200 of a gate's works: its war is found, and from then on it is kept
 function warFound(P){let w=WARS.get(P.id);if(w)return w;
@@ -37,6 +37,7 @@ function warStateTick(){
   if(near)warWorksTick(P,near);else{const bw=warBasinWar(X,Z);if(bw){wgSite(bw.P);warFrontTick(bw.P,bw.w);}} // (out on the basin's floor: its forward camps, W5)
   warRaidsTick(); // the raids on the bordering realms (W6)
   emberWarTick(); // the Emberlords in the war (W7b)
+  emberAfterTick(); // after an Emberlord's fall (W7c)
   warPanel(near);}
 // how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
 function warOutcome(A){

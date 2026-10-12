@@ -10,7 +10,7 @@ function wearHeld(n){
   drawBar(true);
 }
 function hurt(n,cause){
-  if(!SURV()||dead||n<=0)return;
+  if(!SURV()||dead||n<=0)return;if(equip.body&&ITEMS[equip.body.id].fireproof&&/^(lava|fire|breath|erupt|spirit)$/.test(cause))return; // the cloak of the Ember Wing (W7c)
   if(hurtCD>0&&cause!=='fell'&&cause!=='blew up'&&cause!=='void')return;
   hp=Math.max(0,hp-n);hurtCD=0.5;exh+=0.1;shake=Math.max(shake,0.35);buzz(40);padRumble(0.7,0.5,220);
   tone(220,120,0.18,0.25);const f=$('hurt');f.style.opacity=0.55;setTimeout(()=>{f.style.opacity=0;},120);
@@ -86,7 +86,7 @@ function lampLevel(){
   const adj=LAMP_ADJ[settings.cave||0]||0;
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
   const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
-  const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];
+  const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];if(h===378)return[0.95,14+adj]; // the Emberheart glows in the hand (W7c)
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
@@ -265,6 +265,7 @@ function act(btn){
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}
+  if(btn===2&&(held===379||held===384)&&emberRelicUse(held))return; // a fallen Emberlord's horn or crown (W7c)
   if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);

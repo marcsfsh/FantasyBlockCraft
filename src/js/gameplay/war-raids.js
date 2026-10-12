@@ -52,7 +52,8 @@ function warRaidsTick(){let busy=false;for(const w of WARS.values()){const R=w.r
     for(const r of R.L)if(!r.out)raidStep(w,B,r);
     if(warPlay>=R.nx)raidBegin(w,B,R);raidApply(w,B,R);}
   raidBorderTick();}
-function raidBegin(w,B,R){const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=!(w.s>=2)&&R.n%4===3;R.n++;R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
+function raidBegin(w,B,R){if(w.el&&w.el.fate){R.nx=Math.round(warPlay+1e9);return null;} // (its lord fallen, the raids end: W7c)
+  const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=!(w.s>=2)&&R.n%4===3;R.n++;R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
   const L=B.S.filter(e=>siege?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0);if(!L.length)return null;const s=L[Math.floor(q*q*L.length)].s;
   const r={i:R.n-1,k:siege?'siege':'raid',s:s.id,X:Math.round(s.X),Z:Math.round(s.Z),t0:Math.round(warPlay),out:null,b:0,hb:[]};R.L.push(r);const j=R.L.length>16?R.L.findIndex(q=>q.out):-1;if(j>=0)R.L.splice(j,1);
   if(Math.hypot(s.X-(PL.x+OX),s.Z-(PL.z+OZ))<900)toast(siege?'A warhost marches out of the wastes against '+s.name:'Orcs ride out of the wastes to raid '+s.name);saveDirty=true;return r;}

@@ -234,7 +234,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v35',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v36',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -247,7 +247,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=35,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=36,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -623,7 +623,10 @@ item(247,'Platinum Pickaxe','pick',[226,240,248],{tool:'pick',tier:5,speed:14,du
 ITEMS[251].tool='hoe';ITEMS[251].dur=150;
 // Swords and armour (D-052), for the foes of the Volcanic Wastes: a sword on every step of the ladder, coats for the body slot
 TOOL_LADDER.forEach((m,i)=>item(370+i,m[0]+' Sword','sword',m[1],{tool:'sword',tier:i+1,dur:Math.round(m[3]*0.8)}));
-item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(378,'Emberheart','heart',[255,110,40]);item(386,'Troll Hide','hide',[96,90,86]);
+item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(378,'Emberheart','heart',[255,110,40]);
+// the greater relics of a fallen Emberlord (W7c, D-076): its horn or its crown (sounded or raised, the wastes' creatures near flee),
+// and a cloak of its wing (armour that no fire burns through)
+item(379,'Emberlord\'s Horn','horn',[96,74,60]);item(384,'Emberlord\'s Crown','crown',[72,58,52]);item(385,'Cloak of the Ember Wing','cloak',[74,22,18],{equip:'body',armor:0.5,dur:2000,one:true,fireproof:true});item(386,'Troll Hide','hide',[96,90,86]);
 item(380,'Hide Jerkin','mail',[150,108,70],{equip:'body',armor:0.15,dur:120,one:true});item(381,'Iron Mail','mail',[200,200,196],{equip:'body',armor:0.3,dur:260,one:true});
 item(382,'Steel Plate','mail',[124,134,152],{equip:'body',armor:0.45,dur:420,one:true});item(383,'Moonsilver Mail','mail',[170,176,206],{equip:'body',armor:0.55,dur:800,one:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
@@ -714,13 +717,16 @@ function itemIcon(id){
     g.fillStyle='#4a3a2a';for(let k=-2;k<=2;k++)g.fillRect(4+k,10+k,2,2);if(id===377){g.fillStyle='rgba(255,220,120,0.9)';for(let k=2;k<10;k+=2)g.fillRect(6+k,9-k,1,1);}}
   else if(it.kind==='mail'){for(let y=2;y<15;y++)for(let x=2;x<14;x++){const sl=y<6&&(x<4||x>11),neck=y<4&&x>5&&x<10;if(sl&&y<3||neck)continue;if(y>6&&(x<4||x>11))continue;px(x,y,(x===2||x===13||y===2?18:y===14?-30:0)+((x+y)%2&&id!==380?-14:0));}}
   else if(it.kind==='heart'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const a=Math.hypot(x-5.5,y-5.5)<3.2||Math.hypot(x-10.5,y-5.5)<3.2||(y>=6&&Math.abs(x-8)<(14-y)*0.75);if(a)px(x,y,(y<5?40:0)+(r()-.5)*30);}g.fillStyle='rgba(255,240,180,0.9)';g.fillRect(5,4,2,1);}
+  else if(it.kind==='horn'){for(let k=0;k<12;k++){const x=3+k,y=12-Math.round(Math.sin(k/11*2.6)*7),w=k<3?3:k<8?2:1;for(let d=0;d<w;d++)px(x,y+d,(d?-24:20)+(k>9?-20:0));}g.fillStyle='rgba(255,150,50,0.9)';g.fillRect(4,12,2,1);g.fillRect(9,7,1,1);}
+  else if(it.kind==='crown'){for(let y=7;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===7?24:y===12?-30:0)+((x+y)%3?0:-12));for(const x of [2,5,8,11,13])for(let y=2+(x%2);y<7;y++)px(Math.min(13,x),y,(y<4?30:0));g.fillStyle='rgba(255,140,40,0.95)';for(const x of [4,7,10])g.fillRect(x,9,2,2);}
+  else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);g.fillStyle='#2e1a16';g.fillRect(6,2,4,1);}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378]); // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385]); // relics for the discovery log (M7)
 // Texture atlas, drawn pixel by pixel
 const TS=16,AC=8,AR=64,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
@@ -8070,6 +8076,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
     const m=editsByChunk.get(ckey(WCX,WCZ));
     if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(v>LAVA_LV&&v<LAVA_LV+5){world[i]=LAVA;lvl[i]=v-LAVA_LV;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
+    deadMount(lcx,lcz,WCX,WCZ); // a fallen Emberlord's mountain, its lava cooled: a saved change of the world, after the edits (W7c)
     for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
       const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
       for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}
@@ -9525,7 +9532,7 @@ function wearHeld(n){
   drawBar(true);
 }
 function hurt(n,cause){
-  if(!SURV()||dead||n<=0)return;
+  if(!SURV()||dead||n<=0)return;if(equip.body&&ITEMS[equip.body.id].fireproof&&/^(lava|fire|breath|erupt|spirit)$/.test(cause))return; // the cloak of the Ember Wing (W7c)
   if(hurtCD>0&&cause!=='fell'&&cause!=='blew up'&&cause!=='void')return;
   hp=Math.max(0,hp-n);hurtCD=0.5;exh+=0.1;shake=Math.max(shake,0.35);buzz(40);padRumble(0.7,0.5,220);
   tone(220,120,0.18,0.25);const f=$('hurt');f.style.opacity=0.55;setTimeout(()=>{f.style.opacity=0;},120);
@@ -9601,7 +9608,7 @@ function lampLevel(){
   const adj=LAMP_ADJ[settings.cave||0]||0;
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
   const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
-  const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];
+  const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];if(h===378)return[0.95,14+adj]; // the Emberheart glows in the hand (W7c)
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
@@ -9780,6 +9787,7 @@ function act(btn){
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}
+  if(btn===2&&(held===379||held===384)&&emberRelicUse(held))return; // a fallen Emberlord's horn or crown (W7c)
   if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}
   if(btn===2&&FOOD[held]&&SURV()){eat();return;}
   if(btn===2){const th=raycast(eyePos(),camDir(),6);
@@ -11845,7 +11853,7 @@ function foeSpawnTick(){
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
   const wn=warNear(),live=foes.filter(f=>!f.dead).length; // by a gate of the wastes there are more of both (D-067); (the war's fallen, lying, do not count, W2)
-  for(const s0 of foePlaces()){const s=warHeld(s0),folk=!!s.folk; /* (a place the hosts have stormed is theirs, W5) */if(foeSpots.has(s.id)||(!folk&&live>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+  for(const s0 of foePlaces()){const s=warHeld(s0),folk=!!s.folk; /* (a place the hosts have stormed is theirs, W5) */if(foeSpots.has(s.id)||(!folk&&live>=(wn?42:28)&&s.kind!=='lord'))continue;if(!folk&&s.kind!=='lord'&&fallenLords.size&&hsh(Math.round(s.x),9997,Math.round(s.z))>0.25&&deadBasinAt(s.x,s.z))continue; /* (a fallen lord's servants scatter, W7c) */const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     if(folk&&folkCount()>=FOLK_CAP+(wn?14:0))continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=emberSpawn(s.F,x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
@@ -12529,7 +12537,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
+  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
@@ -12585,7 +12593,7 @@ const warSave=()=>({wr:[...WARS.values()],wpc:Math.round(warPlay)});
 // how far an effort has come (0 to 1): its pace at this gate since the war was found, and what the battles have added or taken
 function warEff(w,k){const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));return Math.max(0,Math.min(1,(w.b[k]||0)+(warPlay-w.f)/pace));}
 const warAll=w=>WAR_EFF.every(e=>warEff(w,e[0])>=1);
-function warStage(w){const fr=w.s>=2?warFront(w):0;return w.s>=2?(fr<0.02?'The gate has fallen':fr<1?'The hosts push into the basin':'The hosts stand at the foot of the burning mountain'):warAll(w)?'The gate stands ready to fall':'The siege';}
+function warStage(w){const fr=w.s>=2?warFront(w):0;if(w.el&&w.el.fate)return 'The war is won';return w.s>=2?(fr<0.02?'The gate has fallen':fr<1?'The hosts push into the basin':'The hosts stand at the foot of the burning mountain'):warAll(w)?'The gate stands ready to fall':'The siege';}
 function warLog(w,s){w.log.push([Math.round(warPlay),s]);if(w.log.length>80)w.log.splice(1,1);saveDirty=true;}
 // the player comes within 200 of a gate's works: its war is found, and from then on it is kept
 function warFound(P){let w=WARS.get(P.id);if(w)return w;
@@ -12605,6 +12613,7 @@ function warStateTick(){
   if(near)warWorksTick(P,near);else{const bw=warBasinWar(X,Z);if(bw){wgSite(bw.P);warFrontTick(bw.P,bw.w);}} // (out on the basin's floor: its forward camps, W5)
   warRaidsTick(); // the raids on the bordering realms (W6)
   emberWarTick(); // the Emberlords in the war (W7b)
+  emberAfterTick(); // after an Emberlord's fall (W7c)
   warPanel(near);}
 // how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
 function warOutcome(A){
@@ -13280,7 +13289,8 @@ function warRaidsTick(){let busy=false;for(const w of WARS.values()){const R=w.r
     for(const r of R.L)if(!r.out)raidStep(w,B,r);
     if(warPlay>=R.nx)raidBegin(w,B,R);raidApply(w,B,R);}
   raidBorderTick();}
-function raidBegin(w,B,R){const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=!(w.s>=2)&&R.n%4===3;R.n++;R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
+function raidBegin(w,B,R){if(w.el&&w.el.fate){R.nx=Math.round(warPlay+1e9);return null;} // (its lord fallen, the raids end: W7c)
+  const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=!(w.s>=2)&&R.n%4===3;R.n++;R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
   const L=B.S.filter(e=>siege?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0);if(!L.length)return null;const s=L[Math.floor(q*q*L.length)].s;
   const r={i:R.n-1,k:siege?'siege':'raid',s:s.id,X:Math.round(s.X),Z:Math.round(s.Z),t0:Math.round(warPlay),out:null,b:0,hb:[]};R.L.push(r);const j=R.L.length>16?R.L.findIndex(q=>q.out):-1;if(j>=0)R.L.splice(j,1);
   if(Math.hypot(s.X-(PL.x+OX),s.Z-(PL.z+OZ))<900)toast(siege?'A warhost marches out of the wastes against '+s.name:'Orcs ride out of the wastes to raid '+s.name);saveDirty=true;return r;}
@@ -13535,11 +13545,11 @@ const EMBER_FATE={hosts:L=>'In the hosts\' final assault '+L.n+' was slain befor
 // a fate befalls the lord: written, told, the lord gone from its throne
 function emberFate(w,R,fate,f){const E=w?elOf(w):null;if(E&&E.fate)return;if(E){E.fate=fate;E.ft=Math.round(warPlay);}
   fallenLords.add(R.F.id);const k=emberKnown.get(R.F.id)||[null,R.L.n];k[2]=fate;emberKnown.set(R.F.id,k);saveDirty=true;
-  if(w)warLog(w,EMBER_FATE[fate](R.L));const near=Math.hypot(R.F.GX-(PL.x+OX),R.F.GZ-(PL.z+OZ))<700||w&&Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<500;
+  if(w)warLog(w,EMBER_FATE[fate](R.L));emberAfterFate(R,fate,!!(f&&f.byP)&&fate==='alone'||!!(f&&f.byP&&fate==='hosts'));const near=Math.hypot(R.F.GX-(PL.x+OX),R.F.GZ-(PL.z+OZ))<700||w&&Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<500;
   if(near){showName(R.L.n+(fate==='bound'?' is bound':fate==='cast'?' is cast down':fate==='quenched'?': its fire is out':' has fallen'));toast(EMBER_FATE[fate](R.L));}
   const g=f||foes.find(q=>isLord(q)&&!q.dead&&!q.show&&q.L&&q.L.F===R.F);if(g&&!g.dead){g.fate=fate;g.hp=0;g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;if(g.lordOf)lordFalls(g);}}
 // slain (from emberFalls): by the player with none of the hosts near, alone; else in the hosts' assault; or cast down
-function emberFateOnDeath(f){if(f.show||!f.L||f.fate)return;const w=warOfFort(f.L.F),R=w?warLord(w):{F:f.L.F,L:f.L};
+function emberFateOnDeath(f){if(f.show||!f.L||f.fate)return;const w=warOfFort(f.L.F),R=w?warLord(w):{F:f.L.F,L:f.L,G:f.L.F.v};
   const hosts=foes.filter(g=>!g.dead&&FOES[g.kind].folk&&!FOES[g.kind].civ&&Math.hypot(g.x-f.x,g.z-f.z)<40).length;
   emberFate(w,R,f.cast?'cast':f.byP&&hosts<3?'alone':'hosts',f);}
 // ---- the mountain's vents, broken by the dwarves once the front stands at its foot
@@ -13615,6 +13625,76 @@ function emberWarTick(){const X=PL.x+OX,Z=PL.z+OZ;let near=null,nd=1e9,inB=false
 function emberAsh(dt){for(const w of WARS.values()){const E=w.el;if(!E||!(E.ash>0))continue;E.ash-=dt;for(let k=0;k<dt*30;k++)spawnP(PL.x+(Math.random()-.5)*30,PL.y+8+Math.random()*6,PL.z+(Math.random()-.5)*30,0.3,-1.2-Math.random(),0.1,[0.42,0.4,0.4],6,0.05);}}
 // the panel: its lord, the vents, its fate
 function emberPanel(w){const R=warLord(w);if(!R)return '';const E=elOf(w);return '<div>'+R.L.n+(E.fate?': '+{hosts:'slain',alone:'slain by you',bound:'bound',cast:'cast down',quenched:'its fire put out'}[E.fate]:E.vents?', vents broken '+E.vents+' of 5':', on its throne')+'</div>';}
+// ---- After an Emberlord's fall (W7c, D-076; Q186, Q187). Its mountain dies: every open lava cell of the great volcano and its
+// flows, from under its foot to over its rim, cools (sources to obsidian, the rest to lava crust) as a change of the world kept by
+// the fallen lords in the save, made in each chunk as it is generated after the player's edits (`deadMount`), and at once in the
+// loaded world by reloading it. The sky over its basin clears (`emberClearK`, read by the land's weather), its servants scatter
+// (one place of the wastes in four keeps its creatures, and the war's warhosts, raids and engines stop), and the land slowly heals
+// where the player goes (grass and flowers on the ash, more as time passes). It leaves its relics (its horn or its crown, a cloak of
+// its wing, its blade, its heart; dropped where it falls to the player, else kept by the lords of the hosts and given in any
+// Leaguer), its name and story (the journal), a monument on its crater's rim raised by the three peoples, and now and then deep
+// under its basin something stirs in the lava sea. In its war's Leaguer a victory feast is held, the three banners are raised over
+// the Ashen Gate, and the heralds sing of it.
+const deadKey=v=>'f'+(v.key||v.i+','+v.j),deadVolc=v=>!!v&&!!v.great&&fallenLords.has(deadKey(v));
+// in a chunk as it is generated, after the edits: on a dead mountain each open lava cell cools (bottom up, so only the top of a
+// pool or a flow; the lava sea far below is untouched)
+function deadMount(lcx,lcz,WCX,WCZ){if(!fallenLords.size)return;const X0=WCX*CS+8,Z0=WCZ*CS+8;
+  for(const v of volcanoesNear(X0,Z0,460)){if(!deadVolc(v))continue;const S=volcShape(v),R=v.R*1.3+12;if(Math.hypot(X0-S.cx,Z0-S.cz)>R+12)continue;
+    const y0=Math.max(1,v.base-30),y1=Math.min(H-2,(v.rimTop||v.base+200)+12);
+    for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){if(Math.hypot(WCX*CS+x-S.cx,WCZ*CS+z-S.cz)>R)continue;const lx=lcx*CS+x,lz=lcz*CS+z;
+      for(let y=y0;y<=y1;y++){const i=I(lx,y,lz);if(world[i]!==LAVA||world[i+WD]===LAVA)continue;world[i]=lvl[i]?LAVACRUST:OBSID;lvl[i]=0;}}}}
+// the basin of a point if its lord has fallen
+function deadBasinAt(X,Z){const B=warBasinAt(Math.floor(X),Math.floor(Z));if(B){const G=greatOf(B.chief);return G&&deadVolc(G)?{B:B,G:G,F:fortOf(G),P:wasteGateOf(B)}:null;}
+  for(const v of volcanoesNear(X,Z,320))if(deadVolc(v)&&Math.hypot(X-v.X,Z-v.Z)<v.R*1.4){const F=fortOf(v),w=F&&warOfFort(F);return {B:null,G:v,F:F,P:w?warLord(w).P:null};} // (on the mountain itself)
+  return null;}
+// ---- the relics: dropped to the player who slays it (FOES drops), else owed and given in any Leaguer
+const EMBER_RELICS=k=>[k==='ember3'?384:379,385,377,378];
+FOES.ember.drops=FOES.ember.drops.concat([[379,1,1,1],[385,1,1,1]]);FOES.ember2.drops=FOES.ember.drops.slice();FOES.ember3.drops=FOES.ember.drops.filter(d=>d[0]!==379).concat([[384,1,1,1]]);
+function emberOwe(R){const k=emberKnown.get(R.F.id);if(k){k[3]=1;saveDirty=true;}}
+let emberRelicT=0;
+function emberRelicUse(id){if(warPlay<emberRelicT){toast('The '+(id===384?'crown':'horn')+' must rest a while');return true;}emberRelicT=warPlay+90;let n=0;
+  for(const f of foes)if(!f.dead&&!FOES[f.kind].folk&&!isLord(f)&&Math.hypot(f.x-PL.x,f.z-PL.z)<36){f.foe=null;f.st='flee';f.t=12+Math.random()*4;f.bold=0;n++;}
+  warSignal('advance','d',[PL.x,PL.y+2,PL.z]);burst(1.6,'lowpass',90,0.6,0.4,0,[PL.x,PL.y+2,PL.z]);for(let k=0;k<30;k++)spawnP(PL.x,PL.y+1.5,PL.z,(Math.random()-.5)*6,Math.random()*3,(Math.random()-.5)*6,[1,0.5,0.15],0.8,1);
+  toast(id===384?'You raise the crown of a fallen lord':'You sound the horn of a fallen lord');if(n)setTimeout(()=>toast('The creatures of the wastes flee before it'),1500);return true;}
+// ---- the monument on its crater's rim, toward its gate: a platform of the men's white stone, three pillars (the men's, the elves'
+// and the dwarves'), each under its people's banners, and in their midst a block of obsidian crowned with gold
+function emberMonumentAt(Db){const S=volcShape(Db.G),dx=Db.P?Db.P.X-S.cx:Db.F.ox,dz=Db.P?Db.P.Z-S.cz:Db.F.oz,dl=Math.hypot(dx,dz)||1;return [Math.round(S.cx+dx/dl*(Db.G.rc+6)),Math.round(S.cz+dz/dl*(Db.G.rc+6))];}
+function emberMonumentCells(Db){const [X,Z]=emberMonumentAt(Db),x=X-OX,z=Z-OZ;if(x<4||z<4||x>=W-4||z>=D-4||!genDone[(x>>4)+(z>>4)*NCX])return null;const y0=ground[x+W*z],out=[],put=(a,y,b,id)=>out.push([X+a,y,Z+b,id]);
+  for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){put(a,y0,b,WSBRICK);for(let y=y0+1;y<y0+14;y++)put(a,y,b,AIR);}
+  for(const [a,b,pil,ban] of [[0,-2,WSPILLAR,RBANNER],[-2,2,EVPILLAR,EVBANNER],[2,2,DWPILLAR,DBANNER]]){for(let y=y0+1;y<y0+9;y++)put(a,y,b,pil);put(a,y0+9,b,ban);put(a,y0+10,b,ban);}
+  put(0,y0+1,0,OBSID);put(0,y0+2,0,OBSID);put(0,y0+3,0,GILDED);return out;}
+// ---- the three banners over the Ashen Gate, and the feast in the Leaguer
+function emberGateBanners(P){const out=[],g=P.hG;for(const [v,id] of [[-3,RBANNER],[0,EVBANNER],[3,DBANNER]]){const [X,Z]=wgXZ(P,0,v);for(let y=g+49;y<g+52;y++)out.push([X,y,Z,FENCE]);for(let y=g+52;y<g+56;y++)out.push([X,y,Z,id]);}return out;}
+function emberFeastCells(P){const out=[],s=wgSite(P),g=P.hG;for(const v of [-4,4])for(let u=P.uC0+28;u<=P.uC0+40;u++){const [X,Z]=siteXZ(s,u,v).map(Math.round),x=X-OX,z=Z-OZ;if(x<0||z<0||x>=W||z>=D)continue;const y=ground[x+W*z]+1;out.push([X,y,Z,CTIMBER]);if(u%4===0)out.push([X,y+1,Z,LANTERN]);}return out;}
+function emberSong(R){const L=R.L,notes=[392,440,494,523,494,440,392,349,392,440,523,587,523,494,440,392];notes.forEach((f,i)=>setTimeout(()=>tone(f,f,0.45,0.07),i*420));
+  const lines=['The heralds sing: "Hear now of the fall of '+L.name+', '+L.n.slice(L.name.length+1)+',"','"who rose from the deep and sat upon the Ember Throne of '+L.mt.replace(/^The /,'the ')+',"',
+    '"'+({hosts:'and the hosts of the three peoples cast it down before its gate,',alone:'and one who stood alone in its hall struck it down,',bound:'and the loremasters bound it in chains of light,',cast:'and it fell through the mountain\'s heart into the lava sea,',quenched:'and the dwarves broke the mountain, and its fire went out,'}[R.fate]||'and it fell,')+'"',
+    '"Sing it in the halls of the three peoples, and let the mountain sleep."'];lines.forEach((l,i)=>setTimeout(()=>toast(l),1500+i*3200));}
+// ---- every second (from warStateTick): the clearing sky, the dead mountain's lava reloaded, the healing land, the stirring below,
+// the monument, the banners, the feast and the song, the relics owed
+let emberClearK=0,emberReload=0,emberHealN=0,emberStirT=240;
+function emberAfterTick(){const X=PL.x+OX,Z=PL.z+OZ;
+  if(emberReload>0&&(emberReload-=1)<=0){toast('The fire of the mountain dies, and its lava cools to stone');regenerateAll(X,Z);}
+  const Db=fallenLords.size?deadBasinAt(X,Z):null;emberClearK=Db?1:0;
+  // the relics the lords of the hosts keep for the player, given in any Leaguer
+  const Pg=wasteGateAt(Math.floor(X),Math.floor(Z),300);if(Pg&&SURV()&&wgUV(Pg,X,Z)[0]>Pg.uC0-30)for(const [id,k] of emberKnown){if(!k[3])continue;const F=[...FORT_C.values()].find(F=>F&&F.id===id);if(!F)continue;
+    const got=[];for(const r of EMBER_RELICS(emberLord(F).kind)){if(!addItem(r,1))got.push(nameOf(r));}k[3]=0;saveDirty=true;drawBar(true);toast('The lords of the hosts give you the relics of '+k[1]+': '+got.join(', '));}
+  // the war won: the feast, the banners over the gate, the song (once each, in the Leaguer or by the gate)
+  for(const w of WARS.values()){const E=w.el;if(!E||!E.fate)continue;const R=warLord(w);if(!R)continue;const P=R.P,[u]=wgUV(P,X,Z),d=Math.hypot(X-w.X,Z-w.Z);
+    if(!E.ban2&&d<200&&warLoaded(P,-2,2,-4,4)){E.ban2=-1;warJob(emberGateBanners(P),300,ok=>{E.ban2=ok?1:0;if(ok)warLog(w,'The three banners of the peoples were raised over '+P.name.replace(/^The /,'the ')+'.');saveDirty=true;});}
+    if(!E.feast&&u>P.uC0-10&&u<P.uC1&&d<450){E.feast=1;saveDirty=true;toast('A victory feast in the Leaguer!');warCheer();const c=emberFeastCells(P);if(c.length)warJob(c,300,()=>{});setTimeout(()=>emberSong(Object.assign({fate:E.fate},R)),4000);warLog(w,'The hosts held a victory feast in the Leaguer, and the heralds sang of the fall of '+R.L.name+'.');}}
+  if(!Db)return;
+  // the monument on its crater's rim
+  const w=WARS.get(Db.P&&Db.P.id),E=w&&elOf(w);if(E&&!E.mon){const c=emberMonumentCells(Db);if(c){E.mon=-1;warJob(c,300,ok=>{E.mon=ok?1:0;if(ok)warLog(w,'The three peoples raised a monument on the rim of the crater where '+warLord(w).L.name+' had its throne.');saveDirty=true;});}}
+  // the land heals: grass and flowers on the ash about the player, more as time passes
+  const bx=Math.floor(PL.x),bz=Math.floor(PL.z),onTop=bx>=0&&bz>=0&&bx<W&&bz<D&&PL.y>=ground[bx+W*bz]-2;
+  if(onTop&&emberHealN<800){const t0=E&&E.ft||0,p=Math.min(0.9,0.15+(warPlay-t0)/3600*0.5);if(Math.random()<p){const a=Math.random()*6.283,r=6+Math.random()*24,x=Math.floor(PL.x+Math.sin(a)*r),z=Math.floor(PL.z+Math.cos(a)*r);
+    if(x>=0&&z>=0&&x<W&&z<D){const y=ground[x+W*z],id=get(x,y,z);if([BLACKASH,CINDER,ASH].includes(id)&&get(x,y+1,z)===AIR){setBlock(x,y,z,GRASS,true);emberHealN++;if(Math.random()<0.35)setBlock(x,y+1,z,[TGRASS,TGRASS,FLOWR,FLOWY][Math.floor(Math.random()*4)],true);}}}}
+  // something stirs below
+  if(PL.y<Db.G.base-40&&(emberStirT-=1)<=0){emberStirT=300+Math.random()*180;burst(4,'lowpass',40,0.5,0.6,0,[PL.x,PL.y-20,PL.z]);shake=Math.max(shake,0.5);toast('Far below, something stirs in the lava sea');}}
+// a lord's fate: its mountain dies at once in the loaded world; its relics owed unless the player slew it (from emberFate)
+function emberAfterFate(R,fate,byP){const S=volcShape(R.G);if(Math.hypot(S.cx-(PL.x+OX),S.cz-(PL.z+OZ))<R.G.R*1.3+W)emberReload=6;if(!byP)emberOwe(R);
+  const w=warOfFort(R.F);if(w)setTimeout(()=>warLog(w,'As it fell, something stirred far below in the lava sea.'),10);}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -14603,11 +14683,12 @@ const LWX={fog:0,ta:0,dust:0,ash:0,storm:0,snow:0,burn:0,tint:new THREE.Color(1,
 function landWeather(dt){
   LWX.t-=dt;if(LWX.t<=0){LWX.t=0.5;colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TLW);LWX.k=LANDS[TLW.land].k;}
   const p=LAND_WX[LWX.k]||{},f=Math.min(1,dt*0.3);
-  LWX.fog+=((p.fog||0)-LWX.fog)*f;LWX.burn+=((p.burn||0)-LWX.burn)*f;LWX.ta+=((p.ta||0)-LWX.ta)*f;LWX.dust+=((p.dust||0)-LWX.dust)*f;LWX.ash+=((p.ash||0)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
+  const K=emberClearK; // (over a fallen Emberlord's mountain the sky clears, W7c)
+  LWX.fog+=((p.fog||0)*(1-0.5*K)-LWX.fog)*f;LWX.burn+=((p.burn||0)*(1-0.85*K)-LWX.burn)*f;LWX.ta+=((p.ta||0)*(1-0.6*K)-LWX.ta)*f;LWX.dust+=((p.dust||0)*(1-0.6*K)-LWX.dust)*f;LWX.ash+=((p.ash||0)*(1-0.7*K)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
   if(p.tint)LWX.tint.lerp(tintTmp.setRGB(p.tint[0],p.tint[1],p.tint[2]),f);
 }
 // the weather of the land you stand in, at once (travel and screenshots), instead of easing in
-function landWeatherNow(){LWX.t=0;landWeather(0);const p=LAND_WX[LWX.k]||{};LWX.fog=p.fog||0;LWX.ta=p.ta||0;LWX.dust=p.dust||0;LWX.ash=p.ash||0;LWX.burn=p.burn||0;LWX.tint.setRGB(1,1,1);if(p.tint)LWX.tint.setRGB(p.tint[0],p.tint[1],p.tint[2]);}
+function landWeatherNow(){LWX.t=0;landWeather(0);const p=LAND_WX[LWX.k]||{};const K=emberClearK;LWX.fog=(p.fog||0)*(1-0.5*K);LWX.ta=(p.ta||0)*(1-0.6*K);LWX.dust=(p.dust||0)*(1-0.6*K);LWX.ash=(p.ash||0)*(1-0.7*K);LWX.burn=(p.burn||0)*(1-0.85*K);LWX.tint.setRGB(1,1,1);if(p.tint)LWX.tint.setRGB(p.tint[0],p.tint[1],p.tint[2]);}
 // the sky takes on the land's tint
 function tintSky(c){tintMul.copy(c).multiply(LWX.tint);c.lerp(tintMul,LWX.ta);}
 // ---- The sky over the Volcanic Wastes (D-051): smoke-black overhead, a red glow along the horizon, a dull red sun; dry lightning
@@ -14757,7 +14838,7 @@ function warGlowTick(dt){
 function fireTick(dt){
   if(!ready)return;updBolts(dt);updPlumes(dt);updFarWastes(dt);updVentPuffs(dt);warGlowTick(dt);
   const b=LWX.burn;if(b<0.05||!playing)return;
-  fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=(1.5+Math.random()*5)/(1+2*emberSkyK);if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
+  fireBoltT-=dt;if(fireBoltT<=0){fireBoltT=(1.5+Math.random()*5)/(1+2*emberSkyK)*(1+4*emberClearK);if(sky(Math.floor(PL.x),Math.floor(PL.y+EYE),Math.floor(PL.z))>0.4)strike(false);}
   fireScanT-=dt;if(fireScanT<=0){fireScanT=1;fireScan();}
   for(let k=0;k<lavaSpots.length*dt*0.6;k++){const s=lavaSpots[Math.random()*lavaSpots.length|0];spawnP(s[0]+Math.random(),s[1]+1.05,s[2]+Math.random(),(Math.random()-0.5)*0.8+0.4,1.2+Math.random()*2.2,(Math.random()-0.5)*0.8,[1,0.35+Math.random()*0.35,0.08],1.2+Math.random()*2,-0.5);}
   for(let k=0;k<12*dt*b;k++)spawnP(PL.x+(Math.random()-0.5)*30,PL.y+Math.random()*8-2,PL.z+(Math.random()-0.5)*30,0.6+Math.random()*0.4,0.4+Math.random()*0.8,(Math.random()-0.5)*0.5,[1,0.42,0.1],2+Math.random()*2,-0.15); // embers on the wind

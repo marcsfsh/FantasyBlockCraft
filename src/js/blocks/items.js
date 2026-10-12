@@ -22,7 +22,10 @@ item(247,'Platinum Pickaxe','pick',[226,240,248],{tool:'pick',tier:5,speed:14,du
 ITEMS[251].tool='hoe';ITEMS[251].dur=150;
 // Swords and armour (D-052), for the foes of the Volcanic Wastes: a sword on every step of the ladder, coats for the body slot
 TOOL_LADDER.forEach((m,i)=>item(370+i,m[0]+' Sword','sword',m[1],{tool:'sword',tier:i+1,dur:Math.round(m[3]*0.8)}));
-item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(378,'Emberheart','heart',[255,110,40]);item(386,'Troll Hide','hide',[96,90,86]);
+item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(378,'Emberheart','heart',[255,110,40]);
+// the greater relics of a fallen Emberlord (W7c, D-076): its horn or its crown (sounded or raised, the wastes' creatures near flee),
+// and a cloak of its wing (armour that no fire burns through)
+item(379,'Emberlord\'s Horn','horn',[96,74,60]);item(384,'Emberlord\'s Crown','crown',[72,58,52]);item(385,'Cloak of the Ember Wing','cloak',[74,22,18],{equip:'body',armor:0.5,dur:2000,one:true,fireproof:true});item(386,'Troll Hide','hide',[96,90,86]);
 item(380,'Hide Jerkin','mail',[150,108,70],{equip:'body',armor:0.15,dur:120,one:true});item(381,'Iron Mail','mail',[200,200,196],{equip:'body',armor:0.3,dur:260,one:true});
 item(382,'Steel Plate','mail',[124,134,152],{equip:'body',armor:0.45,dur:420,one:true});item(383,'Moonsilver Mail','mail',[170,176,206],{equip:'body',armor:0.55,dur:800,one:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
@@ -113,10 +116,13 @@ function itemIcon(id){
     g.fillStyle='#4a3a2a';for(let k=-2;k<=2;k++)g.fillRect(4+k,10+k,2,2);if(id===377){g.fillStyle='rgba(255,220,120,0.9)';for(let k=2;k<10;k+=2)g.fillRect(6+k,9-k,1,1);}}
   else if(it.kind==='mail'){for(let y=2;y<15;y++)for(let x=2;x<14;x++){const sl=y<6&&(x<4||x>11),neck=y<4&&x>5&&x<10;if(sl&&y<3||neck)continue;if(y>6&&(x<4||x>11))continue;px(x,y,(x===2||x===13||y===2?18:y===14?-30:0)+((x+y)%2&&id!==380?-14:0));}}
   else if(it.kind==='heart'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const a=Math.hypot(x-5.5,y-5.5)<3.2||Math.hypot(x-10.5,y-5.5)<3.2||(y>=6&&Math.abs(x-8)<(14-y)*0.75);if(a)px(x,y,(y<5?40:0)+(r()-.5)*30);}g.fillStyle='rgba(255,240,180,0.9)';g.fillRect(5,4,2,1);}
+  else if(it.kind==='horn'){for(let k=0;k<12;k++){const x=3+k,y=12-Math.round(Math.sin(k/11*2.6)*7),w=k<3?3:k<8?2:1;for(let d=0;d<w;d++)px(x,y+d,(d?-24:20)+(k>9?-20:0));}g.fillStyle='rgba(255,150,50,0.9)';g.fillRect(4,12,2,1);g.fillRect(9,7,1,1);}
+  else if(it.kind==='crown'){for(let y=7;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===7?24:y===12?-30:0)+((x+y)%3?0:-12));for(const x of [2,5,8,11,13])for(let y=2+(x%2);y<7;y++)px(Math.min(13,x),y,(y<4?30:0));g.fillStyle='rgba(255,140,40,0.95)';for(const x of [4,7,10])g.fillRect(x,9,2,2);}
+  else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);g.fillStyle='#2e1a16';g.fillRect(6,2,4,1);}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378]); // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385]); // relics for the discovery log (M7)

@@ -330,6 +330,10 @@
       "about": "The Emberlords in the war and their fates (W7b, D-075): each war's lord (warLord, w.el), showing itself at the height of assaults, driving the warhosts, its mountain's rumbles, eruptions and ash, the darker sky, its taunts; the last battles (the vents, its sally, the loremasters' rite) and the five fates"
     },
     {
+      "path": "gameplay/ember-after.js",
+      "about": "After an Emberlord's fall (W7c, D-076): its mountain dies (deadMount in chunk generation, after the edits), the sky clears, its servants scatter, the land heals; its relics (horn or crown, the cloak of its wing) given or owed; the monument on its crater's rim, the banners over the Ashen Gate, the feast and the heralds' song; something stirring below"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

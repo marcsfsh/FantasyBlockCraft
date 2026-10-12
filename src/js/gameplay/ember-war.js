@@ -22,11 +22,11 @@ const EMBER_FATE={hosts:L=>'In the hosts\' final assault '+L.n+' was slain befor
 // a fate befalls the lord: written, told, the lord gone from its throne
 function emberFate(w,R,fate,f){const E=w?elOf(w):null;if(E&&E.fate)return;if(E){E.fate=fate;E.ft=Math.round(warPlay);}
   fallenLords.add(R.F.id);const k=emberKnown.get(R.F.id)||[null,R.L.n];k[2]=fate;emberKnown.set(R.F.id,k);saveDirty=true;
-  if(w)warLog(w,EMBER_FATE[fate](R.L));const near=Math.hypot(R.F.GX-(PL.x+OX),R.F.GZ-(PL.z+OZ))<700||w&&Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<500;
+  if(w)warLog(w,EMBER_FATE[fate](R.L));emberAfterFate(R,fate,!!(f&&f.byP)&&fate==='alone'||!!(f&&f.byP&&fate==='hosts'));const near=Math.hypot(R.F.GX-(PL.x+OX),R.F.GZ-(PL.z+OZ))<700||w&&Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<500;
   if(near){showName(R.L.n+(fate==='bound'?' is bound':fate==='cast'?' is cast down':fate==='quenched'?': its fire is out':' has fallen'));toast(EMBER_FATE[fate](R.L));}
   const g=f||foes.find(q=>isLord(q)&&!q.dead&&!q.show&&q.L&&q.L.F===R.F);if(g&&!g.dead){g.fate=fate;g.hp=0;g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;if(g.lordOf)lordFalls(g);}}
 // slain (from emberFalls): by the player with none of the hosts near, alone; else in the hosts' assault; or cast down
-function emberFateOnDeath(f){if(f.show||!f.L||f.fate)return;const w=warOfFort(f.L.F),R=w?warLord(w):{F:f.L.F,L:f.L};
+function emberFateOnDeath(f){if(f.show||!f.L||f.fate)return;const w=warOfFort(f.L.F),R=w?warLord(w):{F:f.L.F,L:f.L,G:f.L.F.v};
   const hosts=foes.filter(g=>!g.dead&&FOES[g.kind].folk&&!FOES[g.kind].civ&&Math.hypot(g.x-f.x,g.z-f.z)<40).length;
   emberFate(w,R,f.cast?'cast':f.byP&&hosts<3?'alone':'hosts',f);}
 // ---- the mountain's vents, broken by the dwarves once the front stands at its foot

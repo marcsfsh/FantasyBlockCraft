@@ -126,6 +126,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
     const m=editsByChunk.get(ckey(WCX,WCZ));
     if(m)m.forEach((v,k)=>{const i=keyToI(k);if(i<0)return;if(v>100&&v<108){world[i]=WATER;lvl[i]=v-100;}else if(v>LAVA_LV&&v<LAVA_LV+5){world[i]=LAVA;lvl[i]=v-LAVA_LV;}else if(BL[v]){world[i]=v;lvl[i]=0;}const t=(i/W)|0;wakeWater(i%W,(t/D)|0,t%D);}); // water next to a player change flows again
+    deadMount(lcx,lcz,WCX,WCZ); // a fallen Emberlord's mountain, its lava cooled: a saved change of the world, after the edits (W7c)
     for(let z=0;z<CS;z++)for(let x=0;x<CS;x++){
       const lx=lcx*CS+x,lz=lcz*CS+z;calcHM(lx,lz);
       for(let y=0;y<H;y++){const i=I(lx,y,lz);if(world[i]===TORCH)torches.add(i);else if(isFarm(world[i]))farms.add(i);}

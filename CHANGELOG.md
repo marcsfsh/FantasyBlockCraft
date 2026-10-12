@@ -5,6 +5,20 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.46.0 (2026-10-12): W7c, after an Emberlord's fall
+
+Saves from 0.45.0 do not carry over (save key v36): a fallen lord's mountain, its relics and the war's victory are saved.
+
+### Game
+- **Its mountain dies.** When an Emberlord falls, the open lava of its great volcano (the crater, the gullies, its fortress, its flows) cools to obsidian and crust, and stays cooled. The sky over its basin clears and the lightning grows rare.
+- **Its war is won.** Its servants scatter (most of the wastes' places in its basin stand empty), the warhosts, raids and engines stop, and the war panel says the war is won.
+- **The land heals** where you go in its basin: grass and flowers come up through the ash, more as time passes.
+- **Relics:** its horn or its crown (sound or raise it and the creatures of the wastes near flee), the Cloak of the Ember Wing (armour that no fire or lava burns through), its blade and its heart (which now glows in the hand). They drop to the one who slays it; otherwise the lords of the hosts keep them for you and give them to you in any Leaguer.
+- **Remembered:** the three peoples raise a monument on its crater's rim; the three banners are raised over the Ashen Gate; a victory feast is held in the Leaguer and the heralds sing of its fall. Deep under its basin, now and then, something stirs in the lava sea.
+
+### Tooling
+- New test case `68-ember-after`. `tools/shot.mjs --siege=dead` shows the monument on a dead mountain's rim.
+
 ## 0.45.0 (2026-10-12): W7b, the Emberlords in the war and their fates
 
 Saves from 0.44.0 do not carry over (save key v35): each war keeps its lord's vents and fate.

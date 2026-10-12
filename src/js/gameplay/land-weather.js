@@ -9,10 +9,11 @@ const LWX={fog:0,ta:0,dust:0,ash:0,storm:0,snow:0,burn:0,tint:new THREE.Color(1,
 function landWeather(dt){
   LWX.t-=dt;if(LWX.t<=0){LWX.t=0.5;colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TLW);LWX.k=LANDS[TLW.land].k;}
   const p=LAND_WX[LWX.k]||{},f=Math.min(1,dt*0.3);
-  LWX.fog+=((p.fog||0)-LWX.fog)*f;LWX.burn+=((p.burn||0)-LWX.burn)*f;LWX.ta+=((p.ta||0)-LWX.ta)*f;LWX.dust+=((p.dust||0)-LWX.dust)*f;LWX.ash+=((p.ash||0)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
+  const K=emberClearK; // (over a fallen Emberlord's mountain the sky clears, W7c)
+  LWX.fog+=((p.fog||0)*(1-0.5*K)-LWX.fog)*f;LWX.burn+=((p.burn||0)*(1-0.85*K)-LWX.burn)*f;LWX.ta+=((p.ta||0)*(1-0.6*K)-LWX.ta)*f;LWX.dust+=((p.dust||0)*(1-0.6*K)-LWX.dust)*f;LWX.ash+=((p.ash||0)*(1-0.7*K)-LWX.ash)*f;LWX.storm=p.storm||0;LWX.snow=p.snow||0;
   if(p.tint)LWX.tint.lerp(tintTmp.setRGB(p.tint[0],p.tint[1],p.tint[2]),f);
 }
 // the weather of the land you stand in, at once (travel and screenshots), instead of easing in
-function landWeatherNow(){LWX.t=0;landWeather(0);const p=LAND_WX[LWX.k]||{};LWX.fog=p.fog||0;LWX.ta=p.ta||0;LWX.dust=p.dust||0;LWX.ash=p.ash||0;LWX.burn=p.burn||0;LWX.tint.setRGB(1,1,1);if(p.tint)LWX.tint.setRGB(p.tint[0],p.tint[1],p.tint[2]);}
+function landWeatherNow(){LWX.t=0;landWeather(0);const p=LAND_WX[LWX.k]||{};const K=emberClearK;LWX.fog=(p.fog||0)*(1-0.5*K);LWX.ta=(p.ta||0)*(1-0.6*K);LWX.dust=(p.dust||0)*(1-0.6*K);LWX.ash=(p.ash||0)*(1-0.7*K);LWX.burn=(p.burn||0)*(1-0.85*K);LWX.tint.setRGB(1,1,1);if(p.tint)LWX.tint.setRGB(p.tint[0],p.tint[1],p.tint[2]);}
 // the sky takes on the land's tint
 function tintSky(c){tintMul.copy(c).multiply(LWX.tint);c.lerp(tintMul,LWX.ta);}
