@@ -139,4 +139,5 @@
         P.sheet('wingL','z',inner);P.sheet('wingR','z',(a,b)=>inner(27-a,b));P.sheet('wingL2','z',outer);P.sheet('wingR2','z',(a,b)=>outer(31-a,b));
         P.coat(['wbL','fL0','fL1','fL2','fL3','fL4'],c.bone,8);P.coat(['wcL'],c.ivory,8);}}
   });
+  MODEL_KIT.foe={legs,arms,gob,gobPaint,gobCoats,orc,orcPaint,orcCoats,blade,HAFT};
 })();

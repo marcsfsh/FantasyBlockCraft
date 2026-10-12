@@ -152,4 +152,5 @@
       warriorPaint(P,c);P.map('thL',ALL,(s,t,w,h)=>t>=10?(t===h-1?[50,40,32]:sh(GOLD,hz(s,t,553)*8+(s===(w>>1)?24:0))):sh(WINE,hz(s,t,555)*8));
       shieldPaint(P,BLUE);P.map('lance',ALL,(s,t)=>t%10===0?sh(GOLD,10):sh([230,226,214],hz(s,t>>2,557)*8));plate(P,['ltip'],[220,226,234]);
       P.sheet('flag','x',(a,b)=>{if(a<8&&Math.abs(b-5.5)<(8-a)*0.7)return 'cut';return b===5||b===6?sh(GOLD,0):sh(BLUE,hz(a,b,559)*8);});}};
+  MODEL_KIT.elf={coats,warrior,warriorPaint,kit,shield,shieldPaint,blade,bladePaint,sign,SIGN,scales,lames,vine,ears,hairB,elfFace,horse,riderParts,GOLD,WINE,BLUE,WHITE,ESKIN,EHAIR};
 })();

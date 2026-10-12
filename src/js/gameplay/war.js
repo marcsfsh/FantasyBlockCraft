@@ -75,13 +75,16 @@ function warRanks(s,u0,v0,dir,n,files,y,r0){
 // the companies of an army of the hosts (def: the camp's defenders), each {t: table, fp, n, lead, g: its block in the ranks}
 function warAllied(def){const k=warSz(),C=[],add=(fp,n,lead,m,g)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:fp+'host',fp:fp,n:n,lead:lead,g:g});};
   if(def){add('r_',8,'rcapt',2,0);add('d_',8,'dcapt',1,1);add('e_',7,'ecapt',1,2);}
-  else{add('r_',9,'rcapt',4,0);add('h_',6,'hcapt',2,0);add('d_',9,'dcapt',4,1);add('e_',8,'ecapt',3,2);add('w_',8,'wcapt',1,2);}
+  else{add('r_',9,'rcapt',3,0);add('h_',6,'hcapt',2,0);add('d_',9,'dcapt',4,1);add('e_',8,'ecapt',3,2);add('w_',8,'wcapt',1,2);
+    // (W3) the knights and lancers, a standard bearer with the first company of each people, healers and bearers behind
+    for(let i=0;i<Math.max(1,Math.round(k));i++)C.splice(1,0,{t:'x_kn',fp:'r_',n:6,lead:null,g:0});
+    for(const [fp,sk] of [['r_','rstd'],['d_','dstd'],['e_','estd']]){const c=C.find(q=>q.fp===fp&&q.t===fp+'host');if(c)c.std=sk;}C.push({t:'x_aid',fp:'e_',n:4,lead:null,g:2});}
   return C;}
 // the companies of a warhost of the wastes (def: the yard's defenders): orcs under warchiefs, goblins, trolls among them
 function warOrcs(def){const k=warSz(),C=[],add=(t,n,lead,m)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:t,n:n,lead:i<2?lead:null,g:0});};
   if(def){add('band',8,'ochief',2);add('oscout',8,null,1);add('band',1,'troll',1);}
-  else{add('oarmy',10,'ochief',8);add('oscout',10,'gchief',3);add('band',1,'troll',6);
-    for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'){const t=C.splice(i,1)[0];C.splice(2+3*j++,0,t);}}
+  else{add('oline',8,null,2);add('oarmy',10,'ochief',6);add('owolf',5,null,2);add('oscout',10,'gchief',2);add('oswarm',10,null,1);add('oroused',8,null,1);add('band',1,'troll',4);add('otroll',2,'tdriver',2);add('owb',2,'tdriver',1);
+    for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'||C[i].t==='otroll'||C[i].t==='owb'){const t=C.splice(i,1)[0];C.splice(Math.min(C.length,2+3*j++),0,t);}} // (W3: shield lines in front, wolf riders, skulkers, drummers and shamans, siege trolls and war beasts with their drivers)
   return C;}
 const warN=C=>C.reduce((a,c)=>a+c.n,0);
 // points in the gate's frame to world points (an exact one keeps its mark)
@@ -114,7 +117,7 @@ function warArmy(P,al){
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
     if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
-  const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
+  const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');warHeroLead(A);if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
 // way; null if it found no place to come from
 function warCompany(A){
@@ -135,7 +138,9 @@ function warCompany(A){
 // the army's way; at its end it holds a while and marches back the way it came
 function warSpawn(A,c,X,Z,path,route,direct){
   const P=A.P,y=warAt(X,Z,0,999);if(y<0)return null;
-  const grp=spawnGroup(c.t,c.n,X-OX,y,Z-OZ,4,A.al?{lead:c.lead,prov:'wg:'+P.id,site:wgSite(P)}:{lead:c.lead});if(!grp.length)return null;
+  const o=A.al?{lead:c.lead,prov:'wg:'+P.id,site:wgSite(P)}:{lead:c.lead},grp=spawnGroup(c.t,c.n,X-OX,y,Z-OZ,4,o);if(!grp.length)return null;
+  if(c.std){const g0=grp[0];grp.push(addFoe(c.std,g0.x+0.6,g0.y,g0.z+0.6,{prov:o.prov,site:o.site}));} // the people's standard (W3)
+  if(!A.def)warHeroSpawn(A,grp,{prov:o.prov,site:o.site}); // the army's hero and its guard, with its first company (W3)
   const pre=A.mus&&A.mus.pre?warW(wgSite(P),A.mus.pre):[];
   for(const f of grp){const F=FOES[f.kind];f.war=P.id;f.army=A;f.fo=((A.m.length%4)-1.5)*1.25;A.m.push(f);let way=path.slice();
     if(A.mus&&!direct){const R=A['rk'+c.g],q=R&&A['ri'+c.g]<R.length?R[A['ri'+c.g]++]:null;if(q)way.push([q[0],q[1],1]);way.push({A:A,r:q?q[3]:36});if(!A.def)way=way.concat(pre);}
@@ -198,7 +203,7 @@ function warBattle(A,live){
     if(A.al&&!A.def&&!(A.mus&&!A.go))warForm(A,live,cx,cz,ex,ez);
     if(!A.al&&!A.def&&!(A.mus&&!A.go))warCharge(A,live,en);
     warHorn(A,A.al?'muster':'advance');return;}
-  const B=A.bat;if(en.length)B.last=foeClock;
+  const B=A.bat;warWedgeTick(A,en);if(en.length)B.last=foeClock;
   else if(foeClock-B.last>8){A.bat=null;if(A.line){Object.assign(A.line,{hold:false,go:true,goT:foeClock});A.line=null;warHorn(A,'advance');}return;}
   if(!B.cry){let near=0,ex=0,ez=0;for(const g of en)if(Math.hypot(g.x-cx,g.z-cz)<14){near++;ex+=g.x;ez+=g.z;}
     if(near>=3){B.cry=1;warCry(!A.al,16,cx,y+2,cz);warCry(!!A.al,12,ex/near,y+2,ez/near);}}
@@ -212,7 +217,8 @@ function warForm(A,live,cx,cz,ex,ez){
   const dx=ex-cx,dz=ez-cz,l=Math.hypot(dx,dz)||1,fx=dx/l,fz=dz/l,ax=-fz,az=fx,FA={hold:true,go:false,goT:0,gap:0.15,face:Math.atan2(fx,fz),line:1};A.line=FA;
   let y=0;for(const f of live)y+=f.y;y=Math.round(y/live.length);
   const put=(f,a,b)=>{let x=cx+fx*b+ax*a,z=cz+fz*b+az*a;if(foeStand(x,y+1,z,FOES[f.kind].tall||2)<0){x=f.x;z=f.z;}warHoldAt(f,x+OX,z+OZ,FA);};
-  const G=[live.filter(f=>!FOES[f.kind].shot&&!FOES[f.kind].mount),live.filter(f=>FOES[f.kind].shot&&!FOES[f.kind].mount),live.filter(f=>FOES[f.kind].mount)];
+  const wedge=warWedge(A,live,cx,cz,fx,fz); // (W3: the knights' wedge before the line, the pikes in its front rank, healers and bearers behind it)
+  const G=[live.filter(f=>!FOES[f.kind].shot&&!FOES[f.kind].mount&&!FOES[f.kind].civ).sort((a,b)=>(FOES[b.kind].pike||0)-(FOES[a.kind].pike||0)),live.filter(f=>(FOES[f.kind].shot||FOES[f.kind].civ)&&!FOES[f.kind].mount&&!FOES[f.kind].bear),live.filter(f=>FOES[f.kind].mount&&!wedge.includes(f))];
   const per=Math.max(8,Math.ceil(G[0].length/2));G[0].forEach((f,i)=>{const r=Math.floor(i/per),n=Math.min(per,G[0].length-r*per);put(f,((i%per)-(n-1)/2)*1.5,4-r*1.7);});
   G[1].forEach((f,i)=>{const r=Math.floor(i/12),n=Math.min(12,G[1].length-r*12);put(f,((i%12)-(n-1)/2)*1.6,-1.5-r*1.7);});
   const w0=per*0.75+4;G[2].forEach((f,i)=>put(f,(i%2?1:-1)*(w0+Math.floor(i/2)%3*2.2),2-Math.floor(i/6)*2.5));}

@@ -86,7 +86,7 @@ function campLayout(P,s,L,r){
     for(const [U,V] of [[150,40],[200,40]]){const vv=sv*V;A.push({k:'well',cu:c0+U,cv:vv,y:g,u0:c0+U-1,u1:c0+U+1,v0:vv-1,v1:vv+1});take(U-3,U+3,vv-3,vv+3);}
     for(const [U,V] of [[162,46],[176,46],[190,46]]){const vv=sv*V;box('lgcook',U-2,U+2,vv-2,vv+2);take(U-3,U+3,vv-3,vv+3);}
     {const vv=sv*26;pc('lghosp',190,vv,7,31,sv>0?2:3,{col:WOOLR});take(172,208,vv-5,vv+5);}
-    sp('r_market',176,sv*60,6);sp('r_farm',200,sv*80,5);sp('e_garden',190,sv*26,4);
+    sp('r_market',176,sv*60,6);sp('r_farm',200,sv*80,5);sp('e_garden',190,sv*26,4);sp('e_aid',184,sv*20,4); // (healers and bearers by the field hospital, W3)
     for(let U=136;U<=230;U+=11)for(let V=12;V<=112;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:hsh(U,9749,V)<0.4?WOOLR:WOOLW});take(U-4,U+4,vv-3,vv+3);}}
 }
 // ---- Column builders of the camp (U = u - P.uC0, V = v)

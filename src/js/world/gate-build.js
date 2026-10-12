@@ -56,6 +56,7 @@ function gateLayout(P,s,L,r){
   const sp=(kind,u,v,R,y)=>L.spots.push({kind:kind,u:u,v:v,R:R||4,y:y||g});
   sp('ogate',-12,-cs*4,3);sp('ocamp',ubk-10,vm,7);sp('ocamp',ua+12,vm+(sd>0?-12:12),6);sp('oforge',ua+20,v0+8,4);sp('opit',ua+20,v1-7,2);sp('owall',-1,-12,2,g+49);sp('owall',-1,14,2,g+49);
   sp('d_ram',16,cs*10,4);sp('r_mant',40,-cs*14,5);sp('d_treb',ub+8,-20,5);sp('d_treb',ub+8,20,5);sp('r_lines',uL+10,0,4);sp('e_lines',uL+10,cs*28,4);
+  sp('r_eng',ub+10,cs*30,5);sp('d_sap',uL+16,cs*60,4); // engineers by the trebuchets, sappers by the mine's shaft (W3)
 }
 // ---- Column builders
 // The ground of the works: the yard trodden to ash and cinder; before the gate scorched, pocked with the craters of the

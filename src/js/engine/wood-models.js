@@ -113,4 +113,5 @@
       paint(P,c){elfFace(P,c);cloth(P,['armL','body','tunic'],c.cl);hands(P,c);P.map('legL',ALL,(s,t)=>sh([84,74,60],hz(s,t,637)*8));boots(P,[96,70,46],21);
         vine(P,'tunic',SIDE,26,30,[200,170,90],c.cl);cloth(P,['hoodB'],sh(c.cl,-14));leather(P,['belt'],[80,56,34]);}}
   });
+  MODEL_KIT.wood={coats,leafSign,leaves,vine,ears,hairB,elfFace,hood,hoodPaint,bow,bowPaint,knife,knifePaint,jerkin,jerkinPaint,kit,COP,GOLD,SILV,DEEP,MOSS,CLOAK,BARKC};
 })();

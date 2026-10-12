@@ -234,7 +234,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v29',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v30',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -247,7 +247,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=29,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=30,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -7343,6 +7343,7 @@ function gateLayout(P,s,L,r){
   const sp=(kind,u,v,R,y)=>L.spots.push({kind:kind,u:u,v:v,R:R||4,y:y||g});
   sp('ogate',-12,-cs*4,3);sp('ocamp',ubk-10,vm,7);sp('ocamp',ua+12,vm+(sd>0?-12:12),6);sp('oforge',ua+20,v0+8,4);sp('opit',ua+20,v1-7,2);sp('owall',-1,-12,2,g+49);sp('owall',-1,14,2,g+49);
   sp('d_ram',16,cs*10,4);sp('r_mant',40,-cs*14,5);sp('d_treb',ub+8,-20,5);sp('d_treb',ub+8,20,5);sp('r_lines',uL+10,0,4);sp('e_lines',uL+10,cs*28,4);
+  sp('r_eng',ub+10,cs*30,5);sp('d_sap',uL+16,cs*60,4); // engineers by the trebuchets, sappers by the mine's shaft (W3)
 }
 // ---- Column builders
 // The ground of the works: the yard trodden to ash and cinder; before the gate scorched, pocked with the craters of the
@@ -7615,7 +7616,7 @@ function campLayout(P,s,L,r){
     for(const [U,V] of [[150,40],[200,40]]){const vv=sv*V;A.push({k:'well',cu:c0+U,cv:vv,y:g,u0:c0+U-1,u1:c0+U+1,v0:vv-1,v1:vv+1});take(U-3,U+3,vv-3,vv+3);}
     for(const [U,V] of [[162,46],[176,46],[190,46]]){const vv=sv*V;box('lgcook',U-2,U+2,vv-2,vv+2);take(U-3,U+3,vv-3,vv+3);}
     {const vv=sv*26;pc('lghosp',190,vv,7,31,sv>0?2:3,{col:WOOLR});take(172,208,vv-5,vv+5);}
-    sp('r_market',176,sv*60,6);sp('r_farm',200,sv*80,5);sp('e_garden',190,sv*26,4);
+    sp('r_market',176,sv*60,6);sp('r_farm',200,sv*80,5);sp('e_garden',190,sv*26,4);sp('e_aid',184,sv*20,4); // (healers and bearers by the field hospital, W3)
     for(let U=136;U<=230;U+=11)for(let V=12;V<=112;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:hsh(U,9749,V)<0.4?WOOLR:WOOLW});take(U-4,U+4,vv-3,vv+3);}}
 }
 // ---- Column builders of the camp (U = u - P.uC0, V = v)
@@ -10090,6 +10091,7 @@ function amLayout(K){
   return K.uv=uv;
 }
 const amTexC=new Map();
+const MODEL_KIT={}; // each people's helpers for building and painting models, shared with the war's units (W3, war-models.js)
 function amHash(x,y,s){let h=(x*374761393+y*668265263+s*1442695041)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;}
 function amTexture(kind,ci,flags){
   const key=kind+':'+ci+':'+(flags.young?1:0)+(flags.stag?1:0);if(amTexC.has(key))return amTexC.get(key);
@@ -10356,6 +10358,7 @@ function amCoat(kind,q){const C=AM_KINDS[kind].coats;let t=0;for(const c of C)t+
         P.sheet('wingL','z',inner);P.sheet('wingR','z',(a,b)=>inner(27-a,b));P.sheet('wingL2','z',outer);P.sheet('wingR2','z',(a,b)=>outer(31-a,b));
         P.coat(['wbL','fL0','fL1','fL2','fL3','fL4'],c.bone,8);P.coat(['wcL'],c.ivory,8);}}
   });
+  MODEL_KIT.foe={legs,arms,gob,gobPaint,gobCoats,orc,orcPaint,orcCoats,blade,HAFT};
 })();
 // ---- The folk of the realms of men (D-060): soldiers and townsfolk, built like the foes (foe-models.js) from boxes measured in
 // pixels, in human proportions (about 1.9 blocks tall), and painted at two texels to a pixel (res 2) so their gear shows
@@ -10549,6 +10552,7 @@ const FOLK_KIT=(function(){
         P.map('body',['F'],(s,t)=>Math.abs(t-3-Math.abs(s-7.5)*0.45)<0.6&&t<8?sh(GOLD,(s+t)%2?24:-10):null);
         plate(P,['circ'],GOLD);P.map('circ',['F'],(s)=>s===6||s===7?[110,170,230]:null);}}
   });
+  MODEL_KIT.realm={soldier,soldierPaint,shield,shieldPaint,coats,sign,SIGN};
   return {SK,HAIR,ALL,SIDE,sh,hz,legs,arms,man,cloth,mail,plate,leather,band,rivets,boots,hands,face,sword,swordPaint,STEEL,SILVER,GOLD,BLACK};
 })();
 // ---- The folk of the riders of the plains (D-061), built and painted like the white realm's (folk-models.js, whose painting
@@ -10758,6 +10762,7 @@ const FOLK_KIT=(function(){
         leather(P,['belt'],[60,40,26]);P.map('belt',['F'],(s,t)=>s>=8&&s<=11?sh(GOLD,t===0?24:0):s%3===0&&t===1?sh(GOLD,10):null);
         leather(P,['sheath'],[50,70,44]);band(P,'sheath',SIDE,0,2,GOLD);band(P,'sheath',SIDE,20,22,GOLD);P.map('shilt',ALL,(s,t)=>(s+t)%2?[70,48,30]:sh(GOLD,0));plate(P,['sguard'],GOLD);}}
   });
+  MODEL_KIT.rider={coats,soldier,soldierPaint,helmParts,kit,shieldParts,shieldPaint,spear,spearPaint,horseSign,woven,GREEN,DGREEN,WHITE,BRONZE,HORSE};
 })();
 // ---- The folk of the high elves (D-062), built and painted like the other folk (FOLK_KIT): boxes measured in pixels, two texels
 // to a pixel, a little taller than men (scale 1.08), with pointed ears and long hair, beardless.
@@ -10913,6 +10918,7 @@ const FOLK_KIT=(function(){
       warriorPaint(P,c);P.map('thL',ALL,(s,t,w,h)=>t>=10?(t===h-1?[50,40,32]:sh(GOLD,hz(s,t,553)*8+(s===(w>>1)?24:0))):sh(WINE,hz(s,t,555)*8));
       shieldPaint(P,BLUE);P.map('lance',ALL,(s,t)=>t%10===0?sh(GOLD,10):sh([230,226,214],hz(s,t>>2,557)*8));plate(P,['ltip'],[220,226,234]);
       P.sheet('flag','x',(a,b)=>{if(a<8&&Math.abs(b-5.5)<(8-a)*0.7)return 'cut';return b===5||b===6?sh(GOLD,0):sh(BLUE,hz(a,b,559)*8);});}};
+  MODEL_KIT.elf={coats,warrior,warriorPaint,kit,shield,shieldPaint,blade,bladePaint,sign,SIGN,scales,lames,vine,ears,hairB,elfFace,horse,riderParts,GOLD,WINE,BLUE,WHITE,ESKIN,EHAIR};
 })();
 // ---- The folk of the wood elves (D-065), built and painted like the other folk (FOLK_KIT): boxes measured in pixels, two texels
 // to a pixel, a little taller than men, pointed ears, long hair, beardless. Their wardens go as the forest's own: hooded cloaks of
@@ -11029,6 +11035,7 @@ const FOLK_KIT=(function(){
       paint(P,c){elfFace(P,c);cloth(P,['armL','body','tunic'],c.cl);hands(P,c);P.map('legL',ALL,(s,t)=>sh([84,74,60],hz(s,t,637)*8));boots(P,[96,70,46],21);
         vine(P,'tunic',SIDE,26,30,[200,170,90],c.cl);cloth(P,['hoodB'],sh(c.cl,-14));leather(P,['belt'],[80,56,34]);}}
   });
+  MODEL_KIT.wood={coats,leafSign,leaves,vine,ears,hairB,elfFace,hood,hoodPaint,bow,bowPaint,knife,knifePaint,jerkin,jerkinPaint,kit,COP,GOLD,SILV,DEEP,MOSS,CLOAK,BARKC};
 })();
 // ---- The folk of the mountain dwarves (D-066), built and painted like the other folk (FOLK_KIT): boxes measured in pixels, two
 // texels to a pixel. A dwarf stands a little under a block and a half: short thick legs, a broad deep body, heavy arms reaching to
@@ -11147,6 +11154,217 @@ const FOLK_KIT=(function(){
       paint(P,c){dface(P,c);P.map('armL',ALL,(s,t)=>sh(c.skin,hz(s,t,741)*8-(t<6?0:4)));P.map('body',ALL,()=>sh(c.skin,-6));boots(P,[70,52,36],7);P.map('legL',ALL,(s,t)=>t<7?sh([80,70,60],hz(s,t,743)*8):null);
         leather(P,['apron'],[100,66,40]);leather(P,['belt'],[70,50,30]);P.map('apron',['F'],(s,t)=>t%9===4?sh([100,66,40],-20):null);
         P.map('haft',ALL,(s,t)=>sh([110,80,50],hz(s,t>>1,745)*10));plate(P,['hmr'],DIRON);}}
+  });
+  MODEL_KIT.dwarf={coats,dwarf,dface,kit,kitPaint,helm,helmPaint,axe,axePaint,shield,shieldPaint,sign,BRZ,BLUE,CRIM,DIRON};
+})();
+// ---- The soldiers and creatures of the war (W3, D-070; Q150, Q151, Q170, Q171), built from each people's own parts and paint
+// (MODEL_KIT) so they wear their people's look. For the hosts: knights of the realm on barded horses with lances, lancers of the
+// riders, pikemen with bucklers and crossbowmen with a pavise on the back, the realm's household knights in plate with great
+// swords; horse archers and outriders with javelins; the high elves' mounted archers, glaive wardens and blade masters with a
+// blade in each hand; the wood elves' skirmishers and sharpshooters with great bows; the dwarves' axe throwers, shieldbreakers
+// with war picks, ironclads with great axes, and sappers with pick and shovel; engineers of the realm, elven healers with a staff
+// of white stone, bearers with a rolled litter (and the fallen across their shoulders), and a standard bearer of each people.
+// For the wastes: goblin wolf riders on great wargs, goblin pot-throwers, war drummers, fire shamans, siege trolls armoured in
+// iron with a ram, war beasts in chains, shield orcs, goblin skulkers, troll drivers with whips, and orc crossbowmen.
+(function(){
+  const {SK,ALL,SIDE,sh,hz,man,cloth,mail,plate,leather,band,rivets,boots,hands,face,sword,swordPaint,STEEL,SILVER,GOLD,BLACK}=FOLK_KIT;
+  const R=MODEL_KIT.realm,H=MODEL_KIT.rider,E=MODEL_KIT.elf,Wd=MODEL_KIT.wood,Dw=MODEL_KIT.dwarf,F=MODEL_KIT.foe,K=n=>AM_KINDS[n];
+  const drop=(ps,ns)=>ps.filter(p=>!ns.includes(p[0])),only=(ps,ns)=>ps.filter(p=>ns.includes(p[0]));
+  const ASH=[112,82,52],IRON=[96,98,108];
+  // ---- shared pieces
+  // a horse's coat in fine hair, darker below the knee, hooves; the mane and tail in strands; eyes and nostrils
+  const horseCoat=(P,Hc)=>{const hair=(n,col)=>P.map(n,ALL,(s,t,w,h,f)=>sh(col,hz(s,t>>2,901)*8+hz(s,t,903)*5-(f==='D'?18:f==='T'?0:t/h*10)));
+    for(const n of ['hbody','neck','hhead','muzzle','earL','legFL','legBL'])hair(n,Hc.coat);
+    for(const n of ['legFL','legBL'])P.map(n,SIDE,(s,t,w,h)=>t>=h-3?[44,38,34]:t>=h-12?sh(Hc.low,hz(s,t,905)*8):null);
+    P.map('mane',ALL,(s,t)=>sh(Hc.mane,hz(s,0,907)*24));P.map('tail',ALL,(s,t,w,h)=>sh(Hc.mane,hz(s,0,909)*24-t/h*10));
+    P.map('hhead',['L','R'],(s,t,w,h,f)=>{const e=f==='L'?w-4:3;return t>=2&&t<=3&&(s===e||s===e+(f==='L'?-1:1))?(t===2?[30,26,24]:[18,14,14]):null;});
+    P.map('muzzle',['F'],(s,t,w,h)=>t>=h-3?[60,54,50]:(t===2&&(s===1||s===w-2))?[24,20,20]:null);};
+  const HORSES=[{coat:[40,36,36],mane:[24,22,22],low:[28,26,26]},{coat:[120,70,40],mane:[34,28,26],low:[34,28,26]},{coat:[176,174,170],mane:[90,88,86],low:[110,108,106]},{coat:[150,84,46],mane:[170,100,60],low:[140,80,44]}];
+  // a pole with a crossbar and a finial, and a banner hanging from it that sways (`flag`): painted by `fn(a, b)` on its face
+  const standard=(arm,len)=>[['pole',arm||'armR',[1.5,-10,0.5],[-0.5,-10,-0.5,1,len,1],[0.12,0,0],{nb:1}],['bar','pole',[0,len-12,0],[-0.5,-0.5,-0.5,1,1,11],0,{nb:1}],
+    ['fin','pole',[0,len-10,0],[-1,0,-1,2,3,2],0,{nb:1,tp:['y',0,0,0,0]}],['flag','pole',[0,len-12.5,0.5],[-0.5,-16,0,1,16,10],0,{nb:1}]];
+  const standardPaint=(P,wood,metal,fn,fringe)=>{P.map('pole',ALL,(s,t)=>t%10===0?sh(metal,10):sh(wood,hz(s,t>>2,911)*10));P.map('bar',ALL,(s,t)=>sh(wood,hz(s,t,913)*10));plate(P,['fin'],metal);
+    P.sheet('flag','x',(a,b)=>{if(b>=29&&(a%4===1||a%4===2))return 'cut';if(b>=27)return sh(fringe,(a%2?10:-10));return fn(a,b);});};
+  // a crossbow: the stock along the forearm, its steel bow across, the string; a case of bolts at the hip
+  const xbow=(arm,x)=>[['stock',arm||'armR',[x||1.5,-10,0.5],[-0.5,-0.75,-2,1,1.5,11]],['prod','stock',[0,0,8],[-5.5,-0.5,-0.5,11,1,1],[0,0.1,0],{nb:1,tp:['x',1,1,0,0]}],['xstr','stock',[0,0.4,7.4],[-5,-0.25,-0.25,10,0.5,0.5],0,{nb:1}],
+    ['case','body',[4.6,2,-1.5],[-1,-3,-1,2,8,2],[0,0,-0.2],{nb:1}],['bolts','case',[0,5,0],[-0.75,0,-0.75,1.5,2,1.5],0,{nb:1}]];
+  const xbowPaint=(P,wood,metal,fl)=>{P.map('stock',ALL,(s,t)=>sh(wood,hz(s,t>>1,915)*10+(t%6===0?-12:0)));plate(P,['prod'],metal);P.map('xstr',ALL,()=>[220,214,196]);
+    leather(P,['case'],[90,62,38]);P.map('bolts',ALL,(s,t)=>(s+t)%2?[226,220,204]:fl);};
+  // a horse's harness of leather with a gilt or bronze stud at each crossing
+  const riderOf=(ps)=>only(ps,['body','head','armL','armR','thL','thR']);
+  // ---- the hosts
+  Object.assign(AM_KINDS,{
+    // the pikeman of the realm: the soldier's mail and black surcoat, a pike of ash half again a spear's length couched low, a small
+    // round buckler of black and silver on the forearm
+    rpike:{res:2,tex:256,parts:R.soldier([['spear','armR',[1.5,-10,0.5],[-0.5,-14,-0.5,1,46,1],[0.6,0,0],{nb:1}],['lug','spear',[0,30,0],[-1.25,0,-0.75,2.5,1,1.5],0,{nb:1}],
+        ['tipB','spear',[0,31,0],[-1,0,-0.5,2,5,1],0,{nb:1,tp:['y',0,1,0,0]}],['buck','armL',[-3.5,-6,0],[-1,-3.5,-3.5,1,7,7],0,{nb:1}]]),coats:R.coats(4),
+      paint(P,c){R.soldierPaint(P,c);P.map('spear',ALL,(s,t)=>sh(ASH,hz(s,t>>2,917)*14+(t%12===0?-14:0)));plate(P,['lug'],STEEL);P.map('tipB',ALL,(s,t,w)=>sh([214,220,228],s===(w>>1)?-16:16));
+        P.sheet('buck','x',(a,b)=>{const r=Math.hypot(a-6.5,b-6.5);return r>7?'cut':r>5.8?sh(SILVER,b<6?16:-8):r<1.6?sh(SILVER,24):sh(BLACK,hz(a,b,919)*8);});}},
+    // the crossbowman of the realm: the crossbow and its bolts, a tall pavise slung on the back, black with the realm's sign
+    rxbow:{res:2,tex:256,parts:R.soldier([...xbow(),['pav','body',[0,9.5,-2.7],[-5,-16,-1,10,17,1],[0.04,0,0],{nb:1}]]),coats:R.coats(5),
+      paint(P,c){R.soldierPaint(P,c);xbowPaint(P,[104,74,46],IRON,[40,40,48]);
+        P.sheet('pav','z',(a,b)=>{if(a===0||a===19||b===0||b===33)return sh(SILVER,b===0?16:0);if(R.SIGN(a-2,b-7))return [238,240,244];return sh(BLACK,hz(a,b,921)*8+(b%8===0?-6:0));});}},
+    // the household knight: the lord's own, on foot in plate over the mail, a great helm with a slit and a plume, a great sword
+    rguard:{res:2,tex:512,scale:1.04,parts:[...R.soldier([['cuir','body',[0,0,0],[-4.75,0.5,-2.75,9.5,10.5,5.5]],['ghelm','head',[0,0,0],[-3.75,-0.5,-3.75,7.5,8,7.5],0,{head:1}],
+        ['gplume','ghelm',[0,8,-1],[-0.5,0,-3,1,5,6],[-0.3,0,0],{head:1,nb:1,tp:['y',1,0.5,0,-1]}],['cloak','body',[0,10.5,-2.8],[-4.5,-17,-0.5,9,17,1],[0.08,0,0],{nb:1}],...sword(16)],{plume:1})],coats:R.coats(3),
+      paint(P,c){R.soldierPaint(P,c,{plume:1});plate(P,['cuir','ghelm'],SILVER);R.sign(P,'cuir','F',1,1,[30,30,40]);band(P,'cuir',SIDE,0,2,GOLD);
+        P.map('ghelm',['F'],(s,t,w)=>t===6&&s>=2&&s<w-2?[14,14,18]:(s===(w>>1)&&t>7)?sh(SILVER,-20):(t>8&&(s+t)%3===0)?[30,30,36]:null);band(P,'ghelm',SIDE,0,2,GOLD);
+        P.map('gplume',ALL,(s,t)=>sh([240,240,244],hz(s,t,923)*14+(s%2?-10:6)));cloth(P,['cloak'],[24,24,34],{off:2});band(P,'cloak',SIDE,30,34,SILVER);R.sign(P,'cloak','B',1,5,[238,240,244]);swordPaint(P,1);}},
+    // the engineer of the realm: the smith's apron and gauntlets over a working tunic, a felt cap, a coil of rope and a mallet
+    rengin:{res:2,tex:256,parts:[...K('rsmith').parts,['cap','head',[0,6,0],[-3.5,0,-3.5,7,2,7],0,{head:1,tp:['y',0.8,0.8,0,0]}],['coil','body',[-4.8,5,0],[-1,-3,-2.5,2,6,5],[0,0,-0.15],{nb:1}],
+        ['rod','body',[3,10,-2.8],[-0.5,-14,-0.5,1,16,1],[0,0,0.3],{nb:1}]],coats:K('rsmith').coats,
+      paint(P,c){K('rsmith').paint(P,c);cloth(P,['cap'],[70,60,90]);band(P,'cap',SIDE,0,1,[50,40,70]);P.map('coil',ALL,(s,t)=>sh([186,160,110],((s+t*2)%4===0?-30:(s+t*2)%4===1?14:0)+(t%3===0?-12:0)));
+        P.map('rod',ALL,(s,t)=>t%4===0?[30,30,30]:[220,210,180]);}},
+    // the bearer: a plain tunic under a white tabard with the healers' sign (a green branch), a litter rolled on the back; when he
+    // carries one of the fallen, a body wrapped in its cloak lies across his shoulders (`load`, shown by placeFoe)
+    rbear:{res:2,tex:256,parts:[...man(),['tunic','body',[0,0,0],[-4.5,-4,-2.5,9,15,5]],['tab','body',[0,0,0],[-4,-5,-2.75,8,15,5.5]],['belt','body',[0,0,0],[-5,3,-3,10,1,6]],
+        ['lit','body',[0,11,-3.3],[-5,-1.5,-1.5,10,3,3],[0,0,0],{nb:1}],['load','body',[0,11.5,0],[-8,0,-2.5,16,3.5,5],0,{nb:1}]],coats:R.coats(6),
+      paint(P,c){face(P,c);cloth(P,['armL','tunic','body'],[120,104,80]);hands(P,c);cloth(P,['legL'],[90,80,64]);boots(P,[80,58,38],19);
+        cloth(P,['tab'],[228,226,218]);P.map('tab',['F','B'],(s,t,w)=>{const x=s-w/2+0.5,y=t-12;return Math.abs(x)<0.8&&y>-8&&y<6||Math.abs(Math.abs(x)-(6-y)*0.35)<0.7&&y>-6&&y<4?sh([60,120,60],hz(s,t,925)*8):null;});
+        leather(P,['belt'],[80,54,32]);P.map('lit',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([200,190,160],(Math.hypot(s-w/2,t-h/2)%2<1?-14:6)):sh([200,190,160],hz(s,t,927)*10+(t%3===0?-10:0)));
+        P.map('load',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh(c.skin,-10):sh([70,60,52],hz(s,t,929)*12+(s%6===0?-14:0)));}},
+    // ---- standard bearers: each people's banner on a tall pole, its sign large, a fringe at its foot; their banner steadies those
+    // about them (war-units.js)
+    rstd:{res:2,tex:512,parts:R.soldier([...standard('armR',40)]),coats:R.coats(7),
+      paint(P,c){R.soldierPaint(P,c);standardPaint(P,[60,44,34],SILVER,(a,b)=>R.SIGN(a+3,b-6)?[238,240,244]:a<1||b<1?sh(SILVER,0):sh(BLACK,hz(a,b,931)*8),SILVER);}},
+    dstd:{res:2,tex:512,scale:0.95,parts:[...Dw.dwarf(),...Dw.kit(),...Dw.helm(),...standard('armR',34)],coats:Dw.coats(6),
+      paint(P,c){Dw.kitPaint(P,c);Dw.helmPaint(P);const rows=['................','.......1........','......111.......','..2..11111..2...','.222.11111.222..','22222111111222..','................','................',
+        '..3333333333....','...33333333.....','.....3333.......','......33........','.....333........','....33333.......','................','................'];
+        standardPaint(P,[86,60,38],Dw.BRZ,(a,b)=>{const q=(rows[b-6]||'')[a+3];return q==='1'?[236,236,240]:q==='2'?[200,204,214]:q==='3'?sh(GOLD,0):sh(Dw.BLUE,hz(a,b,933)*8);},GOLD);}},
+    estd:{res:2,tex:512,scale:1.08,parts:E.warrior([...standard('armR',42)]),coats:E.coats(4),
+      paint(P,c){E.warriorPaint(P,c);standardPaint(P,[58,40,32],E.GOLD,(a,b)=>{const q=E.SIGN(a+0,b-5);return q===1?E.WHITE:q===2?E.GOLD:sh(E.BLUE,hz(a,b,935)*8);},E.GOLD);}},
+    // ---- the knight of the realm: a horse barded in black with a silver border and the realm's sign on its flanks, a steel
+    // chanfron; the knight in mail and plate under the black surcoat, plumed, with the kite shield and a lance with a black pennon
+    rknight:{res:2,tex:512,scale:1.04,parts:[...E.horse,...riderOf(E.riderParts),...drop(R.soldier([],{plume:1}),['legL','legR','toeL','toeR','body','head','armL','armR','grL','grR']),R.shield,
+        ['lance','armR',[1.5,-10,0.5],[-0.5,-10,-0.5,1,42,1],[0.75,0,0],{nb:1}],['ltip','lance',[0,32,0],[-0.75,0,-0.75,1.5,4,1.5],0,{nb:1,tp:['y',0,0,0,0]}],['pen','lance',[0,24,0],[-0.5,-6,-10,1,6,10],0,{nb:1}]],
+      coats:HORSES.map((h,k)=>[Object.assign({},R.coats(k)[k][0],{h:h}),k?1:2]),
+      paint(P,c){horseCoat(P,c.h);P.map('hhead',['F','T'],(s,t)=>sh(STEEL,(s+t)%4===0?24:0));plate(P,['hspike'],STEEL);
+        cloth(P,['capar'],BLACK);band(P,'capar',['L','R','F','B'],18,22,SILVER);R.sign(P,'capar','L',14,3,[238,240,244]);R.sign(P,'capar','R',14,3,[238,240,244]);
+        leather(P,['saddle','cantle'],[60,40,30]);R.soldierPaint(P,c,{plume:1});P.map('thL',ALL,(s,t,w,h)=>t>=10?(t===h-1?[40,32,28]:sh(STEEL,hz(s,t,937)*8+(s===(w>>1)?24:0))):null);mail(P,['thL']);
+        P.map('thL',SIDE,(s,t,w,h)=>t>=10?sh(STEEL,(t===10?24:0)+hz(s,t,939)*8):null);R.shieldPaint(P);P.map('lance',ALL,(s,t)=>t%10===0?sh(SILVER,0):sh([60,52,48],hz(s,t>>2,941)*8));plate(P,['ltip'],[220,226,234]);
+        P.sheet('pen','x',(a,b)=>{if(a<8&&Math.abs(b-5.5)<(8-a)*0.7)return 'cut';return b===5||b===6?sh(SILVER,0):sh(BLACK,hz(a,b,943)*8);});}},
+    // ---- the riders: the lancer, armed as the horseman with a longer lance and a long plume; the horse archer, quilted, with the
+    // short bow; the outrider, light, with a bundle of javelins on his back and one in hand
+    hlancer:{res:2,tex:512,parts:[...drop(K('hrider').parts,['spear','tipA','tipB','flag','hplume']),...H.spear(50,0.95),['hplume','helm',[0,5.5,-0.5],[-1,-13,-0.5,2,13,1],[0.42,0,0],{head:1,nb:1,tp:['-y',1.6,1,0,0]}]],
+      coats:K('hrider').coats,paint(P,c){K('hrider').paint(P,c);P.map('hplume',ALL,(s,t,w,h)=>sh([238,236,228],hz(s,0,945)*26-t/h*14));}},
+    hharch:{res:2,tex:512,parts:[...drop(K('hrider').parts,['spear','tipA','tipB','flag','shield','boss']),...only(K('hbow').parts,['bowU','bowUt','bowD','bowDt','bgrip','bstr','quiver','fletch'])],
+      coats:K('hrider').coats,paint(P,c){K('hrider').paint(P,c);K('hbow').paint(P,c);}},
+    hout:{res:2,tex:512,parts:[...drop(K('hrider').parts,['spear','tipA','tipB','flag','shield','boss']),['jav','armR',[1.5,-10,0.5],[-0.5,-6,-0.5,1,18,1],[0.3,0,0],{nb:1}],
+        ['javt','jav',[0,12,0],[-0.75,0,-0.75,1.5,3,1.5],0,{nb:1,tp:['y',0,0,0,0]}],['javs','body',[2.5,4,-2.8],[-1.5,-6,-0.75,3,17,1.5],[0.15,0,-0.35],{nb:1}]],
+      coats:K('hrider').coats,paint(P,c){K('hrider').paint(P,c);P.map('jav',ALL,(s,t)=>sh(ASH,hz(s,t>>2,947)*12));plate(P,['javt'],STEEL);
+        P.map('javs',ALL,(s,t,w,h,f)=>f==='T'?((s%2)?sh(STEEL,10):[60,44,30]):(t<3?sh(STEEL,(s%2?10:-10)):t===8?[70,48,30]:sh(ASH,(s%2?-12:6))));}},
+    // ---- the high elves: the mounted archer (the knight's horse, the archer's bow and cloak); the glaive warden with a great glaive
+    // in both hands; the blade master in silver over white with a long blade in each hand and no shield
+    emarch:{res:2,tex:512,scale:1.04,parts:[...E.horse,...drop(E.riderParts,['lance','ltip','flag','shield']),...only(K('ebow').parts,['cape','bowU','bowUt','bowD','bowDt','bgrip','bstr','quiver','fletch'])],
+      coats:K('eknight').coats,paint(P,c){K('eknight').paint(P,c);K('ebow').paint(P,c);}},
+    eglaive:{res:2,tex:256,scale:1.1,parts:E.warrior([['shaft','armR',[1.5,-10,0.5],[-0.5,-12,-0.5,1,38,1],[0.25,0,0],{nb:1}],['sock','shaft',[0,26,0],[-0.75,0,-0.75,1.5,2,1.5],0,{nb:1}],
+        ['gl1','shaft',[0,28,0],[-0.5,0,-1.5,1,7,3],0,{nb:1}],['gl2','gl1',[0,7,0],[-0.5,0,-1.5,1,6,3],[-0.4,0,0],{nb:1,tp:['y',1,0,0,-0.8]}],['spk','shaft',[0,-12,0],[-0.5,-3,-0.5,1,3,1],0,{nb:1,tp:['-y',0,0,0,0]}]],{tall:1}),coats:E.coats(5),
+      paint(P,c){E.warriorPaint(P,c,{gold:[236,206,120]});P.map('shaft',ALL,(s,t)=>t%8===0?sh(E.GOLD,10):sh([40,30,30],hz(s,t>>2,949)*8));plate(P,['sock','spk'],E.GOLD);
+        for(const n of ['gl1','gl2'])P.map(n,ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([222,228,236],s===0?-18:s===w-1?26:4):sh([232,236,242],10));}},
+    eblade:{res:2,tex:256,scale:1.1,parts:E.warrior([...E.blade(15),['gripL','armL',[-1.5,-10.5,0.5],[-0.5,-0.5,-2.5,1,1,4],0,{nb:1}],['guardL','gripL',[0,0,1.5],[-0.5,-3,0,1,6,1],[0.3,0,0],{nb:1}],
+        ['blL','gripL',[0,0,2],[-0.5,-1,0,1,2,13],[-0.08,0,0],{nb:1,tp:['z',1,0,0,0.5]}],['cape','body',[0,10.5,-2.9],[-4.5,-20,-0.5,9,20,1],[0.08,0,0],{nb:1}]],{tall:1,robe:11}),coats:E.coats(6),
+      paint(P,c){E.warriorPaint(P,c,{gold:[214,220,232],robe:[226,226,232]});E.bladePaint(P);P.map('gripL',ALL,(s,t)=>(s+t)%2?sh(E.GOLD,0):[60,40,30]);plate(P,['guardL'],E.GOLD);
+        P.map('blL',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([220,226,234],t===0?26:t===h-1?-10:t===1?-20:4):sh([230,234,240],12));cloth(P,['cape'],[230,232,238],{off:2});E.vine(P,'cape',SIDE,34,38,E.GOLD,[230,232,238]);E.sign(P,'cape','B',1,8,E.GOLD,[120,160,220]);}},
+    // ---- the wood elves: the skirmisher, light, a short bow and a long knife, a green band at the brow; the sharpshooter, hooded
+    // and cloaked, with a great bow taller than he is
+    wskirm:{res:2,tex:256,scale:1.06,parts:[...man(),...Wd.jerkin(),...Wd.ears(),...Wd.hairB(6),['band','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}],...Wd.bow(),...Wd.knife('R',5)],coats:Wd.coats(4),
+      paint(P,c){Wd.jerkinPaint(P,c,[120,96,62]);Wd.bowPaint(P);Wd.knifePaint(P,'R');P.map('band',ALL,(s,t)=>sh(Wd.MOSS,(s%3===0?-14:6)));}},
+    wlong:{res:2,tex:256,scale:1.08,parts:[...man(),...Wd.jerkin(),...Wd.ears(),...Wd.hairB(6),...Wd.hood(),
+        ['bowU','armL',[-1.5,-10,1.5],[-0.5,0,-0.5,1,16,1],[-0.12,0,0],{nb:1,tp:['y',0.6,0.6,0,0]}],['bowUt','bowU',[0,16,0],[-0.5,0,-0.5,1,2,1],[0.8,0,0],{nb:1}],
+        ['bowD','armL',[-1.5,-10,1.5],[-0.5,-16,-0.5,1,16,1],[0.12,0,0],{nb:1,tp:['-y',0.6,0.6,0,0]}],['bowDt','bowD',[0,-16,0],[-0.5,-2,-0.5,1,2,1],[-0.8,0,0],{nb:1}],
+        ['bgrip','armL',[-1.5,-10,1.5],[-1,-1,-1,2,2,2],0,{nb:1}],['bstr','armL',[-1.5,-10,-0.4],[-0.5,-15,-0.5,1,30,1],0,{nb:1}],
+        ['quiver','body',[2,5,-3.4],[-1,-2,-1,2,11,2],[0,0,0.4],{nb:1}],['fletch','quiver',[0,9,0],[-1,0,-1,2,3,2],0,{nb:1}]],coats:Wd.coats(5),
+      paint(P,c){Wd.jerkinPaint(P,c,[100,84,58]);Wd.hoodPaint(P,Wd.CLOAK);Wd.bowPaint(P);Wd.leafSign(P,'cloak','B',2,10,Wd.MOSS,Wd.COP);}},
+    // ---- the dwarves: the axe thrower with a bandolier of throwing axes; the shieldbreaker with a two-handed war pick; the
+    // ironclad in plate from crown to foot with a great axe; the sapper with a mail shirt under the miner's leathers, pick and shovel
+    dthrow:{res:2,tex:256,scale:0.95,parts:[...Dw.dwarf(),...Dw.kit(),...Dw.helm(),...Dw.axe(7),['bando','body',[0,5,0],[-5.5,-1,-3.5,11,2,7],[0,0,0.55],{nb:1}],
+        ['ax1','bando',[-3,0,3.6],[-0.5,-1.5,0,1,3,1.5],0,{nb:1}],['ax2','bando',[0,0,3.6],[-0.5,-1.5,0,1,3,1.5],0,{nb:1,m:'ax1'}],['ax3','bando',[3,0,3.6],[-0.5,-1.5,0,1,3,1.5],0,{nb:1,m:'ax1'}]],coats:Dw.coats(7),
+      paint(P,c){Dw.kitPaint(P,c);Dw.helmPaint(P);Dw.axePaint(P);leather(P,['bando'],[96,62,36]);P.map('ax1',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?sh([200,204,210],t===0?24:0):sh(Dw.BRZ,0));}},
+    dbreak:{res:2,tex:256,scale:0.97,parts:[...Dw.dwarf({beard:8}),...Dw.kit(),...Dw.helm(),['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-3,1,1,17]],['phead','haft',[0,0,13],[-1.5,-1.5,0,3,3,3],0,{nb:1}],
+        ['spike','phead',[0,-1.5,1.5],[-0.5,-6,-0.75,1,6,1.5],0,{nb:1,tp:['-y',0,0.2,0,0]}],['peen','phead',[0,1.5,1.5],[-1.25,0,-1.25,2.5,3,2.5],0,{nb:1}],['fur','body',[0,10,0],[-5.75,-2,-3.75,11.5,3,7.5]]],coats:Dw.coats(8),
+      paint(P,c){Dw.kitPaint(P,c);Dw.helmPaint(P);P.map('haft',ALL,(s,t)=>t%5===0?sh(Dw.BRZ,6):sh([86,60,38],hz(s,t>>2,951)*10));plate(P,['phead','spike','peen'],Dw.DIRON);band(P,'phead',SIDE,0,1,Dw.BRZ);
+        P.map('fur',ALL,(s,t)=>sh([110,86,62],hz(s,t,953)*30+((s+t)%3===0?-16:0)));}},
+    diron:{res:2,tex:512,scale:1,parts:[...drop(K('dhammer').parts,['haft','maul']),['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-3,1,1,17]],['axe','haft',[0,0,12],[-0.5,-6,0,1,10,4.5],0,{nb:1,tp:['z',1,0.5,0,-1]}],
+        ['axe2','haft',[0,0,12],[-0.5,-1,-0.5,1,8,4],[Math.PI,0,0],{nb:1,tp:['z',1,0.5,0,-1]}],['crown','head',[0,8,0],[-0.5,0,-3,1,3,6],0,{head:1,nb:1}]],coats:Dw.coats(9),
+      paint(P,c){K('dhammer').paint(P,c);for(const n of ['cuir','skirt','grL','helm','mask'])P.map(n,SIDE,(s,t,w,h)=>t===0||t===h-1?sh(GOLD,0):null);P.map('haft',ALL,(s,t)=>t%4===0?sh(GOLD,0):sh([60,42,30],hz(s,t>>2,955)*10));
+        for(const n of ['axe','axe2'])P.map(n,ALL,(s,t,w,h,f)=>f==='L'||f==='R'?(t===0?sh([226,230,236],26):sh([150,154,164],s<2?-20:hz(s,t,957)*10)):sh(GOLD,6));plate(P,['crown'],GOLD);}},
+    dsapper:{res:2,tex:256,scale:0.94,parts:[...K('dminer').parts,['shov','body',[3,4,-3.6],[-0.5,-8,-0.5,1,17,1],[0,0,0.35],{nb:1}],['shovb','shov',[0,-8,0],[-1.75,-5,-0.5,3.5,5,1],0,{nb:1}]],coats:Dw.coats(10),
+      paint(P,c){K('dminer').paint(P,c);mail(P,['tunic']);band(P,'tunic',SIDE,24,28,Dw.BLUE);P.map('shov',ALL,(s,t)=>sh([110,80,50],hz(s,t>>2,959)*10));plate(P,['shovb'],Dw.DIRON);}},
+    // ---- the healer: an elf of the houses of healing in white, a green stole worked with gold leaves, a satchel of herbs, a staff
+    // of pale wood with a white stone that shines
+    eheal:{res:2,tex:256,scale:1.06,parts:[...man(),['robe','body',[0,1,0],[-4.5,-12,-2.5,9,13,5],0,{tp:['-y',1.12,1.15,0,0]}],['stole','body',[0,0,0],[-2,-11,-2.75,4,22,5.5]],
+        ['bag','body',[-4.6,2,0.5],[-1.25,-3,-2,2.5,4,4],0,{nb:1}],['strap','body',[0,5,0],[-5,-0.5,-3,10,1,6],[0,0,-0.6],{nb:1}],['circ','head',[0,5,0],[-3.5,0,-3.5,7,1,7],0,{head:1}],
+        ['staff','armR',[1.5,-10,0.5],[-0.5,-9,-0.5,1,30,1],[0.12,0,0],{nb:1}],['stone','staff',[0,21,0],[-1,0,-1,2,2.5,2],0,{nb:1}],...E.ears(),...E.hairB(9)],coats:E.coats(7),
+      paint(P,c){E.elfFace(P,c);cloth(P,['armL','body','robe'],[232,232,226]);hands(P,c);P.map('legL',ALL,()=>[200,198,190]);boots(P,[150,140,120],21);E.vine(P,'robe',SIDE,46,50,[150,190,140],[232,232,226]);
+        P.map('stole',SIDE,(s,t)=>s===0||s===7?sh(E.GOLD,0):(t%6===2&&s>1&&s<6)?sh(E.GOLD,6):sh([70,120,74],hz(s,t,961)*8));leather(P,['bag','strap'],[120,90,56]);P.map('bag',['L'],(s,t)=>t===3?sh([120,160,90],0):null);
+        plate(P,['circ'],[226,228,236]);P.map('staff',ALL,(s,t)=>sh([220,206,170],hz(s,t>>2,963)*8+(t%7===0?-14:0)));P.map('stone',ALL,()=>[236,244,255,200]);}}
+  });
+  // ---- the wastes
+  const gobRider=[['body','hbody',[0,11,-1],[-3,0,-1.5,6,7,3],[0.2,0,0]],['cloth','body',[0,0,0],[-4,-3,-2,8,4,4]],['head','body',[0,7,1],[-3,-0.5,-3,6,5,6],[-0.3,0,0],{head:1}],
+    ['nose','head',[0,1.5,3],[-0.5,-1,0,1,2,2],[0.2,0,0],{head:1}],['earL','head',[-3,3,0],[-5,-0.5,-0.5,5,1,2],[0,0.35,-0.35],{head:1}],['earR','head',[3,3,0],[0,-0.5,-0.5,5,1,2],[0,-0.35,0.35],{head:1,m:'earL'}],
+    ['armL','body',[-3,6,0.5],[-2,-7,-1,2,7,2],[-0.6,0,0.08]],['armR','body',[3,6,0.5],[0,-7,-1,2,7,2],[-0.6,0,-0.08],{m:'armL'}],
+    ['thL','body',[-2,0.5,0],[-1,-6,-1,2,6,2],[-0.6,0,-0.7]],['thR','body',[2,0.5,0],[-1,-6,-1,2,6,2],[-0.6,0,0.7],{m:'thL'}]];
+  Object.assign(AM_KINDS,{
+    // the wolf rider: a goblin on a great warg of the ash (shaggy grey-black, a mane of bristles along its back, a long jaw full of
+    // teeth, eyes like coals) in a harness of hide and iron rings, a spear with a ragged pennon
+    wolfrid:{res:2,tex:256,parts:[['legFL',null,[-2.5,8,7],[-1.5,-8,-1.5,3,8,3]],['legFR',null,[2.5,8,7],[-1.5,-8,-1.5,3,8,3],0,{m:'legFL'}],['legBL',null,[-2.5,8,-6],[-1.5,-8,-1.5,3,8,3]],['legBR',null,[2.5,8,-6],[-1.5,-8,-1.5,3,8,3],0,{m:'legBL'}],
+        ['hbody',null,[0,8,0],[-4,0,-9,8,8,18]],['mane','hbody',[0,8,0],[-1.5,0,-8,3,2,14],0,{nb:1}],['neck','hbody',[0,5,8],[-3,-2,-2,6,7,5],[0.5,0,0]],
+        ['hhead','neck',[0,4,2],[-3,-3,-1,6,6,6],[-0.5,0,0]],['muzzle','hhead',[0,-2,5],[-2,-1,0,4,3,5]],['jaw','muzzle',[0,-1,0],[-1.75,-1.5,0,3.5,1.5,4.5],[0.15,0,0]],
+        ['earL','hhead',[-2,3,0],[-0.75,0,-0.75,1.5,3,1.5],[-0.2,0,-0.2]],['earR','hhead',[2,3,0],[-0.75,0,-0.75,1.5,3,1.5],[-0.2,0,0.2],{m:'earL'}],
+        ['tail','hbody',[0,6,-9],[-1.5,-10,-1.5,3,10,3],[0.6,0,0]],['harn','hbody',[0,0,0],[-4.5,3,-3,9,5.5,7]],
+        ...gobRider,['spear','armR',[1,-6.5,0],[-0.5,-6,-0.5,1,26,1],[0.4,0,0],{nb:1}],['stip','spear',[0,20,0],[-1,0,-0.5,2,3,1],0,{nb:1,tp:['y',0,0,0,0]}],['pen','spear',[0,16,0],[-0.5,-4,-6,1,4,6],0,{nb:1}]],
+      coats:[[{fur:[64,60,58],skin:[118,136,62],inner:[150,110,100],rag:[96,72,46],eye:[255,214,60],weye:[255,120,30]},3],[{fur:[82,72,62],skin:[100,120,74],inner:[146,104,96],rag:[84,64,52],eye:[255,190,40],weye:[255,80,30]},2],
+        [{fur:[46,44,46],skin:[136,132,82],inner:[156,112,98],rag:[110,84,52],eye:[255,120,40],weye:[255,170,40]},1]],
+      paint(P,c){P.coat(['hbody','neck','hhead','muzzle','jaw','earL','legFL','legBL','tail'],c.fur,16);for(const n of ['hbody','neck','tail','legFL','legBL'])P.hair(n);P.coat(['mane'],[c.fur[0]-24,c.fur[1]-24,c.fur[2]-24],18);
+        P.rows('legFL',['L','F','R','B'],13,16,[30,28,28]);P.rows('legBL',['L','F','R','B'],13,16,[30,28,28]);P.rows('muzzle',['F'],0,2,[24,20,20]);
+        P.rows('jaw',['L','R','F'],0,1,[236,230,214]);P.rows('muzzle',['L','R'],4,6,[236,230,214]);P.glow('hhead','L',9,3,c.weye);P.glow('hhead','R',2,3,c.weye);P.coat(['earL'],[c.fur[0]-20,c.fur[1]-20,c.fur[2]-20],10);
+        P.coat(['harn'],[70,50,34],12);P.rows('harn',['L','R','T'],0,2,[50,46,50]);P.spots('harn',['L','R'],[150,146,150],0.08);
+        F.gobPaint(P,c);P.coat(['thL'],c.skin,14);P.rows('thL',['L','F','R','B'],8,12,[50,40,30]);P.coat(['spear'],[80,56,34],8);P.coat(['stip'],[150,146,150],10);P.coat(['pen'],[110,30,26],16);P.spots('pen',['L','R'],[60,20,18],0.3);}},
+    // the pot-thrower: a goblin with a wicker basket of clay fire pots on his back and one alight in his hand
+    gpot:{parts:[...F.gob(),['basket','body',[0,4,-2],[-2.5,-3,-3,5,6,3],0,{nb:1}],['pots','basket',[0,3,-1.5],[-2,0,-1.25,4,1.5,2.5],0,{nb:1}],['pot','armR',[1,-6.5,0],[-1,-1,-1,2,2,2],0,{nb:1}],['wick','pot',[0,1,0],[-0.5,0,-0.5,1,1,1],0,{nb:1}]],coats:F.gobCoats,
+      paint(P,c){F.gobPaint(P,c);P.coat(['basket'],[150,120,70],14);P.rows('basket',['L','F','R','B'],1,2,[110,84,50]);P.rows('basket',['L','F','R','B'],4,5,[110,84,50]);P.coat(['pots','pot'],[150,80,50],12);P.glowFaces(['wick'],[255,170,50]);P.glow('pots','T',1,1,[255,140,40]);P.glow('pots','T',5,2,[255,140,40]);}},
+    // the war drummer: an orc with a great drum of hide on a harness at his belly and a bone stick in each hand
+    odrum:{scale:1.08,parts:[...F.orc(),['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['drum','body',[0,2,3],[-4,-4,0,8,8,6],[0.15,0,0],{nb:1}],['skin','drum',[0,0,6],[-3.5,-3.5,0,7,7,0.5],0,{nb:1}],
+        ['stL','armL',[-1.5,-10,0],[-0.5,-0.5,-0.5,1,1,7],[0.6,0,0],{nb:1}],['stR','armR',[1.5,-10,0],[-0.5,-0.5,-0.5,1,1,7],[0.6,0,0],{nb:1,m:'stL'}]],coats:F.orcCoats,
+      paint(P,c){F.orcPaint(P,c);P.coat(['helm'],c.iron,10);P.coat(['drum'],[90,40,30],12);P.rows('drum',['L','R','F','B'],0,1,c.iron);P.rows('drum',['L','R','F','B'],7,8,c.iron);P.spots('drum',['L','R'],[230,220,190],0.06);
+        P.coat(['skin'],[200,184,150],10);P.rect('skin','F',5,5,4,4,[130,30,24]);P.coat(['stL'],[226,216,190],8);P.glow('stL','F',0,0,[255,140,40]);}},
+    // the fire shaman: an orc in hides hung with bones, a headdress of horns, a staff crowned with a burning skull
+    oshaman:{scale:1.06,parts:[...F.orc(),['robe','body',[0,0,0],[-5,-6,-3,10,16,6]],['horns','head',[0,6,0],[-4,0,-0.5,8,1,1],0,{head:1}],['hnL','horns',[-4,0,0],[-0.5,0,-0.5,1,4,1],[0,0,-0.4],{head:1,nb:1}],['hnR','horns',[4,0,0],[-0.5,0,-0.5,1,4,1],[0,0,0.4],{head:1,nb:1,m:'hnL'}],
+        ['bones','body',[0,9,3],[-3,-3,0,6,3,1],0,{nb:1}],['staff','armR',[1.5,-10,0],[-0.5,-4,-0.5,1,22,1],[-0.2,0,0],{nb:1}],['skull','staff',[0,18,0],[-1.5,0,-1.5,3,3,3],0,{nb:1}],['flame','skull',[0,3,0],[-1,0,-1,2,3,2],0,{nb:1,tp:['y',0,0,0,0]}]],coats:F.orcCoats,
+      paint(P,c){F.orcPaint(P,c);P.coat(['robe'],[70,50,40],16);P.fringe('robe',[40,28,22]);P.cracks(['robe'],[255,110,30],0.06);P.coat(['horns','hnL'],[210,196,170],8);P.coat(['bones'],[226,216,190],10);
+        P.coat(['staff'],[60,40,30],8);P.coat(['skull'],[220,210,184],10);P.glow('skull','F',0,1,[255,90,30]);P.glow('skull','F',2,1,[255,90,30]);P.glowFaces(['flame'],[255,150,40]);P.glowEyes('head',2,2,[255,90,30]);}},
+    // the siege troll: an ash troll armoured in plates of black iron chained over its back and shoulders, an iron cap, carrying a ram
+    // of a whole trunk shod with iron
+    strollr:{scale:1.45,parts:[...drop(K('troll').parts,['club']),['plB','body',[0,8,-5.5],[-7,-6,-1,14,13,2],0,{nb:1}],['plL','armL',[0,0,0],[-6,-4,-4,6,5,8]],['plR','armR',[0,0,0],[0,-4,-4,6,5,8],0,{m:'plL'}],
+        ['cap','head',[0,4,0],[-4.5,0,-3.5,9,3,8],0,{head:1}],['ram','body',[0,3,8],[-2,-2,-4,4,4,26],[-0.45,0,0],{nb:1}],['ramh','ram',[0,0,22],[-2.5,-2.5,0,5,5,3],0,{nb:1}]],coats:K('troll').coats,
+      paint(P,c){K('troll').paint(P,c);P.coat(['plB','plL','cap'],[40,38,42],10);P.spots('plB',['B','L','R'],[120,110,100],0.05);P.rows('plB',['B'],5,6,[70,66,70]);
+        P.coat(['ram'],[80,60,42],12);P.rows('ram',['L','R','T','D'],0,2,[50,48,52]);P.coat(['ramh'],[52,50,54],8);P.glow('ramh','F',4,4,[255,120,30]);}},
+    // the war beast: a great boar of the ash bred for war, a head lower than a troll but twice as heavy, plated in iron down its
+    // back, an iron mask over its face, tusks shod with iron, chains hanging from its collar
+    wbeast:{scale:1.6,parts:[['legL',null,[-3.5,9,-7],[-2,-9,-2,4,9,4]],['legR',null,[3.5,9,-7],[-2,-9,-2,4,9,4],0,{m:'legL'}],['body',null,[0,9,0],[-6,-1,-10,12,12,20]],
+        ['armL','body',[-3.5,2,7],[-2,-10,-2,4,10,4]],['armR','body',[3.5,2,7],[-2,-10,-2,4,10,4],0,{m:'armL'}],['head','body',[0,3,10],[-4,-4,0,8,8,7],[0.2,0,0],{head:1}],
+        ['snout','head',[0,-2,7],[-2.5,-2,0,5,4,3]],['tuskL','snout',[-2.5,0,1],[-0.5,0,-0.5,1,4,1],[0.4,0,-0.3]],['tuskR','snout',[2.5,0,1],[-0.5,0,-0.5,1,4,1],[0.4,0,0.3],{m:'tuskL'}],
+        ['mask','head',[0,0,7],[-4.25,-1,0,8.5,5,0.5],0,{head:1}],['plates','body',[0,11,0],[-5,0,-9,10,2,18],0,{nb:1}],['spikes','plates',[0,2,0],[-0.5,0,-8,1,3,16],0,{nb:1,tp:['y',0,1,0,0]}],
+        ['collar','body',[0,5,9],[-6.5,-3,-1.5,13,8,3]],['chainL','collar',[-6,-3,0],[-0.5,-9,-0.5,1,9,1],[0.3,0,0],{nb:1}],['chainR','collar',[6,-3,0],[-0.5,-9,-0.5,1,9,1],[0.3,0,0],{nb:1,m:'chainL'}],['tail','body',[0,8,-10],[-0.5,-5,-0.5,1,5,1],[0.6,0,0],{nb:1}]],
+      coats:[[{hide:[70,56,48],iron:[44,42,46],eye:[255,120,30]},3],[{hide:[86,64,50],iron:[52,48,50],eye:[255,80,30]},1]],
+      paint(P,c){P.coat(['body','head','snout','legL','armL'],c.hide,16);P.hair('body');P.spots('body',['L','R','T'],[c.hide[0]-30,c.hide[1]-30,c.hide[2]-30],0.12);P.rows('legL',['L','F','R','B'],15,18,[30,26,24]);P.rows('armL',['L','F','R','B'],15,20,[30,26,24]);
+        P.coat(['tuskL'],[226,216,190],8);P.coat(['mask','plates','collar'],c.iron,10);P.spots('plates',['T','L','R'],[120,110,100],0.06);P.coat(['spikes'],[150,146,150],8);P.coat(['chainL'],[90,88,92],12);
+        P.rows('chainL',['L','F','R','B'],0,30,[110,108,112]);P.glowEyes('mask',3,4,c.eye);P.rows('snout',['F'],2,4,[30,24,22]);P.coat(['tail'],c.hide,10);}},
+    // the shield orc: an orc behind a tall shield of black iron plates with spikes at its foot, a short spear
+    oshield:{parts:[...F.orc(),['helm','head',[0,0,0],[-3.5,-0.5,-3.5,7,8,7],0,{head:1}],['tower','armL',[-3,-6,0],[-1,-9,-5,1,17,10],0,{nb:1}],['tspk','tower',[0,-9,0],[-0.5,-2,-4,1,2,8],0,{nb:1,tp:['-y',0,1,0,0]}],
+        ['spear','armR',[1.5,-10,0],[-0.5,-6,-0.5,1,20,1],[0.3,0,0],{nb:1}],['stip','spear',[0,14,0],[-1,0,-0.5,2,3,1],0,{nb:1,tp:['y',0,0,0,0]}]],coats:F.orcCoats,
+      paint(P,c){F.orcPaint(P,c);P.coat(['helm','tower'],c.iron,10);P.rows('helm',['F'],2,3,[20,18,20]);P.glow('helm','F',2,2,c.eye);P.glow('helm','F',4,2,c.eye);P.rows('tower',['L'],0,1,[70,66,70]);P.rect('tower','L',8,0,4,34,[120,30,26]);
+        P.spots('tower',['L'],[110,100,96],0.05);P.coat(['tspk'],[150,146,150],8);P.coat(['spear'],[80,56,34],8);P.coat(['stip'],[150,146,150],10);}},
+    // the goblin skulker: small and quick, a knife in each hand, a rag over the face
+    gswarm:{scale:0.85,parts:[...F.gob(),['wpn','armR',[1,-6.5,0],[-0.5,-0.5,-1,1,1,5],0,{nb:1}],['wpnL','armL',[-1,-6.5,0],[-0.5,-0.5,-1,1,1,5],0,{nb:1}],['rag','head',[0,0.5,3],[-3,-0.5,0,6,2,0.5],0,{head:1,nb:1}]],coats:F.gobCoats,
+      paint(P,c){F.gobPaint(P,c);P.coat(['wpn','wpnL'],[170,170,176],10);P.coat(['rag'],[60,40,30],10);}},
+    // the troll driver: an orc in a long hide coat with a whip of many tails and a goad of iron
+    tdriver:{scale:1.1,parts:[...F.orc(),['coatT','body',[0,0,0],[-5,-8,-3,10,18,6]],['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['whip1','armR',[1.5,-10,0],[-0.5,-0.5,-0.5,1,1,6],[0.4,0,0],{nb:1}],
+        ['whip2','whip1',[0,0,6],[-0.5,-0.5,-0.5,1,1,7],[0.4,0,0],{nb:1}],['whip3','whip2',[0,0,7],[-0.5,-0.5,-0.5,1,1,7],[0.4,0,0],{nb:1}],['goad','armL',[-1.5,-10,0],[-0.5,-4,-0.5,1,14,1],[0.3,0,0],{nb:1}]],coats:F.orcCoats,
+      paint(P,c){F.orcPaint(P,c);P.coat(['coatT'],[80,62,46],14);P.fringe('coatT',[54,40,30]);P.coat(['helm'],c.iron,10);P.coat(['whip1'],[60,40,30],8);P.coat(['whip2','whip3'],[90,60,40],10);P.coat(['goad'],c.iron,10);P.glow('goad','T',0,0,[255,120,30]);}},
+    // the orc crossbowman: a heavy crossbow of black iron, a hood, a case of bolts
+    oxbow:{parts:[...F.orc(),['hood','head',[0,0,0],[-3.5,-0.5,-3.5,7,7,6],0,{head:1}],...xbow('armR',1.5)],coats:F.orcCoats,
+      paint(P,c){F.orcPaint(P,c);P.coat(['hood'],[50,44,40],12);xbowPaint(P,[70,50,34],[52,50,54],[110,30,26]);}}
   });
 })();
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
@@ -11658,7 +11876,7 @@ function folkGreet(){
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
     if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
-    toast(F.n+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
+    toast((f.hero?f.hero.n:F.n)+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
 // ---- Behaviour
 // can a foe see the player? A ray from its eyes to the player's, through anything but solid opaque blocks
@@ -11691,15 +11909,15 @@ function foeRally(f,E){
 // a blow or a shot from the other side: less through a shield from the front, a push back; it turns on the one who struck
 // unless it already fights; slain, it falls
 function foeHurtFoe(g,n,by,ux,uz,kb,blow){
-  if(g.dead)return;const G=FOES[g.kind];
-  if(blow&&G.block&&g.st!=='sleep'&&Math.abs(angTo(g.yaw,Math.atan2(by.x-g.x,by.z-g.z)))<1.05){n*=1-G.block;if(foeHear([g.x,g.y,g.z]))burst(0.12,'bandpass',2600,4,0.2,0,[g.x,g.y+1.2,g.z]);}
+  if(g.dead)return;const G=FOES[g.kind];[n,kb]=warDmg(g,n,by,kb,blow); // the war's units (W3)
+  if(blow&&G.block&&!(by&&by.kind&&FOES[by.kind].pierce)&&g.st!=='sleep'&&Math.abs(angTo(g.yaw,Math.atan2(by.x-g.x,by.z-g.z)))<1.05){n*=1-G.block;if(foeHear([g.x,g.y,g.z]))burst(0.12,'bandpass',2600,4,0.2,0,[g.x,g.y+1.2,g.z]);}
   g.hp-=n;g.hurt=1;g.kvx+=ux*kb*G.mass;g.kvz+=uz*kb*G.mass;if(blow&&G.mass>0.3)g.vy=Math.max(g.vy,2);
   for(let k=0;k<4;k++)spawnP(g.x,g.y+g.m.box[4]*0.6,g.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,g.kind==='ember'?[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
   if(g.st==='sleep')g.st='idle';
   if(!g.foe&&g.st!=='chase'&&!by.gone&&!by.dead){g.foe=by;g.eseen=0;foeRally(g,by);}else foeCall(g,'hurt');
-  if(g.hp<=0)foeFalls(g,by);
+  if(g.hp<=0)foeFalls(g,by);warCleave(g,n,by,ux,uz,blow);
 }
-function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;if(g.lordOf)lordFalls(g);
+function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;if(g.lordOf)lordFalls(g);warHeroFell(g,by);
   if(G.boss&&!g.lordOf&&Math.hypot(g.x-PL.x,g.z-PL.z)<48){const n=FOES[by.kind].n.toLowerCase();toast('The '+G.n.toLowerCase()+' is slain by a'+(/^[aeiou]/.test(n)?'n ':' ')+n);}}
 const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
 function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee'||g.foe)continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
@@ -11815,7 +12033,7 @@ function foeShoot(f,S,k){
   const d=Math.hypot(tx-ex,tz-ez),t=d/S.v,ax=tx+tvx*t*0.6+(k?(Math.random()-0.5)*k*2.5:0),az=tz+tvz*t*0.6+(k?(Math.random()-0.5)*k*2.5:0);
   const vx=(ax-ex)/t,vz=(az-ez)/t,vy=(ty-ey)/t+0.5*K.g*t;
   const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(K.col[0],K.col[1],K.col[2]),transparent:!!K.glow,opacity:K.glow?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
-  m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}m.frustumCulled=false;scene.add(m);
+  m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}else if(S.k==='bolt'){m.scale.z=0.6;m.scale.x=m.scale.y=0.1;}else if(S.k==='jav'){m.scale.z=1.7;m.scale.x=m.scale.y=0.08;}else if(S.k==='axe'){m.scale.set(0.08,0.4,0.3);}m.frustumCulled=false;scene.add(m);
   shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,from:f,side:foeSide(f),atP:!FOES[f.kind].folk||folkWrath(f),cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
   if(foeHear([ex,ey,ez])){if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);}
 }
@@ -11831,8 +12049,9 @@ function updShots(dt){
     if((s.k==='fire'||s.k==='hellfire')&&Math.random()<(s.k==='fire'?0.6:1))spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
     if(gone){if(s.k==='fire'||s.k==='hellfire')for(let k=0;k<(s.k==='fire'?8:24);k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
       else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
+      if(s.k==='pot'){for(let k=0;k<14;k++)spawnP(s.x,s.y+0.4,s.z,(Math.random()-.5)*4,Math.random()*3,(Math.random()-.5)*4,[1,0.5+Math.random()*0.3,0.1],0.6,3);burst(0.5,'lowpass',380,1,0.35,0,[s.x,s.y,s.z]);warSplash(s.x,s.y,s.z,!FOES[s.from.kind].folk);} // a fire pot bursts (W3)
       scene.remove(s.m);s.m.material.dispose();shots.splice(i,1);continue;}
-    s.m.position.x=s.x;s.m.position.y=s.y;s.m.position.z=s.z;s.m.rotation.y=Math.atan2(s.vx,s.vz);s.m.rotation.x=-Math.atan2(s.vy,Math.hypot(s.vx,s.vz));}
+    s.m.position.x=s.x;s.m.position.y=s.y;s.m.position.z=s.z;s.m.rotation.y=Math.atan2(s.vx,s.vz);s.m.rotation.x=K.spin?s.life*14:-Math.atan2(s.vy,Math.hypot(s.vx,s.vz));}
 }
 // ---- The parts in motion: legs and arms in step, a wind-up and a blow, a bow drawn, a sling whirled, wings that beat,
 // a whip that trails, a fall when slain
@@ -11857,11 +12076,12 @@ function placeFoe(f,dt){
   if(P.wingL){const b=Math.sin(foeClock*(f.st==='chase'?3.2:1.4))*0.25;P.wingL.rotation.y=rest(P.wingL)[1]+b;P.wingR.rotation.y=rest(P.wingR)[1]-b;}
   if(P.whip1){const k=f.atkK==='whip'&&f.atk>0?prog:0,wv=Math.sin(foeClock*4+f.id)*0.25;P.whip1.rotation.x=rest(P.whip1)[0]-k*1.4+wv;P.whip2.rotation.x=rest(P.whip2)[0]+wv*1.2;P.whip3.rotation.x=rest(P.whip3)[0]+wv*1.5;}
   if(P.tail)P.tail.rotation.y=Math.sin(foeClock*1.3+f.id)*0.3;
-  if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;
+  if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;if(P.load)P.load.visible=!!f.carry; // a bearer's burden (W3)
   if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
   if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-(f.war?WAR_LIE-1:1.6))*0.6;}
   else if(f.atkK==='heave'&&f.atk>0&&P.armL){const k=Math.min(1,prog*1.6);P.armL.rotation.x=P.armR.rotation.x=-1.5+0.5*k;} // the ram's crew heave (W2)
   else if(f.climb&&!f.climb.ph&&P.armL){const k=Math.sin(foeClock*8+f.id);P.armL.rotation.x=-2.6+k*0.4;P.armR.rotation.x=-2.6-k*0.4;if(P.legL){P.legL.rotation.x=-0.4+k*0.5;P.legR.rotation.x=-0.4-k*0.5;}}
+  else if(F.drum&&!f.atk&&P.armL){const k=Math.sin(foeClock*9+f.id);P.armL.rotation.x=-0.9+k*0.5;P.armR.rotation.x=-0.9-k*0.5;} // the drummer beats (W3)
   else if(f.cheer>foeClock&&!f.atk&&!f.foe&&P.armL){const k=Math.abs(Math.sin(foeClock*3+f.id));P.armL.rotation.x=-2.7-0.3*k;P.armR.rotation.x=-2.5-0.4*k;root.position.y=Math.max(0,Math.sin(foeClock*5+f.id))*0.15;}
   if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   if(F.mount&&!f.dead)riderPose(f,P,amp);
@@ -11882,7 +12102,7 @@ function placeFoe(f,dt){
 // Seen from afar (D-067): beyond 34 blocks a foe or one of the folk is drawn as one mesh, its parts baked at rest (`amMerged`),
 // and its parts leave the scene (so their matrices are not worked out each frame); within 30 it is drawn whole again
 function foeLod(f,far){const M=f.m,F=FOES[f.kind];f.far=far;
-  if(far){if(!M.fg){M.fg=new THREE.Group();M.fm=new THREE.Mesh(amMerged(F.m,F.mount?P=>riderPose({ph:0,sp:0,atk:0,swing:0},P,0):null),M.mat);M.fm.frustumCulled=false;M.fg.add(M.fm);}scene.remove(M.grp);scene.add(M.fg);}
+  if(far){if(!M.fg){M.fg=new THREE.Group();M.fm=new THREE.Mesh(amMerged(F.m,F.mount?P=>riderPose({ph:0,sp:0,atk:0,swing:0},P,0):F.bear?P=>{P.load.scale.setScalar(0.001);}:null),M.mat);M.fm.frustumCulled=false;M.fg.add(M.fm);}scene.remove(M.grp);scene.add(M.fg);}
   else{scene.remove(M.fg);scene.add(M.grp);}}
 // A horseman's gait (D-061): at a walk the horse's legs move in diagonal pairs, at the gallop the forelegs reach together and the
 // hind legs drive under, its body rocking and its neck nodding; the rider rises with each stride, the shield arm and the rein
@@ -11923,8 +12143,8 @@ function emberPose(f,P,root,prog){
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
   for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
-  foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
-  warSoundTick(dt);warWorksFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2)
+  foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
+  warSoundTick(dt);warWorksFrame(dt);warUnitsFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
   foeGrid.clear();for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);}
   foeDin=Math.min(18,foeDin+dt*12);
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
@@ -11941,7 +12161,10 @@ function foeCall(f,what){
   if(!AX||!settings.sound)return;const at=[f.x,f.y+f.m.box[4]*0.85,f.z],k=f.kind,p=what==='hurt'?1.2:what==='alert'?1.1:1;if(!foeHear(at))return;
   if(k[0]==='g'){if(what==='alert'||what==='hurt')for(let i=0;i<3;i++)voice(700*p+Math.random()*200,900*p,0.12,0.07,{type:'square',form:1400,q:2,delay:i*0.11},at);
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
-  else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
+  else if(k==='troll'||k==='strollr'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
+  else if(k==='wolfrid'){if(what==='alert'){tone(260,480,0.5,0.06,0,'triangle',at);tone(480,440,0.9,0.06,0.5,'triangle',at);tone(440,240,0.6,0.05,1.4,'triangle',at);for(let i=0;i<3;i++)voice(700+Math.random()*200,900,0.1,0.05,{type:'square',form:1400,q:2,delay:0.3+i*0.12},at);} // the warg howls, its rider whoops
+    else{burst(0.4,'bandpass',300,2,0.12,0,at);voice(110*p,90,0.4,0.06,{form:400,q:1.5,vib:24,vd:0.15},at);}} // a snarl (W3)
+  else if(k==='wbeast'){voice(80*p,60,0.8,0.14,{form:260,q:1,vib:9,vd:0.1},at);if(what!=='idle')voice(400*p,250,0.6,0.08,{form:1200,q:2,vib:20,vd:0.08,delay:0.3},at);} // the war beast grunts and squeals (W3)
   else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
     else{if(what==='alert'&&k[0]==='d'&&(k==='dcapt'||Math.random()<0.35)){tone(110,110,1.3,0.08,0,'sawtooth',at);tone(147,147,1.8,0.07,1.1,'triangle',at);} // the dwarves' horn, two deep notes
       else if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
@@ -12066,13 +12289,16 @@ function warRanks(s,u0,v0,dir,n,files,y,r0){
 // the companies of an army of the hosts (def: the camp's defenders), each {t: table, fp, n, lead, g: its block in the ranks}
 function warAllied(def){const k=warSz(),C=[],add=(fp,n,lead,m,g)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:fp+'host',fp:fp,n:n,lead:lead,g:g});};
   if(def){add('r_',8,'rcapt',2,0);add('d_',8,'dcapt',1,1);add('e_',7,'ecapt',1,2);}
-  else{add('r_',9,'rcapt',4,0);add('h_',6,'hcapt',2,0);add('d_',9,'dcapt',4,1);add('e_',8,'ecapt',3,2);add('w_',8,'wcapt',1,2);}
+  else{add('r_',9,'rcapt',3,0);add('h_',6,'hcapt',2,0);add('d_',9,'dcapt',4,1);add('e_',8,'ecapt',3,2);add('w_',8,'wcapt',1,2);
+    // (W3) the knights and lancers, a standard bearer with the first company of each people, healers and bearers behind
+    for(let i=0;i<Math.max(1,Math.round(k));i++)C.splice(1,0,{t:'x_kn',fp:'r_',n:6,lead:null,g:0});
+    for(const [fp,sk] of [['r_','rstd'],['d_','dstd'],['e_','estd']]){const c=C.find(q=>q.fp===fp&&q.t===fp+'host');if(c)c.std=sk;}C.push({t:'x_aid',fp:'e_',n:4,lead:null,g:2});}
   return C;}
 // the companies of a warhost of the wastes (def: the yard's defenders): orcs under warchiefs, goblins, trolls among them
 function warOrcs(def){const k=warSz(),C=[],add=(t,n,lead,m)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:t,n:n,lead:i<2?lead:null,g:0});};
   if(def){add('band',8,'ochief',2);add('oscout',8,null,1);add('band',1,'troll',1);}
-  else{add('oarmy',10,'ochief',8);add('oscout',10,'gchief',3);add('band',1,'troll',6);
-    for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'){const t=C.splice(i,1)[0];C.splice(2+3*j++,0,t);}}
+  else{add('oline',8,null,2);add('oarmy',10,'ochief',6);add('owolf',5,null,2);add('oscout',10,'gchief',2);add('oswarm',10,null,1);add('oroused',8,null,1);add('band',1,'troll',4);add('otroll',2,'tdriver',2);add('owb',2,'tdriver',1);
+    for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'||C[i].t==='otroll'||C[i].t==='owb'){const t=C.splice(i,1)[0];C.splice(Math.min(C.length,2+3*j++),0,t);}} // (W3: shield lines in front, wolf riders, skulkers, drummers and shamans, siege trolls and war beasts with their drivers)
   return C;}
 const warN=C=>C.reduce((a,c)=>a+c.n,0);
 // points in the gate's frame to world points (an exact one keeps its mark)
@@ -12105,7 +12331,7 @@ function warArmy(P,al){
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
     if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
-  const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
+  const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');warHeroLead(A);if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
 // way; null if it found no place to come from
 function warCompany(A){
@@ -12126,7 +12352,9 @@ function warCompany(A){
 // the army's way; at its end it holds a while and marches back the way it came
 function warSpawn(A,c,X,Z,path,route,direct){
   const P=A.P,y=warAt(X,Z,0,999);if(y<0)return null;
-  const grp=spawnGroup(c.t,c.n,X-OX,y,Z-OZ,4,A.al?{lead:c.lead,prov:'wg:'+P.id,site:wgSite(P)}:{lead:c.lead});if(!grp.length)return null;
+  const o=A.al?{lead:c.lead,prov:'wg:'+P.id,site:wgSite(P)}:{lead:c.lead},grp=spawnGroup(c.t,c.n,X-OX,y,Z-OZ,4,o);if(!grp.length)return null;
+  if(c.std){const g0=grp[0];grp.push(addFoe(c.std,g0.x+0.6,g0.y,g0.z+0.6,{prov:o.prov,site:o.site}));} // the people's standard (W3)
+  if(!A.def)warHeroSpawn(A,grp,{prov:o.prov,site:o.site}); // the army's hero and its guard, with its first company (W3)
   const pre=A.mus&&A.mus.pre?warW(wgSite(P),A.mus.pre):[];
   for(const f of grp){const F=FOES[f.kind];f.war=P.id;f.army=A;f.fo=((A.m.length%4)-1.5)*1.25;A.m.push(f);let way=path.slice();
     if(A.mus&&!direct){const R=A['rk'+c.g],q=R&&A['ri'+c.g]<R.length?R[A['ri'+c.g]++]:null;if(q)way.push([q[0],q[1],1]);way.push({A:A,r:q?q[3]:36});if(!A.def)way=way.concat(pre);}
@@ -12189,7 +12417,7 @@ function warBattle(A,live){
     if(A.al&&!A.def&&!(A.mus&&!A.go))warForm(A,live,cx,cz,ex,ez);
     if(!A.al&&!A.def&&!(A.mus&&!A.go))warCharge(A,live,en);
     warHorn(A,A.al?'muster':'advance');return;}
-  const B=A.bat;if(en.length)B.last=foeClock;
+  const B=A.bat;warWedgeTick(A,en);if(en.length)B.last=foeClock;
   else if(foeClock-B.last>8){A.bat=null;if(A.line){Object.assign(A.line,{hold:false,go:true,goT:foeClock});A.line=null;warHorn(A,'advance');}return;}
   if(!B.cry){let near=0,ex=0,ez=0;for(const g of en)if(Math.hypot(g.x-cx,g.z-cz)<14){near++;ex+=g.x;ez+=g.z;}
     if(near>=3){B.cry=1;warCry(!A.al,16,cx,y+2,cz);warCry(!!A.al,12,ex/near,y+2,ez/near);}}
@@ -12203,7 +12431,8 @@ function warForm(A,live,cx,cz,ex,ez){
   const dx=ex-cx,dz=ez-cz,l=Math.hypot(dx,dz)||1,fx=dx/l,fz=dz/l,ax=-fz,az=fx,FA={hold:true,go:false,goT:0,gap:0.15,face:Math.atan2(fx,fz),line:1};A.line=FA;
   let y=0;for(const f of live)y+=f.y;y=Math.round(y/live.length);
   const put=(f,a,b)=>{let x=cx+fx*b+ax*a,z=cz+fz*b+az*a;if(foeStand(x,y+1,z,FOES[f.kind].tall||2)<0){x=f.x;z=f.z;}warHoldAt(f,x+OX,z+OZ,FA);};
-  const G=[live.filter(f=>!FOES[f.kind].shot&&!FOES[f.kind].mount),live.filter(f=>FOES[f.kind].shot&&!FOES[f.kind].mount),live.filter(f=>FOES[f.kind].mount)];
+  const wedge=warWedge(A,live,cx,cz,fx,fz); // (W3: the knights' wedge before the line, the pikes in its front rank, healers and bearers behind it)
+  const G=[live.filter(f=>!FOES[f.kind].shot&&!FOES[f.kind].mount&&!FOES[f.kind].civ).sort((a,b)=>(FOES[b.kind].pike||0)-(FOES[a.kind].pike||0)),live.filter(f=>(FOES[f.kind].shot||FOES[f.kind].civ)&&!FOES[f.kind].mount&&!FOES[f.kind].bear),live.filter(f=>FOES[f.kind].mount&&!wedge.includes(f))];
   const per=Math.max(8,Math.ceil(G[0].length/2));G[0].forEach((f,i)=>{const r=Math.floor(i/per),n=Math.min(per,G[0].length-r*per);put(f,((i%per)-(n-1)/2)*1.5,4-r*1.7);});
   G[1].forEach((f,i)=>{const r=Math.floor(i/12),n=Math.min(12,G[1].length-r*12);put(f,((i%12)-(n-1)/2)*1.6,-1.5-r*1.7);});
   const w0=per*0.75+4;G[2].forEach((f,i)=>put(f,(i%2?1:-1)*(w0+Math.floor(i/2)%3*2.2),2-Math.floor(i/6)*2.5));}
@@ -12303,14 +12532,14 @@ function warOutcome(A){
   else{if(reach>=N*0.25){w.b.ram=(w.b.ram||0)-0.02;w.b.sally=(w.b.sally||0)-0.02;w.w[1]++;s='A warhost of '+N+' broke through to the siege lines and set fire to the ram\'s shed before it was driven back; '+fell+' of them fell.';
       const [rx,rz]=wgXZ(P,18,P.cs*10);warIgnite(w,rx-OX,P.hG+4,rz-OZ,6,40);}
     else if(fell>=N*0.55){w.b.sally=(w.b.sally||0)+0.08;w.w[0]++;s='A warhost of '+N+' was broken before the siege lines; '+fell+' of them fell.';}}
-  if(s){warLog(w,s);if(Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400)toast(s);}}
+  if(s){const d=warHeroDeeds(A,w);if(d)s+=' '+d;warLog(w,s);if(Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400)toast(s);}}
 // ---- The war panel (Q158): near a found gate, its stage, the four efforts and how many stand on each side about the player
 function warPanel(w){
   const el=$('warpanel');if(!el)return;if(!w||photo){el.style.display='none';return;}el.style.display='block';
   let al=0,orc=0;const X=PL.x,Z=PL.z;for(const f of foes){if(f.dead||Math.hypot(f.x-X,f.z-Z)>160)continue;if(FOES[f.kind].folk){if(!FOES[f.kind].civ)al++;}else orc++;}
   const bar=v=>'<span class="wb"><i style="width:'+Math.round(v*100)+'%"></i></span>';
   el.innerHTML='<b>'+w.n+'</b><div>'+warStage(w)+'</div>'+WAR_EFF.map(([k,lab])=>'<div class="we">'+lab+' '+bar(warEff(w,k))+' '+Math.round(warEff(w,k)*100)+'%</div>').join('')+
-    '<div>The hosts '+al+', the wastes '+orc+'</div>';}
+    '<div>The hosts '+al+', the wastes '+orc+'</div>'+warArmies.filter(A=>A.hero&&!A.hero.dead&&A.P.id===w.id).map(A=>'<div>'+A.hero.n+' leads '+(A.al?'the hosts':'the warhost')+'</div>').join('');}
 // ---- On the world map: each found gate's war, its stage and how far the siege has come, and the two lines across the pass
 function warMapDraw(g,sx,sz){
   for(const w of WARS.values()){const P=wasteGateAt(w.X,w.Z,10);const x=sx(w.X),y=sz(w.Z);
@@ -12322,7 +12551,7 @@ function warMapDraw(g,sx,sz){
 function warJournal(out){
   out.push('','THE WARS OF THE WASTES');if(!WARS.size)out.push('None found yet. The Ashen Gates stand in the rings of ash mountains about the Volcanic Wastes.');
   for(const w of WARS.values()){out.push('','The War at '+w.n+' ('+warStage(w).toLowerCase()+'; '+WAR_EFF.map(([k,lab])=>lab.toLowerCase()+' '+Math.round(warEff(w,k)*100)+'%').join(', ')+'; battles won '+w.w[0]+', lost '+w.w[1]+')');
-    for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}}
+    warHeroJournal(w,out);for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}}
 // ---- The works of the war (W2, D-069; Q142, Q146, Q149, Q154 to Q157). What the war does to the world follows from each gate's
 // war (war-state.js) and is made through setBlock, so it is saved like the player's own changes, whenever the works are in the
 // loaded world, a slice at a time (`warJob`): the barred leaf broken a step at a time by the ram (`warLeafCells`); the dwarves'
@@ -12417,7 +12646,7 @@ function warFireFrame(dt){warFireT-=dt;const tick=warFireT<=0;if(tick)warFireT=1
         else if(e[3]&&age<e[3]+120&&Math.random()<dt*0.5)spawnP(x+0.5,Y+0.6,z+0.5,(Math.random()-.5)*0.2,0.6,(Math.random()-.5)*0.2,[0.3,0.3,0.3],3,-0.15);}
       if(!tick||!inW||!genDone[(x>>4)+(z>>4)*NCX])continue;
       if(!e[3]&&age>25+(X*7+Z*3+Y)%15){e[3]=Math.max(1,Math.round(warPlay)-e[2]);if(get(x,Y,z)===e[1])setBlock(x,Y,z,WAR_CLOTH.has(e[1])?AIR:CHARWOOD,true);saveDirty=true;}
-      else if(e[3]&&age>900){const c=get(x,Y,z);if(c===AIR||c===CHARWOOD)setBlock(x,Y,z,e[1],true);w.bn.splice(i,1);saveDirty=true;}}}}
+      else if(e[3]&&age>(e.q?300:900)){const c=get(x,Y,z);if(c===AIR||c===CHARWOOD)setBlock(x,Y,z,e[1],true);w.bn.splice(i,1);saveDirty=true;}}}}
 // ---- The ram (Q155): while its crew stands by it and the war at its gate goes on, a blow every three and a half seconds: the crew
 // heave together, the beam booms on the leaf, the ground shakes near, dust and splinters fly from the leaf
 let warRamT=0,warRamBlow=-9;
@@ -12495,7 +12724,7 @@ function warClimbTick(dt,P,w){warClimbT-=dt;if(warClimbT>0||w.s>=2)return;warCli
 let warMineT=0,warPickT=0;
 function warMineFight(dt,P,w){if(w.s>=2)return;const g=P.hG;if(PL.y>g-2)return;const M=warMinePts(P),mid=warMineMid(P),ap=w.ap||{},me=ap.me||0,cm=ap.cm||0,[pu,pv]=wgUV(P,PL.x+OX,PL.z+OZ);
   const at=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],seg=(a,b,t)=>t>0&&wgLineD([a,at(a,b,t)],pu,pv)<14;if(!seg(M.A,M.B,me)&&!seg(M.C,mid,cm))return;
-  const faces=[];if(me>0.05&&me<1)faces.push(['d_patrol',at(M.A,M.B,me-0.04),1]);if(cm>0.05&&cm<1)faces.push(['den',at(M.C,mid,cm-0.04),0]);
+  const faces=[];if(me>0.05&&me<1)faces.push(['d_sap',at(M.A,M.B,me-0.04),1]);if(cm>0.05&&cm<1)faces.push(['den',at(M.C,mid,cm-0.04),0]);
   warPickT-=dt;if(warPickT<=0){warPickT=0.6+Math.random()*0.5;for(const [,[u,v]] of faces){const [X,Z]=wgXZ(P,Math.round(u),Math.round(v)),x=X-OX+0.5,z=Z-OZ+0.5;
     if(Math.hypot(x-PL.x,z-PL.z)<40){burst(0.05,'highpass',2600+Math.random()*1400,1.5,0.22,0,[x,g-8,z]);burst(0.12,'bandpass',520,1,0.12,0.02,[x,g-8,z]);}}}
   warMineT-=dt;if(warMineT>0)return;warMineT=12;if(foes.some(f=>!f.dead&&f.mine===P.id))return;
@@ -12526,6 +12755,14 @@ function warTowerCells(P){const g=P.hG,cs=P.cs,out=[],M=warMinePts(P);
 function warBlast(x,y,z){const d=Math.hypot(x-PL.x,z-PL.z);sfxBoom(d*0.6,[x,y,z]);setTimeout(()=>sfxBoom(d,[x,y+10,z]),350);setTimeout(()=>burst(3,'lowpass',160,0.7,0.5*Math.max(0.1,1-d/150),0,[x,y,z]),700); // the blast, then the stones falling
   shake=Math.max(shake,Math.max(0,1.2*(1-d/90)));
   for(let k=0;k<160;k++)spawnP(x+(Math.random()-.5)*12,y+Math.random()*30,z+(Math.random()-.5)*12,(Math.random()-.5)*8,Math.random()*6,(Math.random()-.5)*8,k%4?[0.4,0.37,0.33]:[1,0.5,0.12],2.5+Math.random()*2,4);}
+// the cairns of the hosts' fallen heroes (W3): in a row before the graves, each a mound of stones capped with moss and its
+// people's banner on a pole
+const HERO_BAN={r:RBANNER,h:HBANNER,e:EVBANNER,w:WBANNER,d:DBANNER};
+function warCairnCells(P,w,n0,n1){const out=[],D=w.hr.dead.filter(d=>d.side==='al'),cs=P.cs;
+  for(let i=n0;i<n1&&i<20;i++){const u=P.uL+26,v=(i%2?-cs:cs)*(54+Math.floor(i/2)*7),y=warTop(P,u,v)+1;if(y<1)continue;
+    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){warSet(out,P,u+a,v+b,y,COBBLE);if(!a||!b)warSet(out,P,u+a,v+b,y+1,a||b?COBBLE:MOSSY);}warSet(out,P,u,v,y+2,MOSSY);
+    for(let k=3;k<=5;k++)warSet(out,P,u,v,y+k,HERO_BAN[D[i]&&D[i].p]||RBANNER);}
+  return out;}
 // victory fires on the Leaguer's muster field: a ring of logs about a bed of embers, three of them; burnt out after twenty minutes
 const WAR_FIRES=[[30,-16],[30,16],[42,0]];
 function warFireCells(P,lit){const out=[];for(const [du,dv] of WAR_FIRES){const u=P.uC0+du,v=dv,y=warTop(P,u,v)+1;if(y<1)continue;
@@ -12545,6 +12782,7 @@ function warWorksTick(P,w){if(!P||!w||WJ.length)return;wgSite(P);w.ap=w.ap||{lea
     warJob(warTowerCells(P),recent?2500:4000,ok=>{if(done('fall',ok))A.fall=1;});return;}
   if(w.s>=2&&A.fall&&!A.ban&&due('ban')&&warLoaded(P,-12,12,-36,36)){const out=[],cs=-P.cs;for(let y=g+30;y<=g+46;y++){warSet(out,P,10,cs*25,y,RBANNER);warSet(out,P,10,cs*31,y,DBANNER);}for(let y=g+20;y<=g+30;y++)warSet(out,P,-10,cs*28,y,EVBANNER);
     warJob(out,400,ok=>{if(done('ban',ok))A.ban=1;});return;}
+  const hc=w.hr?w.hr.dead.filter(d=>d.side==='al').length:0;if(hc>(A.hc||0)&&due('hc')&&warLoaded(P,P.uL+24,P.uL+30,-92,92)){const n0=A.hc||0;warJob(warCairnCells(P,w,n0,hc),200,ok=>{if(done('hc',ok))A.hc=hc;});return;}
   const lit=w.s>=2&&warPlay-(w.fallT||0)<1200;if(w.s>=2&&A.fire!==(lit?1:2)&&due('fire')&&warLoaded(P,P.uC0+26,P.uC0+44,-18,18))warJob(warFireCells(P,lit),100,ok=>{if(done('fire',ok))A.fire=lit?1:2;});}
 // the fallen of the war (counted once each, from updFoes): the hosts' fill the graves; they lie a while (WAR_LIE seconds; past
 // WAR_DEAD of them, the longest fallen are cleared first)
@@ -12579,14 +12817,171 @@ function warCrowTick(){const near=foes.filter(f=>f.dead>3&&f.war&&!f.gone&&Math.
   if(!near.length){for(const c of warCrows)if(!c.leave){c.leave=1;c.life=8;}return;}if(warCrows.filter(c=>!c.leave).length>=want)return;
   const f=near[Math.floor(Math.random()*near.length)],m=crowMesh(),cy=f.gy+12+Math.random()*7;scene.add(m);
   warCrows.push({f:f,cx:f.x,cz:f.z,cy:cy,r:5+Math.random()*5,a:Math.random()*6.28,sp:4+Math.random()*2,ph:Math.random()*6,x:f.x,y:cy,z:f.z,sx:0,sy:0,sz:0,tx:0,ty:0,tz:0,t:6+Math.random()*10,cw:2+Math.random()*6,st:'air',life:8,m:m});}
+// engineers of the hosts mend what burned or was broken within 20 of them three times as fast (W3)
+function warMend(){const E=foes.filter(f=>!f.dead&&FOES[f.kind].eng);if(!E.length)return;for(const w of WARS.values()){if(!w.bn)continue;for(const e of w.bn){if(e.q)continue;const [X,Y,Z]=e.c||(e.c=e[0].split(',').map(Number));
+  for(const f of E)if(Math.abs(f.x+OX-X)<20&&Math.abs(f.z+OZ-Z)<20){e.q=1;break;}}}}
 // ---- Every frame: the jobs, the fires, the crows, and near a gate the ram, the walk's defence, the climbing, the tunnels, the
 // victory fires' flames
 let warWorksT=0;
-function warWorksFrame(dt){warJobsFrame();warFireFrame(dt);warWorksT-=dt;if(warWorksT<=0){warWorksT=1;warClearDead();warCrowTick();}
+function warWorksFrame(dt){warJobsFrame();warFireFrame(dt);warWorksT-=dt;if(warWorksT<=0){warWorksT=1;warClearDead();warCrowTick();warMend();}
   const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),160),w=P&&WARS.get(P.id);if(!w)return;wgSite(P);warRamTick(dt,P,w);warPitch(dt,P,w);warClimbTick(dt,P,w);warMineFight(dt,P,w);
   if(w.ap&&w.ap.fire===1)for(const [du,dv] of WAR_FIRES){const [X,Z]=wgXZ(P,P.uC0+du,dv),x=X-OX+0.5,z=Z-OZ+0.5;if(Math.hypot(x-PL.x,z-PL.z)>100||Math.random()>dt*14)continue;const y=warTop(P,P.uC0+du,dv)+1;
     spawnP(x+(Math.random()-.5)*1.6,y+0.6,z+(Math.random()-.5)*1.6,(Math.random()-.5)*0.4,2+Math.random()*1.5,(Math.random()-.5)*0.4,[1,0.5+Math.random()*0.3,0.1],0.8,-1.4);
     if(Math.random()<0.4)spawnP(x,y+2.5,z,(Math.random()-.5)*0.4,1.2,(Math.random()-.5)*0.4,[0.3,0.29,0.28],3,-0.3);if(Math.random()<0.08)AMB_EV.crackle([x,y,z]);}}
+// ---- The war's new soldiers and creatures at work (W3, D-070; Q150, Q151, Q170, Q171): their kinds (FOES, models in
+// war-models.js), how they shoot (bolts, javelins, thrown axes, fire pots), whom they strengthen and how. The hosts: knights and
+// lancers charge in a wedge (`warWedge`, from warForm), pikemen stand in the front rank and strike harder at horsemen and the
+// great creatures, crossbowmen, horse archers and outriders skirmish, glaive wardens and blade masters cleave a second foe,
+// shieldbreakers' blows go through a shield, sappers dig the mine, engineers mend the works (the burned and broken are rebuilt
+// three times as fast near one), healers mend the hurt about them, bearers carry the fallen to the field hospital, and a standard
+// bearer's banner steadies those within 9 (a fifth less hurt). The wastes: wolf riders run down the lines, pot-throwers' pots burst
+// in fire and set the works alight, war drummers and fire shamans drive the orcs about them on (a quarter harder blows) and troll
+// drivers their trolls, siege trolls batter the siege lines' palisades (rebuilt later), war beasts throw those they strike far,
+// shield orcs take most of a blow from the front, goblin skulkers come in swarms, orc crossbowmen shoot hard.
+Object.assign(FOES,{
+  rpike:{n:'Pikeman of the Realm',m:'rpike',hp:24,dmg:5,reach:3.8,walk:1.3,run:4.5,sight:24,cd:1.4,wind:0.5,block:0.25,mass:0.55,folk:1,pike:1,drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'guard'},
+  rxbow:{n:'Crossbowman of the Realm',m:'rxbow',hp:20,dmg:3,reach:2,walk:1.3,run:4.5,sight:34,cd:1.2,wind:0.4,shot:{dmg:6,v:40,lo:4,hi:32,cd:2.6,k:'bolt'},keep:10,mass:0.55,folk:1,drops:[[201,2,4,0.6],[206,1,1,0.4]],cause:'rbolt'},
+  rguard:{n:'Household Knight of the Realm',m:'rguard',hp:60,dmg:10,reach:2.6,walk:1.3,run:4.6,sight:28,cd:1.3,wind:0.5,block:0.3,mass:0.3,folk:1,elite:1,drops:[[227,1,2,0.6],[206,1,2,0.5]],cause:'guard'},
+  rengin:{n:'Engineer of the Hosts',m:'rengin',hp:18,dmg:3,reach:1.8,walk:1.2,run:4.3,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,eng:1,drops:[[206,1,2,0.5]],cause:'guard'},
+  rbear:{n:'Bearer of the Hosts',m:'rbear',hp:16,dmg:1,reach:1.6,walk:1.4,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,bear:1,drops:[[206,1,1,0.3]],cause:'guard'},
+  eheal:{n:'Healer of the Elves',m:'eheal',hp:22,dmg:1,reach:1.6,walk:1.3,run:4.8,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,heal:1,drops:[[206,1,1,0.3]],cause:'elf'},
+  rstd:{n:'Standard Bearer of the Realm',m:'rstd',hp:30,dmg:4,reach:2.2,walk:1.3,run:4.5,sight:24,cd:1.3,wind:0.45,mass:0.5,folk:1,std:1,drops:[[206,1,2,0.5]],cause:'guard'},
+  dstd:{n:'Standard Bearer of the Mountain',m:'dstd',hp:40,dmg:5,reach:2,walk:1.15,run:4.3,sight:26,cd:1.1,wind:0.4,mass:0.3,tall:1.7,folk:1,std:1,say:'dguard',drops:[[206,1,2,0.5]],cause:'dwarf'},
+  estd:{n:'Standard Bearer of the Elves',m:'estd',hp:36,dmg:5,reach:2.3,walk:1.4,run:5,sight:30,cd:1.1,wind:0.4,mass:0.5,folk:1,std:1,say:'eguard',drops:[[206,1,2,0.5]],cause:'elf'},
+  rknight:{n:'Knight of the Realm',m:'rknight',hp:56,dmg:9,reach:3.6,walk:1.8,run:7.5,sight:34,cd:1.4,wind:0.5,block:0.5,mass:0.2,tall:3,mount:1,folk:1,wedge:1,drops:[[223,1,2,0.4],[206,1,2,0.5]],cause:'knight'},
+  hlancer:{n:'Lancer of the Riders',m:'hlancer',hp:40,dmg:7,reach:3.8,walk:1.7,run:7.4,sight:32,cd:1.4,wind:0.5,block:0.4,mass:0.25,tall:3,mount:1,folk:1,wedge:1,say:'hguard',drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'horse'},
+  hharch:{n:'Horse Archer of the Riders',m:'hharch',hp:30,dmg:3,reach:2.4,walk:1.7,run:7,sight:36,cd:1.3,wind:0.4,shot:{dmg:4,v:30,lo:6,hi:30,cd:1.6,k:'arrow'},keep:16,mass:0.25,tall:3,mount:1,folk:1,say:'hguard',drops:[[201,2,4,0.6]],cause:'harrow'},
+  hout:{n:'Outrider of the Riders',m:'hout',hp:30,dmg:4,reach:2.6,walk:1.8,run:7.6,sight:36,cd:1.2,wind:0.4,shot:{dmg:6,v:24,lo:4,hi:18,cd:2.4,k:'jav'},keep:9,mass:0.25,tall:3,mount:1,folk:1,say:'hguard',drops:[[206,1,2,0.4]],cause:'jav'},
+  emarch:{n:'Mounted Archer of the Elves',m:'emarch',hp:40,dmg:4,reach:2.4,walk:1.8,run:7.4,sight:40,cd:1.2,wind:0.35,shot:{dmg:5,v:34,lo:6,hi:34,cd:1.5,k:'arrow'},keep:16,mass:0.22,tall:3,mount:1,folk:1,say:'eguard',drops:[[201,2,5,0.6]],cause:'earrow'},
+  eglaive:{n:'Glaive Warden of the Elves',m:'eglaive',hp:40,dmg:8,reach:3.8,walk:1.4,run:5,sight:32,cd:1.3,wind:0.45,block:0.2,mass:0.45,folk:1,cleave:1,say:'eguard',drops:[[223,1,2,0.4],[206,1,2,0.5]],cause:'elf'},
+  eblade:{n:'Blade Master of the Elves',m:'eblade',hp:54,dmg:9,reach:2.5,walk:1.5,run:5.4,sight:34,cd:0.7,wind:0.25,block:0.3,mass:0.4,folk:1,elite:1,cleave:1,say:'eguard',drops:[[223,1,2,0.5],[227,1,1,0.3]],cause:'elf'},
+  wskirm:{n:'Skirmisher of the Wood',m:'wskirm',hp:22,dmg:4,reach:2,walk:1.6,run:6,sight:40,cd:0.8,wind:0.3,shot:{dmg:3,v:30,lo:4,hi:26,cd:1.2,k:'arrow'},keep:14,mass:0.6,folk:1,say:'wguard',drops:[[201,2,4,0.6]],cause:'warrow'},
+  wlong:{n:'Sharpshooter of the Wood',m:'wlong',hp:22,dmg:3,reach:2,walk:1.4,run:5.2,sight:56,cd:1.1,wind:0.35,shot:{dmg:8,v:44,lo:8,hi:54,cd:2.8,k:'arrow'},keep:20,mass:0.6,folk:1,say:'wguard',drops:[[201,3,6,0.7]],cause:'warrow'},
+  dthrow:{n:'Axe Thrower of the Mountain',m:'dthrow',hp:34,dmg:5,reach:2,walk:1.2,run:4.4,sight:30,cd:0.9,wind:0.35,shot:{dmg:6,v:20,lo:3,hi:16,cd:1.8,k:'axe'},keep:6,block:0.3,mass:0.3,tall:1.7,folk:1,say:'dguard',drops:[[223,1,1,0.4]],cause:'daxe'},
+  dbreak:{n:'Shieldbreaker of the Mountain',m:'dbreak',hp:44,dmg:9,reach:2.4,walk:1.1,run:4.2,sight:28,cd:1.4,wind:0.55,mass:0.2,tall:1.7,folk:1,pierce:1,say:'dguard',drops:[[223,1,2,0.5]],cause:'dwarf'},
+  diron:{n:'Ironclad of the Mountain',m:'diron',hp:80,dmg:11,reach:2.5,walk:1.05,run:3.9,sight:28,cd:1.3,wind:0.55,block:0.5,mass:0.12,tall:1.7,folk:1,elite:1,say:'dguard',drops:[[223,1,2,0.5],[227,1,1,0.3]],cause:'dwarf'},
+  dsapper:{n:'Sapper of the Mountain',m:'dsapper',hp:30,dmg:5,reach:1.9,walk:1.2,run:4.3,sight:22,cd:1,wind:0.4,mass:0.35,tall:1.7,folk:1,sap:1,say:'dguard',drops:[[223,1,1,0.3]],cause:'dwarf'},
+  wolfrid:{n:'Wolf Rider',m:'wolfrid',hp:26,dmg:4,reach:2.8,walk:1.8,run:8,sight:30,cd:1,wind:0.35,mass:0.35,tall:2,mount:1,flee:0.2,drops:[[200,1,3,0.6],[213,1,1,0.3]],cause:'wolf'},
+  gpot:{n:'Goblin Pot-Thrower',m:'gpot',hp:9,dmg:1,reach:1.5,walk:1.4,run:4.4,sight:20,cd:1.2,wind:0.4,shot:{dmg:4,v:12,lo:5,hi:20,cd:3,k:'pot'},keep:10,flee:0.3,mass:0.8,drops:[[SULFUR,1,2,0.5],[200,1,2,0.4]],cause:'pot'},
+  odrum:{n:'War Drummer',m:'odrum',hp:22,dmg:3,reach:2,walk:1.3,run:4.4,sight:22,cd:1.2,wind:0.4,mass:0.5,drum:1,keep:7,drops:[[213,1,2,0.5],[200,1,2,0.5]],cause:'orc'},
+  oshaman:{n:'Fire Shaman',m:'oshaman',hp:24,dmg:3,reach:2,walk:1.3,run:4.2,sight:26,cd:1.2,wind:0.4,shot:{dmg:5,v:12,lo:4,hi:22,cd:2.8,k:'fire'},keep:10,mass:0.5,rouse:1,drops:[[SULFUR,1,3,0.6],[230,1,1,0.08]],cause:'fire'},
+  strollr:{n:'Siege Troll',m:'strollr',hp:120,dmg:12,reach:3.8,walk:1.05,run:3.4,sight:22,cd:2.4,wind:0.9,block:0.3,mass:0.08,tall:3,siege:1,drops:[[386,1,2,1],[213,2,4,0.8]],cause:'troll'},
+  wbeast:{n:'War Beast',m:'wbeast',hp:150,dmg:12,reach:3.4,walk:1.2,run:5.2,sight:24,cd:1.8,wind:0.6,mass:0.05,tall:3,knock:1,drops:[[386,1,1,0.6],[200,3,6,1]],cause:'beast'},
+  oshield:{n:'Shield Orc',m:'oshield',hp:22,dmg:3,reach:2.6,walk:1.3,run:4.2,sight:22,cd:1.2,wind:0.4,block:0.75,mass:0.4,drops:[[213,1,2,0.5],[200,1,2,0.5]],cause:'orc'},
+  gswarm:{n:'Goblin Skulker',m:'gswarm',hp:6,dmg:2,reach:1.4,walk:1.7,run:5.6,sight:16,cd:0.6,wind:0.22,flee:0.2,mass:0.9,drops:[[200,1,1,0.4]],cause:'goblin'},
+  tdriver:{n:'Troll Driver',m:'tdriver',hp:26,dmg:3,reach:2,walk:1.4,run:4.4,sight:24,cd:1.1,wind:0.4,whip:{dmg:4,lo:2,hi:6,cd:3.5},mass:0.5,drive:1,drops:[[213,1,2,0.5],[200,1,2,0.5]],cause:'orc'},
+  oxbow:{n:'Orc Crossbowman',m:'oxbow',hp:14,dmg:2,reach:2,walk:1.4,run:4.5,sight:30,cd:1.2,wind:0.4,shot:{dmg:5,v:38,lo:5,hi:30,cd:2.6,k:'bolt'},keep:12,mass:0.6,drops:[[201,2,4,0.6],[213,1,1,0.3]],cause:'obolt'}
+});
+Object.assign(DEATH,{rbolt:'A crossbowman of the realm shot you',knight:'A knight of the realm rode you down',jav:'An outrider\'s javelin found you',daxe:'A dwarf\'s thrown axe struck you',
+  wolf:'A wolf rider ran you down',pot:'A goblin\'s fire pot burned you',beast:'A war beast trampled you',obolt:'An orc\'s crossbow bolt found you'});
+// their shots: a bolt (short and fast), a javelin (long, lofted a little), a thrown axe (spinning), a fire pot (lofted; it bursts in
+// flame where it lands, hurting the other side about it and setting the works alight)
+Object.assign(SHOT_K,{bolt:{g:6,sz:0.14,col:[0.32,0.3,0.3]},jav:{g:10,sz:0.12,col:[0.5,0.4,0.28]},axe:{g:12,sz:0.3,col:[0.6,0.6,0.64],spin:1},pot:{g:14,sz:0.32,col:[1,0.5,0.15],glow:1,spin:1}});
+// who fights in the hosts and the warhosts now
+Object.assign(FOE_HOME,{r_host:[['rsword',2],['rspear',2],['rbow',1.5],['rpike',1.5],['rxbow',1]],h_host:[['hrider',3],['hbow',1],['hspear',0.5],['hharch',1.2],['hout',0.8]],
+  e_host:[['esword',2],['espear',2],['ebow',2],['eknight',1],['eglaive',1],['emarch',0.6]],w_host:[['wbow',3],['wknife',2],['wguard',1.5],['wskirm',1.2],['wlong',0.8]],
+  d_host:[['daxe',3],['dhammer',2],['dxbow',2],['dthrow',1.2],['dbreak',1]],
+  x_kn:[['rknight',3],['hlancer',1.5]],x_aid:[['eheal',1],['rbear',2]],e_aid:[['eheal',1],['rbear',1]],x_eg:[['rguard',1],['eblade',1],['diron',1]],d_sap:[['dsapper',3],['daxe',1]],r_eng:[['rengin',2],['rpike',1]],
+  oarmy:[['raider',4],['bowman',2],['brute',3],['oshield',2],['oxbow',1.2]],oline:[['oshield',4],['oxbow',2],['odrum',0.7]],owolf:[['wolfrid',1]],oswarm:[['gswarm',4],['gpot',1]],
+  oroused:[['raider',3],['brute',2],['oshaman',0.8],['odrum',0.8]],otroll:[['strollr',1],['troll',0.6]],owb:[['wbeast',1]]});
+Object.assign(FOLK_N,{eng:[2,2],sap:[2,3],aid:[2,3]});
+// ---- Blows: what each side's units add to a blow (from foeHurtFoe): [the hurt, the push]
+function warDmg(g,n,by,kb,blow){if(!by||!by.kind)return [n,kb];const B=FOES[by.kind],G=FOES[g.kind];
+  if(by.driven>foeClock)n*=1.25;if(by.chg&&blow){n*=1.8;kb*=2;by.chg=0;}
+  if(B.pike&&(G.mount||(G.tall||2)>2.5))n*=1.6;if(B.knock)kb*=3;if(g.steady>foeClock)n*=0.8;return [n,kb];}
+// a glaive warden's or blade master's sweep takes a second foe within its reach, for half
+function warCleave(g,n,by,ux,uz,blow){if(!blow||!by||!FOES[by.kind]||!FOES[by.kind].cleave||by.cleaving)return;const B=FOES[by.kind];
+  for(const h of foes){if(h===g||h.dead||foeSide(h)===foeSide(by)||Math.hypot(h.x-by.x,h.z-by.z)-foeRad(h)>B.reach+0.4)continue;by.cleaving=1;foeHurtFoe(h,n*0.5,by,ux,uz,3,true);by.cleaving=0;break;}}
+// ---- Every frame: the banners' steadying and the drums' driving (twice a second), healing, bearers, drums, the shamans' fire,
+// siege trolls at the palisades
+let warUnitT=0,warDrumT=0;
+function warUnitsFrame(dt){
+  warDrumT-=dt;if(warDrumT<=0){warDrumT=0.5;for(const f of foes){if(f.dead)continue;const F=FOES[f.kind];if(!F.drum||Math.hypot(f.x-PL.x,f.z-PL.z)>70||!AX||!settings.sound||!foeHear([f.x,f.y,f.z]))continue;
+      const at=[f.x,f.y+1,f.z],fast=f.st==='chase'||f.war;burst(0.3,'lowpass',85,1.2,0.4,0,at);tone(72,48,0.28,0.2,0,'sine',at);if(fast){burst(0.2,'lowpass',110,1.2,0.3,0.25,at);tone(80,52,0.22,0.15,0.25,'sine',at);}}}
+  for(const f of foes){if(f.dead)continue;const F=FOES[f.kind];
+    if(F.rouse&&Math.random()<dt*10)spawnP(f.x+Math.sin(f.yaw+0.4)*0.6,f.y+3+Math.random()*0.4,f.z+Math.cos(f.yaw+0.4)*0.6,(Math.random()-.5)*0.3,0.8,(Math.random()-.5)*0.3,[1,0.5+Math.random()*0.3,0.1],0.5,-0.6);
+    if(F.heal&&f.healFx>0){f.healFx-=dt;if(Math.random()<dt*12)spawnP(f.x+(Math.random()-.5)*2,f.y+0.5+Math.random()*1.5,f.z+(Math.random()-.5)*2,0,0.6,0,[0.75,0.95,0.6],0.8,-0.3);}}
+  warUnitT-=dt;if(warUnitT>0)return;warUnitT=0.5;
+  // the banners and the drums
+  for(const f of foes){if(f.dead)continue;const F=FOES[f.kind];if(!F.std&&!F.drum&&!F.rouse&&!F.drive)continue;const r=F.std?9:F.drive?10:12;
+    for(const g of foes){if(g.dead||g===f||Math.abs(g.x-f.x)>r||Math.abs(g.z-f.z)>r||Math.hypot(g.x-f.x,g.z-f.z)>r)continue;const G=FOES[g.kind];
+      if(F.std&&G.folk)g.steady=foeClock+1;else if((F.drum||F.rouse)&&!G.folk&&g.kind!=='troll'&&g.kind!=='strollr')g.driven=foeClock+1;else if(F.drive&&(g.kind==='troll'||g.kind==='strollr'))g.driven=foeClock+1;}}
+  // healers: those of the hosts about them mended a little, three a second's half
+  for(const f of foes){if(f.dead||!FOES[f.kind].heal||f.st==='flee')continue;let k=0;for(const g of foes){if(g.dead||!FOES[g.kind].folk||g.hp>=g.mhp||Math.hypot(g.x-f.x,g.z-f.z)>6)continue;g.hp=Math.min(g.mhp,g.hp+1.5);k++;}if(k)f.healFx=0.6;}
+  warBearers();warSiegeTrolls();}
+// bearers: each goes to the nearest of the hosts' fallen within 40, lifts them and carries them back toward the field hospital
+// in the Leaguer; out of sight they are gone in
+function warHosp(P){const s=wgSite(P),L=s.lay.parts.find(p=>p.k==='lghosp');return L?siteXZ(s,(L.u0+L.u1)/2,(L.v0+L.v1)/2):siteXZ(s,P.uC0+190,0);}
+function warBearers(){
+  for(const f of foes){if(f.dead||!FOES[f.kind].bear||f.foe&&!f.foe.dead||f.st==='flee')continue;
+    if(f.carry){if(Math.hypot(f.x-PL.x,f.z-PL.z)>80&&f.st!=='flee'){removeFoe(f);}else if(f.st==='idle'&&!(f.way&&f.way.length)){f.carry=0;f.bT=0;}continue;}
+    const c=f.bT&&f.bT.dead&&!f.bT.gone?f.bT:null;
+    if(c){if(Math.hypot(c.x-f.x,c.z-f.z)<1.8){removeFoe(c);f.carry=1;f.bT=null;foeCall(f,'idle');const P=wasteGateAt(Math.floor(f.x+OX),Math.floor(f.z+OZ),200);
+        if(P){const [u]=wgUV(P,f.x+OX,f.z+OZ),R=warRoute(P,false).filter(q=>wgUV(P,q[0],q[1])[0]>u+2),[hx,hz]=warHosp(P);f.way=R.map(q=>[q[0]+0.5,q[1]+0.5]).concat([[hx+0.5,hz+0.5]]);const w0=f.way.shift();warAim(f,w0);f.wp=w0;f.st='return';f.t=30;}
+        else{f.way=[];f.st='return';f.hx=f.x-Math.sin(f.yaw)*40;f.hz=f.z-Math.cos(f.yaw)*40;f.t=30;}}
+      else if(f.st!=='return'){f.way=[];warAim(f,[c.x+OX,c.z+OZ,1]);f.st='return';f.t=20;}continue;}
+    let best=null,bd=40;for(const g of foes){if(!g.dead||g.gone||!g.war||!FOES[g.kind].folk||g.claim&&g.claim!==f&&!g.claim.dead)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
+    if(best){best.claim=f;f.bT=best;f.way=[];f.waitA=null;f.lineHold=null;f.back=null;warAim(f,[best.x+OX,best.z+OZ,1]);f.st='return';f.t=20;}}}
+// siege trolls: one at the hosts' palisades, mantlets or stakes (what burns) within reach of its ram knocks out a few of them
+// every three seconds, with a boom and splinters; they are mended with the burned works, fifteen minutes later
+function warSiegeTrolls(){
+  for(const f of foes){if(f.dead||!FOES[f.kind].siege||!f.war||(f.ramT||0)>foeClock||Math.hypot(f.x-PL.x,f.z-PL.z)>90)continue;const w=WARS.get(f.war);if(!w)continue;
+    const fx=f.x+Math.sin(f.yaw)*2.6,fz=f.z+Math.cos(f.yaw)*2.6,out=[];
+    for(let dy=0;dy<=4&&out.length<3;dy++)for(let dx=-1;dx<=1&&out.length<3;dx++)for(let dz=-1;dz<=1&&out.length<3;dz++){const x=Math.floor(fx)+dx,y=Math.floor(f.y)+dy,z=Math.floor(fz)+dz;if(x<0||z<0||x>=W||z>=D)continue;
+      const id=world[I(x,y,z)];if(WAR_BURN.has(id))out.push([x,y,z,id]);}
+    if(!out.length)continue;f.ramT=foeClock+3;f.atk=0.9;f.atkK='blow';if(!w.bn)w.bn=[];
+    for(const [x,y,z,id] of out){const k=x+OX+','+y+','+(z+OZ);if(w.bn.length<400&&!w.bn.some(e=>e[0]===k))w.bn.push([k,id,Math.round(warPlay),1]);setBlock(x,y,z,AIR,true);breakFx(x,y,z,id,8);}
+    const d=Math.hypot(fx-PL.x,fz-PL.z);sfxBoom(d*1.6,[fx,f.y+2,fz]);shake=Math.max(shake,Math.max(0,0.4*(1-d/30)));saveDirty=true;}}
+// ---- The wedge (Q150): in battle the hosts' knights and lancers form a wedge before the line, its point toward the foe, and at
+// the horn charge together, each at the nearest foe, the first blow of the charge striking near twice as hard
+function warWedge(A,live,cx,cz,fx,fz){const K=live.filter(f=>FOES[f.kind].wedge);if(K.length<3)return [];const ax=-fz,az=fx,FW={hold:true,go:false,goT:0,gap:0.1,face:Math.atan2(fx,fz),line:1};
+  let y=0;for(const f of K)y+=f.y;y=Math.round(y/K.length);
+  K.forEach((f,i)=>{const r=Math.floor((Math.sqrt(8*i+1)-1)/2),c=i-r*(r+1)/2;let x=cx+fx*(12-r*2.8)+ax*(c-r/2)*2.6,z=cz+fz*(12-r*2.8)+az*(c-r/2)*2.6;if(foeStand(x,y+1,z,3)<0){x=f.x;z=f.z;}warHoldAt(f,x+OX,z+OZ,FW);});
+  A.wedge={FW:FW,m:K,t:foeClock+6};return K;}
+function warWedgeTick(A,en){const Wg=A.wedge;if(!Wg||foeClock<Wg.t)return;A.wedge=null;Wg.FW.hold=false;Wg.FW.go=true;Wg.FW.goT=foeClock;
+  const [x,z]=warMid(A);warSignal('advance','r',[x,A.P.hG+4,z]);setTimeout(()=>warCry(false,14,x,A.P.hG+2,z),600);
+  for(const f of Wg.m){if(f.dead)continue;let best=null,bd=80;for(const g of en){if(g.dead)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
+    f.waitA=null;f.lineHold=null;f.chg=1;if(best){f.foe=best;f.eseen=0;f.st='chase';f.seen=0;f.t=0;}}
+  if(Math.hypot(x-PL.x,z-PL.z)<120)toast('The knights charge!');}
+// ---- The heroes of each war (W3, D-070; Q159, Q174). Every found war keeps three captains of the hosts and two warchiefs of the
+// wastes by name (`w.hr`, saved with the war): each of a people (a captain or lord of the realm, a marshal of the riders, a
+// lord-captain of the high elves, a captain of the wood, a captain or thane of the dwarves; a warchief of the orcs, a chieftain
+// of the goblins), named in its people's style with an epithet. An army sent while the player is near is led by the one of its
+// side who has led fewest (`A.hero`): the hero marches with its first company, two of the elite at its side, two and a half
+// times as hard to kill and half again as hard a hitter; its coming, its deeds (those it slays) and its fall are told and written
+// in the chronicle. The fallen stay dead: the hosts raise a cairn for each behind the lines (war-works.js), the journal remembers
+// them, and a new captain or warchief takes up the command.
+const HERO={r:{k:'rcapt',p:'realm',t:['Captain','Knight-Captain','Lord'],g:['rguard','rguard']},h:{k:'hcapt',p:'rider',t:['Marshal','Thane'],g:['hlancer','hlancer']},
+  e:{k:'ecapt',p:'elder',t:['Lord-Captain','Warden'],g:['eblade','eblade']},w:{k:'wcapt',p:'woodelf',t:['Captain of the Wood'],g:['wknife','eblade']},
+  d:{k:'dcapt',p:'dwarf',t:['Captain','Thane'],g:['diron','diron']},o:{k:'ochief',p:'orc',t:['Warchief','Gorechief'],g:['brute','oshield']},g:{k:'gchief',p:'goblin',t:['Chieftain'],g:['wolfrid','gswarm']}};
+const HERO_EP={al:['the Bold','the Steadfast','Ironhand','the Grey','the Fair','Oathkeeper','the Unbowed','Stormhelm','Brightblade','the Watchful','Longspear','the Young'],
+  or:['Skullsplitter','the Burnt','Gutripper','Blackmaw','the Flayer','Bonecrusher','Ashtongue','the Cruel','Ironjaw','Redhand']};
+function heroNew(w,side){const H=w.hr,i=H.n++,r=rngAt(w.X+i*131,9911,w.Z),ps=side==='al'?['r','d','e','h','w']:['o','o','g'],p=ps[Math.floor(r()*ps.length)],D=HERO[p];
+  const h={id:i,p:p,k:D.k,n:D.t[Math.floor(r()*D.t.length)]+' '+fullName(D.p,r,false)+' '+HERO_EP[side][Math.floor(r()*HERO_EP[side].length)],side:side,kills:0,bat:0,t0:Math.round(warPlay)};
+  H[side].push(h);return h;}
+function heroesOf(w){if(!w.hr)w.hr={n:0,al:[],or:[],dead:[]};while(w.hr.al.length<3)heroNew(w,'al');while(w.hr.or.length<2)heroNew(w,'or');return w.hr;}
+// an army sent while the player is near: its hero (the one of its side who has led fewest), told
+function warHeroLead(A){const w=WARS.get(A.P.id);if(!w||A.def)return;const H=heroesOf(w),L=H[A.al?'al':'or'].slice().sort((a,b)=>a.bat-b.bat);const h=L[0];A.hero=h;h.bat++;A.heroK0=h.kills;
+  setTimeout(()=>toast(h.n+(A.al?' leads the hosts':' leads the warhost')),1800);saveDirty=true;}
+// with the army's first company: the hero and two of the elite at its side
+function warHeroSpawn(A,grp,o){const h=A.hero;if(!h||A.heroF||!grp.length)return;const g0=grp[0],D=HERO[h.p],out=[];
+  for(const k of [h.k,...D.g]){const f=addFoe(k,g0.x+(Math.random()-0.5)*2,g0.y,g0.z+(Math.random()-0.5)*2,o||{});out.push(f);}
+  const f=out[0];f.hero=h;f.hp=f.mhp=Math.round(FOES[h.k].hp*2.5);f.dmgK=1.5;A.heroF=f;grp.push(...out);}
+// a blow that fells: the hero's deed counted; a hero fallen
+function warHeroFell(g,by){if(by&&by.hero&&!g.cntH){g.cntH=1;by.hero.kills++;}if(g.hero&&!g.hero.dead)heroFalls(g.hero,by);}
+function heroFalls(h,by){h.dead=1;const w=[...WARS.values()].find(w=>w.hr&&(w.hr.al.includes(h)||w.hr.or.includes(h)));if(!w)return;const H=w.hr,L=H[h.side];L.splice(L.indexOf(h),1);
+  const who=by&&by.kind?(by.hero?by.hero.n:'a'+(/^[AEIOU]/.test(FOES[by.kind].n)?'n ':' ')+FOES[by.kind].n.toLowerCase()):'';
+  H.dead.push({n:h.n,p:h.p,side:h.side,kills:h.kills,bat:h.bat,t:Math.round(warPlay),by:who});const nh=heroNew(w,h.side),near=Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400;
+  warLog(w,h.n+' fell'+(who?' to '+who:'')+', having slain '+h.kills+(h.bat?' in '+h.bat+' battle'+(h.bat===1?'':'s'):'')+'.'+(h.side==='al'?' The hosts raise a cairn behind the lines.':'')+' '+nh.n+' takes up the command.');
+  if(near){toast(h.n+' has fallen!');setTimeout(()=>toast(nh.n+' takes up the command'),3000);}saveDirty=true;}
+// when an army is done: what its hero did
+function warHeroDeeds(A,w){const h=A.hero;if(!h||h.dead)return null;const k=h.kills-(A.heroK0||0);return h.n+' led them'+(k?' and slew '+k:'')+'.';}
+// near a hero of the wastes, once: a warning
+function warHeroSeen(){for(const f of foes){if(!f.hero||f.dead||f.heroSeen||Math.hypot(f.x-PL.x,f.z-PL.z)>24)continue;f.heroSeen=1;if(!FOES[f.kind].folk)toast(f.hero.n+' of the wastes is here!');}}
+// the journal: the heroes of each war, living and remembered
+function warHeroJournal(w,out){if(!w.hr)return;const H=w.hr,line=h=>h.n+' (slain '+h.kills+', battles '+h.bat+')';
+  out.push('Captains of the hosts: '+H.al.map(line).join('; ')+'.','Warchiefs of the wastes: '+H.or.map(line).join('; ')+'.');
+  if(H.dead.length)out.push('Remembered: '+H.dead.map(d=>d.n+', fell in hour '+(d.t/3600).toFixed(1)+(d.by?' to '+d.by:'')+', slew '+d.kills).join('; ')+'.');}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};

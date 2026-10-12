@@ -274,6 +274,10 @@
       "about": "The folk of the mountain dwarves (D-066): axeguards, hammerers, crossbowmen, captains, the king, thanes, ladies, miners and smiths, short and broad with braided beards"
     },
     {
+      "path": "engine/war-models.js",
+      "about": "The war's soldiers and creatures (W3, D-070): knights, lancers, pikemen, crossbowmen, household knights, horse archers, outriders, mounted archers, glaive wardens, blade masters, skirmishers, sharpshooters, axe throwers, shieldbreakers, ironclads, sappers, engineers, healers, bearers and standard bearers; wolf riders, pot-throwers, drummers, fire shamans, siege trolls, war beasts, shield orcs, skulkers, troll drivers and orc crossbowmen, built from each people's parts (MODEL_KIT)"
+    },
+    {
       "path": "gameplay/wildlife.js",
       "about": "Animals (E1): kinds by land, wandering and fleeing, hunting, wool, milk and eggs, riding, a hound and a pack mule that follow you"
     },
@@ -292,6 +296,14 @@
     {
       "path": "gameplay/war-works.js",
       "about": "The works of the war (W2, D-069): the leaf broken, the mine and countermine, ladders and breaches, graves, fires that burn and are rebuilt (all saved as block edits), the ram's crew, the siege tower, climbing, pitch from the walk, fights in the tunnels, the gate's fall, the fallen and the crows"
+    },
+    {
+      "path": "gameplay/war-units.js",
+      "about": "The war's new soldiers and creatures at work (W3, D-070): their kinds, shots (bolts, javelins, thrown axes, fire pots) and companies; banners that steady, drums that drive, healers, bearers, siege trolls at the palisades, the knights' wedge"
+    },
+    {
+      "path": "gameplay/war-heroes.js",
+      "about": "The heroes of each war (W3, D-070): captains of the hosts and warchiefs of the wastes by name, saved with the war, leading its armies, their deeds and their falls, cairns and the journal's memory"
     },
     {
       "path": "input/touch.js",

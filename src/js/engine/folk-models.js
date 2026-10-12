@@ -190,5 +190,6 @@ const FOLK_KIT=(function(){
         P.map('body',['F'],(s,t)=>Math.abs(t-3-Math.abs(s-7.5)*0.45)<0.6&&t<8?sh(GOLD,(s+t)%2?24:-10):null);
         plate(P,['circ'],GOLD);P.map('circ',['F'],(s)=>s===6||s===7?[110,170,230]:null);}}
   });
+  MODEL_KIT.realm={soldier,soldierPaint,shield,shieldPaint,coats,sign,SIGN};
   return {SK,HAIR,ALL,SIDE,sh,hz,legs,arms,man,cloth,mail,plate,leather,band,rivets,boots,hands,face,sword,swordPaint,STEEL,SILVER,GOLD,BLACK};
 })();

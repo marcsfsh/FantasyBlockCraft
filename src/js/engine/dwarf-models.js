@@ -116,4 +116,5 @@
         leather(P,['apron'],[100,66,40]);leather(P,['belt'],[70,50,30]);P.map('apron',['F'],(s,t)=>t%9===4?sh([100,66,40],-20):null);
         P.map('haft',ALL,(s,t)=>sh([110,80,50],hz(s,t>>1,745)*10));plate(P,['hmr'],DIRON);}}
   });
+  MODEL_KIT.dwarf={coats,dwarf,dface,kit,kitPaint,helm,helmPaint,axe,axePaint,shield,shieldPaint,sign,BRZ,BLUE,CRIM,DIRON};
 })();

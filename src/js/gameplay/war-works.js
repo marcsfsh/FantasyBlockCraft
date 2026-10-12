@@ -92,7 +92,7 @@ function warFireFrame(dt){warFireT-=dt;const tick=warFireT<=0;if(tick)warFireT=1
         else if(e[3]&&age<e[3]+120&&Math.random()<dt*0.5)spawnP(x+0.5,Y+0.6,z+0.5,(Math.random()-.5)*0.2,0.6,(Math.random()-.5)*0.2,[0.3,0.3,0.3],3,-0.15);}
       if(!tick||!inW||!genDone[(x>>4)+(z>>4)*NCX])continue;
       if(!e[3]&&age>25+(X*7+Z*3+Y)%15){e[3]=Math.max(1,Math.round(warPlay)-e[2]);if(get(x,Y,z)===e[1])setBlock(x,Y,z,WAR_CLOTH.has(e[1])?AIR:CHARWOOD,true);saveDirty=true;}
-      else if(e[3]&&age>900){const c=get(x,Y,z);if(c===AIR||c===CHARWOOD)setBlock(x,Y,z,e[1],true);w.bn.splice(i,1);saveDirty=true;}}}}
+      else if(e[3]&&age>(e.q?300:900)){const c=get(x,Y,z);if(c===AIR||c===CHARWOOD)setBlock(x,Y,z,e[1],true);w.bn.splice(i,1);saveDirty=true;}}}}
 // ---- The ram (Q155): while its crew stands by it and the war at its gate goes on, a blow every three and a half seconds: the crew
 // heave together, the beam booms on the leaf, the ground shakes near, dust and splinters fly from the leaf
 let warRamT=0,warRamBlow=-9;
@@ -170,7 +170,7 @@ function warClimbTick(dt,P,w){warClimbT-=dt;if(warClimbT>0||w.s>=2)return;warCli
 let warMineT=0,warPickT=0;
 function warMineFight(dt,P,w){if(w.s>=2)return;const g=P.hG;if(PL.y>g-2)return;const M=warMinePts(P),mid=warMineMid(P),ap=w.ap||{},me=ap.me||0,cm=ap.cm||0,[pu,pv]=wgUV(P,PL.x+OX,PL.z+OZ);
   const at=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],seg=(a,b,t)=>t>0&&wgLineD([a,at(a,b,t)],pu,pv)<14;if(!seg(M.A,M.B,me)&&!seg(M.C,mid,cm))return;
-  const faces=[];if(me>0.05&&me<1)faces.push(['d_patrol',at(M.A,M.B,me-0.04),1]);if(cm>0.05&&cm<1)faces.push(['den',at(M.C,mid,cm-0.04),0]);
+  const faces=[];if(me>0.05&&me<1)faces.push(['d_sap',at(M.A,M.B,me-0.04),1]);if(cm>0.05&&cm<1)faces.push(['den',at(M.C,mid,cm-0.04),0]);
   warPickT-=dt;if(warPickT<=0){warPickT=0.6+Math.random()*0.5;for(const [,[u,v]] of faces){const [X,Z]=wgXZ(P,Math.round(u),Math.round(v)),x=X-OX+0.5,z=Z-OZ+0.5;
     if(Math.hypot(x-PL.x,z-PL.z)<40){burst(0.05,'highpass',2600+Math.random()*1400,1.5,0.22,0,[x,g-8,z]);burst(0.12,'bandpass',520,1,0.12,0.02,[x,g-8,z]);}}}
   warMineT-=dt;if(warMineT>0)return;warMineT=12;if(foes.some(f=>!f.dead&&f.mine===P.id))return;
@@ -201,6 +201,14 @@ function warTowerCells(P){const g=P.hG,cs=P.cs,out=[],M=warMinePts(P);
 function warBlast(x,y,z){const d=Math.hypot(x-PL.x,z-PL.z);sfxBoom(d*0.6,[x,y,z]);setTimeout(()=>sfxBoom(d,[x,y+10,z]),350);setTimeout(()=>burst(3,'lowpass',160,0.7,0.5*Math.max(0.1,1-d/150),0,[x,y,z]),700); // the blast, then the stones falling
   shake=Math.max(shake,Math.max(0,1.2*(1-d/90)));
   for(let k=0;k<160;k++)spawnP(x+(Math.random()-.5)*12,y+Math.random()*30,z+(Math.random()-.5)*12,(Math.random()-.5)*8,Math.random()*6,(Math.random()-.5)*8,k%4?[0.4,0.37,0.33]:[1,0.5,0.12],2.5+Math.random()*2,4);}
+// the cairns of the hosts' fallen heroes (W3): in a row before the graves, each a mound of stones capped with moss and its
+// people's banner on a pole
+const HERO_BAN={r:RBANNER,h:HBANNER,e:EVBANNER,w:WBANNER,d:DBANNER};
+function warCairnCells(P,w,n0,n1){const out=[],D=w.hr.dead.filter(d=>d.side==='al'),cs=P.cs;
+  for(let i=n0;i<n1&&i<20;i++){const u=P.uL+26,v=(i%2?-cs:cs)*(54+Math.floor(i/2)*7),y=warTop(P,u,v)+1;if(y<1)continue;
+    for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){warSet(out,P,u+a,v+b,y,COBBLE);if(!a||!b)warSet(out,P,u+a,v+b,y+1,a||b?COBBLE:MOSSY);}warSet(out,P,u,v,y+2,MOSSY);
+    for(let k=3;k<=5;k++)warSet(out,P,u,v,y+k,HERO_BAN[D[i]&&D[i].p]||RBANNER);}
+  return out;}
 // victory fires on the Leaguer's muster field: a ring of logs about a bed of embers, three of them; burnt out after twenty minutes
 const WAR_FIRES=[[30,-16],[30,16],[42,0]];
 function warFireCells(P,lit){const out=[];for(const [du,dv] of WAR_FIRES){const u=P.uC0+du,v=dv,y=warTop(P,u,v)+1;if(y<1)continue;
@@ -220,6 +228,7 @@ function warWorksTick(P,w){if(!P||!w||WJ.length)return;wgSite(P);w.ap=w.ap||{lea
     warJob(warTowerCells(P),recent?2500:4000,ok=>{if(done('fall',ok))A.fall=1;});return;}
   if(w.s>=2&&A.fall&&!A.ban&&due('ban')&&warLoaded(P,-12,12,-36,36)){const out=[],cs=-P.cs;for(let y=g+30;y<=g+46;y++){warSet(out,P,10,cs*25,y,RBANNER);warSet(out,P,10,cs*31,y,DBANNER);}for(let y=g+20;y<=g+30;y++)warSet(out,P,-10,cs*28,y,EVBANNER);
     warJob(out,400,ok=>{if(done('ban',ok))A.ban=1;});return;}
+  const hc=w.hr?w.hr.dead.filter(d=>d.side==='al').length:0;if(hc>(A.hc||0)&&due('hc')&&warLoaded(P,P.uL+24,P.uL+30,-92,92)){const n0=A.hc||0;warJob(warCairnCells(P,w,n0,hc),200,ok=>{if(done('hc',ok))A.hc=hc;});return;}
   const lit=w.s>=2&&warPlay-(w.fallT||0)<1200;if(w.s>=2&&A.fire!==(lit?1:2)&&due('fire')&&warLoaded(P,P.uC0+26,P.uC0+44,-18,18))warJob(warFireCells(P,lit),100,ok=>{if(done('fire',ok))A.fire=lit?1:2;});}
 // the fallen of the war (counted once each, from updFoes): the hosts' fill the graves; they lie a while (WAR_LIE seconds; past
 // WAR_DEAD of them, the longest fallen are cleared first)
@@ -254,10 +263,13 @@ function warCrowTick(){const near=foes.filter(f=>f.dead>3&&f.war&&!f.gone&&Math.
   if(!near.length){for(const c of warCrows)if(!c.leave){c.leave=1;c.life=8;}return;}if(warCrows.filter(c=>!c.leave).length>=want)return;
   const f=near[Math.floor(Math.random()*near.length)],m=crowMesh(),cy=f.gy+12+Math.random()*7;scene.add(m);
   warCrows.push({f:f,cx:f.x,cz:f.z,cy:cy,r:5+Math.random()*5,a:Math.random()*6.28,sp:4+Math.random()*2,ph:Math.random()*6,x:f.x,y:cy,z:f.z,sx:0,sy:0,sz:0,tx:0,ty:0,tz:0,t:6+Math.random()*10,cw:2+Math.random()*6,st:'air',life:8,m:m});}
+// engineers of the hosts mend what burned or was broken within 20 of them three times as fast (W3)
+function warMend(){const E=foes.filter(f=>!f.dead&&FOES[f.kind].eng);if(!E.length)return;for(const w of WARS.values()){if(!w.bn)continue;for(const e of w.bn){if(e.q)continue;const [X,Y,Z]=e.c||(e.c=e[0].split(',').map(Number));
+  for(const f of E)if(Math.abs(f.x+OX-X)<20&&Math.abs(f.z+OZ-Z)<20){e.q=1;break;}}}}
 // ---- Every frame: the jobs, the fires, the crows, and near a gate the ram, the walk's defence, the climbing, the tunnels, the
 // victory fires' flames
 let warWorksT=0;
-function warWorksFrame(dt){warJobsFrame();warFireFrame(dt);warWorksT-=dt;if(warWorksT<=0){warWorksT=1;warClearDead();warCrowTick();}
+function warWorksFrame(dt){warJobsFrame();warFireFrame(dt);warWorksT-=dt;if(warWorksT<=0){warWorksT=1;warClearDead();warCrowTick();warMend();}
   const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),160),w=P&&WARS.get(P.id);if(!w)return;wgSite(P);warRamTick(dt,P,w);warPitch(dt,P,w);warClimbTick(dt,P,w);warMineFight(dt,P,w);
   if(w.ap&&w.ap.fire===1)for(const [du,dv] of WAR_FIRES){const [X,Z]=wgXZ(P,P.uC0+du,dv),x=X-OX+0.5,z=Z-OZ+0.5;if(Math.hypot(x-PL.x,z-PL.z)>100||Math.random()>dt*14)continue;const y=warTop(P,P.uC0+du,dv)+1;
     spawnP(x+(Math.random()-.5)*1.6,y+0.6,z+(Math.random()-.5)*1.6,(Math.random()-.5)*0.4,2+Math.random()*1.5,(Math.random()-.5)*0.4,[1,0.5+Math.random()*0.3,0.1],0.8,-1.4);

@@ -5,6 +5,18 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.40.0 (2026-10-12): W3, the soldiers and their heroes
+
+Saves from 0.39.0 do not carry over (save key v30): the wars keep their heroes.
+
+### Game
+- **New soldiers of the hosts:** knights of the realm on barded horses and lancers of the riders, who charge in a wedge; pikemen and crossbowmen of the realm; household knights in plate; horse archers and outriders with javelins; elven mounted archers, glaive wardens and blade masters; wood-elf skirmishers and sharpshooters; dwarven axe throwers, shieldbreakers, ironclads and sappers; engineers who mend the works; elven healers who mend the wounded; bearers who carry the fallen off the field; and a standard bearer of each people whose banner steadies those near.
+- **New creatures of the wastes:** goblin wolf riders on great wargs, goblin pot-throwers whose pots burst in flame, war drummers and fire shamans who drive the orcs on, siege trolls with rams who knock the siege lines' palisades apart, war beasts in chains, shield orcs, swarms of goblin skulkers, troll drivers with whips, and orc crossbowmen.
+- **Heroes:** each war has named captains of the hosts and warchiefs of the wastes who lead its armies with their guards. Their coming, their deeds and their deaths are told and written in the chronicle; the fallen stay dead, the hosts raise cairns for theirs behind the lines, the journal remembers them, and new captains take their place.
+
+### Tooling
+- New test case `62-war-units`.
+
 ## 0.39.0 (2026-10-12): W2, the siege works and the gate's fall
 
 Saves from 0.38.0 do not carry over (save key v29): the gates' walls are mended and the war's works are saved.

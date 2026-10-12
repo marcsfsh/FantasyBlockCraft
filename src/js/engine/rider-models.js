@@ -205,4 +205,5 @@
         leather(P,['belt'],[60,40,26]);P.map('belt',['F'],(s,t)=>s>=8&&s<=11?sh(GOLD,t===0?24:0):s%3===0&&t===1?sh(GOLD,10):null);
         leather(P,['sheath'],[50,70,44]);band(P,'sheath',SIDE,0,2,GOLD);band(P,'sheath',SIDE,20,22,GOLD);P.map('shilt',ALL,(s,t)=>(s+t)%2?[70,48,30]:sh(GOLD,0));plate(P,['sguard'],GOLD);}}
   });
+  MODEL_KIT.rider={coats,soldier,soldierPaint,helmParts,kit,shieldParts,shieldPaint,spear,spearPaint,horseSign,woven,GREEN,DGREEN,WHITE,BRONZE,HORSE};
 })();

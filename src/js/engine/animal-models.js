@@ -153,6 +153,7 @@ function amLayout(K){
   return K.uv=uv;
 }
 const amTexC=new Map();
+const MODEL_KIT={}; // each people's helpers for building and painting models, shared with the war's units (W3, war-models.js)
 function amHash(x,y,s){let h=(x*374761393+y*668265263+s*1442695041)|0;h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;}
 function amTexture(kind,ci,flags){
   const key=kind+':'+ci+':'+(flags.young?1:0)+(flags.stag?1:0);if(amTexC.has(key))return amTexC.get(key);
