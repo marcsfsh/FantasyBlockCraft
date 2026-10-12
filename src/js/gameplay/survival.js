@@ -252,13 +252,14 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
   if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
+  if(btn===2&&(morBind()||morHorn(held)||engAct()))return; // a wounded soldier's wounds bound, the Horn of the Hosts sounded (W8b), an engine of the war worked (W8c)
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}

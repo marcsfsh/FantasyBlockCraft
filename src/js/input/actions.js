@@ -30,12 +30,13 @@ const ACTIONS={
   hostHold:{name:'Your host: hold here',crea:1,run:()=>hostCommand('hold')},
   hostMarch:{name:'Your host: march to where I look',crea:1,run:()=>hostCommand('march')},
   hostCharge:{name:'Your host: charge',crea:1,run:()=>hostCommand('charge')},
-  hostVolley:{name:'Your host: loose a volley',crea:1,run:()=>hostCommand('volley')}
+  hostVolley:{name:'Your host: loose a volley',crea:1,run:()=>hostCommand('volley')},
+  hostForm:{name:'Your host: change formation',crea:1,run:()=>hostFormNext()}
 };
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyL:'journal',KeyJ:'mapZoom',KeyI:'hud',KeyK:'warConsole',KeyG:'hostFollow',KeyY:'hostHold',KeyP:'hostMarch',KeyC:'hostCharge',KeyO:'hostVolley',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyL:'journal',KeyJ:'mapZoom',KeyI:'hud',KeyK:'warConsole',KeyG:'hostFollow',KeyY:'hostHold',KeyP:'hostMarch',KeyC:'hostCharge',KeyO:'hostVolley',Digit0:'hostForm',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
   // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code (PAD_FIXED).

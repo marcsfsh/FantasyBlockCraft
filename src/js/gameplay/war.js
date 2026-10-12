@@ -84,6 +84,7 @@ function warAllied(def){const k=warSz(),C=[],add=(fp,n,lead,m,g)=>{const q=Math.
 function warOrcs(def){const k=warSz(),C=[],add=(t,n,lead,m)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:t,n:n,lead:i<2?lead:null,g:0});};
   if(def){add('band',8,'ochief',2);add('oscout',8,null,1);add('band',1,'troll',1);}
   else{add('oline',8,null,2);add('oarmy',10,'ochief',6);add('owolf',5,null,2);add('oscout',10,'gchief',2);add('oswarm',10,null,1);add('oroused',8,null,1);add('band',1,'troll',4);add('otroll',2,'tdriver',2);add('owb',2,'tdriver',1);
+    C.filter(c=>c.t==='oarmy').slice(0,3).forEach(c=>c.std='obanner'); // the warhost's banners (W8b)
     for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'||C[i].t==='otroll'||C[i].t==='owb'){const t=C.splice(i,1)[0];C.splice(Math.min(C.length,2+3*j++),0,t);}} // (W3: shield lines in front, wolf riders, skulkers, drummers and shamans, siege trolls and war beasts with their drivers)
   return C;}
 const warN=C=>C.reduce((a,c)=>a+c.n,0);
@@ -197,35 +198,36 @@ function warMarch(){
 function warBattle(A,live){
   if(!live.length||A.mus&&!A.go&&!A.def)return; // (an army mustering is not yet in battle)
   const [cx,cz]=warMid(A),y=A.P.hG,en=[];
-  for(const g of foes){if(g.dead||g.gone||FOES[g.kind].civ||!!FOES[g.kind].folk===!!A.al)continue;if(Math.hypot(g.x-cx,g.z-cz)<60)en.push(g);}
+  for(const g of foes){if(g.dead||g.gone||g.wnd||FOES[g.kind].civ||!!FOES[g.kind].folk===!!A.al)continue;if(Math.hypot(g.x-cx,g.z-cz)<60)en.push(g);}
   if(!A.bat){if(en.filter(g=>Math.hypot(g.x-cx,g.z-cz)<50).length<4)return;
     let ex=0,ez=0;for(const g of en){ex+=g.x;ez+=g.z;}ex/=en.length;ez/=en.length;A.bat={last:foeClock,vT:foeClock+2,cry:0};
-    if(A.al&&!A.def&&!(A.mus&&!A.go))warForm(A,live,cx,cz,ex,ez);
+    if(A.al&&!A.def&&!(A.mus&&!A.go))warForm(A,live,cx,cz,ex,ez,en);
     if(!A.al&&!A.def&&!(A.mus&&!A.go))warCharge(A,live,en);
     warHorn(A,A.al?'muster':'advance');return;}
   const B=A.bat;warWedgeTick(A,en);if(en.length)B.last=foeClock;
-  else if(foeClock-B.last>8){A.bat=null;if(A.line){Object.assign(A.line,{hold:false,go:true,goT:foeClock});A.line=null;warHorn(A,'advance');}return;}
+  else if(foeClock-B.last>8){A.bat=null;for(const f of live)f.fm=null;morCheer(live); /* (the field won: they cheer, W8b) */if(A.line){Object.assign(A.line,{hold:false,go:true,goT:foeClock});A.line=null;warHorn(A,'advance');}return;}
   if(!B.cry){let near=0,ex=0,ez=0;for(const g of en)if(Math.hypot(g.x-cx,g.z-cz)<14){near++;ex+=g.x;ez+=g.z;}
-    if(near>=3){B.cry=1;warCry(!A.al,16,cx,y+2,cz);warCry(!!A.al,12,ex/near,y+2,ez/near);}}
+    if(near>=3){B.cry=1;warCry(!A.al,16,cx,y+2,cz);warCry(!!A.al,12,ex/near,y+2,ez/near);morCry(live);}}
   if(foeClock>=B.vT){B.vT=foeClock+10+Math.random()*3;
     const arch=live.filter(f=>{const S=FOES[f.kind].shot;return S&&S.k!=='fire'&&!(f.foe&&!f.foe.dead&&Math.hypot(f.foe.x-f.x,f.foe.z-f.z)<8);});
     const tg=en.filter(g=>{const d=Math.hypot(g.x-cx,g.z-cz);return d>14&&d<55;});
     if(arch.length>=3&&tg.length){warSignal('volley',warPeople(arch[0]),[cx,y+3,cz]);for(const f of arch){f.volT=foeClock+0.9+Math.random()*0.3;f.volG=tg[Math.floor(Math.random()*tg.length)];}}}}
 // the hosts' line: its middle a little ahead of the army's, across the way to the foe; each to a place, standing where it is if the
 // place has no footing; it holds (`A.line`, a hold for the marks in their ways) until the battle is done
-function warForm(A,live,cx,cz,ex,ez){
+function warForm(A,live,cx,cz,ex,ez,en){
   const dx=ex-cx,dz=ez-cz,l=Math.hypot(dx,dz)||1,fx=dx/l,fz=dz/l,ax=-fz,az=fx,FA={hold:true,go:false,goT:0,gap:0.15,face:Math.atan2(fx,fz),line:1};A.line=FA;
   let y=0;for(const f of live)y+=f.y;y=Math.round(y/live.length);
   const put=(f,a,b)=>{let x=cx+fx*b+ax*a,z=cz+fz*b+az*a;if(foeStand(x,y+1,z,FOES[f.kind].tall||2)<0){x=f.x;z=f.z;}warHoldAt(f,x+OX,z+OZ,FA);};
   const wedge=warWedge(A,live,cx,cz,fx,fz); // (W3: the knights' wedge before the line, the pikes in its front rank, healers and bearers behind it)
   const G=[live.filter(f=>!FOES[f.kind].shot&&!FOES[f.kind].mount&&!FOES[f.kind].civ).sort((a,b)=>(FOES[b.kind].pike||0)-(FOES[a.kind].pike||0)),live.filter(f=>(FOES[f.kind].shot||FOES[f.kind].civ)&&!FOES[f.kind].mount&&!FOES[f.kind].bear),live.filter(f=>FOES[f.kind].mount&&!wedge.includes(f))];
+  const fm=en&&morPick(en);if(fm){for(const f of G[0])f.fm=fm;if(Math.hypot(cx-PL.x,cz-PL.z)<100)toast(fm==='wall'?'The hosts lock shields against the arrows':'The hosts brace their spears against the horsemen');} // (W8b)
   const per=Math.max(8,Math.ceil(G[0].length/2));G[0].forEach((f,i)=>{const r=Math.floor(i/per),n=Math.min(per,G[0].length-r*per);put(f,((i%per)-(n-1)/2)*1.5,4-r*1.7);});
   G[1].forEach((f,i)=>{const r=Math.floor(i/12),n=Math.min(12,G[1].length-r*12);put(f,((i%12)-(n-1)/2)*1.6,-1.5-r*1.7);});
   const w0=per*0.75+4;G[2].forEach((f,i)=>put(f,(i%2?1:-1)*(w0+Math.floor(i/2)%3*2.2),2-Math.floor(i/6)*2.5));}
 function warHoldAt(f,X,Z,FA){if(f.waitA)return;const rest=f.way?f.way.slice():[];if(f.wp&&f.st==='return')rest.unshift(f.wp);
   f.way=[{A:FA,r:0}].concat(rest);warAim(f,[X,Z,1]);f.wp=[X,Z,1];f.retry=0;f.lineHold=FA;if(f.st!=='chase'){f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/FOES[f.kind].walk-20)+5;}}
 // the wastes' charge: each without a foe runs at the nearest of the hosts within 70, howling
-function warCharge(A,live,en){for(const f of live){if(f.foe||f.waitA&&!warGo(f))continue;let best=null,bd=70;for(const g of en){const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
+function warCharge(A,live,en){for(const f of live){if(f.foe||f.rout||f.wnd||f.waitA&&!warGo(f))continue;let best=null,bd=70;for(const g of en){const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
     if(best){f.foe=best;f.eseen=0;f.st='chase';f.seen=0;f.t=0;}}
   const [x,z]=warMid(A);warCry(true,18,x,A.P.hG+2,z);}
 // the din of the fighting about the player and the battle music, four times a second (from updFoes)
@@ -240,7 +242,7 @@ function warTick(){
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
   const w=WARS.get(P.id),last=w&&w.s!==2&&warAll(w);if(last&&!busy&&st.army>45)st.army=45; // the last assault on the gate (W2)
-  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=last||Math.random()<(st.al?0.3:0.7);const A=warArmy(P,st.al);if(!A.al)emberDrive(A);
+  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=last||Math.random()<(st.al?0.3:0.7);if(!last&&Math.random()<0.3){fieldBattle(P);return;} /* (a pitched battle: both sides at once, W8c) */const A=warArmy(P,st.al);if(!A.al)emberDrive(A);
     if(last){A.last=1;toast('The last assault: the hosts come against '+P.name.replace(/^The /,'the ')+' with all their strength');}}
   else if(st.raid<=0){st.raid=50+Math.random()*60;warRaid(P);}
   else if(st.scout<=0){st.scout=70+Math.random()*80;warScout(P);}}
@@ -267,7 +269,7 @@ function updWarStones(dt){
 // player in survival standing by it
 function warSplash(x,y,z,orc){
   for(const g of foes){if(g.dead||!!FOES[g.kind].folk!==orc||FOES[g.kind].civ)continue;const dx=g.x-x,dz=g.z-z,d=Math.hypot(dx,dz);if(d>3||Math.abs(g.y-y)>4)continue;
-    const n=Math.round((orc?9:14)*(1-d/4)),G=FOES[g.kind];g.hp-=n;g.hurt=1;g.kvx+=dx/(d||1)*6*G.mass;g.kvz+=dz/(d||1)*6*G.mass;g.vy=Math.max(g.vy,3);if(g.st==='sleep')g.st='idle';
+    const n=Math.round((orc?9:14)*(1-d/4)*(g.fm==='loose'?0.5:1)),G=FOES[g.kind];g.hp-=n;g.hurt=1;g.kvx+=dx/(d||1)*6*G.mass;g.kvz+=dz/(d||1)*6*G.mass;g.vy=Math.max(g.vy,3);if(g.st==='sleep')g.st='idle';
     if(g.hp<=0){g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;}}
   if(orc&&foeTarget()&&Math.hypot(PL.x-x,PL.z-z)<2.6&&Math.abs(PL.y-y)<3)foeHurtPlayer(6,'pot',(PL.x-x)||0.1,(PL.z-z)||0.1,4);
   if(orc)warIgnite(warAtGate(x,z),x,y,z,1.8,8);} // a pot sets the works where it lands alight (W2)

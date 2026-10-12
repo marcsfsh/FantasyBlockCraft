@@ -43,7 +43,7 @@ const blow=(A,B)=>{const h0=B.hp;foeHurtFoe(B,10,A,1,0,1,true);const d=h0-B.hp;B
   info('a siege troll broke',broke,'; gone',gone,'; mended',back);assert(broke>=1&&gone&&back,'a siege troll knocks the hosts\' palisade apart, and it is mended in time');clear();}
 // the armies: their new companies, their heroes, the knights' wedge; a hero's fall, a cairn, a new captain; the journal
 {clear();playing=true;const AL=warArmy(P,true),OR=warArmy(P,false),seen={};let wedge=0,charge=0;
-  for(let k=0;k<160;k++){run(1);for(const f of foes)if(!f.dead)seen[f.kind]=1;if(AL.wedge)wedge=1;if(foes.some(f=>f.chg))charge=1;}
+  for(let k=0;k<160;k++){run(1);for(const f of foes)if(!f.dead)seen[f.kind]=1;if(AL.wedge)wedge=1;if(foes.some(f=>f.chg)||AL.charged)charge=1;} // (the charge counted when it is sounded: since W8b the knights may strike within the second)
   const hostKinds=['rknight','rstd','dstd','estd','eheal'].filter(k=>seen[k]),orcKinds=['oshield','wolfrid','gswarm','strollr','tdriver','wbeast'].filter(k=>seen[k]);
   info('the hosts brought',hostKinds.join(' '),'; the warhost',orcKinds.join(' '),'; heroes',AL.hero&&AL.hero.n,'and',OR.hero&&OR.hero.n,'; wedge',wedge,'charge',charge);
   assert(hostKinds.length>=4&&orcKinds.length>=4,'the armies bring their new companies: knights, standards, healers; shield orcs, wolf riders, skulkers, siege trolls and their drivers');

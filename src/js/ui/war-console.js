@@ -32,7 +32,7 @@ function wcRender(){
     else{head('The front beyond the gate');const r=row('The front '+Math.round(warFront(w)*100)+'%');for(const v of pct)btn(r,Math.round(v*100)+'%',()=>now(wcDo('effort',['fr',v])));}
     // now: at the gate
     head('Make it happen now'+(C.near?'':' (the gate\'s events: go to the gate first)'));
-    {const r=row();btn(r,'The hosts attack',()=>now(wcDo('army'),1));btn(r,'A warhost attacks',()=>now(wcDo('warhost'),1));if(!fallen)btn(r,'The last assault',()=>now(wcDo('last'),1));
+    {const r=row();btn(r,'The hosts attack',()=>now(wcDo('army'),1));btn(r,'A warhost attacks',()=>now(wcDo('warhost'),1));btn(r,'A pitched battle',()=>now(wcDo('pitched'),1));if(!fallen)btn(r,'The last assault',()=>now(wcDo('last'),1));
       btn(r,'A raiding party of the hosts',()=>now(wcDo('party'),1));btn(r,'Orcs sally',()=>now(wcDo('sally'),1));btn(r,'Scouts of the hosts',()=>now(wcDo('scouts'),1));btn(r,'Goblin scouts',()=>now(wcDo('goblins'),1));
       btn(r,'The engines loose',()=>now(wcDo('engines'),1));if(!fallen)twice(r,'The gate falls',()=>now(wcDo('fall'),1));}
     head('The bordering realms');{const r=row();btn(r,'A raid on the nearest place',()=>now(wcDo('raid'),1));btn(r,'A siege of the nearest city or castle',()=>now(wcDo('siege'),1));
@@ -56,7 +56,8 @@ function wcRender(){
     for(const H of HOSTS){const n=hostLive(H).length,r=row((H.led?'Yours, ':'Against you, ')+'of '+(H.side==='al'?'the alliance':'the wastes')+': '+n+' of '+H.N+', '+{follow:'following you',hold:'holding',march:'marching',charge:'charging',advance:'advancing'}[H.cmd]);
       if(H.led){for(const [c,lab] of [['follow','Follow'],['hold','Hold'],['march','March to where you look'],['charge','Charge']])btn(r,lab,()=>{hostOrder(H,c);now('',c==='march'||c==='charge');});btn(r,'Volley',()=>{const v=hostVolley(H);now(v?'Loose! '+v+' archers draw and loose':'No archer of yours has a foe within bowshot',1);});}
       else for(const [c,lab] of [['hold','Hold'],['advance','Advance on you'],['charge','Charge']])btn(r,lab,()=>{hostOrder(H,c);now('',1);});
+      {const r2=row('Formation: '+MOR_FORM_N[H.form||'line']+(H.mor&&H.mor.broken?' (broken, running)':''));for(const fm of MOR_FORMS)btn(r2,{line:'Ranks',wall:'Shield wall',wedge:'Wedge',square:'Square',loose:'Loose order'}[fm],()=>{hostReform(H,fm);now('',1);});}
       btn(r,'Dismiss',()=>{hostDismiss(H,'The host is dismissed');now('');});}
-    text('Orders as you play: follow '+ctl('hostFollow')+', hold '+ctl('hostHold')+', march to where you look '+ctl('hostMarch')+', charge '+ctl('hostCharge')+', volley '+ctl('hostVolley')+'.');}
+    text('Orders as you play: follow '+ctl('hostFollow')+', hold '+ctl('hostHold')+', march to where you look '+ctl('hostMarch')+', charge '+ctl('hostCharge')+', volley '+ctl('hostVolley')+', change formation '+ctl('hostForm')+'.');}
   el.scrollTop=top;
 }

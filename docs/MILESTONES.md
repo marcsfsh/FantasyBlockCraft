@@ -349,14 +349,14 @@ Planned without questions, as asked (D-078 to D-082). Built in five stages, each
   - Average: **throwing weapons**: javelins and throwing axes.
   - Average: **mounted combat**: blows from the saddle strike harder with speed, the Knight's Lance couched at a gallop strikes very hard, and a galloping horse tramples small foes.
   - Minor: a running blow; the axe's cleave into a second foe; the shield bash; the ring and sparks of a parry; staggered foes; arrows recovered from the slain; hunting with bows; the bow's draw narrowing the view; spent arrows stuck in the ground; recipes for all of it, and the quartermasters' gifts.
-- **W8b Morale, formations and the line** (every battle):
+- **W8b Morale, formations and the line** (every battle; done in 0.48.0, D-079):
   - Major: **morale and rout**: every soldier's fear rises with friends falling near, being outnumbered, its captain, hero or standard slain and the terror of trolls and drakes, and falls near standards, captains, drums and horns; the broken flee and may rally; armies and hosts that break are told.
   - Major: **formations**: line, shield wall, wedge, square and loose order for the hosts the player leads, and chosen by the hosts' armies by what they face, each with its effect (the wall stops arrows, the square stops horsemen, the wedge strikes hard, the loose order scatters before engines and fire).
   - Average: **cavalry charges** that strike, ride through and wheel to charge again; **banners of the warhosts** (orc banner bearers whose fall makes their company quail, taken as trophies); **the Horn of the Hosts** (rallies and steadies); **the wounded** who fall, are mended or carried; **war hounds** of the realms.
   - Minor: battle barks; war cries by people; captains rallying the fleeing; a hero's last stand; cheers after every battle won; the war panel showing each army's morale.
-- **W8c Engines and the field** (siege and open battle):
+- **W8c Engines and the field** (siege and open battle; done in 0.48.0, D-080):
   - Major: **crewing the engines**: the player takes a trebuchet, a captured orc stone-thrower or a bolt thrower, aims where they look and looses.
-  - Major: **pitched battles of the borderlands**: a realm marches to relieve a city or castle besieged by the wastes and the two armies meet on a named field, fought out near the player and settled away, the outcome burning or saving the place.
+  - Major: **pitched battles**: both sides take the field at a gate at once under a name, the champions fight between the lines, and the battle is told (built at the gates rather than in the borderlands: D-080).
   - Average: **the bolt thrower** (a placeable engine); **battle reports** after every battle; **the champions' duel** before a charge or a field battle.
   - Minor: battle sites on the world map; messengers riding with news; dust raised by marching and charging columns.
 - **W8d The war's business** (strategy and logistics):

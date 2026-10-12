@@ -58,7 +58,7 @@ Object.assign(FOLK_N,{eng:[2,2],sap:[2,3],aid:[2,3]});
 // ---- Blows: what each side's units add to a blow (from foeHurtFoe): [the hurt, the push]
 function warDmg(g,n,by,kb,blow){if(!by||!by.kind)return [n,kb];const B=FOES[by.kind],G=FOES[g.kind];
   if(by.driven>foeClock)n*=1.25;if(by.chg&&blow){n*=1.8;kb*=2;by.chg=0;}
-  if(B.pike&&(G.mount||(G.tall||2)>2.5))n*=1.6;if(B.knock)kb*=3;if(g.steady>foeClock)n*=0.8;return [n,kb];}
+  if(B.pike&&(G.mount||(G.tall||2)>2.5))n*=1.6;if(B.knock)kb*=3;if(g.steady>foeClock)n*=0.8;return morDmg(g,n,by,kb,blow);} // (the horn, the charge and the formations: W8b)
 // a glaive warden's or blade master's sweep takes a second foe within its reach, for half
 function warCleave(g,n,by,ux,uz,blow){if(!blow||!by||!FOES[by.kind]||!FOES[by.kind].cleave||by.cleaving)return;const B=FOES[by.kind];
   for(const h of foes){if(h===g||h.dead||foeSide(h)===foeSide(by)||Math.hypot(h.x-by.x,h.z-by.z)-foeRad(h)>B.reach+0.4)continue;by.cleaving=1;foeHurtFoe(h,n*0.5,by,ux,uz,3,true);by.cleaving=0;break;}}
@@ -75,9 +75,9 @@ function warUnitsFrame(dt){
   // the banners and the drums
   for(const f of foes){if(f.dead)continue;const F=FOES[f.kind];if(!F.std&&!F.drum&&!F.rouse&&!F.drive)continue;const r=F.std?9:F.drive?10:12;
     for(const g of foes){if(g.dead||g===f||Math.abs(g.x-f.x)>r||Math.abs(g.z-f.z)>r||Math.hypot(g.x-f.x,g.z-f.z)>r)continue;const G=FOES[g.kind];
-      if(F.std&&G.folk)g.steady=foeClock+1;else if((F.drum||F.rouse)&&!G.folk&&g.kind!=='troll'&&g.kind!=='strollr')g.driven=foeClock+1;else if(F.drive&&(g.kind==='troll'||g.kind==='strollr'))g.driven=foeClock+1;}}
+      if(F.std&&!G.folk===!F.folk)g.steady=foeClock+1;else if((F.drum||F.rouse)&&!G.folk&&g.kind!=='troll'&&g.kind!=='strollr')g.driven=foeClock+1;else if(F.drive&&(g.kind==='troll'||g.kind==='strollr'))g.driven=foeClock+1;}}
   // healers: those of the hosts about them mended a little, three a second's half
-  for(const f of foes){if(f.dead||!FOES[f.kind].heal||f.st==='flee')continue;let k=0;for(const g of foes){if(g.dead||!FOES[g.kind].folk||g.hp>=g.mhp||Math.hypot(g.x-f.x,g.z-f.z)>6)continue;g.hp=Math.min(g.mhp,g.hp+1.5);k++;}if(k)f.healFx=0.6;}
+  for(const f of foes){if(f.dead||!FOES[f.kind].heal||f.st==='flee')continue;let k=0;for(const g of foes){if(g.dead||!FOES[g.kind].folk||g.hp>=g.mhp||Math.hypot(g.x-f.x,g.z-f.z)>6)continue;g.hp=Math.min(g.mhp,g.hp+1.5);if(g.wnd&&g.hp>=g.mhp*0.4)morStand(g);k++;}if(k)f.healFx=0.6;}
   warBearers();warSiegeTrolls();}
 // bearers: each goes to the nearest of the hosts' fallen within 40, lifts them and carries them back toward the field hospital
 // in the Leaguer; out of sight they are gone in
@@ -85,12 +85,12 @@ function warHosp(P){const s=wgSite(P),L=s.lay.parts.find(p=>p.k==='lghosp');retu
 function warBearers(){
   for(const f of foes){if(f.dead||!FOES[f.kind].bear||f.foe&&!f.foe.dead||f.st==='flee')continue;
     if(f.carry){if(Math.hypot(f.x-PL.x,f.z-PL.z)>80&&f.st!=='flee'){removeFoe(f);}else if(f.st==='idle'&&!(f.way&&f.way.length)){f.carry=0;f.bT=0;}continue;}
-    const c=f.bT&&f.bT.dead&&!f.bT.gone?f.bT:null;
+    const c=f.bT&&(f.bT.dead||f.bT.wnd)&&!f.bT.gone?f.bT:null;
     if(c){if(Math.hypot(c.x-f.x,c.z-f.z)<1.8){removeFoe(c);f.carry=1;f.bT=null;foeCall(f,'idle');const P=wasteGateAt(Math.floor(f.x+OX),Math.floor(f.z+OZ),200);
         if(P){const [u]=wgUV(P,f.x+OX,f.z+OZ),R=warRoute(P,false).filter(q=>wgUV(P,q[0],q[1])[0]>u+2),[hx,hz]=warHosp(P);f.way=R.map(q=>[q[0]+0.5,q[1]+0.5]).concat([[hx+0.5,hz+0.5]]);const w0=f.way.shift();warAim(f,w0);f.wp=w0;f.st='return';f.t=30;}
         else{f.way=[];f.st='return';f.hx=f.x-Math.sin(f.yaw)*40;f.hz=f.z-Math.cos(f.yaw)*40;f.t=30;}}
       else if(f.st!=='return'){f.way=[];warAim(f,[c.x+OX,c.z+OZ,1]);f.st='return';f.t=20;}continue;}
-    let best=null,bd=40;for(const g of foes){if(!g.dead||g.gone||!g.war||!FOES[g.kind].folk||g.claim&&g.claim!==f&&!g.claim.dead)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
+    let best=null,bd=40;for(const g of foes){if(!(g.dead||g.wnd)||g.gone||!(g.war||g.hst)||!FOES[g.kind].folk||g.claim&&g.claim!==f&&!g.claim.dead)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
     if(best){best.claim=f;f.bT=best;f.way=[];f.waitA=null;f.lineHold=null;f.back=null;warAim(f,[best.x+OX,best.z+OZ,1]);f.st='return';f.t=20;}}}
 // siege trolls: one at the hosts' palisades, mantlets or stakes (what burns) within reach of its ram knocks out a few of them
 // every three seconds, with a boom and splinters; they are mended with the burned works, fifteen minutes later
@@ -108,8 +108,8 @@ function warWedge(A,live,cx,cz,fx,fz){const K=live.filter(f=>FOES[f.kind].wedge)
   let y=0;for(const f of K)y+=f.y;y=Math.round(y/K.length);
   K.forEach((f,i)=>{const r=Math.floor((Math.sqrt(8*i+1)-1)/2),c=i-r*(r+1)/2;let x=cx+fx*(12-r*2.8)+ax*(c-r/2)*2.6,z=cz+fz*(12-r*2.8)+az*(c-r/2)*2.6;if(foeStand(x,y+1,z,3)<0){x=f.x;z=f.z;}warHoldAt(f,x+OX,z+OZ,FW);});
   A.wedge={FW:FW,m:K,t:foeClock+6};return K;}
-function warWedgeTick(A,en){const Wg=A.wedge;if(!Wg||foeClock<Wg.t)return;A.wedge=null;Wg.FW.hold=false;Wg.FW.go=true;Wg.FW.goT=foeClock;
+function warWedgeTick(A,en){const Wg=A.wedge;if(!Wg||foeClock<Wg.t)return;A.wedge=null;A.charged=(A.charged||0)+1;Wg.FW.hold=false;Wg.FW.go=true;Wg.FW.goT=foeClock;
   const [x,z]=warMid(A);warSignal('advance','r',[x,A.P.hG+4,z]);setTimeout(()=>warCry(false,14,x,A.P.hG+2,z),600);
-  for(const f of Wg.m){if(f.dead)continue;let best=null,bd=80;for(const g of en){if(g.dead)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
+  for(const f of Wg.m){if(f.dead||f.rout||f.wnd)continue;let best=null,bd=80;for(const g of en){if(g.dead)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
     f.waitA=null;f.lineHold=null;f.chg=1;if(best){f.foe=best;f.eseen=0;f.st='chase';f.seen=0;f.t=0;}}
   if(Math.hypot(x-PL.x,z-PL.z)<120)toast('The knights charge!');}

@@ -16,9 +16,20 @@ Saves from 0.47.0 do not carry over (save key v38).
 - **From the saddle:** blows grow with your horse's speed, the Knight's Lance at a gallop strikes very hard, and a galloping horse tramples goblins and orcs in its way.
 - **Blows:** a running blow strikes harder; an axe cleaves into a second foe beside the first.
 - Arrows and bolts no longer pass through a creature unharmed when they fly fast.
+- **Morale and rout:** soldiers of both sides lose heart as they are hurt, as their fellows fall about them and when outnumbered, and take heart near their standards, captains and drums. Past their nerve they run, then rally once clear or when a captain calls them back. An army or a host with a third of it running breaks; the side left standing cheers.
+- **Formations** for the hosts you lead (0, or the war console): ranks, a shield wall that turns arrows, a wedge that strikes hard, a square that throws back horsemen, loose order against arrows and fire. The hosts' own armies lock shields against archers and brace against horsemen.
+- **Cavalry charges** strike harder at a gallop, ride on through and wheel to charge again.
+- **The wounded:** soldiers of the hosts struck down may lie wounded, an arm raised. Healers and bearers come for them; bind their wounds yourself with the use button, or they die.
+- **New soldiers:** banner bearers in the warhosts (take their banner when you slay them) and war hounds in the hosts.
+- **The Horn of the Hosts:** sound it to put heart in the folk about you and turn back those who run; the foe falters. Made at the bench (bronze and gold) and given at the highest rank.
+- Soldiers near you call out as they run, rally, lie wounded, charge and cheer; heroes make a last stand; the war panel shows each army's heart.
+- **Work the engines:** take a trebuchet's rope at the siege lines (or a captured orc catapult once the gate has fallen), look where to loose and use; a mark shows where it will land; engineers about it wind it back quicker.
+- **The bolt thrower**, a block you make and set down: loaded with crossbow bolts, it looses great bolts through several foes.
+- **Pitched battles:** now and then both sides take the field at once under a name. Champions step out and fight between the lines, and the side whose champion wins takes heart. Each battle is told when it ends, written in the chronicle, marked on the world map, and a rider gallops back to the camp with the word.
+- Marching columns raise dust.
 
 ### Tooling
-- New test case `71-arms`.
+- New test cases `71-arms`, `72-morale` and `73-field`; `62-war-units` counts the knights' charge when it is sounded.
 
 ## 0.47.0 (2026-10-12): the war at your command, and hosts of thousands
 

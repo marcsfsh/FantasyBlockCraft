@@ -236,9 +236,9 @@ def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:fa
 // The war at the gate of the wastes (D-067): the canvas of the allied hosts' tents, weathered linen in panels with its seams;
 // the iron of the Ashen Gate's leaves, black plates studded in a lattice between heavy bands, rust bleeding from the studs; and
 // the mantlets of the siege lines, heavy planks bound in iron, scorched, with the stubs of arrows in them
-const CANVAS=1174,GATEIRON=1175,MANTLET=1176;
-def(CANVAS,'Tent Canvas',[355,355,355],{snd:'soft'});def(GATEIRON,'Gate Iron',[356,356,356],{snd:'stone'});def(MANTLET,'Mantlet',[357,357,357],{snd:'wood'});
-setH([CANVAS],0.8,'soft');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
+const CANVAS=1174,GATEIRON=1175,MANTLET=1176,OBANNER=1177,BOLTTHR=1178;
+def(CANVAS,'Tent Canvas',[355,355,355],{snd:'soft'});def(GATEIRON,'Gate Iron',[356,356,356],{snd:'stone'});def(MANTLET,'Mantlet',[357,357,357],{snd:'wood'});def(OBANNER,'Banner of the Warhost',[358,358,358],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(BOLTTHR,'Bolt Thrower',[359,359,359],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
 setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
 setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');

@@ -533,6 +533,16 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     {const band=y===1||y===2||y===13||y===14,pl=x%5===0,rv=band&&x%5===2,sc=hn(x>>1,y>>1,533)<0.18,ar=(x===5&&y>=5&&y<=8)||(x===11&&y>=8&&y<=10)||(x===3&&y>=10&&y<=11),fl=(x===5&&y===4)||(x===11&&y===7)||(x===3&&y===9);
       P(357,x,y,ar?sh([150,120,80],0):fl?[200,200,196]:rv?[176,176,180]:band?sh([82,84,90],(y===1||y===13?14:-8)):pl?sh([70,50,32],0):sh([138,100,64],(sc?-46:0)+(hn(x,y>>2,534)-.5)*16+(x%5===1?10:0)));}
   }
+  // the banner of a warhost (W8b): a hide of black and dull red on a pole's crossbar, a burning eye with a slit, torn at the foot
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){if(y===0){P(358,x,y,[64,52,44]);continue;}const torn=y>=13&&((x*7+y*3)%5<2||y===15&&x%3!==1);if(torn)continue;
+    const dx=x-7.5,dy=y-6.5,r=Math.hypot(dx*0.8,dy*1.15),edge=x<=0||x>=15;
+    P(358,x,y,edge?sh([40,34,32],0):Math.abs(dx)<0.8&&Math.abs(dy)<2.2?[24,10,8]:r<2.6?sh([250,150,40],(2.6-r)*20):r<3.6?sh([170,50,26],(hn(x,y,560)-.5)*10):y===11||y===12?sh([110,30,24],(hn(x,y,561)-.5)*14):sh([46,34,32],(hn(x,y,562)-.5)*12+(hn(x>>2,y>>2,563)-.5)*10));}
+  // a bolt thrower (W8c), seen from its side on a cross block: a trestle of two legs, the stock along its top, the bow of steel at
+  // its head, a great bolt laid in it, the winch at its foot
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){const leg=(y>=9&&(Math.abs(x-4-(y-9)*0.5)<0.8||Math.abs(x-11+(y-9)*0.5)<0.8)),stock=y>=6&&y<=7&&x>=2&&x<=14,bow=x>=12&&x<=13&&y>=1&&y<=12&&Math.abs(y-6.5)>=1,
+      bolt=y===5&&x>=1&&x<=15,tip=y===5&&x===15,str=x===9&&y>=2&&y<=11&&Math.abs(y-6.5)>=1.5,wh=Math.hypot(x-7.5,y-9.5)<1.6;
+    if(tip)P(359,x,y,[200,202,210]);else if(bolt)P(359,x,y,sh([120,90,58],(hn(x,y,570)-.5)*10));else if(bow)P(359,x,y,sh([110,114,124],y<3||y>10?-16:12));else if(str)P(359,x,y,[214,206,184]);
+    else if(wh)P(359,x,y,sh([80,82,90],Math.hypot(x-7.5,y-9.5)<0.8?20:-6));else if(stock)P(359,x,y,sh([132,96,60],(y===6?12:-8)+(hn(x,y,571)-.5)*10));else if(leg)P(359,x,y,sh([110,80,50],(hn(x,y,572)-.5)*12));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

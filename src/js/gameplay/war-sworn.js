@@ -11,7 +11,7 @@
 const WAR_RANKS=[['Levy of the Hosts',0],['Soldier of the Hosts',8],['Sergeant of the Hosts',25],['Captain of the Hosts',55],['Marshal of the Hosts',95],['Lord of the Hosts',150],['Champion of the Three Peoples',230]];
 // what each rank is given, and by whom: [[item, count]...], the quartermaster
 const WAR_GIFTS=[[[[372,1],[380,1],[206,6],[400,1],[405,1],[409,24]],'the men\'s quartermaster'],[[[373,1],[206,8],[411,6],[413,1]],'the riders\' quartermaster'],[[[374,1],[381,1],[408,1],[410,16]],'the dwarves\' quartermaster'],
-  [[[375,1],[342,1],[407,1],[402,1],[409,32]],'the elves\' quartermaster'],[[[382,1],[403,1]],'the dwarves\' armourers'],[[[376,1],[401,1]],'the elves\' smiths'],[[[383,1],[RBANNER,4],[DBANNER,4],[EVBANNER,4]],'the lords of the three peoples']];
+  [[[375,1],[342,1],[407,1],[402,1],[409,32]],'the elves\' quartermaster'],[[[382,1],[403,1]],'the dwarves\' armourers'],[[[376,1],[401,1]],'the elves\' smiths'],[[[383,1],[414,1],[RBANNER,4],[DBANNER,4],[EVBANNER,4]],'the lords of the three peoples']];
 const WAR_SQUAD=[0,0,4,10,10,12,14],WAR_LORDS=new Set(['rnoble','elord','dlord','dking','rcapt','ecapt','dcapt','hcapt','wcapt','hthane','wking','wlord']);
 let SW=saved&&saved.sw&&typeof saved.sw==='object'?saved.sw:null;if(!SW)SW={on:0,r:0,m:0,p:0,k:0,b:0,sup:-1e9,t:0};
 const warSwornSave=()=>({sw:SW}),warSworn=()=>!!SW.on;

@@ -350,6 +350,14 @@
       "about": "The soldier's arms (W8a, D-078): the shield's guard and parry, bows and the crossbow, javelins and throwing axes, blows from the saddle and the lance, the bash, the running blow and the axe's cleave, spent arrows"
     },
     {
+      "path": "gameplay/war-morale.js",
+      "about": "Morale and the line (W8b, D-078): each soldier's heart, routs and rallies, armies and hosts that break, the hosts' formations, the mounted charge and wheel, the wounded, war hounds, the warhosts' banners, the Horn of the Hosts, barks, war cries and cheers"
+    },
+    {
+      "path": "gameplay/war-field.js",
+      "about": "Engines in the player's hands and pitched battles (W8c, D-078): trebuchets and turned catapults worked by the player, the bolt thrower, named battles with both sides at once, the champions' duel, the battle told in the chronicle and on the map, the rider with the word, dust of the columns"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

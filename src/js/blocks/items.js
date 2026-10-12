@@ -36,7 +36,7 @@ item(404,'Orc Hide Shield','shield',[96,80,62],{equip:'arm',guard:0.5,slow:0.7,d
 item(405,'Hunting Bow','bow',[150,112,62],{tool:'bow',draw:0.8,dmg:5,v:34,dur:240});item(406,'Longbow of the Realm','bow',[120,84,46],{tool:'bow',draw:1.1,dmg:9,v:44,dur:400});
 item(407,'Elven Bow','bow',[206,176,96],{tool:'bow',draw:0.75,dmg:9,v:48,dur:600});item(408,'Dwarven Crossbow','xbow',[124,134,152],{tool:'xbow',load:1.8,dmg:14,v:58,dur:500,once:true});
 item(409,'Arrow','arrow',[140,110,70]);item(410,'Crossbow Bolt','bolt',[110,110,116]);item(411,'Javelin','javelin',[150,112,62],{once:true,throw:{k:'jav',dmg:9,v:25}});item(412,'Throwing Axe','taxe',[200,200,196],{once:true,throw:{k:'axe',dmg:8,v:21}});
-item(413,"Knight's Lance",'lance',[196,200,206],{tool:'lance',dur:300});
+item(413,"Knight's Lance",'lance',[196,200,206],{tool:'lance',dur:300});item(414,'Horn of the Hosts','horn',[214,190,140],{once:true,horn:1});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.

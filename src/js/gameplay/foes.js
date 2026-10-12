@@ -274,7 +274,7 @@ const FOLK_SAY={
   host:['We march against the creatures of the ash, for {k}.','Keep close, traveller. The ash hides many foes.','The orcs grow bold. {k} will not wait for them at its gates.','If the horns sound, stand behind our line.','Not all who march out of {k} march home again.']};
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
-  for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
+  for(const f of foes){const F=FOES[f.kind];if(!F.folk||F.hound||f.wnd||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
     if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast((f.hero?f.hero.n:F.n)+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
@@ -297,17 +297,19 @@ function foeNear(x,z,r,fn,sd){const c0=Math.max(0,Math.floor((x-r)/4)+8),c1=Math
   const G=sd===undefined?foeGrid:foeGridS[sd];for(let i=c0;i<=c1;i++)for(let j=d0;j<=d1;j++){const c=G.get(i*256+j);if(c)for(const g of c)if(!g.gone)fn(g);}}
 const foeEyeOn=(f,g,lim)=>foeSeesAt(f,g.x,g.y+g.m.box[4]*0.6,g.z,lim);
 function foeScan(f,F,tg){
+  if(f.rout||f.msg)return; // (running: W8b; a rider with word of a battle: W8c)
+  if(f.duel&&!f.duel.dead&&!f.duel.gone&&!f.duel.wnd){f.foe=f.duel;f.eseen=0;return;} // a champion fights only the other (W8c)
   let E=f.foe;const sr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight,far=g=>f.leash&&Math.hypot(g.x-f.hx,g.z-f.hz)>f.leash+12;
   if(E){const d=Math.hypot(E.x-f.x,E.z-f.z);if(foeEyeOn(f,E,F.sight*2.6))f.eseen=0;else f.eseen+=0.5;
     if(!(f.hst&&f.hst.cmd==='charge')/* (a summoned host's charge keeps its foe: D-077) */&&(f.eseen>6||d>F.sight*2.5||far(E))){f.foe=E=null;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}}
   const hunts=tg&&f.vis&&!F.civ&&(!F.folk||folkWrath(f)),pd=Math.hypot(PL.x-f.x,PL.z-f.z);
   if(E&&hunts&&pd<Math.hypot(E.x-f.x,E.z-f.z)-3){f.foe=null;f.st='chase';f.seen=0;return;}
   let best=null,bd=E?Math.hypot(E.x-f.x,E.z-f.z)-3:sr;if(hunts&&f.st==='chase'&&!E)bd=Math.min(bd,pd-3);if(foes.length>300)bd=Math.min(bd,40); // (in a crowd, a nearer foe only within 40: D-077)
-  foeNear(f.x,f.z,bd,g=>{if(g===f||g===E||g.dead||g.show)return;const d=Math.hypot(g.x-f.x,g.z-f.z);
+  foeNear(f.x,f.z,bd,g=>{if(g===f||g===E||g.dead||g.show||g.wnd||g.duel||g.msg)return;const d=Math.hypot(g.x-f.x,g.z-f.z);
     if(d>=bd||Math.abs(g.y-f.y)>14||far(g)||!foeEyeOn(f,g,sr+2))return;best=g;bd=d;},1-foeSd(f)); // (the other side's only)
   if(best){f.foe=best;f.eseen=0;if(!E)foeRally(f,best);else foeEngage(f);}
 }
-function foeEngage(g){if(FOES[g.kind].civ){if(g.st!=='flee'){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;}}
+function foeEngage(g){if(g.rout||g.wnd)return;if(FOES[g.kind].civ){if(g.st!=='flee'){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;}}
 function foeRally(f,E){
   const one=g=>{if(g.dead||g.foe&&g!==f)return;if(g!==f&&(g.grp!==f.grp||Math.hypot(g.x-f.x,g.z-f.z)>20||g.st==='chase'))return;
     g.foe=E;g.eseen=0;foeEngage(g);if(g!==f&&!FOES[g.kind].civ&&Math.random()<0.5)g.ct=Math.random()*0.6;};
@@ -321,10 +323,10 @@ function foeHurtFoe(g,n,by,ux,uz,kb,blow){
   g.hp-=n;g.hurt=1;g.kvx+=ux*kb*G.mass;g.kvz+=uz*kb*G.mass;if(blow&&G.mass>0.3)g.vy=Math.max(g.vy,2);
   for(let k=0;k<4;k++)spawnP(g.x,g.y+g.m.box[4]*0.6,g.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,isLord(g)?g.fc||[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
   if(g.st==='sleep')g.st='idle';
-  if(!g.foe&&g.st!=='chase'&&!by.gone&&!by.dead){g.foe=by;g.eseen=0;foeRally(g,by);}else foeCall(g,'hurt');
-  if(g.hp<=0)foeFalls(g,by);warCleave(g,n,by,ux,uz,blow);
+  if(!g.foe&&g.st!=='chase'&&!g.rout&&!g.wnd&&!by.gone&&!by.dead){g.foe=by;g.eseen=0;foeRally(g,by);}else foeCall(g,'hurt');
+  if(g.hp<=0&&!morWound(g,by))foeFalls(g,by);warCleave(g,n,by,ux,uz,blow); // (or lies wounded: W8b)
 }
-function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;if(g.lordOf)lordFalls(g);warHeroFell(g,by);
+function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;g.wnd=0;g.rout=0;morDeath(g);if(g.lordOf)lordFalls(g);warHeroFell(g,by);
   if(G.boss&&!g.lordOf&&Math.hypot(g.x-PL.x,g.z-PL.z)<48){const n=FOES[by.kind].n.toLowerCase();toast('The '+G.n.toLowerCase()+' is slain by a'+(/^[aeiou]/.test(n)?'n ':' ')+n);}}
 const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
 function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee'||g.foe)continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
@@ -335,6 +337,7 @@ function stepFoe(f,dt){
   const F=FOES[f.kind],pdx=PL.x-f.x,pdz=PL.z-f.z,pdp=Math.hypot(pdx,pdz),pdy=PL.y-f.y,tg=foeTarget();
   f.hurt=Math.max(0,f.hurt-dt*3);f.atkT-=dt;f.shotT-=dt;f.whipT-=dt;f.detT-=dt;f.scanT-=dt;
   if(f.dead){f.dead+=dt;f.sp=0;return;}
+  if(f.wnd){morWoundStep(f,dt);return;} // lying wounded (W8b)
   if(f.hold){f.sp=f.holdSp||0;f.hd=f.yaw;if(f.holdAtk!==undefined)f.atk=f.holdAtk;return;}
   if(f.climb){warClimbStep(f,dt);return;} // up a ladder or the siege tower (W2)
   if(f.leap||f.breath>0){f.sp=0;return;} // an Emberlord on its wings, or breathing fire (W7a)
@@ -343,7 +346,7 @@ function stepFoe(f,dt){
   // sight: noticed when near and in view (sleepers only close by); lost when long unseen or far
   f.losT-=dt;if(tg&&f.losT<=0&&pdp<F.sight*2.6+4){f.losT=0.35+Math.random()*0.15;f.vis=pdp<F.sight*2.6&&Math.abs(pdy)<14&&foeSees(f);}
   // a foe of the other side (D-063): the one it fights while it stands; a fresh look about every half second
-  if(f.foe&&(f.foe.dead||f.foe.gone)){f.foe=null;f.scanT=0;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}
+  if(f.foe&&(f.foe.dead||f.foe.gone||f.foe.wnd)){f.foe=null;f.scanT=0;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}
   if(f.scanT<=0){f.scanT=0.4+Math.random()*0.2;foeScan(f,F,tg);}
   const E=f.foe,dx=E?E.x-f.x:pdx,dz=E?E.z-f.z:pdz,dp=E?Math.hypot(dx,dz):pdp,dy=E?E.y-f.y:pdy,vis=E?f.eseen===0:f.vis,er=E?foeRad(E):0;
   if(!tg&&!E){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
@@ -353,10 +356,11 @@ function stepFoe(f,dt){
   if(F.folk&&f.st==='chase'&&!E&&!folkWrath(f)){f.st='return';f.atk=0;} // the realm's wrath has passed
   if(F.flee&&(tg||E)&&f.st==='chase'&&!f.fled&&f.hp<f.mhp*F.flee){f.st='flee';f.t=3+Math.random()*2;f.fled=true;foeCall(f,'hurt');}
   if(f.st==='flee'&&f.t<=0){if(!F.civ)f.st='chase';else if(E&&dp<16||tg&&folkWrath(f)&&pdp<16)f.t=3+Math.random()*2;else{f.st='return';f.t=0;f.foe=null;}}
+  if(f.rout)f.st='flee'; // running from the fight (W8b)
   let want=0,face=false;
   switch(f.st){
     case 'sleep':break;
-    case 'idle':if(f.waitA){if(warGo(f)){f.st='return';f.t=0;f.hex=false;}else f.hd=f.waitA.A.face;break;} // in the ranks, waiting for the horns (D-067)
+    case 'idle':if(f.waitA){if(warGo(f)){f.st='return';f.t=0;f.hex=false;}else f.hd=f.waitA.A.face+(f.sf||0);break;} // in the ranks, waiting for the horns (D-067)
       if(f.back&&f.backT&&foeClock>f.backT){if(f.army&&!f.army.ret){f.army.ret=1;warHorn(f.army,'retreat');}f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
       if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
       if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
@@ -368,8 +372,10 @@ function stepFoe(f,dt){
       else if(d<(f.hex?1.1:2.5)||f.t<-30){if(f.waitA&&!warGo(f)){f.st='idle';f.t=1;}
         else if(f.way&&f.way.length){const w=f.way.shift();if(w.climb){f.climb=w.climb;f.waitA=null;}else if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{f.waitA=null;warAim(f,w);f.wp=w;f.retry=0;f.rdS=0;f.rdN=0;f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/(f.pace||F.walk)-20);}} // a leg's time: some 30 s over its walk
         else{f.waitA=null;f.hex=false;f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+(f.holdT||20)+Math.random()*25;}}else{f.hdW=Math.atan2(tdx,tdz);f.hd=f.hdW;if(f.rdT>0){f.rdT-=dt;f.hd+=f.rdA;}want=f.pace||F.walk*1.3;}break;}
-    case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
+    case 'flee':if(f.rout){if(f.stuck>0.5){f.rhd+=f.id%2?1:-1;f.stuck=0;}f.hd=f.rhd+Math.sin(foeClock*1.3+f.id)*0.25;want=F.run*0.95;break;} // (a rout: away from the other side, W8b)
+      f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{if(f.stagger>foeClock){f.atk=0;face=true;break;} // staggered by a parry or a bash (W8a)
+      if(f.wheelT>foeClock){f.hd=f.wheelH;want=F.run;break;} // a horseman rides on through after the blow of its charge, then wheels (W8b)
       // against a creature its girth counts: the blow lands on its near side
       const toward=Math.atan2(dx,dz),S=F.shot,de=dp-er;face=true;if(F.lord)emberChoose(f,dp,vis,E); // its wings and fire (W7a)
       // ranged: shoot when in range and in view, keeping a distance; otherwise close in
@@ -449,13 +455,14 @@ function foeShoot(f,S,k){
 function updShots(dt){
   for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;let gone=s.life<=0,id=0;
     const n=Math.max(1,Math.ceil(Math.hypot(s.vx,s.vy,s.vz)*dt/0.45)),h=dt/n; // (in steps of under half a block, so that a fast shot passes nothing by: W8a)
+    let C=null;if(foes.length>64&&n>1){C=[];const L=Math.hypot(s.vx,s.vz)*dt;foeNear(s.x+s.vx*dt/2,s.z+s.vz*dt/2,L/2+foeRadMax+K.sz,g=>C.push(g),s.byP?undefined:s.side?0:1);} // (those along its way this frame, gathered once for all its steps)
     for(let st=0;st<n&&!gone;st++){s.vy-=K.g*h;s.x+=s.vx*h;s.y+=s.vy*h;s.z+=s.vz*h;id=get(Math.floor(s.x),Math.floor(s.y),Math.floor(s.z));
     if(SOLID[id]){gone=true;break;}
     if(s.atP&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
       const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2,s);gone=true;break;}
     // a shot strikes a creature of the other side (D-063); it passes its own
-    {let hit=null;const one=g=>{if(hit||g.dead||(s.byP?g.show||s.hitL.includes(g):foeSide(g)===s.side))return;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz)hit=g;};
-      if(foes.length>64)foeNear(s.x,s.z,foeRadMax+K.sz,one,s.byP?undefined:s.side?0:1);else for(const g of foes)one(g); // (in a crowd, those about it from the grid)
+    {let hit=null;const one=g=>{if(hit||g.dead||g.wnd||!s.byP&&g.duel&&s.from!==g.duel||(s.byP?g.show||s.hitL.includes(g):foeSide(g)===s.side))return;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz)hit=g;};
+      if(C)for(const g of C)one(g);else if(foes.length>64)foeNear(s.x,s.z,foeRadMax+K.sz,one,s.byP?undefined:s.side?0:1);else for(const g of foes)one(g); // (in a crowd, those about it from the grid)
       if(hit&&s.byP){armsHit(hit,s);if(s.pierce>0){s.pierce--;s.hitL.push(hit);}else gone=true;} // the player's shot (W8a)
       else if(hit){const v=Math.hypot(s.vx,s.vz)||1;foeHurtFoe(hit,s.dmg,s.from,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
       if(!gone&&s.byP&&armsAnimal(s))gone=true;}}
@@ -479,13 +486,15 @@ function placeFoe(f,dt){
   if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
   if(P.armL){P.armL.rotation.x=rest(P.armL)[0]-s1*amp*0.8;P.armR.rotation.x=rest(P.armR)[0]+s1*amp*0.8;P.armL.rotation.z=rest(P.armL)[2];P.armR.rotation.z=rest(P.armR)[2];}
   // the attack: the right arm (or both, for a shot or a lash) raised through the wind-up, then brought down at once
-  if(f.atk>0){const up=Math.min(1,prog*1.4);
+  if(f.atk>0&&P.armR){const up=Math.min(1,prog*1.4);
     if(f.atkK==='blow'){P.armR.rotation.x=rest(P.armR)[0]-2.6*up;if(big)P.armL.rotation.x=rest(P.armL)[0]-1.4*up;}
     else if(f.atkK==='shot'){if(F.shot.k==='arrow'){P.armL.rotation.x=-1.5;P.armR.rotation.x=-1.5;P.armR.rotation.z=0.6*up;}else{P.armR.rotation.x=rest(P.armR)[0]-2.8*up;}}
     else if(f.atkK==='whip'){P.armL.rotation.x=-1.2*up;P.armL.rotation.z=0.9*up;}}
-  else if(f.swing>0){f.swing=Math.max(0,f.swing-dt*5);P.armR.rotation.x=rest(P.armR)[0]+0.7*f.swing;}} // the follow-through
+  else if(f.swing>0&&P.armR){f.swing=Math.max(0,f.swing-dt*5);P.armR.rotation.x=rest(P.armR)[0]+0.7*f.swing;} // the follow-through
+  if(P.legFL&&!F.mount){const a=f.amp*0.9;P.legFL.rotation.x=P.legBR.rotation.x=s1*a;P.legFR.rotation.x=P.legBL.rotation.x=-s1*a;if(P.head)P.head.rotation.x=f.atk>0?-0.6*Math.min(1,prog*1.4):0;}} // a hound's gait and its bite (W8b)
   if(f.st==='sleep'&&P.body){root.rotation.x+=(-1.45-root.rotation.x)*Math.min(1,dt*2);root.position.y=0.25;}
   else if(f.stagger>foeClock&&!f.dead){root.rotation.x+=(-0.32-root.rotation.x)*Math.min(1,dt*10);} // staggered (W8a)
+  else if(f.wnd&&!f.dead){root.rotation.x+=(1.25-root.rotation.x)*Math.min(1,dt*4);root.position.y=0.3;if(P.armR&&!far)P.armR.rotation.x=-2.3+Math.sin(foeClock*2+f.id)*0.4;} // lying wounded on its back, an arm raised for help (W8b)
   else if(!f.dead){root.rotation.x*=1-Math.min(1,dt*6);root.position.y=0;}
   if(!far){if(P.head){P.head.rotation.y=f.lk*0.7;}
   if(P.wingL){const b=Math.sin(foeClock*(f.st==='chase'?3.2:1.4))*0.25;P.wingL.rotation.y=rest(P.wingL)[1]+b;P.wingR.rotation.y=rest(P.wingR)[1]-b;}
@@ -562,7 +571,7 @@ function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
   for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
-  warSoundTick(dt);warWorksFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
+  warSoundTick(dt);warWorksFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt);morFrame(dt);fieldFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
   foeFrame++;foeGrid.clear();foeGridS[0].clear();foeGridS[1].clear();foeRadMax=1;
   for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);const S=foeGridS[foeSd(g)];let e=S.get(k);if(!e)S.set(k,e=[]);e.push(g);foeRadMax=Math.max(foeRadMax,foeRad(g));}
   foeDin=Math.min(18,foeDin+dt*12);
@@ -589,6 +598,7 @@ function foeCall(f,what){
   else if(k==='wolfrid'){if(what==='alert'){tone(260,480,0.5,0.06,0,'triangle',at);tone(480,440,0.9,0.06,0.5,'triangle',at);tone(440,240,0.6,0.05,1.4,'triangle',at);for(let i=0;i<3;i++)voice(700+Math.random()*200,900,0.1,0.05,{type:'square',form:1400,q:2,delay:0.3+i*0.12},at);} // the warg howls, its rider whoops
     else{burst(0.4,'bandpass',300,2,0.12,0,at);voice(110*p,90,0.4,0.06,{form:400,q:1.5,vib:24,vd:0.15},at);}} // a snarl (W3)
   else if(k==='wbeast'){voice(80*p,60,0.8,0.14,{form:260,q:1,vib:9,vd:0.1},at);if(what!=='idle')voice(400*p,250,0.6,0.08,{form:1200,q:2,vib:20,vd:0.08,delay:0.3},at);} // the war beast grunts and squeals (W3)
+  else if(FOES[k].hound){if(what==='alert'||what==='blow')for(let i=0;i<2;i++)voice(560*p,380*p,0.12,0.1,{form:900,q:1.4,delay:i*0.22},at);else if(what==='hurt')voice(900,1200,0.4,0.06,{type:'sine',form:1200,q:1},at);else voice(420,330,0.15,0.05,{form:800,q:1.4},at);return;} // the war hounds bark and yelp (W8b)
   else if(FOES[k].folk){const fem=k==='rwoman'||FOES[k].fem;if(FOES[k].civ){if(what==='alert'||what==='hurt')voice((fem?520:330)*p,(fem?680:430),0.35,0.08,{form:1200,q:1.6,vib:8,vd:0.06},at);else voice((fem?300:190)+Math.random()*30,(fem?330:210),0.4,0.035,{form:900,q:1.2},at);}
     else{if(what==='alert'&&k[0]==='d'&&(k==='dcapt'||Math.random()<0.35)){tone(110,110,1.3,0.08,0,'sawtooth',at);tone(147,147,1.8,0.07,1.1,'triangle',at);} // the dwarves' horn, two deep notes
       else if(what==='alert'&&k[0]==='w'&&(k==='wcapt'||Math.random()<0.35)){tone(330,330,0.6,0.07,0,'triangle',at);tone(392,392,0.6,0.07,0.5,'triangle',at);tone(494,494,1.2,0.07,1,'triangle',at);} // the wood elves' horn, three rising notes
@@ -623,6 +633,7 @@ function foeSlain(f){
   const F=FOES[f.kind],got=[];f.byP=1;f.dead=0.001;f.st='dead';f.sp=0;f.atk=0;if(F.folk)folkProvoke(f,180);
   if(SURV())for(const [id,lo,hi,ch] of F.drops)if(Math.random()<ch){const n=lo+Math.floor(Math.random()*(hi-lo+1)),left=addItem(id,n);if(left)toast('No room for '+nameOf(id));got.push(n+' '+nameOf(id));}
   const ar=armsSlain(f);if(ar)got.push(ar); // (arrows recovered, W8a)
+  const bn=morSlain(f);if(bn)got.push(bn);morDeath(f,1);fieldSlain(f); // (a warhost's banner taken; their hearts sink: W8b)
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
   if(f.lordOf)lordFalls(f);warSwornSlain(f);
 }
