@@ -58,7 +58,12 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 #death h1{font-size:64px;margin:0;font-weight:400;color:#ffdede;text-shadow:4px 4px 0 #400}
 #death p{font-size:24px;max-width:80vw}
 #name{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));font-size:26px;text-shadow:2px 2px 0 rgba(0,0,0,.6);opacity:0;transition:opacity .4s;white-space:nowrap}
-#toast{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-size:22px;background:var(--panel);border:3px solid var(--edge);padding:2px 12px;display:none}
+#toast{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-size:22px;display:none;text-align:center;max-width:min(860px,calc(100vw - 340px))}
+#warpanel{position:absolute;top:calc(172px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:240px;font-size:18px;line-height:1.05;background:var(--panel);border:3px solid var(--edge);padding:4px 8px;display:none}
+#warpanel b{font-weight:normal;color:#ffd27a}#warpanel .we{white-space:nowrap}#warpanel .wb{display:inline-block;width:90px;height:9px;border:2px solid var(--edge);background:#1c1810;vertical-align:middle}#warpanel .wb i{display:block;height:100%;background:#c8902e}
+body.touch #warpanel{top:calc(10px + env(safe-area-inset-top,0px));font-size:15px;width:200px}body.touch #warpanel .wb{width:70px}
+#toast .tl{display:table;margin:0 auto 4px;background:var(--panel);border:3px solid var(--edge);padding:2px 12px;transition:opacity .7s}
+body.touch #toast{font-size:18px;max-width:calc(100vw - 240px)}
 #tint{position:absolute;inset:0;display:none}
 #hint{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:min(560px,88vw);background:rgba(20,18,14,.85);border:2px solid var(--edge);padding:8px 14px;font-size:20px;line-height:1.15;display:none;pointer-events:none;text-align:center;z-index:3}
 #wmap{position:fixed;inset:0;z-index:6;background:#d6c69e}#wmc{position:absolute;inset:0;touch-action:none;cursor:crosshair}
@@ -145,6 +150,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
   <div id="tint"></div><div id="hurt"></div>
   <div id="hint"></div><div id="info"></div>
   <div id="toast"></div>
+  <div id="warpanel"></div>
   <canvas id="mm" width="150" height="150" aria-label="Map, tap to zoom"></canvas>
   <div id="cross"></div>
   <div id="name"></div>
@@ -198,6 +204,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <label>Master volume <input type="range" id="volm" min="0" max="1" step="0.05"></label>
     <label>Effects <input type="range" id="vols" min="0" max="1" step="0.05"></label>
     <label>Ambience <input type="range" id="vola" min="0" max="1" step="0.05"></label>
+    <label>Battle music <input type="range" id="volu" min="0" max="1" step="0.05"></label>
     <button id="sndbtn">Sound on</button><button id="ctlbtn">Controls</button><button id="jnbtn">Journal</button>
   </div>
   <div id="ctl" class="worlds" style="display:none"></div>
@@ -227,7 +234,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v27',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v28',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -240,7 +247,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=27,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=28,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -8746,21 +8753,21 @@ function raycast(o,d,max){
   return null;
 }
 
-// Sound, all synthesized; no music (Q57). Since M8 (D-048): effects and ambience run through their own buses under a master, each
+// Sound, all synthesized; no music (Q57) but the war's (W1, D-068: `war-sound.js`, on its own bus `BUS_U`). Since M8 (D-048): effects and ambience run through their own buses under a master, each
 // with a volume slider; ambient soundscapes follow the land and the layer (Q57); sounds in the world come from where they happen
 // (a panner per sound, and a listener that follows the camera).
-let AX=null,noiseBuf=null,rainGain=null,windGain=null,BUS_M=null,BUS_S=null,BUS_A=null;
-const VOL_DEF={m:0.8,s:1,a:0.7};
+let AX=null,noiseBuf=null,rainGain=null,windGain=null,BUS_M=null,BUS_S=null,BUS_A=null,BUS_U=null;
+const VOL_DEF={m:0.8,s:1,a:0.7,u:0.7};
 function vol(k){const v=settings.vol&&settings.vol[k];return typeof v==='number'?Math.max(0,Math.min(1,v)):VOL_DEF[k];}
 function setVol(k,v){settings.vol=Object.assign({},VOL_DEF,settings.vol||{});settings.vol[k]=Math.max(0,Math.min(1,+v));lsSet(SET_KEY,settings);applyVol();}
-function applyVol(){if(!BUS_M)return;BUS_M.gain.value=settings.sound?vol('m'):0;BUS_S.gain.value=vol('s');BUS_A.gain.value=vol('a');}
+function applyVol(){if(!BUS_M)return;BUS_M.gain.value=settings.sound?vol('m'):0;BUS_S.gain.value=vol('s');BUS_A.gain.value=vol('a');BUS_U.gain.value=vol('u');}
 const AMB={}; // the ambient loops: surf, rumble, lava, stream (with its panner)
 function noiseLoop(type,freq,q,out){const s=AX.createBufferSource();s.buffer=noiseBuf;s.loop=true;const f=AX.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;const g=AX.createGain();g.gain.value=0;s.connect(f);f.connect(g);g.connect(out);s.start();return g;}
 function audioInit(){
   if(!settings.sound)return;
   try{
     if(!AX){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;AX=new C();const len=AX.sampleRate*1.6|0;noiseBuf=AX.createBuffer(1,len,AX.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
-      BUS_M=AX.createGain();BUS_M.connect(AX.destination);BUS_S=AX.createGain();BUS_S.connect(BUS_M);BUS_A=AX.createGain();BUS_A.connect(BUS_M);
+      BUS_M=AX.createGain();BUS_M.connect(AX.destination);BUS_S=AX.createGain();BUS_S.connect(BUS_M);BUS_A=AX.createGain();BUS_A.connect(BUS_M);BUS_U=AX.createGain();BUS_U.connect(BUS_M);
       windGain=noiseLoop('bandpass',420,0.6,BUS_A);rainGain=noiseLoop('lowpass',1300,1,BUS_A);
       AMB.surf=noiseLoop('lowpass',480,0.7,BUS_A);AMB.rumble=noiseLoop('lowpass',90,0.8,BUS_A);AMB.lava=noiseLoop('lowpass',170,1.4,BUS_A);
       AMB.pan=panner(0,0,0,BUS_A);AMB.stream=noiseLoop('bandpass',950,0.45,AMB.pan);applyVol();}
@@ -8919,6 +8926,87 @@ function ambTick(dt){
   for(const k in P.ev){if(Math.random()<P.ev[k]/60*dt){const a=Math.random()*6.283,d=6+Math.random()*16,at=[PL.x+Math.cos(a)*d,PL.y+1+(P.under?Math.random()*6-2:2+Math.random()*6),PL.z+Math.sin(a)*d];
     AMB_STATS.ev[k]=(AMB_STATS.ev[k]||0)+1;if(on)AMB_EV[k](panner(at[0],at[1],at[2]));}}
 }
+// ---- The sound of the war (W1, D-068; Q160: "Design these sounds carefully, by hand"). All synthesized like the rest of the
+// game's sound. Each people's horn and its signals (muster, advance, volley, retreat); the war cries of a charge; the din of a
+// battle that grows with the fight (a bed of noise and the ring of steel on steel and on shields); and battle music on its own bus
+// (`BUS_U`, the Music slider): slow war drums, a low drone and horn phrases in a minor key, rising as a battle starts and fading
+// after it. The game had no music (Q57); the owner asked for it for the war.
+// A horn's note: a sawtooth with a triangle an octave up through a lowpass that opens as the note speaks and closes as it dies, the
+// pitch rising into the note (a brass attack); the dwarves' and the orcs' have a growl an octave down
+function hornNote(f,dur,vol,delay,at,H){
+  if(!AX||!settings.sound)return;const t=AX.currentTime+(delay||0),o1=AX.createOscillator(),o2=AX.createOscillator(),lp=AX.createBiquadFilter(),g=AX.createGain(),out=outAt(at);
+  o1.type=H.w||'sawtooth';o2.type='triangle';o1.frequency.setValueAtTime(f*0.94,t);o1.frequency.exponentialRampToValueAtTime(f,t+0.07);o2.frequency.setValueAtTime(f*1.88,t);o2.frequency.exponentialRampToValueAtTime(f*2,t+0.07);
+  const g2=AX.createGain();g2.gain.value=0.3;lp.type='lowpass';lp.Q.value=1.2;lp.frequency.setValueAtTime(H.lp*0.2,t);lp.frequency.exponentialRampToValueAtTime(H.lp,t+0.09);lp.frequency.setValueAtTime(H.lp,t+dur*0.75);lp.frequency.exponentialRampToValueAtTime(H.lp*0.3,t+dur);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.05);g.gain.setValueAtTime(vol*0.9,t+dur*0.7);g.gain.exponentialRampToValueAtTime(0.0001,t+dur+0.2);
+  o1.connect(lp);o2.connect(g2);g2.connect(lp);
+  if(H.sub){const o3=AX.createOscillator(),g3=AX.createGain();o3.type='triangle';o3.frequency.value=f/2;g3.gain.value=0.5;o3.connect(g3);g3.connect(lp);o3.start(t);o3.stop(t+dur+0.3);}
+  lp.connect(g);g.connect(out);o1.start(t);o2.start(t);o1.stop(t+dur+0.3);o2.stop(t+dur+0.3);
+}
+// each people's horn (its three notes, its tone, how loud): the men's silver horn, the riders' long low horn, the elves' clear
+// high one, the wood elves' three rising notes, the dwarves' deep horn, the orcs' war horns
+const WAR_HORNS={r:{n:[392,523.25,659.25],w:'sawtooth',lp:2600,v:0.07},h:{n:[146.83,196,220],w:'sawtooth',lp:1200,v:0.09},e:{n:[440,659.25,880],w:'triangle',lp:3400,v:0.065},
+  w:{n:[329.63,392,493.88],w:'triangle',lp:2800,v:0.065},d:{n:[98,110,146.83],w:'sawtooth',lp:760,v:0.1,sub:1},o:{n:[116.54,138.59,155.56],w:'sawtooth',lp:900,v:0.11,sub:1}};
+// the signals: notes of the horn's three, each with its length, played one after another
+const WAR_SIGNALS={muster:[[0,1.3],[1,1.9]],advance:[[0,0.32],[1,0.32],[2,1.5]],volley:[[2,0.16],[2,0.16],[2,0.55]],retreat:[[2,0.8],[1,0.8],[0,1.7]]};
+function warSignal(kind,people,at){const H=WAR_HORNS[people]||WAR_HORNS.r,S=WAR_SIGNALS[kind];if(!H||!S)return;let t=0;
+  for(const [i,d] of S){hornNote(H.n[i],d,H.v,t,at,H);t+=d+(kind==='volley'?0.1:0.16);}
+  if(people==='o'&&kind!=='volley')AMB_EV.drums(Array.isArray(at)?at:[PL.x,PL.y,PL.z]);}
+// A war cry: many voices at once from about one place (one panner for all): the hosts' a rising shout, the orcs' a falling howl,
+// rough and growling, with the breath of it
+function warCry(orc,n,x,y,z){
+  if(!AX||!settings.sound||Math.hypot(x-PL.x,z-PL.z)>90)return;const p=panner(x,y,z);
+  for(let i=0;i<n;i++){const d=Math.random()*0.6;
+    if(orc){const f=90+Math.random()*80;voice(f,f*0.72,1+Math.random()*0.7,0.03,{type:Math.random()<0.5?'square':'sawtooth',form:420+Math.random()*260,q:1.6,vib:5+Math.random()*5,vd:0.08,delay:d},p);}
+    else{const f=170+Math.random()*150;voice(f,f*1.18,0.8+Math.random()*0.6,0.026,{form:650+Math.random()*500,q:1.5,vib:4,vd:0.03,delay:d},p);}}
+  burst(1.2,'bandpass',orc?700:1200,0.8,0.05,0.1,p);}
+// ---- The din of a battle: a bed of noise whose loudness follows how many fight near the player, and the ring of steel among them
+let warDinG=null,warDinT=0;
+function warDin(fighters,dt){
+  if(!AX||!settings.sound)return;if(!warDinG)warDinG=noiseLoop('bandpass',620,0.5,BUS_A);const n=fighters.length;
+  warDinG.gain.setTargetAtTime(0.07*Math.min(1,n/45),AX.currentTime,0.8);
+  warDinT-=dt;if(warDinT>0||!n)return;warDinT=Math.max(0.12,1.6/Math.min(12,n));
+  const f=fighters[Math.floor(Math.random()*n)],at=[f.x,f.y+1.2,f.z];if(Math.hypot(f.x-PL.x,f.z-PL.z)>70)return;
+  if(Math.random()<0.6){burst(0.05,'bandpass',2800+Math.random()*1800,7,0.05,0,at);burst(0.04,'bandpass',4200+Math.random()*1500,9,0.03,0.03,at);} // steel on steel
+  else burst(0.1,'lowpass',380+Math.random()*200,1,0.06,0,at);} // a blow on a shield
+// ---- Battle music (Q160): 78 beats a minute in four; war drums on the first and third beats with a pickup before the bar, a frame
+// drum on the second and fourth, a roll at the end of every fourth bar when the fight is hot; a drone on A and E; every fourth bar a
+// horn phrase in A minor, and when the fight is great a low choir under it. Scheduled a bar ahead on the music bus.
+const WM_BEAT=60/78,WM_PHR=[[220,261.63,293.66,329.63],[329.63,293.66,261.63,220],[220,329.63,293.66,261.63,293.66,220],[196,220,261.63,246.94,220]];
+const WMU={lvl:0,want:0,quietT:0,next:0,bar:0,drone:null};
+function wmDrum(t,f,v){if(!BUS_U)return;const o=AX.createOscillator(),g=AX.createGain();o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*0.62,t+0.3);
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.45);o.connect(g);g.connect(BUS_U);o.start(t);o.stop(t+0.5);
+  const s=AX.createBufferSource(),fl=AX.createBiquadFilter(),g2=AX.createGain();s.buffer=noiseBuf;fl.type='lowpass';fl.frequency.value=240;g2.gain.setValueAtTime(v*0.6,t);g2.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+  s.connect(fl);fl.connect(g2);g2.connect(BUS_U);s.start(t,Math.random());s.stop(t+0.25);}
+function wmSnare(t,v,f){const s=AX.createBufferSource(),fl=AX.createBiquadFilter(),g=AX.createGain();s.buffer=noiseBuf;fl.type='bandpass';fl.frequency.value=f||1700;fl.Q.value=0.9;
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);s.connect(fl);fl.connect(g);g.connect(BUS_U);s.start(t,Math.random());s.stop(t+0.15);}
+function wmHorn(f,t,dur,v){const H={w:'sawtooth',lp:1300,sub:1};const o=AX.createOscillator(),lp=AX.createBiquadFilter(),g=AX.createGain(),o3=AX.createOscillator(),g3=AX.createGain();
+  o.type='sawtooth';o.frequency.setValueAtTime(f*0.95,t);o.frequency.exponentialRampToValueAtTime(f,t+0.08);o3.type='triangle';o3.frequency.value=f/2;g3.gain.value=0.5;
+  lp.type='lowpass';lp.frequency.setValueAtTime(260,t);lp.frequency.exponentialRampToValueAtTime(H.lp,t+0.12);lp.frequency.setValueAtTime(H.lp,t+dur*0.7);lp.frequency.exponentialRampToValueAtTime(300,t+dur);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.08);g.gain.setValueAtTime(v*0.85,t+dur*0.75);g.gain.exponentialRampToValueAtTime(0.0001,t+dur+0.15);
+  o.connect(lp);o3.connect(g3);g3.connect(lp);lp.connect(g);g.connect(BUS_U);o.start(t);o3.start(t);o.stop(t+dur+0.2);o3.stop(t+dur+0.2);}
+function wmChoir(t,dur,v){for(const f of [110,130.81,164.81,220]){const o=AX.createOscillator(),fl=AX.createBiquadFilter(),g=AX.createGain(),l=AX.createOscillator(),lg=AX.createGain();
+  o.type='sawtooth';o.frequency.value=f;l.frequency.value=4.5+Math.random();lg.gain.value=f*0.012;l.connect(lg);lg.connect(o.frequency);fl.type='bandpass';fl.frequency.value=720;fl.Q.value=2.2;
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+0.8);g.gain.setValueAtTime(v,t+dur-1);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(fl);fl.connect(g);g.connect(BUS_U);o.start(t);l.start(t);o.stop(t+dur+0.1);l.stop(t+dur+0.1);}}
+function wmDroneOn(){if(WMU.drone)return;const g=AX.createGain(),lp=AX.createBiquadFilter(),l=AX.createOscillator(),lg=AX.createGain();g.gain.value=0;lp.type='lowpass';lp.frequency.value=320;l.frequency.value=0.07;lg.gain.value=120;l.connect(lg);lg.connect(lp.frequency);
+  const os=[55,55.4,82.41].map(f=>{const o=AX.createOscillator();o.type='sawtooth';o.frequency.value=f;o.connect(lp);o.start();return o;});lp.connect(g);g.connect(BUS_U);l.start();WMU.drone={g:g,os:os.concat([l])};}
+function wmDroneOff(){const D=WMU.drone;if(!D)return;WMU.drone=null;const t=AX.currentTime;D.g.gain.setTargetAtTime(0,t,1.2);setTimeout(()=>{for(const o of D.os)try{o.stop();}catch(e){}},6000);}
+// every frame: the music's level eases toward what the fight wants; while it plays, the next bar is scheduled a little ahead
+function warMusicTick(dt,fights){
+  if(!AX||!settings.sound||!BUS_U)return;
+  if(fights>=10){WMU.want=fights>=28?1:0.65;WMU.quietT=0;}else if((WMU.quietT+=dt)>15)WMU.want=0;
+  WMU.lvl+=(WMU.want-WMU.lvl)*Math.min(1,dt*(WMU.want>WMU.lvl?0.4:0.15));
+  if(WMU.lvl<0.02){if(WMU.drone)wmDroneOff();WMU.next=0;return;}
+  wmDroneOn();WMU.drone.g.gain.setTargetAtTime(0.05*WMU.lvl,AX.currentTime,0.6);
+  const now=AX.currentTime;if(!WMU.next||WMU.next<now)WMU.next=now+0.1;if(WMU.next-now>1.2)return;
+  const t=WMU.next,b=WMU.bar++,L=WMU.lvl,B=WM_BEAT;
+  wmDrum(t,66,0.32*L);wmDrum(t+2*B,62,0.26*L);if(b%2)wmDrum(t+3.5*B,70,0.16*L);wmSnare(t+B,0.06*L,240);wmSnare(t+3*B,0.06*L,240);
+  if(L>0.8&&b%4===3)for(let k=0;k<6;k++)wmSnare(t+3*B+k*B/6,0.03+0.012*k,1800);
+  if(b%4===0){const P=WM_PHR[(b>>2)%WM_PHR.length],d=4*B/P.length;P.forEach((f,i)=>wmHorn(f,t+i*d,i===P.length-1?d*1.6:d*0.9,0.05*L));}
+  if(L>0.8&&b%8===4)wmChoir(t,8*B,0.018);
+  WMU.next=t+4*B;}
+// paused, the battle music and the din fall silent (they are driven from the foes' update, which stops with the game)
+setInterval(()=>{if(playing||!AX)return;if(WMU.drone)wmDroneOff();WMU.lvl=WMU.want=0;WMU.next=0;if(warDinG)warDinG.gain.setTargetAtTime(0,AX.currentTime,0.3);},1000);
 // ---- Input actions: named actions, and the keys and controller buttons bound to them.
 // Keyboard, controller and touch all dispatch through runAction, so a rebinding screen (M5) only edits settings.binds.
 // Held controls (movement, jump, sprint) are read with keyHeld; analog sticks, triggers and the mouse stay in their own code.
@@ -9739,8 +9827,13 @@ function toggleNoclip(){
   if(!PL.noclip){while(collide()&&PL.y<H)PL.y++;}
   $('tClip').classList.toggle('on',PL.noclip);drawClip();toast(PL.noclip?'Noclip: flying through blocks':'Noclip off');
 }
-let toastT=0;
-function toast(s){const t=$('toast');if(!s){t.style.display='none';return;}t.textContent=s;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{t.style.display='none';},1300);}
+// Subtitles (W1, Q163, Q167): each line stays at least seven seconds, longer lines longer (a quarter second a word, up to twelve);
+// up to four stack, the newest at the bottom, each fading on its own; the same line again keeps its place and starts its time over
+function toast(s){const box=$('toast');if(!s){box.innerHTML='';box.style.display='none';return;}box.style.display='block';
+  for(let i=0;i<box.children.length;i++){const e=box.children[i];if(e.textContent===s&&!e.out){clearTimeout(e.tm);e.tm=setTimeout(()=>toastOut(e),toastLen(s));return;}}
+  while(box.children.length>=4)box.firstChild.remove();const e=document.createElement('div');e.className='tl';e.textContent=s;box.appendChild(e);e.tm=setTimeout(()=>toastOut(e),toastLen(s));}
+const toastLen=s=>Math.min(12,7+s.split(/\s+/).length*0.25)*1000;
+function toastOut(e){e.out=1;e.style.opacity='0';setTimeout(()=>{e.remove();const box=$('toast');if(!box.children.length)box.style.display='none';},700);}
 addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
   keys[e.code]=true;
@@ -11618,6 +11711,7 @@ function stepFoe(f,dt){
   f.hurt=Math.max(0,f.hurt-dt*3);f.atkT-=dt;f.shotT-=dt;f.whipT-=dt;f.detT-=dt;f.scanT-=dt;
   if(f.dead){f.dead+=dt;f.sp=0;return;}
   if(f.hold){f.sp=f.holdSp||0;f.hd=f.yaw;if(f.holdAtk!==undefined)f.atk=f.holdAtk;return;}
+  if(f.volT&&foeClock>=f.volT){f.volT=0;const G=f.volG;f.volG=null;if(G&&!G.dead&&!G.gone&&!f.atk){f.foe=G;f.eseen=0;f.yaw=f.hd=Math.atan2(G.x-f.x,G.z-f.z);f.atk=0.45;f.atkK='shot';f.volley=1;f.shotT=FOES[f.kind].shot.cd;}} // a volley at the captain's horn (W1)
   f.t-=dt;
   // sight: noticed when near and in view (sleepers only close by); lost when long unseen or far
   f.losT-=dt;if(tg&&f.losT<=0&&pdp<F.sight*2.6+4){f.losT=0.35+Math.random()*0.15;f.vis=pdp<F.sight*2.6&&Math.abs(pdy)<14&&foeSees(f);}
@@ -11636,7 +11730,7 @@ function stepFoe(f,dt){
   switch(f.st){
     case 'sleep':break;
     case 'idle':if(f.waitA){if(warGo(f)){f.st='return';f.t=0;f.hex=false;}else f.hd=f.waitA.A.face;break;} // in the ranks, waiting for the horns (D-067)
-      if(f.back&&f.backT&&foeClock>f.backT){f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
+      if(f.back&&f.backT&&foeClock>f.backT){if(f.army&&!f.army.ret){f.army.ret=1;warHorn(f.army,'retreat');}f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
       if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
       if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
     case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&pdp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
@@ -11658,6 +11752,7 @@ function stepFoe(f,dt){
       if(F.keep&&de<F.keep&&!f.atk){f.hd=toward+Math.PI+(f.id%2?0.5:-0.5);want=F.walk*1.2;}
       else if(F.keep&&S&&dp<=S.hi*0.8&&vis){f.hd=toward+(Math.floor(foeClock/3+f.id)%2?1.4:-1.4);want=F.walk*0.6;}
       else if(de>F.reach*0.8){f.hd=toward;want=de>6?F.run:F.walk*1.6;}
+      if(f.lineHold&&f.lineHold.hold&&f.waitA&&(S||de>(f.lineHold.near||5)))want=0; // the line holds until the foe is upon it (W1)
       if(f.atk)want*=0.25;
       // a way round what blocks it
       if(f.det&&f.detT>0)f.hd+=f.det*1.1;break;}
@@ -11696,13 +11791,13 @@ function folkRoadStep(f){const R=f.road,rd=R.rd;R.along+=R.dir*12;if(R.along<0||
 function foeStrike(f,F){
   const E=f.foe&&!f.foe.dead&&!f.foe.gone?f.foe:null;
   if(E){const dx=E.x-f.x,dz=E.z-f.z,dp=Math.hypot(dx,dz),dy=E.y-f.y,ux=dx/(dp||1),uz=dz/(dp||1);
-    if(f.atkK==='blow'){foeCall(f,'blow');if(dp-foeRad(E)<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6))foeHurtFoe(E,F.dmg,f,ux,uz,F.mass<0.2?9:5,true);}
+    if(f.atkK==='blow'){foeCall(f,'blow');if(dp-foeRad(E)<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6))foeHurtFoe(E,F.dmg*(f.dmgK||1),f,ux,uz,F.mass<0.2?9:5,true);}
     else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtFoe(E,F.whip.dmg,f,ux*0.6,uz*0.6,4);
       for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
-    else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
+    else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,f.volley?2.2+k:k);f.volley=0;}
     return;}
   const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
-  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(F.dmg,F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
+  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(Math.round(F.dmg*(f.dmgK||1)),F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
   else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(tg&&dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtPlayer(F.whip.dmg,F.cause,-dx/(dp||1)*0.6,-dz/(dp||1)*0.6,4);
     for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
   else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
@@ -11825,6 +11920,7 @@ function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
   for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
+  warSoundTick(dt); // the din of the fighting and the battle music (W1)
   foeGrid.clear();for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);}
   foeDin=Math.min(18,foeDin+dt*12);
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
@@ -11897,7 +11993,7 @@ function armourCut(n){const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[
 // a warhost of the wastes with its trolls and warchief. A party marches by waypoints (f.way, world coordinates, taken one by one
 // as its home in the foes' 'return' step) and fights whatever of the other side it meets on the way (D-063). In creative they
 // fight each other and never the player.
-Object.assign(FOE_HOME,{owall:[['bowman',3],['raider',1]],oscout:[['goblin',2],['gslinger',2]],oarmy:[['raider',5],['bowman',2.5],['brute',2]],
+Object.assign(FOE_HOME,{owall:[['bowman',3],['raider',1]],oscout:[['goblin',2],['gslinger',2]],oarmy:[['raider',4],['bowman',2],['brute',3]],
   r_mant:[['rbow',2],['rspear',1]],r_lines:[['rspear',2],['rbow',1],['rsword',1]],e_lines:[['ebow',2],['esword',1]],d_ram:[['dhammer',2],['daxe',2]],d_treb:[['dxbow',1],['daxe',1]],
   e_scout:[['ebow',2]],w_scout:[['wbow',2],['wknife',1]],h_scout:[['hrider',2]]});
 Object.assign(FOLK_N,{mant:[2,3],lines:[2,4],ram:[3,4],treb:[2,2],scout:[2,3]});Object.assign(FOLK_LEAD,{d_ram:'dcapt',r_lines:'rcapt'});FOE_N.owall=[2,3];
@@ -11968,7 +12064,7 @@ function warAllied(def){const k=warSz(),C=[],add=(fp,n,lead,m,g)=>{const q=Math.
 // the companies of a warhost of the wastes (def: the yard's defenders): orcs under warchiefs, goblins, trolls among them
 function warOrcs(def){const k=warSz(),C=[],add=(t,n,lead,m)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:t,n:n,lead:i<2?lead:null,g:0});};
   if(def){add('band',8,'ochief',2);add('oscout',8,null,1);add('band',1,'troll',1);}
-  else{add('oarmy',10,'ochief',8);add('oscout',10,'gchief',3);add('band',1,'troll',4);
+  else{add('oarmy',10,'ochief',8);add('oscout',10,'gchief',3);add('band',1,'troll',6);
     for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'){const t=C.splice(i,1)[0];C.splice(2+3*j++,0,t);}}
   return C;}
 const warN=C=>C.reduce((a,c)=>a+c.n,0);
@@ -12002,7 +12098,7 @@ function warArmy(P,al){
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
     if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
-  warArmies.push(A);warHorn(A);warDefend(P,!al);return A;}
+  warArmies.push(A);warHorn(A,'muster');warDefend(P,!al);return A;}
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
 // way; null if it found no place to come from
 function warCompany(A){
@@ -12028,29 +12124,33 @@ function warSpawn(A,c,X,Z,path,route,direct){
   for(const f of grp){const F=FOES[f.kind];f.war=P.id;f.army=A;f.fo=((A.m.length%4)-1.5)*1.25;A.m.push(f);let way=path.slice();
     if(A.mus&&!direct){const R=A['rk'+c.g],q=R&&A['ri'+c.g]<R.length?R[A['ri'+c.g]++]:null;if(q)way.push([q[0],q[1],1]);way.push({A:A,r:q?q[3]:36});if(!A.def)way=way.concat(pre);}
     way=way.concat(route);f.way=way;if(!A.def){f.back=route.slice(0,-1).reverse().concat(pre.slice().reverse(),A.mus&&A.mus.home||[]);f.holdT=25;}
-    f.pace=Math.min(A.pace,F.walk*1.4);
+    f.pace=Math.min(A.pace,F.walk*1.4);if(A.def)f.lineHold=A;
+    if(!A.al&&!A.def){f.hp=f.mhp=Math.round(F.hp*1.6);f.dmgK=1.3;} // a warhost's fighters are its picked, blooded warriors: harder to kill, harder hitting (W1)
+    // the defenders hold their ranks until the foe is near
     const w=f.way.shift();if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{warAim(f,w);f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/F.walk-20);}}
   return grp;}
 // the other side's defenders: to the nearest of their lines within 85 of the player, in ranks, there to hold
 function warDefend(P,al){
   const s=wgSite(P),X=PL.x+OX,Z=PL.z+OZ,[pu,pv]=wgUV(P,X,Z),c0=P.uC0,g=P.hG,C=al?warAllied(true):warOrcs(true);
-  // the allies' lines: the siege lines, inside the camp's great gate, before the pavilion; the orcs': before their barricades
-  const L=al?[[P.uL+11,0],[c0+20,0],[c0+113,0]]:[[-15,-P.cs*2]];let best=null,bd=86;for(const q of L){const d=Math.hypot(pu-q[0],pv-q[1]);if(d<bd){bd=d;best=q;}}
+  // the allies' lines: by the ram, the siege lines, inside the camp's great gate, before the pavilion; the orcs': before their barricades
+  const L=al?[[44,-P.cs*14],[P.uL+11,0],[c0+20,0],[c0+113,0]]:[[-15,-P.cs*2]];let best=null,bd=86;for(const q of L){const d=Math.hypot(pu-q[0],pv-q[1]);if(d<bd){bd=d;best=q;}}
   if(!best)return null;const dir=al?-1:1;
   const A={P:P,al:al,C:C,i:0,m:[],t0:foeClock,nt:foeClock+4,lt:foeClock,go:false,hold:true,gap:2,pace:1.5,N:warN(C),def:1,face:0,mus:{at:best,pre:[]},rk0:warRanks(s,best[0],best[1],dir,warN(C),12,g,0),ri0:0};
   const [ax,az]=siteXZ(s,best[0],best[1]),[bx,bz]=siteXZ(s,best[0]+dir*10,best[1]);A.face=Math.atan2(bx-ax,bz-az);
-  for(const c of C)c.g=0;warArmies.push(A);toast(al?'The Leaguer sounds the alarm: to the lines!':P.yard+' beats to arms');return A;}
+  A.near=al?5:14;for(const c of C)c.g=0;warArmies.push(A);warHorn(A,'muster');toast(al?'The Leaguer sounds the alarm: to the lines!':P.yard+' beats to arms');return A;}
 // a defenders' company: out of the camp's great gate, the muster field or the street (the allies), or out of the orcs' camp
 function warDefCompany(A){
   const P=A.P,s=wgSite(P),c=A.C[A.i],c0=P.uC0,y=P.yc,cs=P.cs,to=A.mus.at;
-  const from=A.al?[[c0+28,0],[c0+60,3],[c0+4,0],[c0+100,4]]:[[y.ub-10,y.vm],[y.ua+12,y.vm]];let at=null;
+  const from=A.al?[[c0+28,0],[c0+60,3],[c0+4,0],[c0+100,4],[P.uL+14,0],[P.uL-6,0]]:[[y.ub-10,y.vm],[y.ua+12,y.vm]];let at=null;
   for(const q of from){const [X,Z]=siteXZ(s,q[0],q[1]);if(warAt(X+0.5,Z+0.5,18,90)>=0){at=q;break;}}if(!at)return null;
-  const path=A.al?(to[0]<c0&&at[0]>c0?[[c0+4,0],[P.uL+14,0]]:to[0]>c0+60&&at[0]<c0+100?[[c0+100,4],[c0+112,4]]:[]):[[-26,y.vm],[-26,-cs*3],[-20,-cs*2]];
+  const path=A.al?(to[0]<c0&&at[0]>c0?[[c0+16,0],[c0+4,0],[c0-8,0],[P.uL+14,0]].concat(to[0]<P.uL?[[P.uL+4,0],[P.uL-6,0]]:[]):to[0]<P.uL&&at[0]>=P.uL?[[P.uL+4,0],[P.uL-6,0]]:to[0]>c0+60&&at[0]<c0+100?[[c0+100,4],[c0+112,4]]:[]):[[-26,y.vm],[-26,-cs*3],[-20,-cs*2]];
   const [X,Z]=siteXZ(s,at[0],at[1]);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),[]);}
-// horns from the camp (the men's silver horn, the dwarves' deep one, the elves' clear one), or the drums and war horns of the wastes
-function warHorn(A){if(!AX||!settings.sound)return;const s=wgSite(A.P),[X,Z]=A.al?siteXZ(s,A.P.uC0+60,0):siteXZ(s,-30,0),at=[X-OX,A.P.hG+4,Z-OZ];
-  if(A.al){tone(392,392,0.7,0.08,0,'triangle',at);tone(523,523,1.2,0.08,0.6,'triangle',at);tone(110,110,1.5,0.08,1.6,'sawtooth',at);tone(147,147,2,0.07,2.9,'triangle',at);tone(440,440,1.1,0.07,4.2,'triangle',at);tone(660,660,1.8,0.06,5.1,'triangle',at);}
-  else{AMB_EV.drums(at);tone(155,150,1.6,0.12,0.4,'sawtooth',at);tone(116,112,2,0.12,2.2,'sawtooth',at);}}
+// an army's signal on the horns (W1, Q160): the hosts' from each people in turn (the men's silver horn, the dwarves' deep one, the
+// elves' clear one), the wastes' on their war horns with drums; from the army's middle, or its muster ground before it is out
+const warPeople=f=>FOES[f.kind].folk?f.kind[0]:'o';
+function warMid(A){const live=A.m.filter(f=>!f.dead&&!f.gone);if(!live.length){const s=wgSite(A.P),[X,Z]=A.al?siteXZ(s,A.P.uC0+60,0):siteXZ(s,-30,0);return [X-OX,Z-OZ];}
+  let x=0,z=0;for(const f of live){x+=f.x;z+=f.z;}return [x/live.length,z/live.length];}
+function warHorn(A,kind){const [x,z]=warMid(A),at=[x,A.P.hG+4,z];if(A.al)['r','d','e'].forEach((p,i)=>setTimeout(()=>warSignal(kind,p,at),i*2400));else warSignal(kind,'o',at);}
 // every second: each army sends its next company when its time comes (and the war is under its cap), and its ranks march when
 // all are in or a while has passed; an army is done when all of it has fallen or gone, or the player has left its gate
 function warMarch(){
@@ -12059,28 +12159,76 @@ function warMarch(){
     if(A.P!==here)A.i=A.C.length;
     if(A.i<A.C.length&&foeClock>=A.nt&&warLive()<warCap()){const g=A.def?warDefCompany(A):warCompany(A);A.i++;A.nt=foeClock+(A.mus&&!A.def?2.5:4);if(g)A.lt=foeClock;}
     const live=A.m.filter(f=>!f.dead&&!f.gone);
+    for(const f of A.m)if(f.dead&&!f.cntd){f.cntd=1;A.fell=(A.fell||0)+1;} // how many fell, and how many got through (W1: warOutcome)
+    if(!A.def){if(!A.reach)A.reach=new Set();for(const f of live){const u=wgUV(A.P,f.x+OX,f.z+OZ)[0];if(A.al?u<-16:u>A.P.uL+8)A.reach.add(f.id);}}
+    warBattle(A,live);
     if(A.mus&&!A.def&&!A.go){const ready=live.filter(f=>f.waitA&&f.st==='idle').length;
-      if(A.i>=A.C.length&&(ready>=live.length*0.85||foeClock>A.lt+(A.al?55:80))||foeClock>A.t0+200){A.go=true;A.goT=foeClock+3;warHorn(A);
+      if(A.i>=A.C.length&&(ready>=live.length*0.85||foeClock>A.lt+(A.al?55:80))||foeClock>A.t0+200){A.go=true;A.goT=foeClock+3;warHorn(A,'advance');const [mx,mz]=warMid(A);setTimeout(()=>warCry(!A.al,16,mx,A.P.hG+2,mz),2500);
         if(live.length)toast(A.al?'The allied hosts march on '+A.P.name.replace(/^The /,'the ')+': men, elves and dwarves, '+live.length+' strong':'The warhost of '+A.P.name.replace(/^The /,'the ')+' charges, '+live.length+' strong');}}
-    if(A.i>=A.C.length&&!live.length)warArmies.splice(a,1);}}
+    if(A.i>=A.C.length&&!live.length){warOutcome(A);warArmies.splice(a,1);}}}
+// ---- Battle (W1, Q152, Q153): an army (or the defenders) with four or more of the other side's soldiers within 50 of its middle is
+// in battle. The hosts form a line across the way the foe comes (`warForm`): two ranks of shields, blades and spears in front,
+// archers behind them, horsemen on the wings; they hold their places (`f.lineHold`) until the foe is upon them, the archers
+// shooting from where they stand. The wastes charge in a mass (`warCharge`), every one running at the nearest of the hosts with a
+// howl. While the foe is 14 to 55 off, the archers of an army loose together at their captain's horn (`f.volT`), then each on their
+// own once the fight is joined. As the lines meet both sides cry out. When no foe has come within 60 for eight seconds the line
+// marches on at the horn.
+function warBattle(A,live){
+  if(!live.length||A.mus&&!A.go&&!A.def)return; // (an army mustering is not yet in battle)
+  const [cx,cz]=warMid(A),y=A.P.hG,en=[];
+  for(const g of foes){if(g.dead||g.gone||FOES[g.kind].civ||!!FOES[g.kind].folk===!!A.al)continue;if(Math.hypot(g.x-cx,g.z-cz)<60)en.push(g);}
+  if(!A.bat){if(en.filter(g=>Math.hypot(g.x-cx,g.z-cz)<50).length<4)return;
+    let ex=0,ez=0;for(const g of en){ex+=g.x;ez+=g.z;}ex/=en.length;ez/=en.length;A.bat={last:foeClock,vT:foeClock+2,cry:0};
+    if(A.al&&!A.def&&!(A.mus&&!A.go))warForm(A,live,cx,cz,ex,ez);
+    if(!A.al&&!A.def&&!(A.mus&&!A.go))warCharge(A,live,en);
+    warHorn(A,A.al?'muster':'advance');return;}
+  const B=A.bat;if(en.length)B.last=foeClock;
+  else if(foeClock-B.last>8){A.bat=null;if(A.line){Object.assign(A.line,{hold:false,go:true,goT:foeClock});A.line=null;warHorn(A,'advance');}return;}
+  if(!B.cry){let near=0,ex=0,ez=0;for(const g of en)if(Math.hypot(g.x-cx,g.z-cz)<14){near++;ex+=g.x;ez+=g.z;}
+    if(near>=3){B.cry=1;warCry(!A.al,16,cx,y+2,cz);warCry(!!A.al,12,ex/near,y+2,ez/near);}}
+  if(foeClock>=B.vT){B.vT=foeClock+10+Math.random()*3;
+    const arch=live.filter(f=>{const S=FOES[f.kind].shot;return S&&S.k!=='fire'&&!(f.foe&&!f.foe.dead&&Math.hypot(f.foe.x-f.x,f.foe.z-f.z)<8);});
+    const tg=en.filter(g=>{const d=Math.hypot(g.x-cx,g.z-cz);return d>14&&d<55;});
+    if(arch.length>=3&&tg.length){warSignal('volley',warPeople(arch[0]),[cx,y+3,cz]);for(const f of arch){f.volT=foeClock+0.9+Math.random()*0.3;f.volG=tg[Math.floor(Math.random()*tg.length)];}}}}
+// the hosts' line: its middle a little ahead of the army's, across the way to the foe; each to a place, standing where it is if the
+// place has no footing; it holds (`A.line`, a hold for the marks in their ways) until the battle is done
+function warForm(A,live,cx,cz,ex,ez){
+  const dx=ex-cx,dz=ez-cz,l=Math.hypot(dx,dz)||1,fx=dx/l,fz=dz/l,ax=-fz,az=fx,FA={hold:true,go:false,goT:0,gap:0.15,face:Math.atan2(fx,fz),line:1};A.line=FA;
+  let y=0;for(const f of live)y+=f.y;y=Math.round(y/live.length);
+  const put=(f,a,b)=>{let x=cx+fx*b+ax*a,z=cz+fz*b+az*a;if(foeStand(x,y+1,z,FOES[f.kind].tall||2)<0){x=f.x;z=f.z;}warHoldAt(f,x+OX,z+OZ,FA);};
+  const G=[live.filter(f=>!FOES[f.kind].shot&&!FOES[f.kind].mount),live.filter(f=>FOES[f.kind].shot&&!FOES[f.kind].mount),live.filter(f=>FOES[f.kind].mount)];
+  const per=Math.max(8,Math.ceil(G[0].length/2));G[0].forEach((f,i)=>{const r=Math.floor(i/per),n=Math.min(per,G[0].length-r*per);put(f,((i%per)-(n-1)/2)*1.5,4-r*1.7);});
+  G[1].forEach((f,i)=>{const r=Math.floor(i/12),n=Math.min(12,G[1].length-r*12);put(f,((i%12)-(n-1)/2)*1.6,-1.5-r*1.7);});
+  const w0=per*0.75+4;G[2].forEach((f,i)=>put(f,(i%2?1:-1)*(w0+Math.floor(i/2)%3*2.2),2-Math.floor(i/6)*2.5));}
+function warHoldAt(f,X,Z,FA){if(f.waitA)return;const rest=f.way?f.way.slice():[];if(f.wp&&f.st==='return')rest.unshift(f.wp);
+  f.way=[{A:FA,r:0}].concat(rest);warAim(f,[X,Z,1]);f.wp=[X,Z,1];f.retry=0;f.lineHold=FA;if(f.st!=='chase'){f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/FOES[f.kind].walk-20)+5;}}
+// the wastes' charge: each without a foe runs at the nearest of the hosts within 70, howling
+function warCharge(A,live,en){for(const f of live){if(f.foe||f.waitA&&!warGo(f))continue;let best=null,bd=70;for(const g of en){const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}
+    if(best){f.foe=best;f.eseen=0;f.st='chase';f.seen=0;f.t=0;}}
+  const [x,z]=warMid(A);warCry(true,18,x,A.P.hG+2,z);}
+// the din of the fighting about the player and the battle music, four times a second (from updFoes)
+let warSndT=0;
+function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[];for(const f of foes)if(!f.dead&&f.foe&&!f.foe.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<70)F.push(f);warDin(F,0.25);warMusicTick(0.25,F.length);}
 // every second the armies march (warMarch); every five near a gate the parties' timers run down, and one is sent when its time
-// comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts between while no army is out,
-// under the war's cap (warCap: 170 marching at once at the massive size)
+// comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
+// Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warMarch();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
+  warStateTick();warMarch();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
-  const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-(busy?0:20))return;
-  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,60);st.scout=Math.max(st.scout,40);st.al=Math.random()<(st.al?0.3:0.7);warArmy(P,st.al);}
-  else if(busy)return;
+  const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
+  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=Math.random()<(st.al?0.3:0.7);warArmy(P,st.al);}
   else if(st.raid<=0){st.raid=50+Math.random()*60;warRaid(P);}
   else if(st.scout<=0){st.scout=70+Math.random()*80;warScout(P);}}
-// ---- The engines (D-067): now and then the dwarves' trebuchets loft a stone over the wall into the yard, or the orcs' throwers a
-// burning pot onto the siege lines. They fly and land for the look and the sound only, and strike no one.
+// ---- The engines (D-067; since W1, Q156, they strike): now and then the dwarves' trebuchets loft a stone over the wall into the
+// yard, or the orcs' throwers a burning pot onto the siege lines, aimed at the other side's soldiers where any stand within reach
+// (a little off), else anywhere in the yard or before the lines. Where it lands it hurts the other side's soldiers about it (a
+// stone 14 at its heart, a pot 9 and fire); a pot that lands by the player in survival burns them too.
 const warStones=entityKind({name:'warStones',list:[],update:dt=>updWarStones(dt),persist:false,shift:(dx,dz)=>{for(const s of warStones){s.x-=dx;s.z-=dz;}}});
 function warVolley(P){
   const s=wgSite(P),orc=Math.random()<0.45,eng=s.lay.parts.filter(p=>p.k===(orc?'ocata':'dtreb')&&p.u0<P.uC0);if(!eng.length)return;const e=eng[Math.floor(Math.random()*eng.length)];
-  const [ox,oz]=siteXZ(s,(e.u0+e.u1)/2,(e.v0+e.v1)/2),tu=orc?P.uL-12+Math.random()*44:-60+Math.random()*40,[tx,tz]=siteXZ(s,tu,(Math.random()-0.5)*80);
+  const [ox,oz]=siteXZ(s,(e.u0+e.u1)/2,(e.v0+e.v1)/2),tg=foes.filter(g=>!g.dead&&!FOES[g.kind].civ&&!!FOES[g.kind].folk===orc&&Math.hypot(g.x+OX-ox,g.z+OZ-oz)<150&&wgUV(P,g.x+OX,g.z+OZ)[0]<(orc?P.uC0:P.uL));
+  let tx,tz;if(tg.length){const g=tg[Math.floor(Math.random()*tg.length)];tx=g.x+OX+(Math.random()-0.5)*5;tz=g.z+OZ+(Math.random()-0.5)*5;}else{const tu=orc?P.uL-12+Math.random()*44:-60+Math.random()*40;[tx,tz]=siteXZ(s,tu,(Math.random()-0.5)*80);}
   const x=ox-OX+0.5,z=oz-OZ+0.5,y=P.hG+(orc?8:12),T=3.2+Math.random()*0.8,g=16,ty=P.hG+1;if(Math.hypot(x-PL.x,z-PL.z)>110)return;
   const mat=new THREE.MeshBasicMaterial({color:orc?new THREE.Color(1,0.5,0.12):new THREE.Color(0.32,0.31,0.3),transparent:orc,opacity:orc?0.92:1}),m=new THREE.Mesh(shotGeo,mat);m.scale.set(0.8,0.8,0.8);m.frustumCulled=false;scene.add(m);
   warStones.push({x:x,y:y,z:z,vx:(tx-ox)/T,vz:(tz-oz)/T,vy:(ty-y)/T+0.5*g*T,fire:orc,life:T+1,m:m});burst(0.3,'lowpass',160,1,0.3,0,[x,y,z]);}
@@ -12089,7 +12237,75 @@ function updWarStones(dt){
     if(s.fire&&Math.random()<0.7)spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.4,0.2,(Math.random()-.5)*0.4,[1,0.5,0.1],0.4,-0.3);
     const bx=Math.floor(s.x),bz=Math.floor(s.z),hit=s.life<=0||bx<0||bz<0||bx>=W||bz>=D||SOLID[get(bx,Math.floor(s.y),bz)];
     if(hit){for(let k=0;k<(s.fire?16:10);k++)spawnP(s.x,s.y+0.5,s.z,(Math.random()-.5)*4,Math.random()*3.5,(Math.random()-.5)*4,s.fire?[1,0.5,0.1]:[0.32,0.3,0.28],0.6,s.fire?3:14);
-      burst(s.fire?0.6:0.5,'lowpass',s.fire?380:140,1.1,0.45,0,[s.x,s.y,s.z]);scene.remove(s.m);s.m.material.dispose();warStones.splice(i,1);}}}
+      burst(s.fire?0.6:0.5,'lowpass',s.fire?380:140,1.1,0.45,0,[s.x,s.y,s.z]);scene.remove(s.m);s.m.material.dispose();warStones.splice(i,1);warSplash(s.x,s.y,s.z,s.fire);}}}
+// where an engine's shot lands: the other side's soldiers within 3 are hurt (most at its heart) and thrown back; a burning pot burns a
+// player in survival standing by it
+function warSplash(x,y,z,orc){
+  for(const g of foes){if(g.dead||!!FOES[g.kind].folk!==orc||FOES[g.kind].civ)continue;const dx=g.x-x,dz=g.z-z,d=Math.hypot(dx,dz);if(d>3||Math.abs(g.y-y)>4)continue;
+    const n=Math.round((orc?9:14)*(1-d/4)),G=FOES[g.kind];g.hp-=n;g.hurt=1;g.kvx+=dx/(d||1)*6*G.mass;g.kvz+=dz/(d||1)*6*G.mass;g.vy=Math.max(g.vy,3);if(g.st==='sleep')g.st='idle';
+    if(g.hp<=0){g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;}}
+  if(orc&&foeTarget()&&Math.hypot(PL.x-x,PL.z-z)<2.6&&Math.abs(PL.y-y)<3)foeHurtPlayer(6,'pot',(PL.x-x)||0.1,(PL.z-z)||0.1,4);}
+DEATH.pot='A burning pot from the orcs\' throwers fell on you';
+// ---- The war at each gate (W1, D-068; Q138 to Q190). A war is kept for every gate the player has found (`WARS`, saved as `wr`,
+// with the war's own play clock `wpc`), and moves on with play time wherever the player is (Q144, Q165): about an hour and a half
+// of play takes a gate. The gate falls to four efforts at once (Q142, Q146): the ram's work on the barred leaf, the dwarves' mine
+// under the ring, the assaults on the walls, and the orcs' sallies broken before the lines. Each grows with time (`WAR_EFF`, its
+// pace a little different at each gate) and with the battles fought there (`warOutcome`: an army of the hosts that storms the
+// yard, a warhost broken before the lines; a warhost that breaks through sets the ram and the sallies back a little). Every war
+// ends well for the alliance (Q139). The war panel near a gate (Q158), the gates' wars and their lines on the world map
+// (`warMapDraw`), and each gate's chronicle in the journal (`warJournal`).
+const WAR_EFF=[['ram','The ram',85],['mine','The mine',95],['walls','The walls',80],['sally','The sallies',75]]; // [key, label, minutes of play to finish alone]
+const WAR_MARK={ram:['The ram has cracked the barred leaf','The barred leaf splits under the ram','The barred leaf is breaking','The barred leaf can hold no longer'],
+  mine:['The dwarves\' mine under the ring is begun','The mine under the ring is half dug','The mine is nearly under the tower','The mine lies under the tower, ready to be fired'],
+  walls:['The siege towers are building and the ladders made','The siege towers are ready to be wheeled up','The assaults have half won the gate\'s walk','The gate\'s walk is all but taken'],
+  sally:['The orcs\' sallies break on the siege lines','Half the warbands of the yard are spent','The Gatewarden\'s Camp is thinning','The orcs no longer dare to sally']};
+const WARS=new Map();let warPlay=saved&&typeof saved.wpc==='number'?saved.wpc:0;
+if(saved&&Array.isArray(saved.wr))for(const w of saved.wr)if(w&&w.id&&w.b&&Array.isArray(w.log))WARS.set(w.id,w);
+const warSave=()=>({wr:[...WARS.values()],wpc:Math.round(warPlay)});
+// how far an effort has come (0 to 1): its pace at this gate since the war was found, and what the battles have added or taken
+function warEff(w,k){const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));return Math.max(0,Math.min(1,(w.b[k]||0)+(warPlay-w.f)/pace));}
+const warAll=w=>WAR_EFF.every(e=>warEff(w,e[0])>=1);
+function warStage(w){return warAll(w)?'The gate stands ready to fall':'The siege';}
+function warLog(w,s){w.log.push([Math.round(warPlay),s]);if(w.log.length>80)w.log.splice(1,1);saveDirty=true;}
+// the player comes within 200 of a gate's works: its war is found, and from then on it is kept
+function warFound(P){let w=WARS.get(P.id);if(w)return w;
+  w={id:P.id,n:P.name,X:P.X,Z:P.Z,camp:P.camp,f:Math.round(warPlay),b:{ram:0.02,mine:0,walls:0,sally:0.05},m:{},w:[0,0],log:[]};WARS.set(P.id,w);
+  warLog(w,'You came to '+P.name.replace(/^The /,'the ')+'. The hosts of '+P.camp.replace(/^The /,'the ')+' have it under siege, and '+P.ram+'\'s ram stands at its barred leaf.');
+  toast('The siege of '+P.name.replace(/^The /,'the ')+': you have found the war at the gate');return w;}
+// every second while playing: the war's clock, finding a gate, each effort's marks (a quarter, a half...), and the panel
+function warStateTick(){
+  warPlay+=1;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),200),near=P?warFound(P):null;
+  for(const w of WARS.values())for(const [k] of WAR_EFF){const q=Math.floor(warEff(w,k)*4);while(q>(w.m[k]||0)){const m=w.m[k]=(w.m[k]||0)+1,s=WAR_MARK[k][m-1];warLog(w,s+'.');if(w===near)toast(s);
+      if(m===4&&warAll(w)){warLog(w,'All four are done. The hosts make ready for the last assault on the gate.');if(w===near)toast('The hosts make ready for the last assault on the gate');}}}
+  warPanel(near);}
+// how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
+function warOutcome(A){
+  const w=WARS.get(A.P.id),N=A.m.length;if(!w||A.def||N<10)return;const fell=A.fell||0,reach=A.reach?A.reach.size:0;if(fell+reach<N*0.35)return; // fought out of sight
+  const P=A.P,nm=P.name.replace(/^The /,'the ');let s=null;
+  if(A.al){if(reach>=N*0.2){w.b.walls=(w.b.walls||0)+0.05;w.b.ram=(w.b.ram||0)+0.03;w.w[0]++;s='The hosts stormed '+P.yard.replace(/^The /,'the ')+': '+reach+' went in through the gap, '+fell+' fell.';}
+    else if(fell>=N*0.5){w.w[1]++;s='The hosts were thrown back at the gap of '+nm+'; '+fell+' fell.';}}
+  else{if(reach>=N*0.25){w.b.ram=(w.b.ram||0)-0.02;w.b.sally=(w.b.sally||0)-0.02;w.w[1]++;s='A warhost of '+N+' broke through to the siege lines and set fire to the ram\'s shed before it was driven back; '+fell+' of them fell.';}
+    else if(fell>=N*0.55){w.b.sally=(w.b.sally||0)+0.08;w.w[0]++;s='A warhost of '+N+' was broken before the siege lines; '+fell+' of them fell.';}}
+  if(s){warLog(w,s);if(Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400)toast(s);}}
+// ---- The war panel (Q158): near a found gate, its stage, the four efforts and how many stand on each side about the player
+function warPanel(w){
+  const el=$('warpanel');if(!el)return;if(!w||photo){el.style.display='none';return;}el.style.display='block';
+  let al=0,orc=0;const X=PL.x,Z=PL.z;for(const f of foes){if(f.dead||Math.hypot(f.x-X,f.z-Z)>160)continue;if(FOES[f.kind].folk){if(!FOES[f.kind].civ)al++;}else orc++;}
+  const bar=v=>'<span class="wb"><i style="width:'+Math.round(v*100)+'%"></i></span>';
+  el.innerHTML='<b>'+w.n+'</b><div>'+warStage(w)+'</div>'+WAR_EFF.map(([k,lab])=>'<div class="we">'+lab+' '+bar(warEff(w,k))+' '+Math.round(warEff(w,k)*100)+'%</div>').join('')+
+    '<div>The hosts '+al+', the wastes '+orc+'</div>';}
+// ---- On the world map: each found gate's war, its stage and how far the siege has come, and the two lines across the pass
+function warMapDraw(g,sx,sz){
+  for(const w of WARS.values()){const P=wasteGateAt(w.X,w.Z,10);const x=sx(w.X),y=sz(w.Z);
+    if(P){const line=(u,c)=>{const [ax,az]=wgXZ(P,u,-wgHalf(P,u)+4),[bx,bz]=wgXZ(P,u,wgHalf(P,u)-4);g.strokeStyle=c;g.lineWidth=4;g.beginPath();g.moveTo(sx(ax),sz(az));g.lineTo(sx(bx),sz(bz));g.stroke();};
+      line(P.uL+4,'#2a4c9c');line(-22,'#a82a1a');}
+    g.strokeStyle='#5a0e06';g.lineWidth=3;g.beginPath();g.moveTo(x-7,y-7);g.lineTo(x+7,y+7);g.moveTo(x+7,y-7);g.lineTo(x-7,y+7);g.stroke();
+    const p=Math.round(WAR_EFF.reduce((a,e)=>a+warEff(w,e[0]),0)/4*100);g.fillStyle='#5a0e06';g.fillText(warStage(w)+' of '+w.n.replace(/^The /,'the ')+', '+p+'%',x,y+22);}}
+// ---- In the journal: each found war's chronicle, oldest first
+function warJournal(out){
+  out.push('','THE WARS OF THE WASTES');if(!WARS.size)out.push('None found yet. The Ashen Gates stand in the rings of ash mountains about the Volcanic Wastes.');
+  for(const w of WARS.values()){out.push('','The War at '+w.n+' ('+warStage(w).toLowerCase()+'; '+WAR_EFF.map(([k,lab])=>lab.toLowerCase()+' '+Math.round(warEff(w,k)*100)+'%').join(', ')+'; battles won '+w.w[0]+', lost '+w.w[1]+')');
+    for(const [t,s] of w.log)out.push('Hour '+(t/3600).toFixed(1)+'. '+s);}}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -12214,6 +12430,7 @@ function drawWorldMap(){
     for(const [n,e] of seen)g.fillText(n,sx(e.x/e.k),sz(e.z/e.k));}
   g.font='16px VT323, monospace';
   for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
+  warMapDraw(g,sx,sz); // the wars at the gates found, and their lines (W1, D-068)
   waypoints.forEach(m=>{const k=keyXYZ(m.userData.k),x=sx(k[0]+0.5),y=sz(k[2]+0.5);g.fillStyle=m.userData.c||'#5ff2ff';g.strokeStyle='#111';g.lineWidth=1.5;
     g.beginPath();g.moveTo(x,y-7);g.lineTo(x+6,y);g.lineTo(x,y+7);g.lineTo(x-6,y);g.closePath();g.fill();g.stroke();g.fillStyle='#10202a';g.fillText(wpName(m.userData.k),x,y+18);});
   for(const m of markers){const x=sx(m.X),y=sz(m.Z);g.fillStyle=m.c;g.strokeStyle='#111';g.lineWidth=2;g.beginPath();g.arc(x,y,6,0,6.3);g.fill();g.stroke();g.fillStyle='#111';g.fillText(m.n,x,y-10);}
@@ -12313,6 +12530,7 @@ function journalText(){
   out.push('','RUNE TABLETS ('+Math.min(JN.t,TABLETS.length)+' of '+TABLETS.length+')');
   if(!JN.t)out.push('None read yet. Rune tablets turn up in the old holds; hold one and use it to read it.');
   for(let i=0;i<Math.min(JN.t,TABLETS.length);i++)out.push((i+1)+'. '+TABLETS[i]);
+  warJournal(out); // the wars of the wastes, a chronicle for each gate found (W1, D-068)
   out.push('','DISCOVERIES');
   for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');
@@ -12687,7 +12905,7 @@ function drawMode(){[...$('modeseg').querySelectorAll('button')].forEach(b=>b.cl
 $('modeseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v&&v!==mode){setMode(v);toast(v==='survival'?'Survival mode':'Creative mode');}});segBind('caveseg','cave',v=>+v);segBind('wxseg','weather',v=>v==='1');
 const sndBtn=$('sndbtn');function drawSnd(){sndBtn.textContent=settings.sound?'Sound on':'Sound off';}drawSnd();
 sndBtn.addEventListener('click',()=>{settings.sound=!settings.sound;lsSet(SET_KEY,settings);drawSnd();if(settings.sound)audioInit();applyVol();});
-for(const k of ['m','s','a']){const el=$('vol'+k);el.value=vol(k);el.addEventListener('input',()=>{setVol(k,el.value);audioInit();});} // volume sliders (M8)
+for(const k of ['m','s','a','u']){const el=$('vol'+k);el.value=vol(k);el.addEventListener('input',()=>{setVol(k,el.value);audioInit();});} // volume sliders (M8)
 $('play').addEventListener('click',lockOrPlay);
 $('respawnbtn').addEventListener('click',revive);
 $('photo').addEventListener('click',()=>{setPhoto(true);lockOrPlay();toast('');});
@@ -12722,7 +12940,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -12946,7 +13164,7 @@ async function generate(){
   progress(1,TOUCH?'Ready. Tap Play.':'Ready. Click Play.');
   $('play').textContent=resumed?'Continue':'Play';
   ready=true;/*@test-hook*/$('play').disabled=false;$('play').focus();
-  $('toast').style.display='none';
+  toast('');
 }
 
 // Day, night and weather

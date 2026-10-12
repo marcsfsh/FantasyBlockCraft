@@ -50,7 +50,12 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 #death h1{font-size:64px;margin:0;font-weight:400;color:#ffdede;text-shadow:4px 4px 0 #400}
 #death p{font-size:24px;max-width:80vw}
 #name{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));font-size:26px;text-shadow:2px 2px 0 rgba(0,0,0,.6);opacity:0;transition:opacity .4s;white-space:nowrap}
-#toast{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-size:22px;background:var(--panel);border:3px solid var(--edge);padding:2px 12px;display:none}
+#toast{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-size:22px;display:none;text-align:center;max-width:min(860px,calc(100vw - 340px))}
+#warpanel{position:absolute;top:calc(172px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:240px;font-size:18px;line-height:1.05;background:var(--panel);border:3px solid var(--edge);padding:4px 8px;display:none}
+#warpanel b{font-weight:normal;color:#ffd27a}#warpanel .we{white-space:nowrap}#warpanel .wb{display:inline-block;width:90px;height:9px;border:2px solid var(--edge);background:#1c1810;vertical-align:middle}#warpanel .wb i{display:block;height:100%;background:#c8902e}
+body.touch #warpanel{top:calc(10px + env(safe-area-inset-top,0px));font-size:15px;width:200px}body.touch #warpanel .wb{width:70px}
+#toast .tl{display:table;margin:0 auto 4px;background:var(--panel);border:3px solid var(--edge);padding:2px 12px;transition:opacity .7s}
+body.touch #toast{font-size:18px;max-width:calc(100vw - 240px)}
 #tint{position:absolute;inset:0;display:none}
 #hint{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:min(560px,88vw);background:rgba(20,18,14,.85);border:2px solid var(--edge);padding:8px 14px;font-size:20px;line-height:1.15;display:none;pointer-events:none;text-align:center;z-index:3}
 #wmap{position:fixed;inset:0;z-index:6;background:#d6c69e}#wmc{position:absolute;inset:0;touch-action:none;cursor:crosshair}

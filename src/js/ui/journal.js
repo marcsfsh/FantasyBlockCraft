@@ -53,6 +53,7 @@ function journalText(){
   out.push('','RUNE TABLETS ('+Math.min(JN.t,TABLETS.length)+' of '+TABLETS.length+')');
   if(!JN.t)out.push('None read yet. Rune tablets turn up in the old holds; hold one and use it to read it.');
   for(let i=0;i<Math.min(JN.t,TABLETS.length);i++)out.push((i+1)+'. '+TABLETS[i]);
+  warJournal(out); // the wars of the wastes, a chronicle for each gate found (W1, D-068)
   out.push('','DISCOVERIES');
   for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');

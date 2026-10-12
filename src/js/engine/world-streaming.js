@@ -106,6 +106,6 @@ async function generate(){
   progress(1,TOUCH?'Ready. Tap Play.':'Ready. Click Play.');
   $('play').textContent=resumed?'Continue':'Play';
   ready=true;/*@test-hook*/$('play').disabled=false;$('play').focus();
-  $('toast').style.display='none';
+  toast('');
 }
 

@@ -68,6 +68,7 @@ function drawWorldMap(){
     for(const [n,e] of seen)g.fillText(n,sx(e.x/e.k),sz(e.z/e.k));}
   g.font='16px VT323, monospace';
   for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
+  warMapDraw(g,sx,sz); // the wars at the gates found, and their lines (W1, D-068)
   waypoints.forEach(m=>{const k=keyXYZ(m.userData.k),x=sx(k[0]+0.5),y=sz(k[2]+0.5);g.fillStyle=m.userData.c||'#5ff2ff';g.strokeStyle='#111';g.lineWidth=1.5;
     g.beginPath();g.moveTo(x,y-7);g.lineTo(x+6,y);g.lineTo(x,y+7);g.lineTo(x-6,y);g.closePath();g.fill();g.stroke();g.fillStyle='#10202a';g.fillText(wpName(m.userData.k),x,y+18);});
   for(const m of markers){const x=sx(m.X),y=sz(m.Z);g.fillStyle=m.c;g.strokeStyle='#111';g.lineWidth=2;g.beginPath();g.arc(x,y,6,0,6.3);g.fill();g.stroke();g.fillStyle='#111';g.fillText(m.n,x,y-10);}

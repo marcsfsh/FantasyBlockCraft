@@ -5,6 +5,20 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.38.0 (2026-10-12): W1, the war at the gate
+
+Saves from 0.37.0 do not carry over (save key v28): the wars at the gates are saved.
+
+### Game
+- **Subtitles stay** at least seven seconds (longer lines longer) and stack, up to four at once.
+- **Each gate you find has its war**, kept in the save and moving on while you play anywhere: the ram on the barred leaf, the dwarves' mine under the ring, the assaults on the walls and the orcs' sallies broken, all growing together over about an hour and a half of play and with the battles fought there. A **war panel** near a gate shows its stage, the four efforts and how many stand on each side; the **world map** marks each war and its lines; the **journal** keeps each gate's chronicle.
+- **Battles:** the hosts form a line when the foe comes (shields, blades and spears in front, archers behind, horsemen on the wings) and hold it until the foe is upon them; their archers loose **volleys** at the captain's horn, then shoot on their own once the lines meet. The warhosts of the wastes **charge in a mass**, heavier now with more brutes and trolls and picked warriors. Raids and scouts go on while armies are out.
+- **The engines strike:** trebuchet stones and the orcs' burning pots now hit soldiers where they land (and a pot can burn you).
+- **The sound of war:** each people's horn calls (muster, advance, volley, retreat), war cries as armies charge and the lines meet, a battle din that grows with the fight, and **battle music** (drums, a drone and horns) that rises with a battle and fades after it, with its own Battle music slider.
+
+### Tooling
+- New test case `60-war`. `tools/shot.mjs --army=both:60` stages both armies at once.
+
 ## 0.37.0 (2026-10-12): the war at the gates of the wastes
 
 Saves from 0.36.0 do not carry over (save key v27): the wastes are remade about their gates.

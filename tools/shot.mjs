@@ -9,7 +9,7 @@
 //   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep;
 //        a third part turns it (ember.w.90: side on), --far=30 stands an Emberlord further off, --near=2 the others closer
 //   node tools/shot.mjs --tiles=258-269,254      atlas tiles enlarged side by side, to tiles.png (no views unless --view is given)
-//   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al) or the wastes' (orc),
+//   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al), the wastes' (orc) or both (W1),
 //        marched on that many seconds before the shot
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
@@ -56,7 +56,7 @@ const HOOK=`window.__fbc={
     for(let i=0;i<Math.round((sec||0.5)/0.02);i++)updFoes(0.02);return foes.length;
   },
   // an army at the gate of the wastes about the camera (D-067): the hosts' (al) or the wastes', marched on for sec seconds
-  army(al,sec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;for(const f of [...foes])removeFoe(f);foeSpots.clear();warArmies.length=0;warClk=1e9;warArmy(P,al);
+  army(al,sec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;for(const f of [...foes])removeFoe(f);foeSpots.clear();warArmies.length=0;warClk=1e9;if(al==='both'){warArmy(P,true);warArmy(P,false);}else warArmy(P,al);
     const real=performance.now;performance.now=()=>0;try{for(let i=0;i<Math.round(sec/0.05);i++){foeT-=0.05;updFoes(0.05);}}finally{performance.now=real;}return warLive();},
   // animals in two rows ahead of the camera, side on or three-quarter, still; then a few frames of their update
   stage(kinds,sec){
@@ -89,7 +89,7 @@ for(const [name,X,Y,Z,yaw,pitch,t] of views){
   await p.waitForTimeout(1500);
   if(args.bolt!==undefined)await p.evaluate(()=>window.__fbc.bolt());
   if(args.foes!==undefined)await p.evaluate(k=>window.__fbc.stageFoes(k?k.split(','):[],1),args.foes);
-  if(args.army!==undefined){const [k,sec]=args.army.split(':'),n=await p.evaluate(a=>window.__fbc.army(a[0]==='al',a[1]),[k,Number(sec||60)]);console.log('army '+k+': '+n+' marching');}
+  if(args.army!==undefined){const [k,sec]=args.army.split(':'),n=await p.evaluate(a=>window.__fbc.army(a[0]==='both'?'both':a[0]==='al',a[1]),[k,Number(sec||60)]);console.log('army '+k+': '+n+' marching');}
   const file=path.join(out,seed+'-'+name+'.png');await p.screenshot({path:file});
   console.log('shot '+path.relative(ROOT,file)+'  fog '+Math.round(r.fog)+(r.surf?' surface':' cave')+' mode');
 }

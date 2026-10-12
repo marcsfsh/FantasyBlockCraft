@@ -297,11 +297,11 @@ These are planned now so refinements leave room for them.
 - **E4 Magic (Q49).** Player magic: runes, enchanting, spells. Gold and platinum become ingredients (Q68).
 - **E5 New lands (Q23).** For example a desert; more to be chosen.
 
-## The War of the Wastes (W1 to W7; planned 2026-10-12 from Q138 to Q190, awaiting the owner's approval)
+## The War of the Wastes (W1 to W7; planned 2026-10-12 from Q138 to Q190, approved by the owner the same day)
 
 The war between the alliance (men, riders, high elves, wood elves, dwarves) and the wastes (orcs, goblins, trolls, the Emberlords), widened from the gates (0.37.0, D-067) to the whole of the wastes, the ground beneath them and the realms that border them. The settled answers: constant fighting (Q141); every found gate has its own war, saved and moving on with play time even while the player is elsewhere (Q144, Q165), a few hours of play from siege to the fall of its great volcano (Q164); the gate falls to four efforts at once (Q142, Q146), and every war ends well for the alliance (Q139); after the gate the hosts push into the basin, under it and up the great volcano (Q138, Q143); the player can swear to the alliance or stay a spectator (Q140, Q145, Q166). Each stage is one release with its tests, both builds, its docs, a "Check in-game" list, and the HTML sent to the owner.
 
-- **W1 The war at the gate: its state and its battles (first, Q190).**
+- **W1 The war at the gate: its state and its battles (first, Q190; done in 0.38.0, D-068).**
   - Subtitles last 7 seconds or more (longer lines longer) and stack, up to four, each fading on its own timer (Q163, Q167).
   - Each found gate keeps its war in the save: its stage and its four efforts (the ram's work on the barred leaf, the dwarves' mine under the ring, the assaults on the walls, the orcs' sallies broken before the lines), moved on by play time near and away and by battles won (Q144, Q146, Q164, Q165).
   - Battles in formation: the hosts in lines (shields and spears in front, archers behind, horse on the flanks) that hold and close up; the orcs charging in a mass before the lines break into melee (Q152). Archers loose massed volleys at a captain's call at range, then shoot on their own once the fight is joined (Q153).

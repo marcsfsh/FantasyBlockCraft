@@ -313,8 +313,13 @@ function toggleNoclip(){
   if(!PL.noclip){while(collide()&&PL.y<H)PL.y++;}
   $('tClip').classList.toggle('on',PL.noclip);drawClip();toast(PL.noclip?'Noclip: flying through blocks':'Noclip off');
 }
-let toastT=0;
-function toast(s){const t=$('toast');if(!s){t.style.display='none';return;}t.textContent=s;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>{t.style.display='none';},1300);}
+// Subtitles (W1, Q163, Q167): each line stays at least seven seconds, longer lines longer (a quarter second a word, up to twelve);
+// up to four stack, the newest at the bottom, each fading on its own; the same line again keeps its place and starts its time over
+function toast(s){const box=$('toast');if(!s){box.innerHTML='';box.style.display='none';return;}box.style.display='block';
+  for(let i=0;i<box.children.length;i++){const e=box.children[i];if(e.textContent===s&&!e.out){clearTimeout(e.tm);e.tm=setTimeout(()=>toastOut(e),toastLen(s));return;}}
+  while(box.children.length>=4)box.firstChild.remove();const e=document.createElement('div');e.className='tl';e.textContent=s;box.appendChild(e);e.tm=setTimeout(()=>toastOut(e),toastLen(s));}
+const toastLen=s=>Math.min(12,7+s.split(/\s+/).length*0.25)*1000;
+function toastOut(e){e.out=1;e.style.opacity='0';setTimeout(()=>{e.remove();const box=$('toast');if(!box.children.length)box.style.display='none';},700);}
 addEventListener('keydown',e=>{
   if(e.target&&e.target.tagName==='INPUT')return;
   keys[e.code]=true;

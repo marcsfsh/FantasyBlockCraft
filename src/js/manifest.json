@@ -206,6 +206,10 @@
       "about": "Synthesized sound and haptics"
     },
     {
+      "path": "engine/war-sound.js",
+      "about": "The sound of the war (W1, D-068): each people's horn signals, war cries, the din of battle, battle music on its own bus"
+    },
+    {
       "path": "input/actions.js",
       "about": "Input actions: named actions with keyboard, controller and touch bindings (settings.binds overrides the defaults)"
     },
@@ -280,6 +284,10 @@
     {
       "path": "gameplay/war.js",
       "about": "War at the gates of the wastes (D-067): the camp's, the siege works' and the yard's spots, and the raiding parties, scouts and armies the two sides send at each other by waypoints while the player is near"
+    },
+    {
+      "path": "gameplay/war-state.js",
+      "about": "The war at each gate (W1, D-068): kept for every gate found and saved (wr), its four efforts, how battles went, the war panel, the map's lines, the journal's chronicle"
     },
     {
       "path": "input/touch.js",

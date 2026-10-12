@@ -1,18 +1,18 @@
-// Sound, all synthesized; no music (Q57). Since M8 (D-048): effects and ambience run through their own buses under a master, each
+// Sound, all synthesized; no music (Q57) but the war's (W1, D-068: `war-sound.js`, on its own bus `BUS_U`). Since M8 (D-048): effects and ambience run through their own buses under a master, each
 // with a volume slider; ambient soundscapes follow the land and the layer (Q57); sounds in the world come from where they happen
 // (a panner per sound, and a listener that follows the camera).
-let AX=null,noiseBuf=null,rainGain=null,windGain=null,BUS_M=null,BUS_S=null,BUS_A=null;
-const VOL_DEF={m:0.8,s:1,a:0.7};
+let AX=null,noiseBuf=null,rainGain=null,windGain=null,BUS_M=null,BUS_S=null,BUS_A=null,BUS_U=null;
+const VOL_DEF={m:0.8,s:1,a:0.7,u:0.7};
 function vol(k){const v=settings.vol&&settings.vol[k];return typeof v==='number'?Math.max(0,Math.min(1,v)):VOL_DEF[k];}
 function setVol(k,v){settings.vol=Object.assign({},VOL_DEF,settings.vol||{});settings.vol[k]=Math.max(0,Math.min(1,+v));lsSet(SET_KEY,settings);applyVol();}
-function applyVol(){if(!BUS_M)return;BUS_M.gain.value=settings.sound?vol('m'):0;BUS_S.gain.value=vol('s');BUS_A.gain.value=vol('a');}
+function applyVol(){if(!BUS_M)return;BUS_M.gain.value=settings.sound?vol('m'):0;BUS_S.gain.value=vol('s');BUS_A.gain.value=vol('a');BUS_U.gain.value=vol('u');}
 const AMB={}; // the ambient loops: surf, rumble, lava, stream (with its panner)
 function noiseLoop(type,freq,q,out){const s=AX.createBufferSource();s.buffer=noiseBuf;s.loop=true;const f=AX.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;const g=AX.createGain();g.gain.value=0;s.connect(f);f.connect(g);g.connect(out);s.start();return g;}
 function audioInit(){
   if(!settings.sound)return;
   try{
     if(!AX){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;AX=new C();const len=AX.sampleRate*1.6|0;noiseBuf=AX.createBuffer(1,len,AX.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
-      BUS_M=AX.createGain();BUS_M.connect(AX.destination);BUS_S=AX.createGain();BUS_S.connect(BUS_M);BUS_A=AX.createGain();BUS_A.connect(BUS_M);
+      BUS_M=AX.createGain();BUS_M.connect(AX.destination);BUS_S=AX.createGain();BUS_S.connect(BUS_M);BUS_A=AX.createGain();BUS_A.connect(BUS_M);BUS_U=AX.createGain();BUS_U.connect(BUS_M);
       windGain=noiseLoop('bandpass',420,0.6,BUS_A);rainGain=noiseLoop('lowpass',1300,1,BUS_A);
       AMB.surf=noiseLoop('lowpass',480,0.7,BUS_A);AMB.rumble=noiseLoop('lowpass',90,0.8,BUS_A);AMB.lava=noiseLoop('lowpass',170,1.4,BUS_A);
       AMB.pan=panner(0,0,0,BUS_A);AMB.stream=noiseLoop('bandpass',950,0.45,AMB.pan);applyVol();}
