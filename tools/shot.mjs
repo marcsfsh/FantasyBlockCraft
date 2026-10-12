@@ -7,7 +7,7 @@
 //   node tools/shot.mjs --view=... --animals[=deer.s,sheep.y,horse.2,hen.w]   animals lined up in front of the camera (E1), held
 //   node tools/shot.mjs --view=... --bolt     a lightning bolt strikes just before the shot (the Volcanic Wastes, D-051)
 //   node tools/shot.mjs --view=... --foes[=troll,raider.a,goblin.w,ember]   foes lined up (D-052): .a winding up a blow or shot, .w walking, .z asleep;
-//        a third part turns it (ember.w.90: side on), --far=30 stands an Emberlord further off, --near=2 the others closer
+//        a third part turns it (ember.w.90: side on), .c2 takes coat 2 (an Emberlord's fire, W7a), --far=30 stands an Emberlord further off, --near=2 the others closer
 //   node tools/shot.mjs --tiles=258-269,254      atlas tiles enlarged side by side, to tiles.png (no views unless --view is given)
 //   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al), the wastes' (orc) or both (W1),
 //        marched on that many seconds before the shot
@@ -54,7 +54,7 @@ const HOOK=`window.__fbc={
     const fx=-Math.sin(PL.yaw),fz=-Math.cos(PL.yaw),rx=Math.cos(PL.yaw),rz=-Math.sin(PL.yaw);
     ks.forEach((k,i)=>{const [kk,md,turn]=k.split('.'),big=FOES[kk].tall>2,huge=FOES[kk].tall>6,row=ks.length<4?0:i%2,col=ks.length<4?i:Math.floor(i/2),n=ks.length<4?ks.length:cols,side=(col-(n-1)/2)*(big?4.2:${Number(args.near||3.6)<3?1.4:2.2}),d=(huge?${Number(args.far||20)}:big?7:${Number(args.near||3.6)})+row*3;
       const x=PL.x+fx*d+rx*side,z=PL.z+fz*d+rz*side,g=ground[Math.floor(x)+W*Math.floor(z)],y=foeStand(x,PL.y<g-3?PL.y-1:g+1,z,FOES[kk].tall||2);if(y<0)return; // underground, on the floor near the camera
-      const f=addFoe(kk,x,y,z,md==='z'?{st:'sleep',t:999}:{});f.yaw=f.hd=PL.yaw+(turn!==undefined?+turn*Math.PI/180:((i%3)-1)*0.45);f.hold=1;if(md==='w')f.holdSp=FOES[kk].walk;if(md==='a'){f.atkK=FOES[kk].shot&&kk!=='troll'?'shot':'blow';f.holdAtk=(FOES[kk].wind||0.4)*0.35;}});
+      const f=addFoe(kk,x,y,z,md==='z'?{st:'sleep',t:999}:/^c[0-9]/.test(md||'')?{ci:+md.slice(1)}:{});f.yaw=f.hd=PL.yaw+(turn!==undefined?+turn*Math.PI/180:((i%3)-1)*0.45);f.hold=1;if(md==='w')f.holdSp=FOES[kk].walk;if(md==='a'){f.atkK=FOES[kk].shot&&kk!=='troll'?'shot':'blow';f.holdAtk=(FOES[kk].wind||0.4)*0.35;}});
     for(let i=0;i<Math.round((sec||0.5)/0.02);i++)updFoes(0.02);return foes.length;
   },
   // an army at the gate of the wastes about the camera (D-067): the hosts' (al) or the wastes', marched on for sec seconds

@@ -32,7 +32,11 @@ const HINTS={
   f_troll:()=>'An ash troll. Slow, but its blows send you flying and it throws rocks. Keep moving.',
   p_folk:()=>'Folk of the realm. They mean you no harm: walk among them, and they will greet you. Strike one, and the guards near by take up arms while the townsfolk flee.',
   oath:()=>'A lord of the hosts. Press '+ctl('place')+' to swear the Oath of the Three Banners and fight for the alliance, rising in rank by your deeds; once sworn, the same shows your standing.', // (W4)
-  f_ember:()=>'An Emberlord: a towering demon of fire and shadow, lord of the Ember Throne in the great volcano. Its whip reaches far, its fire comes in threes, and it never leaves its fortress. Few survive it.'
+  f_ember:()=>'An Emberlord: a demon of fire and shadow twenty blocks tall, lord of the Ember Throne in the great volcano. Its blade sweeps wide and its whip drags you in; hurt, it takes to its wings and breathes fire and calls creatures out of the flames, and near its end it tears at the mountain and floods its hall with lava. It never leaves its fortress. Few survive it.',
+  f_ember2:()=>HINTS.f_ember(),f_ember3:()=>HINTS.f_ember(),
+  f_fspirit:()=>'A fire spirit, called out of the flames by an Emberlord. It drifts over the ground and throws fire; it burns out when its lord falls.',
+  f_fhound:()=>'A flame hound, called by an Emberlord. Fast and fierce; strike it as it comes.',
+  f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.'
 };
 let hintT=0,darkT=0;
 function hint(id){

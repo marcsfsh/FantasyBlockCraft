@@ -5,6 +5,19 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.44.0 (2026-10-12): W7a, the Emberlords remade
+
+Saves from 0.43.0 do not carry over (save key v34): the Ember Thrones' gates are rebuilt to let their lords out, and the lords you have seen are saved.
+
+### Game
+- **Every Emberlord is its own.** About twenty blocks tall (were twelve), in one of three builds (swept horns and a burning great sword, ram's horns and a great axe, or a crown of spikes and a broad cleaver) and one of four fires (burning orange, white flame, crimson, or the violet deep-fire). Each has a name and epithet, a temper that shapes how it fights and what it says, and a story: risen from the deep, answering to something in the lava sea that no one has seen. The journal tells it once you have seen the lord.
+- **Three phases.** At first its blade cleaves everything before it, its whip drags you to it, and it throws fire in threes. Hurt, it takes to its wings: long leaps down onto you, fire breath, fissures of fire along the ground, and fire spirits, flame hounds and lesser demons called out of the flames. Near its end it tears at the mountain: eruptions of fire about you, walls of fire, stones falling from the vault, and its hall flooding with lava from its rivers.
+- **When it falls** what it called burns out and the lava it loosed cools to obsidian and crust.
+- **The way out:** each Ember Throne's portcullis hangs higher and the fire baskets in its way in hang above the lord's head, so a lord can walk out of its gate.
+
+### Tooling
+- New test case `66-emberlord`. `tools/shot.mjs --foes=ember2.c1` takes a coat (an Emberlord's fire) after a dot.
+
 ## 0.43.0 (2026-10-12): W6, raids on the bordering realms
 
 Saves from 0.42.0 do not carry over (save key v33): the wars keep their raids and what they burned.

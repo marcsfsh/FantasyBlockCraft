@@ -278,6 +278,10 @@
       "about": "The war's soldiers and creatures (W3, D-070): knights, lancers, pikemen, crossbowmen, household knights, horse archers, outriders, mounted archers, glaive wardens, blade masters, skirmishers, sharpshooters, axe throwers, shieldbreakers, ironclads, sappers, engineers, healers, bearers and standard bearers; wolf riders, pot-throwers, drummers, fire shamans, siege trolls, war beasts, shield orcs, skulkers, troll drivers and orc crossbowmen, built from each people's parts (MODEL_KIT)"
     },
     {
+      "path": "engine/ember-models.js",
+      "about": "The Emberlords remade (W7a, D-074): three builds (horns and arms) and four fires of the one kind, about twenty blocks tall; the fire spirits, flame hounds and lesser demons they call"
+    },
+    {
       "path": "gameplay/wildlife.js",
       "about": "Animals (E1): kinds by land, wandering and fleeing, hunting, wool, milk and eggs, riding, a hound and a pack mule that follow you"
     },
@@ -316,6 +320,10 @@
     {
       "path": "gameplay/war-raids.js",
       "about": "Raids on the bordering realms (W6, D-073): the provinces nearest each gate (warBorder), raids and sieges begun, fought out near the player or settled away, burned buildings kept in the war's rb and rebuilt, beacons, the realm riding out, refugees, wolf riders roaming and ambushes on the roads"
+    },
+    {
+      "path": "gameplay/emberlord.js",
+      "about": "The Emberlords remade (W7a, D-074): each lord's identity, temper and story (emberLord, ek), its powers (cleaving blade, dragging whip, leaps, breath, fissures, walls of fire, eruptions, summons) in three phases, its hall flooding with lava and cooling when it falls"
     },
     {
       "path": "input/touch.js",

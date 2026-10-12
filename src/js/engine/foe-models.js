@@ -102,16 +102,17 @@
       ['wingL2','wingL',[-28,4,0],[-32,-36,-0.5,32,40,1],[0,-0.35,-0.35],{nb:1}],['wcL','wingL2',[-0.5,3.5,0],[-1,0,-1,2,5,2],[0,0,0.5],{nb:1,tp:['y',0,0,0,0]}],['fL0','wingL2',[-0.5,3.5,0],[-32,-1,-1,32,2,2],0,{nb:1,tp:['-x',0.35,0.4,0,0]}],['fL1','wingL2',[-0.5,3.5,0],[-30,-0.5,-0.5,30,1,1],[0,0,0.44],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL2','wingL2',[-0.5,3.5,0],[-38,-0.5,-0.5,38,1,1],[0,0,0.942],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL3','wingL2',[-0.5,3.5,0],[-40,-0.5,-0.5,40,1,1],[0,0,1.351],{nb:1,tp:['-x',0.3,0.3,0,0]}],['fL4','wingL2',[-0.5,3.5,0],[-36,-0.5,-0.5,36,1,1],[0,0,1.571],{nb:1,tp:['-x',0.3,0.3,0,0]}],
       ['wingR','chest',[5,9,-6.5],[0,-30,-0.5,28,34,1],[-0.85,0.6,0.55],{nb:1}],['wbR','wingR',[0,3,0],[0,-1,-1,28,3,2],0,{nb:1,m:'wbL',tp:['x',0.45,0.5,0,0]}],
       ['wingR2','wingR',[28,4,0],[0,-36,-0.5,32,40,1],[0,0.35,0.35],{nb:1}],['wcR','wingR2',[0.5,3.5,0],[-1,0,-1,2,5,2],[0,0,-0.5],{nb:1,m:'wcL',tp:['y',0,0,0,0]}],['fR0','wingR2',[0.5,3.5,0],[0,-1,-1,32,2,2],0,{nb:1,m:'fL0',tp:['x',0.35,0.4,0,0]}],['fR1','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,30,1,1],[0,0,-0.44],{nb:1,m:'fL1',tp:['x',0.3,0.3,0,0]}],['fR2','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,38,1,1],[0,0,-0.942],{nb:1,m:'fL2',tp:['x',0.3,0.3,0,0]}],['fR3','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,40,1,1],[0,0,-1.351],{nb:1,m:'fL3',tp:['x',0.3,0.3,0,0]}],['fR4','wingR2',[0.5,3.5,0],[0,-0.5,-0.5,36,1,1],[0,0,-1.571],{nb:1,m:'fL4',tp:['x',0.3,0.3,0,0]}]],
-      coats:[[{hide:[36,21,19],dark:[18,11,11],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],ivory:[206,192,164],memb:[74,22,18]},1]],
+      coats:[[{hide:[36,21,19],dark:[18,11,11],fire:[255,130,30],hot:[255,214,110],white:[255,248,214],bone:[46,34,30],ivory:[206,192,164],memb:[74,22,18],
+        eye:[255,238,160],rib:[200,70,20],edge:[255,96,26],fl:[[255,196,90],[255,150,44],[240,90,24],[190,38,18]],skull:[30,18,16],whip:[255,120,30],blade:[255,170,50]},1]], // (more coats: ember-models.js)
       paint(P,c){
         P.coat(['body','chest','neck','legL','shinL','footL','armL','foreL','handL','tail','tail2'],c.hide,12);
         P.cracks(['legL','shinL','armL','foreL','tail'],c.fire,0.014);P.cracks(['body','chest','neck'],c.fire,0.012);
         // the burning heart in the chest, a few ribs glowing through the hide
         P.glowRect('chest','F',7,3,4,4,c.fire);P.glowRect('chest','F',8,4,2,2,c.hot);P.glowRect('chest','T',8,8,2,3,c.fire);
-        for(let k=0;k<3;k++){const t=2+k*4;P.glowRect('chest','F',3,t,3,1,[200,70,20]);P.glowRect('chest','F',12,t,3,1,[200,70,20]);}
+        for(let k=0;k<3;k++){const t=2+k*4;P.glowRect('chest','F',3,t,3,1,c.rib);P.glowRect('chest','F',12,t,3,1,c.rib);}
         P.glowRect('body','F',5,2,2,9,c.fire);P.glowRect('body','F',5,4,1,5,c.hot);
         // the skull: near black, a seam of fire along the muzzle, the brow darker still; burning slits for eyes; the maw on fire
-        P.coat(['head','jaw'],[30,18,16],8);P.cracks(['head'],c.fire,0.02);P.coat(['browL'],c.dark,4);P.glowFaces(['eyeL'],[255,238,160]);
+        P.coat(['head','jaw'],c.skull,8);P.cracks(['head'],c.fire,0.02);P.coat(['browL'],c.dark,4);P.glowFaces(['eyeL'],c.eye);
         P.glowRect('head','D',1,2,6,7,c.fire);P.glowRect('jaw','T',1,1,5,7,c.hot);P.glowRect('jaw','F',1,0,5,1,c.fire);P.glow('head','F',1,3,c.fire);P.glow('head','F',6,3,c.fire);
         P.coat(['fangL','chkL','clL1','toeL1','spurL','elbL'],c.ivory,10);P.rows('chkL',['L','R','T','D'],0,1,c.bone);
         P.coat(['hornL'],[72,58,50],10);P.coat(['tipL'],[46,38,34],8);P.coat(['tip2L'],[22,18,18],4);
@@ -119,23 +120,23 @@
         P.rows('handL',['L','F','R','B'],3,4,c.bone);P.face('footL','D',c.dark,4);
         // the flames: crossed sheets, white at the root to red at the tips, cut into tongues
         const flame=(w,h,salt)=>(a,b)=>{const top=h*(0.35+0.65*Math.abs(Math.sin(a*0.85+salt)*Math.cos(a*0.37+salt*2)));const up=h-1-b;if(up>top)return 'cut';const q=up/Math.max(1,top);
-          return q<0.25?[255,196,90,200]:q<0.55?[255,150,44,200]:q<0.8?[240,90,24,200]:[190,38,18,200];};
+          const L=c.fl[q<0.25?0:q<0.55?1:q<0.8?2:3];return [L[0],L[1],L[2],200];};
         P.sheet('maneA','z',flame(20,16,1.3));P.sheet('maneB','x',flame(16,16,2.9));P.sheet('crest','x',(a,b)=>{const top=14*(0.3+0.7*Math.abs(Math.sin(a*1.3+0.7)));return b<14-top?'cut':flame(7,14,4.1)(a,b);});
         // the blade burns, the whip is fire, the tail ends in flame
-        P.glowFaces(['wpn'],[255,170,50]);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',4,0,2,2,c.fire);
-        P.glowFaces(['whip1'],[255,120,30]);P.glowRect('tail2','L',8,0,4,2,c.fire);P.glowRect('tail2','R',0,0,4,2,c.fire);P.glowRect('tail2','B',0,0,2,2,c.hot);
+        P.glowFaces(['wpn'],c.blade);P.spots('wpn',['L','R','T'],c.white,0.2);P.rect('wpn','L',0,0,5,3,[34,26,24]);P.rect('wpn','R',29,0,5,3,[34,26,24]);P.coat(['guard'],[34,26,24],6);P.glowRect('guard','F',4,0,2,2,c.fire);
+        P.glowFaces(['whip1'],c.whip);P.glowRect('tail2','L',8,0,4,2,c.fire);P.glowRect('tail2','R',0,0,4,2,c.fire);P.glowRect('tail2','B',0,0,2,2,c.hot);
         // the wings: bones of their own over a dark membrane hung in scallops between the fingers, torn here and there, the torn
         // edges smouldering. Each side is painted in its own frame (the wrist is at the far end of the left wing's texture)
         const H=(a,b,k)=>((Math.sin(a*12.9898+b*78.233+k)*43758.5453)%1+1)%1;
         const inner=(a,b)=>{const w=28,body=a/(w-1),lim=33-10*body-5*Math.abs(Math.sin(body*Math.PI*2));
           if(b>lim)return 'cut';if(b>lim-6&&H(a>>1,b>>1,3)<0.12)return 'cut';if(b<=1)return c.bone;if(a>w-3)return c.bone;
-          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [255,96,26,200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];};
+          if(b>lim-1.3||(b>lim-7&&H(a>>1,(b+1)>>1,3)<0.12))return [c.edge[0],c.edge[1],c.edge[2],200];return [c.memb[0]-b*0.8,c.memb[1]-b*0.3,c.memb[2]-b*0.2];};
         const FING=[[Math.PI*1.0,32],[Math.PI*0.86,30],[Math.PI*0.7,38],[Math.PI*0.57,40],[Math.PI*0.5,36]];
         const outer=(a,b)=>{const dx=a-31,dy=b,r=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);if(ang>Math.PI+0.01||ang<FING[FING.length-1][0]-0.01)return 'cut';
           let lim=0,bone=false;for(let k=0;k+1<FING.length;k++){const [a0,l0]=FING[k],[a1,l1]=FING[k+1];if(ang<=a0+0.001&&ang>=a1-0.001){const u=(a0-ang)/(a0-a1);lim=l0+(l1-l0)*u-7*Math.sin(Math.PI*u);}}
           for(const [fa,fl] of FING)if(r<=fl+0.5&&Math.abs(Math.sin(ang-fa))*r<0.8)bone=true;
           if(bone)return r<4?c.ivory:c.bone;if(r>lim)return 'cut';if(r>lim-7&&H(a>>1,b>>1,5)<0.14)return 'cut';
-          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [255,96,26,200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];};
+          if(r>lim-1.3||(r>lim-8&&(H((a+1)>>1,b>>1,5)<0.14||H(a>>1,(b+1)>>1,5)<0.14)))return [c.edge[0],c.edge[1],c.edge[2],200];const k2=Math.min(1,r/40);return [c.memb[0]-24*k2,c.memb[1]-10*k2,c.memb[2]-8*k2];};
         P.sheet('wingL','z',inner);P.sheet('wingR','z',(a,b)=>inner(27-a,b));P.sheet('wingL2','z',outer);P.sheet('wingR2','z',(a,b)=>outer(31-a,b));
         P.coat(['wbL','fL0','fL1','fL2','fL3','fL4'],c.bone,8);P.coat(['wcL'],c.ivory,8);}}
   });

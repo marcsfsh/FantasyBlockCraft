@@ -15,7 +15,7 @@ const FORT_P={
   // the grandest, for the great volcanoes of the sunken wastes (D-055), and a narrower hall for the smaller ones
   throneL:{gw:9,gh:26,cw:10,ch:28,hw:40,Lhs:[84,72,60],Hmin:34,Hmax:50,tv:28,ts:5,th:58,fw:36,fh:50,tz:36,td:40,pv:24,ps:3,pg:12,lv:14,dw:20,steps:6,k:3,bw:4},
   throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:27,td:30,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
-const FORT_C=new Map();
+const FORT_C=new Map(),FORT_LORD=21; // (an Ember Throne's gate and way in leave this much clear over the middle of the floor for its lord, D-074)
 // the four quarters of a volcano, the one farthest from its flows (old and new) and its lesser cones first: a fortress faces the
 // first where it fits (pure, without the ground, so the gullies' lava can keep off it, D-064)
 function fortQuarters(v){const qs=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
@@ -168,7 +168,7 @@ function fortFacade(F,d,X,Z,u,v,av){const P=F.P,k=P.k,Fy=F.Fy,S=(y,id)=>PW(X,y,Z
   const topY=Fy+P.fh+Math.max(0,Math.round((d.pw-av)*0.6)),rel=(av,dy,dA,ad,y)=>dy<=2*k+2||y>=topY-1||ad<=ring+1.5||(av<=7*k+2&&dA>=-2&&dA<=yb(av)+k+1)||(dy>=d.sG-1&&dy<=d.sG+k)?'':fortPanel(k,av,dy-2*k-2);
   if(u>=0&&u<=2&&av<=P.fw){
     for(let y=Fy-1;y<=topY;y++){const dy=y-Fy,ad=archD(av,dy,P.gw,d.sG,d.rG);let id;
-      if(dy>=0&&ad<=0.45){const tl=av>=P.gw?0:av%3===1?2*k:av%3===2?k:0;id=u===0&&dy>d.sG&&ad>=-tl?OBSID:u===1&&ad>-3*k?GRATE:AIR;}
+      if(dy>=0&&ad<=0.45){const tl=av>=P.gw?0:av%3===1?2*k:av%3===2?k:0;id=u===0&&dy>d.sG&&ad>=-tl?OBSID:u===1&&ad>-3*k&&(!F.great||dy>=FORT_LORD)?GRATE:AIR;}
       else if(dy>=0&&ad<=ring){const ri=Math.min(2,Math.floor((ad-0.45)/d.kr));id=u===0&&ri===0?AIR:[OBSBRICK,EMBRICK,BASCARVE][ri];}
       else{const dA=y-apex;
         if(u===0&&av>=Math.ceil(1.5*k)&&av<=Math.floor(5.5*k)&&dA>=yb(av)-1-k+(av>4.5*k?1:0)&&dA<=yb(av)-1)id=MAGMA; // the eyes
@@ -227,7 +227,7 @@ function fortWay(F,d,X,Z,u,v,av){const P=F.P,k=P.k,fl=fortFloor(F,u),S=(y,id)=>P
       if(u===F.U1-3&&dy>=P.ch-2*k)id=GRATE;
       else if(rib&&ad>0.45-d.rt)id=dy>d.sC?EMBRICK:BASPILLAR;
       else if(rib&&av===P.cw-d.rt&&!lava&&dy<=k+1)id=dy===k+1?BRAZIER:OBSBRICK;
-      else if(c===mb&&av===0&&((u-3)/d.rs|0)%2===0&&dy>d.sC)id=dy===d.sC+1?BRAZIER:CHAIN;
+      else if(c===mb&&av===0&&((u-3)/d.rs|0)%2===0&&dy>Math.max(d.sC,F.great?FORT_LORD-1:0))id=dy===Math.max(d.sC,F.great?FORT_LORD-1:0)+1?BRAZIER:CHAIN;
       else if(av===P.cw&&!rib&&(dy===d.sC||dy===0))id=OBSBRICK;}
     else if(ad<=1.45&&!rib&&av>(k>1?1:0)&&fortCoffer(av,dy,d.sC,d.RC,d.cC,u-3,mb,k))id=AIR;
     else if(ad<=2.45&&!rib&&av>(k>1?1:0)&&fortCofferMid(av,dy,d.sC,d.RC,d.cC,u-3,mb,k))id=fortCofferMid(av,dy,d.sC,d.RC,d.cC,u-3,mb,k);
