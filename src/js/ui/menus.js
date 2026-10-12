@@ -50,6 +50,7 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('warseg','war',v=>+v); // how great the armies at the gates of the wastes are (D-067)
 // creative tools in the pause menu (M5b): time of day, the weather now, going to coordinates, test structures
 $('invsearch').addEventListener('input',e=>filterBlocks(e.target.value));$('invsearch').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')closeInv();});
 $('todr').addEventListener('input',e=>{setTimeOfDay(e.target.value);[...$('timeseg').querySelectorAll('button')].forEach(b=>b.classList.remove('on'));});

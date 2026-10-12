@@ -184,6 +184,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg" id="timeseg">Time <button data-v="cycle">Cycle</button><button data-v="day">Day</button><button data-v="night">Night</button></div>
     <div class="seg" id="caveseg">Caves <button data-v="0">Dark</button><button data-v="1">Normal</button><button data-v="2">Bright</button></div>
     <div class="seg" id="wxseg">Weather <button data-v="1">On</button><button data-v="0">Off</button></div>
+    <div class="seg" id="warseg">Battles <button data-v="0">Small</button><button data-v="1">Large</button><button data-v="2">Massive</button></div>
     <label class="crea-only">Time of day <input type="range" id="todr" min="0" max="24" step="0.5" value="12"></label>
     <div class="seg crea-only" id="wxnow">Sky <button data-v="rain">Rain now</button><button data-v="clear">Clear now</button></div>
     <div class="seg crea-only" id="gotoseg">Go to <input id="gox" placeholder="X" size="6" autocomplete="off"><input id="goz" placeholder="Z" size="6" autocomplete="off"><input id="goy" placeholder="Y (optional)" size="9" autocomplete="off"><button id="gobtn">Go</button></div>
@@ -242,7 +243,7 @@ const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const SAVE_V=27,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
 // View distances [near fog, far fog]: Near, Normal, Far, and (with a wider loaded area, D-057) Farther and Farthest; none reaches
 // past VIEW_MAX, eight blocks short of the loaded area's edge (104 in the Near area, 152 in Far, 200 in Farthest)
 const VIEWS=[[34,70],[50,90],[60,98],[84,150],[110,200]],VIEW_MAX=W/2-8;
@@ -10077,6 +10078,20 @@ function amShadowMat(){
   return new THREE.MeshBasicMaterial({map:amShadowTex,transparent:true,depthWrite:false,opacity:0.35,color:0x000000,polygonOffset:true,polygonOffsetFactor:-2});
 }
 const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
+// ---- One draw for a model seen from afar (D-067): its parts at rest (or as `pose` sets them) baked into one geometry about
+// its root, cached per kind. Drawn with the creature's own material, it takes one draw call where the parts take one each
+const amMergeC=new Map();
+function amMerged(kind,pose){
+  if(amMergeC.has(kind))return amMergeC.get(kind);
+  const M=amBuild(kind,0,{}),root=M.root,pos=[],nor=[],uv=[],idx=[],nm=new THREE.Matrix3(),v=new THREE.Vector3();
+  if(pose)pose(M.parts);root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);root.updateMatrixWorld(true);
+  root.traverse(o=>{if(!o.isMesh)return;const g=o.geometry,P=g.attributes.position,N=g.attributes.normal,T=g.attributes.uv,X=g.index,k=pos.length/3;nm.getNormalMatrix(o.matrixWorld);
+    for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i).applyMatrix4(o.matrixWorld);pos.push(v.x,v.y,v.z);v.fromBufferAttribute(N,i).applyMatrix3(nm).normalize();nor.push(v.x,v.y,v.z);uv.push(T.getX(i),T.getY(i));}
+    for(let i=0;i<X.count;i++)idx.push(k+X.getX(i));});
+  M.mat.dispose();M.shadow.material.dispose();
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeBoundingSphere();amMergeC.set(kind,g);return g;
+}
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;
@@ -11394,7 +11409,7 @@ const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],mark
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
     e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
-const foes=[],shots=[],foeSpots=new Map(),TFO={};let foeT=0,foeId=1,foeClock=0,foeSnd=0;
+const foes=[],shots=[],foeSpots=new Map(),TFO={},foeGrid=new Map();let foeT=0,foeId=1,foeClock=0,foeSnd=0;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
 entityKind({name:'foes',list:foes,update:dt=>updFoes(dt),persist:true,shift:(dx,dz)=>{for(const f of foes){f.x-=dx;f.z-=dz;f.hx-=dx;f.hz-=dz;if(f.tx!==undefined){f.tx-=dx;f.tz-=dz;}}
   for(const s of shots){s.x-=dx;s.z-=dz;}}});
@@ -11409,7 +11424,7 @@ function addFoe(kind,x,y,z,o){
     ph:Math.random()*6,amp:0,atk:0,atkK:'',atkT:0,foe:null,eseen:0,scanT:Math.random()*0.5,shotT:1+Math.random()*2,whipT:3,seen:0,losT:0,vis:false,lk:0,lkT:0,hurt:0,ct:4+Math.random()*10,lt:0,eL:1,eB:0,det:0,detT:0,ci:ci,m:m},o||{});
   f.hd=f.yaw;if(!f.grp)f.grp=f.id;foes.push(f);placeFoe(f,0);return f;
 }
-function removeFoe(f){f.gone=1;scene.remove(f.m.grp);scene.remove(f.m.shadow);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
+function removeFoe(f){f.gone=1;scene.remove(f.m.grp);scene.remove(f.m.shadow);if(f.m.fg)scene.remove(f.m.fg);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
 // a group of `n` from a place's table around (x,z) near height y, sharing a group and a home; spread within r
 function spawnGroup(table,n,x,y,z,r,o){
   let lead=null;const out=[];
@@ -11584,7 +11599,7 @@ function foeRally(f,E){
 // unless it already fights; slain, it falls
 function foeHurtFoe(g,n,by,ux,uz,kb,blow){
   if(g.dead)return;const G=FOES[g.kind];
-  if(blow&&G.block&&g.st!=='sleep'&&Math.abs(angTo(g.yaw,Math.atan2(by.x-g.x,by.z-g.z)))<1.05){n*=1-G.block;burst(0.12,'bandpass',2600,4,0.2,0,[g.x,g.y+1.2,g.z]);}
+  if(blow&&G.block&&g.st!=='sleep'&&Math.abs(angTo(g.yaw,Math.atan2(by.x-g.x,by.z-g.z)))<1.05){n*=1-G.block;if(foeHear([g.x,g.y,g.z]))burst(0.12,'bandpass',2600,4,0.2,0,[g.x,g.y+1.2,g.z]);}
   g.hp-=n;g.hurt=1;g.kvx+=ux*kb*G.mass;g.kvz+=uz*kb*G.mass;if(blow&&G.mass>0.3)g.vy=Math.max(g.vy,2);
   for(let k=0;k<4;k++)spawnP(g.x,g.y+g.m.box[4]*0.6,g.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,g.kind==='ember'?[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
   if(g.st==='sleep')g.st='idle';
@@ -11620,13 +11635,18 @@ function stepFoe(f,dt){
   let want=0,face=false;
   switch(f.st){
     case 'sleep':break;
-    case 'idle':if(f.back&&f.backT&&foeClock>f.backT){f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
+    case 'idle':if(f.waitA){if(warGo(f)){f.st='return';f.t=0;f.hex=false;}else f.hd=f.waitA.A.face;break;} // in the ranks, waiting for the horns (D-067)
+      if(f.back&&f.backT&&foeClock>f.backT){f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
       if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
       if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
     case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&pdp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
     case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);
-      if(d<2.5||f.t<-30){if(f.way&&f.way.length){const w=f.way.shift();f.hx=w[0]-OX+((f.id%3)-1)*0.8;f.hz=w[1]-OZ+(f.id%2?0.5:-0.5);f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/F.walk-20);} // a leg's time: some 30 s over its walk // a party's next waypoint (D-067)
-        else{f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+20+Math.random()*25;}}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
+      // a party's or an army's next waypoint (D-067): a place in the ranks is reached exactly; a mark there waits for the horns
+      if(f.war&&f.stuck>15&&pdp>24){const ty=foeStand(f.hx,f.y+3,f.hz,F.tall||2);if(ty>0&&Math.abs(ty-f.y)<6){f.x=f.hx;f.z=f.hz;f.y=f.gy=ty;f.stuck=0;}else{removeFoe(f);return;}} // a straggler stuck out of sight finds its way (D-067)
+      if(f.t<-30&&d>=2.5&&f.wp&&(f.retry||0)<2){f.retry=(f.retry||0)+1;f.hx=f.wp[0]-OX;f.hz=f.wp[1]-OZ;f.t=Math.min(20,d/F.walk);} // a leg overrun: once more straight at the waypoint itself
+      else if(d<(f.hex?1.1:2.5)||f.t<-30){if(f.waitA&&!warGo(f)){f.st='idle';f.t=1;}
+        else if(f.way&&f.way.length){const w=f.way.shift();if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{f.waitA=null;warAim(f,w);f.wp=w;f.retry=0;f.rdS=0;f.rdN=0;f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/(f.pace||F.walk)-20);}} // a leg's time: some 30 s over its walk
+        else{f.waitA=null;f.hex=false;f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+(f.holdT||20)+Math.random()*25;}}else{f.hdW=Math.atan2(tdx,tdz);f.hd=f.hdW;if(f.rdT>0){f.rdT-=dt;f.hd+=f.rdA;}want=f.pace||F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{
       // against a creature its girth counts: the blow lands on its near side
@@ -11652,14 +11672,18 @@ function stepFoe(f,dt){
   const mx=Math.sin(f.yaw)*f.sp+f.kvx,mz=Math.cos(f.yaw)*f.sp+f.kvz;f.kvx*=Math.max(0,1-dt*5);f.kvz*=Math.max(0,1-dt*5);
   if(Math.abs(mx)+Math.abs(mz)>1e-4){const nx=f.x+mx*dt,nz=f.z+mz*dt,ml=Math.hypot(mx,mz),rr=Math.max(0.25,f.m.box[5]*0.8),fx=f.x+mx/ml*rr,fz=f.z+mz/ml*rr;
     const gn=foeStand(nx,f.y+0.05,nz,tall),gf=foeStand(fx,f.y+0.05,fz,tall),ok=!(f.leash&&Math.hypot(nx-f.hx,nz-f.hz)>f.leash)&&gn>0&&gf>0&&gn-f.y<=1.01&&gf-f.y<=1.01&&f.y-gn<=3&&f.y-gf<=3&&!foeWet(nx,gn,nz)&&!foeWet(fx,gf,fz);
-    if(ok){f.x=nx;f.z=nz;f.gy=gn;f.stuck=0;}else{f.sp*=0.2;f.kvx=f.kvz=0;f.stuck=(f.stuck||0)+dt;if(f.st==='walk'){f.st='idle';f.t=0.5;}else if(f.st==='chase'&&f.detT<=0){f.det=Math.random()<0.5?1:-1;f.detT=0.9;}
+    if(ok){f.x=nx;f.z=nz;f.gy=gn;f.stuck=0;f.rdB=0;}else{f.sp*=0.2;f.kvx=f.kvz=0;f.stuck=(f.stuck||0)+dt;if(f.st==='walk'){f.st='idle';f.t=0.5;}else if(f.st==='chase'&&f.detT<=0){f.det=Math.random()<0.5?1:-1;f.detT=0.9;}
+      else if(f.st==='return'&&f.way){f.rdB=(f.rdB||0)+dt;if(!(f.rdT>0)||f.rdB>0.4){f.rdB=0;f.rdN=Math.min(3,(f.rdN||0)+1); // round what blocks a marching party: to the open side, wider each time it fails
+        const W0=f.hdW!==undefined?f.hdW:f.yaw,A=[0.9,1.4,2][f.rdN-1],free=k=>foeStand(f.x+Math.sin(W0+k*A)*0.7,f.y+0.05,f.z+Math.cos(W0+k*A)*0.7,tall)>0&&foeStand(f.x+Math.sin(W0+k*A)*1.4,f.y+0.05,f.z+Math.cos(W0+k*A)*1.4,tall)>0;
+        const pf=f.rdS||(f.id%2?1:-1);f.rdS=free(pf)?pf:free(-pf)?-pf:-pf;f.rdA=f.rdS*A;f.rdT=0.9;}}
       else if(f.st==='flee'||f.st==='return')f.hd=f.yaw+(f.id%2?1:-1)*(1.4+Math.random());}}
   const gy=foeStand(f.x,f.y+0.05,f.z,tall);if(gy>0)f.gy=gy;
   if(f.vy>0||f.y>f.gy+0.001){f.vy-=24*dt;f.y+=f.vy*dt;if(f.y<=f.gy){f.y=f.gy;f.vy=0;}}else if(f.y<f.gy)f.y=Math.min(f.gy,f.y+5*dt);
   // room from each other and the player
   const r1=foeRad(f)+0.1;
   if(pdp<r1+0.3&&pdp>0.01){f.kvx-=pdx/pdp*dt*14;f.kvz-=pdz/pdp*dt*14;}
-  for(const g of foes){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e=Math.hypot(ex,ez),rr=r1+foeRad(g);if(e<rr&&e>0.01){f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}
+  const gx=Math.floor(f.x/4)+8,gz=Math.floor(f.z/4)+8; // (those about it, from the grid of four-block cells: an army is many)
+  for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=foeGrid.get((gx+i)*256+gz+j);if(c)for(const g of c){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e=Math.hypot(ex,ez),rr=r1+foeRad(g);if(e<rr&&e>0.01){f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}}
   // the head turns to whom it faces when near; now and then a call
   if(dp<12&&f.st!=='sleep'){f.lkT=Math.max(-0.8,Math.min(0.8,angTo(f.yaw,Math.atan2(dx,dz))));}else f.lkT*=0.9;
   f.ct-=dt;if(f.ct<=0){f.ct=(f.st==='chase'?3:8)+Math.random()*10;if(pdp<36&&f.st!=='sleep')foeCall(f,f.st==='chase'?'alert':'idle');}
@@ -11697,7 +11721,7 @@ function foeShoot(f,S,k){
   const mat=new THREE.MeshBasicMaterial({color:new THREE.Color(K.col[0],K.col[1],K.col[2]),transparent:!!K.glow,opacity:K.glow?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
   m.scale.x=m.scale.y=m.scale.z=K.sz;if(S.k==='arrow'){m.scale.z=0.9;m.scale.x=m.scale.y=0.07;}m.frustumCulled=false;scene.add(m);
   shots.push({x:ex,y:ey,z:ez,vx:vx,vy:vy,vz:vz,k:S.k,dmg:S.dmg,from:f,side:foeSide(f),atP:!FOES[f.kind].folk||folkWrath(f),cause:S.k==='stone'?'stone':S.k==='rock'?'rock':S.k==='arrow'?'arrow':FOES[f.kind].cause,life:4,m:m});
-  if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);
+  if(foeHear([ex,ey,ez])){if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);}
 }
 function updShots(dt){
   for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;s.vy-=K.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;
@@ -11742,18 +11766,25 @@ function placeFoe(f,dt){
   if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
   if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   if(F.mount&&!f.dead)riderPose(f,P,amp);
-  if(F.mount&&!f.dead&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.5){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<40&&AX&&settings.sound)burst(0.06,'bandpass',sp>3?520:760,3,0.22*(1-d/40),0,[f.x,f.y,f.z]);} // hoofbeats
+  if(F.mount&&!f.dead&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.5){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<40&&AX&&settings.sound&&foeHear([f.x,f.y,f.z]))burst(0.06,'bandpass',sp>3?520:760,3,0.22*(1-d/40),0,[f.x,f.y,f.z]);} // hoofbeats
   M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
+  const lod=f.kind!=='ember'&&Math.hypot(f.x-PL.x,f.z-PL.z)>(f.far?30:34);if(lod!==!!f.far)foeLod(f,lod);
+  if(f.far){const fm=M.fm;M.fg.position.set(f.x,f.y,f.z);M.fg.rotation.y=f.yaw;fm.position.copy(root.position);fm.position.y+=Math.abs(Math.sin(f.ph))*0.08*f.amp;fm.rotation.copy(root.rotation);fm.scale.copy(root.scale);}
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
   if(f.eLT!==undefined){f.eL+=(f.eLT-f.eL)*Math.min(1,dt*4);f.eB+=(f.eBT-f.eB)*Math.min(1,dt*4);}
   const u=M.mat.uniforms;u.eL.value=f.eL;u.eB.value=f.lordOf?Math.max(f.eB,0.55):f.eB;u.hurt.value=f.hurt;
   const sh=M.shadow,b=M.box,dist=Math.hypot(f.x-PL.x,f.z-PL.z);sh.position.set(f.x,f.gy+0.02,f.z);sh.rotation.y=f.yaw;sh.scale.set((b[3]-b[0])*1.2,1,(b[5]-b[2])*1.1);
   sh.material.opacity=f.dead>1?0:0.4*Math.max(0,1-(f.y-f.gy)/2)*Math.max(0,1-dist/Math.max(20,U.fogFar.value))*Math.min(1,f.eL*1.3+f.eB);
-  const vis=dist<U.fogFar.value+10;M.grp.visible=vis;sh.visible=vis&&sh.material.opacity>0.01;
+  const vis=dist<U.fogFar.value+10;M.grp.visible=vis;if(M.fg)M.fg.visible=vis;sh.visible=vis&&!f.far&&sh.material.opacity>0.01;
   // an Emberlord sheds embers
   if(f.kind==='ember'&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
 }
+// Seen from afar (D-067): beyond 34 blocks a foe or one of the folk is drawn as one mesh, its parts baked at rest (`amMerged`),
+// and its parts leave the scene (so their matrices are not worked out each frame); within 30 it is drawn whole again
+function foeLod(f,far){const M=f.m,F=FOES[f.kind];f.far=far;
+  if(far){if(!M.fg){M.fg=new THREE.Group();M.fm=new THREE.Mesh(amMerged(F.m,F.mount?P=>riderPose({ph:0,sp:0,atk:0,swing:0},P,0):null),M.mat);M.fm.frustumCulled=false;M.fg.add(M.fm);}scene.remove(M.grp);scene.add(M.fg);}
+  else{scene.remove(M.fg);scene.add(M.grp);}}
 // A horseman's gait (D-061): at a walk the horse's legs move in diagonal pairs, at the gallop the forelegs reach together and the
 // hind legs drive under, its body rocking and its neck nodding; the rider rises with each stride, the shield arm and the rein
 // hand steady, the spear arm still but for its blow
@@ -11794,14 +11825,19 @@ function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
   for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
+  foeGrid.clear();for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);}
+  foeDin=Math.min(18,foeDin+dt*12);
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
     if(f.dead>2.6){removeFoe(f);continue;}
     if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(FOES[f.kind].folk?(f.spot?72:96):f.spot?130:96)){removeFoe(f);continue;}
-    stepFoe(f,dt);placeFoe(f,dt);}
+    stepFoe(f,dt);if(!f.gone)placeFoe(f,dt);}
 }
 // ---- Calls: each kind's own (synthesized like every sound in the game), from where it stands
+// a battle's din (D-067): of the calls, blows and shots of many, some eighteen a second are heard, the near ones always, none beyond 64
+let foeDin=18;
+function foeHear(at){const d=Math.hypot(at[0]-PL.x,at[2]-PL.z);if(d>64)return false;if(d<10)return true;if(foeDin<1)return false;foeDin--;return true;}
 function foeCall(f,what){
-  if(!AX||!settings.sound)return;const at=[f.x,f.y+f.m.box[4]*0.85,f.z],k=f.kind,p=what==='hurt'?1.2:what==='alert'?1.1:1;
+  if(!AX||!settings.sound)return;const at=[f.x,f.y+f.m.box[4]*0.85,f.z],k=f.kind,p=what==='hurt'?1.2:what==='alert'?1.1:1;if(!foeHear(at))return;
   if(k[0]==='g'){if(what==='alert'||what==='hurt')for(let i=0;i<3;i++)voice(700*p+Math.random()*200,900*p,0.12,0.07,{type:'square',form:1400,q:2,delay:i*0.11},at);
     else for(let i=0;i<2;i++)voice(520+Math.random()*160,640,0.14,0.05,{form:1100,q:2,delay:i*0.18,vib:14,vd:0.1},at);}
   else if(k==='troll'){voice(110*p,70,what==='alert'?1.2:0.7,0.12,{form:240,q:1.2,vib:4,vd:0.06},at);if(what==='blow')burst(0.4,'lowpass',160,0.8,0.3,0.1,at);}
@@ -11898,17 +11934,145 @@ function warScout(P){
   if(Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
   else{const s=wgSite(P),r=warRoute(P,false);r.push(siteXZ(s,P.uC0+40,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)),siteXZ(s,P.uC0+160,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)));
     const g=warParty(P,'oscout',3,r);if(g)toast('Goblin scouts creep out along the pass');}}
-function warArmy(P){
-  if(Math.random()<0.5){let any=null;for(const fp of ['r_','d_','e_']){const g=warParty(P,fp+'host',4+Math.floor(Math.random()*2),warRoute(P,true),warFolk(P,fp,1));if(g&&!any)any=g;}
-    if(any){toast('The allied hosts march on the gate: men, elves and dwarves together');foeCall(any[0],'alert');}}
-  else{const r=warRoute(P,false),g=warParty(P,'oarmy',8+Math.floor(Math.random()*3),r,{lead:'ochief',back:1});if(g){warParty(P,'band',1,r,{lead:'troll',back:1});warParty(P,'oscout',3,r);toast('A warhost pours out of '+P.name.replace(/^The /,'the '));foeCall(g[0],'alert');}}}
-// every few seconds near a gate: the parties' timers run down, and one is sent when its time comes (at most 26 marching at once)
+// ---- Armies (D-067): an invasion is massive. An army is a column of companies (`warAllied`, `warOrcs`: some 116 of the hosts
+// or 114 of the wastes at the "massive" size of the war setting, settings.war). The allies muster in the camp when the player is
+// in it: the companies march out of their quarters by the streets to the muster field inside the great gate or to the square
+// before the pavilion, whichever is nearer, and stand there in ranks by people (men, dwarves, elves) facing the gate; when all
+// are in (or a while has passed) the horns sound and they march out rank by rank, through the lines and the gate's gap, half to
+// storm the Gatewarden's Camp and half on down the Long Descent; they hold a while, then march back. The orcs come up the Long
+// Descent company by company when the player is in the yard or on the road, mass in ranks before the gate and charge, half
+// against the siege lines and the engines, half on into the Leaguer to its square. Elsewhere the companies come one after
+// another along the army's way from as near as is out of the way (`warEntry`). The other side calls defenders to its lines
+// (`warDefend`). An army's soldiers march at one pace (`f.pace`) in files about its way (`f.fo`, `warAim`).
+const WAR_SIZE=[0.35,0.65,1],warArmies=[];
+const warSz=()=>WAR_SIZE[settings.war>=0&&settings.war<3?settings.war:2],warCap=()=>Math.round(60+110*warSz());
+const warLive=()=>{let n=0;for(const f of foes)if(f.war&&!f.dead)n++;return n;};
+// the next waypoint, the file's offset across the leg (an exact point, such as a place in the ranks, has none)
+function warAim(f,w){const wx=w[0]-OX,wz=w[1]-OZ;f.hex=!!w[2];if(w[2]||f.fo===undefined){f.hx=wx+(w[2]?0:((f.id%3)-1)*0.8);f.hz=wz+(w[2]?0:(f.id%2?0.5:-0.5));return;}
+  const lx=wx-f.x,lz=wz-f.z,l=Math.hypot(lx,lz)||1;f.hx=wx-lz/l*f.fo;f.hz=wz+lx/l*f.fo;}
+// may a soldier waiting in the ranks march? (its rank's turn after the horns)
+const warGo=f=>{const w=f.waitA,A=w.A;return !A.hold&&A.go&&foeClock>=A.goT+w.r*A.gap;};
+// a point (world) a company may form at: in the loaded world, generated, lo to hi blocks from the player; its ground, or -1
+function warAt(X,Z,lo,hi){const x=X-OX,z=Z-OZ,bx=Math.floor(x),bz=Math.floor(z),d=Math.hypot(x-PL.x,z-PL.z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX]||d<lo||d>hi)return -1;return ground[bx+W*bz];}
+// places in ranks for n on open ground: the front at (u0, v0) in the gate's frame, facing dir (+1 toward +u), files across; each
+// [X, Z, 1 (exact), its rank (counted from r0)]
+function warRanks(s,u0,v0,dir,n,files,y,r0){
+  const out=[];for(let r=0;out.length<n&&r<40;r++)for(let c=0;c<files&&out.length<n;c++){const [X,Z]=siteXZ(s,u0-dir*r*1.8,v0+(c-(files-1)/2)*1.6),x=X+0.5-OX,z=Z+0.5-OZ;
+    if(x<2||z<2||x>=W-2||z>=D-2)continue;const yy=foeStand(x,y+1,z,2);if(yy<0||Math.abs(yy-y)>1||foeWet(x,yy,z))continue;out.push([X+0.5,Z+0.5,1,(r0||0)+r]);}
+  return out;}
+// the companies of an army of the hosts (def: the camp's defenders), each {t: table, fp, n, lead, g: its block in the ranks}
+function warAllied(def){const k=warSz(),C=[],add=(fp,n,lead,m,g)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:fp+'host',fp:fp,n:n,lead:lead,g:g});};
+  if(def){add('r_',8,'rcapt',2,0);add('d_',8,'dcapt',1,1);add('e_',7,'ecapt',1,2);}
+  else{add('r_',9,'rcapt',4,0);add('h_',6,'hcapt',2,0);add('d_',9,'dcapt',4,1);add('e_',8,'ecapt',3,2);add('w_',8,'wcapt',1,2);}
+  return C;}
+// the companies of a warhost of the wastes (def: the yard's defenders): orcs under warchiefs, goblins, trolls among them
+function warOrcs(def){const k=warSz(),C=[],add=(t,n,lead,m)=>{const q=Math.max(1,Math.round(m*k));for(let i=0;i<q;i++)C.push({t:t,n:n,lead:i<2?lead:null,g:0});};
+  if(def){add('band',8,'ochief',2);add('oscout',8,null,1);add('band',1,'troll',1);}
+  else{add('oarmy',10,'ochief',8);add('oscout',10,'gchief',3);add('band',1,'troll',4);
+    for(let i=C.length-1,j=0;i>0;i--)if(C[i].lead==='troll'){const t=C.splice(i,1)[0];C.splice(2+3*j++,0,t);}}
+  return C;}
+const warN=C=>C.reduce((a,c)=>a+c.n,0);
+// points in the gate's frame to world points (an exact one keeps its mark)
+const warW=(s,L)=>L.map(([u,v,e])=>{const [X,Z]=siteXZ(s,u,v);return e?[X+0.5,Z+0.5,1]:[X+0.5,Z+0.5];});
+// the road's line down from its head, every third point (some 18 blocks), as far as len along it
+function warRoad(P,len){const out=[];const p=P.ramp.pts;for(let i=3;i<p.length&&p[i][2]<=len;i+=3)out.push([p[i][0],p[i][1]]);return out;}
+// the allies' ways from the camp's great gate: to storm the orcs' camp (inA) or on down the road (inB); the orcs' ways out of the
+// gap: against the lines and the engines (outA) or on into the camp to its square (outB)
+function warWays(P){if(P.ways)return P.ways;const s=wgSite(P),w=[[P.uC0+16,0],[P.uC0+4,0],[P.uC0-8,0]].concat(wgWay(P).slice(1)),cs=P.cs,c0=P.uC0,ub=P.uL+12;
+  const inA=warW(s,w),inB=warW(s,w.slice(0,11).concat([[-26,-cs*3],[-26,P.side*36],[P.uY+8,P.side*36]])).concat(warRoad(P,170));
+  const out=w.slice(3,10).reverse(),outA=warW(s,out.concat([[ub+4,-12],[ub+8,-20],[ub+8,20]])),outB=warW(s,out.concat([[c0-8,0],[c0+4,0],[c0+16,0],[c0+28,0],[c0+60,3],[c0+100,4],[c0+116,4]]));
+  return P.ways={inA:inA,inB:inB,outA:outA,outB:outB};}
+// where the orcs come up the road from: the farthest point down it from 34 to 76 blocks from the player (its index), or -1
+function warUp(P){const p=P.ramp.pts;let best=-1;for(let i=3;i<p.length;i+=3)if(warAt(p[i][0],p[i][1],34,76)>=0)best=i;return best;}
+// the first point of a way from 30 to 85 from the player, loaded and generated (an army without a muster comes in there), or -1
+function warEntry(R){for(let k=0;k<R.length-1;k++)if(warAt(R[k][0],R[k][1],30,85)>=0)return k;return -1;}
+// Starts an army of the hosts (al) or of the wastes at the gate, and the other side's defenders
+function warArmy(P,al){
+  const s=wgSite(P),X=PL.x+OX,Z=PL.z+OZ,[pu,pv]=wgUV(P,X,Z),c0=P.uC0,g=P.hG,C=al?warAllied(false):warOrcs(false),N=warN(C);
+  const A={P:P,al:al,C:C,i:0,m:[],t0:foeClock,nt:foeClock+2,lt:foeClock,go:false,goT:0,gap:al?2.2:2.8,pace:al?1.45:1.7,N:N,face:0,mus:null};
+  if(al){// the muster: the field inside the great gate or the square, whichever is nearer the player, if within 80
+    const dF=Math.hypot(pu-(c0+28),pv),dS=Math.hypot(pu-(c0+120),pv),sq=dS<dF;
+    if(Math.min(dF,dS)<=80){const u0=c0+(sq?113:18),side=-P.cs;
+      // the ranks: the men (and riders) on their side, the dwarves in the middle, the elves on theirs; five files to each
+      for(let b=0;b<3;b++){A['rk'+b]=warRanks(s,u0,[side*9,0,-side*9][b],-1,warN(C.filter(c=>c.g===b)),5,g,b*12);A['ri'+b]=0;}
+      const [ax,az]=siteXZ(s,u0,0),[bx,bz]=siteXZ(s,u0-10,0);A.face=Math.atan2(bx-ax,bz-az);
+      A.mus={sq:sq,pre:sq?[[c0+112,4],[c0+104,4],[c0+100,4],[c0+60,3],[c0+28,0]]:[],home:sq?[]:warW(s,[[c0+28,0]])};}
+    toast(A.mus?'The horns of '+P.camp.replace(/^The /,'the ')+' sound: the hosts muster '+(A.mus.sq?'in the square':'on the field'):'The allied hosts come against the gate, '+N+' strong');}
+  else{// the orcs mass before the gate when the player is in the yard or on the road and the road is in reach
+    const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
+    if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
+    toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
+  warArmies.push(A);warHorn(A);warDefend(P,!al);return A;}
+// sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
+// way; null if it found no place to come from
+function warCompany(A){
+  const P=A.P,s=wgSite(P),c=A.C[A.i],W2=warWays(P),c0=P.uC0,side=-P.cs,odd=A.i%2;
+  if(A.mus&&A.al){// out of the quarters by the streets
+    const own=c.fp==='d_'?[[160,0],[180,0],[200,0],[125,side*40]]:c.fp==='e_'||c.fp==='w_'?[[125,-side*44],[125,-side*64],[125,-side*84],[80,0]]:[[125,side*50],[125,side*70],[125,side*90],[80,0]];
+    let at=null;for(const q of own.concat([[60,0],[100,0],[150,0],[40,0]])){const [X,Z]=siteXZ(s,c0+q[0],q[1]);if(warAt(X+0.5,Z+0.5,22,88)>=0){at=q;break;}}
+    if(!at)return null;const U=at[0],V=at[1],sg=Math.sign(V||side);
+    const path=U>154?[[c0+153,0],[c0+153,sg*17],[c0+126,sg*17]]:Math.abs(V)>5?[[c0+125,sg*22]]:[],cu=path.length?125:U;
+    if(!A.mus.sq){if(cu>=104)path.push([c0+125,4]);for(const q of [[112,4],[104,4],[100,4],[60,3],[46,0]])if(q[0]<cu)path.push([c0+q[0],q[1]]);}
+    const [X,Z]=siteXZ(s,c0+U,V);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),odd?W2.inB:W2.inA);}
+  if(A.mus){// up the Long Descent, to the head of the road, along the paved way behind the barricades and through their gap
+    const k=warUp(P);if(k<0)return null;const p=P.ramp.pts,up=[];for(let i=k-3;i>=3;i-=3)up.push([p[i][0],p[i][1]]);
+    return warSpawn(A,c,p[k][0],p[k][1],up.concat(warW(s,[[P.uY+8,P.side*36],[-40,P.side*37]])),odd?W2.outB:W2.outA);}
+  const route=A.al?(odd?W2.inB:W2.inA):(odd?W2.outB:W2.outA),k=warEntry(route);if(k<0)return null;
+  return warSpawn(A,c,route[k][0],route[k][1],[],route.slice(k+1),true);}
+// a company of the army at (X,Z): each to its place in the ranks (if the army musters), there to wait for the horns, then on along
+// the army's way; at its end it holds a while and marches back the way it came
+function warSpawn(A,c,X,Z,path,route,direct){
+  const P=A.P,y=warAt(X,Z,0,999);if(y<0)return null;
+  const grp=spawnGroup(c.t,c.n,X-OX,y,Z-OZ,4,A.al?{lead:c.lead,prov:'wg:'+P.id,site:wgSite(P)}:{lead:c.lead});if(!grp.length)return null;
+  const pre=A.mus&&A.mus.pre?warW(wgSite(P),A.mus.pre):[];
+  for(const f of grp){const F=FOES[f.kind];f.war=P.id;f.army=A;f.fo=((A.m.length%4)-1.5)*1.25;A.m.push(f);let way=path.slice();
+    if(A.mus&&!direct){const R=A['rk'+c.g],q=R&&A['ri'+c.g]<R.length?R[A['ri'+c.g]++]:null;if(q)way.push([q[0],q[1],1]);way.push({A:A,r:q?q[3]:36});if(!A.def)way=way.concat(pre);}
+    way=way.concat(route);f.way=way;if(!A.def){f.back=route.slice(0,-1).reverse().concat(pre.slice().reverse(),A.mus&&A.mus.home||[]);f.holdT=25;}
+    f.pace=Math.min(A.pace,F.walk*1.4);
+    const w=f.way.shift();if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{warAim(f,w);f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/F.walk-20);}}
+  return grp;}
+// the other side's defenders: to the nearest of their lines within 85 of the player, in ranks, there to hold
+function warDefend(P,al){
+  const s=wgSite(P),X=PL.x+OX,Z=PL.z+OZ,[pu,pv]=wgUV(P,X,Z),c0=P.uC0,g=P.hG,C=al?warAllied(true):warOrcs(true);
+  // the allies' lines: the siege lines, inside the camp's great gate, before the pavilion; the orcs': before their barricades
+  const L=al?[[P.uL+11,0],[c0+20,0],[c0+113,0]]:[[-15,-P.cs*2]];let best=null,bd=86;for(const q of L){const d=Math.hypot(pu-q[0],pv-q[1]);if(d<bd){bd=d;best=q;}}
+  if(!best)return null;const dir=al?-1:1;
+  const A={P:P,al:al,C:C,i:0,m:[],t0:foeClock,nt:foeClock+4,lt:foeClock,go:false,hold:true,gap:2,pace:1.5,N:warN(C),def:1,face:0,mus:{at:best,pre:[]},rk0:warRanks(s,best[0],best[1],dir,warN(C),12,g,0),ri0:0};
+  const [ax,az]=siteXZ(s,best[0],best[1]),[bx,bz]=siteXZ(s,best[0]+dir*10,best[1]);A.face=Math.atan2(bx-ax,bz-az);
+  for(const c of C)c.g=0;warArmies.push(A);toast(al?'The Leaguer sounds the alarm: to the lines!':P.yard+' beats to arms');return A;}
+// a defenders' company: out of the camp's great gate, the muster field or the street (the allies), or out of the orcs' camp
+function warDefCompany(A){
+  const P=A.P,s=wgSite(P),c=A.C[A.i],c0=P.uC0,y=P.yc,cs=P.cs,to=A.mus.at;
+  const from=A.al?[[c0+28,0],[c0+60,3],[c0+4,0],[c0+100,4]]:[[y.ub-10,y.vm],[y.ua+12,y.vm]];let at=null;
+  for(const q of from){const [X,Z]=siteXZ(s,q[0],q[1]);if(warAt(X+0.5,Z+0.5,18,90)>=0){at=q;break;}}if(!at)return null;
+  const path=A.al?(to[0]<c0&&at[0]>c0?[[c0+4,0],[P.uL+14,0]]:to[0]>c0+60&&at[0]<c0+100?[[c0+100,4],[c0+112,4]]:[]):[[-26,y.vm],[-26,-cs*3],[-20,-cs*2]];
+  const [X,Z]=siteXZ(s,at[0],at[1]);return warSpawn(A,c,X+0.5,Z+0.5,warW(s,path),[]);}
+// horns from the camp (the men's silver horn, the dwarves' deep one, the elves' clear one), or the drums and war horns of the wastes
+function warHorn(A){if(!AX||!settings.sound)return;const s=wgSite(A.P),[X,Z]=A.al?siteXZ(s,A.P.uC0+60,0):siteXZ(s,-30,0),at=[X-OX,A.P.hG+4,Z-OZ];
+  if(A.al){tone(392,392,0.7,0.08,0,'triangle',at);tone(523,523,1.2,0.08,0.6,'triangle',at);tone(110,110,1.5,0.08,1.6,'sawtooth',at);tone(147,147,2,0.07,2.9,'triangle',at);tone(440,440,1.1,0.07,4.2,'triangle',at);tone(660,660,1.8,0.06,5.1,'triangle',at);}
+  else{AMB_EV.drums(at);tone(155,150,1.6,0.12,0.4,'sawtooth',at);tone(116,112,2,0.12,2.2,'sawtooth',at);}}
+// every second: each army sends its next company when its time comes (and the war is under its cap), and its ranks march when
+// all are in or a while has passed; an army is done when all of it has fallen or gone, or the player has left its gate
+function warMarch(){
+  const X=PL.x+OX,Z=PL.z+OZ,here=wasteGateAt(Math.floor(X),Math.floor(Z),200);
+  for(let a=warArmies.length-1;a>=0;a--){const A=warArmies[a];
+    if(A.P!==here)A.i=A.C.length;
+    if(A.i<A.C.length&&foeClock>=A.nt&&warLive()<warCap()){const g=A.def?warDefCompany(A):warCompany(A);A.i++;A.nt=foeClock+(A.mus&&!A.def?2.5:4);if(g)A.lt=foeClock;}
+    const live=A.m.filter(f=>!f.dead&&!f.gone);
+    if(A.mus&&!A.def&&!A.go){const ready=live.filter(f=>f.waitA&&f.st==='idle').length;
+      if(A.i>=A.C.length&&(ready>=live.length*0.85||foeClock>A.lt+(A.al?55:80))||foeClock>A.t0+200){A.go=true;A.goT=foeClock+3;warHorn(A);
+        if(live.length)toast(A.al?'The allied hosts march on '+A.P.name.replace(/^The /,'the ')+': men, elves and dwarves, '+live.length+' strong':'The warhost of '+A.P.name.replace(/^The /,'the ')+' charges, '+live.length+' strong');}}
+    if(A.i>=A.C.length&&!live.length)warArmies.splice(a,1);}}
+// every second the armies march (warMarch); every five near a gate the parties' timers run down, and one is sent when its time
+// comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts between while no army is out,
+// under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
-  let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:120+Math.random()*120};warS.set(P.id,st);}for(const k in st)st[k]=Math.max(-5,st[k]-5);
-  if(foes.filter(f=>f.war&&!f.dead).length>=26)return;
+  warMarch();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
+  let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
-  if(st.army<=0){st.army=240+Math.random()*180;st.raid=Math.max(st.raid,45);warArmy(P);}
+  const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-(busy?0:20))return;
+  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,60);st.scout=Math.max(st.scout,40);st.al=Math.random()<(st.al?0.3:0.7);warArmy(P,st.al);}
+  else if(busy)return;
   else if(st.raid<=0){st.raid=50+Math.random()*60;warRaid(P);}
   else if(st.scout<=0){st.scout=70+Math.random()*80;warScout(P);}}
 // ---- The engines (D-067): now and then the dwarves' trebuchets loft a stone over the wall into the yard, or the orcs' throwers a
@@ -12488,6 +12652,7 @@ drawView();
 function segBind(id,key,parse){const el=$(id),draw=()=>[...el.querySelectorAll('button')].forEach(b=>b.classList.toggle('on',parse(b.dataset.v)===settings[key]));
   el.addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v===undefined)return;settings[key]=parse(v);lsSet(SET_KEY,settings);draw();});draw();}
 segBind('timeseg','time',v=>v);
+segBind('warseg','war',v=>+v); // how great the armies at the gates of the wastes are (D-067)
 // creative tools in the pause menu (M5b): time of day, the weather now, going to coordinates, test structures
 $('invsearch').addEventListener('input',e=>filterBlocks(e.target.value));$('invsearch').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')closeInv();});
 $('todr').addEventListener('input',e=>{setTimeOfDay(e.target.value);[...$('timeseg').querySelectorAll('button')].forEach(b=>b.classList.remove('on'));});

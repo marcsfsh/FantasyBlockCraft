@@ -234,6 +234,20 @@ function amShadowMat(){
   return new THREE.MeshBasicMaterial({map:amShadowTex,transparent:true,depthWrite:false,opacity:0.35,color:0x000000,polygonOffset:true,polygonOffsetFactor:-2});
 }
 const amShadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
+// ---- One draw for a model seen from afar (D-067): its parts at rest (or as `pose` sets them) baked into one geometry about
+// its root, cached per kind. Drawn with the creature's own material, it takes one draw call where the parts take one each
+const amMergeC=new Map();
+function amMerged(kind,pose){
+  if(amMergeC.has(kind))return amMergeC.get(kind);
+  const M=amBuild(kind,0,{}),root=M.root,pos=[],nor=[],uv=[],idx=[],nm=new THREE.Matrix3(),v=new THREE.Vector3();
+  if(pose)pose(M.parts);root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);root.updateMatrixWorld(true);
+  root.traverse(o=>{if(!o.isMesh)return;const g=o.geometry,P=g.attributes.position,N=g.attributes.normal,T=g.attributes.uv,X=g.index,k=pos.length/3;nm.getNormalMatrix(o.matrixWorld);
+    for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i).applyMatrix4(o.matrixWorld);pos.push(v.x,v.y,v.z);v.fromBufferAttribute(N,i).applyMatrix3(nm).normalize();nor.push(v.x,v.y,v.z);uv.push(T.getX(i),T.getY(i));}
+    for(let i=0;i<X.count;i++)idx.push(k+X.getX(i));});
+  M.mat.dispose();M.shadow.material.dispose();
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeBoundingSphere();amMergeC.set(kind,g);return g;
+}
 function amBuild(kind,ci,flags){
   const K=AM_KINDS[kind],uv=amLayout(K),mat=amMaterial(amTexture(kind,ci,flags)),root=new THREE.Group(),parts={},dyn=[];
   for(const [n,par,piv,b,rot,o0] of K.parts){const o=o0||{};if(o.only&&!flags[o.only])continue;if(o.not&&flags[o.not])continue;

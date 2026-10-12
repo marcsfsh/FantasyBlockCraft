@@ -29,7 +29,7 @@ const WORLD=WIX.list.find(w=>w.id===WIX.active);
 const SAVE_V=27,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
 // View distances [near fog, far fog]: Near, Normal, Far, and (with a wider loaded area, D-057) Farther and Farthest; none reaches
 // past VIEW_MAX, eight blocks short of the loaded area's edge (104 in the Near area, 152 in Far, 200 in Farthest)
 const VIEWS=[[34,70],[50,90],[60,98],[84,150],[110,200]],VIEW_MAX=W/2-8;

@@ -4,7 +4,8 @@
 // to the floor, the camp of the allied hosts beyond the siege lines, three times the ground of the largest city of men. Built:
 // the gate between its towers, one leaf barred and propped, the other ajar with a way through by its edge, the dwarves' ram at
 // the barred leaf, the camp's pavilions, tents and banners of the three peoples, the orcs' camp in the yard; the places named.
-// The war: both sides peopled, parties marching at each other by waypoints and fighting, the player left alone in creative.
+// The war: both sides peopled, parties marching at each other by waypoints and fighting, the player left alone in creative; the
+// armies: the hosts mustering in ranks in the camp and marching out, the wastes' warhost massing in the yard and charging.
 // Last the Ember Stair inside each great volcano: from the Ember Throne's way in to a gallery over the crater, its cover of
 // rock, its halls and caverns built and named, the lava of their pools held, their foes.
 setMode('creative');
@@ -72,6 +73,25 @@ gen(...at(20,0));
   for(const f of foes)if(f.war&&f.dead)dead[FOES[f.kind].folk?0:1]++;
   info('in five minutes by the ram: marching',allies,'of the hosts and',orcs,'orcs and goblins; fighting seen',fights,'times; the player',hp);
   assert(allies>=8&&orcs>=6&&fights>20&&hp===20,'the two sides send their parties at each other and fight along the pass; the player in creative is left alone');}
+// the armies (the owner: "have armies muster in the camp. i want invasions to be massive"): the hosts muster in ranks on the
+// camp's field and march out through its great gate; the wastes' warhost comes up the Long Descent, masses before the gate and
+// charges; the yard calls its defenders; far off, a soldier is drawn as one mesh
+const army=(label,pu,pv,al,sec)=>{gen(...at(pu,pv));const [X,Z]=at(pu,pv);PL.x=X-OX+0.5;PL.z=Z-OZ+0.5;PL.y=ground[Math.floor(PL.x)+W*Math.floor(PL.z)]+1;playing=true;hp=20;
+  for(const f of [...foes])removeFoe(f);foeSpots.clear();warS.clear();warArmies.length=0;warClk=1e9;
+  const A=warArmy(P,al),R={A:A,ranks:0,go:-1,beyond:0,far:0,whole:0,one:0,max:0};
+  for(let k=0;k<sec;k++){run(1);const m=A.m.filter(f=>!f.dead&&!f.gone);R.max=Math.max(R.max,m.length);if(!A.go)R.ranks=Math.max(R.ranks,m.filter(f=>f.waitA&&f.st==='idle').length);else if(R.go<0)R.go=k+1;
+    for(const f of m){const u=wgUV(P,f.x+OX,f.z+OZ)[0];if(al?u<P.uC0-10:u>8)R.beyond++;}
+    if(k===sec-1)for(const f of foes){if(f.dead)continue;const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(f.far){R.far++;if(f.m.fm&&d>30)R.one++;}else if(d<=34)R.whole++;}} // (three.js is not here: the headless harness stands in for it; the screenshots show the look)
+  return R;};
+{const R=army('the hosts',P.uC0+40,12,true,150),A=R.A;
+  info('the hosts muster:',A.mus&&(A.mus.sq?'in the square':'on the field'),'; companies',A.C.length,'of',A.N,'(men, riders, dwarves, elves, wood elves) ; in their ranks before the horns',R.ranks,'of',R.max,'; they march at',R.go,'s ; soldier-seconds out beyond the great gate',R.beyond,'; the player',hp);
+  assert(A.mus&&!A.mus.sq&&A.N>=100&&R.max>=100&&R.ranks>=R.max*0.8&&R.go>0&&R.beyond>200&&hp===20,'a massive army of the hosts musters in ranks on the camp\'s field, then marches out through its great gate');
+  info('drawn far off as one mesh',R.one,'of',R.far,'; whole near by',R.whole);assert(R.far>10&&R.one===R.far&&R.whole>5,'soldiers far off are drawn as one mesh each, those near whole');}
+{const R=army('the warhost',-30,P.side*20,false,130),A=R.A;
+  info('the warhost:',A.mus&&A.mus.yard?'masses in the yard':'comes in','; companies',A.C.length,'of',A.N,'(orcs, goblins, trolls) ; massed before the charge',R.ranks,'of',R.max,'; it charges at',R.go,'s ; soldier-seconds out through the gate',R.beyond,'; the player',hp);
+  assert(A.mus&&A.mus.yard&&A.N>=100&&R.max>=100&&R.ranks>=R.max*0.75&&R.go>0&&R.beyond>200&&hp===20,'a massive warhost comes up the Long Descent, masses in ranks before the gate and charges out through it');}
+{for(const f of [...foes])removeFoe(f);foeSpots.clear();warArmies.length=0;const D0=warDefend(P,false);
+  info('the yard\'s defenders',D0?D0.N:0,'to their ranks before the gap',D0?D0.rk0.length:0);assert(D0&&D0.N>=20&&D0.rk0.length>=D0.N,'the yard calls its defenders to ranks before the gap when the hosts come');warArmies.length=0;for(const f of [...foes])removeFoe(f);}
 // the camp built, its quarters and names
 gen(...at(P.uC0+125,0));
 {const c=count([CANVAS,WOOLW,WOOLB,WOOLY,WOOLK,RBANNER,EVBANNER,DBANNER,DGRAN,STAKES,LOG,LANTERN,PAVING,EVROOF],0,W-1,0,D-1,P.hG-4,P.hG+30); // (the window holds the camp but for its edges)
