@@ -37,9 +37,7 @@ function warSwornSlain(f){const F=FOES[f.kind];if(F.folk||!warZone())return;SW.k
 function warSwornBattle(A){if(!SW.on||Math.hypot(...warMid(A).map((v,i)=>v-(i?PL.z:PL.x)))>150)return;SW.b++;warMerit(3);}
 // using one of the lords of the hosts: the oath, or (sworn) where the player stands
 function warOathAct(){const f=foeHit(4.6);if(!f||f.dead||!FOES[f.kind].folk||!(WAR_LORDS.has(f.kind)||f.hero)||!(f.site&&f.site.k==='wgate'||f.war))return false;
-  if(!SW.on){warSwear('oath');return true;}const r=SW.r,nx=WAR_RANKS[r+1];
-  showText(WAR_RANKS[r][0],'Sworn in hour '+(SW.t/3600).toFixed(1)+' of the war. Merit '+SW.m+(nx?' ('+nx[1]+' for '+nx[0]+')':'')+'; battles won beside the hosts '+SW.b+'; creatures of the wastes slain '+SW.k+'. '+
-    (WAR_SQUAD[r]?'Your '+(WAR_SQUAD[r]>4?'company':'squad')+' of '+WAR_SQUAD[r]+' follows you in the wastes and at the gates.':'From Sergeant a squad of the hosts will follow you.'));return true;}
+  if(!SW.on){warSwear('oath');return true;}warCouncil(f);return true;} // (the council of war, where the player stands and what the lords may do: W8d)
 // ---- the squad: as many of the hosts as the rank gives, following the player in the wastes and at the gates, each to a place
 // about them, fighting what comes near; the fallen replaced one at a time
 const WAR_SQ_T=['r_host','d_host','e_host','w_host','h_host'];

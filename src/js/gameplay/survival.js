@@ -10,7 +10,7 @@ function wearHeld(n){
   drawBar(true);
 }
 function hurt(n,cause){
-  if(!SURV()||dead||n<=0)return;if(equip.body&&ITEMS[equip.body.id].fireproof&&/^(lava|fire|breath|erupt|spirit)$/.test(cause))return; // the cloak of the Ember Wing (W7c)
+  if(!SURV()||dead||n<=0)return;if(equip.body&&ITEMS[equip.body.id].fireproof&&/^(lava|fire|breath|erupt|spirit|drake)$/.test(cause))return; // the cloak of the Ember Wing (W7c)
   if(hurtCD>0&&cause!=='fell'&&cause!=='blew up'&&cause!=='void')return;
   hp=Math.max(0,hp-n);hurtCD=0.5;exh+=0.1;shake=Math.max(shake,0.35);buzz(40);padRumble(0.7,0.5,220);
   tone(220,120,0.18,0.25);const f=$('hurt');f.style.opacity=0.55;setTimeout(()=>{f.style.opacity=0;},120);
@@ -259,7 +259,7 @@ function act(btn){
   const held=curId();
   if(held===FILLTOOL&&btn!==1){if(creativeOnly())return;const th=raycast(eyePos(),camDir(),64);if(th){fillCorner(btn===0?'a':'b',th);swing=1;}return;}
   if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
-  if(btn===2&&(morBind()||morHorn(held)||engAct()))return; // a wounded soldier's wounds bound, the Horn of the Hosts sounded (W8b), an engine of the war worked (W8c)
+  if(btn===2&&(morBind()||campSalvage()||morHorn(held)||engAct()))return; // a wounded soldier's wounds bound, the Horn of the Hosts sounded (W8b), an engine of the war worked (W8c)
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}

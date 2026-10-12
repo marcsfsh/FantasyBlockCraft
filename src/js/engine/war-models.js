@@ -215,6 +215,19 @@
     // the war hound of the hosts (W8b): a big hound of the camps in a coat of mail over its back, a spiked collar of leather
     whound:{scale:1.2,parts:[...K('hound').parts,['mail','body',[0,2,0],[-3.5,0,-4.5,7,5,9],0,{nb:1}],['coll','head',[0,1,-1],[-3,-1,-1,6,3,2],0,{head:1,nb:1}]],
       coats:[[{coat:[150,110,70],saddle:[90,64,44],chest:[210,190,160],nose:[30,26,24]},3],[{coat:[52,46,44],saddle:[36,32,30],chest:[176,128,80],nose:[24,20,20],tan:1},2],[{coat:[140,136,130],saddle:[104,100,96],chest:[186,182,176],nose:[30,28,28],shag:1},1]],
-      paint(P,c){K('hound').paint(P,c);mail(P,['mail']);P.rows('mail',['L','R','F','B'],0,1,[120,30,26]);P.coat(['coll'],[70,50,36],8);P.spots('coll',['L','R','F','B','T'],[200,200,206],0.3);}}
+      paint(P,c){K('hound').paint(P,c);mail(P,['mail']);P.rows('mail',['L','R','F','B'],0,1,[120,30,26]);P.coat(['coll'],[70,50,36],8);P.spots('coll',['L','R','F','B','T'],[200,200,206],0.3);}},
+    // the ash drake (W8e): a wyvern of the wastes, its hide grey as ash and cracked with fire, a long neck and a horned head, two
+    // great wings of bone and leathery membrane, two hind legs drawn up under it, a long tail; burning eyes
+    drake:{scale:1.6,tex:256,parts:[['body',null,[0,20,0],[-5,-4,-12,10,9,24]],['neck1','body',[0,2,12],[-3,-3,0,6,6,8],[-0.35,0,0]],['neck2','neck1',[0,0,8],[-2.5,-2.5,0,5,5,7],[-0.25,0,0]],
+        ['head','neck2',[0,0,7],[-3.5,-3,0,7,6,10],[0.5,0,0],{head:1}],['jaw','head',[0,-3,1],[-3,-2,0,6,2,8],[0.15,0,0],{head:1}],
+        ['hornL','head',[-2.5,3,1],[-0.5,0,-0.5,1,5,1],[-0.9,0,-0.2],{head:1,nb:1,tp:['y',0,0,0,0]}],['hornR','head',[2.5,3,1],[-0.5,0,-0.5,1,5,1],[-0.9,0,0.2],{head:1,nb:1,m:'hornL',tp:['y',0,0,0,0]}],
+        ['tail1','body',[0,0,-12],[-3,-3,-12,6,6,12],[0.1,0,0]],['tail2','tail1',[0,0,-12],[-2,-2,-12,4,4,12],[0.1,0,0]],['tail3','tail2',[0,0,-12],[-1,-1,-10,2,2,10],[0.05,0,0]],
+        ['wingL','body',[-5,4,6],[-24,-0.5,-12,24,1,14],[0,0,0.2],{nb:1}],['wingL2','wingL',[-24,0,0],[-20,-0.5,-14,20,1,16],[0,0,-0.15],{nb:1}],
+        ['wingR','body',[5,4,6],[0,-0.5,-12,24,1,14],[0,0,-0.2],{nb:1,m:'wingL'}],['wingR2','wingR',[24,0,0],[0,-0.5,-14,20,1,16],[0,0,0.15],{nb:1,m:'wingL2'}],
+        ['legL','body',[-4,-4,-6],[-1.5,-8,-1.5,3,8,3],[0.7,0,0]],['legR','body',[4,-4,-6],[-1.5,-8,-1.5,3,8,3],[0.7,0,0],{m:'legL'}],['spines','body',[0,5,0],[-0.5,0,-11,1,2,22],0,{nb:1}]],
+      coats:[[{hide:[70,66,68],belly:[96,84,78],wing:[92,70,64],ember:[255,110,30],eye:[255,170,40]},3],[{hide:[54,48,50],belly:[84,70,64],wing:[112,62,50],ember:[255,80,20],eye:[255,90,30]},2]],
+      paint(P,c){P.coat(['body','neck1','neck2','head','jaw','tail1','tail2','tail3','legL'],c.hide,16);P.belly('body',c.belly,2);P.cracks(['body','neck1','tail1','tail2'],c.ember,0.05);
+        P.map('wingL',ALL,(s,t,w,h)=>s%6===0||t===0?sh(c.hide,-10):sh(c.wing,hz(s,t,961)*12+(t/h)*-14));P.map('wingL2',ALL,(s,t,w,h)=>s%5===0||t===0?sh(c.hide,-10):sh(c.wing,hz(s,t,963)*12+(t/h)*-14));
+        P.coat(['spines','hornL'],[206,196,176],8);P.rows('legL',['L','F','R','B'],6,8,[40,36,34]);P.glowEyes('head',2,2,c.eye);P.rows('jaw',['F','L','R'],0,1,[230,220,200]);}}
   });
 })();

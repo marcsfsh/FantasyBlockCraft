@@ -118,7 +118,8 @@ function warArmy(P,al){
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
     const wf=WARS.get(P.id);if(near&&warUp(P)>=0&&!(wf&&wf.s>=2)){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
-  const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');warHeroLead(A);if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
+  const w=WARS.get(P.id);if(al&&w){if(warSup(w)<0.25){A.C=A.C.filter((c,i)=>i%3!==2);A.N=warN(A.C);}w.sp=Math.max(0,warSup(w)-0.05);} // (an army eats the stores; short of them, a smaller army: W8d)
+  warArmies.push(A);warHorn(A,'muster');warHeroLead(A);if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
 // way; null if it found no place to come from
 function warCompany(A){
@@ -185,7 +186,7 @@ function warMarch(){
     if(!A.def){if(!A.reach)A.reach=new Set();for(const f of live){const u=wgUV(A.P,f.x+OX,f.z+OZ)[0];if(A.al?u<-16:u>A.P.uL+8)A.reach.add(f.id);}}
     warBattle(A,live);
     if(A.mus&&!A.def&&!A.go){const ready=live.filter(f=>f.waitA&&f.st==='idle').length;
-      if(A.i>=A.C.length&&(ready>=live.length*0.85||foeClock>A.lt+(A.al?55:80))||foeClock>A.t0+200){A.go=true;A.goT=foeClock+3;warHorn(A,'advance');const [mx,mz]=warMid(A);setTimeout(()=>warCry(!A.al,16,mx,A.P.hG+2,mz),2500);
+      if(A.i>=A.C.length&&(ready>=live.length*0.85||foeClock>A.lt+(A.al?55:80))||foeClock>A.t0+200){A.go=true;A.goT=foeClock+3;warHorn(A,'advance');const [mx,mz]=warMid(A);if(!A.al)warChant(mx,A.P.hG+2,mz); /* (the orcs' chant: W8e) */setTimeout(()=>warCry(!A.al,16,mx,A.P.hG+2,mz),2500);
         if(live.length)toast(A.al?'The allied hosts march on '+A.P.name.replace(/^The /,'the ')+': men, elves and dwarves, '+live.length+' strong':'The warhost of '+A.P.name.replace(/^The /,'the ')+' charges, '+live.length+' strong');}}
     if(A.i>=A.C.length&&!live.length){warOutcome(A);warArmies.splice(a,1);}}}
 // ---- Battle (W1, Q152, Q153): an army (or the defenders) with four or more of the other side's soldiers within 50 of its middle is
@@ -237,7 +238,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P||!warAuto('a'))return; /* (stopped from the war console: D-077) */const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
+  warStateTick();warMarch();warSwornTick();warDeepTick();warCampTick();warSkyTick();drakeTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P||!warAuto('a'))return; /* (stopped from the war console: D-077) */const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
@@ -272,5 +273,5 @@ function warSplash(x,y,z,orc){
     const n=Math.round((orc?9:14)*(1-d/4)*(g.fm==='loose'?0.5:1)),G=FOES[g.kind];g.hp-=n;g.hurt=1;g.kvx+=dx/(d||1)*6*G.mass;g.kvz+=dz/(d||1)*6*G.mass;g.vy=Math.max(g.vy,3);if(g.st==='sleep')g.st='idle';
     if(g.hp<=0){g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;}}
   if(orc&&foeTarget()&&Math.hypot(PL.x-x,PL.z-z)<2.6&&Math.abs(PL.y-y)<3)foeHurtPlayer(6,'pot',(PL.x-x)||0.1,(PL.z-z)||0.1,4);
-  if(orc)warIgnite(warAtGate(x,z),x,y,z,1.8,8);} // a pot sets the works where it lands alight (W2)
+  if(orc&&!(raining&&rainAmt>0.3))warIgnite(warAtGate(x,z),x,y,z,1.8,8);} // (the rain puts the pots out: W8e) // a pot sets the works where it lands alight (W2)
 DEATH.pot='A burning pot from the orcs\' throwers fell on you';

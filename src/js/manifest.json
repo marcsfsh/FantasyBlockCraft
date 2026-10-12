@@ -358,6 +358,14 @@
       "about": "Engines in the player's hands and pitched battles (W8c, D-078): trebuchets and turned catapults worked by the player, the bolt thrower, named battles with both sides at once, the champions' duel, the battle told in the chronicle and on the map, the rider with the word, dust of the columns"
     },
     {
+      "path": "gameplay/war-camp.js",
+      "about": "The war's business (W8d, D-081): supplies and convoys, ambushes in the ash, the council of war, the captains' tasks and captives, the camp's life, salvage and standards brought back, the war record and titles (saved as wrc)"
+    },
+    {
+      "path": "gameplay/war-drakes.js",
+      "about": "The drakes and the night (W8e, D-082): ash drakes over the battles (circling, diving with fire, shot down, their scales), torches and fire arrows at night, shorter sight and reach in the dark, rain and fog, smoke columns over what burns, the orcs' war chant"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

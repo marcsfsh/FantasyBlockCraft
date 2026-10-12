@@ -28,6 +28,7 @@ function wcDo(what,arg){
       if(what==='last'){if(fallen)return 'The gate has fallen already';for(const [k] of WAR_EFF)if(warEff(w,k)<1)wcEffort(w,k,1);}
       const A=warArmy(P,what!=='warhost');if(!A.al)emberDrive(A);if(what==='last'){A.last=1;return 'The last assault: the hosts come against '+P.name.replace(/^The /,'the ')+' with all their strength';}
       return A.al?'The hosts march, '+A.N+' strong':'A warhost comes, '+A.N+' strong';}
+    case 'drakes':{const A=warArmies.find(A=>!A.al&&!A.def);const [cx,cz]=A?warMid(A):[PL.x,PL.z];drakeSpawn(cx,cz,A);drakeSpawn(cx,cz,A);return 'Ash drakes come over '+(A?'the warhost':'you');}
     case 'pitched':{if(!C.near||!P)return WC_NEED;if(E.fate)return 'The war is won: no army marches';const F=fieldBattle(P);return F?'':'No battle';}
     case 'party':case 'sally':{if(!C.near||!P)return WC_NEED;warRaid(P,what==='party'?'al':'o');return '';}
     case 'scouts':case 'goblins':{if(!C.near||!P)return WC_NEED;warScout(P,what==='scouts'?'al':'o');return '';}

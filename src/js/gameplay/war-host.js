@@ -66,13 +66,13 @@ function hostCome(H){
 function hostHere(H){const L=hostLive(H);if(!L.length)return;const [mx,mz]=hostMid(H),[fx,fz,ax,az]=hostAxes(H.face);let a=0,b=0;for(const f of L){a+=f.sa;b+=f.sb;}a/=L.length;b/=L.length;
   H.ax=mx+OX-fx*b-ax*a;H.az=mz+OZ-fz*b-az*a;}
 // the living of the other side about a host (each second), nearest its middle first; the charge picks among the nearest 300
-function hostFoes(H){const [cx,cz]=hostMid(H),out=[],ally=H.side==='al';for(const g of foes){if(g.dead||g.gone||g.show||g.wnd||!FOES[g.kind].folk===!ally||FOES[g.kind].civ&&!ally)continue;const d=Math.hypot(g.x-cx,g.z-cz);if(d<160){g.hd2=d;out.push(g);}}
+function hostFoes(H){const [cx,cz]=hostMid(H),out=[],ally=H.side==='al';for(const g of foes){if(g.dead||g.gone||g.show||g.wnd||g.cap||!FOES[g.kind].folk===!ally||FOES[g.kind].civ&&!ally)continue;const d=Math.hypot(g.x-cx,g.z-cz);if(d<160){g.hd2=d;out.push(g);}}
   out.sort((a,b)=>a.hd2-b.hd2);H.en=out;H.en0=out.slice(0,300);return out;}
 function hostMid(H){const L=hostLive(H);if(!L.length)return [H.ax-OX,H.az-OZ];let x=0,z=0;for(const f of L){x+=f.x;z+=f.z;}return [x/L.length,z/L.length];}
 const hostNearest=(f,L,r)=>{let best=null,bd=r;for(const g of L){if(g.dead||g.gone||g.wnd)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}return best;};
 // one soldier's turn: in the charge, at the nearest foe; else to its place in the ranks, there to stand facing the host's way
 function hostStep(H,f){
-  if(f.rout||f.wnd)return; // (running, or lying wounded: W8b)
+  if(f.rout||f.wnd||FOES[f.kind].fly)return; // (running, or lying wounded: W8b)
   if(H.cmd==='charge'){if(f.foe&&!f.foe.dead&&!f.foe.gone)return;const g=hostNearest(f,H.en0||H.en,180);if(g){f.foe=g;f.eseen=0;f.st='chase';f.seen=0;f.t=0;f.waitA=null;f.lineHold=null;return;}}
   if(f.st==='chase'||f.st==='flee')return;
   f.waitA=H.W;f.lineHold=H.FA;const F=FOES[f.kind],[tx,tz]=hostSlotAt(H,f),d=Math.hypot(tx-f.x,tz-f.z);
@@ -104,7 +104,7 @@ function hostOrder(H,cmd){
   else if(cmd==='follow'){H.fx=PL.x+OX;H.fz=PL.z+OZ;const pf=[-Math.sin(PL.yaw),-Math.cos(PL.yaw)];H.face=Math.atan2(pf[0],pf[1]);H.ax=H.fx-pf[0]*5;H.az=H.fz-pf[1]*5;}
   else if(cmd==='charge'){hostFoes(H);for(const f of hostLive(H)){f.waitA=null;f.lineHold=null;if(H.form==='wedge')f.chgT=foeClock+8;}H.ci=0;morCry(hostLive(H));}
   H.FA.face=H.face;H.cmd=cmd;H.FA.hold=cmd!=='charge';
-  const people=H.side==='al'?'r':'o',[mx,mz]=hostMid(H);warSignal(cmd==='charge'?'advance':cmd==='hold'?'muster':'advance',people,[mx,PL.y+3,mz]);if(cmd==='charge')setTimeout(()=>warCry(H.side==='o',18,mx,PL.y+2,mz),600);
+  const people=H.side==='al'?'r':'o',[mx,mz]=hostMid(H);warSignal(cmd==='charge'?'advance':cmd==='hold'?'muster':'advance',people,[mx,PL.y+3,mz]);if(cmd==='charge'){setTimeout(()=>warCry(H.side==='o',18,mx,PL.y+2,mz),600);if(H.side==='o')warChant(mx,PL.y+2,mz);}
   // every soldier at once (not a slice): the ranks move together
   for(const f of hostLive(H))hostStep(H,f);}
 // orders to the hosts the player leads (from the keys and the console)

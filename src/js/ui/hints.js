@@ -38,6 +38,7 @@ const HINTS={
   f_fhound:()=>'A flame hound, called by an Emberlord. Fast and fierce; strike it as it comes.',
   f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.',
   parry:()=>'Parried! A shield raised just before a blow turns it aside and staggers the one who struck. Held up, it catches arrows and much of every blow from the front.',
+  task:()=>'A mark of sparks rises over the place of your task. The war panel shows how long you have; the council (use a lord of the hosts) lets you give it up.',
   engine:()=>'Look where the shot should land: a mark of sparks shows it. Use ('+ctl('place')+') to loose; engineers of the hosts about the engine wind it back quicker. Walk away to leave it.',
   bolt:()=>'A bolt thrower takes a crossbow bolt for each great bolt it looses, through as many as four foes in a line.',
   bow:()=>'Hold '+ctl('place')+' to draw, let go to loose: the longer the draw, the farther and harder the arrow flies.',

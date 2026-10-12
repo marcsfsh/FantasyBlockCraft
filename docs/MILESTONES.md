@@ -359,15 +359,15 @@ Planned without questions, as asked (D-078 to D-082). Built in five stages, each
   - Major: **pitched battles**: both sides take the field at a gate at once under a name, the champions fight between the lines, and the battle is told (built at the gates rather than in the borderlands: D-080).
   - Average: **the bolt thrower** (a placeable engine); **battle reports** after every battle; **the champions' duel** before a charge or a field battle.
   - Minor: battle sites on the world map; messengers riding with news; dust raised by marching and charging columns.
-- **W8d The war's business** (strategy and logistics):
+- **W8d The war's business** (strategy and logistics; done in 0.48.0, D-081):
   - Major: **supply and convoys**: each war's supplies, convoys from the bordering realms to the Leaguer, ambushes on them; low supply slows the siege.
-  - Major: **the council of war**: in the Pavilion the lords hear the player's counsel and press the effort chosen.
-  - Major: **war missions**: the captains' tasks (slay a named warchief, burn a forge, free captives, hold the lines, carry a message, recover a fallen standard) with markers and rewards.
+  - Major: **the council of war**: using a lord of the hosts (sworn), the lords hear the player's counsel and press the effort chosen.
+  - Major: **war missions**: the captains' tasks (slay a named warchief, free captives, hold the stakes, carry word, take back a fallen standard, loose the engines into the yard) with marks and rewards.
   - Average: **captives** held in the wastes' camps and freed; **war camp life** in the Leaguer; **ambushes** by goblins hidden in the ash; **titles and the war record**.
   - Minor: battlefield salvage from the fallen of the wastes; recovered standards returned for merit.
-- **W8e The drakes and the night** (terror and atmosphere):
+- **W8e The drakes and the night** (terror and atmosphere; done in 0.48.0, D-082):
   - Major: **the ash drakes**: winged beasts of the wastes that circle over battles and dive to burn the lines, shot down by archers and bolt throwers, slain for their scales (drakescale mail).
   - Average: **night battles** (torches, shorter sight, fire arrows).
-  - Minor: smoke columns over burning works; rain dousing fire pots and fire arrows; fog and dust shortening the archers' range; the orcs' war chant before a charge.
+  - Minor: smoke columns over burning works; rain dousing fire pots and fire arrows; fog shortening the archers' range; the orcs' war chant before a charge.
 
 The order of E2 to E5 is not yet decided; confirm it before E1 ends.

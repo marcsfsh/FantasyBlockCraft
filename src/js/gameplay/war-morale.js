@@ -45,7 +45,7 @@ function morOne(f){
   const s=foeSd(f),o=1-s,cx=Math.floor(f.x/8)+16,cz=Math.floor(f.z/8)+16;let fr=0,en=0,ld=0,bg=0,dd=0;
   for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const k=(cx+i)*512+cz+j,c=MOR_C.get(k),d=MOR_D.get(k);if(c){fr+=c[s];en+=c[o];ld+=c[2+s];bg+=c[4+o];}if(d)dd+=d[s];}
   const hz=f.horn>foeClock;let T=0;
-  if(en&&!hz)T=(1-f.hp/f.mhp)*0.5+Math.min(0.6,dd*0.06)+(en>fr*1.3?Math.min(0.5,(en/(fr+1)-1.3)*0.25):0)+Math.min(0.35,bg*0.1)-Math.min(0.4,(ld-(morLead(f)&&!f.rout?1:0))*0.12)-(f.steady>foeClock?0.1:0)-(f.driven>foeClock?0.1:0);
+  if(en&&!hz)T=(f.war&&F.folk&&WARS.get(f.war)&&warSup(WARS.get(f.war))<0.25?0.1:0)+(1-f.hp/f.mhp)*0.5+Math.min(0.6,dd*0.06)+(en>fr*1.3?Math.min(0.5,(en/(fr+1)-1.3)*0.25):0)+Math.min(0.35,bg*0.1)-Math.min(0.4,(ld-(morLead(f)&&!f.rout?1:0))*0.12)-(f.steady>foeClock?0.1:0)-(f.driven>foeClock?0.1:0);
   f.fear=hz?0:Math.max(0,(f.fear||0)+(T-(f.fear||0))*0.5);
   if(f.rout){if(foeClock>=f.rout){if(f.fear<nv*0.55||!en)morRally(f);else f.rout=foeClock+3;}return;}
   // a hero sore pressed makes a last stand: it will not run, strikes harder and those about it take heart
@@ -117,7 +117,7 @@ function morWound(g,by){const G=FOES[g.kind];if(!G.folk||G.civ||G.hound||g.hero|
 function morWoundStep(f,dt){f.sp=0;f.atk=0;if(foeClock>f.wnd){f.wnd=0;f.hp=0;foeFalls(f,f);}else if(Math.random()<dt*0.4)spawnP(f.x,f.y+0.3,f.z,(Math.random()-.5)*0.4,0.3,(Math.random()-.5)*0.4,[0.55,0.08,0.06],0.35,6);}
 function morStand(f){f.wnd=0;f.hp=Math.max(f.hp,Math.round(f.mhp*0.4));f.st='return';f.hx=f.x;f.hz=f.z;f.t=0;f.fear=0;}
 // the player binds a wounded soldier's wounds (the use button, looking at them)
-function morBind(){const f=foeHit(3.5);if(!f||!f.wnd)return false;f.hp=Math.max(f.hp,Math.round(f.mhp*0.5));morStand(f);swing=1;morBark(f,'bind',1);
+function morBind(){const f=foeHit(3.5);if(!f||!f.wnd)return false;warRec('w');f.hp=Math.max(f.hp,Math.round(f.mhp*0.5));morStand(f);swing=1;morBark(f,'bind',1);
   for(let k=0;k<10;k++)spawnP(f.x+(Math.random()-.5),f.y+0.6+Math.random(),f.z+(Math.random()-.5),0,0.6,0,[0.75,0.95,0.6],0.8,-0.3);return true;}
 // ---- the Horn of the Hosts: the folk within 40 take heart (no fear for twenty seconds, blows a little harder, the running turn
 // back); the wastes' creatures within 24 falter; then a minute before the player has the breath for it again
@@ -130,7 +130,7 @@ function morHorn(held){const it=ITEMS[held];if(!it||!it.horn)return false;
   warSignal('advance','r',[PL.x,PL.y+2,PL.z]);setTimeout(()=>warSignal('muster','r',[PL.x,PL.y+2,PL.z]),1500);
   toast(n?'You sound the Horn of the Hosts: '+n+' about you take heart'+(t?', and the foe falters':''):'You sound the Horn of the Hosts. Its call rolls over the land');return true;}
 // a banner of the warhost taken from the one who bore it
-function morSlain(f){if(f.kind!=='obanner'||!SURV())return '';const left=addItem(OBANNER,1);return left?'':'their banner';}
+function morSlain(f){if(f.kind!=='obanner')return '';warRec('s');if(!SURV())return '';const left=addItem(OBANNER,1);return left?'':'their banner';}
 // the hearts of the armies at a gate, for the war panel
 function morPanel(w){const A=warArmies.filter(A=>A.P.id===w.id&&A.mor&&A.mor.n),word=m=>m.broken?'broken, fleeing':m.h<0.35?'steady':m.h<0.7?'wavering':'near breaking';
   return A.length?'<div>'+A.map(a=>(a.al?'The hosts\' hearts ':'The warhost\'s hearts ')+word(a.mor)).join('; ')+'</div>':'';}

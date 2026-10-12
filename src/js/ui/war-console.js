@@ -32,7 +32,7 @@ function wcRender(){
     else{head('The front beyond the gate');const r=row('The front '+Math.round(warFront(w)*100)+'%');for(const v of pct)btn(r,Math.round(v*100)+'%',()=>now(wcDo('effort',['fr',v])));}
     // now: at the gate
     head('Make it happen now'+(C.near?'':' (the gate\'s events: go to the gate first)'));
-    {const r=row();btn(r,'The hosts attack',()=>now(wcDo('army'),1));btn(r,'A warhost attacks',()=>now(wcDo('warhost'),1));btn(r,'A pitched battle',()=>now(wcDo('pitched'),1));if(!fallen)btn(r,'The last assault',()=>now(wcDo('last'),1));
+    {const r=row();btn(r,'The hosts attack',()=>now(wcDo('army'),1));btn(r,'A warhost attacks',()=>now(wcDo('warhost'),1));btn(r,'A pitched battle',()=>now(wcDo('pitched'),1));btn(r,'Ash drakes',()=>now(wcDo('drakes'),1));btn(r,'The council of war',()=>{closeInv();warCouncil(null);});if(!fallen)btn(r,'The last assault',()=>now(wcDo('last'),1));
       btn(r,'A raiding party of the hosts',()=>now(wcDo('party'),1));btn(r,'Orcs sally',()=>now(wcDo('sally'),1));btn(r,'Scouts of the hosts',()=>now(wcDo('scouts'),1));btn(r,'Goblin scouts',()=>now(wcDo('goblins'),1));
       btn(r,'The engines loose',()=>now(wcDo('engines'),1));if(!fallen)twice(r,'The gate falls',()=>now(wcDo('fall'),1));}
     head('The bordering realms');{const r=row();btn(r,'A raid on the nearest place',()=>now(wcDo('raid'),1));btn(r,'A siege of the nearest city or castle',()=>now(wcDo('siege'),1));

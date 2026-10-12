@@ -26,13 +26,13 @@ function engAct(){
 function engMark(){const e=eyePos(),d=camDir(),hit=raycast(e,d,ENG_R);if(hit)return [hit.x+0.5,hit.y+1,hit.z+0.5];
   const l=Math.hypot(d.x,d.z)||1,x=PL.x+d.x/l*200,z=PL.z+d.z/l*200,bx=Math.floor(x),bz=Math.floor(z);return [x,bx>=0&&bz>=0&&bx<W&&bz<D?ground[bx+W*bz]+1:PL.y,z];}
 function engLoose(){const E=engOn;if(foeClock<engT){toast('The crew are winding the arm back down: '+Math.ceil(engT-foeClock)+' s');return;}
-  const [tx,ty,tz]=engMark(),c=engCrew(E);engT=foeClock+(SURV()?(c>=2?5:c?8:14):2);
+  const [tx,ty,tz]=engMark(),c=engCrew(E);warRec('e');engT=foeClock+(SURV()?(c>=2?5:c?8:14):2);
   const x=E.x,y=E.y,z=E.z,T=2.4+Math.hypot(tx-x,tz-z)/90,g=16,mat=new THREE.MeshBasicMaterial({color:E.orc?new THREE.Color(1,0.5,0.12):new THREE.Color(0.34,0.33,0.32),transparent:E.orc,opacity:E.orc?0.92:1}),m=new THREE.Mesh(shotGeo,mat);
   m.scale.set(0.9,0.9,0.9);m.frustumCulled=false;scene.add(m);warStones.push({x:x,y:y,z:z,vx:(tx-x)/T,vz:(tz-z)/T,vy:(ty-y)/T+0.5*g*T,fire:E.orc,life:T+1.5,m:m,hit:engHit,byP:1});
   sfxBoom(Math.hypot(x-PL.x,z-PL.z)*1.6,[x,y,z]);burst(0.6,'lowpass',120,0.9,0.4,0.1,[x,y,z]);shake=Math.max(shake,0.15);
   const cr=foes.find(f=>!f.dead&&FOES[f.kind].eng&&Math.hypot(f.x-E.x,f.z-E.z)<14);if(cr)morBark(cr,'loose',1);}
 // it lands: the wastes' soldiers within four or so broken and thrown (the player credited), a pot's fire; the player near it hurt
-function engHit(s){const r=s.fire?4:4.5,dm=s.fire?14:22,x=s.x,y=s.y,z=s.z;let n=0;
+function engHit(s){const r=s.fire?4:4.5,dm=s.fire?14:22,x=s.x,y=s.y,z=s.z;let n=0;msnEngine(s);
   for(const g of foes){const G=FOES[g.kind];if(g.dead||G.folk||G.lord)continue;const dx=g.x-x,dz=g.z-z,d=Math.hypot(dx,dz);if(d>r||Math.abs(g.y-y)>5)continue;
     foeStruck(g,dm*(1-d/(r+1.5)),dx||0.1,dz||0.1,{kb:9,shot:1,pierce:1,stagger:1});n++;}
   if(s.fire)for(let k=0;k<24;k++)spawnP(x+(Math.random()-.5)*3,y+0.3,z+(Math.random()-.5)*3,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[1,0.45+Math.random()*0.3,0.1],0.8,2);
@@ -77,7 +77,7 @@ function fieldReport(F){const {A,B,w,P}=F,na=A.m.length,nb=B.m.length;if(na+nb<1
   const won=B.brk&&!A.brk?true:A.brk&&!B.brk?false:fa/(na||1)<=fb/(nb||1),D=F.duel;
   let s=F.n.replace(/^the /,'The ')+': the hosts '+na+' strong against a warhost of '+nb+'. '+(won?'The hosts held the field':'The wastes held the field')+'; '+fa+' of the hosts fell and '+fb+' of the wastes'+
     (B.brk?', and the warhost broke and fled':'')+(A.brk?', and the hosts broke and fell back':'')+'.'+(D&&D.w?' Between the lines '+D.wn+' slew '+D.ln+' in single combat.':'')+(F.pk?' You slew '+F.pk+' of the wastes.':'');
-  warLog(w,s);if(!w.pb)w.pb=[];if(F.X||F.Z){w.pb.push([Math.round(F.X),Math.round(F.Z),won?1:0,F.n]);if(w.pb.length>12)w.pb.shift();}
+  warLog(w,s);if(F.pk)warRec('b');if(!w.pb)w.pb=[];if(F.X||F.Z){w.pb.push([Math.round(F.X),Math.round(F.Z),won?1:0,F.n]);if(w.pb.length>12)w.pb.shift();}
   const d=Math.hypot(F.X-OX-PL.x,F.Z-OZ-PL.z);if(d<400)toast(s);
   if(won)morCheer(A.m.filter(f=>!f.dead&&!f.gone));else morCheer(B.m.filter(f=>!f.dead&&!f.gone));
   if(d<150)fieldRider(F,won);saveDirty=true;return s;}

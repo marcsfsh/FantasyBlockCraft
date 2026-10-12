@@ -27,9 +27,19 @@ Saves from 0.47.0 do not carry over (save key v38).
 - **The bolt thrower**, a block you make and set down: loaded with crossbow bolts, it looses great bolts through several foes.
 - **Pitched battles:** now and then both sides take the field at once under a name. Champions step out and fight between the lines, and the side whose champion wins takes heart. Each battle is told when it ends, written in the chronicle, marked on the world map, and a rider gallops back to the camp with the word.
 - Marching columns raise dust.
+- **Supplies and convoys:** each war's stores run down as the siege goes on and its armies march. Convoys of bearers and guards come up the road behind the Leaguer to fill them, and goblins may lie in wait for them in the ash. Short of supplies the works go slower, the armies are smaller and the soldiers lose heart sooner.
+- **The council of war:** sworn, use a lord of the hosts to sit in council: hear how the war stands and, from Sergeant, press one effort (the ram, the mine, the walls, the sally, or the front) for half an hour.
+- **Tasks from the captains:** slay a named warchief, free captives held by goblins, hold the stakes against three waves, carry word across the lines, take back the realm's fallen standard, or loose the trebuchets into the yard. A column of sparks marks the place; coin, merit and the war's thanks when done.
+- **Ambushes:** goblins lie hidden in the ash of the basins and spring at you.
+- **The camp's life:** soldiers in the Leaguer sit by the fires, spar in pairs, and sing at night.
+- **Salvage:** search the fallen of the wastes with the use button; bear a fallen standard of the hosts back to the lines.
+- **Your war record and titles:** the hosts keep count of your deeds and give you names for them, shown in the war panel and the journal.
+- **Ash drakes:** winged beasts of the wastes come over the battles with the warhosts, circle high and dive to burn the hosts' lines (and you). Archers can reach them low in a dive; your arrows and the bolt thrower anywhere. Slain, a drake falls burning and leaves its scales: make drakescale mail from them, proof against fire.
+- **Night battles:** soldiers carry torches, the folk see and shoot less far in the dark while the orcs do not, and the hosts' archers loose fire arrows.
+- **Weather in war:** rain puts out fire arrows and fire pots and weakens the shamans' fire; fog cuts every archer's reach. Smoke rises in tall columns over what burns. The orcs chant before a charge.
 
 ### Tooling
-- New test cases `71-arms`, `72-morale` and `73-field`; `62-war-units` counts the knights' charge when it is sounded.
+- New test cases `71-arms`, `72-morale`, `73-field`, `74-camp` and `75-drakes`; `62-war-units` counts the knights' charge when it is sounded.
 
 ## 0.47.0 (2026-10-12): the war at your command, and hosts of thousands
 
