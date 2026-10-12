@@ -91,6 +91,18 @@ function realmTour(kind,ck){
   const [x,z]=sitePort(best),d=DIRS[best.dir];goTo(Math.round(x+d[0]*6),Math.round(z+d[1]*6));PL.yaw=Math.atan2(d[0],d[1]);
   toast(best.name+', '+(realmPlace(best.X,best.Z)||{line:''}).line+', '+Math.round(bd)+' blocks from where you were');return{X:best.X,Z:best.Z,d:Math.round(bd),s:best};
 }
+// The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
+function gateTour(kind){
+  if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
+  for(let r=0;r<=30&&!(best&&bd<(r-1)*LS);r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
+    if(LANDS[cellLand(c)].k!=='volcanic')continue;const B=wasteBasin(c);if(seen.has(B.key))continue;seen.add(B.key);const P=wasteGateOf(B);if(!P)continue;const d=Math.hypot(P.X-X,P.Z-Z);if(d<bd){bd=d;best=P;}}
+  if(!best){toast('No gate of the wastes within reach');return null;}
+  const P=best,s=wgSite(P),cs=P.cs,inw=Math.atan2(P.dx,P.dz),out=Math.atan2(-P.dx,-P.dz);
+  const at={gate:[44,-cs*22,inw],ram:[40,cs*22,inw],lines:[P.uL+18,6,inw],camp:[P.uC0-14,8,out],pavilion:[P.uC0+108,6,out],yard:[-50,-cs*16,out]}[kind];
+  let x,z,yaw;if(at){[x,z]=siteXZ(s,at[0],at[1]);yaw=at[2];}
+  else{const p=P.ramp.pts,i=Math.floor(p.length*0.3),q=p[i+1];x=p[i][0];z=p[i][1];yaw=Math.atan2(-(q[0]-x),-(q[1]-z));}
+  goTo(Math.round(x),Math.round(z));PL.yaw=yaw;toast(wasteGateName(Math.round(x),Math.round(z))||P.name);return{X:Math.round(x),Z:Math.round(z),P:P};
+}
 // ---- Time and weather (creative)
 function setTimeOfDay(h){settings.time='fixed';tod=((+h/24)%1+1)%1;lsSet(SET_KEY,settings);}
 function setWeatherNow(rain){settings.weather=true;raining=!!rain;rainT=rain?240:400;if(!rain)rainAmt=Math.min(rainAmt,0.3);lsSet(SET_KEY,settings);}

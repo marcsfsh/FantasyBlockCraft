@@ -159,14 +159,17 @@ function foePlaces(){
   // the realms of men (D-060): each spot of a site's layout within 46 blocks
   for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites){if(Math.hypot(s.X-X,s.Z-Z)>s.R+70)continue;const L=siteLayout(s);
     L.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);if(Math.hypot(x-X,z-Z)>46)return;out.push({id:s.id+':'+i,x:x+0.5,y:p.y>0?p.y+1:hAt(Math.round(x),Math.round(z))+1,z:z+0.5,R:p.kind==='gate'||p.kind==='post'||p.kind==='citgate'?2.5:4,kind:s.prov.cult.fp+p.kind,folk:1,horses:p.horses||0,s:s});});}
+  warPlaces(X,Z,out); // the gates of the wastes: the camp of the hosts, the siege works, the orcs' yard (D-067)
+  stairSpots(X,PL.y,Z,out); // the halls and caverns of the Ember Stair (D-067)
   return out;
 }
 function foeSpawnTick(){
   const X=PL.x+OX,Z=PL.z+OZ;
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
-  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
-    if(folk&&folkCount()>=FOLK_CAP)continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
+  const wn=warNear(); // by a gate of the wastes there are more of both (D-067)
+  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+    if(folk&&folkCount()>=FOLK_CAP+(wn?14:0))continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
@@ -174,8 +177,8 @@ function foeSpawnTick(){
       spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s});
       if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
-    spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
-  folkPatrol();
+    spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.stair==='cavern'&&Math.random()<0.5?'troll':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
+  folkPatrol();warTick();
   // now and then a host of the nearest people marches through the wastes against their creatures (D-063): from out of sight
   // behind the player to as far again beyond, one host at a time, every few minutes
   hostT-=1;if(hostT<=0){hostT=20;if(!foes.some(f=>f.host&&!f.dead)&&folkCount()<FOLK_CAP-6){const p=wasteGround(46,60),H=p&&hostOf(PL.x+OX,PL.z+OZ);if(H){hostT=150+Math.random()*90;
@@ -271,7 +274,7 @@ const FOLK_SAY={
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast(F.n+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -343,10 +346,13 @@ function stepFoe(f,dt){
   let want=0,face=false;
   switch(f.st){
     case 'sleep':break;
-    case 'idle':if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
+    case 'idle':if(f.back&&f.backT&&foeClock>f.backT){f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
+      if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
       if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
     case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&pdp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
-    case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);if(d<2.5||f.t<-30){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
+    case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);
+      if(d<2.5||f.t<-30){if(f.way&&f.way.length){const w=f.way.shift();f.hx=w[0]-OX+((f.id%3)-1)*0.8;f.hz=w[1]-OZ+(f.id%2?0.5:-0.5);f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/F.walk-20);} // a leg's time: some 30 s over its walk // a party's next waypoint (D-067)
+        else{f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+20+Math.random()*25;}}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{
       // against a creature its girth counts: the blow lands on its near side

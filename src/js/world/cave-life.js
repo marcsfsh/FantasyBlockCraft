@@ -66,7 +66,7 @@ const hCache=new Map();
 function hAt(X,Z){const k=X*1048576+Z;let h=hCache.get(k);if(h===undefined){if(hCache.size>400000)hCache.clear();h=colInfo(X,Z,TN).h;hCache.set(k,h);}return h;}
 function slopeAt(X,Z,h){return Math.max(Math.abs(hAt(X+1,Z)-h),Math.abs(hAt(X-1,Z)-h),Math.abs(hAt(X,Z+1)-h),Math.abs(hAt(X,Z-1)-h));}
 function fillCol(x,z,X,Z,o){
-  let h=o.h;const b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3),wallS=0;
+  let h=o.h;const b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:o.wgate>0.2&&o.wVolc>0.5?BASALT:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3),wallS=0;
   if(b!==0&&b!==1&&!o.vflow&&!o.vfis){const sl=slopeAt(X,Z,h);
     if(sl>=4){top=rock||STONE;soil=0;}
     else if(sl>=2&&F&&F.wall)wallS=F.wall; // the terraces' retaining walls (M6g)

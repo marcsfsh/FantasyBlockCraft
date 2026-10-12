@@ -523,6 +523,16 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(353,x,y,y<=2?sh([170,174,182],y===0?24:0):(y>=6&&y<=11&&(x<3||x>12))?sh([30,30,34],0):sh([66,68,74],(hn(x,y,521)-.5)*10+(y===3?-16:0)));
     {const jx=x%8,jy=y%8,gold=jx===0||jy===0;P(354,x,y,gold?sh([190,146,72],(hn(x,y,522)-.5)*12):sh(gran(x,y,523),12+(jx===1||jy===1?10:0)+(hn(x>>2,y>>2,524)-.5)*10));}
   }
+  // the war at the gate (D-067): tent canvas, linen in panels between darker seams, a stitch line, weathered toward the foot;
+  // gate iron, black plates with studs in a lattice and heavy bands top and bottom, rust bleeding below the studs; a mantlet,
+  // heavy planks bound in iron at top and bottom, scorched in patches, the stubs of arrows standing in it
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const seam=x%8===0,st=x%8===1&&y%3===1,wx=Math.max(0,y-9)*2;P(355,x,y,seam?sh([168,156,128],(hn(x,y,525)-.5)*8):st?[150,138,112]:sh([222,212,186],(hn(x,y,526)-.5)*10+(hn(x>>2,y>>2,527)-.5)*12-wx));}
+    {const band=y<=1||y>=14,sx=(x+(y>>2)*2)%4,sy=y%4,stud=!band&&sx===1&&sy===1,rust=!band&&(sx===1&&sy===2&&hn(x,y,528)<0.6||hn(x,y,529)<0.05);
+      P(356,x,y,band?sh([70,68,72],(y===0||y===14?18:-6)+(x%5===2?22:0)):stud?[148,146,150]:rust?sh([120,66,40],(hn(x,y,530)-.5)*18):sh([58,56,62],(hn(x,y,531)-.5)*12+(hn(x>>2,y>>2,532)-.5)*14+(sy===0?8:0)));}
+    {const band=y===1||y===2||y===13||y===14,pl=x%5===0,rv=band&&x%5===2,sc=hn(x>>1,y>>1,533)<0.18,ar=(x===5&&y>=5&&y<=8)||(x===11&&y>=8&&y<=10)||(x===3&&y>=10&&y<=11),fl=(x===5&&y===4)||(x===11&&y===7)||(x===3&&y===9);
+      P(357,x,y,ar?sh([150,120,80],0):fl?[200,200,196]:rv?[176,176,180]:band?sh([82,84,90],(y===1||y===13?14:-8)):pl?sh([70,50,32],0):sh([138,100,64],(sc?-46:0)+(hn(x,y>>2,534)-.5)*16+(x%5===1?10:0)));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

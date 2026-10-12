@@ -5,6 +5,31 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.37.0 (2026-10-12): the war at the gates of the wastes
+
+Saves from 0.36.0 do not carry over (save key v27): the wastes are remade about their gates.
+
+### Game
+- **The Volcanic Wastes mended.**
+  - Each basin has one great volcano. A basin of several stretches used to raise one for each, so two or three stood together.
+  - No volcano is cut in two: the gorges of the wastes no longer slice through cones (they narrow and stop at a volcano's foot), and where two volcanoes' reaches overlap the higher ground wins instead of the first.
+  - No crystal geode or fossil hangs in the air over a sunken basin's floor.
+  - The gullies down the great volcano are a third as deep and half again as wide, and the lava in them is three deep, thinning toward the foot.
+- **The Ashen Gate.** Every basin of the wastes has one way in for an army, on the side facing the nearest realm. The ring of ash mountains breaks into a pass cut down to the level of the lands outside, and across it the orcs have built a gate of basalt between two towers 64 high, the Emberlord's horned skull over the arch. One leaf is shut and propped with great beams; the other hangs ajar, its bar broken, and there is a way through by its edge.
+  - **The Long Descent:** inside, a broad paved road runs down along the ring's inner wall at one in eight from the gate's yard to the floor of the wastes.
+  - **The Gatewarden's Camp** fills the yard behind the gate: barricades of stakes, a palisade, the warlord's hall, tents of hide, a forge by a trough of lava, a troll's cage, a war drum and two stone-throwers aimed at the gate. Archers walk the gate's top.
+  - **The siege:** at the shut leaf stands the dwarves' ram ("X the Gatebreaker"), its steel head in a bronze collar, slung under a shed of bronze plates on eight wheels. A covered way of mantlets leads back to the siege lines (ditch, rampart, palisade, towers, ballistae), with the dwarves' trebuchets and a siege tower of men behind them.
+  - **The Leaguer:** beyond the lines lies the camp of the allied hosts, 250 blocks square, more than three times the ground of the largest city of men. It has a ditch, rampart and palisade with towers and four gates, streets and a muster field. In the middle the Pavilion of the Three Banners, where men, elves and dwarves hold council, faces a square with the three banners on tall poles. The men's lines of tents, timber halls, smithy and stables; the elves' round pavilions, watch-spire and archery range; the dwarves' granite redoubt with its forges, crane, trebuchet and a second ram; storehouses, wagons, wells, cook-fires and a field hospital.
+  - **The war:** both camps are manned, and while you are near the gate the two sides keep sending raiding parties, scouts and now and then whole armies at each other through the gap. Allied raiders march from the lines into the orcs' yard; orc bands sally out against the lines; elven scouts slip through and on down the long road; goblins creep round the camp; men, elves and dwarves march together, or a warhost pours out with trolls and a warchief. They fight wherever they meet, hold a while, and march home. In creative they never turn on you. The camp's folk have their own words for a passer-by.
+  - **The engines and the sound of it:** the dwarves' trebuchets loft stones over the wall into the yard and the orcs' throwers send burning pots onto the lines (for the look and the sound; they strike no one). Near the gate you hear the orcs' drums behind the wall, the hosts' horns, the clash of arms along the pass and hammering at the engines; the drums beat harder by night.
+- **The Ember Stair.** Inside every great volcano a way winds up from a door in the Ember Throne's way in, round and round inside the mountain at one in six, two to three turns, up to a gallery open over the crater's lake of fire. It is part orc stronghold (dressed basalt, tiled floors, fire baskets, iron gates; the Gate of the Stair, the Barracks of the Ash Guard, the Forge of the Deep Fire, the Armoury of the Throne, the Shrine of the Emberlord, the Pit of the Stair) and part raw cave of the mountain's fire (cinder and obsidian, crusted lava, veins of magma; the Cavern of Cinders with its pool of lava, the Obsidian Hollow with its spires), each chamber held by orcs, goblins or trolls.
+- The readout names the gate, the ram, the siege lines, the camp and its pavilion, the yard, the road, the stair and its chambers.
+- New blocks (creative, Building): Tent Canvas, Gate Iron, Mantlet.
+- The creative land tour gains the gates' works.
+
+### Tooling
+- New test case `59-gates`. `47-volcanic` and `55-strife` find their windows round about where the new terrain moved them (D-067).
+
 ## 0.36.0 (2026-10-11): the mountain dwarves
 
 Saves from 0.35.0 do not carry over (save key v26): the dwarves are new to the world.

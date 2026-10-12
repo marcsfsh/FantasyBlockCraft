@@ -84,7 +84,7 @@ function* planProvince(root,key){
   for(let b=0;b<nz;b++){yield;for(let a=0;a<nx;a++){const X=(gx0+a)*S,Z=(gz0+b)*S,k=a+b*nx;landsAt(X,Z,TRL);if(TRL.land!==L.i||!ck.has(TRL.lcell))continue; // only the province's own ground is read
     const o=realmRaw(X,Z);gh[k]=o.h;
     const lk=lakeAt(X,Z);if(lk&&Math.hypot(X-lk.cx,Z-lk.cz)<lk.R+12)continue; // no lake under a site or its margin
-    ok[k]=o.river||o.bank||o.wet||o.h<o.sl+3||o.b===0||o.b===1||o.rvBot<999||o.bs<WB_END+40?1:2;}}
+    ok[k]=o.river||o.bank||o.wet||o.h<o.sl+3||o.b===0||o.b===1||o.rvBot<999||o.bs<WB_END+40||wasteGateNear(X,Z,40)?1:2;}}
   // how far each sample lies from the province's edge (in samples), for castles near the border
   const bd=new Int16Array(N).fill(999),qq=[];for(let k=0;k<N;k++)if(!ok[k]){bd[k]=0;qq.push(k);}
   for(let h=0;h<qq.length;h++){const k=qq[h],a=k%nx,b=(k/nx)|0;for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const A=a+da,B=b+db;if(A<0||B<0||A>=nx||B>=nz)continue;const n=A+B*nx;if(bd[n]>bd[k]+1){bd[n]=bd[k]+1;qq.push(n);}}}

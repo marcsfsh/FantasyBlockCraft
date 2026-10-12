@@ -53,7 +53,8 @@ function colInfoBase(X,Z,o){
     const soft=h*(1-o.wS)+sf*o.wS,cl=Math.min(1,o.wChalk+o.wFjord);
     if(cl>0){const t=0.5+fbm2(X/30,Z/30,1,8307.9)*0.15;h=soft*(1-cl)+(o.wS<t?h:sf)*cl;}else h=soft;}
   if(o.bs<WB_END)h=wasteTerrain(X,Z,o,h); // the sunken wastes and their ring of ash mountains (D-055)
-  const SL=o.sl,ring=o.bs<WB_END?wasteRing(o.bs):0;
+  wgMask(X,Z,o); // the gates of the wastes, their camps and roads, keep rivers, gorges, lakes and fissures off (D-067)
+  const SL=o.sl,ring=Math.max(o.bs<WB_END?wasteRing(o.bs):0,o.wgate);
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
   const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SL-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief))*(1-ring),vw=rw+Math.min(0.24,relief*0.0075);
@@ -62,7 +63,8 @@ function colInfoBase(X,Z,o){
     // the channel shelves up into its bank, and the bank slopes up to the land
     const c=Math.max(0,1-rv2/rw),bed=SL-2-Math.round(3*c),bankH=SL+1+(h-SL-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SL-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
-  o.vflow=o.vcrust=o.vfis=o.vcr=o.vgul=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
+  o.vflow=o.vcrust=o.vfis=o.vcr=o.vgul=false;o.vlake=0;o.vs=0;o.vnear=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
+  if(o.wg)h=wgShape(X,Z,o,h); // the gates' works: the pass, the yard, the camp and the road down, cut and banked (D-067)
   h=realmGround(X,Z,o,h); // the realms of men level the ground under their cities, castles, villages and farms (D-060)
   h=Math.max(SL-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
@@ -75,15 +77,16 @@ function colInfoBase(X,Z,o){
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   // Gorges (M6a, Q137; once the hairline ravines of M2b): fewer and wider, along a slow noise line where the land allows them.
   // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
-  // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
+  // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea, and none up a volcano: it
+  // narrows and shallows to nothing as it nears one's foot (D-067; before, it sliced through the cones)
   o.rvBot=999;
-  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01&&!o.town){
+  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01&&!o.town&&o.vnear<0.98){
     const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
     if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
       // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
       const gx=(fbm2((X+2)/150,Z/150,2,401.1)-fbm2((X-2)/150,Z/150,2,401.1))/4,gzz=(fbm2(X/150,(Z+2)/150,2,401.1)-fbm2(X/150,(Z-2)/150,2,401.1))/4,g2=Math.max(1e-9,gx*gx+gzz*gzz);
       const d=av/Math.sqrt(g2),cX=X-gv*gx/g2,cZ=Z-gv*gzz/g2;landsAt(cX,cZ,TGC);
-      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SL+4,SL+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
+      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SL+4,SL+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1)*(1-o.vnear);
       if(rf>0){const WT=8+12*rf,WF=3.5,Dm=8+52*rf;
         if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SL-56,h-dep);}}}}
   return o;
@@ -114,7 +117,7 @@ function lakeAt(X,Z){
 }
 function colInfoCompute(X,Z,o){
   colInfoBase(X,Z,o);o.lake=0;
-  const lk=o.town?null:lakeAt(X,Z);
+  const lk=o.town||o.wgate>0?null:lakeAt(X,Z);
   if(lk){const d=Math.hypot(X-lk.cx,(Z-lk.cz)*1.15)+fbm2(X/9,Z/9,1,2503.1)*3;
     if(d<lk.R){const f=1-d/lk.R,bottom=lk.L-1-Math.round(f*f*5+f*2);if(o.h>bottom)o.h=bottom;o.lake=lk.L;o.b=0;o.wet=true;o.river=false;o.rvBot=999;o.ent=false;}
     else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}}

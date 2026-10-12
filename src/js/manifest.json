@@ -130,8 +130,16 @@
       "about": "The Emberlords' fortresses cut into the great volcanoes (D-052): plan per volcano (fortOf), trusted lava troughs, names, spawn spots, per-chunk building"
     },
     {
+      "path": "world/emberstair.js",
+      "about": "The Ember Stair in each great volcano (D-067): a way winding up inside the mountain from the Ember Throne's way in to a gallery over the crater, stretches of the orcs' stronghold and of fiery cave, halls and caverns with their foes; planned from the cone's shape, carved sealed per chunk"
+    },
+    {
       "path": "world/orcs.js",
       "about": "The orcs' places on the floor of the Volcanic Wastes (D-064): war camps, watchtowers, forges and fighting pits, planned on a grid where the floor is open, built per chunk, with their spawn spots and names"
+    },
+    {
+      "path": "world/gate.js",
+      "about": "The Gate of the Wastes (D-067): each basin's one way in, planned toward the nearest realm (the pass cut through the ring, the yard, the road down the inner wall, the siege camp's ground), the ground shaped to it, and the queries that keep everything else off"
     },
     {
       "path": "world/realm-build.js",
@@ -152,6 +160,14 @@
     {
       "path": "world/dwarf-build.js",
       "about": "Building the mountain dwarves (D-066): terraces, granite houses, smithies, furnaces, headframes, cranes, engines of war, the hold's massif and great gate, and the sealed workings below (halls, forges, cistern, shafts, mines)"
+    },
+    {
+      "path": "world/gate-build.js",
+      "about": "Building the Gate of the Wastes (D-067): the gate's works as a site in its frame (the gate and its towers, the leaves, the dwarves' ram, the covered way, mantlets, the siege lines and engines, the orcs' camp in the yard), their column builders, the road down, per chunk"
+    },
+    {
+      "path": "world/siege-build.js",
+      "about": "The camp of the allied hosts before the gate (D-067): its layout (rampart, towers, gates, streets, the Pavilion of the Three Banners, the quarters of men, elves and dwarves, the stores) and column builders"
     },
     {
       "path": "world/warrens.js",
@@ -260,6 +276,10 @@
     {
       "path": "gameplay/foes.js",
       "about": "Foes of the Volcanic Wastes (D-052): orcs, trolls, goblins and the Emberlords; places they live, spawning, sight, chase, blows, shots, the player striking them, drops, armour"
+    },
+    {
+      "path": "gameplay/war.js",
+      "about": "War at the gates of the wastes (D-067): the camp's, the siege works' and the yard's spots, and the raiding parties, scouts and armies the two sides send at each other by waypoints while the player is near"
     },
     {
       "path": "input/touch.js",

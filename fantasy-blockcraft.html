@@ -226,7 +226,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v26',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v27',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -239,7 +239,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=26,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=27,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
@@ -569,6 +569,12 @@ def(DBRONZE,'Bronze Plating',[340,340,340],{snd:'stone'});def(DFORGE,'Forge Bric
 def(DLAMP,'Hold Lamp',[343,343,343],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});def(DGEAR,'Iron Cogwheel',[345,345,344],{snd:'stone'});
 def(DCART,'Ore Cart',[346,347,347],{snd:'stone'});def(DSLAG,'Slag',[348,348,348]);def(DPROP,'Pit Prop',[349,349,350],{snd:'wood'});
 def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(DANVIL,'Anvil',[352,353,353],{snd:'stone'});def(DFLAG,'Hold Flagstones',[354,354,354]);
+// The war at the gate of the wastes (D-067): the canvas of the allied hosts' tents, weathered linen in panels with its seams;
+// the iron of the Ashen Gate's leaves, black plates studded in a lattice between heavy bands, rust bleeding from the studs; and
+// the mantlets of the siege lines, heavy planks bound in iron, scorched, with the stubs of arrows in them
+const CANVAS=1174,GATEIRON=1175,MANTLET=1176;
+def(CANVAS,'Tent Canvas',[355,355,355],{snd:'soft'});def(GATEIRON,'Gate Iron',[356,356,356],{snd:'stone'});def(MANTLET,'Mantlet',[357,357,357],{snd:'wood'});
+setH([CANVAS],0.8,'soft');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
 setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
 setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
@@ -1232,6 +1238,16 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(353,x,y,y<=2?sh([170,174,182],y===0?24:0):(y>=6&&y<=11&&(x<3||x>12))?sh([30,30,34],0):sh([66,68,74],(hn(x,y,521)-.5)*10+(y===3?-16:0)));
     {const jx=x%8,jy=y%8,gold=jx===0||jy===0;P(354,x,y,gold?sh([190,146,72],(hn(x,y,522)-.5)*12):sh(gran(x,y,523),12+(jx===1||jy===1?10:0)+(hn(x>>2,y>>2,524)-.5)*10));}
   }
+  // the war at the gate (D-067): tent canvas, linen in panels between darker seams, a stitch line, weathered toward the foot;
+  // gate iron, black plates with studs in a lattice and heavy bands top and bottom, rust bleeding below the studs; a mantlet,
+  // heavy planks bound in iron at top and bottom, scorched in patches, the stubs of arrows standing in it
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const seam=x%8===0,st=x%8===1&&y%3===1,wx=Math.max(0,y-9)*2;P(355,x,y,seam?sh([168,156,128],(hn(x,y,525)-.5)*8):st?[150,138,112]:sh([222,212,186],(hn(x,y,526)-.5)*10+(hn(x>>2,y>>2,527)-.5)*12-wx));}
+    {const band=y<=1||y>=14,sx=(x+(y>>2)*2)%4,sy=y%4,stud=!band&&sx===1&&sy===1,rust=!band&&(sx===1&&sy===2&&hn(x,y,528)<0.6||hn(x,y,529)<0.05);
+      P(356,x,y,band?sh([70,68,72],(y===0||y===14?18:-6)+(x%5===2?22:0)):stud?[148,146,150]:rust?sh([120,66,40],(hn(x,y,530)-.5)*18):sh([58,56,62],(hn(x,y,531)-.5)*12+(hn(x>>2,y>>2,532)-.5)*14+(sy===0?8:0)));}
+    {const band=y===1||y===2||y===13||y===14,pl=x%5===0,rv=band&&x%5===2,sc=hn(x>>1,y>>1,533)<0.18,ar=(x===5&&y>=5&&y<=8)||(x===11&&y>=8&&y<=10)||(x===3&&y>=10&&y<=11),fl=(x===5&&y===4)||(x===11&&y===7)||(x===3&&y===9);
+      P(357,x,y,ar?sh([150,120,80],0):fl?[200,200,196]:rv?[176,176,180]:band?sh([82,84,90],(y===1||y===13?14:-8)):pl?sh([70,50,32],0):sh([138,100,64],(sc?-46:0)+(hn(x,y>>2,534)-.5)*16+(x%5===1?10:0)));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
@@ -1296,7 +1312,8 @@ function colInfoBase(X,Z,o){
     const soft=h*(1-o.wS)+sf*o.wS,cl=Math.min(1,o.wChalk+o.wFjord);
     if(cl>0){const t=0.5+fbm2(X/30,Z/30,1,8307.9)*0.15;h=soft*(1-cl)+(o.wS<t?h:sf)*cl;}else h=soft;}
   if(o.bs<WB_END)h=wasteTerrain(X,Z,o,h); // the sunken wastes and their ring of ash mountains (D-055)
-  const SL=o.sl,ring=o.bs<WB_END?wasteRing(o.bs):0;
+  wgMask(X,Z,o); // the gates of the wastes, their camps and roads, keep rivers, gorges, lakes and fissures off (D-067)
+  const SL=o.sl,ring=Math.max(o.bs<WB_END?wasteRing(o.bs):0,o.wgate);
   // Rivers follow valleys (Q89): they rise in the hills and never cross a range; the higher the land beside a river, the wider
   // and gentler the valley it lies in, so banks slope down to the water instead of standing as ravine walls.
   const rv2=Math.abs(fbm2(X/260,Z/260,3,511.3)),rw=0.022,relief=Math.max(0,h-SL-3),on=(1-sstep(0.3,0.65,mf))*(1-sstep(34,60,relief))*(1-ring),vw=rw+Math.min(0.24,relief*0.0075);
@@ -1305,7 +1322,8 @@ function colInfoBase(X,Z,o){
     // the channel shelves up into its bank, and the bank slopes up to the land
     const c=Math.max(0,1-rv2/rw),bed=SL-2-Math.round(3*c),bankH=SL+1+(h-SL-1)*Math.pow(sstep(rw*1.1,vw,rv2),1.3),tgt=bed+(bankH-bed)*sstep(rw*0.4,rw*1.1,rv2);
     h=h+(Math.min(h,tgt)-h)*on;o.river=on>0.5&&tgt<SL-0.5;o.bank=!o.river&&rv2<rw*2.2&&on>0.08;}
-  o.vflow=o.vcrust=o.vfis=o.vcr=o.vgul=false;o.vlake=0;o.vs=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
+  o.vflow=o.vcrust=o.vfis=o.vcr=o.vgul=false;o.vlake=0;o.vs=0;o.vnear=0;if(o.wVolc>0.05)h=volcTerrain(X,Z,o,h); // volcanoes, lava flows and fissures (D-051), over the rivers
+  if(o.wg)h=wgShape(X,Z,o,h); // the gates' works: the pass, the yard, the camp and the road down, cut and banked (D-067)
   h=realmGround(X,Z,o,h); // the realms of men level the ground under their cities, castles, villages and farms (D-060)
   h=Math.max(SL-56,Math.min(H-14,Math.round(h)));
   // The column's land decides its look; height still decides the sea, the shore and the mountain tops.
@@ -1318,15 +1336,16 @@ function colInfoBase(X,Z,o){
   o.ent=fbm2(X/70,Z/70,1,1201.7)>0.44;
   // Gorges (M6a, Q137; once the hairline ravines of M2b): fewer and wider, along a slow noise line where the land allows them.
   // The floor is at least 7 blocks wide, the walls step back in ledges of 5 to a rim 16 to 40 across, and the depth (up to about
-  // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea.
+  // 60, so some reach the crawlways, Q22) eases to nothing at the ends. None by water or the sea, and none up a volcano: it
+  // narrows and shallows to nothing as it nears one's foot (D-067; before, it sliced through the cones)
   o.rvBot=999;
-  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01&&!o.town){
+  if(!o.wet&&!o.river&&o.gz>0.05&&ring<0.01&&!o.town&&o.vnear<0.98){
     const gv=fbm2(X/150,Z/150,2,401.1),av=Math.abs(gv);
     if(av<0.09){ // near the line. How deep the gorge runs is read on its centre line, so its ends cut straight across it; it
       // eases out before water (rivers, the sea, low wet ground) so it never ends in a point
       const gx=(fbm2((X+2)/150,Z/150,2,401.1)-fbm2((X-2)/150,Z/150,2,401.1))/4,gzz=(fbm2(X/150,(Z+2)/150,2,401.1)-fbm2(X/150,(Z-2)/150,2,401.1))/4,g2=Math.max(1e-9,gx*gx+gzz*gzz);
       const d=av/Math.sqrt(g2),cX=X-gv*gx/g2,cZ=Z-gv*gzz/g2;landsAt(cX,cZ,TGC);
-      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SL+4,SL+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1);
+      const rf=sstep(0.24,0.4,fbm2(cX/420,cZ/420,2,433.7)+(TGC.gz-1)*0.25)*sstep(0.03,0,TGC.wS)*sstep(SL+4,SL+12,h)*(on>0?sstep(vw+0.01,vw+0.09,Math.abs(fbm2(cX/260,cZ/260,3,511.3))):1)*(1-o.vnear);
       if(rf>0){const WT=8+12*rf,WF=3.5,Dm=8+52*rf;
         if(d<WT){const p=d<WF?1:(WT-d)/(WT-WF),dep=Math.floor(Dm*Math.pow(p,0.8)/5)*5;if(dep>=5)o.rvBot=Math.max(SL-56,h-dep);}}}}
   return o;
@@ -1357,7 +1376,7 @@ function lakeAt(X,Z){
 }
 function colInfoCompute(X,Z,o){
   colInfoBase(X,Z,o);o.lake=0;
-  const lk=o.town?null:lakeAt(X,Z);
+  const lk=o.town||o.wgate>0?null:lakeAt(X,Z);
   if(lk){const d=Math.hypot(X-lk.cx,(Z-lk.cz)*1.15)+fbm2(X/9,Z/9,1,2503.1)*3;
     if(d<lk.R){const f=1-d/lk.R,bottom=lk.L-1-Math.round(f*f*5+f*2);if(o.h>bottom)o.h=bottom;o.lake=lk.L;o.b=0;o.wet=true;o.river=false;o.rvBot=999;o.ent=false;}
     else if(d<lk.R+5){if(o.h<lk.L)o.h=lk.L;o.rvBot=999;o.ent=false;o.wet=true;}}
@@ -1555,6 +1574,18 @@ function wasteCells(X,Z){
   for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++){const c=landSite(ci+a,cj+b);if(LANDS[cellLand(c)].k==='volcanic'&&Math.hypot(c.x-cx,c.z-cz)<WB_FAR+50)L.push(c);}
   wasteTC.set(tk,L);return L;
 }
+// The basin a volcanic cell lies in (D-067): the volcanic cells joined to it, each within 900 of the next (so their discs run
+// together), their middle and their chief (the stretch of most priority among them, which names the basin's great volcano and
+// its gate). The same object for every cell of the basin; key is the chief's.
+const wasteBC=new Map();
+function wasteBasin(c){
+  const k0=landKey(c.i,c.j);let B=wasteBC.get(k0);if(B)return B;if(LANDS[cellLand(c)].k!=='volcanic')return null;if(wasteBC.size>4000)wasteBC.clear();
+  const cells=[c],seen=new Set([k0]);
+  for(let q=0;q<cells.length&&cells.length<400;q++){const a=cells[q];for(let di=-3;di<=3;di++)for(let dj=-3;dj<=3;dj++){const d=landSite(a.i+di,a.j+dj),k=landKey(d.i,d.j);
+    if(seen.has(k)||LANDS[cellLand(d)].k!=='volcanic'||Math.hypot(a.x-d.x,a.z-d.z)>=900)continue;seen.add(k);cells.push(d);}}
+  let cx=0,cz=0,ch=null;for(const d of cells){cx+=d.x/cells.length;cz+=d.z/cells.length;const sc=stretchCell(d);if(!ch||sc.pr>ch.pr||sc.pr===ch.pr&&landKey(sc.i,sc.j)<landKey(ch.i,ch.j))ch=sc;}
+  B={key:'b'+landKey(ch.i,ch.j),cells:cells,cx:cx,cz:cz,chief:ch};for(const d of cells)wasteBC.set(landKey(d.i,d.j),B);return B;
+}
 // The basin at a column, from the warped coordinates landsAt reads cells by: o.bs, how far outside the edge of the basin's
 // floor (negative inside it), and o.bc, the nearest volcanic cell; o.bs is 1e9 where no basin reaches. The distance is a soft
 // minimum over the cells (each fading out by WB_FAR, so it never jumps), which rounds the joins between their discs.
@@ -1672,7 +1703,7 @@ function* planProvince(root,key){
   for(let b=0;b<nz;b++){yield;for(let a=0;a<nx;a++){const X=(gx0+a)*S,Z=(gz0+b)*S,k=a+b*nx;landsAt(X,Z,TRL);if(TRL.land!==L.i||!ck.has(TRL.lcell))continue; // only the province's own ground is read
     const o=realmRaw(X,Z);gh[k]=o.h;
     const lk=lakeAt(X,Z);if(lk&&Math.hypot(X-lk.cx,Z-lk.cz)<lk.R+12)continue; // no lake under a site or its margin
-    ok[k]=o.river||o.bank||o.wet||o.h<o.sl+3||o.b===0||o.b===1||o.rvBot<999||o.bs<WB_END+40?1:2;}}
+    ok[k]=o.river||o.bank||o.wet||o.h<o.sl+3||o.b===0||o.b===1||o.rvBot<999||o.bs<WB_END+40||wasteGateNear(X,Z,40)?1:2;}}
   // how far each sample lies from the province's edge (in samples), for castles near the border
   const bd=new Int16Array(N).fill(999),qq=[];for(let k=0;k<N;k++)if(!ok[k]){bd[k]=0;qq.push(k);}
   for(let h=0;h<qq.length;h++){const k=qq[h],a=k%nx,b=(k/nx)|0;for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const A=a+da,B=b+db;if(A<0||B<0||A>=nx||B>=nz)continue;const n=A+B*nx;if(bd[n]>bd[k]+1){bd[n]=bd[k]+1;qq.push(n);}}}
@@ -1947,7 +1978,7 @@ function caveStep(B,ni,dir,kind,r,o){
 function caveEntrance(B,r,mx){
   let best=null,flat=null;const o={};
   for(let k=0;k<28;k++){const X=B.x0+mx+Math.floor(r()*(CRB-2*mx)),Z=B.z0+mx+Math.floor(r()*(CRB-2*mx)),h=hAt(X,Z);
-    colInfo(X,Z,o);if(h<o.sl+3||o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS))||realmNear(X,Z,8))continue;
+    colInfo(X,Z,o);if(h<o.sl+3||o.wet||o.lake||o.river||o.b===0||o.rvBot<999||ruinZone(Math.floor(X/CS),Math.floor(Z/CS))||realmNear(X,Z,8)||wasteGateNear(X,Z,12))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,ux=Math.cos(a),uz=Math.sin(a),rise=hAt(Math.round(X+ux*7),Math.round(Z+uz*7))-h;sl=Math.max(sl,Math.abs(rise));
       if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
@@ -2367,6 +2398,7 @@ function poiBase(WCX,WCZ){
     {const band=['camp','lab','outpost','forge'].includes(tp)?[156,196]:['ruins','shrine'].includes(tp)?[106,146]:[208,252],y=band[0]+(r()*(band[1]-band[0])|0);p={tp:tp,x:x,y:y,z:z,seed:r()};
       // rarer (Q24); every built place sits beside a worm cave of its chunk and gets a passage to it. Geodes and fossils stay sealed.
       if(hsh(WCX,6411,WCZ)>=0.6||warBand(x,y,z))p=null; // no sealed geode or fossil in a goblin warren (D-052)
+      else if((tp==='geode'||tp==='fossil')&&y>top)p=null; // nor one over the ground, where a basin of the wastes is sunk (D-067)
       else if(tp!=='geode'&&tp!=='fossil'){const a=caveAnchor(WCX,WCZ,band[0],band[1],6412);
         if(!a)p=null;else{const ang=hsh(WCX,6413,WCZ)*6.283,dd=tp==='grove'||tp==='outpost'?13:10;p.x=a.x+Math.round(Math.cos(ang)*dd);p.z=a.z+Math.round(Math.sin(ang)*dd);p.y=a.y-2;p.a=a;
           if(hAt(p.x,p.z)-p.y<16||ruinZone(Math.floor(p.x/CS),Math.floor(p.z/CS)))p=null;}}}
@@ -3495,7 +3527,7 @@ const hCache=new Map();
 function hAt(X,Z){const k=X*1048576+Z;let h=hCache.get(k);if(h===undefined){if(hCache.size>400000)hCache.clear();h=colInfo(X,Z,TN).h;hCache.set(k,h);}return h;}
 function slopeAt(X,Z,h){return Math.max(Math.abs(hAt(X+1,Z)-h),Math.abs(hAt(X-1,Z)-h),Math.abs(hAt(X,Z+1)-h),Math.abs(hAt(X,Z-1)-h));}
 function fillCol(x,z,X,Z,o){
-  let h=o.h;const b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3),wallS=0;
+  let h=o.h;const b=o.b,ci=x+W*z,F=forestOf(o),rock=(F&&F.rock)||(o.wChalk>0.4?CHALK:o.wgate>0.2&&o.wVolc>0.5?BASALT:0),shoreS=F&&F.shore&&(b===0||b===1)?F.shore(o):0;let top=topBlock(o),soil=3+Math.round(fbm2(X/30,Z/30,1,2401.7)*3),wallS=0;
   if(b!==0&&b!==1&&!o.vflow&&!o.vfis){const sl=slopeAt(X,Z,h);
     if(sl>=4){top=rock||STONE;soil=0;}
     else if(sl>=2&&F&&F.wall)wallS=F.wall; // the terraces' retaining walls (M6g)
@@ -3634,7 +3666,7 @@ function stairwayAt(WCX,WCZ){
 }
 function stairwayNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=stairwayAt(cx+a,cz+b);if(s&&Math.abs(X-s.X)<=3+m&&Math.abs(Z-s.Z)<=3+m)return true;}return false;}
 // Surface columns that structures have claimed: trees, boulders and other surface features keep off them
-function surfTaken(X,Z,m,tree){m=m||0;return gateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m)||!!realmNear(X,Z,m,tree);}
+function surfTaken(X,Z,m,tree){m=m||0;return gateNear(X,Z,m)||wasteGateNear(X,Z,m)||stairwayNear(X,Z,m)||!!siteNear(X,Z,m)||oldRoadAt(X,Z)||caveMouthNear(X,Z,m)||!!realmNear(X,Z,m,tree);}
 const SW_RING=[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
 function stairwayP(s,r){
   const X=s.X,Z=s.Z,g=s.g,a=s.a,ys=a.y-1,wall=()=>{const q=r();return q<0.4?SBRICK:q<0.75?MOSSY:COBBLE;};
@@ -3706,7 +3738,7 @@ function siteAt(rx,rz){
       const X=rx*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0),Z=rz*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0);
       let lo=1e9,hi=-1e9,bad=false;
       for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=TS2.sl+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
-      if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4)||realmNear(X,Z,R+8))continue;
+      if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4)||wasteGateNear(X,Z,R+8)||realmNear(X,Z,R+8))continue;
       let ring=0,river=0;for(let k=0;k<8;k++){const a=k*0.785;ring+=hAt(Math.round(X+Math.cos(a)*36),Math.round(Z+Math.sin(a)*36));
         for(const d of [20,40]){colInfo(Math.round(X+Math.cos(a)*d),Math.round(Z+Math.sin(a)*d),TS2);if(TS2.river||TS2.bank)river=1;}}
       const prom=hi-ring/8;if(prom<-1)continue;
@@ -3835,6 +3867,7 @@ function buildSite(s){
 // What to call a place on the surface
 function surfaceName(X,Y,Z){
   const s=siteNear(X,Z,1);if(s){if(s.way&&Math.abs(X-(s.X+s.R+4))<=2&&Math.abs(Z-s.Z)<=2)return 'An Ancient Waystone';return s.name;}
+  {const wn=wasteGateName(X,Z);if(wn)return wn;} // the gates of the wastes, the siege and the camp of the hosts (D-067)
   {const rp=realmPlace(X,Z);if(rp)return rp.name;} // a city, castle, village, watchtower or farmstead of the realms of men (D-060)
   {const rr=realmRoadAt(X,Z,0);if(rr)return realmRoadName(rr.rd);} // the people's high road or a lane (D-060, D-061)
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(gateNear(X,Z,0))return 'The Gate of '+holdOf(cx,cz).name;
@@ -3842,6 +3875,7 @@ function surfaceName(X,Y,Z){
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
+  {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
   {const op=orcNear(X,Z,0);if(op)return op.name;} // the orcs' places on the wastes (D-064)
   for(const v of volcanoesNear(X,Z,0))if(Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name; // the volcanoes (D-051), the great ones too (D-054)
@@ -4647,47 +4681,45 @@ function keptBuild(s,r){
 // obsidian where they meet the water of other lands. The ground is black ash and cinder, with charred trees (some still
 // smouldering), basalt spires, obsidian shards and fumaroles ringed with sulphur. All pure functions of the seed.
 const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
-// ---- The great volcano (D-054, D-055): every stretch of the wastes has one near its middle, far larger than the rest, the seat
-// of an Emberlord's fortress, rising from the sunken floor high over the ring of ash mountains about it. Placed where the floor
-// holds its whole foot with room to spare (the widest that fits, searched outward from the middle of the stretch's cells), clear
-// of the great volcanoes of stronger stretches that share the basin; the lesser volcanoes keep clear of it.
+// ---- The great volcano (D-054, D-055, D-067): every basin of the wastes has one, near its middle, far larger than the rest,
+// the seat of an Emberlord's fortress, rising from the sunken floor high over the ring of ash mountains about it. Placed where
+// the floor holds its whole foot with room to spare (the widest that fits, searched outward from the basin's middle), clear of
+// the way down from its gate (wasteGateOf); its lesser cones about its foot. A basin of several stretches has one all the same,
+// in its chief stretch's name (wasteBasin).
 const GREAT_R=[250,225,200,175,150,125];
 function greatOf(c){
   const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;greatC.set(key,null);
-  if(LANDS[cellLand(c)].k==='volcanic'){
-    // the middle of the stretch, and the stronger stretches' great volcanoes nearby
-    let mx=0,mz=0,n=0;const others=[];
-    for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const d=landSite(c.i+a,c.j+b);if(LANDS[cellLand(d)].k!=='volcanic')continue;const sc=stretchCell(d);
-      if(sc===c){mx+=d.x;mz+=d.z;n++;}else if(sc.pr>c.pr&&!others.includes(sc))others.push(sc);}
-    const G=[];for(const sc of others){const g=greatOf(sc);if(g){G.push(g);for(const t of g.sats)G.push(t);}}
-    for(const R of GREAT_R){v=greatTry(c,R,mx/n,mz/n,G);if(v)break;}}
+  if(LANDS[cellLand(c)].k==='volcanic'){const B=wasteBasin(c),ch=B.chief;
+    if(ch.i===c.i&&ch.j===c.j)for(const R of GREAT_R){v=greatTry(c,R,B.cx,B.cz,[],B);if(v)break;}}
   greatC.set(key,v);return v;
 }
 // Is a disc of radius m about (X,Z) on the floor of a basin, and not over the sea?
 function onFloor(X,Z,m,k){landsAt(X,Z,TVC);if(TVC.bs>-m-8||TVC.wVolc<0.95)return false;
   for(let q=0;q<k;q++){const a=q*6.2832/k;landsAt(X+Math.round(Math.cos(a)*m),Z+Math.round(Math.sin(a)*m),TVC2);if(TVC2.bs>-8)return false;}return true;}
-function greatTry(c,R,cx,cz,G){
+function greatTry(c,R,cx,cz,G,B){
   const foot=Math.round(R*1.3)+40;
-  for(let k=0;k<30;k++){const a=k*2.4,d=k?k*9:0,X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
-    if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24))continue;if(!onFloor(X,Z,foot,16))continue;
+  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0,X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
+    if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24))continue;if(!onFloor(X,Z,foot,16))continue;if(B&&wasteGateKeep(B,X,Z,foot+16))continue;
     volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)continue;
       const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);
       const fl=[],nf=4+Math.floor(r()*3),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.6,len:0.85+r()*0.4});const old=[];for(let q=0;q<5;q++)old.push(r()*6.283);
       const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
       // lesser cones about its foot, where the floor holds them, clear of each other and of the stronger great volcanoes
       const s0=r()*6.283;for(let q=0;q<18&&v.sats.length<4;q++){const sa=s0+q*0.75+(r()-0.5)*0.3,sR=30+Math.floor(r()*28),sd=R*1.15+sR*1.1+10+(q%2)*20+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
-        if(v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8))continue;
+        if(v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8)||B&&wasteGateKeep(B,sX,sZ,Math.round(sR*1.45)+12))continue;
         const so={};colInfoBase(sX,sZ,so);if(so.h<so.sl+2||so.river||so.rvBot!==999)continue;
         const sHv=Math.min(H-50-so.h,Math.round(sR*(0.62+sh*0.26))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
         v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
       return v;}finally{volcSkip=false;}}
   return null;
 }
-// the great volcanoes whose works may reach within r of (X,Z) (cached by 32-block tile for the terrain)
+// the great volcanoes whose works may reach within r of (X,Z), with their lesser cones (cached by 32-block tile for the terrain):
+// the basins of the volcanic cells about it, each once
 function greatNear(X,Z,r){
   const tk=(X>>5)*65536+(Z>>5)+(r>200?0.5:0);if(r<=200){const c=greatNC.get(tk);if(c)return c;}if(greatNC.size>40000)greatNC.clear();
   const out=[],seen=new Set(),ci=Math.floor(X/LS),cj=Math.floor(Z/LS),n=r>200?Math.min(6,Math.ceil(r/LS)+1):2;
-  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);const g=greatOf(c);if(g&&Math.hypot(g.X-X,g.Z-Z)<Math.max(r,200)+g.R*1.45+120){out.push(g);for(const t of g.sats)out.push(t);}}
+  for(let a=-n;a<=n;a++)for(let b=-n;b<=n;b++){const d=landSite(ci+a,cj+b);if(LANDS[cellLand(d)].k!=='volcanic')continue;const B=wasteBasin(d);if(seen.has(B.key))continue;seen.add(B.key);
+    const g=greatOf(B.chief);if(g&&Math.hypot(g.X-X,g.Z-Z)<Math.max(r,200)+g.R*1.45+120){out.push(g);for(const t of g.sats)out.push(t);}}
   if(r<=200)greatNC.set(tk,out);return out;
 }
 // a candidate: one per grid cell where the land is wholly volcanic for its whole width (no base height yet)
@@ -4696,6 +4728,7 @@ function volcCand(i,j){
   if(hsh(i,9101,j)<0.95){const X=Math.floor((i+0.15+hsh(i,9103,j)*0.7)*VOLC_C),Z=Math.floor((j+0.15+hsh(i,9105,j)*0.7)*VOLC_C),R=34+Math.floor(hsh(i,9107,j)*30);
     let ok=onFloor(X,Z,Math.round(R*1.3)+6,8); // on a basin's floor, its foot and flows too (D-055)
     if(ok)for(const g of greatNear(X,Z,200))if(Math.hypot(g.X-X,g.Z-Z)<(g.great?g.R*1.15+R*0.9+8:(g.R+R)*1.3+12))ok=false; // clear of the great volcano
+    if(ok&&wasteGateNear(X,Z,Math.round(R*1.45)+12))ok=false; // clear of the gate, its yard, the way down and the camps (D-067)
     if(ok)v={i:i,j:j,key:i+','+j,X:X,Z:Z,R:R,pri:hsh(i,9113,j)};}
   volcCandC.set(key,v);return v;
 }
@@ -4740,8 +4773,8 @@ function volcCone(v,S,d,th,X,Z){
   if(d<v.rc){const q=d/v.rc;return v.Hv-(v.cd+3)+(v.cd+3)*Math.pow(q,4)+rv*Math.pow(q,8);}
   if(d>=v.R)return 0;
   const n=v.great?9:6,gnf=t=>fbm2(Math.cos(t)*3+v.i*0.37,Math.sin(t)*3+v.j*0.37,2,9311.3),s=1-(d-v.rc)/(v.R-v.rc),e=S.e0+S.e1*Math.sin(th+S.ep),g0=gnf(th),ph=th*n+g0*5,
-    dph=Math.max(0.3,Math.abs(n+(gnf(th+0.002)-g0)*2500)),k=Math.round(ph/Math.PI),off=Math.abs(ph-k*Math.PI),fw=v.great?2.2+2.8*(1-s):1.2+1.3*(1-s),
-    gul=Math.sin(Math.max(0,off-fw*dph/d)),deep=Math.max(10,v.R*0.17)*4*s*(1-s);
+    dph=Math.max(0.3,Math.abs(n+(gnf(th+0.002)-g0)*2500)),k=Math.round(ph/Math.PI),off=Math.abs(ph-k*Math.PI),fw=v.great?3+4*(1-s):1.5+1.6*(1-s),
+    gul=Math.sin(Math.max(0,off-fw*dph/d)),deep=Math.max(6,v.R*0.07)*4*s*(1-s);
   VCG.lat=off/dph*d;VCG.fw=fw;VCG.k=((k%(2*n))+2*n)%(2*n);VCG.s=s;
   let hh=Math.pow(s,e)*v.Hv+rv*sstep(0.86,1,s)-(1-gul)*(1-gul)*(1-gul)*deep+fbm2(X/29,Z/29,2,9315.7)*(v.great?7:3)*4*s*(1-s)+fbm2(X/11,Z/11,1,9119.3)*1.8;
   if(S.col){const k=sstep(0.55,0.2,Math.abs(angDiffV(th,S.thc)))*sstep(0.1,0.32,s)*sstep(0.96,0.78,s);hh-=k*S.col*v.Hv;} // the fallen flank
@@ -4749,28 +4782,37 @@ function volcCone(v,S,d,th,X,Z){
   return hh;}
 // Does gully k (counted round the cone) of volcano v carry lava? Most do; never those near the quarter of its fortress
 function gullyLava(v,S,k,th){if(hsh(v.i*7+k,9333,v.j)>=(v.great?0.88:0.7))return false;if(S.fq===undefined)S.fq=fortQuarters(v)[0].th;return Math.abs(angDiffV(th,S.fq))>(v.great?0.4:0.6);}
-// The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land
+// The ground's height and its fire, called by colInfoBase for every column touched by the volcanic land. Every volcano whose reach
+// covers the column is worked out and the highest ground wins, its fire with it (D-067: before, the first to reach a column took
+// it, so a cone overlapping another's reach was cut off along that line)
+const TVA={},TVB={};
+function volcOne(v,X,Z,h,T){
+  T.vflow=T.vcrust=T.vcr=T.vgul=T.nr=false;T.vlake=0;T.vs=0;T.vn=0;
+  const dx=X-v.X,dz=Z-v.Z;
+  if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));const rx=v.reach*1.3+v.R*0.1;if(Math.abs(dx)>=rx||Math.abs(dz)>=rx||Math.hypot(dx,dz)>=rx)return null;
+  const S=volcShape(v),[d,th]=volcFrame(v,S,X,Z);if(d>=v.reach)return null;T.vn=sstep(v.reach,v.R*1.05,d); // gorges ease out before it (D-067)
+  // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
+  const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;if(fb>0.3)T.nr=true; // no river climbs a volcano
+  if(d<v.R){hh+=volcCone(v,S,d,th,X,Z);if(d<v.rc){T.vcr=true;T.vs=1;if(hh<v.lake)T.vlake=v.lake;}else T.vs=1-(d-v.rc)/(v.R-v.rc);
+    // a gully's floor (D-064, D-067): most carry a stream of lava three deep from high on the flank, thinning to one at the
+    // foot, its face a block under the gully's floor; the rest a floor of glowing crust; none on the quarter the mountain's
+    // fortress faces
+    if(VCG.lat<VCG.fw-0.35&&VCG.s>0.03&&VCG.s<0.9){if(gullyLava(v,S,VCG.k,th)){const f=Math.round(hh);hh=f-(VCG.s<0.07?1:VCG.s<0.13?2:3);T.vlake=f-1;T.vflow=true;T.vgul=true;}else T.vcrust=true;}}
+  // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
+  if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
+    const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=(0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0))*(v.great?1.6:1);
+    if(lat<w&&d<dmax){hh=Math.min(Math.round(hh)-1,Math.round(v.lake-Math.max(0,d-v.rc)*0.55));T.vflow=true;T.vlake=0;T.vgul=false;break;}
+    if(lat<w+2.2)T.vcrust=true;}
+  if(!T.vflow&&d>v.rc&&d<v.R*0.95)for(const a0 of v.old)if(Math.abs(angDiffV(th,a0+0.2*Math.sin(d/9)))*d<1.4+d/v.R*1.6)T.vcrust=true; // old flows, cooled
+  return hh;}
 function volcTerrain(X,Z,o,h){
   if(volcSkip||o.wVolc<0.05)return h;
-  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);
-  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;const dx=X-v.X,dz=Z-v.Z;
-    if(v.reach===undefined)v.reach=v.R*Math.max(1.3,1+0.6*Math.max(...v.fl.map(f=>f.len-1),0));const rx=v.reach*1.3+v.R*0.1;if(Math.abs(dx)>=rx||Math.abs(dz)>=rx||Math.hypot(dx,dz)>=rx)continue;
-    const S=volcShape(v),[d,th]=volcFrame(v,S,X,Z);if(d>=v.reach)continue;
-    // the cone: the ground near it eases to the volcano's own base, so its crater and rim keep their heights
-    const fb=sstep(v.R*1.3,v.R*0.75,d);let hh=h+(v.base-h)*fb;if(fb>0.3){o.river=false;o.bank=false;} // no river climbs a volcano
-    if(d<v.R){hh+=volcCone(v,S,d,th,X,Z);if(d<v.rc){o.vcr=true;o.vs=1;if(hh<v.lake)o.vlake=v.lake;}else o.vs=1-(d-v.rc)/(v.R-v.rc);
-      // a gully's floor (D-064): most carry a stream of lava a block down in it from high on the flank to the foot, the rest
-      // a floor of glowing crust; none on the quarter the mountain's fortress faces
-      if(VCG.lat<VCG.fw-0.35&&VCG.s>0.03&&VCG.s<0.9){if(gullyLava(v,S,VCG.k,th)){hh=Math.round(hh)-1;o.vflow=true;o.vgul=true;}else o.vcrust=true;}}
-    // the flows: out through a breach in the rim at the lake's level, then down the flank and out onto the plain
-    if(d>=v.rc*0.9)for(let k=0;k<v.fl.length;k++){const f=v.fl[k],dmax=v.R*f.len;if(d>dmax+3)continue;
-      const ca=f.a+0.33*Math.sin(d/11+k*2.1)+0.12*Math.sin(d/4.3+k),lat=Math.abs(angDiffV(th,ca))*d,w=(0.8+Math.min(d/v.R,1.2)*1.7+(d>v.R?(d-v.R)*0.1:0))*(v.great?1.6:1);
-      if(lat<w&&d<dmax){hh=Math.min(Math.round(hh)-1,Math.round(v.lake-Math.max(0,d-v.rc)*0.55));o.vflow=true;o.vlake=0;break;}
-      if(lat<w+2.2)o.vcrust=true;}
-    if(!o.vflow&&d>v.rc&&d<v.R*0.95)for(const a0 of v.old)if(Math.abs(angDiffV(th,a0+0.2*Math.sin(d/9)))*d<1.4+d/v.R*1.6)o.vcrust=true; // old flows, cooled
-    return hh;}
-  // fissures across the plains: narrow, a few blocks deep, lava at the bottom
-  if(o.wVolc>0.55&&h>o.sl+3){const q=Math.abs(fbm2(X/85,Z/85,2,9121.3));if(q<0.0075+0.006*(o.wVolc-0.55)){o.vfis=true;return h-4-Math.floor(hsh(X>>2,9123,Z>>2)*4);}}
+  const ci=Math.floor(X/VOLC_C),cj=Math.floor(Z/VOLC_C),G=greatNear(X,Z,0);let B=null,bh=-1e9,nr=false,T=TVA;
+  for(let q=-G.length;q<9;q++){const v=q<0?G[q+G.length]:volcAt(ci+(q%3)-1,cj+Math.floor(q/3)-1);if(!v)continue;
+    const hh=volcOne(v,X,Z,h,T);if(hh===null)continue;if(T.nr)nr=true;if(T.vn>o.vnear)o.vnear=T.vn;if(hh>bh){bh=hh;B=T;T=T===TVA?TVB:TVA;}}
+  if(B){if(nr){o.river=false;o.bank=false;}o.vflow=B.vflow;o.vcrust=B.vcrust;o.vcr=B.vcr;o.vgul=B.vgul;o.vlake=B.vlake;o.vs=B.vs;return bh;}
+  // fissures across the plains: narrow, a few blocks deep, lava at the bottom (none on the gate's way, D-067)
+  if(o.wVolc>0.55&&h>o.sl+3&&!o.wgate){const q=Math.abs(fbm2(X/85,Z/85,2,9121.3));if(q<0.0075+0.006*(o.wVolc-0.55)){o.vfis=true;return h-4-Math.floor(hsh(X>>2,9123,Z>>2)*4);}}
   return h;
 }
 // Fumaroles: here and there a smoking vent, sulphur round it
@@ -4839,7 +4881,7 @@ function volcBuild(s,r){
   }
 }
 // ---- Fortresses in the volcanoes (D-052, D-054). The owner asked for balrogs; the name is Tolkien's, so ours are the Emberlords,
-// towering demons of fire and shadow. Each stretch of the wastes has one great volcano (volcanic.js), and in it the Ember Throne:
+// towering demons of fire and shadow. Each basin of the wastes has one great volcano (volcanic.js), and in it the Ember Throne:
 // an Emberlord's fortress built to its lord's size, with a gate between two great towers at the mountain's foot, a broad way in
 // through the rock past troughs of lava, and under the summit a vast throne hall with pillars, rivers of lava in the floor, a dais,
 // the throne and the hoard. The lesser volcanoes hold warholds of the orcs on the same plan at a smaller size. A fortress faces
@@ -5147,6 +5189,158 @@ function fortBuild(F){
   }
 }
 function applyFortresses(WCX,WCZ){const X=WCX*CS+8,Z=WCZ*CS+8;for(const F of fortsNear(X,Z,12))fortBuild(F);}
+// ---- The Ember Stair (D-067): the way up inside each great volcano, from its foot to its crater. It leaves the Ember Throne's
+// way in by a door in its side wall and winds round the mountain inside it, rising one in six, as near the flank as keeps 18
+// blocks of rock over it, so it turns tighter as the mountain narrows; two turns and more to the top, where it ends in a gallery
+// open over the crater's lake of fire. It goes by stretches of about 150: the orcs' stronghold (dressed basalt, floors of tiles,
+// ribbed vaults, fire baskets, banners, iron gates between the stretches) and raw cave of the mountain's fire (basalt and
+// obsidian, crusted lava underfoot, veins of magma in the walls, rock hanging from the roof). Halfway along each stretch it
+// opens into a chamber: in the stronghold a hall (the gate of the stair, barracks, a forge, an armoury, a shrine of the
+// Emberlord, a fighting pit), in the cave a cavern with a pool of lava held in its floor, or a hollow of obsidian spires.
+// Every hall and cavern has its orcs, goblins or trolls (stairSpots). It is carved sealed: every cell of its interiors is
+// opened, every cell about them within two is walled, so no cave's lava reaches in, and nothing is walled above the
+// mountain's surface. Planned from the cone's own shape (volcCone), never the ground, per volcano; built per chunk.
+const STAIR_W=4,STAIR_H=8,STAIR_COVER=18,stairC=new Map(),stairJ=new Map();
+const STAIR_HALLS=['gate','barracks','forge','armoury','shrine','pit'],STAIR_CAVES=['cavern','hollow'];
+const STAIR_NAMES={gate:'The Gate of the Stair',barracks:'The Barracks of the Ash Guard',forge:'The Forge of the Deep Fire',armoury:'The Armoury of the Throne',shrine:'The Shrine of the Emberlord',pit:'The Pit of the Stair',
+  cavern:'The Cavern of Cinders',hollow:'The Obsidian Hollow',gallery:'The Gallery of the Crater'};
+// the stair of great volcano v (null if it has none), planned now if it is not yet
+function stairOf(v){
+  if(!v||!v.great)return null;if(stairC.has(v.key))return stairC.get(v.key);const g=stairJ.get(v.key)||planStair(v);stairJ.delete(v.key);let r;while(!(r=g.next()).done);
+  if(stairC.size>200)stairC.clear();stairC.set(v.key,r.value);return r.value;}
+// Streaming (a step of its own, before a chunk's columns, like realmPrep): the stairs of the great volcanoes about the chunk are
+// planned a slice at a time. True once all are planned
+function stairPrep(X,Z){for(const v of greatNear(X,Z,0)){if(!v.great||stairC.has(v.key))continue;let g=stairJ.get(v.key);if(!g){if(stairJ.size>4)stairJ.clear();g=planStair(v);stairJ.set(v.key,g);}
+    const t0=performance.now();let r;while(!(r=g.next()).done)if(performance.now()-t0>WG_STEP_MS)return false;
+    stairJ.delete(v.key);if(stairC.size>200)stairC.clear();stairC.set(v.key,r.value);return false;}
+  return true;}
+function* planStair(v){
+  let H=null;const F=fortOf(v);yield;
+  if(F){const S=volcShape(v),P=F.P,cone=(X,Z)=>{const [d,th]=volcFrame(v,S,X,Z);return d>=v.R?v.base:v.base+volcCone(v,S,d,th,X,Z);},r=rngAt(v.i,9801,v.j),sj=r()<0.5?1:-1;
+    const fw=(u,w)=>[F.GX-F.ox*u+F.px*w,F.GZ-F.oz*u+F.pz*w];
+    // the door: where the way in has rock enough beside it, at least 12 in from the gate
+    let uJ=-1;for(let u=12;u<F.U1-12;u+=2){const [x,z]=fw(u,sj*(P.cw+16));if(cone(x,z)>=fortFloor(F,u)+STAIR_H+STAIR_COVER){uJ=u;break;}}
+    if(uJ>=0){const y0=fortFloor(F,uJ)-1,pts=[];let [x,z]=fw(uJ,sj*(P.cw+1)),dx=F.px*sj,dz=F.pz*sj,y=y0;pts.push([x,z,y]);
+      for(let k=1;k<=4;k++){x+=dx*4;z+=dz*4;pts.push([x,z,y]);}
+      // round the mountain: four along the way about its middle (which leans with the crater as it rises), then in (at most four)
+      // or out (at most two) toward the radius that keeps its cover over the next four steps, and up two in three
+      const mid=yy=>{const q=Math.pow(Math.max(0,Math.min(1,(yy-v.base)/v.Hv)),1.5);return [v.X+S.ox*q,v.Z+S.oz*q];};
+      for(let k=0;k<700;k++){if(k%8===0)yield;const [mx,mz]=mid(y),rx=x-mx,rz=z-mz,rr=Math.hypot(rx,rz)||1;let tx=-rz/rr,tz=rx/rr;if(tx*dx+tz*dz<0){tx=-tx;tz=-tz;}
+        x+=tx*4;z+=tz*4;y+=4/6;dx=tx;dz=tz;
+        const [cx,cz]=mid(y),rad=Math.hypot(x-cx,z-cz),ux=(x-cx)/rad,uz=(z-cz)/rad,need=y+STAIR_H+STAIR_COVER;let best=null;
+        // the cover over a spread of points across the passage and out beyond its flank side (the gullies are narrow and deep)
+        const deep=(px,pz)=>{for(const [o,t] of [[0,0],[STAIR_W+3,0],[STAIR_W+9,0],[0,4],[0,-4],[STAIR_W+3,4],[STAIR_W+3,-4]])if(cone(px+ux*o+tx*t,pz+uz*o+tz*t)<need)return false;return true;};
+        for(let e=4;e>=-24&&best===null;e-=2){let ok=true;for(let a=0;a<=4&&ok;a++){const px=x+tx*4*a+ux*e,pz=z+tz*4*a+uz*e;
+            if(!deep(px,pz))ok=false; // its cover toward the flank
+            else if(y<v.lake+3&&cone(px-ux*(STAIR_W+3),pz-uz*(STAIR_W+3))<y+STAIR_H+6)ok=false;} // and never into the crater below its lake
+          if(ok)best=e;}
+        const e=best===null?-4:Math.max(-4,Math.min(2,best));x+=ux*e;z+=uz*e;pts.push([x,z,y]);
+        if(y>=v.lake+3)break;}
+      if(y>=v.lake+3){
+        // the gallery at the top: in from the stair's end toward the crater until the floor of the crater lies below it, a little more
+        const [cx,cz]=mid(y),ex=cx-x,ez=cz-z,el=Math.hypot(ex,ez)||1,top=[];for(let q=1;q<40;q++){const px=x+ex/el*q*2,pz=z+ez/el*q*2;top.push([px,pz,y]);if(cone(px,pz)<y-1&&q>3){top.push([px+ex/el*3,pz+ez/el*3,y]);break;}}
+        const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+        // the stretches and their chambers
+        const tot=L[L.length-1],secs=[],ch=[],seg=new Array(pts.length).fill(0);let nh=0,nc=0;
+        for(let s=0;s*150<tot;s++){const kind=s%2===0?'hold':'cave';secs.push(kind);}
+        for(let i=0;i<pts.length;i++)seg[i]=Math.min(secs.length-1,Math.floor(L[i]/150));
+        for(let s=0;s<secs.length;s++){const Lm=s===0?Math.min(40,tot/2):s*150+75;if(Lm>tot-30)break;let i=0;while(i+1<pts.length&&L[i]<Lm)i++;
+          const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)],tl=Math.hypot(b[0]-a[0],b[1]-a[1])||1,tx=(b[0]-a[0])/tl,tz=(b[1]-a[1])/tl,[mx,mz]=mid(pts[i][2]),rl=Math.hypot(pts[i][0]-mx,pts[i][1]-mz)||1,ox=(pts[i][0]-mx)/rl,oz=(pts[i][1]-mz)/rl;
+          const kind=secs[s]==='hold'?STAIR_HALLS[nh++%STAIR_HALLS.length]:STAIR_CAVES[nc++%STAIR_CAVES.length],cave=secs[s]==='cave',inw=cave?9:7;
+          ch.push({kind:kind,cave:cave,x:pts[i][0]-ox*inw,z:pts[i][1]-oz*inw,y:Math.round(pts[i][2]),tx:tx,tz:tz,ox:ox,oz:oz,R:cave?15:0,len:26,wid:16,Hc:cave?18:11,i:i,seed:hsh(i,9803,v.i)});}
+        ch.push({kind:'gallery',cave:false,x:x-ex/el*8,z:z-ez/el*8,y:Math.round(y),tx:dx,tz:dz,ox:-ex/el,oz:-ez/el,R:0,len:18,wid:14,Hc:10,i:pts.length-1,seed:0}); // (back from the crater, its spur opening onto it)
+        const allP=pts.concat(top),segK=seg.concat(top.map(()=>secs.length));
+        let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9,ylo=1e9,yhi=-1e9;for(const p of allP){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);ylo=Math.min(ylo,p[2]);yhi=Math.max(yhi,p[2]);}
+        H={v:v,F:F,pts:allP,top0:pts.length,seg:segK,secs:secs.concat(['hold']),L:L,ch:ch,name:'The Ember Stair of '+v.name.replace(/^The Burning Mountain of /,''),sj:sj,
+          box:[x0-40,x1+40,z0-40,z1+40,ylo-4,yhi+30],id:'st'+v.key};}}}
+  return H;}
+// the stairs of the great volcanoes whose works reach within m of (X,Z)
+function stairsNear(X,Z,m){const out=[];for(const v of greatNear(X,Z,0))if(v.great){const H=stairOf(v);if(H&&X>=H.box[0]-m&&X<=H.box[1]+m&&Z>=H.box[2]-m&&Z<=H.box[3]+m)out.push(H);}return out;}
+// A chamber's cells about (X,Z): its floor and the height of its interior there (0 outside it), and how far outside it lies
+// (for the shell); local a along the stair, b across (out toward the flank positive)
+function stairChamber(c,X,Z){const dx=X-c.x,dz=Z-c.z,a=dx*c.tx+dz*c.tz,b=dx*c.ox+dz*c.oz;
+  if(c.R){const ang=Math.atan2(b,a),Rr=c.R*(1+0.18*Math.sin(ang*3+c.seed*6)+0.1*Math.sin(ang*7+c.seed*11)),r=Math.hypot(a,b)/Rr;
+    if(r>=1)return [0,(Math.hypot(a,b)-Rr),a,b];return [Math.max(2,Math.round(c.Hc*Math.sqrt(1-r*r)+fbm2(X/6,Z/6,1,9805.3)*3)),0,a,b];}
+  const ea=Math.abs(a)-c.len/2,eb=Math.abs(b)-c.wid/2;if(ea>0||eb>0)return [0,Math.max(ea,eb),a,b];
+  return [c.Hc-(Math.abs(b)>c.wid/2-2?Math.round((Math.abs(b)-(c.wid/2-2))*1.5):0),0,a,b];}
+// Is (X,Y,Z) a block of a cavern's pool of lava (held in its floor)?
+function stairPool(c,a,b){return c.kind==='cavern'&&Math.hypot(a-3,b+2)<4.2;}
+function stairLavaAt(X,Y,Z){for(const H of stairsNear(X,Z,0))for(const c of H.ch){if(!c.R||Math.abs(X-c.x)>c.R+2||Math.abs(Z-c.z)>c.R+2)continue;const [h,e,a,b]=stairChamber(c,X,Z);if(h&&Y===c.y&&stairPool(c,a,b))return true;}return false;}
+// ---- Building, per chunk: each column's interiors (the stair's stretches near it and its chambers) and the shell about them
+const TST={};
+function applyStairs(WCX,WCZ){
+  const x0=WCX*CS,z0=WCZ*CS;
+  for(const H of stairsNear(x0+8,z0+8,8)){if(x0+CS<H.box[0]||x0>H.box[1]||z0+CS<H.box[2]||z0>H.box[3])continue;
+    const segs=[],p=H.pts,M=STAIR_W+5;for(let i=0;i+1<p.length;i++){if(Math.max(p[i][0],p[i+1][0])+M<x0||Math.min(p[i][0],p[i+1][0])-M>x0+CS||Math.max(p[i][1],p[i+1][1])+M<z0||Math.min(p[i][1],p[i+1][1])-M>z0+CS)continue;segs.push(i);}
+    const chs=H.ch.filter(c=>{const e=Math.max(c.R+6,c.len/2+c.wid/2+4);return c.x+e>=x0&&c.x-e<=x0+CS&&c.z+e>=z0&&c.z-e<=z0+CS;});
+    if(!segs.length&&!chs.length)continue;genLit=true;
+    try{for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++)stairCol(H,segs,chs,x0+lx,z0+lz);}finally{genLit=false;}}}
+function stairCol(H,segs,chs,X,Z){
+  const p=H.pts,x=X-OX,z=Z-OZ,gTop=ground[x+W*z],iv=[];
+  for(const i of segs){const a=p[i],b=p[i+1],ex=b[0]-a[0],ez=b[1]-a[1],l2=ex*ex+ez*ez||1,t=Math.max(0,Math.min(1,((X-a[0])*ex+(Z-a[1])*ez)/l2)),d=Math.hypot(X-a[0]-ex*t,Z-a[1]-ez*t);
+    const cave=H.secs[H.seg[i]]==='cave',hw=cave?STAIR_W+1+fbm2(X/9,Z/9,1,9807.1)*1.5:STAIR_W;if(d>hw+2.5)continue;const f=Math.round(a[2]+(b[2]-a[2])*t),L=(H.L[i]||0)+Math.sqrt(l2)*t;
+    const top=d>hw?0:cave?Math.max(3,Math.round((STAIR_H+2)*Math.sqrt(Math.max(0,1-(d/hw)*(d/hw)))+fbm2(X/5,Z/5,1,9809.3)*2)):STAIR_H-(d>hw-1.5?1:0);
+    iv.push([f,top,d>hw?d-hw:0,cave,L,d,i]);}
+  for(const c of chs){const [h,e,a,b]=stairChamber(c,X,Z);if(e>2.5)continue;iv.push([c.y,h,e,c.cave,0,0,-1,c,a,b]);}
+  if(!iv.length)return;
+  // the fortress's own way in and hall stay as they are (the stair opens a door in the way's wall, nothing more)
+  let fz=null;{const F=H.F,[fu,fv]=fortUV(F,X,Z),P=F.P;if(fu>=3&&fu<F.U1&&Math.abs(fv)<=P.cw||fu>=F.U1&&fu<=F.U1+F.Lh&&Math.abs(fv)<=P.hw+3)fz=[fortFloor(F,fu)-1,F.Fh+F.Hh+2];}
+  const band=q=>q[0]+Math.max(q[1],q[7]?q[7].Hc+3:STAIR_H+4)+2;let ylo=1e9,yhi=-1e9;for(const q of iv){ylo=Math.min(ylo,q[0]-2);yhi=Math.max(yhi,band(q));}
+  const S=(y,id)=>{if(fz&&y>=fz[0]&&y<=fz[1])return;PW(X,y,Z,id,MODE_SET);};
+  for(let y=ylo;y<=yhi;y++){let inn=null,sh=null;
+    for(const q of iv){const f=q[0];if(q[1]&&q[2]===0&&y>f&&y<=f+q[1]){inn=q;break;}if(y>=f-2&&y<=band(q))sh=sh||q;}
+    if(inn){S(y,y>gTop?AIR:stairInner(H,inn,X,y,Z));continue;} // nothing is furnished out in the open
+    if(!sh)continue;
+    // out in the open only the gallery at the top and its way out over the crater are built: a floor, and a parapet at its edge
+    if(y>gTop&&!((sh[7]&&sh[7].kind==='gallery'||sh[6]>=H.top0-1)&&(y===sh[0]||y===sh[0]+1&&sh[2]>0&&sh[2]<=1.5)))continue;
+    S(y,stairShell(H,sh,X,y,Z,iv));}}
+// what fills an interior cell (air, or a piece of furnishing)
+function stairInner(H,q,X,y,Z){const f=q[0],dy=y-f,c=q[7],h=hsh(X*3+y,9811,Z);
+  if(c)return stairRoom(H,c,q[8],q[9],X,y,Z,dy,q[1]);
+  if(q[3]){if(dy===q[1]&&h<0.12)return CINDER;return AIR;} // rock hanging from a cave's roof
+  const L=q[4],d=q[5],at=Math.floor(L)%10;
+  if(dy===1&&d>STAIR_W-1.2&&at===5)return BRAZIER;
+  if(dy===STAIR_H&&Math.floor(L)%6===0)return BASCARVE;
+  if(dy>=STAIR_H-1&&Math.floor(L)%150<2)return GRATE; // the gate between the stretches, raised
+  return AIR;}
+// the shell: the floor, the walls and the vault, by the stretch's kind
+function stairShell(H,q,X,y,Z,iv){const f=q[0],h=hsh(X*7+y,9813,Z);
+  if(q[7]&&y===f&&q[2]===0&&stairPool(q[7],q[8],q[9]))return LAVA; // a cavern's pool, held in its floor
+  if(q[3]){if(y===f)return h<0.18?LAVACRUST:h<0.6?CINDER:BLACKASH;return h<0.05?MAGMA:h<0.17?OBSID:h<0.4?BASALT:CINDER;}
+  if(y===f)return q[2]>0.5?OBSBRICK:BASTILE;
+  if(q[7])return fortStone(X,y,Z);
+  if(y===f+3&&Math.floor(q[4])%20===10&&q[2]<1.2&&h<0.6)return EMGLYPH;
+  return fortStone(X,y,Z);}
+// The furnishings of a chamber (a along the stair, b across, dy over its floor, hc its height there)
+function stairRoom(H,c,a,b,X,y,Z,dy,hc){const k=c.kind,h=hsh(X*5+y,9815,Z),ab=Math.abs(b),aa=Math.abs(a);
+  if(c.cave){if(stairPool(c,a,b))return AIR;
+    if(k==='hollow'){const sx=Math.round(a/5)*5,sz=Math.round(b/5)*5,sh2=hsh(sx,9817,sz);if(sh2<0.35&&Math.hypot(a-sx,b-sz)<1.2&&dy<=Math.round(3+sh2*14))return OBSID;}
+    if(dy===hc&&h<0.15)return CINDER;
+    if(k==='cavern'&&dy===1&&h<0.03)return BONES;return AIR;}
+  const W2=c.wid/2,L2=c.len/2;
+  // pillars down both sides of every hall, fire baskets between them
+  if(ab>=W2-3&&ab<=W2-2&&(Math.round(a)%6+6)%6===0&&dy<hc)return BASPILLAR;
+  if(ab>W2-1.5&&(Math.round(a)%6+6)%6===3&&dy===1)return BRAZIER;
+  if(dy===hc&&(Math.round(a)%6+6)%6===0)return BASCARVE;
+  switch(k){
+    case 'gate':if(aa<=1&&dy>=hc-2&&ab<=STAIR_W)return GRATE;if(aa>=L2-1&&ab<=W2-3&&dy===1&&h<0.4)return SPIKES;if(ab<=1&&aa===4&&dy===1)return SKULLS;break;
+    case 'barracks':if(ab>=W2-5&&ab<=W2-4&&(Math.round(a)%3+3)%3!==0&&dy===1)return HIDE;if(ab<=1&&(Math.round(a)%8+8)%8===4&&dy===1)return h<0.5?BARREL:CRATE;break;
+    case 'forge':if(ab<=1.5&&aa<=L2-4){if(dy===1&&(Math.round(a)%5+5)%5===0)return ORCIRON;}if(ab>=W2-5&&ab<=W2-4&&aa<=3){if(dy<=4)return dy===1?MAGMA:BASBRICK;}if(ab<=0.5&&aa===L2-3&&dy>=2&&dy<=hc-1)return CHAIN;break;
+    case 'armoury':if(ab>=W2-5&&ab<=W2-4&&(Math.round(a)%2+2)%2===0&&dy<=2)return dy===2?SPIKES:CHARWOOD;if(ab<=1&&(Math.round(a)%5+5)%5===0&&dy===1)return CRATE;break;
+    case 'shrine':if(ab<=1.5&&a>=L2-4&&dy<=6)return dy===6?BRAZIER:dy===1?OBSBRICK:EMGLYPH;if(ab<=0.5&&a>=L2-6&&a<L2-4&&dy===1)return SKULLS;if(ab>=2&&ab<=4&&a>=L2-3&&dy===1)return BONES;break;
+    case 'pit':if(ab<=W2-5&&aa<=L2-6){if(dy===1&&(ab>W2-6||aa>L2-7))return SPIKES;}break;
+    case 'gallery':if(dy===1&&ab>=W2-2&&(Math.round(a)%4+4)%4===0)return BRAZIER;break;}
+  return AIR;}
+// ---- Names and the foes in it
+// the name of the stair at (X,Y,Z) (a chamber's own name in a chamber), or null
+function stairName(X,Y,Z){for(const H of stairsNear(X,Z,0)){if(Y<H.box[4]||Y>H.box[5])continue;
+  for(const c of H.ch){if(Math.abs(Y-c.y-4)>c.Hc)continue;const [h]=stairChamber(c,X,Z);if(h)return STAIR_NAMES[c.kind];}
+  const p=H.pts;for(let i=0;i+1<p.length;i++){const a=p[i],b=p[i+1],ex=b[0]-a[0],ez=b[1]-a[1],l2=ex*ex+ez*ez||1,t=Math.max(0,Math.min(1,((X-a[0])*ex+(Z-a[1])*ez)/l2));
+    if(Math.hypot(X-a[0]-ex*t,Z-a[1]-ez*t)<=STAIR_W+1&&Math.abs(Y-(a[2]+(b[2]-a[2])*t)-4)<=6)return H.name;}}return null;}
+// where they stand: each chamber's band (world coordinates, y the floor), within 44 of (X,Z) and 18 of Y
+const STAIR_SPOT={gate:'gate',barracks:'ocamp',forge:'oforge',armoury:'ogate',shrine:'shrine',pit:'opit',cavern:'band',hollow:'den',gallery:'gate'};
+function stairSpots(X,Y,Z,out){for(const H of stairsNear(X,Z,44))H.ch.forEach((c,k)=>{if(Math.hypot(c.x-X,c.z-Z)>44||Math.abs(c.y-Y)>18)return;
+  out.push({id:H.id+':'+k,x:c.x+0.5,y:c.y+1,z:c.z+0.5,R:c.cave?6:5,kind:STAIR_SPOT[c.kind],stair:c.kind});});}
 // ---- The orcs' places on the floor of the Volcanic Wastes (D-064): war camps behind black palisades, watchtowers, forges by
 // troughs of lava and fighting pits, each with its orcs (foes.js peoples them). One may stand in each cell of a grid where the
 // floor is open and level enough, clear of the volcanoes and their flows, the lava rivers and fissures, the landmarks, the old
@@ -5167,11 +5361,11 @@ function orcCand(i,j){
       if(ok&&hi-lo<=K.sp)p={i:i,j:j,kind:kind,X:X,Z:Z,R:R,g:hAt(X,Z),pr:hsh(i,9609,j)};}}
   orcCandC.set(key,p);return p;
 }
-// clear of the volcanoes' feet, the landmarks, the old sites, the fortresses and the goblins' camps (the
+// clear of the volcanoes' feet, the landmarks, the old sites, the fortresses, the goblins' camps and the gate's works (the
 // cave plans, which the landmarks read, never ask for the orcs, so nothing here asks for itself)
 function orcClear(X,Z,R){
   for(const v of volcanoesNear(X,Z,R+60))if(Math.hypot(v.X-X,v.Z-Z)<(v.great?v.R*1.15+R+10:v.R*0.95+R*0.5))return false; // a lesser cone's gentle foot may hold one; the samples keep it off the flows
-  return !siteNear(X,Z,R+6)&&!fortsNear(X,Z,R+12).length&&!sigNear(X,Z,R+16)&&!warrenSpots(X,Z,R+16).some(s=>s.kind==='camp');
+  return !siteNear(X,Z,R+6)&&!fortsNear(X,Z,R+12).length&&!sigNear(X,Z,R+16)&&!warrenSpots(X,Z,R+16).some(s=>s.kind==='camp')&&!wasteGateNear(X,Z,R+12);
 }
 // the orcs' place of cell (i,j): a candidate not crowded by a stronger neighbour, named
 function orcAt(i,j){
@@ -5290,6 +5484,156 @@ function orcBuild(p){
       break;}
   }
 }
+// ---- The Gate of the Wastes (D-067): every basin of the Volcanic Wastes has one way in for an army. Where the ring of ash
+// mountains faces the nearest realm, a pass is cut through it down to the level of the lands outside, and the orcs have shut it
+// with a gate between two towers; one leaf hangs ajar. Inside, a yard is cut into the inner wall for the orcs' camp, and from it a
+// broad road runs down along the wall to the floor, at one in eight. Outside, the pass opens onto the siege lines and the camp of
+// the allied hosts, levelled at the gate's height. Plans are pure functions of the seed and the land layout, read from the
+// ground before any volcano, realm or gate touches it (wgRaw, never cached); colInfoBase shapes the ground to them (wgMask,
+// wgShape). Everything else keeps off them (wasteGateNear); the great volcano and its cones too (wasteGateKeep).
+//
+// The gate's frame: u from the gate outward (toward the camp), v across; the gate faces one of the four ways (dir, DIRS), so its
+// works stand square in the world. Inside the ring u is negative.
+const WG_STEP_MS=6,WG_GRADE=1/8,WG_RW=12,WG_WY=50,WG_WG=34,WG_CAMP=[250,125],wgC=new Map(),wgJ=new Map(),wgTC=new Map(),TWG={},TWG2={};let wgSkip=false;
+// the ground before the gate's works, the volcanoes and the realms shape it (so the plan cannot depend on itself)
+function wgRaw(X,Z){const a=volcSkip,b=wgSkip,c=realmSkip;volcSkip=wgSkip=realmSkip=true;try{return colInfoBase(Math.round(X),Math.round(Z),TWG);}finally{volcSkip=a;wgSkip=b;realmSkip=c;}}
+const wgBs=(X,Z)=>{landsAt(Math.round(X),Math.round(Z),TWG2);return TWG2.bs;};
+// (the same frame as siteUV gives a site facing inward, DIRS[P.din], so the realms' column builders serve the gate's works)
+const wgUV=(P,X,Z)=>{const dx=X-P.X,dz=Z-P.Z;return [dx*P.dx+dz*P.dz,dx*P.dz-dz*P.dx];};
+const wgXZ=(P,u,v)=>[P.X+u*P.dx+v*P.dz,P.Z+u*P.dz-v*P.dx];
+// ---- The plan of a basin's gate (null if no side of it will do)
+function wasteGateOf(B){
+  if(wgC.has(B.key))return wgC.get(B.key);const g=wgJ.get(B.key)||planGate(B);wgJ.delete(B.key);let r;while(!(r=g.next()).done);
+  if(wgC.size>400)wgC.clear();wgC.set(B.key,r.value);return r.value;}
+function* planGate(B){
+  // from the cell of the basin nearest its middle (its centre lies on the floor), toward the nearest stretch any realm holds
+  let O=B.cells[0];for(const c of B.cells)if(Math.hypot(c.x-B.cx,c.z-B.cz)<Math.hypot(O.x-B.cx,O.z-B.cz))O=c;
+  let tg=null,td=1e9;const ci=Math.floor(O.x/LS),cj=Math.floor(O.z/LS);
+  for(let a=-9;a<=9;a++)for(let b=-9;b<=9;b++){const c=landSite(ci+a,cj+b);if(LANDS[cellLand(c)].k==='volcanic'||!realmHeld(stretchCell(c)))continue;const d=Math.hypot(c.x-O.x,c.z-O.z);if(d<td&&wgBs(c.x,c.z)>WB_END){td=d;tg=c;}}
+  const ta=tg?Math.atan2(tg.z-O.z,tg.x-O.x):hsh(O.i,9701,O.j)*6.2832,mid=WB_IN+WB_CR/2;
+  // candidates: rays out from there to the middle of the ring's crest; the gate faces the nearest of the four ways to the ring's
+  // own outward line there. Each is scored by the ground its camp would stand on (out of every basin and its ring, land, as
+  // level as may be), how high the crest stands over it, and how near it faces the realm
+  let best=null;
+  for(let k=0;k<24;k++){yield;const a=k/24*6.2832,ux=Math.cos(a),uz=Math.sin(a);let d=0;
+    for(;d<2600;d+=16)if(wgBs(O.x+ux*d,O.z+uz*d)>=mid)break;if(d>=2600)continue;
+    let lo=Math.max(0,d-16),hi=d;for(let q=0;q<5;q++){const m=(lo+hi)/2;if(wgBs(O.x+ux*m,O.z+uz*m)>=mid)hi=m;else lo=m;}
+    const X=Math.round(O.x+ux*hi),Z=Math.round(O.z+uz*hi),na=Math.atan2(wgBs(X,Z+6)-wgBs(X,Z-6),wgBs(X+6,Z)-wgBs(X-6,Z));
+    let dir=0,sk=9;for(let q=0;q<4;q++){const e=Math.abs(angDiffV(na,Math.atan2(DIRS[q][1],DIRS[q][0])));if(e<sk){sk=e;dir=q;}}
+    const P={X:X,Z:Z,dir:dir,din:(dir+2)%4,dx:DIRS[dir][0],dz:DIRS[dir][1]},hs=[];let bad=false,wet=0,sea=0;
+    for(let i=0;i<5&&!bad;i++)for(let j=0;j<5&&!bad;j++){const [sx,sz]=wgXZ(P,150+i*60,(j-2)*60);if(wgBs(sx,sz)<WB_END+10){bad=true;break;}const ws=TWG2.wS,o=wgRaw(sx,sz);
+      if(ws>0.15||o.b===0&&o.h<SEA){sea++;hs.push(SEA+3);continue;}if(o.river||o.lake||o.h<SEA+2)wet++;hs.push(o.h);}
+    if(bad)continue;hs.sort((p,q)=>p-q);const hm=hs[12],sp=hs[20]-hs[4],cr=wgRaw(X,Z).h;
+    // a side whose camp would stand in the sea is taken only if no other will do (its camp is built up out of the shallows)
+    const sc=-Math.abs(angDiffV(a,ta))*25-sk*30-sp*1.5-wet*4+Math.min(50,cr-hm)*0.3-(sea||wet>8?1000+sea*30+wet*4:0);
+    if(!best||sc>best.sc)best={sc:sc,P:P,hm:hm,cr:cr};}
+  if(!best)return null;
+  const P=best.P,r=rngAt(P.X,9703,P.Z);
+  Object.assign(P,{key:B.key,B:B,hG:Math.max(SEA+3,Math.min(best.cr-14,best.hm))});const hG=P.hG;
+  // the yard: in from the gate to where the inner wall has fallen to the gate's height (across its width), at least 70 deep
+  // (banked out over the wall if need be, for the orcs' camp)
+  P.uY=-110;for(let u=-8;u>=-110;u-=2){let ok=false;for(const v of [-WG_WY+6,0,WG_WY-6])if(wgRaw(...wgXZ(P,u,v)).h<hG+1)ok=true;if(ok){P.uY=Math.min(-70,u);break;}}
+  // the ring's outer foot (uF), past which the ground before the camp (the siege lines) is levelled gently, not cut
+  yield;P.uF=170;for(let u=10;u<=170;u+=3)if(wgBs(...wgXZ(P,u,0))>=WB_END||wgRaw(...wgXZ(P,u,0)).h<=hG+1){P.uF=Math.max(60,u);break;}
+  P.uC0=P.uF+64;P.uC1=P.uC0+WG_CAMP[0];
+  // the road down: from the yard's inner corner on one side, along the inner wall of the ring, falling one in eight, where the
+  // wall stands at its height (so it runs as a ledge, cut in above and banked out below) until it meets the floor
+  const side0=hsh(P.X,9705,P.Z)<0.5?1:-1;let path=null;
+  for(const side of [side0,-side0]){yield;path=yield* wgTrace(P,side);if(path){P.side=side;break;}}
+  if(!path)return null;P.ramp=path;path.all=path.pts.slice(1).map((_,i)=>i);
+  // the reach of the works, for the tiles
+  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;const grow=(x,z,m)=>{x0=Math.min(x0,x-m);x1=Math.max(x1,x+m);z0=Math.min(z0,z-m);z1=Math.max(z1,z+m);};
+  for(const [u,v] of [[P.uY,-WG_WY],[P.uY,WG_WY],[P.uC1,-WG_CAMP[1]],[P.uC1,WG_CAMP[1]]])grow(...wgXZ(P,u,v),100);for(const p of path.pts)grow(p[0],p[1],70);
+  P.box=[x0,z0,x1,z1];
+  P.name='The Ashen Gate of '+fullName('orc',r,false);P.camp='The Leaguer of '+nameWord('realm',r);P.ram=nameWord('dwarf',r)+' the Gatebreaker';P.yard='The Gatewarden\'s Camp';P.road='The Long Descent';
+  P.id='wg'+P.X+','+P.Z;P.seed=hsh(P.X,9707,P.Z);
+  return P;
+}
+// The road's line: steps of six along the wall, each drawn in or out (at most three blocks) toward where the raw wall stands at
+// the road's height there; smoothed, with its height by its length along. Null if it leaves the inner wall.
+function* wgTrace(P,side){
+  const hG=P.hG,[sx,sz]=wgXZ(P,P.uY+8,side*(WG_WY-WG_RW-2));let x=sx,z=sz,L=0,y=hG;const pts=[[x,z]];
+  // first along the yard's inner edge, out of its side
+  for(let k=0;k<200;k++){if(k%4===0)yield;
+    const gx=wgBs(x+6,z)-wgBs(x-6,z),gz=wgBs(x,z+6)-wgBs(x,z-6),gl=Math.hypot(gx,gz)||1,nx=gx/gl,nz=gz/gl;
+    // the way along the wall: across the outward line, on the road's side (the first step goes along v)
+    let tx=-nz*side,tz=nx*side;if(k===0){const [ax,az]=[P.dz*side,-P.dx*side];if(tx*ax+tz*az<0){tx=-tx;tz=-tz;}}
+    else{const px=x-pts[pts.length-2][0],pz=z-pts[pts.length-2][1];if(tx*px+tz*pz<0){tx=-tx;tz=-tz;}}
+    x+=tx*6;z+=tz*6;L+=6;y=hG-L*WG_GRADE;
+    // where along the outward line does the wall stand at y? (a search over 40 either way)
+    const at=e=>wgRaw(x+nx*e,z+nz*e).h;if(at(-40)>=y-1){pts.push([x,z]);break;} // the floor: the road is down
+    let lo=-40,hi=40;if(at(hi)<y)lo=hi;else for(let q=0;q<6;q++){const m=(lo+hi)/2;if(at(m)<y)lo=m;else hi=m;}
+    const e=Math.max(-3,Math.min(3,(lo+hi)/2));x+=nx*e;z+=nz*e;const bs=wgBs(x,z);if(bs<-60||bs>WB_IN+WB_CR)return null;
+    // never back into the yard or the pass
+    const [u,v]=wgUV(P,x,z);if(k>3&&u>P.uY-WG_RW&&Math.abs(v)<WG_WY+WG_RW)return null;
+    pts.push([x,z]);if(k===199)return null;}
+  if(pts.length<8)return null;
+  // smooth the line, then its lengths and heights; the road levels out on the floor
+  const sm=pts.map((p,i)=>{if(i<2||i>pts.length-3)return p;let ax=0,az=0;for(let q=-2;q<=2;q++){ax+=pts[i+q][0]/5;az+=pts[i+q][1]/5;}return [ax,az];});
+  const out=[];let l=0,yF=Math.round(wgRaw(...sm[sm.length-1]).h);
+  for(let i=0;i<sm.length;i++){if(i)l+=Math.hypot(sm[i][0]-sm[i-1][0],sm[i][1]-sm[i-1][1]);out.push([sm[i][0],sm[i][1],l,Math.max(yF,hG-l*WG_GRADE)]);}
+  // a stretch on along the floor past the foot of the wall
+  const a=out[out.length-1],b=out[out.length-2],dl=Math.hypot(a[0]-b[0],a[1]-b[1])||1;for(let q=1;q<=3;q++)out.push([a[0]+(a[0]-b[0])/dl*8*q,a[1]+(a[1]-b[1])/dl*8*q,a[2]+8*q,a[3]]);
+  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(const p of out){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);}
+  // which side of the line the drop to the floor lies on (the side the ring's outward line points away from), in the sign
+  // wgRoadNear gives
+  const p3=out[3],p4=out[4],ex=p4[0]-p3[0],ez=p4[1]-p3[1],gx=wgBs(p3[0]+6,p3[1])-wgBs(p3[0]-6,p3[1]),gz=wgBs(p3[0],p3[1]+6)-wgBs(p3[0],p3[1]-6);
+  return {pts:out,len:out[out.length-1][2],yF:a[3],box:[x0,z0,x1,z1],drop:(ex*(-gz)-ez*(-gx))>=0?1:-1};
+}
+// ---- Lookups: the gates whose works may reach a tile of 64 blocks (the basins of the volcanic cells four about it), with the
+// road's segments near it
+function wgBasins(tx,tz){const ci=Math.floor((tx*64+32)/LS),cj=Math.floor((tz*64+32)/LS),out=[],seen=new Set();
+  for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++){const c=landSite(ci+a,cj+b);if(LANDS[cellLand(c)].k!=='volcanic')continue;const B=wasteBasin(c);if(!seen.has(B.key)){seen.add(B.key);out.push(B);}}return out;}
+function wgTile(X,Z){
+  const tx=X>>6,tz=Z>>6,tk=tx*65536+tz;let T=wgTC.get(tk);if(T)return T;if(wgTC.size>20000)wgTC.clear();T=[];
+  for(const B of wgBasins(tx,tz)){const P=wasteGateOf(B);if(!P)continue;const b=P.box;if(b[2]<tx*64||b[0]>tx*64+63||b[3]<tz*64||b[1]>tz*64+63)continue;
+    const segs=[],p=P.ramp.pts;for(let i=0;i+1<p.length;i++){const m=80;if(Math.max(p[i][0],p[i+1][0])+m<tx*64||Math.min(p[i][0],p[i+1][0])-m>tx*64+63||Math.max(p[i][1],p[i+1][1])+m<tz*64||Math.min(p[i][1],p[i+1][1])-m>tz*64+63)continue;segs.push(i);}
+    T.push({P:P,segs:segs});}
+  wgTC.set(tk,T);return T;}
+// Streaming (a step of its own, before a chunk's columns, like realmPrep): the gates of the basins about the chunk are planned a
+// slice at a time, WG_STEP_MS to a call. True once all are planned
+function wgPrep(X,Z){const tx=X>>6,tz=Z>>6;if(wgTC.has(tx*65536+tz))return true;
+  for(const B of wgBasins(tx,tz)){if(wgC.has(B.key))continue;let g=wgJ.get(B.key);if(!g){if(wgJ.size>4)wgJ.clear();g=planGate(B);wgJ.set(B.key,g);}
+    const t0=performance.now();let r;while(!(r=g.next()).done)if(performance.now()-t0>WG_STEP_MS)return false;
+    wgJ.delete(B.key);if(wgC.size>400)wgC.clear();wgC.set(B.key,r.value);return false;}
+  return true;}
+// the nearest point of a gate's road to (X,Z) over the segments listed: [distance, length along, height there, side of the line]
+const WGN=[0,0,0,0];
+function wgRoadNear(P,segs,X,Z){const p=P.ramp.pts;let bd=1e9;
+  for(const i of segs){const a=p[i],b=p[i+1],ex=b[0]-a[0],ez=b[1]-a[1],l2=ex*ex+ez*ez||1,t=Math.max(0,Math.min(1,((X-a[0])*ex+(Z-a[1])*ez)/l2)),qx=a[0]+ex*t,qz=a[1]+ez*t,d=Math.hypot(X-qx,Z-qz);
+    if(d<bd){bd=d;WGN[0]=d;WGN[1]=a[2]+(b[2]-a[2])*t;WGN[2]=a[3]+(b[3]-a[3])*t;WGN[3]=(ex*(Z-a[1])-ez*(X-a[0]))>=0?1:-1;}}
+  if(bd===1e9)WGN[0]=1e9;return WGN;}
+// The level works (all at the gate's height hG), as boxes in the gate's frame [u0,u1,half-width at u0, at u1, cut slope, fill
+// slope, how far out they reach]: the yard, the throat of the gate, the pass widening out through the ring, the field of the
+// siege lines before the camp (graded gently), the camp
+function wgPieces(P){if(P.pc)return P.pc;
+  return P.pc=[[P.uY,-6,WG_WY,WG_WY,3,1.3,60],[-6,6,WG_WG,WG_WG,3.4,1.3,60],[6,P.uF,WG_WG,60,2.6,1.2,60],[P.uF,P.uC0,60,WG_CAMP[1],0.7,0.7,80],[P.uC0,P.uC1,WG_CAMP[1],WG_CAMP[1],0.6,0.6,90]];}
+// how far (u,v) lies outside a piece, 0 inside
+function wgOut(q,u,v){const hw=u<=q[0]?q[2]:u>=q[1]?q[3]:q[2]+(q[3]-q[2])*(u-q[0])/(q[1]-q[0]),eu=Math.max(q[0]-u,0,u-q[1]),ev=Math.max(Math.abs(v)-hw,0);return Math.hypot(eu,ev);}
+// ---- The ground. Before the rivers (wgMask): o.wgate, how far the column is under the works (1 on them, fading out over their
+// reach), which keeps rivers, gorges, lakes and fissures off; o.wg the tile's gates. After the volcanoes (wgShape): each work
+// is levelled, cut down into the land with steep walls and banked out over lower ground, easing back to the land over its reach;
+// o.wroad, how far from the road's middle (on it), o.wlvl 1 on the level works
+function wgMask(X,Z,o){o.wgate=0;o.wg=null;o.wroad=-1;o.wlvl=0;if(wgSkip)return;const T=wgTile(X,Z);if(!T.length)return;o.wg=T;
+  for(const t of T){const P=t.P,[u,v]=wgUV(P,X,Z);for(const q of wgPieces(P)){const e=wgOut(q,u,v);if(e<q[6])o.wgate=Math.max(o.wgate,sstep(q[6],q[6]*0.4,e));}
+    if(t.segs.length){const n=wgRoadNear(P,t.segs,X,Z);if(n[0]<WG_RW+50)o.wgate=Math.max(o.wgate,sstep(WG_RW+50,WG_RW+16,n[0]));}}}
+function wgShape(X,Z,o,h){
+  for(const t of o.wg){const P=t.P,hG=P.hG,[u,v]=wgUV(P,X,Z);let lo=-1e9,hi=1e9;
+    for(const q of wgPieces(P)){const e=wgOut(q,u,v);if(e>=q[6])continue;const f=sstep(q[6]*0.7,q[6],e)*400;hi=Math.min(hi,hG+e*q[4]+f);lo=Math.max(lo,hG-e*q[5]-f);if(e===0)o.wlvl=1;}
+    if(lo>-1e9)h=Math.max(lo,Math.min(hi,h));
+    if(t.segs.length){const n=wgRoadNear(P,t.segs,X,Z),e=Math.max(0,n[0]-WG_RW);if(e<50){const y=Math.round(n[2]),f=sstep(35,50,e)*400;
+      h=Math.max(y-e*1.3-f,Math.min(y+e*2.5+f,h));if(n[0]<=WG_RW){o.wroad=n[0];o.wlvl=1;}}}}
+  return h;}
+// ---- Queries
+// Is (X,Z) on (or within m of) any gate's works: its level works or its road?
+function wasteGateNear(X,Z,m){m=m||0;if(wgSkip)return false;for(const t of wgTile(X,Z)){const P=t.P,[u,v]=wgUV(P,X,Z);for(const q of wgPieces(P))if(wgOut(q,u,v)<=m)return true;
+  if(wgRoadNear(P,P.ramp.all,X,Z)[0]<=WG_RW+12+m)return true;}return false;}
+// Is a disc of radius m about (X,Z) clear of basin B's gate? (the great volcano and its cones keep off; they lie on the floor,
+// where only the road's foot reaches)
+function wasteGateKeep(B,X,Z,m){const P=wasteGateOf(B);if(!P)return false;const b=P.ramp.box;if(X+m<b[0]-WG_RW-20||X-m>b[2]+WG_RW+20||Z+m<b[1]-WG_RW-20||Z-m>b[3]+WG_RW+20)return false;
+  return wgRoadNear(P,P.ramp.all,X,Z)[0]<=WG_RW+20+m;}
+// the gate whose works hold (X,Z) (within m), for names and spawns
+function wasteGateAt(X,Z,m){if(wgSkip)return null;for(const t of wgTile(X,Z)){const P=t.P,[u,v]=wgUV(P,X,Z);for(const q of wgPieces(P))if(wgOut(q,u,v)<=(m||0))return P;}return null;}
 // ---- Building the realms of men (D-060). Every site has a layout of parts (walls, towers, houses, halls, lanes, wells, fields
 // and the rest), each a box in the site's own frame (u from the side its road arrives on, at u = -R, toward the back; v across)
 // with a column builder. A chunk builds its own columns only: for each column, every part whose box holds it writes that
@@ -5746,7 +6090,7 @@ RB.ring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>=p.r-1.5&&d<p.r+0.5)RBP(X,p
 // ---- Roads: paved with flagstones between kerbs of white stone (the king's roads), lanes of beaten earth; a bridge of stone
 // or planks where a road crosses water; on the king's roads a white milestone with a lamp every 72 blocks
 function realmRoadCol(X,Z,x,z){
-  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='dwarf')return dwarfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
+  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s||wasteGateNear(X,Z,0))return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='dwarf')return dwarfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
     if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}
@@ -6933,6 +7277,414 @@ function dwarfRoadCol(X,Z,x,z,rr){
 // The water the dwarves hold under the ground (their cisterns): drainCaveWater trusts it where a chunk's edge cuts a basin
 function dwarfWaterAt(X,y,Z){for(const s of realmTile(X,Z).sites){if(s.prov.cult.k!=='dwarf'||Math.hypot(s.X-X,s.Z-Z)>s.R+20)continue;const L=siteLayout(s);if(!L.water||!L.water.length)continue;const [u,v]=siteUV(s,X,Z);
   for(const w of L.water)if(u>=w.u0&&u<=w.u1&&v>=w.v0&&v<=w.v1&&y>=w.y0&&y<=w.y1)return true;}return false;}
+// ---- Building the Gate of the Wastes (D-067). The gate's works are one site in the gate's frame (u outward, v across, as
+// siteUV gives it; the yard at u < 0, the camp of the allied hosts far out at u > 0), its level the gate's height, with a layout
+// of parts like a realm's: the gate between its towers, its leaves (one barred and propped, the other ajar), the dwarves' ram
+// at the barred leaf under its shed, the covered way back to the siege lines, mantlets, the lines with their engines, the orcs'
+// camp in the yard (gateLayout), and the camp of the hosts (campLayout, siege-build.js). A chunk builds its own columns only,
+// part by part in the layout's order; then the road down (wgRoadCol). Pure functions of the plan.
+const TGB={};
+function wgSite(P){if(P.s)return P.s;
+  const s={k:'wgate',X:P.X,Z:P.Z,dir:P.din,T:P.hG,R:0,M:0,P:P,id:P.id,seed:P.seed,name:P.camp,prov:{cult:REALM_CULTS.white,key:'wg:'+P.id,kingdom:{name:'The Allied Hosts'}}},L={parts:[],spots:[],pads:[]};
+  P.s=s;s.lay=L;P.cs=hsh(P.X,9709,P.Z)<0.5?1:-1; // the side of the barred leaf (v > 0 or v < 0); the ram stands before it
+  gateLayout(P,s,L,rngAt(P.X,9711,P.Z));campLayout(P,s,L,rngAt(P.X,9713,P.Z));
+  for(const p of L.parts){p.bu0=Math.min(p.u0,p.u1);p.bu1=Math.max(p.u0,p.u1);p.bv0=Math.min(p.v0,p.v1);p.bv1=Math.max(p.v0,p.v1);}
+  return s;}
+// the half-width of the level works at u (the pass, the field of the siege lines)
+function wgHalf(P,u){for(const q of wgPieces(P))if(u>=q[0]&&u<=q[1])return q[2]+(q[3]-q[2])*(u-q[0])/Math.max(1,q[1]-q[0]);return 0;}
+// the way the war parties march between the camp and the orcs' camp in the yard (the gate's frame, from the camp inward): out of
+// the camp's great gate, through the gate of the lines, up the pass clear of the covered way and the ram, through the gap by
+// the open leaf's edge, to the opening in the barricades before the orcs' gate and into their camp. The works keep off it.
+function wgWay(P){if(P.way)return P.way;const cs=P.cs,y=P.yc;
+  return P.way=[[P.uC0+4,0],[P.uL+14,0],[P.uL+4,0],[P.uL-6,0],[44,-cs*14],[22,-cs*4],[8,-cs*2],[-2,-cs*2],[-14,-cs*2],[-17,y.vm],[-26,y.vm],[-34,y.vm],[y.ua+16,y.vm]];}
+// how far (u,v) lies from a line of points
+function wgLineD(pts,u,v){let bd=1e9;for(let i=0;i+1<pts.length;i++){const [a0,b0]=pts[i],[a1,b1]=pts[i+1],ex=a1-a0,ez=b1-b0,l2=ex*ex+ez*ez||1,t=Math.max(0,Math.min(1,((u-a0)*ex+(v-b0)*ez)/l2));bd=Math.min(bd,Math.hypot(u-a0-ex*t,v-b0-ez*t));}return bd;}
+function gateLayout(P,s,L,r){
+  const g=P.hG,cs=P.cs,A=L.parts,uY=P.uY,uF=P.uF,uC0=P.uC0,box=(k,u0,u1,v0,v1,o)=>A.push(Object.assign({k:k,u0:u0,u1:u1,v0:v0,v1:v1,y:g},o||{}));
+  const sd=P.side,ua=uY+6,ubk=-28,v0=sd>0?-46:-24,v1=sd>0?24:46,vm=(v0+v1)>>1;P.yc={ua:ua,ub:ubk,v0:v0,v1:v1,vm:vm};P.uL=uF+10;const way=wgWay(P);
+  // the ground of the works first: the yard trodden to ash, the pass scarred by the siege, the field before the lines trampled
+  box('gground',uY-2,uC0+2,-128,128);
+  // the gate: its wall across the throat, keyed into the cliffs, the towers either side, the leaves
+  box('gwall',-16,12,-52,52);
+  // the dwarves' ram at the barred leaf, under its shed on eight wheels; the covered way back from it to the lines
+  const uL=P.uL;
+  box('gram',1,32,cs>0?2:-18,cs>0?18:-2);
+  box('ggall',32,uL-1,cs>0?6:-14,cs>0?14:-6,{cv:cs*10});
+  // mantlets about the pass, propped and facing the gate
+  for(let k=0;k<9;k++){const u=36+Math.floor(r()*(uL-44)),v=Math.round((r()-0.5)*2*(wgHalf(P,u)-8));if(Math.abs(v-cs*10)<8||wgLineD(way,u,v)<9)continue;box('gmant',u-1,u+1,v-2,v+2);}
+  // the siege lines across the field: a ditch, a rampart and a palisade, their gate in the middle between two towers, ballistae
+  const hw=Math.floor(wgHalf(P,uL+4))-3;box('gline',uL,uL+8,-hw,hw,{hw:hw,cv:cs*10});
+  for(const sv of [-1,1]){A.push(partC('gtwr',uL+6,sv*9,5,5,0,{y:g,H:12}));A.push(partC('gball',uL+11,sv*30,3,3,0,{y:g}));}
+  // behind the lines: the dwarves' trebuchets with their shot, a siege tower of men ready to be wheeled up, wagons of shot
+  const ub=uL+12;
+  for(const tv of [-44,-20,20,44])if(Math.abs(tv)+6<wgHalf(P,ub+12)){A.push(partC('dtreb',ub+6,tv,7,12,0,{y:g}));box('gshot',ub+13,ub+15,tv-2,tv+2);}
+  A.push(partC('gsiege',ub+6,-cs*Math.min(68,Math.floor(wgHalf(P,ub+6))-10),7,7,0,{y:g}));
+  // ---- the orcs' camp in the yard: barricades of stakes across it facing the gate, a palisade round the camp (open on the side
+  // the road leaves), the warlord's hall at its back, tents of hide, a forge by a trough of lava, a cage for the troll, the war
+  // drum, two stone-throwers aimed at the gate, fires, skull poles and banners; the road paved from the gate's gap to its head
+  box('opath',uY,-4,-50,50);
+  box('ospike',-24,-19,-46,46);
+  box('opal',ua,ubk,v0,v1,{gv:vm});
+  A.push(partC('ohall',ua+8,vm,21,11,1,{y:g}));
+  for(let k=0;k<5;k++){const tv=v0+6+k*Math.floor((v1-v0-12)/4);if(Math.abs(tv-vm)<5)continue;A.push(partC('otent',ubk-6,tv,5,7,1,{y:g}));if(k%2)A.push(partC('otent',ubk-16,tv,5,7,1,{y:g}));}
+  A.push(partC('oforge',ua+20,v0+8,9,9,3,{y:g}));A.push(partC('ocage',ua+20,v1-7,7,7,2,{y:g}));
+  A.push(partC('odrum',ubk-12,vm+7,5,5,1,{y:g})); // (the avenue down the camp's middle, |v - vm| < 4, is kept clear for the warbands)
+  for(const cv of [vm-13,vm+13])A.push(partC('ocata',ubk-4,cv,5,9,1,{y:g}));
+  for(const [pu,pv] of [[ubk-2,vm-6],[ubk-2,vm+6],[ua+18,vm-6],[ua+18,vm+6],[ubk-20,v0+4],[ubk-20,v1-4]])box('opole',pu,pu,pv,pv);
+  // where they all stand (for the war, war.js): kinds of the foes' tables and the folk's; y over the level
+  const sp=(kind,u,v,R,y)=>L.spots.push({kind:kind,u:u,v:v,R:R||4,y:y||g});
+  sp('ogate',-12,-cs*4,3);sp('ocamp',ubk-10,vm,7);sp('ocamp',ua+12,vm+(sd>0?-12:12),6);sp('oforge',ua+20,v0+8,4);sp('opit',ua+20,v1-7,2);sp('owall',-1,-12,2,g+49);sp('owall',-1,14,2,g+49);
+  sp('d_ram',16,cs*10,4);sp('r_mant',40,-cs*14,5);sp('d_treb',ub+8,-20,5);sp('d_treb',ub+8,20,5);sp('r_lines',uL+10,0,4);sp('e_lines',uL+10,cs*28,4);
+}
+// ---- Column builders
+// The ground of the works: the yard trodden to ash and cinder; before the gate scorched, pocked with the craters of the
+// throwers' stones and strewn with them; the field before the lines trampled
+RB.gground=(s,p,u,v,X,Z)=>{const P=s.P,g=s.T,o=colInfo(X,Z,TGB);if(!o.wlvl||o.wroad>=0||Math.abs(o.h-g)>1)return;const q=hsh(X,9715,Z);
+  if(u<-4){RBP(X,g,Z,q<0.45?CINDER:q<0.9?BLACKASH:BASCRACK);RBS(X,Z,g+1,g+3,AIR);return;}
+  if(u<=P.uF+4){const cu=Math.round(u/13)*13,cv=Math.round(v/13)*13,ch=hsh(cu,9717,cv),d=Math.hypot(u-cu-(ch-0.5)*5,v-cv-(hsh(cv,9719,cu)-0.5)*5),cr=2+ch*2.5;
+    if(u>6&&ch<0.45&&d<cr){RBP(X,g,Z,AIR);RBP(X,g-1,Z,d<cr-1?SCORCH:CINDER);if(d<0.8&&ch<0.25){RBP(X,g-1,Z,STONE);RBP(X,g,Z,COBBLE);}return;}
+    RBP(X,g,Z,q<0.3?SCORCH:q<0.65?CINDER:q<0.95?BLACKASH:GRAVEL);RBS(X,Z,g+1,g+3,AIR);return;}
+  const top=world[I(X-OX,g,Z-OZ)];if(top===GRASS||top===DIRT)RBP(X,g,Z,q<0.35?PATH:q<0.55?DIRT:GRASS);RBS(X,Z,g+1,g+3,AIR);};
+// The Ashen Gate. A wall of basalt seven thick across the throat of the pass, 48 high, keyed into the cliffs either side; the
+// gateway 41 wide under a pointed arch 39 high, the Emberlord's horned skull carved over it with eyes of ember glyphs; a tower
+// either side 15 square and 64 high, hollow, its floors joined by a ladder, slits in its walls, a door from the yard and one
+// onto the wall's walk, a crown of spikes and a brazier on its top, banners down its outer face. The barred leaf (side cs) is
+// iron plates over black timber, banded, battered by the ram, three great props behind it; the other leaf hangs ajar, swung in
+// 38 degrees about its hinge, its bar broken on the ground behind it
+const WG_SIGIL=["hh.............hh",".hh...xxxxx...hh.","..hhxxxxxxxxxhh..","...xxeexxxeexx...","...xxeexxxeexx...","....xxxx.xxxx....",".....xx.x.xx.....","......x.x.x......"];
+const wgArch=(g,w)=>g+30+Math.round(9*(1-Math.min(1,w/20.5)));
+RB.gwall=(s,p,u,v,X,Z)=>{const P=s.P,g=s.T,cs=P.cs,av=Math.abs(v),au=Math.abs(u),sv=v*cs,q=(y)=>hsh(X*7+y,9721,Z);
+  const stone=y=>y<=g+3?OBSBRICK:(y-g)%9===0?BASCARVE:q(y)<0.14?BASCRACK:BASBRICK;
+  // the towers
+  if(av>=20&&av<=36&&au<=10){const core=av>=21&&av<=35&&au<=9;
+    if(!core){for(let y=g-4;y<=g+6;y++)RBP(X,y,Z,y===g+6?BASCARVE:OBSBRICK); // the battered foot
+      if(u===10&&(av===25||av===31))RBS(X,Z,g+30,g+46,BANNER);if(u===-10&&av===28)RBS(X,Z,g+20,g+30,BANNER);return;}
+    const top=g+64,inner=av>=24&&av<=32&&au<=6,lad=av===24&&u===-6;
+    for(let y=g-4;y<=top;y++){let id=stone(y);
+      if(inner&&y>g){id=(y-g)%8===0&&!lad?BASTILE:AIR;if(lad&&y<top)id=LADDER;}
+      if(!inner&&y>g){const slit=(au>=7&&(av===26||av===30)||au<=6&&av>=33&&(u===-3||u===3))&&(y-g)%8>=3&&(y-g)%8<=4&&y<top-4;if(slit)id=AIR;
+        if(u<=-7&&av>=27&&av<=29&&y<=g+4)id=AIR; // the door from the yard
+        if(av<=23&&au<=1&&y>=g+49&&y<=g+51)id=AIR; // the door onto the walk
+        if(au===9&&y===g+40&&(av===24||av===28||av===32))id=EMGLYPH;}
+      RBP(X,y,Z,id);}
+    // the top: a parapet with crenels, pinnacles at the corners crowned with spikes, a brazier on a pillar in the middle
+    const rim=av===21||av===35||au===9,corner=(av===21||av===35)&&au===9;
+    if(rim){RBP(X,top+1,Z,BASBRICK);if((av+au)%2===0)RBP(X,top+2,Z,BASBRICK);if((av+au)%2===0&&hsh(X,9723,Z)<0.25)RBP(X,top+3,Z,SKULLS);}
+    if(corner){RBS(X,Z,top+1,top+5,BASPILLAR);RBP(X,top+6,Z,SPIKES);}
+    if(av===28&&u===0){RBP(X,top+1,Z,BASPILLAR);RBP(X,top+2,Z,BRAZIER);}
+    return;}
+  // what the leaves, the props and the bar put in this column at y (0 where none)
+  let lf=0,lt=0;
+  if(sv>=1&&sv<=20&&au<=1){lf=1;lt=wgArch(g,av);} // the barred leaf, in the gateway's middle
+  else if(sv<=0&&sv>=-21&&u<=1&&u>=-15){const th=0.66,ex=-20*Math.sin(th),ey=20*Math.cos(th),t=Math.max(0,Math.min(1,(u*ex+(sv+20.5)*ey)/400)),d=Math.hypot(u-ex*t,sv+20.5-ey*t);
+    if(d<=1.05){lf=2;lt=wgArch(g,20.5-t*20);}} // the leaf ajar, swung in about its hinge at (0, -cs*20.5)
+  const prop=u<=-2&&u>=-14&&(sv===4||sv===5||sv===11||sv===12||sv===17||sv===18)?Math.round(g+13-(-2-u)*1.1):0;
+  const extra=y=>{if(lf&&y>g&&y<lt){const band=(y-g)%10===4||(y-g)%10===5;if(lf===1){if(u===-1)return ORCLOG;if(u===1&&sv>=8&&sv<=12&&y>=g+3&&y<=g+7&&hsh(X*5+y,9727,Z)<0.35)return AIR;return sv===1||band?ORCIRON:GATEIRON;}return band?ORCIRON:GATEIRON;}
+    if(prop&&(y===prop||y===prop-1))return ORCLOG;if(prop&&u===-14&&y===g+1)return BASBRICK;
+    if(y===g+1&&(u===-17&&sv<=-6&&sv>=-16&&sv!==-10||u===-16&&(sv===-11||sv===-10)))return ORCIRON; // the bar, broken
+    return 0;};
+  // the wall, the gateway and its arch
+  if(au<=3&&av<=50){const ar=wgArch(g,av);
+    for(let y=g-4;y<=g+48;y++){let id=stone(y);
+      if(av<=20&&y>g&&y<ar)id=extra(y)||AIR; // the way through
+      else if(av<=20&&y===g)id=BASTILE;
+      else if(av<=20&&(y===ar||y===ar+1)&&au===3)id=BASCARVE; // the voussoirs
+      else if(av<=20&&y===ar&&au<=1&&av%5===2)id=GRATE; // murder holes
+      if(u===3&&av<=8&&y>=g+40&&y<=g+47){const c=WG_SIGIL[g+47-y][v+8];if(c==='x'||c==='h')id=BASCARVE;else if(c==='e')id=EMGLYPH;else id=OBSBRICK;}
+      if(u===3&&y===g+43&&av>=11&&av<=20&&av%3===0)id=EMGLYPH;
+      RBP(X,y,Z,id);}
+    // the walk along the top behind crenels, braziers along it
+    if(au===3){if((v&1)===0)RBP(X,g+49,Z,BASBRICK);if((v&1)===0&&hsh(X,9725,Z)<0.12)RBP(X,g+50,Z,SKULLS);}
+    else{RBP(X,g+48,Z,BASTILE);if(u===-2&&av%12===6&&av<=20)RBP(X,g+49,Z,BRAZIER);}
+    return;}
+  for(let y=g+1;y<=g+40;y++){const id=extra(y);if(id)RBP(X,y,Z,id);}};
+// The dwarves' ram: a beam of three logs square, 29 long, its head of steel in a collar of bronze against the barred leaf,
+// hung on chains from the cross-beams of its shed; the shed on posts of oiled timber, its roof of bronze plates, on eight
+// wheels; bars at its back for the crew, the banner of the mountain over it
+RB.gram=(s,p,u,v,X,Z)=>{const P=s.P,g=s.T,a=v*P.cs-10,aa=Math.abs(a),b=u;
+  // the head and the beam
+  if(aa<=2&&b>=2&&b<=4){for(let y=g+3;y<=g+7;y++){const c=aa<=1&&y>=g+4&&y<=g+6;RBP(X,y,Z,b===2?(c?STEELB:DBRONZE):DBRONZE);}}
+  if(aa<=1&&b>=5&&b<=30)for(let y=g+4;y<=g+6;y++)RBP(X,y,Z,LOG);
+  if(b>=4&&b<=28){
+    // posts, beams, the roof
+    if(aa===6&&b%6===4)RBS(X,Z,g+1,g+7,DPROP);
+    if(aa===6)RBP(X,g+8,Z,DPROP);
+    if(aa<=6&&(b===8||b===16||b===24)){RBP(X,g+8,Z,DPROP);if(aa<=1&&a===0)RBP(X,g+7,Z,CHAIN);}
+    if(aa<=7){const ry=g+9+Math.round((7-aa)*0.55);RBP(X,ry,Z,aa===0?DPROP:DBRONZE);if(aa===7)RBP(X,ry-1,Z,DBRONZE);}
+    if(a===0&&b===26){RBS(X,Z,g+13,g+15,DPROP);RBP(X,g+16,Z,DBANNER);RBP(X,g+17,Z,DBANNER);}}
+  // the wheels, each a rim of timber with its spokes about an iron hub, outside the posts
+  if(aa===7)for(const bc of [7,13,20,27]){const db=b-bc;if(Math.abs(db)>3)continue;for(let y=g+1;y<=g+5;y++){const dy=y-(g+2.5),r=Math.hypot(db,dy);
+    if(r<0.9)RBP(X,y,Z,DGEAR);else if(r>=1.6&&r<2.7||r<1.6&&(db===0||Math.abs(dy)<0.6))RBP(X,y,Z,DPROP);}}
+  if(b===30&&aa<=5&&aa>=2)RBP(X,g+3,Z,DPROP);};
+// The covered way from the ram back to the lines: posts every six, a roof of mantlets, its sides of mantlets to shoulder height
+// with gaps to step out
+RB.ggall=(s,p,u,v,X,Z)=>{const g=s.T,a=v-p.cv,aa=Math.abs(a);if(aa>3)return;
+  if(aa===3&&u%6===0){RBS(X,Z,g+1,g+4,DPROP);RBP(X,g+5,Z,MANTLET);return;}
+  RBP(X,g+5,Z,MANTLET);if(aa===3&&u%12!==3)RBS(X,Z,g+1,g+2,MANTLET);};
+// a mantlet: a wall of heavy planks 5 across and 3 high facing the gate, propped from behind
+RB.gmant=(s,p,u,v,X,Z)=>{const g=s.T,b=u-p.u0,a=v-p.v0;if(b===0)RBS(X,Z,g+1,g+3,MANTLET);else if(b===1&&(a===0||a===4))RBP(X,g+2,Z,DPROP);else if(b===2&&(a===0||a===4))RBP(X,g+1,Z,DPROP);};
+// The siege lines: a ditch three deep toward the gate with stakes in its bottom, the spoil thrown up behind it into a rampart,
+// a palisade of logs pointed at their tops along it; the way through in the middle, bridged over the ditch
+RB.gline=(s,p,u,v,X,Z)=>{const g=s.T,b=u-p.u0,av=Math.abs(v),gap=av<=4||Math.abs(v-p.cv)<=3,end=av>p.hw-2;
+  if(gap){RBP(X,g,Z,b<=3?PLANKS:PATH);RBS(X,Z,g+1,g+3,AIR);return;} // the way through, bridged; a sally port where the covered way meets it
+  if(b<=3&&!end){RBS(X,Z,g-2,g,AIR);RBP(X,g-3,Z,DIRT);if(b===1&&hsh(X,9729,Z)<0.4)RBP(X,g-2,Z,STAKES);return;}
+  if(b>=4&&b<=7){const top=b===5||b===6?g+2:g+1;RBS(X,Z,g+1,top-1,DIRT);RBP(X,top,Z,GRASS);
+    if(b===6&&!end){RBS(X,Z,g+3,g+5,LOG);RBP(X,g+6,Z,STAKES);}}};
+// a timber tower 5 square on the lines (or the camp's rampart), p.H high, a platform with a rail and a roof of canvas
+RB.gtwr=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y,H=p.H,e=a===0||a===4||b===0||b===4,c=(a===0||a===4)&&(b===0||b===4);
+  if(c)RBS(X,Z,g+1,g+H+3,LOG);
+  if(e&&!c&&a!==2)RBP(X,g+H+1,Z,FENCE);
+  RBP(X,g+H,Z,a===2&&b===2?AIR:PLANKS);if(a===2&&b===2)for(let y=g+1;y<g+H;y++)RBP(X,y,Z,LADDER);
+  if(e&&!c&&(b===0||b===4)&&a!==2)for(let y=g+2;y<g+H;y+=3)RBP(X,y,Z,LOG);
+  RBP(X,g+H+4,Z,CANVAS);if(a===2&&b===2){RBP(X,g+H+5,Z,LOG);RBP(X,g+H+6,Z,RBANNER);}};
+// a ballista on its platform: the bow across, the stock along, a bolt laid in it
+RB.gball=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y;if(a===1&&b===1){RBP(X,g,Z,PLANKS);RBP(X,g+1,Z,DPROP);return;}
+  if(b===0)RBP(X,g+1,Z,a===1?STEELB:DPROP);if(a===1&&b===2)RBP(X,g+1,Z,DPROP);};
+// a heap of stone shot for the throwers
+RB.gshot=(s,p,u,v,X,Z)=>{const g=s.T,c=(p.u0+p.u1)/2,d=Math.hypot(u-c,v-(p.v0+p.v1)/2);RBP(X,g+1,Z,hsh(X,9731,Z)<0.5?STONE:COBBLE);if(d<1.5)RBP(X,g+2,Z,STONE);};
+// A siege tower of men, 7 square and 24 high, on its wheels: a frame of timber, its front and sides hung with hides, floors
+// with ladders, a drawbridge raised at the top of its front, a banner over it
+RB.gsiege=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y,e=a===0||a===6||b===0||b===6,c=(a===0||a===6)&&(b===0||b===6),T=g+24;
+  if(e&&(b===1||b===5)&&(a===0||a===6)){RBP(X,g+1,Z,DGEAR);}
+  for(let y=g+2;y<=T;y++){let id=AIR;if(c)id=LOG;else if(e)id=b===6&&y<T-6&&(y-g)%6===0?AIR:(y-g)%6===0?LOG:b===6?PLANKS:HIDE;if((y-g)%6===2&&!e)id=a===3&&b===3?AIR:PLANKS;if(!e&&a===1&&b===1&&y>g+2)id=LADDER;RBP(X,y,Z,id);}
+  if(b===0&&a>=1&&a<=5)RBS(X,Z,T-5,T,PLANKS); // the drawbridge, raised
+  if(a===3&&b===3){RBS(X,Z,T+1,T+3,LOG);RBP(X,T+4,Z,RBANNER);RBP(X,T+5,Z,RBANNER);}
+  if(!e)RBP(X,T,Z,PLANKS);};
+// ---- the orcs' camp in the yard
+// the paved way from the gate's gap to the head of the road down, through the barricades; skull poles and fire baskets by it
+RB.opath=(s,p,u,v,X,Z)=>{const P=s.P,g=s.T,y=P.yc,cs=P.cs;
+  const pts=[[-4,-cs*3],[-26,-cs*3],[-26,P.side*36],[P.uY+8,P.side*36]];
+  for(let k=0;k+1<pts.length;k++){const [a0,b0]=pts[k],[a1,b1]=pts[k+1],ex=a1-a0,ez=b1-b0,l2=ex*ex+ez*ez||1,t=Math.max(0,Math.min(1,((u-a0)*ex+(v-b0)*ez)/l2)),d=Math.hypot(u-a0-ex*t,v-b0-ez*t);
+    if(d<=2.5){RBP(X,g,Z,d>=2?BASBRICK:BASTILE);RBS(X,Z,g+1,g+3,AIR);return;}}};
+// barricades of stakes across the yard toward the gate, two rows, open before the gap of the leaf ajar and before the orcs' gate
+RB.ospike=(s,p,u,v,X,Z)=>{const g=s.T,av=Math.abs(v),P=s.P;if(Math.abs(v+P.cs*3)<=4||Math.abs(v-P.yc.vm)<=4)return;if(u===-24||u===-20){if((v&1)===0)RBP(X,g+1,Z,STAKES);if(hsh(X,9733,Z)<0.3)RBP(X,g+2,Z,SPIKES);}};
+// the camp's palisade: black logs, pointed, banners here and there; its gate toward the gate (u = p.u1), a way out toward the road
+RB.opal=(s,p,u,v,X,Z)=>{const g=s.T,e=u===p.u0||u===p.u1||v===p.v0||v===p.v1;if(!e)return;
+  if(u===p.u1&&Math.abs(v-p.gv)<=3)return;if(u===p.u0&&Math.abs(v-p.gv)<=2)return;const sv=s.P.side;if((sv>0?v===p.v1:v===p.v0)&&u<=p.u0+10)return;
+  const tall=hsh(X,9735,Z)<0.3?1:0;RBS(X,Z,g+1,g+4+tall,ORCLOG);RBP(X,g+5+tall,Z,hsh(X,9737,Z)<0.1?BANNER:STAKES);};
+// a tent of hide on a ridge pole, its door toward its front
+RB.otent=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,m=(W-1)/2,da=Math.abs(a-m),ry=g+4-Math.round(da);
+  for(let y=g+1;y<=ry;y++){const end=b===0||b===D-1,door=b===0&&da<1&&y<=g+2;if(y===ry||end&&!door)RBP(X,y,Z,HIDE);else RBP(X,y,Z,AIR);}
+  if(da<0.5&&(b===0||b===D-1))RBP(X,g+5,Z,CHARWOOD);RBP(X,g,Z,BLACKASH);};
+// The warlord's hall: walls of black palisade under a roof of hide on rafters, its door toward the gate under skulls; within, a
+// long fire of magma, a seat of iron and bones at the back between braziers
+RB.ohall=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,m=(W-1)/2,da=Math.abs(a-m),e=a===0||a===W-1||b===0||b===D-1,ry=g+6+Math.round((m-da)*0.6);
+  RBP(X,g,Z,e?BASBRICK:BASTILE);
+  for(let y=g+1;y<ry;y++){let id=AIR;if(e)id=y<=g+5?ORCLOG:HIDE;if(b===0&&da<=1.5&&y<=g+4)id=AIR;if(e&&a%4===0&&y===g+3&&b>0)id=AIR;RBP(X,y,Z,id);}
+  RBP(X,ry,Z,da<0.6?CHARWOOD:HIDE);
+  if(b===0&&da<=2.5&&da>1.5)RBP(X,g+5,Z,SKULLS);
+  if(!e&&da<0.6&&b>=2&&b<=D-4)RBP(X,g,Z,MAGMA);
+  if(!e&&b===D-2&&da<0.6){RBP(X,g+1,Z,ORCIRON);RBP(X,g+2,Z,BONES);}
+  if(!e&&b===D-2&&da>=2&&da<3)RBP(X,g+1,Z,BRAZIER);};
+// a forge in the yard: a smelter of basalt glowing at its mouth with a chimney, a trough of lava a block down, anvils
+RB.oforge=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y;RBP(X,g,Z,BASTILE);
+  if(b>=D-3&&a>=2&&a<=6){const e=a===2||a===6||b===D-1;for(let y=g+1;y<=g+6;y++)RBP(X,y,Z,e?((y-g)%3===1?EMBRICK:BASBRICK):y===g+1?MAGMA:AIR);if(a===4&&b===D-3)RBS(X,Z,g+7,g+10,BASCRACK);}
+  if(b>=1&&b<=2&&a>=1&&a<=7){RBP(X,g-2,Z,BASBRICK);if(a===1||a===7){RBP(X,g-1,Z,BASBRICK);RBP(X,g,Z,BASBRICK);}else{RBP(X,g-1,Z,LAVA);RBP(X,g,Z,AIR);}}
+  if(b===4&&(a===2||a===6)){RBP(X,g+1,Z,BASBRICK);RBP(X,g+2,Z,ORCIRON);}
+  if(b===0&&(a===0||a===8))RBS(X,Z,g+1,g+3,ORCLOG);};
+// the troll's cage of iron grates, bones within
+RB.ocage=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,e=a===0||a===W-1||b===0||b===D-1;RBP(X,g,Z,BASTILE);
+  for(let y=g+1;y<=g+5;y++)RBP(X,y,Z,y===g+5?ORCIRON:e?(b===0&&a===3&&y<=g+3?AIR:GRATE):AIR);if(!e&&hsh(X,9739,Z)<0.2)RBP(X,g+1,Z,BONES);};
+// the war drum: a great drum of hide on a platform, braziers either side
+RB.odrum=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y,d=Math.hypot(a-2,b-2);RBP(X,g+1,Z,CHARWOOD);if(d<1.6){RBS(X,Z,g+2,g+3,HIDE);RBP(X,g+4,Z,HIDE);}
+  if((a===0||a===4)&&b===2)RBP(X,g+2,Z,BRAZIER);};
+// a stone-thrower of black timber aimed at the gate: two frames, the arm cocked back with a boulder in its cup
+RB.ocata=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y;
+  if((a===0||a===4)&&b>=1&&b<=7)RBP(X,g+1,Z,ORCLOG);if((a===0||a===4)&&(b===3||b===5))RBS(X,Z,g+2,g+4,ORCLOG);if(a>=0&&a<=4&&b===4)RBP(X,g+5,Z,a===2?ORCIRON:ORCLOG);
+  if(a===2){for(let bb=1;bb<=8;bb++)if(b===bb){const y=Math.round(g+5+(bb-4)*0.6);RBP(X,y,Z,ORCLOG);}if(b===8){RBP(X,g+8,Z,BASCRACK);}}};
+// a pole of black timber crowned with skulls, a fire basket by it
+RB.opole=(s,p,u,v,X,Z)=>{const g=s.T;RBS(X,Z,g+1,g+3,CHARWOOD);RBP(X,g+4,Z,SKULLS);};
+// ---- The road down (The Long Descent): paved in basalt tiles between kerbs of basalt bricks, a low wall along its edge over
+// the drop; every forty blocks skull poles and fire baskets
+function wgRoadCol(P,segs,X,Z){const n=wgRoadNear(P,segs,X,Z),d=n[0];if(d>WG_RW+0.5)return;const g=hAt(X,Z),y=Math.round(n[2]);if(Math.abs(g-y)>1)return;
+  const L=Math.floor(n[1]),edge=d>WG_RW-1,low=n[3]===P.ramp.drop?1:0;
+  RBP(X,g,Z,d<4?BASTILE:edge?BASBRICK:hsh(X,9741,Z)<0.5?CINDER:BLACKASH);RBS(X,Z,g+1,g+4,AIR);
+  if(edge&&low)RBP(X,g+1,Z,BASBRICK);
+  if(d>WG_RW-2.5&&d<=WG_RW-1.5&&L%40===20){if(low){RBS(X,Z,g+1,g+3,CHARWOOD);RBP(X,g+4,Z,SKULLS);}else{RBP(X,g+1,Z,BASBRICK);RBP(X,g+2,Z,BRAZIER);}}}
+// ---- Names: the place at (X,Z) among a gate's works (the readout and the map): the road down, the camp (the pavilion in it),
+// the ram, the siege lines and the pass before the gate, the gate itself, the orcs' camp in the yard
+function wasteGateName(X,Z){if(wgSkip)return null;for(const t of wgTile(X,Z)){const P=t.P,[u,v]=wgUV(P,X,Z);
+  if(t.segs.length&&wgRoadNear(P,t.segs,X,Z)[0]<=WG_RW&&u<P.uY+4)return P.road;
+  let on=false;for(const q of wgPieces(P))if(wgOut(q,u,v)<=2)on=true;if(!on)continue;const cs=wgSite(P)&&P.cs;
+  if(u>=P.uC0)return u>=P.uC0+132&&u<=P.uC0+150&&Math.abs(v)<=13?'The Pavilion of the Three Banners':P.camp;
+  if(u>=1&&u<=32&&Math.abs(v*cs-10)<=8)return P.ram;
+  if(u>16)return 'The Siege Lines of '+P.camp.replace(/^The /,'the ');
+  return u>=-16?P.name:P.yard;}return null;}
+// ---- Per chunk: every gate whose works reach the chunk builds the parts over its columns, then the road down
+function applyGates(WCX,WCZ){
+  const x0=WCX*CS,z0=WCZ*CS,T=wgTile(x0,z0);if(!T.length)return;genLit=true;
+  try{for(const t of T){const P=t.P,s=wgSite(P),L=s.lay;let u0=1e9,u1=-1e9,v0=1e9,v1=-1e9;
+      for(const [X,Z] of [[x0,z0],[x0+CS-1,z0],[x0,z0+CS-1],[x0+CS-1,z0+CS-1]]){const [u,v]=siteUV(s,X,Z);u0=Math.min(u0,u);u1=Math.max(u1,u);v0=Math.min(v0,v);v1=Math.max(v1,v);}
+      const ps=L.parts.filter(p=>!(p.bu1<u0||p.bu0>u1||p.bv1<v0||p.bv0>v1));
+      if(ps.length)for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=x0+lx,Z=z0+lz,[u,v]=siteUV(s,X,Z);for(const p of ps)if(u>=p.bu0&&u<=p.bu1&&v>=p.bv0&&v<=p.bv1)RB[p.k](s,p,u,v,X,Z);}
+      if(t.segs.length)for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++)wgRoadCol(P,t.segs,x0+lx,z0+lz);}}
+  finally{genLit=false;}}
+// ---- The camp of the allied hosts before the Gate of the Wastes (D-067): a leaguer, not a scatter of tents. 250 deep and 250
+// across (three times the ground of the largest city of men), levelled at the gate's height out beyond the siege lines, its
+// front toward the gate. A ditch, a rampart and a palisade all round with timber towers, a gate in each side (the great gate
+// toward the wastes between two towers under a bridge hung with the three peoples' banners); a street from the great gate to
+// the back gate and one across, a road inside the rampart; in the middle a square before the Pavilion of the Three Banners,
+// where the captains of men, elves and dwarves hold council, the three banners on tall poles before it; the muster field
+// inside the great gate. The quarters:
+//   men (front, one side): rows of tents of canvas in their lines, pavilions of the captains in the black and white of the
+//     realm, timber halls (barracks and mess), a smithy, the riders' stables and horse lines
+//   elves (front, the other side): round pavilions, tents of grey and blue, a watch-spire, an archery range
+//   dwarves (back, the men's side): a redoubt of granite with towers and ballistae, forges, cranes, a trebuchet under repair, a
+//     second ram on its trestles, heaps of shot, carts and kegs
+//   stores (back, the elves' side): storehouses, wagons, haystacks, wells, cook-fires, the field hospital
+// Parts in the gate's site frame (gate-build.js), u = P.uC0 + U, v = V.
+function campLayout(P,s,L,r){
+  const g=P.hG,c0=P.uC0,A=L.parts,CW=WG_CAMP[0],HV=WG_CAMP[1],cs=P.cs,res=[];
+  const box=(k,U0,U1,V0,V1,o)=>{const p=Object.assign({k:k,u0:c0+U0,u1:c0+U1,v0:V0,v1:V1,y:g},o||{});A.push(p);return p;};
+  const pc=(k,U,V,w,d,f,o)=>{const p=partC(k,c0+U,V,w,d,f,Object.assign({y:g},o||{}));A.push(p);return p;};
+  const take=(U0,U1,V0,V1)=>res.push([U0,U1,V0,V1]),free=(U0,U1,V0,V1)=>res.every(q=>U1<q[0]||U0>q[1]||V1<q[2]||V0>q[3]);
+  const sp=(kind,U,V,R,y)=>L.spots.push({kind:kind,u:c0+U,v:V,R:R||4,y:y||g});
+  P.campC={c0:c0,c1:c0+CW,hv:HV};
+  // the ground, the perimeter
+  box('lgground',0,CW,-HV,HV,{cw:CW,hv:HV});
+  box('lgwall',0,CW,-HV,HV,{cw:CW,hv:HV});
+  take(0,13,-HV,HV);take(CW-13,CW,-HV,HV);take(0,CW,-HV,-HV+13);take(0,CW,HV-13,HV);
+  // towers on the rampart: the corners, every forty or so along, either side of each gate
+  const tw=(U,V,H)=>{pc('gtwr',U,V,5,5,0,{H:H||12});take(U-3,U+3,V-3,V+3);};
+  for(const U of [6,CW-6])for(const V of [-HV+6,-82,-44,-9,9,44,82,HV-6])tw(U,V,V===9||V===-9?14:12);
+  for(const V of [-HV+6,HV-6])for(const U of [48,90,116,134,160,202])tw(U,V);
+  // the great gate's bridge between its towers, hung with the banners of the three peoples
+  box('lggate',4,8,-7,7);
+  // the streets and the square
+  take(14,CW-14,-5,5);take(121,129,-HV+14,HV-14);
+  box('lgsq',104,154,-24,24);take(104,154,-24,24);
+  box('lgpav3',132,150,-13,13,{f:0,cols:[WOOLW,WOOLB,WOOLY],big:1});
+  for(const [V,id] of [[-8,RBANNER],[0,EVBANNER],[8,DBANNER],[-16,HBANNER],[16,WBANNER]])box('lgpole',110,110,V,V,{id:id,H:Math.abs(V)>8?12:16});
+  for(const V of [-20,20])for(const U of [108,120,140,152])box('lglamp',U,U,V,V);
+  for(let U=20;U<CW-16;U+=16)if(U<100||U>158)for(const V of [-6,6])box('lglamp',U,U,V,V);
+  // the muster field inside the great gate
+  box('lgmuster',14,44,-44,44);take(14,44,-44,44);
+  sp('r_gate',10,0,3);sp('r_drill',28,-24,6);sp('h_drill',28,24,6);sp('d_drill',36,-6,5);sp('r_hall',140,-4,4);sp('e_hall',140,4,4);sp('d_hall',146,0,3);
+  const side=-cs; // the men's side of the main street (the elves' the other), so the men lie toward the ram's side of the pass
+  // ---- the men
+  {const sv=side;
+    // timber halls (barracks, mess) by the front, the smithy, the stables and horse lines toward the side gate
+    for(const [U,V] of [[18,74],[18,100]]){const v0=sv>0?V:-V-8;A.push(housePart(c0+U,c0+U+17,v0,v0+7,sv>0?2:3,[1,1,1,1],{mat:'timber',st:2,sh:4,roof:SLATE,door:3,y:g}));take(U-2,U+19,Math.min(v0,v0+7)-2,Math.max(v0,v0+7)+2);}
+    sp('r_barracks',27,sv*78,5);sp('r_barracks',27,sv*104,5);
+    {const V=sv*66,p=pc('smithy',52,V,7,6,sv>0?2:3);take(47,57,V-5,V+5);sp('r_smithy',52,V,3);}
+    {const vv=sv*95;pc('stable',58,vv,26,7,sv>0?2:3);take(44,71,vv-4,vv+4);pc('paddock',87,vv,24,14,sv>0?2:3);take(74,100,vv-8,vv+8);sp('h_stable',58,vv-sv*6,4);sp('h_paddock',87,vv,5);}
+    // the captains' pavilions in the realm's black and white, along the cross street
+    for(const U of [100,112])for(const V of [36,54,72]){const vv=sv*V;if(!free(U-5,U+5,vv-6,vv+6))continue;pc('lgpav3',U,vv,11,9,0,{cols:[WOOLW,WOOLK]});take(U-5,U+5,vv-6,vv+6);}
+    // the lines of tents
+    for(let U=48;U<=112;U+=11)for(let V=12;V<=112;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:hsh(U,9743,V)<0.5?WOOLK:WOOLW,flag:V%24===12?RBANNER:0});take(U-4,U+4,vv-3,vv+3);}
+    for(let U=16;U<=44;U+=10)for(let V=48;V<=64;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:WOOLK});take(U-4,U+4,vv-3,vv+3);}
+    sp('r_street',80,sv*30,6);sp('r_street',100,sv*90,6);}
+  // ---- the elves
+  {const sv=-side;
+    // the archery range along the side: a shooting line, butts of hay with their marks at the far end
+    box('lgrange',52,104,sv>0?86:-112,sv>0?112:-86,{sv:sv});take(50,106,sv>0?84:-114,sv>0?114:-84);sp('w_range',56,sv*99,4);
+    // the watch-spire, round pavilions, tents of grey and blue
+    A.push({k:'etower',cu:c0+112,cv:sv*104,rr:3,H:22,y:g,flag:1,door:0,u0:c0+107,u1:c0+117,v0:sv*104-5,v1:sv*104+5});take(107,117,sv*104-6,sv*104+6);
+    for(const [U,V] of [[24,64],[24,90],[60,40],[86,40],[100,64],[74,66]]){const vv=sv*V;if(!free(U-6,U+6,vv-6,vv+6))continue;A.push({k:'epav',cu:c0+U,cv:vv,rp:4,y:g,roof:EVROOF,u0:c0+U-6,u1:c0+U+6,v0:vv-6,v1:vv+6});take(U-6,U+6,vv-6,vv+6);}
+    sp('e_garden',60,sv*40,5);sp('e_hall',86,sv*40,4);sp('e_barracks',24,sv*77,5);
+    for(let U=48;U<=112;U+=11)for(let V=12;V<=80;V+=9){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:hsh(U,9745,V)<0.5?WOOLB:WOOLG,canvas:hsh(V,9747,U)<0.5?WOOLW:CANVAS,flag:V%27===12?EVBANNER:0});take(U-4,U+4,vv-3,vv+3);}
+    for(let U=16;U<=40;U+=11)for(let V=50;V<=112;V+=9){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:WOOLB,canvas:WOOLW,flag:V%27===14?WBANNER:0});take(U-4,U+4,vv-3,vv+3);}}
+  // ---- the dwarves: their redoubt of granite at the back on the men's side
+  {const sv=side,U0=150,U1=226,V0=sv>0?30:-110,V1=sv>0?110:-30;
+    box('lgred',U0,U1,V0,V1,{gu:U0,gv:(V0+V1)>>1});take(U0-2,U1+2,V0-2,V1+2);
+    for(const [U,V] of [[U0,V0],[U0,V1],[U1,V0],[U1,V1]])A.push({k:'dtower',cu:c0+U,cv:V,h2:3,H:14,y:g,ball:U===U0?1:0,flag:U===U1?1:0,door:U===U0?1:0,u0:c0+U-4,u1:c0+U+4,v0:V-4,v1:V+4});
+    const vm=(V0+V1)>>1;
+    pc('dforge',U0+12,vm-sv*20,9,7,0,{W:7,D:5});pc('dforge',U0+12,vm+sv*4,9,7,0,{W:7,D:5});
+    A.push({k:'dcrane',cu:c0+U0+40,cv:vm-sv*24,y:g,u0:c0+U0+39,u1:c0+U0+41,v0:vm-sv*24-6,v1:vm-sv*24+9});
+    pc('dtreb',U0+40,vm+sv*14,7,12,0);
+    box('lgram',U0+56,U0+70,vm-5,vm+5);
+    box('gshot',U0+28,U0+31,vm+sv*28-3,vm+sv*28+3);box('gshot',U0+50,U0+53,vm-sv*30-3,vm-sv*30+3);
+    for(const [U,V] of [[U0+24,vm+sv*30],[U0+64,vm+sv*28],[U0+66,vm-sv*28]])box('lgkegs',U,U+3,V-2,V+2);
+    sp('d_forge',U0+12,vm-sv*20,4);sp('d_dforge',U0+12,vm+sv*4,4);sp('d_barracks',U0+40,vm,6);sp('d_gate',U0+3,vm,3);
+    // their tents outside the redoubt, toward the cross street
+    for(let U=134;U<=146;U+=11)for(let V=12;V<=112;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:WOOLB,flag:V%32===12?DBANNER:0,low:1});take(U-4,U+4,vv-3,vv+3);}
+    for(let U=160;U<=222;U+=11)for(let V=12;V<=24;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:WOOLY,low:1});take(U-4,U+4,vv-3,vv+3);}}
+  // ---- the stores, the kitchens and the field hospital at the back on the elves' side
+  {const sv=-side;
+    for(const [U,V] of [[160,96],[184,96],[208,96]]){const v0=sv>0?V:-V-9;A.push(housePart(c0+U,c0+U+17,v0,v0+8,sv>0?2:3,[1,1,1,1],{mat:'cottage',st:1,sh:4,roof:THATCH,door:4,y:g}));take(U-2,U+19,Math.min(v0,v0+8)-2,Math.max(v0,v0+8)+2);}
+    for(const [U,V] of [[164,72],[176,72],[188,72],[200,72],[212,72]]){const vv=sv*V;box('lgwagon',U-1,U+5,vv-1,vv+1);take(U-2,U+6,vv-3,vv+3);}
+    for(const [U,V] of [[222,60],[226,70],[218,74]]){const vv=sv*V;A.push({k:'hay',cu:c0+U,cv:vv,y:g,u0:c0+U-2,u1:c0+U+2,v0:vv-2,v1:vv+2});take(U-3,U+3,vv-3,vv+3);}
+    for(const [U,V] of [[150,40],[200,40]]){const vv=sv*V;A.push({k:'well',cu:c0+U,cv:vv,y:g,u0:c0+U-1,u1:c0+U+1,v0:vv-1,v1:vv+1});take(U-3,U+3,vv-3,vv+3);}
+    for(const [U,V] of [[162,46],[176,46],[190,46]]){const vv=sv*V;box('lgcook',U-2,U+2,vv-2,vv+2);take(U-3,U+3,vv-3,vv+3);}
+    {const vv=sv*26;pc('lghosp',190,vv,7,31,sv>0?2:3,{col:WOOLR});take(172,208,vv-5,vv+5);}
+    sp('r_market',176,sv*60,6);sp('r_farm',200,sv*80,5);sp('e_garden',190,sv*26,4);
+    for(let U=136;U<=230;U+=11)for(let V=12;V<=112;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:hsh(U,9749,V)<0.4?WOOLR:WOOLW});take(U-4,U+4,vv-3,vv+3);}}
+}
+// ---- Column builders of the camp (U = u - P.uC0, V = v)
+const campE=(p,U,V)=>Math.min(U,p.cw-U,p.hv-Math.abs(V)); // how far in from the camp's edge
+const campGateAt=(p,U,V)=>Math.abs(V)<=5&&(U<14||U>p.cw-14)||Math.abs(V)>p.hv-14&&Math.abs(U-p.cw/2)<=4;
+// the ground: the streets gravelled between edges of beaten earth, the road inside the rampart, the rest trodden grass
+RB.lgground=(s,p,u,v,X,Z)=>{const g=p.y,U=u-p.u0,V=v,av=Math.abs(V),e=campE(p,U,V),q=hsh(X,9751,Z);if(e<8)return;
+  let id=q<0.3?PATH:q<0.42?DIRT:GRASS;
+  if(av<=4&&U>=8&&U<=p.cw-8)id=av<=2?GRAVEL:PATH;else if(Math.abs(U-p.cw/2)<=3)id=Math.abs(U-p.cw/2)<=1?GRAVEL:PATH;else if(e<=12)id=q<0.7?PATH:GRAVEL;
+  RBP(X,g,Z,id);RBS(X,Z,g+1,g+4,AIR);};
+// the perimeter: a ditch four wide and three deep, the rampart behind it, a palisade of pointed logs on the rampart, walked
+// behind at its top; the gates through it bridged
+RB.lgwall=(s,p,u,v,X,Z)=>{const g=p.y,U=u-p.u0,e=campE(p,U,v);if(e>7)return;
+  if(campGateAt(p,U,v)){RBP(X,g,Z,e<=3?PLANKS:PATH);RBS(X,Z,g+1,g+5,AIR);if(e<=3&&(Math.abs(v)===5||Math.abs(U-p.cw/2)===4))RBP(X,g+1,Z,FENCE);return;}
+  if(e<=3){RBS(X,Z,g-2,g+3,AIR);RBP(X,g-3,Z,DIRT);if(e===1&&hsh(X,9753,Z)<0.35)RBP(X,g-2,Z,STAKES);return;}
+  const top=e===5||e===6?g+2:g+1;RBS(X,Z,g,top-1,DIRT);RBP(X,top,Z,GRASS);RBS(X,Z,top+1,top+3,AIR);
+  if(e===6){RBS(X,Z,g+3,g+6,LOG);RBP(X,g+7,Z,STAKES);}else if(e===7)RBP(X,g+3,Z,PLANKS);};
+// the great gate's bridge between its towers at the height of their platforms, the banners of men, elves and dwarves hung from it
+RB.lggate=(s,p,u,v,X,Z)=>{const g=p.y,av=Math.abs(v);RBP(X,g+14,Z,PLANKS);if(u===p.u0||u===p.u1)RBP(X,g+15,Z,FENCE);
+  if(u===p.u0&&(av===2||av===5))RBS(X,Z,g+9,g+13,av===2?(v<0?RBANNER:EVBANNER):v<0?DBANNER:HBANNER);};
+// the square before the pavilion: paved, its edge kerbed in stone
+RB.lgsq=(s,p,u,v,X,Z)=>{const g=p.y,e=Math.min(u-p.u0,p.u1-u,v-p.v0,p.v1-v);RBP(X,g,Z,e===0?WSBRICK:(u+v)%7===0?FSTONE:PAVING);RBS(X,Z,g+1,g+4,AIR);};
+// the muster field: trodden earth, posts for the drill at its edge
+RB.lgmuster=(s,p,u,v,X,Z)=>{const g=p.y,q=hsh(X,9755,Z),e=Math.min(u-p.u0,p.u1-u,v-p.v0,p.v1-v);RBP(X,g,Z,q<0.6?PATH:q<0.85?DIRT:GRAVEL);
+  if(e===0&&(u+v)%6===0){RBP(X,g+1,Z,LOG);RBP(X,g+2,Z,FENCE);}};
+// a tent of canvas on a ridge pole (p.W across, p.D deep), its door toward its front, a band of its people's colour (p.col) along
+// its ridge; poles out at its ends, a pennant (p.flag) on the front one; the dwarves' tents (p.low) a step lower
+RB.lgtent=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,m=(W-1)/2,da=Math.abs(a-m),ry=g+(p.low?3:4)-Math.round(da),cv=p.canvas||CANVAS;
+  RBP(X,g,Z,da<m?PATH:DIRT);
+  for(let y=g+1;y<=ry;y++){const end=b===0||b===D-1,door=b===0&&da<1&&y<=g+2;RBP(X,y,Z,y===ry?(da<0.5?p.col:cv):end&&!door?cv:AIR);}
+  if(da<0.5&&(b===0||b===D-1)){RBP(X,ry+1,Z,LOG);if(b===0&&p.flag)RBP(X,ry+2,Z,p.flag);}
+  if(da<0.5&&b===D-2&&hsh(X,9757,Z)<0.4)RBP(X,g+1,Z,hsh(X,9759,Z)<0.5?BARREL:CRATE);};
+// A pavilion (p.W across, p.D deep, its front toward p.f): walls of canvas in upright stripes of its colours (p.cols), five high
+// (seven for the great one), a valance in the first colour under a roof pitched to a ridge along its depth; a door of three
+// held open, poles at the corners crowned with pennants; within lamps hung from the ridge and, in the great one, the council's
+// long table with its benches and the map laid on it
+RB.lgpav3=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,big=!!p.big,wh=big?7:5,m=(W-1)/2,da=Math.abs(a-m),e=a===0||a===W-1||b===0||b===D-1,c=(a===0||a===W-1)&&(b===0||b===D-1);
+  const cols=p.cols,stripe=cols[Math.floor(a/2)%cols.length],ry=g+wh+1+Math.round((m-da)*(big?0.5:0.6));
+  RBP(X,g,Z,e?PLANKS:big?(b%4===1?WOOLR:PLANKS):PLANKS);
+  for(let y=g+1;y<ry;y++){let id=AIR;if(e){id=y===g+wh?cols[0]:stripe;if(b===0&&da<=1.5&&y<=g+3)id=AIR;}RBP(X,y,Z,id);}
+  RBP(X,ry,Z,da<0.6?LOG:(Math.floor(b/2)%2?CANVAS:cols[0]));
+  if(c){RBS(X,Z,g+1,ry+2,LOG);RBP(X,ry+3,Z,cols[1]===WOOLK?RBANNER:cols[1]===WOOLB&&!big?EVBANNER:[RBANNER,EVBANNER,DBANNER][(a+b)%3]);}
+  if(!e&&da<0.6&&b%5===2)RBP(X,ry-1,Z,LANTERN);
+  if(big&&!e){const ta=Math.abs(a-m)<=2,tb=b>=4&&b<=D-5;if(ta&&tb){RBP(X,g+1,Z,DPROP);RBP(X,g+2,Z,da<=1&&b>=6&&b<=D-7?BOOKS:PLANKS);}else if((Math.abs(a-m)===3)&&tb&&b%2===0)RBP(X,g+1,Z,PLANKS);
+    if(b===D-2&&da<=1)RBS(X,Z,g+1,g+2,da<0.5?GILDED:PLANKS);}};
+// a tall pole crowned with a people's banner
+RB.lgpole=(s,p,u,v,X,Z)=>{const g=p.y;RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+p.H,LOG);RBS(X,Z,g+p.H+1,g+p.H+3,p.id);};
+// a lamp on a post
+RB.lglamp=(s,p,u,v,X,Z)=>{const g=p.y;RBS(X,Z,g+1,g+2,LOG);RBP(X,g+3,Z,LANTERN);};
+// the archery range: the shooting line marked in stone at its near end, three butts of hay with their marks at the far end,
+// the lanes between fenced
+RB.lgrange=(s,p,u,v,X,Z)=>{const g=p.y,b=u-p.u0,a=v-p.v0,W=p.v1-p.v0;RBP(X,g,Z,GRASS);RBS(X,Z,g+1,g+3,AIR);
+  if(b===2)RBP(X,g,Z,FSTONE);if((a===0||a===W)&&b%3===0)RBP(X,g+1,Z,FENCE);
+  if(b>=p.u1-p.u0-2&&b<=p.u1-p.u0-1&&a%7>=2&&a%7<=4&&a>0&&a<W){RBS(X,Z,g+1,g+3,HAYBALE);if(b===p.u1-p.u0-2&&a%7===3)RBP(X,g+2,Z,WOOLR);}};
+// the dwarves' redoubt: a wall of granite four high with merlons, its gate toward the camp's middle (u = p.u0)
+RB.lgred=(s,p,u,v,X,Z)=>{const g=p.y,e=Math.min(u-p.u0,p.u1-u,v-p.v0,p.v1-v);
+  if(e>1){RBP(X,g,Z,hsh(X,9761,Z)<0.5?DFLAG:GRAVEL);RBS(X,Z,g+1,g+3,AIR);return;}
+  if(u-p.u0<=1&&Math.abs(v-p.gv)<=3){RBP(X,g,Z,DFLAG);RBS(X,Z,g+1,g+4,AIR);if(e===0&&Math.abs(v-p.gv)===3)RBS(X,Z,g+1,g+6,DCOL);return;}
+  for(let y=g;y<=g+4;y++)RBP(X,y,Z,y===g+4?DKNOT:y<=g+1?DGRAN:DCOURSE);if(e===0&&(u+v)%2===0)RBP(X,g+5,Z,DGRAN);};
+// a second ram on its trestles, its head not yet hung
+RB.lgram=(s,p,u,v,X,Z)=>{const g=p.y,b=u-p.u0,a=v-(p.v0+p.v1)/2,aa=Math.abs(a);
+  if(aa<=1&&b>=1&&b<=13)RBS(X,Z,g+3,g+4,LOG);
+  if((b===2||b===7||b===12)&&aa<=3){RBP(X,g+1,Z,DPROP);RBP(X,g+2,Z,aa<=1?DPROP:AIR);if(aa===3)RBP(X,g+2,Z,DPROP);}
+  if(b===0&&aa<=2)RBS(X,Z,g+1,g+3,aa<=1?STEELB:DBRONZE);};
+// kegs and crates stacked
+RB.lgkegs=(s,p,u,v,X,Z)=>{const g=p.y,q=hsh(X,9763,Z);RBP(X,g+1,Z,q<0.6?BARREL:CRATE);if(q<0.45)RBP(X,g+2,Z,BARREL);};
+// a wagon: a bed of planks on four wheels, a load under canvas
+RB.lgwagon=(s,p,u,v,X,Z)=>{const g=p.y,b=u-p.u0,a=v-p.v0;if(a===1&&b>=1&&b<=5){RBP(X,g+2,Z,PLANKS);RBP(X,g+3,Z,b%2?CANVAS:CRATE);}
+  if((a===0||a===2)&&(b===1||b===5))RBP(X,g+1,Z,DGEAR);if(a===1&&b===0)RBP(X,g+1,Z,DPROP);};
+// a cook-fire: a ring of stones about the fire, a kettle on a chain from a frame over it
+RB.lgcook=(s,p,u,v,X,Z)=>{const g=p.y,a=u-(p.u0+2),b=v-(p.v0+2),d=Math.max(Math.abs(a),Math.abs(b));
+  if(d===0){RBP(X,g,Z,HEARTH);RBP(X,g+1,Z,TORCH);RBP(X,g+3,Z,CHAIN);RBP(X,g+4,Z,LOG);}else if(d===1&&(a===0||b===0))RBP(X,g+1,Z,COBBLE);
+  else if(d===2&&a===0&&Math.abs(b)===2){RBS(X,Z,g+1,g+4,LOG);}else if(d===2&&b===0)RBP(X,g+4,Z,LOG);};
+// the field hospital: a long tent open along its front, cots of wool down it
+RB.lghosp=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,m=(D-1)/2,db=Math.abs(b-m),ry=g+5-Math.round(db*0.8),end=a===0||a===W-1;
+  RBP(X,g,Z,PLANKS);for(let y=g+1;y<=ry;y++)RBP(X,y,Z,y===ry?(db<0.5?p.col:CANVAS):end||b===D-1?CANVAS:AIR);
+  if(b===D-2&&a%3===1&&!end)RBP(X,g+1,Z,WOOLW);if(db<0.5&&a%6===3)RBP(X,ry-1,Z,LANTERN);};
 // ---- The goblin warrens (D-052): under the Volcanic Wastes the crawlways and the upper caves give way to warrens the goblins
 // dug in hot black rock. Halls on two levels under the sunken floor of the wastes (D-055: the upper at y 168 to 192, the lower
 // at 130 to 154, the levels the crawlways and the upper caves keep under the lands about) are joined by low
@@ -6977,7 +7729,7 @@ function warEntrance(B,r){
   for(let k=0;k<36;k++){const X=B.x0+24+Math.floor(r()*(CRB-48)),Z=B.z0+24+Math.floor(r()*(CRB-48)),h=hAt(X,Z);
     colInfo(X,Z,TWR);if(h<TWR.sl+3||TWR.bs>0||TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
     let hot=false;for(let d=0;d<8&&!hot;d++)for(const rr of [5,10,15]){colInfo(X+Math.round(Math.cos(d*0.785)*rr),Z+Math.round(Math.sin(d*0.785)*rr),TWR);if(TWR.vflow||TWR.vfis||TWR.vlake||TWR.river||TWR.lake){hot=true;break;}}
-    if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24))continue;
+    if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24)||wasteGateNear(X,Z,24))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,rise=hAt(Math.round(X+Math.cos(a)*7),Math.round(Z+Math.sin(a)*7))-h;sl=Math.max(sl,Math.abs(rise));if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
   return best||flat;
@@ -7259,10 +8011,10 @@ function plants(WCX,WCZ){let F0=null;
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=WCX*CS+lx,Z=WCZ*CS+lz,x=X-OX,z=Z-OZ,ci=x+W*z,g=ground[ci],b=biome[ci];
     if(g+12<H&&world[I(x,g+1,z)]===WATER)waterPlants(x,z,X,Z,g,b); // the sea floor, lakes and pools (M6d)
-    if(g+12<H&&world[I(x,g+1,z)]===AIR&&(world[I(x,g,z)]===GRASS||world[I(x,g,z)]===FARM_D)&&stoneWallAt(X,Z,colInfo(X,Z,TP))&&!smallNear(X,Z,0)&&!sigNear(X,Z,0)&&!realmNear(X,Z,1)){world[I(x,g+1,z)]=hsh(X,8723,Z)<0.3?MOSSY:COBBLE;if(hsh(X,8725,Z)<0.35)world[I(x,g+2,z)]=COBBLE;} // dry-stone walls (M6g)
+    if(g+12<H&&world[I(x,g+1,z)]===AIR&&(world[I(x,g,z)]===GRASS||world[I(x,g,z)]===FARM_D)&&stoneWallAt(X,Z,colInfo(X,Z,TP))&&!TP.wlvl&&!smallNear(X,Z,0)&&!sigNear(X,Z,0)&&!realmNear(X,Z,1)){world[I(x,g+1,z)]=hsh(X,8723,Z)<0.3?MOSSY:COBBLE;if(hsh(X,8725,Z)<0.35)world[I(x,g+2,z)]=COBBLE;} // dry-stone walls (M6g)
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
-      if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);if(TP.tsite&&TP.tsite.raw&&woodPath(TP.tsite,X,Z))continue;const F=forestOf(TP); // mountains and fells only where their land has its own plants; none on the wood elves' paths
+      if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);if(TP.tsite&&TP.tsite.raw&&woodPath(TP.tsite,X,Z)||TP.wlvl)continue;const F=forestOf(TP); // mountains and fells only where their land has its own plants; none on the wood elves' paths, nor on the gate's works (D-067)
         const tn=TP.town?0:1,heath=tn*(b===4?1:Math.max(0,(TP.dw-0.2)*1.6)),reed=tn*(b===11?1:Math.max(0,(TP.fen-0.25)*1.6)),dark=tn*(b===8?1:Math.max(0,(TP.sw-0.25)*1.6)); // none of the wild growth on a realm's sites (D-061)
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
@@ -7282,6 +8034,8 @@ function plants(WCX,WCZ){let F0=null;
 // world chunk (WCX,WCZ) at window chunk (lcx,lcz); gx0 and gz0 are set before every step. A step may return false to be called again.
 const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>realmPrep(WCX*CS+8,WCZ*CS+8), // the realms of men about the chunk, planned one province a step (D-060)
+  (lcx,lcz,WCX,WCZ)=>wgPrep(WCX*CS+8,WCZ*CS+8), // the gates of the wastes about it, likewise (D-067)
+  (lcx,lcz,WCX,WCZ)=>stairPrep(WCX*CS+8,WCZ*CS+8), // and the Ember Stairs of the great volcanoes about it (D-067)
   ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
   (lcx,lcz)=>lavaSea(lcx,lcz),
   (lcx,lcz,WCX,WCZ)=>{const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);let n=0; // cave plans of the regions around, one region at a time
@@ -7298,8 +8052,10 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
+    applyStairs(WCX,WCZ); // the Ember Stair winding up inside each great volcano from its fortress's way in (D-067)
     applyOrcs(WCX,WCZ); // the orcs' camps, watchtowers, forges and fighting pits on the wastes' floor (D-064)
     applyRealms(WCX,WCZ); // the realms of men: their cities, castles, villages, farms, watchtowers and roads (D-060)
+    applyGates(WCX,WCZ); // the gates of the wastes: the gate, the siege, the orcs' yard, the camp of the hosts, the road down (D-067)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
   (lcx,lcz,WCX,WCZ)=>warrenDress(WCX,WCZ), // the goblin warrens under the wastes: their rock, halls, tunnels and camps (D-052)
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
@@ -7327,7 +8083,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)||dwarfWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)||dwarfWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ)||stairLavaAt(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;
@@ -8070,6 +8826,8 @@ const AMB_EV={
   crackle:at=>{for(let i=0;i<2+(Math.random()*3|0);i++)burst(0.03,'highpass',2600+Math.random()*2400,0.7,0.05,i*0.05+Math.random()*0.04,at);},
   // the goblin warrens (D-052): war drums far off in the rock, and goblin chatter
   drums:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1],at[2]+(at[2]-PL.z)*2],beat=[0,0.36,0.72,1.44,1.8,2.16,2.88];for(const t of beat){burst(0.16,'lowpass',110,0.9,0.24,t,far);tone(70,52,0.18,0.12,t,null,far);}},
+  // the war at the gates of the wastes (D-067): steel on steel and on shields somewhere off in the fight
+  clash:at=>{const far=[at[0]+(at[0]-PL.x)*1.5,at[1],at[2]+(at[2]-PL.z)*1.5],n=3+(Math.random()*5|0);for(let i=0;i<n;i++){const t=i*0.22+Math.random()*0.12;burst(0.06,'bandpass',2600+Math.random()*1800,6,0.07,t,far);if(Math.random()<0.4)burst(0.09,'lowpass',420,1,0.06,t+0.05,far);}},
   chatter:at=>{for(let i=0;i<3+(Math.random()*4|0);i++)voice(560+Math.random()*320,700+Math.random()*200,0.09,0.035,{type:'square',form:1300,q:2.2,delay:i*0.13+Math.random()*0.06},at);},
   // the realms of men (D-060): a bell from a tower, the hum of voices in the street, a cart's wheels, a dog
   bell:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1]+8,at[2]+(at[2]-PL.z)*2];for(let i=0;i<3;i++){tone(392,390,2.2,0.05,i*1.6,'triangle',far);tone(588,585,1.6,0.02,i*1.6,null,far);tone(784,780,1.2,0.012,i*1.6,null,far);}},
@@ -8114,7 +8872,10 @@ const AMB_LAND={
   woodelves:{wind:0.06,day:{bird:14,song:1.4,harp:2,voices:4},night:{song:1.8,harp:1.5,cricket:6,owl:1.5,voices:1}},
   // among the mountain dwarves (D-066): hammers on anvils, carts and voices, picks at the rock, a deep chant now and then, the
   // mountain's rumble under it all; by night the forges still ring
-  dwarves:{wind:0.06,rumble:0.05,day:{hammer:9,voices:5,cart:2,pick:3,chant:0.6,horn:0.2},night:{hammer:4,voices:1.5,pick:2,chant:0.9,drip:2}}
+  dwarves:{wind:0.06,rumble:0.05,day:{hammer:9,voices:5,cart:2,pick:3,chant:0.6,horn:0.2},night:{hammer:4,voices:1.5,pick:2,chant:0.9,drip:2}},
+  // at the gates of the wastes (D-067): the orcs' drums behind the wall, the hosts' horns, the clash of arms off along the pass,
+  // hammering at the engines, voices; by night the drums beat harder
+  siege:{wind:0.05,rumble:0.03,day:{drums:2,horn:1.2,clash:3,hammer:3,voices:5,crackle:2},night:{drums:3.5,horn:0.6,clash:2,voices:2,crackle:3}}
 };
 const AMB_OF={sea:'sea',isles:'sea',kelp:'sea',chalk:'sea',fjord:'sea',blacksand:'sea',willow:'wet',bog:'wet',moors:'high',mtn:'high',alpine:'high',glacier:'high',tundra:'high',karst:'high',cloud:'wet',
   dry:'dry',steppe:'dry',petrified:'dry',volcanic:'fire',blight:'grey',shadow:'grey',barrow:'grey',crystal:'ring',starfall:'ring',glowcap:'ring'};
@@ -8134,8 +8895,9 @@ function ambProfile(){
   if(yy<g-4){const X=bx+OX,Z=bz+OZ,cx=Math.floor(X/CS),cz=Math.floor(Z/CS),hold=yy<100&&yy>=20&&ruinZone(cx,cz),L=ambLayer(yy,hold,hold&&holdNear(cx,cz).inhabited);
     if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
     if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
+    if(stairName(X,yy,Z))return {surf:0,rumble:0.22,lava:0.12,wind:0,ev:{drums:1.6,crackle:10,bubble:3,boom:0.5,hammer:1,chatter:1},under:true}; // the Ember Stair (D-067)
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
-  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='dwarf'?'dwarves':rs.prov.cult.k==='wood'?'woodelves':rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
+  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=wasteGateAt(bx+OX,bz+OZ,30)?AMB_LAND.siege:rs?AMB_LAND[rs.prov.cult.k==='dwarf'?'dwarves':rs.prov.cult.k==='wood'?'woodelves':rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
   return {surf:P.surf||0,rumble:P.rumble||0,lava:P.lava||0,wind:(P.wind||0)*(1+Math.max(0,yy-SEA-40)/80),ev:ev,under:false};
 }
@@ -10671,14 +11433,17 @@ function foePlaces(){
   // the realms of men (D-060): each spot of a site's layout within 46 blocks
   for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites){if(Math.hypot(s.X-X,s.Z-Z)>s.R+70)continue;const L=siteLayout(s);
     L.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);if(Math.hypot(x-X,z-Z)>46)return;out.push({id:s.id+':'+i,x:x+0.5,y:p.y>0?p.y+1:hAt(Math.round(x),Math.round(z))+1,z:z+0.5,R:p.kind==='gate'||p.kind==='post'||p.kind==='citgate'?2.5:4,kind:s.prov.cult.fp+p.kind,folk:1,horses:p.horses||0,s:s});});}
+  warPlaces(X,Z,out); // the gates of the wastes: the camp of the hosts, the siege works, the orcs' yard (D-067)
+  stairSpots(X,PL.y,Z,out); // the halls and caverns of the Ember Stair (D-067)
   return out;
 }
 function foeSpawnTick(){
   const X=PL.x+OX,Z=PL.z+OZ;
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
-  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=28&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
-    if(folk&&folkCount()>=FOLK_CAP)continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
+  const wn=warNear(); // by a gate of the wastes there are more of both (D-067)
+  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+    if(folk&&folkCount()>=FOLK_CAP+(wn?14:0))continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
@@ -10686,8 +11451,8 @@ function foeSpawnTick(){
       spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s});
       if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
-    spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
-  folkPatrol();
+    spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.stair==='cavern'&&Math.random()<0.5?'troll':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
+  folkPatrol();warTick();
   // now and then a host of the nearest people marches through the wastes against their creatures (D-063): from out of sight
   // behind the player to as far again beyond, one host at a time, every few minutes
   hostT-=1;if(hostT<=0){hostT=20;if(!foes.some(f=>f.host&&!f.dead)&&folkCount()<FOLK_CAP-6){const p=wasteGround(46,60),H=p&&hostOf(PL.x+OX,PL.z+OZ);if(H){hostT=150+Math.random()*90;
@@ -10783,7 +11548,7 @@ const FOLK_SAY={
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast(F.n+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -10855,10 +11620,13 @@ function stepFoe(f,dt){
   let want=0,face=false;
   switch(f.st){
     case 'sleep':break;
-    case 'idle':if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
+    case 'idle':if(f.back&&f.backT&&foeClock>f.backT){f.way=f.back;f.back=null;f.st='return';f.t=0;f.hx=f.x;f.hz=f.z;break;} // a party marches back (D-067)
+      if(F.folk&&pdp<4&&!folkWrath(f)){face=true;break;} // a passer-by: they stop and turn to them
       if(f.t<=0){if(f.road&&folkRoadStep(f)){f.st='walk';f.t=20;}else if(Math.random()<(F.folk&&!F.civ&&f.spot?0.3:0.5)&&foeHome(f,F.folk?(F.civ?7:4):6)){f.st='walk';f.t=10;}else f.t=1.5+Math.random()*3;}break;
     case 'walk':{const tdx=f.tx-f.x,tdz=f.tz-f.z,d=Math.hypot(tdx,tdz);if(d<0.6||f.t<=0){f.st='idle';f.t=f.road?0.2:1+Math.random()*3;}else if(F.folk&&pdp<3&&!folkWrath(f)){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk;}break;}
-    case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);if(d<2.5||f.t<-30){f.st='idle';f.t=2;}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
+    case 'return':{const tdx=f.hx-f.x,tdz=f.hz-f.z,d=Math.hypot(tdx,tdz);
+      if(d<2.5||f.t<-30){if(f.way&&f.way.length){const w=f.way.shift();f.hx=w[0]-OX+((f.id%3)-1)*0.8;f.hz=w[1]-OZ+(f.id%2?0.5:-0.5);f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/F.walk-20);} // a leg's time: some 30 s over its walk // a party's next waypoint (D-067)
+        else{f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+20+Math.random()*25;}}else{f.hd=Math.atan2(tdx,tdz);want=F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{
       // against a creature its girth counts: the blow lands on its near side
@@ -11084,6 +11852,80 @@ function lordFalls(f){fallenLords.add(f.lordOf);saveDirty=true;showName('The Emb
   burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
 // armour (D-052): a coat in the body slot takes a share of every blow from a foe, and wears
 function armourCut(n){const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[q.id];q.d=(q.d||0)+1;if(q.d>=it.dur){equip.body=null;toast('Your '+it.n+' is worn through');}return Math.max(1,Math.round(n*(1-it.armor)));}
+// ---- War at the gates of the wastes (D-067). The camp of the allied hosts, its siege works and the orcs' yard behind the
+// gate are peopled from the spots of the gate's layout (warPlaces, through foePlaces): soldiers of men, elves and dwarves in
+// their quarters, at the lines, the engines and the ram; orcs in their camp, at their forge and the troll's cage, archers on the
+// gate's walk. While the player is near a gate the two sides send parties at each other (warTick): raiding parties out of the
+// camp through the gap of the open leaf into the yard, or out of the yard against the lines; scouts slipping through (the
+// allies' on down the long road, the goblins out round the camp); now and then an army, the three peoples marching together or
+// a warhost of the wastes with its trolls and warchief. A party marches by waypoints (f.way, world coordinates, taken one by one
+// as its home in the foes' 'return' step) and fights whatever of the other side it meets on the way (D-063). In creative they
+// fight each other and never the player.
+Object.assign(FOE_HOME,{owall:[['bowman',3],['raider',1]],oscout:[['goblin',2],['gslinger',2]],oarmy:[['raider',5],['bowman',2.5],['brute',2]],
+  r_mant:[['rbow',2],['rspear',1]],r_lines:[['rspear',2],['rbow',1],['rsword',1]],e_lines:[['ebow',2],['esword',1]],d_ram:[['dhammer',2],['daxe',2]],d_treb:[['dxbow',1],['daxe',1]],
+  e_scout:[['ebow',2]],w_scout:[['wbow',2],['wknife',1]],h_scout:[['hrider',2]]});
+Object.assign(FOLK_N,{mant:[2,3],lines:[2,4],ram:[3,4],treb:[2,2],scout:[2,3]});Object.assign(FOLK_LEAD,{d_ram:'dcapt',r_lines:'rcapt'});FOE_N.owall=[2,3];
+FOLK_SAY.siege=['You stand in {p}. Mind the watch, and keep clear of the lines when the throwers loose.','Men, elves and dwarves in one camp. My grandfather would not have believed it.',
+  'The gate has held a hundred years. It will not hold a hundred more.','They come out by night, mostly. Goblins first, then the big ones.','Every stone they throw at us, we throw two back.',
+  'The dwarves say the ram will break it before the snows. The elves say nothing, and smile.','When the gate falls, we march down the long road to the burning mountain.',
+  'Keep your head down near the pass. Their archers on the wall do not miss twice.'];
+const WAR_PEOPLE={r:'the men of the white realm',h:'the riders',e:'the high elves',w:'the wood elves',d:'the dwarves'},warS=new Map();let warClk=10;
+// is the player near a gate's works (within 160)? (the foes' caps are higher there)
+const warNear=()=>!!wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),160);
+// the spots of the gates near (X,Z): the folk's within 46 blocks, the orcs' within 64
+function warPlaces(X,Z,out){for(const t of wgTile(Math.floor(X),Math.floor(Z))){const P=t.P,s=wgSite(P);
+  s.lay.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v),folk=p.kind[1]==='_';if(Math.hypot(x-X,z-Z)>(folk?46:64))return;
+    out.push({id:P.id+':'+i,x:x+0.5,y:p.y+1,z:z+0.5,R:p.R,kind:p.kind,folk:folk?1:0,s:s});});}}
+// the way between the camp and the orcs' camp (wgWay), in world coordinates, inward from the camp or the other way
+function warRoute(P,inward){const s=wgSite(P),R=wgWay(P);return (inward?R:R.slice().reverse()).map(([u,v])=>siteXZ(s,u,v));}
+// down the long road from its head (for the allies' scouts)
+function warRoadDown(P){const s=wgSite(P),out=[siteXZ(s,-26,P.side*36),siteXZ(s,P.uY+8,P.side*36)];const p=P.ramp.pts;for(let i=6;i<p.length;i+=6)out.push([p[i][0],p[i][1]]);return out;}
+// Sends a party of n from table along the route: it starts at the first waypoint in the loaded world, generated, 30 to 85
+// blocks from the player (out of the way, and well within the reach at which marching foes and folk are let go); null if none.
+// With o.back it holds a while where the route ends, then marches back the way it came (f.back)
+function warParty(P,table,n,route,o){
+  let k=0;for(;k<route.length;k++){const [X,Z]=route[k],x=X-OX,z=Z-OZ,bx=Math.floor(x),bz=Math.floor(z),d=Math.hypot(x-PL.x,z-PL.z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])continue;if(d>=30&&d<=85)break;}
+  if(k>=route.length-1)return null;const [X,Z]=route[k],x=X-OX,z=Z-OZ,g=ground[Math.floor(x)+W*Math.floor(z)];
+  const grp=spawnGroup(table,n,x,g,z,3,Object.assign({lead:null},o||{}));if(!grp.length)return null;
+  for(const f of grp){f.war=P.id;f.way=route.slice(k+1).map(w=>[w[0],w[1]]);if(o&&o.back)f.back=route.slice(k,-1).reverse().map(w=>[w[0],w[1]]);const w=f.way.shift();f.hx=w[0]-OX;f.hz=w[1]-OZ;f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/FOES[f.kind].walk-20);}
+  return grp;}
+const warFolk=(P,fp,back)=>({prov:'wg:'+P.id,site:wgSite(P),lead:FOLK_LEAD[fp+'host']||null,back:back});
+function warRaid(P){
+  if(Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),warRoute(P,true),warFolk(P,fp,1));
+    if(g){toast('A raiding party of '+WAR_PEOPLE[fp[0]]+' makes for the gate');foeCall(g[0],'alert');}}
+  else{const g=warParty(P,'band',5+Math.floor(Math.random()*3),warRoute(P,false),{lead:Math.random()<0.3?'ochief':null,back:1});if(g){toast('Orcs sally from the gate against the siege lines');foeCall(g[0],'alert');}}}
+function warScout(P){
+  if(Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
+  else{const s=wgSite(P),r=warRoute(P,false);r.push(siteXZ(s,P.uC0+40,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)),siteXZ(s,P.uC0+160,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)));
+    const g=warParty(P,'oscout',3,r);if(g)toast('Goblin scouts creep out along the pass');}}
+function warArmy(P){
+  if(Math.random()<0.5){let any=null;for(const fp of ['r_','d_','e_']){const g=warParty(P,fp+'host',4+Math.floor(Math.random()*2),warRoute(P,true),warFolk(P,fp,1));if(g&&!any)any=g;}
+    if(any){toast('The allied hosts march on the gate: men, elves and dwarves together');foeCall(any[0],'alert');}}
+  else{const r=warRoute(P,false),g=warParty(P,'oarmy',8+Math.floor(Math.random()*3),r,{lead:'ochief',back:1});if(g){warParty(P,'band',1,r,{lead:'troll',back:1});warParty(P,'oscout',3,r);toast('A warhost pours out of '+P.name.replace(/^The /,'the '));foeCall(g[0],'alert');}}}
+// every few seconds near a gate: the parties' timers run down, and one is sent when its time comes (at most 26 marching at once)
+function warTick(){
+  if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;
+  let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:120+Math.random()*120};warS.set(P.id,st);}for(const k in st)st[k]=Math.max(-5,st[k]-5);
+  if(foes.filter(f=>f.war&&!f.dead).length>=26)return;
+  if(Math.random()<0.55)warVolley(P);
+  if(st.army<=0){st.army=240+Math.random()*180;st.raid=Math.max(st.raid,45);warArmy(P);}
+  else if(st.raid<=0){st.raid=50+Math.random()*60;warRaid(P);}
+  else if(st.scout<=0){st.scout=70+Math.random()*80;warScout(P);}}
+// ---- The engines (D-067): now and then the dwarves' trebuchets loft a stone over the wall into the yard, or the orcs' throwers a
+// burning pot onto the siege lines. They fly and land for the look and the sound only, and strike no one.
+const warStones=entityKind({name:'warStones',list:[],update:dt=>updWarStones(dt),persist:false,shift:(dx,dz)=>{for(const s of warStones){s.x-=dx;s.z-=dz;}}});
+function warVolley(P){
+  const s=wgSite(P),orc=Math.random()<0.45,eng=s.lay.parts.filter(p=>p.k===(orc?'ocata':'dtreb')&&p.u0<P.uC0);if(!eng.length)return;const e=eng[Math.floor(Math.random()*eng.length)];
+  const [ox,oz]=siteXZ(s,(e.u0+e.u1)/2,(e.v0+e.v1)/2),tu=orc?P.uL-12+Math.random()*44:-60+Math.random()*40,[tx,tz]=siteXZ(s,tu,(Math.random()-0.5)*80);
+  const x=ox-OX+0.5,z=oz-OZ+0.5,y=P.hG+(orc?8:12),T=3.2+Math.random()*0.8,g=16,ty=P.hG+1;if(Math.hypot(x-PL.x,z-PL.z)>110)return;
+  const mat=new THREE.MeshBasicMaterial({color:orc?new THREE.Color(1,0.5,0.12):new THREE.Color(0.32,0.31,0.3),transparent:orc,opacity:orc?0.92:1}),m=new THREE.Mesh(shotGeo,mat);m.scale.set(0.8,0.8,0.8);m.frustumCulled=false;scene.add(m);
+  warStones.push({x:x,y:y,z:z,vx:(tx-ox)/T,vz:(tz-oz)/T,vy:(ty-y)/T+0.5*g*T,fire:orc,life:T+1,m:m});burst(0.3,'lowpass',160,1,0.3,0,[x,y,z]);}
+function updWarStones(dt){
+  for(let i=warStones.length-1;i>=0;i--){const s=warStones[i];s.life-=dt;s.vy-=16*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;s.m.position.set(s.x,s.y,s.z);s.m.rotation.x+=dt*3;s.m.rotation.y+=dt*2;
+    if(s.fire&&Math.random()<0.7)spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.4,0.2,(Math.random()-.5)*0.4,[1,0.5,0.1],0.4,-0.3);
+    const bx=Math.floor(s.x),bz=Math.floor(s.z),hit=s.life<=0||bx<0||bz<0||bx>=W||bz>=D||SOLID[get(bx,Math.floor(s.y),bz)];
+    if(hit){for(let k=0;k<(s.fire?16:10);k++)spawnP(s.x,s.y+0.5,s.z,(Math.random()-.5)*4,Math.random()*3.5,(Math.random()-.5)*4,s.fire?[1,0.5,0.1]:[0.32,0.3,0.28],0.6,s.fire?3:14);
+      burst(s.fire?0.6:0.5,'lowpass',s.fire?380:140,1.1,0.45,0,[s.x,s.y,s.z]);scene.remove(s.m);s.m.material.dispose();warStones.splice(i,1);}}}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -11405,6 +12247,18 @@ function realmTour(kind,ck){
   const [x,z]=sitePort(best),d=DIRS[best.dir];goTo(Math.round(x+d[0]*6),Math.round(z+d[1]*6));PL.yaw=Math.atan2(d[0],d[1]);
   toast(best.name+', '+(realmPlace(best.X,best.Z)||{line:''}).line+', '+Math.round(bd)+' blocks from where you were');return{X:best.X,Z:best.Z,d:Math.round(bd),s:best};
 }
+// The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
+function gateTour(kind){
+  if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
+  for(let r=0;r<=30&&!(best&&bd<(r-1)*LS);r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const c=landSite(ci+a,cj+b);
+    if(LANDS[cellLand(c)].k!=='volcanic')continue;const B=wasteBasin(c);if(seen.has(B.key))continue;seen.add(B.key);const P=wasteGateOf(B);if(!P)continue;const d=Math.hypot(P.X-X,P.Z-Z);if(d<bd){bd=d;best=P;}}
+  if(!best){toast('No gate of the wastes within reach');return null;}
+  const P=best,s=wgSite(P),cs=P.cs,inw=Math.atan2(P.dx,P.dz),out=Math.atan2(-P.dx,-P.dz);
+  const at={gate:[44,-cs*22,inw],ram:[40,cs*22,inw],lines:[P.uL+18,6,inw],camp:[P.uC0-14,8,out],pavilion:[P.uC0+108,6,out],yard:[-50,-cs*16,out]}[kind];
+  let x,z,yaw;if(at){[x,z]=siteXZ(s,at[0],at[1]);yaw=at[2];}
+  else{const p=P.ramp.pts,i=Math.floor(p.length*0.3),q=p[i+1];x=p[i][0];z=p[i][1];yaw=Math.atan2(-(q[0]-x),-(q[1]-z));}
+  goTo(Math.round(x),Math.round(z));PL.yaw=yaw;toast(wasteGateName(Math.round(x),Math.round(z))||P.name);return{X:Math.round(x),Z:Math.round(z),P:P};
+}
 // ---- Time and weather (creative)
 function setTimeOfDay(h){settings.time='fixed';tod=((+h/24)%1+1)%1;lsSet(SET_KEY,settings);}
 function setWeatherNow(rain){settings.weather=true;raining=!!rain;rainT=rain?240:400;if(!rain)rainAmt=Math.min(rainAmt,0.3);lsSet(SET_KEY,settings);}
@@ -11601,7 +12455,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -11652,9 +12506,10 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
     ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm']]],
     ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves']]],
     ['w','The wood elves',[['capital','The king\'s wood'],['city','A city in the trees'],['fort','The king\'s halls'],['village','A tree-village'],['outpost','A watch-tree'],['farm','A glade']]],
-    ['d','The mountain dwarves',[['capital','The high hold'],['city','A mountain hold'],['fort','A bastion'],['village','A mining town'],['outpost','A lookout'],['farm','A mine']]]]){
+    ['d','The mountain dwarves',[['capital','The high hold'],['city','A mountain hold'],['fort','A bastion'],['village','A mining town'],['outpost','A lookout'],['farm','A mine']]],
+    ['g','The gates of the wastes',[['gate','The Ashen Gate'],['ram','The ram at the gate'],['lines','The siege lines'],['camp','The camp of the hosts'],['pavilion','The Pavilion of the Three Banners'],['yard','The orcs\' camp in the yard'],['road','The long road down']]]]){
     const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});

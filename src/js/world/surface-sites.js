@@ -17,7 +17,7 @@ function siteAt(rx,rz){
       const X=rx*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0),Z=rz*SITE_REG*CS+64+(r()*(SITE_REG*CS-128)|0);
       let lo=1e9,hi=-1e9,bad=false;
       for(let a=-1;a<=1&&!bad;a++)for(let b=-1;b<=1&&!bad;b++){colInfo(X+a*(R+1),Z+b*(R+1),TS2);if(TS2.wet||TS2.lake||TS2.river||TS2.rvBot<999||TS2.b===0||TS2.b===1||TS2.b===11||TS2.h<=TS2.sl+2)bad=true;lo=Math.min(lo,TS2.h);hi=Math.max(hi,TS2.h);}
-      if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4)||realmNear(X,Z,R+8))continue;
+      if(bad||hi-lo>(kind==='castle'?7:5)||gateNear(X,Z,R+4)||wasteGateNear(X,Z,R+8)||realmNear(X,Z,R+8))continue;
       let ring=0,river=0;for(let k=0;k<8;k++){const a=k*0.785;ring+=hAt(Math.round(X+Math.cos(a)*36),Math.round(Z+Math.sin(a)*36));
         for(const d of [20,40]){colInfo(Math.round(X+Math.cos(a)*d),Math.round(Z+Math.sin(a)*d),TS2);if(TS2.river||TS2.bank)river=1;}}
       const prom=hi-ring/8;if(prom<-1)continue;
@@ -146,6 +146,7 @@ function buildSite(s){
 // What to call a place on the surface
 function surfaceName(X,Y,Z){
   const s=siteNear(X,Z,1);if(s){if(s.way&&Math.abs(X-(s.X+s.R+4))<=2&&Math.abs(Z-s.Z)<=2)return 'An Ancient Waystone';return s.name;}
+  {const wn=wasteGateName(X,Z);if(wn)return wn;} // the gates of the wastes, the siege and the camp of the hosts (D-067)
   {const rp=realmPlace(X,Z);if(rp)return rp.name;} // a city, castle, village, watchtower or farmstead of the realms of men (D-060)
   {const rr=realmRoadAt(X,Z,0);if(rr)return realmRoadName(rr.rd);} // the people's high road or a lane (D-060, D-061)
   const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);if(gateNear(X,Z,0))return 'The Gate of '+holdOf(cx,cz).name;
@@ -153,6 +154,7 @@ function surfaceName(X,Y,Z){
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   if(oldRoadAt(X,Z))return 'An Old Road';
+  {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
   {const op=orcNear(X,Z,0);if(op)return op.name;} // the orcs' places on the wastes (D-064)
   for(const v of volcanoesNear(X,Z,0))if(Math.hypot(X-v.X,Z-v.Z)<v.R*0.9)return v.name; // the volcanoes (D-051), the great ones too (D-054)

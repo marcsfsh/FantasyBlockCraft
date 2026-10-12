@@ -7,9 +7,14 @@ const gen=(X,Z)=>{regenerateAll(X,Z);while(genQ.length)processGenQ();};
 const clearFoes=()=>{for(const f of [...foes])removeFoe(f);for(const s of [...shots]){scene.remove(s.m);}shots.length=0;foeSpots.clear();realmWrath.clear();};
 const run=(sec,fn)=>{for(let i=0;i<Math.round(sec/0.05);i++){foeT=99;hurtCD=Math.max(0,hurtCD-0.05);updFoes(0.05);if(fn&&fn())return true;}return false;};
 // an open flat spot on the wastes, the player well off to the side
-gen(3010,800);playing=true;settings.time='day';
-let sx=-1,sz=-1;for(let k=0;k<(W-60)*(D-20)&&sx<0;k+=3){const x=30+(k%(W-60)),z=10+Math.floor(k/(W-60)),g=ground[x+W*z];let ok=g>SEA-WB_DEP&&biome[x+W*z]===4;
-  for(let a=-14;a<=14&&ok;a++)for(let b=-3;b<=3&&ok;b++){const gg=ground[x+a+W*(z+b)];if(Math.abs(gg-g)>1||world[I(x+a,gg,z+b)]===LAVA||SOLID[world[I(x+a,gg+1,z+b)]]||SOLID[world[I(x+a,gg+2,z+b)]])ok=false;}if(ok){sx=x;sz=z;}}
+playing=true;settings.time='day';
+let sx=-1,sz=-1;for(const [WX,WZ] of [[3010,800],[3250,520],[3150,300],[2700,300]]){if(sx>=0)break;gen(WX,WZ); // (the first of these windows of the main basin's floor that has one)
+for(let k=0;k<(W-60)*(D-20)&&sx<0;k+=3){const x=30+(k%(W-60)),z=10+Math.floor(k/(W-60)),g=ground[x+W*z];let ok=g>SEA-WB_DEP&&biome[x+W*z]===4;
+  for(let a=-14;a<=14&&ok;a++)for(let b=-3;b<=3&&ok;b++){const gg=ground[x+a+W*(z+b)];if(Math.abs(gg-g)>1||world[I(x+a,gg,z+b)]===LAVA||SOLID[world[I(x+a,gg+1,z+b)]]||SOLID[world[I(x+a,gg+2,z+b)]])ok=false;}
+  // and level, dry ground all round out to 64 (the hosts come from behind the player, a warband meets them halfway; no river
+  // valley or flank between them)
+  const o={};for(let r=16;r<=64&&ok;r+=12)for(let q=0;q<12&&ok;q++){const X=x+OX+Math.round(Math.cos(q*0.5236)*r),Z=z+OZ+Math.round(Math.sin(q*0.5236)*r);colInfo(X,Z,o);if(o.river||o.bank||o.vflow||o.vfis||Math.abs(o.h-g)>6)ok=false;}
+  if(ok){sx=x;sz=z;}}}
 assert(sx>0,'an open place on the wastes for the test');
 const put=(dx)=>{PL.x=sx+0.5+(dx||0);PL.z=sz+0.5;PL.y=ground[Math.floor(PL.x)+W*sz]+1;PL.vx=PL.vy=PL.vz=0;PL.yaw=Math.PI/2;PL.pitch=0;};
 const near=(k,dx)=>{const x=sx+0.5+dx,z=sz+0.5,y=foeStand(x,ground[Math.floor(x)+W*sz]+1,z,FOES[k].tall||2);const f=addFoe(k,x,y,z,{st:'idle',t:3});f.yaw=f.hd=Math.atan2(-dx,0);return f;};

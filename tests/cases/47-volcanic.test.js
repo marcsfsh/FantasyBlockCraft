@@ -64,7 +64,7 @@ const vs=great;
   const dn=med(wo.map(q=>q.out-q.floor)),up=med(wo.map(q=>q.crest-q.out));info('median: the floor',dn,'below the lands about, the crest',up,'above them');
   assert(wo.length>=3&&dn>=75&&dn<=105&&up>=70&&up<=125&&wo.every(q=>q.out-q.floor>=60&&q.crest-q.out>=35&&q.crest-q.floor>=150),'the floor lies about 90 below the lands about it, the ring about 90 above them: up some 90 to the crest and down some 180 to the floor');
   // a window on the ring's inner wall: no water on the ground inside the ring (water in the caves under it is held as anywhere), lava held
-  const g=great[0];let wx=0,wz=0;for(let d=0;d<1400;d+=4){colInfo(g.X+d,g.Z,o);if(o.bs>=WB_IN*0.5){wx=g.X+d;wz=g.Z;break;}}
+  const g=great[0];let wx=0,wz=0;for(let k=0;k<8&&!wx;k++)for(let d=0;d<1600;d+=4){const X=Math.round(g.X+Math.cos(k*0.785)*d),Z=Math.round(g.Z+Math.sin(k*0.785)*d);colInfo(X,Z,o);if(o.bs>=WB_IN*0.5){wx=X;wz=Z;break;}} // (the nearest way out of its basin)
   gen(wx,wz);let water=0,dry=0;for(let z=0;z<D;z++)for(let x=0;x<W;x++){colInfo(x+OX,z+OZ,o);if(o.sl>=SEA)continue;dry++;for(let y=ground[x+W*z]-2;y<ground[x+W*z]+40;y++)if(world[I(x,y,z)]===WATER)water++;}
   const u=unsoundLava();info('on the ring near X',wx,'Z',wz,': columns inside the ring',dry,'; water there',water,'; unsound lava',u);
   assert(dry>1000&&water===0&&u===0,'inside the ring nothing on the ground is water, and the lava is held');}

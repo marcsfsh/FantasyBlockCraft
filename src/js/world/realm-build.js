@@ -454,7 +454,7 @@ RB.ring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>=p.r-1.5&&d<p.r+0.5)RBP(X,p
 // ---- Roads: paved with flagstones between kerbs of white stone (the king's roads), lanes of beaten earth; a bridge of stone
 // or planks where a road crosses water; on the king's roads a white milestone with a lamp every 72 blocks
 function realmRoadCol(X,Z,x,z){
-  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s)return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='dwarf')return dwarfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
+  const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s||wasteGateNear(X,Z,0))return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='dwarf')return dwarfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
     if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}
