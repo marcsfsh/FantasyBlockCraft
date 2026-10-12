@@ -61,6 +61,10 @@ body.surv #name{bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 #toast{position:absolute;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-size:22px;display:none;text-align:center;max-width:min(860px,calc(100vw - 340px))}
 #warpanel{position:absolute;top:calc(172px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:240px;font-size:18px;line-height:1.05;background:var(--panel);border:3px solid var(--edge);padding:4px 8px;display:none}
 #warpanel b{font-weight:normal;color:#ffd27a}#warpanel .we{white-space:nowrap}#warpanel .wb{display:inline-block;width:90px;height:9px;border:2px solid var(--edge);background:#1c1810;vertical-align:middle}#warpanel .wb i{display:block;height:100%;background:#c8902e}
+#hostbar{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));bottom:calc(76px + env(safe-area-inset-bottom,0px));max-width:min(420px,60vw);font-size:18px;line-height:1.1;background:var(--panel);border:3px solid var(--edge);padding:4px 8px;display:none;pointer-events:auto}
+#hostbar button{font:inherit;font-size:16px;background:#5f8a35;color:var(--ink);border:2px solid #2b3a1a;padding:1px 8px;margin:4px 4px 0 0;cursor:pointer}
+body.touch #hostbar{left:auto;right:calc(10px + env(safe-area-inset-right,0px));bottom:auto;top:calc(150px + env(safe-area-inset-top,0px));font-size:15px;max-width:220px}
+.wcrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}.wcrow input{font:inherit;font-size:18px;width:5em}.wcrow .lab{min-width:12em}.wcrow b{font-weight:normal;color:#7a2a10}
 body.touch #warpanel{top:calc(10px + env(safe-area-inset-top,0px));font-size:15px;width:200px}body.touch #warpanel .wb{width:70px}
 #toast .tl{display:table;margin:0 auto 4px;background:var(--panel);border:3px solid var(--edge);padding:2px 12px;transition:opacity .7s}
 body.touch #toast{font-size:18px;max-width:calc(100vw - 240px)}
@@ -151,6 +155,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
   <div id="hint"></div><div id="info"></div>
   <div id="toast"></div>
   <div id="warpanel"></div>
+  <div id="hostbar"><div class="hc"></div><button data-a="hostFollow" data-n="Follow"></button><button data-a="hostHold" data-n="Hold"></button><button data-a="hostMarch" data-n="March"></button><button data-a="hostCharge" data-n="Charge"></button><button data-a="hostVolley" data-n="Volley"></button></div>
   <canvas id="mm" width="150" height="150" aria-label="Map, tap to zoom"></canvas>
   <div id="cross"></div>
   <div id="name"></div>
@@ -197,6 +202,7 @@ body.touch #mm{width:104px;height:104px;right:auto;left:calc(10px + env(safe-are
     <div class="seg crea-only" id="tourseg">Land tour <select id="toursel"></select><button id="tourbtn">Go to the nearest</button></div>
     <div class="seg crea-only" id="animseg">Animal <select id="animsel"></select><button id="animbtn">Bring one here</button></div>
     <div class="seg crea-only" id="foeseg">Foe <select id="foesel"></select><button id="foebtn">Bring one here</button></div>
+    <div class="seg crea-only" id="warconseg">War <button id="warconbtn">The war console</button></div>
     <div class="seg crea-only" id="stampseg">Test structure <select id="stampsel"></select><button id="stampbtn">Build where you look</button></div>
     <div class="seg" id="hudseg">Readout <button data-v="1">On</button><button data-v="0">Off</button></div>
     <div class="seg" id="hintseg">Hints <button data-v="1">On</button><button data-v="0">Off</button></div>
@@ -234,7 +240,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v36',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v37',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -247,7 +253,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=36,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=37,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -9040,12 +9046,19 @@ const ACTIONS={
   pick:{name:'Pick the block you look at',run:()=>act(1)},
   pause:{name:'Pause',run:()=>{playing=false;hold=-1;showPause();}},
   hotbarPrev:{name:'Previous slot',run:()=>{sel=(sel+8)%9;drawBar();}},
-  hotbarNext:{name:'Next slot',run:()=>{sel=(sel+1)%9;drawBar();}}
+  hotbarNext:{name:'Next slot',run:()=>{sel=(sel+1)%9;drawBar();}},
+  // the war console and the orders to a summoned host (D-077)
+  warConsole:{name:'War console',crea:1,run:()=>{invOpen?closeInv():openWarConsole();},anytime:true},
+  hostFollow:{name:'Your host: follow me',crea:1,run:()=>hostCommand('follow')},
+  hostHold:{name:'Your host: hold here',crea:1,run:()=>hostCommand('hold')},
+  hostMarch:{name:'Your host: march to where I look',crea:1,run:()=>hostCommand('march')},
+  hostCharge:{name:'Your host: charge',crea:1,run:()=>hostCommand('charge')},
+  hostVolley:{name:'Your host: loose a volley',crea:1,run:()=>hostCommand('volley')}
 };
 for(let n=1;n<=9;n++)ACTIONS['slot'+n]={name:'Slot '+n,run:()=>{sel=n-1;drawBar();}};
 // Default bindings: keyboard codes (KeyboardEvent.code) and standard-mapping controller button numbers
 const BIND_DEFAULTS={
-  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyL:'journal',KeyJ:'mapZoom',KeyI:'hud',
+  keys:{KeyE:'inventory',Space:'jump',KeyF:'fly',KeyN:'noclip',KeyR:'respawn',KeyB:'brush',KeyV:'swap',KeyH:'photo',KeyT:'waypoint',KeyQ:'bpRotate',KeyX:'bpClear',KeyZ:'undo',KeyU:'undo',KeyM:'worldMap',KeyL:'journal',KeyJ:'mapZoom',KeyI:'hud',KeyK:'warConsole',KeyG:'hostFollow',KeyY:'hostHold',KeyP:'hostMarch',KeyC:'hostCharge',KeyO:'hostVolley',
         Digit1:'slot1',Digit2:'slot2',Digit3:'slot3',Digit4:'slot4',Digit5:'slot5',Digit6:'slot6',Digit7:'slot7',Digit8:'slot8',Digit9:'slot9'},
   held:{forward:['KeyW','ArrowUp'],back:['KeyS','ArrowDown'],left:['KeyA','ArrowLeft'],right:['KeyD','ArrowRight'],jump:['Space'],sprint:['ShiftLeft','ShiftRight']},
   // 0 A jump and 1 B down are held, 6/7 triggers place and break, 10 L3 sprint: those stay in the controller code (PAD_FIXED).
@@ -11451,6 +11464,37 @@ const FOLK_KIT=(function(){
         P.sheet('wingL','z',memb);P.sheet('wingR','z',(a,b)=>memb(12-a,b));}}
   });
 })();
+// ---- Crowds seen from afar (D-077). A foe or one of the folk beyond the nearest whole ones (foeLod) is one instance of its kind's
+// merged model (`amMerged`) in an instanced mesh for each model and coat, so a host of thousands takes a few dozen draw calls. Each
+// instance carries its own place, facing, fall and light (sky, block light, the struck flash); the batches are filled each frame
+// by placeFoe (`crowdPut`) and closed by updFoes (`crowdFrame`). Those behind the eye are left out.
+const CROWD=new Map();
+const AM_VSI='attribute vec3 inst;varying vec3 vI;varying vec2 vUv;varying float vD;varying vec3 vN;void main(){vUv=uv;vI=inst;mat4 m=modelMatrix*instanceMatrix;vN=normalize(mat3(m)*normal);vec4 mv=viewMatrix*m*vec4(position,1.0);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}';
+const AM_FSI=(()=>{const a='uniform float eL;uniform float eB;uniform float hurt;';if(!AM_FS.includes(a))throw new Error('crowd.js: the animal shader changed');
+  return '#define eL vI.x\n#define eB vI.y\n#define hurt vI.z\n'+AM_FS.replace(a,'varying vec3 vI;');})();
+let crowdEye=null;
+// one batch per model and coat: the model's merged geometry (its buffers shared) with its own instance attributes, room for cap
+function crowdBatch(f,M){const F=FOES[f.kind],key=F.m+':'+f.ci;let B=CROWD.get(key);if(B&&B.n<B.cap)return B;
+  const cap=B?B.cap*2:64,g0=amMerged(F.m,F.mount?P=>riderPose({ph:0,sp:0,atk:0,swing:0},P,0):F.bear?P=>{P.load.scale.setScalar(0.001);}:null),g=new THREE.BufferGeometry();
+  for(const k of ['position','normal','uv'])g.setAttribute(k,g0.attributes[k]);g.setIndex(g0.index);
+  const at=new THREE.InstancedBufferAttribute(new Float32Array(cap*3),3);at.setUsage(THREE.DynamicDrawUsage);g.setAttribute('inst',at);
+  const mat=B?B.mat:new THREE.ShaderMaterial({uniforms:{map:{value:M.mat.uniforms.map.value},fogColor:U.fogColor,fogNear:U.fogNear,fogFar:U.fogFar,lamp:U.lamp,lampR:U.lampR,skyMul:U.skyMul,skyTint:U.skyTint,
+    caveMin:U.caveMin,caveTint:U.caveTint,fade:{value:1}},vertexShader:AM_VSI,fragmentShader:AM_FSI});
+  const mesh=new THREE.InstancedMesh(g,mat,cap);mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);mesh.frustumCulled=false;mesh.count=0;scene.add(mesh);
+  const N={key:key,mesh:mesh,mat:mat,at:at,cap:cap,n:0,used:0};
+  if(B){N.mesh.instanceMatrix.array.set(B.mesh.instanceMatrix.array.subarray(0,B.n*16));at.array.set(B.at.array.subarray(0,B.n*3));N.n=B.n;scene.remove(B.mesh);B.mesh.dispose();} // (grown: twice the room; its model's buffers are shared, so its geometry is not disposed)
+  CROWD.set(key,N);return N;}
+// one afar: its place and facing, its fall when slain, its step's bob, its scale; its light
+function crowdPut(f,M,root){
+  if(!crowdEye){const d=camDir();crowdEye=[PL.x,PL.z,d.x,d.z,Math.hypot(d.x,d.z)||1];}
+  const E=crowdEye;if(((f.x-E[0])*E[2]+(f.z-E[1])*E[3])/E[4]<-8)return; // behind the eye
+  const B=crowdBatch(f,M),i=B.n++,e=B.mesh.instanceMatrix.array,o=i*16,s=root.scale.x,ct=Math.cos(f.yaw),st=Math.sin(f.yaw),cp=Math.cos(root.rotation.x),sp=Math.sin(root.rotation.x);
+  e[o]=ct*s;e[o+1]=0;e[o+2]=-st*s;e[o+3]=0;e[o+4]=st*sp*s;e[o+5]=cp*s;e[o+6]=ct*sp*s;e[o+7]=0;e[o+8]=st*cp*s;e[o+9]=-sp*s;e[o+10]=ct*cp*s;e[o+11]=0;
+  e[o+12]=f.x;e[o+13]=f.y+root.position.y+Math.abs(Math.sin(f.ph))*0.08*f.amp;e[o+14]=f.z;e[o+15]=1;
+  const a=B.at.array;a[i*3]=f.eL;a[i*3+1]=f.eB;a[i*3+2]=f.hurt;}
+// the frame's batches closed: each draws what it was given
+function crowdFrame(){crowdEye=null;for(const B of CROWD.values()){B.mesh.count=B.n;B.mesh.visible=B.n>0;if(B.n){B.mesh.instanceMatrix.needsUpdate=true;B.at.needsUpdate=true;}B.used=B.n;B.n=0;}}
+const crowdCount=()=>{let n=0;for(const B of CROWD.values())n+=B.used;return n;};
 // ---- Wildlife (E1, D-049; Q47, Q48, Q63, Q67): peaceful animals in the lands that suit them. They wander, graze and flee;
 // they give wool, milk and eggs, meat and hides to the hunter; wild horses can be ridden, a stray hound fed meat follows you, and
 // a wild mule fed crops carries a pack. Animals are not part of generation: they come and go around the player (Math.random is
@@ -11804,7 +11848,7 @@ const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],mark
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
     e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
-const foes=[],shots=[],foeSpots=new Map(),TFO={},foeGrid=new Map();let foeT=0,foeId=1,foeClock=0,foeSnd=0;
+const foes=[],shots=[],foeSpots=new Map(),TFO={},foeGrid=new Map(),foeGridS=[new Map(),new Map()];let foeFrame=0;let foeT=0,foeId=1,foeClock=0,foeSnd=0,foeRadMax=1;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
 entityKind({name:'foes',list:foes,update:dt=>updFoes(dt),persist:true,shift:(dx,dz)=>{for(const f of foes){f.x-=dx;f.z-=dz;f.hx-=dx;f.hz-=dz;if(f.tx!==undefined){f.tx-=dx;f.tz-=dz;}}
   for(const s of shots){s.x-=dx;s.z-=dz;}}});
@@ -11819,7 +11863,7 @@ function addFoe(kind,x,y,z,o){
     ph:Math.random()*6,amp:0,atk:0,atkK:'',atkT:0,foe:null,eseen:0,scanT:Math.random()*0.5,shotT:1+Math.random()*2,whipT:3,seen:0,losT:0,vis:false,lk:0,lkT:0,hurt:0,ct:4+Math.random()*10,lt:0,eL:1,eB:0,det:0,detT:0,ci:ci,m:m},o||{});
   f.hd=f.yaw;if(!f.grp)f.grp=f.id;foes.push(f);placeFoe(f,0);return f;
 }
-function removeFoe(f){f.gone=1;scene.remove(f.m.grp);scene.remove(f.m.shadow);if(f.m.fg)scene.remove(f.m.fg);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
+function removeFoe(f){f.gone=1;scene.remove(f.m.grp);scene.remove(f.m.shadow);f.m.mat.dispose();f.m.shadow.material.dispose();const i=foes.indexOf(f);if(i>=0)foes.splice(i,1);}
 // a group of `n` from a place's table around (x,z) near height y, sharing a group and a home; spread within r
 function spawnGroup(table,n,x,y,z,r,o){
   let lead=null;const out=[];
@@ -11852,7 +11896,7 @@ function foeSpawnTick(){
   const X=PL.x+OX,Z=PL.z+OZ;
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
-  const wn=warNear(),live=foes.filter(f=>!f.dead).length; // by a gate of the wastes there are more of both (D-067); (the war's fallen, lying, do not count, W2)
+  const wn=warNear(),live=foes.filter(f=>!f.dead&&!f.hst).length; // by a gate of the wastes there are more of both (D-067); (the war's fallen, lying, do not count, W2)
   for(const s0 of foePlaces()){const s=warHeld(s0),folk=!!s.folk; /* (a place the hosts have stormed is theirs, W5) */if(foeSpots.has(s.id)||(!folk&&live>=(wn?42:28)&&s.kind!=='lord'))continue;if(!folk&&s.kind!=='lord'&&fallenLords.size&&hsh(Math.round(s.x),9997,Math.round(s.z))>0.25&&deadBasinAt(s.x,s.z))continue; /* (a fallen lord's servants scatter, W7c) */const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     if(folk&&folkCount()>=FOLK_CAP+(wn?14:0))continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=emberSpawn(s.F,x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
@@ -11866,7 +11910,7 @@ function foeSpawnTick(){
   folkPatrol();warTick();
   // now and then a host of the nearest people marches through the wastes against their creatures (D-063): from out of sight
   // behind the player to as far again beyond, one host at a time, every few minutes
-  hostT-=1;if(hostT<=0){hostT=20;if(!foes.some(f=>f.host&&!f.dead)&&folkCount()<FOLK_CAP-6){const p=wasteGround(46,60),H=p&&hostOf(PL.x+OX,PL.z+OZ);if(H){hostT=150+Math.random()*90;
+  hostT-=1;if(hostT<=0){hostT=20;if(warAuto('a')&&!foes.some(f=>f.host&&!f.dead)&&folkCount()<FOLK_CAP-6){const p=wasteGround(46,60),H=p&&hostOf(PL.x+OX,PL.z+OZ);if(H){hostT=150+Math.random()*90;
     const grp=spawnGroup(H.C.fp+'host',4+Math.floor(Math.random()*3),p.x,p.g,p.z,4,{lead:FOLK_LEAD[H.C.fp+'host'],prov:H.key}),hx=2*PL.x-p.x,hz=2*PL.z-p.z;
     for(const f of grp){f.host=H;f.hx=hx+(Math.random()-0.5)*6;f.hz=hz+(Math.random()-0.5)*6;f.st='return';f.t=60;}
     if(grp.length){toast('A host of '+H.k.replace(/^The /,'the ')+' marches through the wastes');foeCall(grp[0],'alert');}}}}
@@ -11895,7 +11939,7 @@ function hostOf(X,Z){
 // minute or two, longer for a death): its guards near by take up arms against the player, its townsfolk flee; never in
 // creative. Patrols walk the king's roads; folk greet the player who comes close and looks at them.
 const FOLK_CAP=34,realmWrath=new Map();let folkGreetT=0;
-const folkCount=()=>{let n=0;for(const f of foes)if(FOES[f.kind].folk&&!f.dead)n++;return n;};
+const folkCount=()=>{let n=0;for(const f of foes)if(FOES[f.kind].folk&&!f.dead&&!f.hst)n++;return n;}; // (a summoned host's soldiers do not count: D-077)
 const folkWrath=f=>!!f.prov&&(realmWrath.get(f.prov)||0)>0;
 function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
   for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
@@ -11973,23 +12017,29 @@ function foeSeesAt(f,tx,ty,tz,lim){const ex=f.x,ey=f.y+f.m.box[4]*0.85,ez=f.z,d=
 // unless another is plainly nearer, and lets it go when long unseen or far. A player it hunts comes first when plainly nearer.
 // A new fight rallies its fellows near by; townsfolk flee. Their blows and shots wound each other (never one of their own side);
 // what falls to the other side leaves nothing for the player.
-const foeRad=f=>Math.max(f.m.box[3],-f.m.box[0]),foeSide=f=>!FOES[f.kind].folk;
+const foeRad=f=>f.rad||(f.rad=Math.max(f.m.box[3],-f.m.box[0])),foeSide=f=>!FOES[f.kind].folk,foeSd=f=>f.sd!==undefined?f.sd:(f.sd=FOES[f.kind].folk?0:1);
+// the living about (x,z) within r, from the grid of four-block cells built each frame in updFoes (an army is many: D-077), of one
+// side only if sd is given (0 the folk, 1 the wastes); where the cells would outnumber the creatures, all of them
+function foeNear(x,z,r,fn,sd){const c0=Math.max(0,Math.floor((x-r)/4)+8),c1=Math.min(255,Math.floor((x+r)/4)+8),d0=Math.max(0,Math.floor((z-r)/4)+8),d1=Math.min(255,Math.floor((z+r)/4)+8);
+  if((c1-c0+1)*(d1-d0+1)>foes.length){for(const g of foes)if(!g.dead&&!g.gone&&(sd===undefined||foeSd(g)===sd))fn(g);return;}
+  const G=sd===undefined?foeGrid:foeGridS[sd];for(let i=c0;i<=c1;i++)for(let j=d0;j<=d1;j++){const c=G.get(i*256+j);if(c)for(const g of c)if(!g.gone)fn(g);}}
 const foeEyeOn=(f,g,lim)=>foeSeesAt(f,g.x,g.y+g.m.box[4]*0.6,g.z,lim);
 function foeScan(f,F,tg){
   let E=f.foe;const sr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight,far=g=>f.leash&&Math.hypot(g.x-f.hx,g.z-f.hz)>f.leash+12;
   if(E){const d=Math.hypot(E.x-f.x,E.z-f.z);if(foeEyeOn(f,E,F.sight*2.6))f.eseen=0;else f.eseen+=0.5;
-    if(f.eseen>6||d>F.sight*2.5||far(E)){f.foe=E=null;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}}
+    if(!(f.hst&&f.hst.cmd==='charge')/* (a summoned host's charge keeps its foe: D-077) */&&(f.eseen>6||d>F.sight*2.5||far(E))){f.foe=E=null;if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;f.t=0;}}}
   const hunts=tg&&f.vis&&!F.civ&&(!F.folk||folkWrath(f)),pd=Math.hypot(PL.x-f.x,PL.z-f.z);
   if(E&&hunts&&pd<Math.hypot(E.x-f.x,E.z-f.z)-3){f.foe=null;f.st='chase';f.seen=0;return;}
-  let best=null,bd=E?Math.hypot(E.x-f.x,E.z-f.z)-3:sr;if(hunts&&f.st==='chase'&&!E)bd=Math.min(bd,pd-3);
-  for(const g of foes){if(g===f||g===E||g.dead||g.show||foeSide(g)===foeSide(f))continue;const d=Math.hypot(g.x-f.x,g.z-f.z);
-    if(d>=bd||Math.abs(g.y-f.y)>14||far(g)||!foeEyeOn(f,g,sr+2))continue;best=g;bd=d;}
+  let best=null,bd=E?Math.hypot(E.x-f.x,E.z-f.z)-3:sr;if(hunts&&f.st==='chase'&&!E)bd=Math.min(bd,pd-3);if(foes.length>300)bd=Math.min(bd,40); // (in a crowd, a nearer foe only within 40: D-077)
+  foeNear(f.x,f.z,bd,g=>{if(g===f||g===E||g.dead||g.show)return;const d=Math.hypot(g.x-f.x,g.z-f.z);
+    if(d>=bd||Math.abs(g.y-f.y)>14||far(g)||!foeEyeOn(f,g,sr+2))return;best=g;bd=d;},1-foeSd(f)); // (the other side's only)
   if(best){f.foe=best;f.eseen=0;if(!E)foeRally(f,best);else foeEngage(f);}
 }
 function foeEngage(g){if(FOES[g.kind].civ){if(g.st!=='flee'){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;}}
 function foeRally(f,E){
-  for(const g of foes){if(g.dead||g.foe&&g!==f)continue;if(g!==f&&(g.grp!==f.grp||Math.hypot(g.x-f.x,g.z-f.z)>20||g.st==='chase'))continue;
-    g.foe=E;g.eseen=0;foeEngage(g);if(g!==f&&!FOES[g.kind].civ&&Math.random()<0.5)g.ct=Math.random()*0.6;}
+  const one=g=>{if(g.dead||g.foe&&g!==f)return;if(g!==f&&(g.grp!==f.grp||Math.hypot(g.x-f.x,g.z-f.z)>20||g.st==='chase'))return;
+    g.foe=E;g.eseen=0;foeEngage(g);if(g!==f&&!FOES[g.kind].civ&&Math.random()<0.5)g.ct=Math.random()*0.6;};
+  if(foes.length>200){one(f);foeNear(f.x,f.z,20,g=>{if(g!==f)one(g);},foeSd(f));}else for(const g of foes)one(g); // (in a crowd, those about it from the grid)
   foeCall(f,'alert');}
 // a blow or a shot from the other side: less through a shield from the front, a push back; it turns on the one who struck
 // unless it already fights; slain, it falls
@@ -12083,7 +12133,8 @@ function stepFoe(f,dt){
   const r1=foeRad(f)+0.1;
   if(pdp<r1+0.3&&pdp>0.01){f.kvx-=pdx/pdp*dt*14;f.kvz-=pdz/pdp*dt*14;}
   const gx=Math.floor(f.x/4)+8,gz=Math.floor(f.z/4)+8; // (those about it, from the grid of four-block cells: an army is many)
-  for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const c=foeGrid.get((gx+i)*256+gz+j);if(c)for(const g of c){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e=Math.hypot(ex,ez),rr=r1+foeRad(g);if(e<rr&&e>0.01){f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}}
+  const rm=r1+foeRadMax,mx4=f.x/4-Math.floor(f.x/4),mz4=f.z/4-Math.floor(f.z/4),i0=rm>=4||mx4*4<rm?-1:0,i1=rm>=4||mx4*4>4-rm?1:0,j0=rm>=4||mz4*4<rm?-1:0,j1=rm>=4||mz4*4>4-rm?1:0; // (only the cells within reach)
+  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const c=foeGrid.get((gx+i)*256+gz+j);if(c)for(const g of c){if(g===f||g.dead)continue;const ex=f.x-g.x,ez=f.z-g.z,e2=ex*ex+ez*ez,rr=r1+foeRad(g);if(e2<rr*rr&&e2>1e-4){const e=Math.sqrt(e2);f.kvx+=ex/e*(rr-e)*dt*6;f.kvz+=ez/e*(rr-e)*dt*6;}}}
   // the head turns to whom it faces when near; now and then a call
   if(dp<12&&f.st!=='sleep'){f.lkT=Math.max(-0.8,Math.min(0.8,angTo(f.yaw,Math.atan2(dx,dz))));}else f.lkT*=0.9;
   f.ct-=dt;if(f.ct<=0){f.ct=(f.st==='chase'?3:8)+Math.random()*10;if(pdp<36&&f.st!=='sleep')foeCall(f,f.st==='chase'?'alert':'idle');}
@@ -12130,8 +12181,9 @@ function updShots(dt){
     if(!gone&&s.atP&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
       const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
     // a shot strikes a creature of the other side (D-063); it passes its own
-    if(!gone)for(const g of foes){if(g.dead||foeSide(g)===s.side)continue;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz){
-      const v=Math.hypot(s.vx,s.vz)||1;foeHurtFoe(g,s.dmg,s.from,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;break;}}
+    if(!gone){let hit=null;const one=g=>{if(hit||g.dead||foeSide(g)===s.side)return;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz)hit=g;};
+      if(foes.length>64)foeNear(s.x,s.z,foeRadMax+K.sz,one,s.side?0:1);else for(const g of foes)one(g); // (in a crowd, those about it from the grid)
+      if(hit){const v=Math.hypot(s.vx,s.vz)||1;foeHurtFoe(hit,s.dmg,s.from,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}}
     if((s.k==='fire'||s.k==='hellfire')&&Math.random()<(s.k==='fire'?0.6:1))spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
     if(gone){if(s.k==='fire'||s.k==='hellfire')for(let k=0;k<(s.k==='fire'?8:24);k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
       else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
@@ -12148,6 +12200,7 @@ function placeFoe(f,dt){
   f.amp+=((sp>0.05?Math.min(1,0.45+sp/F.run*0.8):0)-f.amp)*Math.min(1,dt*6);
   f.lk+=(f.lkT-f.lk)*Math.min(1,dt*4);
   const amp=f.amp*(big?0.5:0.8),s1=Math.sin(f.ph),w=F.wind||0.4,prog=f.atk>0?1-f.atk/(f.atkK==='shot'?0.45:f.atkK==='whip'?0.55:w):0;
+  const far=f.far;if(!far){ // (seen from afar its limbs are not drawn: D-077)
   if(P.legL){P.legL.rotation.x=rest(P.legL)[0]+s1*amp;P.legR.rotation.x=rest(P.legR)[0]-s1*amp;}
   if(P.armL){P.armL.rotation.x=rest(P.armL)[0]-s1*amp*0.8;P.armR.rotation.x=rest(P.armR)[0]+s1*amp*0.8;P.armL.rotation.z=rest(P.armL)[2];P.armR.rotation.z=rest(P.armR)[2];}
   // the attack: the right arm (or both, for a shot or a lash) raised through the wind-up, then brought down at once
@@ -12155,41 +12208,43 @@ function placeFoe(f,dt){
     if(f.atkK==='blow'){P.armR.rotation.x=rest(P.armR)[0]-2.6*up;if(big)P.armL.rotation.x=rest(P.armL)[0]-1.4*up;}
     else if(f.atkK==='shot'){if(F.shot.k==='arrow'){P.armL.rotation.x=-1.5;P.armR.rotation.x=-1.5;P.armR.rotation.z=0.6*up;}else{P.armR.rotation.x=rest(P.armR)[0]-2.8*up;}}
     else if(f.atkK==='whip'){P.armL.rotation.x=-1.2*up;P.armL.rotation.z=0.9*up;}}
-  else if(f.swing>0){f.swing=Math.max(0,f.swing-dt*5);P.armR.rotation.x=rest(P.armR)[0]+0.7*f.swing;} // the follow-through
+  else if(f.swing>0){f.swing=Math.max(0,f.swing-dt*5);P.armR.rotation.x=rest(P.armR)[0]+0.7*f.swing;}} // the follow-through
   if(f.st==='sleep'&&P.body){root.rotation.x+=(-1.45-root.rotation.x)*Math.min(1,dt*2);root.position.y=0.25;}
   else if(!f.dead){root.rotation.x*=1-Math.min(1,dt*6);root.position.y=0;}
-  if(P.head){P.head.rotation.y=f.lk*0.7;}
+  if(!far){if(P.head){P.head.rotation.y=f.lk*0.7;}
   if(P.wingL){const b=Math.sin(foeClock*(f.st==='chase'?3.2:1.4))*0.25;P.wingL.rotation.y=rest(P.wingL)[1]+b;P.wingR.rotation.y=rest(P.wingR)[1]-b;}
   if(P.whip1){const k=f.atkK==='whip'&&f.atk>0?prog:0,wv=Math.sin(foeClock*4+f.id)*0.25;P.whip1.rotation.x=rest(P.whip1)[0]-k*1.4+wv;P.whip2.rotation.x=rest(P.whip2)[0]+wv*1.2;P.whip3.rotation.x=rest(P.whip3)[0]+wv*1.5;}
   if(P.tail)P.tail.rotation.y=Math.sin(foeClock*1.3+f.id)*0.3;
   if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;if(P.load)P.load.visible=!!f.carry; // a bearer's burden (W3)
-  if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
-  if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-(f.war?WAR_LIE-1:1.6))*0.6;}
+  if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;}
+  if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-(f.war||f.hst?WAR_LIE-1:1.6))*0.6;}
+  else if(far){}
   else if(f.atkK==='heave'&&f.atk>0&&P.armL){const k=Math.min(1,prog*1.6);P.armL.rotation.x=P.armR.rotation.x=-1.5+0.5*k;} // the ram's crew heave (W2)
   else if(f.climb&&!f.climb.ph&&P.armL){const k=Math.sin(foeClock*8+f.id);P.armL.rotation.x=-2.6+k*0.4;P.armR.rotation.x=-2.6-k*0.4;if(P.legL){P.legL.rotation.x=-0.4+k*0.5;P.legR.rotation.x=-0.4-k*0.5;}}
   else if(F.drum&&!f.atk&&P.armL){const k=Math.sin(foeClock*9+f.id);P.armL.rotation.x=-0.9+k*0.5;P.armR.rotation.x=-0.9-k*0.5;} // the drummer beats (W3)
   else if(f.cheer>foeClock&&!f.atk&&!f.foe&&P.armL){const k=Math.abs(Math.sin(foeClock*3+f.id));P.armL.rotation.x=-2.7-0.3*k;P.armR.rotation.x=-2.5-0.4*k;root.position.y=Math.max(0,Math.sin(foeClock*5+f.id))*0.15;}
   if(F.lord&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
-  if(F.mount&&!f.dead)riderPose(f,P,amp);
+  if(F.mount&&!f.dead&&!far)riderPose(f,P,amp);
   if(F.mount&&!f.dead&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.5){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<40&&AX&&settings.sound&&foeHear([f.x,f.y,f.z]))burst(0.06,'bandpass',sp>3?520:760,3,0.22*(1-d/40),0,[f.x,f.y,f.z]);} // hoofbeats
-  M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
-  const lod=!F.lord&&(Math.hypot(f.x-PL.x,f.z-PL.z)>(f.far?30:34)||f.dead>1&&f.war);if(lod!==!!f.far)foeLod(f,lod); // (the war's fallen, lying, as one mesh)
-  if(f.far){const fm=M.fm;M.fg.position.set(f.x,f.y,f.z);M.fg.rotation.y=f.yaw;fm.position.copy(root.position);fm.position.y+=Math.abs(Math.sin(f.ph))*0.08*f.amp;fm.rotation.copy(root.rotation);fm.scale.copy(root.scale);}
+  if(!far){M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;}
+  const lod=!F.lord&&(Math.hypot(f.x-PL.x,f.z-PL.z)>(f.far?foeLodR*0.9:foeLodR)||f.dead>1&&(f.war||f.hst));if(lod!==!!f.far)foeLod(f,lod); // (the war's fallen, lying, as one)
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
   if(f.eLT!==undefined){f.eL+=(f.eLT-f.eL)*Math.min(1,dt*4);f.eB+=(f.eBT-f.eB)*Math.min(1,dt*4);}
-  const u=M.mat.uniforms;u.eL.value=f.eL;u.eB.value=f.lordOf?Math.max(f.eB,0.55):f.eB;u.hurt.value=f.hurt;
-  const sh=M.shadow,b=M.box,dist=Math.hypot(f.x-PL.x,f.z-PL.z);sh.position.set(f.x,f.gy+0.02,f.z);sh.rotation.y=f.yaw;sh.scale.set((b[3]-b[0])*1.2,1,(b[5]-b[2])*1.1);
-  sh.material.opacity=f.dead>1?0:0.4*Math.max(0,1-(f.y-f.gy)/2)*Math.max(0,1-dist/Math.max(20,U.fogFar.value))*Math.min(1,f.eL*1.3+f.eB);
-  const vis=dist<U.fogFar.value+10;M.grp.visible=vis;if(M.fg)M.fg.visible=vis;sh.visible=vis&&!f.far&&sh.material.opacity>0.01;
+  if(!f.far){const u=M.mat.uniforms;u.eL.value=f.eL;u.eB.value=f.lordOf?Math.max(f.eB,0.55):f.eB;u.hurt.value=f.hurt;}
+  const sh=M.shadow,b=M.box,dist=Math.hypot(f.x-PL.x,f.z-PL.z),vis=dist<U.fogFar.value+10;
+  if(!f.far){sh.position.set(f.x,f.gy+0.02,f.z);sh.rotation.y=f.yaw;sh.scale.set((b[3]-b[0])*1.2,1,(b[5]-b[2])*1.1);
+    sh.material.opacity=f.dead>1?0:0.4*Math.max(0,1-(f.y-f.gy)/2)*Math.max(0,1-dist/Math.max(20,U.fogFar.value))*Math.min(1,f.eL*1.3+f.eB);}
+  M.grp.visible=vis;sh.visible=vis&&!f.far&&sh.material.opacity>0.01;if(f.far&&vis)crowdPut(f,M,root); // (afar, one of a crowd: D-077)
   // an Emberlord sheds embers
   if(F.lord&&vis&&!f.dead&&Math.random()<dt*14)spawnP(f.x+(Math.random()-.5)*2,f.y+1+Math.random()*4,f.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[1,0.4+Math.random()*0.3,0.08],1.2,-0.4);
 }
 // Seen from afar (D-067): beyond 34 blocks a foe or one of the folk is drawn as one mesh, its parts baked at rest (`amMerged`),
-// and its parts leave the scene (so their matrices are not worked out each frame); within 30 it is drawn whole again
-function foeLod(f,far){const M=f.m,F=FOES[f.kind];f.far=far;
-  if(far){if(!M.fg){M.fg=new THREE.Group();M.fm=new THREE.Mesh(amMerged(F.m,F.mount?P=>riderPose({ph:0,sp:0,atk:0,swing:0},P,0):F.bear?P=>{P.load.scale.setScalar(0.001);}:null),M.mat);M.fm.frustumCulled=false;M.fg.add(M.fm);}scene.remove(M.grp);scene.add(M.fg);}
-  else{scene.remove(M.fg);scene.add(M.grp);}}
+// and its parts leave the scene (so their matrices are not worked out each frame); within 30 it is drawn whole again. Since D-077
+// those afar are instances of their kind's merged model (`crowdPut`, engine/crowd.js), and in a crowd only the nearest
+// `FOE_WHOLE` are drawn whole (`foeLodR`, worked out twice a second in updFoes)
+const FOE_WHOLE=40;let foeLodR=34,foeLodT=0;
+function foeLod(f,far){const M=f.m;f.far=far;if(far)scene.remove(M.grp);else{M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;scene.add(M.grp);}}
 // A horseman's gait (D-061): at a walk the horse's legs move in diagonal pairs, at the gallop the forelegs reach together and the
 // hind legs drive under, its body rocking and its neck nodding; the rider rises with each stride, the shield arm and the rein
 // hand steady, the spear arm still but for its blow
@@ -12231,15 +12286,20 @@ function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
   for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
-  warSoundTick(dt);warWorksFrame(dt);warUnitsFrame(dt);emberFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
-  foeGrid.clear();for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);}
+  warSoundTick(dt);warWorksFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
+  foeFrame++;foeGrid.clear();foeGridS[0].clear();foeGridS[1].clear();foeRadMax=1;
+  for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);const S=foeGridS[foeSd(g)];let e=S.get(k);if(!e)S.set(k,e=[]);e.push(g);foeRadMax=Math.max(foeRadMax,foeRad(g));}
   foeDin=Math.min(18,foeDin+dt*12);
+  if((foeLodT-=dt)<=0){foeLodT=0.5;foeLodR=34;const ds=[];for(const f of foes)if(!f.dead&&!FOES[f.kind].lord){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<34)ds.push(d);}
+    if(ds.length>FOE_WHOLE){ds.sort((a,b)=>a-b);foeLodR=Math.max(6,ds[FOE_WHOLE]);}} // (in a crowd, the nearest FOE_WHOLE whole: D-077)
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
     if(f.dead&&f.war&&!f.cntW){f.cntW=1;warFallen(f);} // the war's fallen lie a while (W2)
     if(f.dead&&f.spot&&!f.cntS){f.cntS=1;warSpotFell(f);} // a place of the wastes stormed (W5)
-    if(f.dead>(f.war?WAR_LIE:2.6)){removeFoe(f);continue;}
-    if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(FOES[f.kind].folk?(f.spot?72:96):f.spot?130:96)){removeFoe(f);continue;}
-    stepFoe(f,dt);if(!f.gone)placeFoe(f,dt);}
+    if(f.dead>(f.war||f.hst?WAR_LIE:2.6)){removeFoe(f);continue;}
+    if(f.x<0||f.z<0||f.x>=W||f.z>=D||!f.hst&&Math.hypot(f.x-PL.x,f.z-PL.z)>(FOES[f.kind].folk?(f.spot?72:96):f.spot?130:96)){removeFoe(f);continue;} // (a summoned host is kept while in the loaded world: D-077)
+    if(foes.length>300&&f.far&&!f.dead&&!f.climb&&!f.lordOf){const k=!f.foe&&(f.st==='idle'||f.st==='sleep')&&f.sp<0.01?4:2;f.idt=(f.idt||0)+dt;if((foeFrame+f.id)%k){placeFoe(f,0);continue;}stepFoe(f,f.idt);f.idt=0;} // (in a crowd, those afar every other frame, those standing every fourth: D-077)
+    else{f.idt=0;stepFoe(f,dt);}if(!f.gone)placeFoe(f,dt);}
+  crowdFrame();
 }
 // ---- Calls: each kind's own (synthesized like every sound in the game), from where it stands
 // a battle's din (D-067): of the calls, blows and shots of many, some eighteen a second are heard, the near ones always, none beyond 64
@@ -12340,12 +12400,12 @@ function warParty(P,table,n,route,o){
   for(const f of grp){f.war=P.id;f.way=route.slice(k+1).map(w=>[w[0],w[1]]);if(o&&o.back)f.back=route.slice(k,-1).reverse().map(w=>[w[0],w[1]]);const w=f.way.shift();f.hx=w[0]-OX;f.hz=w[1]-OZ;f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/FOES[f.kind].walk-20);}
   return grp;}
 const warFolk=(P,fp,back)=>({prov:'wg:'+P.id,site:wgSite(P),lead:FOLK_LEAD[fp+'host']||null,back:back});
-function warRaid(P){const w=WARS.get(P.id),won=w&&w.s>=2; // (after the fall the hosts' parties go on down the road, the orcs' come up it)
-  if(Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),won?warRoute(P,true).concat(warRoadDown(P)):warRoute(P,true),warFolk(P,fp,1));
+function warRaid(P,side){const w=WARS.get(P.id),won=w&&w.s>=2; // (after the fall the hosts' parties go on down the road, the orcs' come up it; side 'al' or 'o' from the war console, D-077)
+  if(side?side==='al':Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),won?warRoute(P,true).concat(warRoadDown(P)):warRoute(P,true),warFolk(P,fp,1));
     if(g){toast('A raiding party of '+WAR_PEOPLE[fp[0]]+(won?' marches down into the wastes':' makes for the gate'));foeCall(g[0],'alert');}}
   else{const g=warParty(P,'band',5+Math.floor(Math.random()*3),won?warRoadDown(P).reverse():warRoute(P,false),{lead:Math.random()<0.3?'ochief':null,back:1});if(g){toast(won?'Orcs come up the Long Descent against the yard':'Orcs sally from the gate against the siege lines');foeCall(g[0],'alert');}}}
-function warScout(P){
-  if(Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
+function warScout(P,side){
+  if(side?side==='al':Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
   else{const s=wgSite(P),r=warRoute(P,false);r.push(siteXZ(s,P.uC0+40,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)),siteXZ(s,P.uC0+160,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)));
     const g=warParty(P,'oscout',3,r);if(g)toast('Goblin scouts creep out along the pass');}}
 // ---- Armies (D-067): an invasion is massive. An army is a column of companies (`warAllied`, `warOrcs`: some 116 of the hosts
@@ -12537,7 +12597,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
+  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P||!warAuto('a'))return; /* (stopped from the war console: D-077) */const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
@@ -12602,7 +12662,7 @@ function warFound(P){let w=WARS.get(P.id);if(w)return w;
   toast('The siege of '+P.name.replace(/^The /,'the ')+': you have found the war at the gate');return w;}
 // every second while playing: the war's clock, finding a gate, each effort's marks (a quarter, a half...), and the panel
 function warStateTick(){
-  warPlay+=1;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),200),near=P?warFound(P):null;
+  warPlay+=warRate();hostBar();const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),200),near=P?warFound(P):null;
   for(const w of WARS.values())for(const [k] of WAR_EFF){const q=Math.floor(warEff(w,k)*4);while(q>(w.m[k]||0)){const m=w.m[k]=(w.m[k]||0)+1,s=WAR_MARK[k][m-1];warLog(w,s+'.');if(w===near)toast(s);
       if(m===4&&warAll(w)&&w.s!==2){warLog(w,'All four are done. The hosts make ready for the last assault on the gate.');if(w===near)toast('The hosts make ready for the last assault on the gate');}}}
   // the fall (W2): the last assault's hosts at the leaf; or, the player away, ten minutes after all four were done (half an hour
@@ -13209,7 +13269,7 @@ function warHeld(s){if(s.folk||!WAR_CL.has(s.id))return s;const w=WARS.get(WAR_C
   const under=s.y<hAt(Math.round(s.x),Math.round(s.z))-6;return {id:s.id+'h',x:s.x,y:s.y,z:s.z,R:Math.max(2,Math.min(5,s.R||4)),kind:under?'d_sap':'r_lines',folk:1,s:wgSite(P)};}
 // ---- underground in a fallen basin: a company of the hosts with the player, and the deep's warbands
 let warDeepT=60;
-function warDeepTick(){const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const under=PL.y<ground[bx+W*bz]-8,bw=under&&warBasinWar(PL.x+OX,PL.z+OZ);
+function warDeepTick(){const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D||!warAuto('a'))return;const under=PL.y<ground[bx+W*bz]-8,bw=under&&warBasinWar(PL.x+OX,PL.z+OZ);
   warFollow(2,bw?6:0,['d_host','d_sap','d_host','r_host'],'A company of the hosts goes down with you');
   if(!bw||(warDeepT-=1)>0)return;warDeepT=150+Math.random()*90;
   for(let k=0;k<10;k++){const a=Math.random()*6.283,d=26+Math.random()*10,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;
@@ -13287,11 +13347,11 @@ const RAID_LIVE=new Map(); // raid key -> {m: the warband, ...} while fought out
 function warRaidsTick(){let busy=false;for(const w of WARS.values()){const R=w.rd||(w.rd={n:0,nx:Math.round(warPlay+RAID_FIRST*(0.7+0.6*hsh(w.X,9941,w.Z))),L:[],bs:[],bk:[],t:[0,0,0,0]});
     if(busy&&!(RAID_B.get(w.id)||{}).done)continue;const B=warBorder(w);if(!B){busy=true;continue;}
     for(const r of R.L)if(!r.out)raidStep(w,B,r);
-    if(warPlay>=R.nx)raidBegin(w,B,R);raidApply(w,B,R);}
+    if(warPlay>=R.nx&&warAuto('r'))raidBegin(w,B,R);raidApply(w,B,R);}
   raidBorderTick();}
-function raidBegin(w,B,R){if(w.el&&w.el.fate){R.nx=Math.round(warPlay+1e9);return null;} // (its lord fallen, the raids end: W7c)
-  const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=!(w.s>=2)&&R.n%4===3;R.n++;R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
-  const L=B.S.filter(e=>siege?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0);if(!L.length)return null;const s=L[Math.floor(q*q*L.length)].s;
+function raidBegin(w,B,R,force){if(w.el&&w.el.fate&&!force){R.nx=Math.round(warPlay+1e9);return null;} // (its lord fallen, the raids end: W7c; force {s, siege} from the war console, D-077)
+  const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=force?!!force.siege:!(w.s>=2)&&R.n%4===3;R.n++;if(!force)R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
+  const L=B.S.filter(e=>siege?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0);if(!L.length&&!force)return null;const s=force?force.s:L[Math.floor(q*q*L.length)].s;
   const r={i:R.n-1,k:siege?'siege':'raid',s:s.id,X:Math.round(s.X),Z:Math.round(s.Z),t0:Math.round(warPlay),out:null,b:0,hb:[]};R.L.push(r);const j=R.L.length>16?R.L.findIndex(q=>q.out):-1;if(j>=0)R.L.splice(j,1);
   if(Math.hypot(s.X-(PL.x+OX),s.Z-(PL.z+OZ))<900)toast(siege?'A warhost marches out of the wastes against '+s.name:'Orcs ride out of the wastes to raid '+s.name);saveDirty=true;return r;}
 // a raid under way: fought out if the player is near its place, else settled when it would have come there
@@ -13357,7 +13417,7 @@ let raidRoamT=180,raidAmbT=240;
 function raidBorderTick(){for(const f of foes)if((f.ref||f.roam)&&!f.dead&&(Math.hypot(f.x-PL.x,f.z-PL.z)>110||!(f.way&&f.way.length)&&f.st==='idle'&&Math.hypot(f.x-PL.x,f.z-PL.z)>40))removeFoe(f);
   const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),pv=realmOfColumn(X,Z);if(!pv)return;let w=null,B=null;
   for(const v of WARS.values()){const b=RAID_B.get(v.id);if(b&&b.done&&b.keys.has(pv.key)){w=v;B=b;break;}}if(!w)return;
-  raidRoamT-=1;raidAmbT-=1;const C=pv.cult,fp=C.fp;
+  if(warAuto('r')){raidRoamT-=1;raidAmbT-=1;}const C=pv.cult,fp=C.fp; // (stopped from the war console, they come only when called: D-077)
   if(raidRoamT<=0){raidRoamT=240+Math.random()*150;const dx=B.cx-X,dz=B.cz-Z,dl=Math.hypot(dx,dz)||1,ux=dx/dl,uz=dz/dl,sd=Math.random()<0.5?1:-1;
     const a=[X+ux*90-uz*sd*60,Z+uz*90+ux*sd*60],b=[X-ux*40+uz*sd*120,Z-uz*40-ux*sd*120],g=warParty({id:w.id},'owolf',Math.round(3+2*Math.random()),raidRoute(a,b));
     if(g){for(const f of g){f.roam=1;f.war=null;}toast('Wolf riders of the wastes roam the borderlands');foeCall(g[0],'alert');}}
@@ -13611,16 +13671,19 @@ function emberWarTick(){const X=PL.x+OX,Z=PL.z+OZ;let near=null,nd=1e9,inB=false
   for(const f of foes)if(!f.bold&&!f.dead&&f.army&&f.army.drive){f.bold=1;f.dmgK=(f.dmgK||1)*1.15;}
   emberSkyK=0;if(!near)return;const R=warLord(near),E=elOf(near);emberSkyK=Math.max(inB?0.3:0,Math.min(1,1-nd/900));
   // its mountain rumbles and erupts; ash falls; its voice
-  if((emberRumT-=1)<=0){emberRumT=20+Math.random()*25;const v=Math.max(0.12,1-nd/800);burst(3,'lowpass',55,0.5,0.45*v,0,[PL.x,PL.y-4,PL.z]);shake=Math.max(shake,0.3*v);}
-  if((emberEruT-=1)<=0){emberEruT=80+Math.random()*80;E.ash=40;const S=volcShape(R.G),sx=S.cx-OX,sz=S.cz-OZ,v=Math.max(0.15,1-nd/700);toast(R.L.mt.replace(/^the /,'The ')+' erupts');
-    burst(3.5,'lowpass',60,0.5,0.6*v,nd/343,[sx,R.G.rimTop,sz]);if(nd<300)for(let k=0;k<80;k++){const a=Math.random()*6.283,s=4+Math.random()*10;spawnP(sx,R.G.rimTop+2,sz,Math.cos(a)*s,18+Math.random()*20,Math.sin(a)*s,[1,0.45+Math.random()*0.3,0.1],5,9);}}
-  if((emberTauntT-=1)<=0){emberTauntT=150+Math.random()*110;const you=SW.on||emberKnown.has(R.F.id),T=you&&Math.random()<0.5?EMBER_TAUNT.you:EMBER_TAUNT.hosts;toast(R.L.name+': '+T[Math.floor(Math.random()*T.length)]);}
+  const wr=warAuto('e'); // (its wrath stopped from the war console, D-077: the rumbles, eruptions, taunts and showings come only when called)
+  if(wr&&(emberRumT-=1)<=0){emberRumT=20+Math.random()*25;const v=Math.max(0.12,1-nd/800);burst(3,'lowpass',55,0.5,0.45*v,0,[PL.x,PL.y-4,PL.z]);shake=Math.max(shake,0.3*v);}
+  if(wr&&(emberEruT-=1)<=0)emberErupt(near,R,nd);
+  if(wr&&(emberTauntT-=1)<=0){emberTauntT=150+Math.random()*110;const you=SW.on||emberKnown.has(R.F.id),T=you&&Math.random()<0.5?EMBER_TAUNT.you:EMBER_TAUNT.hosts;toast(R.L.name+': '+T[Math.floor(Math.random()*T.length)]);}
   // at the height of an assault it shows itself
-  if(warPlay-E.sh>300&&warArmies.some(A=>A.P.id===near.id&&A.m.filter(f=>!f.dead&&f.foe).length>=6))emberShow(near,R);
+  if(wr&&warPlay-E.sh>300&&warArmies.some(A=>A.P.id===near.id&&A.m.filter(f=>!f.dead&&f.foe).length>=6))emberShow(near,R);
   // the last battles: its sally, and the loremasters' rite for one sworn to the alliance
   const F=R.F,dg=Math.hypot(X-(F.GX+F.ox*10),Z-(F.GZ+F.oz*10));
   if(near.s>=2&&warFront(near)>=1&&dg<160)emberSally(near,R);
   if(!emberRiteS&&near.s>=2&&SW.on&&warPlay-E.rite>900&&(dg<60||fortName(Math.floor(X),Math.floor(PL.y),Math.floor(Z))===F.name)){const yy=foeStand(PL.x,PL.y+2,PL.z,2);if(yy>0)emberRite(near,R,PL.x,yy,PL.z);}}
+// its mountain erupts (nd: the player's distance from it): ash falls, fire flies from its crater
+function emberErupt(w,R,nd){emberEruT=80+Math.random()*80;const E=elOf(w);E.ash=40;const S=volcShape(R.G),sx=S.cx-OX,sz=S.cz-OZ,v=Math.max(0.15,1-nd/700);if(nd<900)toast(R.L.mt.replace(/^the /,'The ')+' erupts');
+  burst(3.5,'lowpass',60,0.5,0.6*v,nd/343,[sx,R.G.rimTop,sz]);if(nd<300)for(let k=0;k<80;k++){const a=Math.random()*6.283,s=4+Math.random()*10;spawnP(sx,R.G.rimTop+2,sz,Math.cos(a)*s,18+Math.random()*20,Math.sin(a)*s,[1,0.45+Math.random()*0.3,0.1],5,9);}}
 // ash falling about the player after an eruption (from emberFrame)
 function emberAsh(dt){for(const w of WARS.values()){const E=w.el;if(!E||!(E.ash>0))continue;E.ash-=dt;for(let k=0;k<dt*30;k++)spawnP(PL.x+(Math.random()-.5)*30,PL.y+8+Math.random()*6,PL.z+(Math.random()-.5)*30,0.3,-1.2-Math.random(),0.1,[0.42,0.4,0.4],6,0.05);}}
 // the panel: its lord, the vents, its fate
@@ -13695,6 +13758,181 @@ function emberAfterTick(){const X=PL.x+OX,Z=PL.z+OZ;
 // a lord's fate: its mountain dies at once in the loaded world; its relics owed unless the player slew it (from emberFate)
 function emberAfterFate(R,fate,byP){const S=volcShape(R.G);if(Math.hypot(S.cx-(PL.x+OX),S.cz-(PL.z+OZ))<R.G.R*1.3+W)emberReload=6;if(!byP)emberOwe(R);
   const w=warOfFort(R.F);if(w)setTimeout(()=>warLog(w,'As it fell, something stirred far below in the lava sea.'),10);}
+// ---- Custom hosts (D-077): in creative the player summons hosts of the alliance or of the wastes, of any make and of thousands,
+// from the war console (ui/war-console.js), and leads them. A host stands in ranks (`hostSlots`): shields and blades in front, the
+// great beasts behind them, archers behind those, healers, bearers and standards at the back, horsemen on the wings. One the player
+// leads follows behind them in the way they go, holds where it stands, marches to where they look, charges whatever of the other
+// side is near, or looses a volley; a host summoned against the player forms where they look, facing them, and holds, advances on
+// their hosts or charges (the wastes' charge by themselves once the foe is near). Its soldiers come in rank by rank (`HOST_RATE` a
+// frame), keep their ranks unless charging, fight what comes within reach, and lie a while when they fall. Hosts are not saved;
+// they are dismissed when the player leaves creative.
+const HOSTS=[];let hostSeq=1;
+const HOST_MAX=6000,HOST_RATE=40;
+// the companies a host is made of: [key, label, table of FOE_HOME (or a kind), its captain, its standard bearer]
+const HOST_UNITS={al:[['r','Men of the white realm','r_host','rcapt','rstd'],['kn','Knights and lancers','x_kn',null,null],['h','Riders of the plains','h_host','hcapt',null],
+    ['e','High elves','e_host','ecapt','estd'],['w','Wood elves','w_host','wcapt',null],['d','Dwarves of the mountain','d_host','dcapt','dstd'],['g','Household guards','x_eg',null,null],['aid','Healers and bearers','x_aid',null,null]],
+  o:[['oarmy','Orcs of the warhosts','oarmy','ochief',null],['oline','Shield orcs and crossbows','oline',null,null],['oscout','Goblins','oscout','gchief',null],['owolf','Wolf riders','owolf',null,null],
+    ['oswarm','Goblin swarms and pot-throwers','oswarm',null,null],['oroused','Drummers and fire shamans','oroused',null,null],['troll','Ash trolls','troll',null,null],['otroll','Siege trolls','otroll','tdriver',null],['owb','War beasts','owb','tdriver',null]]};
+// a host's make by default, in shares of its whole
+const HOST_MIX={al:{r:30,kn:6,h:10,e:18,w:8,d:22,g:2,aid:4},o:{oarmy:45,oline:15,oscout:14,owolf:8,oswarm:7,oroused:5,troll:2,otroll:2,owb:2}};
+const hostMake=(side,n)=>{const M=HOST_MIX[side],t=Object.values(M).reduce((a,b)=>a+b,0),o={},K=Object.keys(M);let left=n;for(const k of K){o[k]=Math.floor(n*M[k]/t);left-=o[k];}
+  K.sort((a,b)=>(n*M[b]/t)%1-(n*M[a]/t)%1);for(let i=0;left>0;i++,left--)o[K[i%K.length]]++;return o;}; // (the shares rounded so that they come to n)
+const hostLive=H=>H.m.filter(f=>!f.dead&&!f.gone);
+const hostSoldiers=()=>{let n=0;for(const H of HOSTS)n+=H.q.length+hostLive(H).length;return n;};
+const hostKind=(t,lead)=>FOES[t]?t:pickW(FOE_HOME[t]);
+// the forward and across of a facing (the foes' yaw: atan2 of the way they look)
+const hostAxes=face=>{const fx=Math.sin(face),fz=Math.cos(face);return [fx,fz,-fz,fx];};
+// each soldier's place in the ranks, [kind, across, along] with along 0 at the front rank and less behind it
+function hostSlots(kinds){
+  const F=k=>FOES[k],big=k=>(F(k).tall||2)>2.5&&!F(k).mount,grp=[[],[],[],[],[]];
+  for(const k of kinds){const G=F(k);grp[G.mount?3:big(k)?1:G.civ||G.std||G.bear||G.heal?4:G.shot&&G.shot.k!=='fire'?2:0].push(k);}
+  grp[0].sort((a,b)=>(F(b).pike||0)+(F(b).block||0)-(F(a).pike||0)-(F(a).block||0));
+  const inf=grp[0].length+grp[2].length,files=Math.max(10,Math.min(90,Math.round(Math.sqrt(inf*3)))),out=[];let b=0;
+  const ranks=(L,sp,dp)=>{const per=Math.max(4,Math.round(files*1.5/sp));for(let i=0;i<L.length;i++){const r=Math.floor(i/per),n=Math.min(per,L.length-r*per);out.push([L[i],((i%per)-(n-1)/2)*sp,b-r*dp]);}
+    if(L.length)b-=Math.ceil(L.length/per)*dp+0.6;};
+  ranks(grp[0],1.5,1.7);ranks(grp[1],3.4,3.6);ranks(grp[2],1.6,1.7);ranks(grp[4],1.8,1.8);
+  const w0=files*0.75+3.5;grp[3].forEach((k,i)=>{const s=i%2?1:-1,j=Math.floor(i/2);out.push([k,s*(w0+(j%5)*2.2),-Math.floor(j/5)*2.6]);}); // horsemen on the wings
+  return out;}
+// a soldier's place in the world (local coordinates): its slot about the host's anchor, facing its way
+function hostSlotAt(H,f){const [fx,fz,ax,az]=hostAxes(H.face);return [H.ax-OX+fx*f.sb+ax*f.sa,H.az-OZ+fz*f.sb+az*f.sa];}
+// Summons a host: side 'al' or 'o'; make {unit key: count}; led by the player (behind them) or against them (where they look)
+function hostSummon(side,make,led){
+  if(creativeOnly())return null;const U=HOST_UNITS[side],kinds=[];let room=HOST_MAX-hostSoldiers();
+  for(const [key,,t,cap,std] of U){const n=Math.max(0,Math.min(room,Math.round(+make[key]||0)));room-=n;for(let i=0;i<n;i++)kinds.push(cap&&i%50===0?cap:std&&i%100===1?std:hostKind(t));} // a captain to each fifty, a standard to each hundred
+  if(!kinds.length){toast(room<=0?'No more: '+HOST_MAX+' soldiers of summoned hosts at most':'Choose how many of each');return null;}
+  const yaw=PL.yaw,pf=[-Math.sin(yaw),-Math.cos(yaw)],H={id:hostSeq++,side:side,led:!!led,m:[],q:[],N:kinds.length,cmd:'hold',t0:foeClock,en:[],enT:0,quiet:0,pace:side==='al'?1.45:1.7,ci:0};
+  if(led){H.face=Math.atan2(pf[0],pf[1]);H.ax=PL.x+OX-pf[0]*5;H.az=PL.z+OZ-pf[1]*5;H.cmd='follow';H.fx=PL.x+OX;H.fz=PL.z+OZ;}
+  else{let [X,Z]=hostLook(70);const dx=X-(PL.x+OX),dz=Z-(PL.z+OZ),dl=Math.hypot(dx,dz)||1;let m=dl; // (its ranks within the loaded world: nearer, if need be)
+    while(m>20){const x=PL.x+dx/dl*m,z=PL.z+dz/dl*m;if(x>40&&z>40&&x<W-40&&z<D-40)break;m-=5;}X=PL.x+OX+dx/dl*m;Z=PL.z+OZ+dz/dl*m;H.ax=X;H.az=Z;H.face=Math.atan2(-dx,-dz);}
+  H.FA={hold:true,go:false,goT:0,gap:0,face:H.face,line:1,near:5};H.W={A:H.FA,r:0};
+  const sl=hostSlots(kinds);for(let i=0;i<sl.length;i++)H.q.push(sl[i]);H.q.reverse(); // (the front ranks first)
+  HOSTS.push(H);const nm=side==='al'?'the alliance':'the wastes';
+  toast((led?'A host of '+nm+' comes to your banner, ':'A host of '+nm+' gathers against you, ')+kinds.length+' strong');if(led)setTimeout(()=>hint('host'),2500);warSignal('muster',side==='al'?'r':'o',[PL.x,PL.y+4,PL.z]);return H;}
+// where the player looks: the ground there (world coordinates), or as far as `d` ahead
+function hostLook(d){const hit=raycast(eyePos(),camDir(),Math.max(d,200));if(hit&&Math.hypot(hit.x+0.5-PL.x,hit.z+0.5-PL.z)>=Math.min(40,d))return [hit.x+OX+0.5,hit.z+OZ+0.5];
+  return [PL.x+OX-Math.sin(PL.yaw)*d,PL.z+OZ-Math.cos(PL.yaw)*d];}
+// the next few of a host's soldiers come in, each at its place (or near it, where there is footing)
+function hostCome(H){
+  for(let k=0;k<HOST_RATE&&H.q.length;k++){const [kind,sa,sb]=H.q.pop(),F=FOES[kind],tall=F.tall||2,f0={sa:sa,sb:sb},[x,z]=hostSlotAt(H,f0);let p=null;
+    for(const [dx,dz] of [[0,0],[0.7,0],[-0.7,0],[0,0.7],[0,-0.7],[1.4,1.4],[-1.4,-1.4]]){const bx=Math.floor(x+dx),bz=Math.floor(z+dz);if(bx<2||bz<2||bx>=W-2||bz>=D-2||!genDone[(bx>>4)+(bz>>4)*NCX])continue;
+      const y=foeStand(x+dx,ground[bx+W*bz]+2,z+dz,tall);if(y>0&&!foeWet(x+dx,y,z+dz)){p=[x+dx,y,z+dz];break;}}
+    if(!p){H.lost=(H.lost||0)+1;continue;}
+    const f=addFoe(kind,p[0],p[1],p[2],{st:'idle',t:1,grp:1e6+H.id*1000+Math.floor(H.m.length/50)});f.hst=H;f.sa=sa;f.sb=sb;f.yaw=f.hd=H.face;f.hx=f.x;f.hz=f.z;f.waitA=H.W;f.lineHold=H.FA;f.pace=Math.min(H.pace,F.walk*1.4);H.m.push(f);}}
+// the anchor that puts the host's ranks about where its soldiers stand now (its middle less their places' mean)
+function hostHere(H){const L=hostLive(H);if(!L.length)return;const [mx,mz]=hostMid(H),[fx,fz,ax,az]=hostAxes(H.face);let a=0,b=0;for(const f of L){a+=f.sa;b+=f.sb;}a/=L.length;b/=L.length;
+  H.ax=mx+OX-fx*b-ax*a;H.az=mz+OZ-fz*b-az*a;}
+// the living of the other side about a host (each second), nearest its middle first; the charge picks among the nearest 300
+function hostFoes(H){const [cx,cz]=hostMid(H),out=[],ally=H.side==='al';for(const g of foes){if(g.dead||g.gone||g.show||!FOES[g.kind].folk===!ally||FOES[g.kind].civ&&!ally)continue;const d=Math.hypot(g.x-cx,g.z-cz);if(d<160){g.hd2=d;out.push(g);}}
+  out.sort((a,b)=>a.hd2-b.hd2);H.en=out;H.en0=out.slice(0,300);return out;}
+function hostMid(H){const L=hostLive(H);if(!L.length)return [H.ax-OX,H.az-OZ];let x=0,z=0;for(const f of L){x+=f.x;z+=f.z;}return [x/L.length,z/L.length];}
+const hostNearest=(f,L,r)=>{let best=null,bd=r;for(const g of L){if(g.dead||g.gone)continue;const d=Math.hypot(g.x-f.x,g.z-f.z);if(d<bd){bd=d;best=g;}}return best;};
+// one soldier's turn: in the charge, at the nearest foe; else to its place in the ranks, there to stand facing the host's way
+function hostStep(H,f){
+  if(H.cmd==='charge'){if(f.foe&&!f.foe.dead&&!f.foe.gone)return;const g=hostNearest(f,H.en0||H.en,180);if(g){f.foe=g;f.eseen=0;f.st='chase';f.seen=0;f.t=0;f.waitA=null;f.lineHold=null;return;}}
+  if(f.st==='chase'||f.st==='flee')return;
+  f.waitA=H.W;f.lineHold=H.FA;const F=FOES[f.kind],[tx,tz]=hostSlotAt(H,f),d=Math.hypot(tx-f.x,tz-f.z);
+  if((d>70||d>3&&f.stuck>8)&&Math.hypot(f.x-PL.x,f.z-PL.z)>(d>70?40:24)){const bx=Math.floor(tx),bz=Math.floor(tz);if(bx>=2&&bz>=2&&bx<W-2&&bz<D-2&&genDone[(bx>>4)+(bz>>4)*NCX]){const y=foeStand(tx,ground[bx+W*bz]+2,tz,F.tall||2);if(y>0){f.x=tx;f.z=tz;f.y=f.gy=y;f.stuck=0;return;}}} // a straggler far behind, or stuck, catches up out of sight
+  if(d>1.1){f.hx=tx;f.hz=tz;f.hex=true;f.way=[];f.st='return';f.t=d/F.walk+10;f.pace=d>9?F.run:Math.min(H.pace,F.walk*1.4);}
+  else if(f.st==='idle')f.hd=H.face;}
+// every frame: soldiers come in, each host's commands are carried out a slice of its soldiers at a time, the led hosts follow
+function hostFrame(dt){
+  if(!HOSTS.length)return;if(SURV()){hostDismiss(null,'Your summoned hosts go back where they came from: they belong to creative');return;}
+  for(let h=HOSTS.length-1;h>=0;h--){const H=HOSTS[h];hostCome(H);const L=hostLive(H);
+    if(!H.q.length&&!L.length){HOSTS.splice(h,1);if(!H.gone)toast(H.led?'Your host is gone: the last of it has fallen':'The host against you is gone');continue;}
+    if((H.enT-=dt)<=0){H.enT=1;H.m=H.m.filter(f=>!f.gone);const en=hostFoes(H);hostAuto(H,en);if(h===0)hostClearDead();}
+    if(H.led&&H.cmd==='follow')hostFollow(H);
+    const n=Math.max(1,Math.ceil(L.length/12));for(let k=0;k<n&&L.length;k++){H.ci=(H.ci+1)%L.length;hostStep(H,L[H.ci]);}}}
+// a led host following: behind the player, facing the way they went (it moves once they have gone four blocks)
+function hostFollow(H){const X=PL.x+OX,Z=PL.z+OZ,dx=X-H.fx,dz=Z-H.fz,d=Math.hypot(dx,dz);if(d<4)return;
+  H.face=Math.atan2(dx,dz);H.FA.face=H.face;H.fx=X;H.fz=Z;H.ax=X-Math.sin(H.face)*5;H.az=Z-Math.cos(H.face)*5;}
+// what a host does by itself: a charge with no foe left near holds where it is; a host against the player advancing charges when
+// near, and the wastes' charge as soon as the foe is within 45
+function hostAuto(H,en){const [cx,cz]=hostMid(H);let near=1e9;for(const g of en)near=Math.min(near,Math.hypot(g.x-cx,g.z-cz));
+  if(H.cmd==='charge'){if(near>150){if((H.quiet+=1)>=5){hostOrder(H,'hold');if(H.led)toast('The field is yours: your host holds where it stands');}}else H.quiet=0;return;}
+  if(!H.led&&H.cmd==='advance'){const T=HOSTS.filter(G=>G.led&&hostLive(G).length);let tx=PL.x,tz=PL.z;if(T.length)[tx,tz]=hostMid(T[0]);H.face=Math.atan2(tx-cx,tz-cz);H.FA.face=H.face;H.ax=tx+OX-Math.sin(H.face)*20;H.az=tz+OZ-Math.cos(H.face)*20;}
+  if(!H.led&&near<(H.cmd==='advance'?30:45)&&(H.side==='o'||H.cmd==='advance'))hostOrder(H,'charge');}
+// an order to a host: follow, hold, march (to where the player looks), charge, advance (a host against the player)
+function hostOrder(H,cmd){
+  const [cx,cz]=hostMid(H);H.quiet=0;
+  if(cmd==='hold'){hostHere(H);if(H.cmd==='charge'){const L=hostLive(H);for(const f of L)if(!f.foe&&f.st!=='chase'){f.waitA=H.W;f.lineHold=H.FA;}}}
+  else if(cmd==='march'){const [X,Z]=hostLook(60);H.face=Math.atan2(X-(PL.x+OX),Z-(PL.z+OZ));H.ax=X;H.az=Z;}
+  else if(cmd==='follow'){H.fx=PL.x+OX;H.fz=PL.z+OZ;const pf=[-Math.sin(PL.yaw),-Math.cos(PL.yaw)];H.face=Math.atan2(pf[0],pf[1]);H.ax=H.fx-pf[0]*5;H.az=H.fz-pf[1]*5;}
+  else if(cmd==='charge'){hostFoes(H);for(const f of hostLive(H)){f.waitA=null;f.lineHold=null;}H.ci=0;}
+  H.FA.face=H.face;H.cmd=cmd;H.FA.hold=cmd!=='charge';
+  const people=H.side==='al'?'r':'o',[mx,mz]=hostMid(H);warSignal(cmd==='charge'?'advance':cmd==='hold'?'muster':'advance',people,[mx,PL.y+3,mz]);if(cmd==='charge')setTimeout(()=>warCry(H.side==='o',18,mx,PL.y+2,mz),600);
+  // every soldier at once (not a slice): the ranks move together
+  for(const f of hostLive(H))hostStep(H,f);}
+// orders to the hosts the player leads (from the keys and the console)
+function hostCommand(cmd){if(creativeOnly())return;const L=HOSTS.filter(H=>H.led&&(H.q.length||hostLive(H).length));if(!L.length){toast('You lead no host. Summon one from the war console ('+ctl('warConsole')+')');return;}
+  if(cmd==='volley'){let n=0;for(const H of L)n+=hostVolley(H);toast(n?'Loose! '+n+' archers draw and loose':'No archer of yours has a foe within bowshot');return;}
+  for(const H of L)hostOrder(H,cmd);toast({follow:'Your host follows you',hold:'Your host holds where it stands',march:'Your host marches to where you look',charge:'Charge! Your host falls on the foe'}[cmd]);}
+// a volley: each archer of the host at a foe within 60 of it, at once on the horn
+function hostVolley(H){const en=hostFoes(H);let n=0;if(!en.length)return 0;const [mx,mz]=hostMid(H);
+  for(const f of hostLive(H)){const S=FOES[f.kind].shot;if(!S||S.k==='fire'||f.atk)continue;const T=en.filter(g=>Math.hypot(g.x-f.x,g.z-f.z)<60);if(!T.length)continue;f.volT=foeClock+0.6+Math.random()*0.4;f.volG=T[Math.floor(Math.random()*T.length)];n++;}
+  if(n)warSignal('volley',H.side==='al'?'r':'o',[mx,PL.y+3,mz]);return n;}
+// the fallen of the summoned hosts lie a while; beyond HOST_DEAD the longest fallen go first
+const HOST_DEAD=400;
+function hostClearDead(){const L=foes.filter(f=>f.dead&&f.hst&&!f.gone);if(L.length<=HOST_DEAD)return;L.sort((a,b)=>b.dead-a.dead);for(let i=0;i<L.length-HOST_DEAD;i++)removeFoe(L[i]);}
+// sends hosts away: one, or all of them (H null)
+function hostDismiss(H,say){for(const G of H?[H]:HOSTS.slice()){G.gone=1;for(const f of G.m)if(!f.gone)removeFoe(f);G.q.length=0;const i=HOSTS.indexOf(G);if(i>=0)HOSTS.splice(i,1);}if(say)toast(say);}
+// the bar of orders while the player leads a host, and the counts
+function hostBar(){const el=$('hostbar');if(!el)return;const L=HOSTS.filter(H=>H.led),E=HOSTS.filter(H=>!H.led);if(!HOSTS.length||photo||SURV()){el.style.display='none';return;}el.style.display='block';
+  const c=A=>A.reduce((a,H)=>a+hostLive(H).length,0),n=A=>A.reduce((a,H)=>a+H.N,0),cmd={follow:'following you',hold:'holding',march:'marching',charge:'charging',advance:'advancing'};
+  const k=a=>TOUCH?'':' ['+ctl(a)+']';
+  el.querySelector('.hc').textContent=(L.length?'Your host '+c(L)+' of '+n(L)+', '+cmd[L[0].cmd]:'')+(L.length&&E.length?'; ':'')+(E.length?'against you '+c(E)+' of '+n(E)+', '+cmd[E[0].cmd]:'');
+  for(const b of el.querySelectorAll('button')){const a=b.dataset.a;b.style.display=L.length?'':'none';b.textContent=b.dataset.n+k(a);}}
+// ---- The war at the player's command (D-077, creative). The war's own clock (warPlay, by which the efforts, the front, the raids,
+// the lords' vents and the healing of the land go on) may be stopped or hastened, five or twenty times; the war's events that come
+// by themselves may each be stopped: the battles at the gates and beyond them (parties, scouts, armies, the engines, the deep's
+// warbands), the raids on the bordering realms (raids, sieges, wolf riders, ambushes) and the Emberlords' wrath (rumbles,
+// eruptions, taunts, showing themselves); and any of them may be made to happen now, from the war console (ui/war-console.js).
+// In survival the war runs as it always does. Kept with the world as `wc`, with the make of the hosts last summoned.
+let WC=saved&&saved.wc&&typeof saved.wc==='object'?saved.wc:null;if(!WC)WC={clk:1,a:1,r:1,e:1,hb:{al:hostMake('al',500),o:hostMake('o',500)}};
+const warCtlSave=()=>({wc:WC});
+const WAR_CLOCKS=[[0,'Stopped'],[1,'As it goes'],[5,'Five times as fast'],[20,'Twenty times as fast']];
+const warRate=()=>SURV()?1:WC.clk; // seconds of the war's clock to each second of play
+const warAuto=k=>SURV()||WC[k]!==0; // does this kind of event ('a' battles, 'r' raids, 'e' the lords) come by itself?
+// the war the console works on: the gate within 300, the basin's war about the player, or the nearest found
+function wcWar(){const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),300);if(P)return {w:warFound(P),P:P,near:wasteGateAt(Math.floor(X),Math.floor(Z),200)===P}; // (near: where its armies march, as warMarch has it)
+  const bw=warBasinWar(X,Z);if(bw)return {w:bw.w,P:bw.P,near:false};let best=null,bd=1e9;for(const w of WARS.values()){const d=Math.hypot(w.X-X,w.Z-Z);if(d<bd){bd=d;best=w;}}
+  return best?{w:best,P:wasteGateAt(best.X,best.Z,10),near:false,d:Math.round(bd)}:null;}
+// an effort (ram, mine, walls, sally) or the front set to v (0 to 1): what the battles have added is set so that, with the clock, it
+// comes to v now; the marks passed are written again when it passes them again
+function wcEffort(w,k,v){v=Math.max(0,Math.min(1,v));
+  if(k==='fr'){if(!(w.s>=2))return false;const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));w.b.fr=v-(warPlay-(w.fallT||0))/pace;saveDirty=true;return true;}
+  const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));w.b[k]=v-(warPlay-w.f)/pace;w.m[k]=Math.min(w.m[k]||0,Math.floor(v*4));if(v<1)w.allT=0;saveDirty=true;return true;}
+// the events, now: each returns what to tell the player
+const WC_NEED='Go to the gate first: within 200 blocks of its works';
+function wcDo(what,arg){
+  const C=wcWar();if(!C)return 'No war found yet. The Ashen Gates stand in the rings of ash mountains about the Volcanic Wastes';
+  const {w,P}=C,R=warLord(w),fallen=w.s>=2,E=elOf(w);
+  switch(what){
+    case 'army':case 'warhost':case 'last':{if(!C.near||!P)return WC_NEED;if(E.fate)return 'The war is won: no army marches';
+      if(what==='last'){if(fallen)return 'The gate has fallen already';for(const [k] of WAR_EFF)if(warEff(w,k)<1)wcEffort(w,k,1);}
+      const A=warArmy(P,what!=='warhost');if(!A.al)emberDrive(A);if(what==='last'){A.last=1;return 'The last assault: the hosts come against '+P.name.replace(/^The /,'the ')+' with all their strength';}
+      return A.al?'The hosts march, '+A.N+' strong':'A warhost comes, '+A.N+' strong';}
+    case 'party':case 'sally':{if(!C.near||!P)return WC_NEED;warRaid(P,what==='party'?'al':'o');return '';}
+    case 'scouts':case 'goblins':{if(!C.near||!P)return WC_NEED;warScout(P,what==='scouts'?'al':'o');return '';}
+    case 'engines':{if(!C.near||!P)return WC_NEED;const n0=warStones.length;for(let i=0;i<24&&warStones.length<n0+3;i++)warVolley(P);return warStones.length>n0?'The engines loose':'Go nearer the siege lines to see the engines loose';}
+    case 'fall':{if(fallen)return 'The gate has fallen already';for(const [k] of WAR_EFF)wcEffort(w,k,1);warFall(w,!!C.near,C.near?P:null);return C.near?'':w.n+' has fallen';}
+    case 'effort':{const [k,v]=arg;return wcEffort(w,k,v)?'':'Not until the gate has fallen';}
+    case 'raid':case 'siege':{let B=null;for(let k=0;k<40000&&!B;k++)B=warBorder(w);if(!B)return 'No realm borders this war';if(!w.rd)warRaidsTick();
+      const X=PL.x+OX,Z=PL.z+OZ,L=B.S.filter(e=>what==='siege'?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0).sort((a,b)=>Math.hypot(a.s.X-X,a.s.Z-Z)-Math.hypot(b.s.X-X,b.s.Z-Z));
+      if(!L.length)return 'No place of the borderlands to '+what;const r=raidBegin(w,B,w.rd,{s:L[0].s,siege:what==='siege'});
+      return r?(Math.hypot(L[0].s.X-X,L[0].s.Z-Z)<900?'':'The wastes march on '+L[0].s.name+', '+Math.round(Math.hypot(L[0].s.X-X,L[0].s.Z-Z))+' blocks from you'):'No raid';}
+    case 'roam':case 'ambush':{if(!realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ)))return 'Stand in a province bordering a war';if(what==='roam')raidRoamT=0;else raidAmbT=0;raidBorderTick();return '';}
+    case 'erupt':case 'show':case 'drive':case 'sally2':case 'rite':case 'fate':{if(!R)return 'This war has no lord';if(E.fate||fallenLords.has(R.F.id))return R.L.n+'\'s fate is told already';
+      if(what==='erupt'){const d=Math.hypot(PL.x+OX-R.G.X,PL.z+OZ-R.G.Z);emberErupt(w,R,d);return d<900?'':R.L.mt.replace(/^the /,'The ')+' erupts, '+Math.round(d)+' blocks from you';}
+      if(what==='show'){if(!C.near&&!fallen)return WC_NEED;emberShow(w,R);return '';} // (on the gate's wall; after its fall on its crater's rim, if that is near)
+      if(what==='drive'){const A=warArmies.filter(A=>!A.al&&!A.def&&A.P.id===w.id);if(!A.length)return 'No warhost of this war is marching';for(const a of A)emberDrive(a);return R.L.n+' roars from its mountain and drives the warhosts on';}
+      const F=R.F,tX=F.GX+F.ox*10,tZ=F.GZ+F.oz*10,dg=Math.hypot(PL.x+OX-tX,PL.z+OZ-tZ);
+      if(what==='sally2'){if(dg>150)return 'Go before the gate of its fortress first';const f=emberSally(w,R);return f?'':'It does not come out now';}
+      if(what==='rite'){if(dg>90)return 'Go before the gate of its fortress first';if(emberRiteS)return 'The rite is under way';const y=foeStand(PL.x,PL.y+2,PL.z,2);if(y<0)return 'Stand on open ground';emberRite(w,R,PL.x,y,PL.z);return '';}
+      if(what==='fate'){if(!EMBER_FATE[arg])return '';emberFate(w,R,arg,null);return '';}}
+  }
+  return '';}
+// the war console's controls for the hosts: summon from the make kept in WC.hb
+function wcSummon(side,led){const H=hostSummon(side,WC.hb[side],led);saveDirty=true;return H;}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -14060,6 +14298,68 @@ function stampHere(kind){
   if(creativeOnly())return 0;const hit=raycast(eyePos(),camDir(),64);if(!hit){toast('Look at the ground where it should stand');return 0;}
   const n=stampAt(kind,hit.x+OX,hit.y,hit.z+OZ);toast(n?'Built a '+STAMPS[kind].toLowerCase()+' ('+n+' blocks); undo removes it':'Nothing was built here');return n;
 }
+// ---- The war console (D-077, creative; from the pause menu or its key): the war about the player (the gate within 300, the
+// basin's war, or the nearest found), its clock, the events that come by themselves (each stopped or let run), its efforts and its
+// front set by hand, any of its events made to happen now (gate, borderlands, Emberlord), and the hosts summoned and led. What
+// cannot be undone (the gate's fall, a lord's fate) asks to be pressed twice.
+let wcArm=null;
+function openWarConsole(){
+  if(creativeOnly())return;if(WM.open)closeWorldMap();
+  invOpen=true;hold=-1;['invgrid','invname','sinv','bplist','invsearch'].forEach(id=>{$(id).style.display='none';});
+  $('lore').style.display='block';$('invtitle').textContent='War console';wcRender();
+  $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
+}
+function wcRender(){
+  const el=$('lore'),top=el.scrollTop;el.innerHTML='';const C=wcWar(),now=(msg,close)=>{if(msg)toast(msg);saveDirty=true;if(close)closeInv();else wcRender();};
+  const head=t=>{const h=document.createElement('div');h.className='inv-h';h.textContent=t;el.appendChild(h);};
+  const row=lab=>{const r=document.createElement('div');r.className='wcrow';if(lab!==undefined){const s=document.createElement('span');s.className='lab';s.textContent=lab;r.appendChild(s);}el.appendChild(r);return r;};
+  const btn=(r,label,fn,on)=>{const b=document.createElement('button');b.className='wide'+(on?' on':'');b.style.marginTop='0';b.textContent=label;b.addEventListener('click',fn);r.appendChild(b);return b;};
+  const twice=(r,label,fn)=>{const k=label,b=btn(r,wcArm===k?'Press again: it cannot be undone':label,()=>{if(wcArm===k){wcArm=null;fn();}else{wcArm=k;wcRender();setTimeout(()=>{if(wcArm===k){wcArm=null;if(invOpen)wcRender();}},4000);}});return b;};
+  const text=t=>{const d=document.createElement('div');d.textContent=t;d.style.marginBottom='6px';el.appendChild(d);};
+  // the war
+  head('The war');
+  if(!C){text('No war found yet. The Ashen Gates stand in the rings of ash mountains about the Volcanic Wastes.');btn(row(),'Go to the nearest gate',()=>{if(gateTour('camp'))closeInv();});}
+  else{const {w,P}=C;text(w.n+': '+warStage(w).toLowerCase()+(C.near?', here':C.d?', '+C.d+' blocks away':''));
+    const r=row();btn(r,'Go to its camp',()=>{if(gateTour('camp'))closeInv();});btn(r,'Go to its gate',()=>{if(gateTour('gate'))closeInv();});}
+  // its clock and the events that come by themselves
+  head('The war\'s clock (efforts, the front, raids, the lords\' vents)');{const r=row();for(const [v,n] of WAR_CLOCKS)btn(r,n,()=>{WC.clk=v;now('');},WC.clk===v);}
+  head('Events that come by themselves');
+  for(const [k,n] of [['a','Battles at the gates and beyond'],['r','Raids on the bordering realms'],['e','The Emberlords\' wrath']]){const r=row(n);btn(r,'On',()=>{WC[k]=1;now('');},WC[k]!==0);btn(r,'Stopped',()=>{WC[k]=0;now('');},WC[k]===0);}
+  if(C){const {w,P}=C,R=warLord(w),E=elOf(w),fallen=w.s>=2;
+    // the efforts or the front, by hand
+    const pct=[0,0.25,0.5,0.75,1];
+    if(!fallen){head('The siege');for(const [k,lab] of WAR_EFF){const r=row(lab+' '+Math.round(warEff(w,k)*100)+'%');for(const v of pct)btn(r,Math.round(v*100)+'%',()=>now(wcDo('effort',[k,v])));}}
+    else{head('The front beyond the gate');const r=row('The front '+Math.round(warFront(w)*100)+'%');for(const v of pct)btn(r,Math.round(v*100)+'%',()=>now(wcDo('effort',['fr',v])));}
+    // now: at the gate
+    head('Make it happen now'+(C.near?'':' (the gate\'s events: go to the gate first)'));
+    {const r=row();btn(r,'The hosts attack',()=>now(wcDo('army'),1));btn(r,'A warhost attacks',()=>now(wcDo('warhost'),1));if(!fallen)btn(r,'The last assault',()=>now(wcDo('last'),1));
+      btn(r,'A raiding party of the hosts',()=>now(wcDo('party'),1));btn(r,'Orcs sally',()=>now(wcDo('sally'),1));btn(r,'Scouts of the hosts',()=>now(wcDo('scouts'),1));btn(r,'Goblin scouts',()=>now(wcDo('goblins'),1));
+      btn(r,'The engines loose',()=>now(wcDo('engines'),1));if(!fallen)twice(r,'The gate falls',()=>now(wcDo('fall'),1));}
+    head('The bordering realms');{const r=row();btn(r,'A raid on the nearest place',()=>now(wcDo('raid'),1));btn(r,'A siege of the nearest city or castle',()=>now(wcDo('siege'),1));
+      btn(r,'Wolf riders, here',()=>now(wcDo('roam'),1));btn(r,'An ambush on the road, here',()=>now(wcDo('ambush'),1));}
+    if(R){head('Its Emberlord: '+R.L.n);
+      if(E.fate||fallenLords.has(R.F.id))text('Its fate is told: '+(EMBER_FATE[E.fate||'hosts'](R.L)));
+      else{const r=row();btn(r,'Its mountain erupts',()=>now(wcDo('erupt'),1));btn(r,fallen?'It shows itself on its crater\'s rim':'It shows itself on the gate\'s wall',()=>now(wcDo('show'),1));btn(r,'It drives the warhosts on',()=>now(wcDo('drive'),1));
+        btn(r,'Go before its gate',()=>{const F=R.F;if(goTo(Math.round(F.GX+F.ox*24),Math.round(F.GZ+F.oz*24))){PL.yaw=Math.atan2(F.ox,F.oz);closeInv();}});
+        btn(r,'It comes out to meet you',()=>now(wcDo('sally2'),1));btn(r,'The loremasters\' rite',()=>now(wcDo('rite'),1));
+        const f=row('Its fate:');for(const [k,n] of [['hosts','Slain by the hosts'],['bound','Bound'],['cast','Cast down'],['quenched','Its fire put out']])twice(f,n,()=>now(wcDo('fate',k),1));}}}
+  // the hosts
+  head('Hosts to summon (up to '+HOST_MAX+' in all)');
+  const side=WC.hs==='o'?'o':'al',M=WC.hb[side]||(WC.hb[side]=hostMake(side,500));
+  {const r=row();btn(r,'Of the alliance',()=>{WC.hs='al';now('');},side==='al');btn(r,'Of the wastes',()=>{WC.hs='o';now('');},side==='o');}
+  for(const [k,lab] of HOST_UNITS[side]){const r=row(lab),i=document.createElement('input');i.type='number';i.min='0';i.max=String(HOST_MAX);i.step='10';i.value=String(M[k]||0);
+    i.addEventListener('keydown',e=>e.stopPropagation());i.addEventListener('change',()=>{M[k]=Math.max(0,Math.min(HOST_MAX,Math.round(+i.value||0)));now('');});r.appendChild(i);
+    btn(r,'+10',()=>{M[k]=Math.min(HOST_MAX,(M[k]||0)+10);now('');});btn(r,'+100',()=>{M[k]=Math.min(HOST_MAX,(M[k]||0)+100);now('');});btn(r,'0',()=>{M[k]=0;now('');});}
+  {const tot=Object.values(M).reduce((a,b)=>a+(+b||0),0),r=row('In all '+tot);for(const n of [100,500,1000,2000,4000])btn(r,'Make it '+n,()=>{WC.hb[side]=hostMake(side,n);now('');});}
+  {const r=row();btn(r,'Summon it to lead',()=>{if(wcSummon(side,true))closeInv();});btn(r,'Summon it against you, where you look',()=>{if(wcSummon(side,false))closeInv();});}
+  if(HOSTS.length){head('The hosts summoned');
+    for(const H of HOSTS){const n=hostLive(H).length,r=row((H.led?'Yours, ':'Against you, ')+'of '+(H.side==='al'?'the alliance':'the wastes')+': '+n+' of '+H.N+', '+{follow:'following you',hold:'holding',march:'marching',charge:'charging',advance:'advancing'}[H.cmd]);
+      if(H.led){for(const [c,lab] of [['follow','Follow'],['hold','Hold'],['march','March to where you look'],['charge','Charge']])btn(r,lab,()=>{hostOrder(H,c);now('',c==='march'||c==='charge');});btn(r,'Volley',()=>{const v=hostVolley(H);now(v?'Loose! '+v+' archers draw and loose':'No archer of yours has a foe within bowshot',1);});}
+      else for(const [c,lab] of [['hold','Hold'],['advance','Advance on you'],['charge','Charge']])btn(r,lab,()=>{hostOrder(H,c);now('',1);});
+      btn(r,'Dismiss',()=>{hostDismiss(H,'The host is dismissed');now('');});}
+    text('Orders as you play: follow '+ctl('hostFollow')+', hold '+ctl('hostHold')+', march to where you look '+ctl('hostMarch')+', charge '+ctl('hostCharge')+', volley '+ctl('hostVolley')+'.');}
+  el.scrollTop=top;
+}
 // ---- Controls (M5a, Q37, Q38, Q39): names for keys and buttons, the rebinding panel in the pause menu, the help panel built from
 // the bindings in use (by device and by mode), and the readout toggle.
 const KEY_NAMES={Space:'Space',ShiftLeft:'Left Shift',ShiftRight:'Right Shift',ControlLeft:'Left Ctrl',ControlRight:'Right Ctrl',AltLeft:'Left Alt',AltRight:'Right Alt',
@@ -14086,7 +14386,8 @@ const HELP={inventory:['inventory and crafting','block menu'],worldMap:['world m
   photo:['hide the HUD for screenshots'],hud:['readout on or off'],pick:['select the block you look at in the hotbar','pick the block you look at'],pause:['pause and settings'],
   hotbarPrev:['previous slot'],hotbarNext:['next slot'],fly:[null,'fly on or off'],noclip:[null,'noclip: fly through blocks'],respawn:[null,'back to spawn'],brush:[null,'brush size'],
   swap:[null,'replace mode: placing replaces blocks'],undo:[null,'undo'],bpRotate:[null,'turn the blueprint'],bpClear:[null,'clear the blueprint'],
-  undoOrClear:[null,'undo, or clear the blueprint'],brushOrRotate:[null,'brush size, or turn the blueprint']};
+  undoOrClear:[null,'undo, or clear the blueprint'],brushOrRotate:[null,'brush size, or turn the blueprint'],warConsole:[null,'the war console: the war\'s events and your hosts'],
+  hostFollow:[null,'your host follows you'],hostHold:[null,'your host holds'],hostMarch:[null,'your host marches to where you look'],hostCharge:[null,'your host charges'],hostVolley:[null,'your host\'s archers loose']};
 const helpText=a=>{const h=HELP[a];if(!h)return null;return SURV()?h[0]:(h[1]===undefined?h[0]:h[1]);};
 const TIPS_SURV=[['Grapnel','place it at a wall below a ledge to hang rope'],['Waystones','touch one to attune it; travel only between attuned stones'],
   ['Lantern','wear it in the belt slot; it burns lamp oil or pitch candles in the dark'],['Chests','what you leave in them stays']];
@@ -14122,7 +14423,8 @@ const BIND_ROWS=[['held','forward','Move forward'],['held','back','Move back'],[
   ['act','worldMap','World map'],['act','journal','Journal'],['act','mapZoom','Minimap zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
   ['act','fly','Fly (creative)'],['act','noclip','Noclip (creative)'],['act','brush','Brush size (creative)'],['act','swap','Replace mode (creative)'],['act','undo','Undo (creative)'],
   ['act','undoOrClear','Undo or clear blueprint (creative)'],['act','brushOrRotate','Brush or turn blueprint (creative)'],['act','respawn','Back to spawn (creative)'],
-  ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];
+  ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],['act','warConsole','War console (creative)'],['act','hostFollow','Your host: follow (creative)'],
+  ['act','hostHold','Your host: hold (creative)'],['act','hostMarch','Your host: march to where you look (creative)'],['act','hostCharge','Your host: charge (creative)'],['act','hostVolley','Your host: volley (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];
 let capture=null; // {kind:'keys'|'held'|'pad', action}
 function bindLabel(kind,a){
   if(kind==='pad'){if(a==='jump')return 'A (fixed)';if(a==='sprint')return 'Left stick click (fixed)';const b=padOf(a);return b.length?b.map(padName).join(', '):'None';}
@@ -14194,7 +14496,8 @@ const HINTS={
   f_ember2:()=>HINTS.f_ember(),f_ember3:()=>HINTS.f_ember(),
   f_fspirit:()=>'A fire spirit, called out of the flames by an Emberlord. It drifts over the ground and throws fire; it burns out when its lord falls.',
   f_fhound:()=>'A flame hound, called by an Emberlord. Fast and fierce; strike it as it comes.',
-  f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.'
+  f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.',
+  host:()=>'Your host follows you. Orders: follow '+ctl('hostFollow')+', hold '+ctl('hostHold')+', march to where you look '+ctl('hostMarch')+', charge '+ctl('hostCharge')+', volley '+ctl('hostVolley')+'. The war console ('+ctl('warConsole')+') summons more and sends them away.'
 };
 let hintT=0,darkT=0;
 function hint(id){
@@ -14276,6 +14579,8 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
   $('animbtn').addEventListener('click',()=>{if(bringAnimal(sel.value))lockOrPlay();});}
 {const sel=$('foesel');for(const k in FOES){const o=document.createElement('option');o.value=k;o.textContent=FOES[k].n;sel.appendChild(o);}
   $('foebtn').addEventListener('click',()=>{if(bringFoe(sel.value))lockOrPlay();});}
+$('warconbtn').addEventListener('click',()=>{if(ready)openWarConsole();}); // the war console (D-077)
+for(const b of $('hostbar').querySelectorAll('button'))b.addEventListener('click',()=>runAction(b.dataset.a)); // orders to a summoned host, by touch or the mouse
 {const sel=$('stampsel');for(const k in STAMPS){const o=document.createElement('option');o.value=k;o.textContent=STAMPS[k];sel.appendChild(o);}
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];
@@ -14335,7 +14640,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }

@@ -36,7 +36,8 @@ const HINTS={
   f_ember2:()=>HINTS.f_ember(),f_ember3:()=>HINTS.f_ember(),
   f_fspirit:()=>'A fire spirit, called out of the flames by an Emberlord. It drifts over the ground and throws fire; it burns out when its lord falls.',
   f_fhound:()=>'A flame hound, called by an Emberlord. Fast and fierce; strike it as it comes.',
-  f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.'
+  f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.',
+  host:()=>'Your host follows you. Orders: follow '+ctl('hostFollow')+', hold '+ctl('hostHold')+', march to where you look '+ctl('hostMarch')+', charge '+ctl('hostCharge')+', volley '+ctl('hostVolley')+'. The war console ('+ctl('warConsole')+') summons more and sends them away.'
 };
 let hintT=0,darkT=0;
 function hint(id){

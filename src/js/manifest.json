@@ -282,6 +282,10 @@
       "about": "The Emberlords remade (W7a, D-074): three builds (horns and arms) and four fires of the one kind, about twenty blocks tall; the fire spirits, flame hounds and lesser demons they call"
     },
     {
+      "path": "engine/crowd.js",
+      "about": "Crowds seen from afar (D-077): every foe or soldier beyond the nearest whole ones drawn as an instance of its kind's merged model, one instanced mesh per model and coat"
+    },
+    {
       "path": "gameplay/wildlife.js",
       "about": "Animals (E1): kinds by land, wandering and fleeing, hunting, wool, milk and eggs, riding, a hound and a pack mule that follow you"
     },
@@ -334,6 +338,14 @@
       "about": "After an Emberlord's fall (W7c, D-076): its mountain dies (deadMount in chunk generation, after the edits), the sky clears, its servants scatter, the land heals; its relics (horn or crown, the cloak of its wing) given or owed; the monument on its crater's rim, the banners over the Ashen Gate, the feast and the heralds' song; something stirring below"
     },
     {
+      "path": "gameplay/war-host.js",
+      "about": "Custom hosts (D-077, creative): hosts of the alliance or the wastes of any make and of thousands, summoned in ranks to lead (follow, hold, march, charge, volley) or against the player; the bar of orders"
+    },
+    {
+      "path": "gameplay/war-control.js",
+      "about": "The war at the player's command (D-077, creative): the war's clock stopped or hastened, the events that come by themselves stopped, and any event made to happen now (saved as wc)"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },
@@ -348,6 +360,10 @@
     {
       "path": "ui/creative.js",
       "about": "Creative tools: block search, the Fill Tool, teleport, time and weather, test structures (M5b)"
+    },
+    {
+      "path": "ui/war-console.js",
+      "about": "The war console (D-077, creative): the war about the player, its clock, the events that come by themselves, its efforts and front by hand, any of its events now, and the hosts to summon and lead"
     },
     {
       "path": "ui/controls.js",

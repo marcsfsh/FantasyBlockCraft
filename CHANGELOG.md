@@ -5,6 +5,19 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.47.0 (2026-10-12): the war at your command, and hosts of thousands
+
+Saves from 0.46.0 do not carry over (save key v37): the war console's settings are saved.
+
+### Game
+- **The war console** (creative; the pause menu's War row, or K): for the war about you, stop or hasten its clock (stopped, as it goes, five or twenty times as fast), stop any of the events that come by themselves (the battles at the gates, the raids on the realms, the Emberlords' wrath) and make any of them happen now: the hosts' army or a warhost, the last assault, raiding parties, sallies, scouts, the engines, each effort and the front set by hand, the gate's fall, a raid or a siege on the nearest place of the borderlands, wolf riders and ambushes, the lord's eruptions, its showing, its sally, the loremasters' rite and its fate.
+- **Summon hosts of thousands** of the alliance or of the wastes, company by company (up to 6,000 at once), to lead or to fight against you. They come in rank by rank: shields and pikes in front, archers behind, horsemen on the wings, captains and standards among them.
+- **Lead them:** G follow, Y hold, P march to where you look, C charge, O loose a volley (rebindable; a bar of orders shows while you lead). A host summoned against you forms where you look and holds; told to advance it marches on yours.
+- **Great crowds run lighter:** soldiers afar are drawn together by kind, the nearest few whole, and those afar think less often, so the wars' massive armies cost less too.
+
+### Tooling
+- New test cases `69-war-control` and `70-war-host`. `tools/shot.mjs --host=N:sec` summons a host of N with half as many against it and prints the foes' update time and draw calls (`--prof` saves a CPU profile); `--console` opens the war console over a view.
+
 ## 0.46.0 (2026-10-12): W7c, after an Emberlord's fall
 
 Saves from 0.45.0 do not carry over (save key v36): a fallen lord's mountain, its relics and the war's victory are saved.

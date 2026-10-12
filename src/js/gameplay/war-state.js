@@ -26,7 +26,7 @@ function warFound(P){let w=WARS.get(P.id);if(w)return w;
   toast('The siege of '+P.name.replace(/^The /,'the ')+': you have found the war at the gate');return w;}
 // every second while playing: the war's clock, finding a gate, each effort's marks (a quarter, a half...), and the panel
 function warStateTick(){
-  warPlay+=1;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),200),near=P?warFound(P):null;
+  warPlay+=warRate();hostBar();const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),200),near=P?warFound(P):null;
   for(const w of WARS.values())for(const [k] of WAR_EFF){const q=Math.floor(warEff(w,k)*4);while(q>(w.m[k]||0)){const m=w.m[k]=(w.m[k]||0)+1,s=WAR_MARK[k][m-1];warLog(w,s+'.');if(w===near)toast(s);
       if(m===4&&warAll(w)&&w.s!==2){warLog(w,'All four are done. The hosts make ready for the last assault on the gate.');if(w===near)toast('The hosts make ready for the last assault on the gate');}}}
   // the fall (W2): the last assault's hosts at the leaf; or, the player away, ten minutes after all four were done (half an hour

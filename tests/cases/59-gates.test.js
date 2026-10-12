@@ -81,12 +81,12 @@ const army=(label,pu,pv,al,sec)=>{gen(...at(pu,pv));const [X,Z]=at(pu,pv);PL.x=X
   const A=warArmy(P,al),R={A:A,ranks:0,go:-1,beyond:0,far:0,whole:0,one:0,max:0};
   for(let k=0;k<sec;k++){run(1);const m=A.m.filter(f=>!f.dead&&!f.gone);R.max=Math.max(R.max,m.length);if(!A.go)R.ranks=Math.max(R.ranks,m.filter(f=>f.waitA&&f.st==='idle').length);else if(R.go<0)R.go=k+1;
     for(const f of m){const u=wgUV(P,f.x+OX,f.z+OZ)[0];if(al?u<P.uC0-10:u>8)R.beyond++;}
-    if(k===sec-1)for(const f of foes){if(f.dead)continue;const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(f.far){R.far++;if(f.m.fm&&d>30)R.one++;}else if(d<=34)R.whole++;}} // (three.js is not here: the headless harness stands in for it; the screenshots show the look)
+    if(k===sec-1)for(const f of foes){if(f.dead)continue;const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(f.far){R.far++;if(d>foeLodR*0.9)R.one++;}else if(d<=34)R.whole++;}R.crowd=crowdCount();} // (three.js is not here: the headless harness stands in for it; the screenshots show the look)
   return R;};
 {const R=army('the hosts',P.uC0+40,12,true,150),A=R.A;
   info('the hosts muster:',A.mus&&(A.mus.sq?'in the square':'on the field'),'; companies',A.C.length,'of',A.N,'(men, riders, dwarves, elves, wood elves) ; in their ranks before the horns',R.ranks,'of',R.max,'; they march at',R.go,'s ; soldier-seconds out beyond the great gate',R.beyond,'; the player',hp);
   assert(A.mus&&!A.mus.sq&&A.N>=100&&R.max>=100&&R.ranks>=R.max*0.8&&R.go>0&&R.beyond>200&&hp===20,'a massive army of the hosts musters in ranks on the camp\'s field, then marches out through its great gate');
-  info('drawn far off as one mesh',R.one,'of',R.far,'; whole near by',R.whole);assert(R.far>10&&R.one===R.far&&R.whole>5,'soldiers far off are drawn as one mesh each, those near whole');}
+  info('drawn far off in the crowd',R.one,'of',R.far,'(instances drawn',R.crowd+') ; whole near by',R.whole);assert(R.far>10&&R.one===R.far&&R.crowd>0&&R.whole>5,'soldiers far off are drawn as instances of their kind in the crowd (D-077), those near whole');}
 {const R=army('the warhost',-30,P.side*20,false,170),A=R.A; // (170 s: it may wait for its last companies before it charges)
   info('the warhost:',A.mus&&A.mus.yard?'masses in the yard':'comes in','; companies',A.C.length,'of',A.N,'(orcs, goblins, trolls) ; massed before the charge',R.ranks,'of',R.max,'; it charges at',R.go,'s ; soldier-seconds out through the gate',R.beyond,'; the player',hp);
   assert(A.mus&&A.mus.yard&&A.N>=100&&R.max>=100&&R.ranks>=R.max*0.75&&R.go>0&&R.beyond>200&&hp===20,'a massive warhost comes up the Long Descent, masses in ranks before the gate and charges out through it');}

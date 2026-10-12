@@ -336,4 +336,6 @@ The war between the alliance (men, riders, high elves, wood elves, dwarves) and 
   - Its fates (Q161, Q177): the hosts' final assault, slain by you alone, bound by a rite of elven and dwarven loremasters that you protect, cast down into the lava sea through the mountain's heart (and perhaps to return), or its fire put out as the dwarves break the mountain's vents.
   - After (Q186): its mountain dies (the lava cools to obsidian and crust, saved), the sky over its basin clears, its servants scatter, and the land slowly heals. It leaves (Q187) greater relics (its crown or horns, a cloak of its wing and more, each with a use), its name and story, a monument on the crater's rim, a stirring below, and a few more: a victory feast in the Leaguer, the three banners raised over the Ashen Gate, the heralds' songs.
 
+- **The war at the player's command** (asked by the owner after W7, done in 0.47.0, D-077): in creative, the war console stops or hastens the war's clock, stops the events that come by themselves and makes any of them happen now; hosts of thousands of the alliance or the wastes are summoned and led, or set against the player.
+
 The order of E2 to E5 is not yet decided; confirm it before E1 ends.

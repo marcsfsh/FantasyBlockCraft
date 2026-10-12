@@ -88,16 +88,19 @@ function emberWarTick(){const X=PL.x+OX,Z=PL.z+OZ;let near=null,nd=1e9,inB=false
   for(const f of foes)if(!f.bold&&!f.dead&&f.army&&f.army.drive){f.bold=1;f.dmgK=(f.dmgK||1)*1.15;}
   emberSkyK=0;if(!near)return;const R=warLord(near),E=elOf(near);emberSkyK=Math.max(inB?0.3:0,Math.min(1,1-nd/900));
   // its mountain rumbles and erupts; ash falls; its voice
-  if((emberRumT-=1)<=0){emberRumT=20+Math.random()*25;const v=Math.max(0.12,1-nd/800);burst(3,'lowpass',55,0.5,0.45*v,0,[PL.x,PL.y-4,PL.z]);shake=Math.max(shake,0.3*v);}
-  if((emberEruT-=1)<=0){emberEruT=80+Math.random()*80;E.ash=40;const S=volcShape(R.G),sx=S.cx-OX,sz=S.cz-OZ,v=Math.max(0.15,1-nd/700);toast(R.L.mt.replace(/^the /,'The ')+' erupts');
-    burst(3.5,'lowpass',60,0.5,0.6*v,nd/343,[sx,R.G.rimTop,sz]);if(nd<300)for(let k=0;k<80;k++){const a=Math.random()*6.283,s=4+Math.random()*10;spawnP(sx,R.G.rimTop+2,sz,Math.cos(a)*s,18+Math.random()*20,Math.sin(a)*s,[1,0.45+Math.random()*0.3,0.1],5,9);}}
-  if((emberTauntT-=1)<=0){emberTauntT=150+Math.random()*110;const you=SW.on||emberKnown.has(R.F.id),T=you&&Math.random()<0.5?EMBER_TAUNT.you:EMBER_TAUNT.hosts;toast(R.L.name+': '+T[Math.floor(Math.random()*T.length)]);}
+  const wr=warAuto('e'); // (its wrath stopped from the war console, D-077: the rumbles, eruptions, taunts and showings come only when called)
+  if(wr&&(emberRumT-=1)<=0){emberRumT=20+Math.random()*25;const v=Math.max(0.12,1-nd/800);burst(3,'lowpass',55,0.5,0.45*v,0,[PL.x,PL.y-4,PL.z]);shake=Math.max(shake,0.3*v);}
+  if(wr&&(emberEruT-=1)<=0)emberErupt(near,R,nd);
+  if(wr&&(emberTauntT-=1)<=0){emberTauntT=150+Math.random()*110;const you=SW.on||emberKnown.has(R.F.id),T=you&&Math.random()<0.5?EMBER_TAUNT.you:EMBER_TAUNT.hosts;toast(R.L.name+': '+T[Math.floor(Math.random()*T.length)]);}
   // at the height of an assault it shows itself
-  if(warPlay-E.sh>300&&warArmies.some(A=>A.P.id===near.id&&A.m.filter(f=>!f.dead&&f.foe).length>=6))emberShow(near,R);
+  if(wr&&warPlay-E.sh>300&&warArmies.some(A=>A.P.id===near.id&&A.m.filter(f=>!f.dead&&f.foe).length>=6))emberShow(near,R);
   // the last battles: its sally, and the loremasters' rite for one sworn to the alliance
   const F=R.F,dg=Math.hypot(X-(F.GX+F.ox*10),Z-(F.GZ+F.oz*10));
   if(near.s>=2&&warFront(near)>=1&&dg<160)emberSally(near,R);
   if(!emberRiteS&&near.s>=2&&SW.on&&warPlay-E.rite>900&&(dg<60||fortName(Math.floor(X),Math.floor(PL.y),Math.floor(Z))===F.name)){const yy=foeStand(PL.x,PL.y+2,PL.z,2);if(yy>0)emberRite(near,R,PL.x,yy,PL.z);}}
+// its mountain erupts (nd: the player's distance from it): ash falls, fire flies from its crater
+function emberErupt(w,R,nd){emberEruT=80+Math.random()*80;const E=elOf(w);E.ash=40;const S=volcShape(R.G),sx=S.cx-OX,sz=S.cz-OZ,v=Math.max(0.15,1-nd/700);if(nd<900)toast(R.L.mt.replace(/^the /,'The ')+' erupts');
+  burst(3.5,'lowpass',60,0.5,0.6*v,nd/343,[sx,R.G.rimTop,sz]);if(nd<300)for(let k=0;k<80;k++){const a=Math.random()*6.283,s=4+Math.random()*10;spawnP(sx,R.G.rimTop+2,sz,Math.cos(a)*s,18+Math.random()*20,Math.sin(a)*s,[1,0.45+Math.random()*0.3,0.1],5,9);}}
 // ash falling about the player after an eruption (from emberFrame)
 function emberAsh(dt){for(const w of WARS.values()){const E=w.el;if(!E||!(E.ash>0))continue;E.ash-=dt;for(let k=0;k<dt*30;k++)spawnP(PL.x+(Math.random()-.5)*30,PL.y+8+Math.random()*6,PL.z+(Math.random()-.5)*30,0.3,-1.2-Math.random(),0.1,[0.42,0.4,0.4],6,0.05);}}
 // the panel: its lord, the vents, its fate

@@ -63,7 +63,7 @@ function warHeld(s){if(s.folk||!WAR_CL.has(s.id))return s;const w=WARS.get(WAR_C
   const under=s.y<hAt(Math.round(s.x),Math.round(s.z))-6;return {id:s.id+'h',x:s.x,y:s.y,z:s.z,R:Math.max(2,Math.min(5,s.R||4)),kind:under?'d_sap':'r_lines',folk:1,s:wgSite(P)};}
 // ---- underground in a fallen basin: a company of the hosts with the player, and the deep's warbands
 let warDeepT=60;
-function warDeepTick(){const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const under=PL.y<ground[bx+W*bz]-8,bw=under&&warBasinWar(PL.x+OX,PL.z+OZ);
+function warDeepTick(){const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D||!warAuto('a'))return;const under=PL.y<ground[bx+W*bz]-8,bw=under&&warBasinWar(PL.x+OX,PL.z+OZ);
   warFollow(2,bw?6:0,['d_host','d_sap','d_host','r_host'],'A company of the hosts goes down with you');
   if(!bw||(warDeepT-=1)>0)return;warDeepT=150+Math.random()*90;
   for(let k=0;k<10;k++){const a=Math.random()*6.283,d=26+Math.random()*10,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d;if(x<3||z<3||x>=W-3||z>=D-3)continue;

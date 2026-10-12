@@ -11,6 +11,9 @@
 //   node tools/shot.mjs --tiles=258-269,254      atlas tiles enlarged side by side, to tiles.png (no views unless --view is given)
 //   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al), the wastes' (orc) or both (W1),
 //        marched on that many seconds before the shot
+//   node tools/shot.mjs --view=... --host=2000:20   a summoned host of 2000 led behind the camera and 1000 of the wastes where it looks,
+//        charging each other for 20 seconds (D-077); prints the foes' update time a frame and the draw calls (--prof also saves a CPU profile)
+//   node tools/shot.mjs --view=... --console   the war console open over the view (D-077)
 //   node tools/shot.mjs --view=... --siege=0.55,0.6,0.55   the works of the war at the gate about the camera (W2): the ram's, the mine's and the
 //        walls' efforts (0 to 1), --siege=fall for the gate fallen, --siege=front for its first forward camp on the basin's floor (W5), --siege=raid for the nearest farmstead of its border burned by a raid (W6), --siege=lord for its Emberlord showing itself on the gate's wall (W7b), or --siege=dead for its lord fallen: the mountain dead and the monument on its rim (W7c)
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
@@ -60,6 +63,19 @@ const HOOK=`window.__fbc={
   // an army at the gate of the wastes about the camera (D-067): the hosts' (al) or the wastes', marched on for sec seconds
   army(al,sec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;for(const f of [...foes])removeFoe(f);foeSpots.clear();warArmies.length=0;warClk=1e9;if(al==='both'){warArmy(P,true);warArmy(P,false);}else warArmy(P,al);
     const real=performance.now;performance.now=()=>0;try{for(let i=0;i<Math.round(sec/0.05);i++){foeT-=0.05;updFoes(0.05);}}finally{performance.now=real;}return warLive();},
+  // summoned hosts (D-077): n of the alliance led in ranks behind the camera, half as many of the wastes formed where it looks, then
+  // sec seconds of the two charging each other; the time of the foes' update a frame (in this page, three.js real) and the draw calls
+  host(n,sec){for(const f of [...foes])removeFoe(f);foeSpots.clear();hostDismiss(null);warClk=1e9;WC.hb.al=hostMake('al',n);WC.hb.o=hostMake('o',Math.round(n/2));
+    const real=performance.now,T=[],step=dt=>{const t=real.call(performance);updFoes(dt);T.push(real.call(performance)-t);};
+    const A=hostSummon('al',WC.hb.al,true),B=hostSummon('o',WC.hb.o,false);for(let i=0;i<Math.ceil(n/HOST_RATE)+10;i++)step(1/60);const t0=T.length;
+    for(let i=0;i<120;i++)step(1/60);const stand=T.slice(t0);if(sec>0){hostOrder(A,'charge');hostOrder(B,'charge');for(let i=0;i<Math.round(sec*30);i++)step(1/30);}
+    const fight=T.slice(t0+120),m=a=>a.length?+(a.reduce((x,y)=>x+y,0)/a.length).toFixed(2):0,p95=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?+s[Math.floor(s.length*0.95)].toFixed(2):0;};
+    {const [mx,mz]=hostMid(A);PL.yaw=Math.atan2(-(mx-PL.x),-(mz-PL.z));PL.pitch=-0.42;PL.y+=10;} // (the camera turned to look over the led host)
+    updateEntities(0.01);for(let i=0;i<3;i++)updFoes(0.001);renderer.render(scene,camera);
+    return {ours:hostLive(A).length,theirs:hostLive(B).length,lost:(A.lost||0)+(B.lost||0),foes:foes.length,whole:foes.filter(f=>!f.far&&!f.dead).length,crowd:crowdCount(),batches:CROWD.size,calls:renderer.info.render.calls,
+      standMs:m(stand),standP95:p95(stand),fightMs:m(fight),fightP95:p95(fight)};},
+  // the war console open over the view (D-077)
+  console(){openWarConsole();return HOSTS.length;},
   // the works of the war at the gate about the camera (W2): its efforts set (the ram, the mine, the walls, each 0 to 1) or its fall,
   // and the works made at once, the siege tower in place
   siege(spec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;const w=warFound(P);
@@ -110,6 +126,10 @@ for(const [name,X,Y,Z,yaw,pitch,t] of views){
   if(args.bolt!==undefined)await p.evaluate(()=>window.__fbc.bolt());
   if(args.foes!==undefined)await p.evaluate(k=>window.__fbc.stageFoes(k?k.split(','):[],1),args.foes);
   if(args.siege!==undefined){const n=await p.evaluate(k=>window.__fbc.siege(k),args.siege);console.log('siege '+args.siege+': '+n+' edits');await p.waitForTimeout(1500);}
+  if(args.host!==undefined){const [n,sec]=args.host.split(':').map(Number),cdp=args.prof!==undefined?await p.context().newCDPSession(p):null;if(cdp){await cdp.send('Profiler.enable');await cdp.send('Profiler.start');}
+    const r=await p.evaluate(a=>window.__fbc.host(a[0],a[1]),[n||1000,sec||0]);console.log('host '+JSON.stringify(r));
+    if(cdp){const {profile}=await cdp.send('Profiler.stop');const f=path.join(out,'host.cpuprofile');fs.writeFileSync(f,JSON.stringify(profile));console.log('profile '+path.relative(ROOT,f));}} // (--prof: a CPU profile of it)
+  if(args.console!==undefined)await p.evaluate(()=>window.__fbc.console());
   if(args.army!==undefined){const [k,sec]=args.army.split(':'),n=await p.evaluate(a=>window.__fbc.army(a[0]==='both'?'both':a[0]==='al',a[1]),[k,Number(sec||60)]);console.log('army '+k+': '+n+' marching');}
   const file=path.join(out,seed+'-'+name+'.png');await p.screenshot({path:file});
   console.log('shot '+path.relative(ROOT,file)+'  fog '+Math.round(r.fog)+(r.surf?' surface':' cave')+' mode');

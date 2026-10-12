@@ -24,7 +24,8 @@ const HELP={inventory:['inventory and crafting','block menu'],worldMap:['world m
   photo:['hide the HUD for screenshots'],hud:['readout on or off'],pick:['select the block you look at in the hotbar','pick the block you look at'],pause:['pause and settings'],
   hotbarPrev:['previous slot'],hotbarNext:['next slot'],fly:[null,'fly on or off'],noclip:[null,'noclip: fly through blocks'],respawn:[null,'back to spawn'],brush:[null,'brush size'],
   swap:[null,'replace mode: placing replaces blocks'],undo:[null,'undo'],bpRotate:[null,'turn the blueprint'],bpClear:[null,'clear the blueprint'],
-  undoOrClear:[null,'undo, or clear the blueprint'],brushOrRotate:[null,'brush size, or turn the blueprint']};
+  undoOrClear:[null,'undo, or clear the blueprint'],brushOrRotate:[null,'brush size, or turn the blueprint'],warConsole:[null,'the war console: the war\'s events and your hosts'],
+  hostFollow:[null,'your host follows you'],hostHold:[null,'your host holds'],hostMarch:[null,'your host marches to where you look'],hostCharge:[null,'your host charges'],hostVolley:[null,'your host\'s archers loose']};
 const helpText=a=>{const h=HELP[a];if(!h)return null;return SURV()?h[0]:(h[1]===undefined?h[0]:h[1]);};
 const TIPS_SURV=[['Grapnel','place it at a wall below a ledge to hang rope'],['Waystones','touch one to attune it; travel only between attuned stones'],
   ['Lantern','wear it in the belt slot; it burns lamp oil or pitch candles in the dark'],['Chests','what you leave in them stays']];
@@ -60,7 +61,8 @@ const BIND_ROWS=[['held','forward','Move forward'],['held','back','Move back'],[
   ['act','worldMap','World map'],['act','journal','Journal'],['act','mapZoom','Minimap zoom'],['act','waypoint','Travel to the next waystone'],['act','photo','Photo mode'],['act','hud','Readout on or off'],['act','pause','Pause'],
   ['act','fly','Fly (creative)'],['act','noclip','Noclip (creative)'],['act','brush','Brush size (creative)'],['act','swap','Replace mode (creative)'],['act','undo','Undo (creative)'],
   ['act','undoOrClear','Undo or clear blueprint (creative)'],['act','brushOrRotate','Brush or turn blueprint (creative)'],['act','respawn','Back to spawn (creative)'],
-  ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];
+  ['act','bpRotate','Turn blueprint (creative)'],['act','bpClear','Clear blueprint (creative)'],['act','warConsole','War console (creative)'],['act','hostFollow','Your host: follow (creative)'],
+  ['act','hostHold','Your host: hold (creative)'],['act','hostMarch','Your host: march to where you look (creative)'],['act','hostCharge','Your host: charge (creative)'],['act','hostVolley','Your host: volley (creative)'],...[1,2,3,4,5,6,7,8,9].map(n=>['act','slot'+n,'Slot '+n])];
 let capture=null; // {kind:'keys'|'held'|'pad', action}
 function bindLabel(kind,a){
   if(kind==='pad'){if(a==='jump')return 'A (fixed)';if(a==='sprint')return 'Left stick click (fixed)';const b=padOf(a);return b.length?b.map(padName).join(', '):'None';}

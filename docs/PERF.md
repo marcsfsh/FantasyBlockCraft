@@ -152,3 +152,15 @@ Same VM type, `npm run bench`, one run per seed, the Near area.
 Generating a chunk at spawn costs about a twentieth more than in 0.29.0 (median 10.6 against 10.1 on the default seed): every column now asks whether a realm's site or road levels it (`realmGround`), and every chunk has the realms' planning step and building pass. Startup grows by about three quarters of a second, most of it planning the provinces about the spawn (D-060).
 
 Planning a province (`planProvince`, measured in a scratch case over the nine held stretches nearest spawn) takes 5 to 150 ms in all: about a third reading the raw ground on its grid, the rest searching for sites and checking their cores. It runs in slices: the planner yields after every row it reads or searches, and the streaming step (`realmPrep`) spends at most 6 ms a frame on it, so the longest single slice measured is 7.5 ms; a plan made in slices is the same as one made at once (checked for all nine). Building the realms per chunk (`applyRealms`, with the relief) costs 0.6 ms at the median over the 81 chunks of the royal city of Thalarin (mean 0.8, at most 5 ms where the citadel and the white tower stand) and 0.3 ms over a village's 36.
+
+## Hosts of thousands (2026-10-12, 0.47.0)
+
+`node tools/shot.mjs --view=host:0,345,40,0,-0.12,0.3 --host=N:15` on the cloud VM (headless Chromium, three.js real, software WebGL): N of the alliance led behind the camera and N/2 of the wastes where it looks, two seconds standing, then 15 seconds charging each other. The foes' update a frame (`updFoes`, its own time only), mean and 95th centile in ms; draw calls of one frame after.
+
+| Creatures | Before (0.46.0 code) standing | fighting | After standing | fighting | Drawn whole | Draw calls |
+|---|---|---|---|---|---|---|
+| 750 | | | 3.9 / 6.8 | 9.3 / 16.7 | 44 | 1,599 |
+| 2,500 | 31.5 / 47.6 | 55.7 / 77.1 | 10.2 / 21.1 | 23.7 / 38.1 | 66 | 2,229 |
+| 3,860 | | | 17.0 / 24.3 | 37.8 / 69.7 | 72 | 2,500 |
+
+Before: sight looked through every creature (most of them its own side), the far ones each drew as a mesh of their own, and all the nearest 34 blocks (141 creatures) whole: 4,480 draw calls. After (D-077): sight looks through the other side's grid cells only, the far ones are instances by kind and coat (about 200 batches), the nearest 40 whole, and those afar step every other frame (standing, every fourth).

@@ -38,12 +38,12 @@ function warParty(P,table,n,route,o){
   for(const f of grp){f.war=P.id;f.way=route.slice(k+1).map(w=>[w[0],w[1]]);if(o&&o.back)f.back=route.slice(k,-1).reverse().map(w=>[w[0],w[1]]);const w=f.way.shift();f.hx=w[0]-OX;f.hz=w[1]-OZ;f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/FOES[f.kind].walk-20);}
   return grp;}
 const warFolk=(P,fp,back)=>({prov:'wg:'+P.id,site:wgSite(P),lead:FOLK_LEAD[fp+'host']||null,back:back});
-function warRaid(P){const w=WARS.get(P.id),won=w&&w.s>=2; // (after the fall the hosts' parties go on down the road, the orcs' come up it)
-  if(Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),won?warRoute(P,true).concat(warRoadDown(P)):warRoute(P,true),warFolk(P,fp,1));
+function warRaid(P,side){const w=WARS.get(P.id),won=w&&w.s>=2; // (after the fall the hosts' parties go on down the road, the orcs' come up it; side 'al' or 'o' from the war console, D-077)
+  if(side?side==='al':Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),won?warRoute(P,true).concat(warRoadDown(P)):warRoute(P,true),warFolk(P,fp,1));
     if(g){toast('A raiding party of '+WAR_PEOPLE[fp[0]]+(won?' marches down into the wastes':' makes for the gate'));foeCall(g[0],'alert');}}
   else{const g=warParty(P,'band',5+Math.floor(Math.random()*3),won?warRoadDown(P).reverse():warRoute(P,false),{lead:Math.random()<0.3?'ochief':null,back:1});if(g){toast(won?'Orcs come up the Long Descent against the yard':'Orcs sally from the gate against the siege lines');foeCall(g[0],'alert');}}}
-function warScout(P){
-  if(Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
+function warScout(P,side){
+  if(side?side==='al':Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
   else{const s=wgSite(P),r=warRoute(P,false);r.push(siteXZ(s,P.uC0+40,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)),siteXZ(s,P.uC0+160,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)));
     const g=warParty(P,'oscout',3,r);if(g)toast('Goblin scouts creep out along the pass');}}
 // ---- Armies (D-067): an invasion is massive. An army is a column of companies (`warAllied`, `warOrcs`: some 116 of the hosts
@@ -235,7 +235,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P)return;const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
+  warStateTick();warMarch();warSwornTick();warDeepTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P||!warAuto('a'))return; /* (stopped from the war console: D-077) */const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)

@@ -79,6 +79,8 @@
 | 66-emberlord | W7a (D-074): three builds in four fires about twenty tall, and the summoned kinds; each lord its own name, build, fire, temper and story; the way out of its fortress clear for it; the whip drags, the blade cleaves wide; in phase two a leap, the breath, its servants, a fissure; in phase three eruptions and a wall of fire, the hall flooding; its fall: servants burnt out, the lava cooled; the journal |
 | 67-ember-war | W7b (D-075): each war's lord; its roar driving a warhost bolder; showing itself on the gate's wall and gone again; its eruption, ash and darker sky; the front at its mountain's foot, the hosts' way on to its gate; the vents broken one by one until its fire goes out; its sally; its fates: alone, with the hosts, cast down by a keg, bound by the loremasters' rite held to the end; the chronicle and the journal |
 | 68-ember-after | W7c (D-076): a fallen lord's mountain's open lava cooled as its chunks are made, the lava sea untouched; the sky cleared and the war won; its servants scattered; the relics owed and given in the Leaguer, the horn routing, the cloak keeping out lava, the heart's light; the feast and the banners over the gate; the monument on the rim; the land healing; the stirring below |
+| 69-war-control | D-077: the war's clock stopped and hastened in creative, as it goes in survival; the events that come by themselves stopped for ten minutes and let run again; the armies, the last assault, parties, sallies, scouts and the engines at the console's word; efforts and the front by hand; the gate's fall; a raid and a siege on the borderlands; an eruption, the lord on the wall and its fate; the settings kept; the console drawn |
+| 70-war-host | D-077: the keys; a host of 2,000 of the alliance in ranks behind the player (pikes in front, archers behind, horsemen on the wings, captains and standards); the crowd drawn in instances with the nearest whole; following, holding, marching to where the player looks; a host of the wastes against the player; a volley and a charge won with losses; dismissed and gone on leaving creative; at most 6,000 |
 
 When a change alters generation on purpose, update the thresholds deliberately and record why in `docs/DECISIONS.md`.
 
@@ -109,6 +111,10 @@ The hashes are identical on Node 20, 21 and 22 (checked on 2026-10-07). If a Nod
 `--animals[=kinds]` lines animals up two to five blocks in front of each view and holds them still (D-050), so a change to their models can be judged from the PNGs. After a dot: `y` young, `s` stag, `d` hind, a coat number, `w` walking, `r` running, `g` grazing, `z` asleep; for example `node tools/shot.mjs --view=steppe:-2478,321.4,-210,0,-0.35,0.32 --animals=horse.2,deer.y`.
 
 `--bolt` throws a lightning strike ahead of each view and holds it still for the shot (D-051), so the bolts can be judged from the PNGs.
+
+`--host=N[:sec]` summons a host of N of the alliance behind each view and half as many of the wastes where it looks, then lets them charge each other for sec seconds (D-077); it prints the creatures in the field, those drawn whole and in the crowd, the draw calls, and the foes' update time a frame standing and fighting (real three.js in this page; the frame rate itself means nothing here). `--prof` also saves a CPU profile of it to `host.cpuprofile`.
+
+`--console` opens the war console over each view (D-077), to judge its layout.
 
 `--foes[=kinds]` lines foes up in front of each view and holds them still (D-052): after a dot `a` winding up a blow or a shot, `w` walking, `z` asleep; a third part turns a foe by degrees (`ember.w.90` stands side on), and `--far=` sets how far off an Emberlord stands (20 by default); underground they stand on the floor near the camera.
 

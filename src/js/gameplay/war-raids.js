@@ -50,11 +50,11 @@ const RAID_LIVE=new Map(); // raid key -> {m: the warband, ...} while fought out
 function warRaidsTick(){let busy=false;for(const w of WARS.values()){const R=w.rd||(w.rd={n:0,nx:Math.round(warPlay+RAID_FIRST*(0.7+0.6*hsh(w.X,9941,w.Z))),L:[],bs:[],bk:[],t:[0,0,0,0]});
     if(busy&&!(RAID_B.get(w.id)||{}).done)continue;const B=warBorder(w);if(!B){busy=true;continue;}
     for(const r of R.L)if(!r.out)raidStep(w,B,r);
-    if(warPlay>=R.nx)raidBegin(w,B,R);raidApply(w,B,R);}
+    if(warPlay>=R.nx&&warAuto('r'))raidBegin(w,B,R);raidApply(w,B,R);}
   raidBorderTick();}
-function raidBegin(w,B,R){if(w.el&&w.el.fate){R.nx=Math.round(warPlay+1e9);return null;} // (its lord fallen, the raids end: W7c)
-  const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=!(w.s>=2)&&R.n%4===3;R.n++;R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
-  const L=B.S.filter(e=>siege?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0);if(!L.length)return null;const s=L[Math.floor(q*q*L.length)].s;
+function raidBegin(w,B,R,force){if(w.el&&w.el.fate&&!force){R.nx=Math.round(warPlay+1e9);return null;} // (its lord fallen, the raids end: W7c; force {s, siege} from the war console, D-077)
+  const q=hsh(w.X+R.n*131,9943,w.Z),q2=hsh(w.Z+R.n*71,9945,w.X),siege=force?!!force.siege:!(w.s>=2)&&R.n%4===3;R.n++;if(!force)R.nx=Math.round(warPlay+(!(w.s>=2)?480+360*q2:1200+600*q2));
+  const L=B.S.filter(e=>siege?e.s.k==='city'||e.s.k==='fort':RAID_MAX[e.s.k]>0);if(!L.length&&!force)return null;const s=force?force.s:L[Math.floor(q*q*L.length)].s;
   const r={i:R.n-1,k:siege?'siege':'raid',s:s.id,X:Math.round(s.X),Z:Math.round(s.Z),t0:Math.round(warPlay),out:null,b:0,hb:[]};R.L.push(r);const j=R.L.length>16?R.L.findIndex(q=>q.out):-1;if(j>=0)R.L.splice(j,1);
   if(Math.hypot(s.X-(PL.x+OX),s.Z-(PL.z+OZ))<900)toast(siege?'A warhost marches out of the wastes against '+s.name:'Orcs ride out of the wastes to raid '+s.name);saveDirty=true;return r;}
 // a raid under way: fought out if the player is near its place, else settled when it would have come there
@@ -120,7 +120,7 @@ let raidRoamT=180,raidAmbT=240;
 function raidBorderTick(){for(const f of foes)if((f.ref||f.roam)&&!f.dead&&(Math.hypot(f.x-PL.x,f.z-PL.z)>110||!(f.way&&f.way.length)&&f.st==='idle'&&Math.hypot(f.x-PL.x,f.z-PL.z)>40))removeFoe(f);
   const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),pv=realmOfColumn(X,Z);if(!pv)return;let w=null,B=null;
   for(const v of WARS.values()){const b=RAID_B.get(v.id);if(b&&b.done&&b.keys.has(pv.key)){w=v;B=b;break;}}if(!w)return;
-  raidRoamT-=1;raidAmbT-=1;const C=pv.cult,fp=C.fp;
+  if(warAuto('r')){raidRoamT-=1;raidAmbT-=1;}const C=pv.cult,fp=C.fp; // (stopped from the war console, they come only when called: D-077)
   if(raidRoamT<=0){raidRoamT=240+Math.random()*150;const dx=B.cx-X,dz=B.cz-Z,dl=Math.hypot(dx,dz)||1,ux=dx/dl,uz=dz/dl,sd=Math.random()<0.5?1:-1;
     const a=[X+ux*90-uz*sd*60,Z+uz*90+ux*sd*60],b=[X-ux*40+uz*sd*120,Z-uz*40-ux*sd*120],g=warParty({id:w.id},'owolf',Math.round(3+2*Math.random()),raidRoute(a,b));
     if(g){for(const f of g){f.roam=1;f.war=null;}toast('Wolf riders of the wastes roam the borderlands');foeCall(g[0],'alert');}}

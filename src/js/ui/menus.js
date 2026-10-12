@@ -61,6 +61,8 @@ $('gobtn').addEventListener('click',()=>{if(creativeOnly())return;if(goTo($('gox
   $('animbtn').addEventListener('click',()=>{if(bringAnimal(sel.value))lockOrPlay();});}
 {const sel=$('foesel');for(const k in FOES){const o=document.createElement('option');o.value=k;o.textContent=FOES[k].n;sel.appendChild(o);}
   $('foebtn').addEventListener('click',()=>{if(bringFoe(sel.value))lockOrPlay();});}
+$('warconbtn').addEventListener('click',()=>{if(ready)openWarConsole();}); // the war console (D-077)
+for(const b of $('hostbar').querySelectorAll('button'))b.addEventListener('click',()=>runAction(b.dataset.a)); // orders to a summoned host, by touch or the mouse
 {const sel=$('stampsel');for(const k in STAMPS){const o=document.createElement('option');o.value=k;o.textContent=STAMPS[k];sel.appendChild(o);}
   $('stampbtn').addEventListener('click',()=>{if(stampHere(sel.value))lockOrPlay();});}
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];
