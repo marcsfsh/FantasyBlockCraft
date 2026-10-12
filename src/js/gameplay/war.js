@@ -19,9 +19,11 @@ const WAR_PEOPLE={r:'the men of the white realm',h:'the riders',e:'the high elve
 // is the player near a gate's works (within 160)? (the foes' caps are higher there)
 const warNear=()=>!!wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),160);
 // the spots of the gates near (X,Z): the folk's within 46 blocks, the orcs' within 64
-function warPlaces(X,Z,out){for(const t of wgTile(Math.floor(X),Math.floor(Z))){const P=t.P,s=wgSite(P);
-  s.lay.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v),folk=p.kind[1]==='_';if(Math.hypot(x-X,z-Z)>(folk?46:64))return;
-    out.push({id:P.id+':'+i,x:x+0.5,y:p.y+1,z:z+0.5,R:p.R,kind:p.kind,folk:folk?1:0,s:s});});}}
+function warPlaces(X,Z,out){for(const t of wgTile(Math.floor(X),Math.floor(Z))){const P=t.P,s=wgSite(P),w=WARS.get(P.id),won=w&&w.s>=2;
+  s.lay.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);let kind=p.kind;if(won&&kind[1]!=='_')kind=WAR_HELD[kind]||'r_lines'; // the yard and the walk held by the hosts (W2)
+    const folk=kind[1]==='_';if(Math.hypot(x-X,z-Z)>(folk?46:64))return;
+    out.push({id:P.id+':'+i+(won?'w':''),x:x+0.5,y:p.y+1,z:z+0.5,R:p.R,kind:kind,folk:folk?1:0,s:s});});}}
+const WAR_HELD={owall:'e_lines',ogate:'r_lines',ocamp:'r_lines',oforge:'d_post',opit:'e_lines'};
 // the way between the camp and the orcs' camp (wgWay), in world coordinates, inward from the camp or the other way
 function warRoute(P,inward){const s=wgSite(P),R=wgWay(P);return (inward?R:R.slice().reverse()).map(([u,v])=>siteXZ(s,u,v));}
 // down the long road from its head (for the allies' scouts)
@@ -36,10 +38,10 @@ function warParty(P,table,n,route,o){
   for(const f of grp){f.war=P.id;f.way=route.slice(k+1).map(w=>[w[0],w[1]]);if(o&&o.back)f.back=route.slice(k,-1).reverse().map(w=>[w[0],w[1]]);const w=f.way.shift();f.hx=w[0]-OX;f.hz=w[1]-OZ;f.st='return';f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/FOES[f.kind].walk-20);}
   return grp;}
 const warFolk=(P,fp,back)=>({prov:'wg:'+P.id,site:wgSite(P),lead:FOLK_LEAD[fp+'host']||null,back:back});
-function warRaid(P){
-  if(Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),warRoute(P,true),warFolk(P,fp,1));
-    if(g){toast('A raiding party of '+WAR_PEOPLE[fp[0]]+' makes for the gate');foeCall(g[0],'alert');}}
-  else{const g=warParty(P,'band',5+Math.floor(Math.random()*3),warRoute(P,false),{lead:Math.random()<0.3?'ochief':null,back:1});if(g){toast('Orcs sally from the gate against the siege lines');foeCall(g[0],'alert');}}}
+function warRaid(P){const w=WARS.get(P.id),won=w&&w.s>=2; // (after the fall the hosts' parties go on down the road, the orcs' come up it)
+  if(Math.random()<0.55){const fp=['r_','h_','e_','w_','d_'][Math.floor(Math.random()*5)],g=warParty(P,fp+'host',4+Math.floor(Math.random()*3),won?warRoute(P,true).concat(warRoadDown(P)):warRoute(P,true),warFolk(P,fp,1));
+    if(g){toast('A raiding party of '+WAR_PEOPLE[fp[0]]+(won?' marches down into the wastes':' makes for the gate'));foeCall(g[0],'alert');}}
+  else{const g=warParty(P,'band',5+Math.floor(Math.random()*3),won?warRoadDown(P).reverse():warRoute(P,false),{lead:Math.random()<0.3?'ochief':null,back:1});if(g){toast(won?'Orcs come up the Long Descent against the yard':'Orcs sally from the gate against the siege lines');foeCall(g[0],'alert');}}}
 function warScout(P){
   if(Math.random()<0.5){const fp=Math.random()<0.5?'e_':'w_',g=warParty(P,fp+'scout',2+Math.floor(Math.random()*2),warRoute(P,true).concat(warRoadDown(P)),warFolk(P,fp));if(g)toast('Scouts of '+WAR_PEOPLE[fp[0]]+' slip through the gate');}
   else{const s=wgSite(P),r=warRoute(P,false);r.push(siteXZ(s,P.uC0+40,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)),siteXZ(s,P.uC0+160,(Math.random()<0.5?-1:1)*(WG_CAMP[1]+16)));
@@ -112,7 +114,7 @@ function warArmy(P,al){
     const near=pu<0&&Math.abs(pv)<90||wgRoadNear(P,P.ramp.all,X,Z)[0]<40;
     if(near&&warUp(P)>=0){A.rk0=warRanks(s,-12,P.side*37,1,N,14,g,0);A.ri0=0;const [ax,az]=siteXZ(s,-11,0),[bx,bz]=siteXZ(s,0,0);A.face=Math.atan2(bx-ax,bz-az);A.mus={yard:1,pre:[[-18,P.side*22],[-18,-P.cs*2]],home:warW(s,[[-14,-P.cs*2],[-20,-P.cs*3],[-26,-P.cs*3],[-26,P.yc.vm],[P.yc.ub-10,P.yc.vm]])};}
     toast(A.mus?'Drums on '+P.road.replace(/^The /,'the ')+': a warhost of the wastes comes up to the gate':'A warhost pours out of '+P.name.replace(/^The /,'the ')+', '+N+' strong');}
-  warArmies.push(A);warHorn(A,'muster');warDefend(P,!al);return A;}
+  const w=WARS.get(P.id);warArmies.push(A);warHorn(A,'muster');if(!(al&&w&&w.s>=2))warDefend(P,!al);return A;} // (once the gate has fallen the yard is the hosts' and no orcs defend it, W2)
 // sends the army's next company: out of its quarters (a muster in the camp), up the road (a muster in the yard), or in along its
 // way; null if it found no place to come from
 function warCompany(A){
@@ -231,7 +233,9 @@ function warTick(){
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)
-  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=Math.random()<(st.al?0.3:0.7);warArmy(P,st.al);}
+  const w=WARS.get(P.id),last=w&&w.s!==2&&warAll(w);if(last&&!busy&&st.army>45)st.army=45; // the last assault on the gate (W2)
+  if(st.army<=0&&!busy){st.army=300+Math.random()*120;st.raid=Math.max(st.raid,40);st.scout=Math.max(st.scout,30);st.al=last||Math.random()<(st.al?0.3:0.7);const A=warArmy(P,st.al);
+    if(last){A.last=1;toast('The last assault: the hosts come against '+P.name.replace(/^The /,'the ')+' with all their strength');}}
   else if(st.raid<=0){st.raid=50+Math.random()*60;warRaid(P);}
   else if(st.scout<=0){st.scout=70+Math.random()*80;warScout(P);}}
 // ---- The engines (D-067; since W1, Q156, they strike): now and then the dwarves' trebuchets loft a stone over the wall into the
@@ -242,7 +246,8 @@ const warStones=entityKind({name:'warStones',list:[],update:dt=>updWarStones(dt)
 function warVolley(P){
   const s=wgSite(P),orc=Math.random()<0.45,eng=s.lay.parts.filter(p=>p.k===(orc?'ocata':'dtreb')&&p.u0<P.uC0);if(!eng.length)return;const e=eng[Math.floor(Math.random()*eng.length)];
   const [ox,oz]=siteXZ(s,(e.u0+e.u1)/2,(e.v0+e.v1)/2),tg=foes.filter(g=>!g.dead&&!FOES[g.kind].civ&&!!FOES[g.kind].folk===orc&&Math.hypot(g.x+OX-ox,g.z+OZ-oz)<150&&wgUV(P,g.x+OX,g.z+OZ)[0]<(orc?P.uC0:P.uL));
-  let tx,tz;if(tg.length){const g=tg[Math.floor(Math.random()*tg.length)];tx=g.x+OX+(Math.random()-0.5)*5;tz=g.z+OZ+(Math.random()-0.5)*5;}else{const tu=orc?P.uL-12+Math.random()*44:-60+Math.random()*40;[tx,tz]=siteXZ(s,tu,(Math.random()-0.5)*80);}
+  const w=WARS.get(P.id);let tx,tz;if(orc&&w&&w.s!==2&&Math.random()<0.3)[tx,tz]=siteXZ(s,14+Math.random()*12,P.cs*(10+(Math.random()-0.5)*8)); // at the ram's shed, to burn it (W2)
+  else if(tg.length){const g=tg[Math.floor(Math.random()*tg.length)];tx=g.x+OX+(Math.random()-0.5)*5;tz=g.z+OZ+(Math.random()-0.5)*5;}else{const tu=orc?P.uL-12+Math.random()*44:-60+Math.random()*40;[tx,tz]=siteXZ(s,tu,(Math.random()-0.5)*80);}
   const x=ox-OX+0.5,z=oz-OZ+0.5,y=P.hG+(orc?8:12),T=3.2+Math.random()*0.8,g=16,ty=P.hG+1;if(Math.hypot(x-PL.x,z-PL.z)>110)return;
   const mat=new THREE.MeshBasicMaterial({color:orc?new THREE.Color(1,0.5,0.12):new THREE.Color(0.32,0.31,0.3),transparent:orc,opacity:orc?0.92:1}),m=new THREE.Mesh(shotGeo,mat);m.scale.set(0.8,0.8,0.8);m.frustumCulled=false;scene.add(m);
   warStones.push({x:x,y:y,z:z,vx:(tx-ox)/T,vz:(tz-oz)/T,vy:(ty-y)/T+0.5*g*T,fire:orc,life:T+1,m:m});burst(0.3,'lowpass',160,1,0.3,0,[x,y,z]);}
@@ -251,12 +256,13 @@ function updWarStones(dt){
     if(s.fire&&Math.random()<0.7)spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.4,0.2,(Math.random()-.5)*0.4,[1,0.5,0.1],0.4,-0.3);
     const bx=Math.floor(s.x),bz=Math.floor(s.z),hit=s.life<=0||bx<0||bz<0||bx>=W||bz>=D||SOLID[get(bx,Math.floor(s.y),bz)];
     if(hit){for(let k=0;k<(s.fire?16:10);k++)spawnP(s.x,s.y+0.5,s.z,(Math.random()-.5)*4,Math.random()*3.5,(Math.random()-.5)*4,s.fire?[1,0.5,0.1]:[0.32,0.3,0.28],0.6,s.fire?3:14);
-      burst(s.fire?0.6:0.5,'lowpass',s.fire?380:140,1.1,0.45,0,[s.x,s.y,s.z]);scene.remove(s.m);s.m.material.dispose();warStones.splice(i,1);warSplash(s.x,s.y,s.z,s.fire);}}}
+      burst(s.fire?0.6:0.5,'lowpass',s.fire?380:140,1.1,0.45,0,[s.x,s.y,s.z]);scene.remove(s.m);s.m.material.dispose();warStones.splice(i,1);if(s.hit)s.hit(s);else warSplash(s.x,s.y,s.z,s.fire);}}}
 // where an engine's shot lands: the other side's soldiers within 3 are hurt (most at its heart) and thrown back; a burning pot burns a
 // player in survival standing by it
 function warSplash(x,y,z,orc){
   for(const g of foes){if(g.dead||!!FOES[g.kind].folk!==orc||FOES[g.kind].civ)continue;const dx=g.x-x,dz=g.z-z,d=Math.hypot(dx,dz);if(d>3||Math.abs(g.y-y)>4)continue;
     const n=Math.round((orc?9:14)*(1-d/4)),G=FOES[g.kind];g.hp-=n;g.hurt=1;g.kvx+=dx/(d||1)*6*G.mass;g.kvz+=dz/(d||1)*6*G.mass;g.vy=Math.max(g.vy,3);if(g.st==='sleep')g.st='idle';
     if(g.hp<=0){g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;}}
-  if(orc&&foeTarget()&&Math.hypot(PL.x-x,PL.z-z)<2.6&&Math.abs(PL.y-y)<3)foeHurtPlayer(6,'pot',(PL.x-x)||0.1,(PL.z-z)||0.1,4);}
+  if(orc&&foeTarget()&&Math.hypot(PL.x-x,PL.z-z)<2.6&&Math.abs(PL.y-y)<3)foeHurtPlayer(6,'pot',(PL.x-x)||0.1,(PL.z-z)||0.1,4);
+  if(orc)warIgnite(warAtGate(x,z),x,y,z,1.8,8);} // a pot sets the works where it lands alight (W2)
 DEATH.pot='A burning pot from the orcs\' throwers fell on you';

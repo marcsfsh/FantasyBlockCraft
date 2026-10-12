@@ -308,7 +308,7 @@ The war between the alliance (men, riders, high elves, wood elves, dwarves) and 
   - The engines strike: trebuchet stones and the orcs' throwers hit soldiers and works where they land (Q156).
   - Sound designed by hand: each people's horn signals (muster, advance, volley, retreat), war cries on the charge, a massed din that grows with the fight, and battle music (drums and horns rising with a battle and fading after, synthesized like the rest; this changes Q57, no music, and is logged) (Q160).
   - The war panel near a gate (its stage, the gate's damage, how many stand on each side), the gates' wars and their fronts on the world map, and each gate's chronicle in the journal (Q158).
-- **W2 The war at the gate: the siege works and the gate's fall.**
+- **W2 The war at the gate: the siege works and the gate's fall (done in 0.39.0, D-069).**
   - The ram rolled up under its shed in assaults and swung by its crew: each blow booms, shakes the ground and throws dust, and the barred leaf cracks a step at a time; the orcs try to burn it and kill its crew (Q155).
   - Siege towers wheeled to the gate's wall, ladders thrown up, soldiers onto the walk; orcs pouring burning pitch and dropping stones (Q156).
   - Mines and countermines: dwarven sappers dig from behind the lines under the ring toward a tower, goblins dig to meet them, fights in the tunnels; the mine fired brings the tower down (Q149).

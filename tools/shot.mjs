@@ -11,6 +11,8 @@
 //   node tools/shot.mjs --tiles=258-269,254      atlas tiles enlarged side by side, to tiles.png (no views unless --view is given)
 //   node tools/shot.mjs --view=... --army=al:70   an army at the gate of the wastes about the camera (D-067), the hosts' (al), the wastes' (orc) or both (W1),
 //        marched on that many seconds before the shot
+//   node tools/shot.mjs --view=... --siege=0.55,0.6,0.55   the works of the war at the gate about the camera (W2): the ram's, the mine's and the
+//        walls' efforts (0 to 1), or --siege=fall for the gate fallen
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
 //                                         still; after a dot: y young, s stag, d hind, a coat number, w walking, r running, g grazing, z asleep
 //
@@ -58,6 +60,12 @@ const HOOK=`window.__fbc={
   // an army at the gate of the wastes about the camera (D-067): the hosts' (al) or the wastes', marched on for sec seconds
   army(al,sec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;for(const f of [...foes])removeFoe(f);foeSpots.clear();warArmies.length=0;warClk=1e9;if(al==='both'){warArmy(P,true);warArmy(P,false);}else warArmy(P,al);
     const real=performance.now;performance.now=()=>0;try{for(let i=0;i<Math.round(sec/0.05);i++){foeT-=0.05;updFoes(0.05);}}finally{performance.now=real;}return warLive();},
+  // the works of the war at the gate about the camera (W2): its efforts set (the ram, the mine, the walls, each 0 to 1) or its fall,
+  // and the works made at once, the siege tower in place
+  siege(spec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;const w=warFound(P);
+    if(spec==='fall'){w.b={ram:1,mine:1,walls:1,sally:1};w.f=warPlay;warFall(w,false,P);}else{const [r,m,l]=spec.split(',').map(Number);w.b={ram:r||0,mine:m||0,walls:l||0,sally:0};w.f=warPlay;}
+    for(let i=0;i<24;i++){warWorksTick(P,w);let k=0;while(WJ.length&&k++<5000)warJobsFrame();}for(const T of warTowers)T.k=1;updateEntities(0.01);
+    const real=performance.now;performance.now=()=>0;try{for(let k=0;k<6;k++)flush();}finally{performance.now=real;}return edits.size;},
   // animals in two rows ahead of the camera, side on or three-quarter, still; then a few frames of their update
   stage(kinds,sec){
     for(const a of [...animals])removeAnimal(a);const ks=kinds.length?kinds:Object.keys(ANIMALS),cols=Math.ceil(ks.length/2);
@@ -89,6 +97,7 @@ for(const [name,X,Y,Z,yaw,pitch,t] of views){
   await p.waitForTimeout(1500);
   if(args.bolt!==undefined)await p.evaluate(()=>window.__fbc.bolt());
   if(args.foes!==undefined)await p.evaluate(k=>window.__fbc.stageFoes(k?k.split(','):[],1),args.foes);
+  if(args.siege!==undefined){const n=await p.evaluate(k=>window.__fbc.siege(k),args.siege);console.log('siege '+args.siege+': '+n+' edits');await p.waitForTimeout(1500);}
   if(args.army!==undefined){const [k,sec]=args.army.split(':'),n=await p.evaluate(a=>window.__fbc.army(a[0]==='both'?'both':a[0]==='al',a[1]),[k,Number(sec||60)]);console.log('army '+k+': '+n+' marching');}
   const file=path.join(out,seed+'-'+name+'.png');await p.screenshot({path:file});
   console.log('shot '+path.relative(ROOT,file)+'  fog '+Math.round(r.fog)+(r.surf?' surface':' cave')+' mode');

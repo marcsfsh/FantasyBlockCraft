@@ -290,6 +290,10 @@
       "about": "The war at each gate (W1, D-068): kept for every gate found and saved (wr), its four efforts, how battles went, the war panel, the map's lines, the journal's chronicle"
     },
     {
+      "path": "gameplay/war-works.js",
+      "about": "The works of the war (W2, D-069): the leaf broken, the mine and countermine, ladders and breaches, graves, fires that burn and are rebuilt (all saved as block edits), the ram's crew, the siege tower, climbing, pitch from the walk, fights in the tunnels, the gate's fall, the fallen and the crows"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

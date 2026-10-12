@@ -167,8 +167,8 @@ function foeSpawnTick(){
   const X=PL.x+OX,Z=PL.z+OZ;
   // a place is peopled once while the player is near; it may be again after they have gone well away
   for(const [id,rec] of foeSpots)if(Math.hypot(rec.x-X,rec.z-Z)>(rec.folk?86:120))foeSpots.delete(id); // the folk's places refill sooner: they are many and close together
-  const wn=warNear(); // by a gate of the wastes there are more of both (D-067)
-  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&foes.length>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
+  const wn=warNear(),live=foes.filter(f=>!f.dead).length; // by a gate of the wastes there are more of both (D-067); (the war's fallen, lying, do not count, W2)
+  for(const s of foePlaces()){const folk=!!s.folk;if(foeSpots.has(s.id)||(!folk&&live>=(wn?42:28)&&s.kind!=='lord'))continue;const x=s.x-OX,z=s.z-OZ;if(x<2||z<2||x>=W-2||z>=D-2||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX])continue;
     if(folk&&folkCount()>=FOLK_CAP+(wn?14:0))continue;foeSpots.set(s.id,{x:s.x,z:s.z,folk:folk});const o={spot:s.id};
     if(s.kind==='lord'&&s.F.great){const f=addFoe('ember',x,s.y,z,{spot:s.id,lordOf:s.id,st:'idle',t:3,leash:fortSpots(s.F).reach});f.yaw=f.hd=Math.atan2(s.F.ox,s.F.oz);continue;}
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
@@ -186,7 +186,7 @@ function foeSpawnTick(){
     for(const f of grp){f.host=H;f.hx=hx+(Math.random()-0.5)*6;f.hz=hz+(Math.random()-0.5)*6;f.st='return';f.t=60;}
     if(grp.length){toast('A host of '+H.k.replace(/^The /,'the ')+' marches through the wastes');foeCall(grp[0],'alert');}}}}
   // the wastes: a warband (sometimes led by a warchief) or a troll, out of sight, on open ground of the volcanic land
-  const roam=foes.filter(f=>!f.spot&&!f.dead&&!FOES[f.kind].folk).length,cap=(ambNight()?14:10)-Math.max(0,foes.length-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
+  const roam=foes.filter(f=>!f.spot&&!f.dead&&!FOES[f.kind].folk).length,cap=(ambNight()?14:10)-Math.max(0,live-FOE_CAP);if(roam>=cap||Math.random()>0.35)return;
   const p=wasteGround(38,66);if(!p)return;
   if(Math.random()<0.2)spawnGroup('band',1,p.x,p.g,p.z,2,{lead:'troll'});
   else spawnGroup('band',2+Math.floor(Math.random()*3)+(Math.random()<0.12?1:0),p.x,p.g,p.z,5,{lead:Math.random()<0.12?'ochief':null});
@@ -329,6 +329,7 @@ function stepFoe(f,dt){
   f.hurt=Math.max(0,f.hurt-dt*3);f.atkT-=dt;f.shotT-=dt;f.whipT-=dt;f.detT-=dt;f.scanT-=dt;
   if(f.dead){f.dead+=dt;f.sp=0;return;}
   if(f.hold){f.sp=f.holdSp||0;f.hd=f.yaw;if(f.holdAtk!==undefined)f.atk=f.holdAtk;return;}
+  if(f.climb){warClimbStep(f,dt);return;} // up a ladder or the siege tower (W2)
   if(f.volT&&foeClock>=f.volT){f.volT=0;const G=f.volG;f.volG=null;if(G&&!G.dead&&!G.gone&&!f.atk){f.foe=G;f.eseen=0;f.yaw=f.hd=Math.atan2(G.x-f.x,G.z-f.z);f.atk=0.45;f.atkK='shot';f.volley=1;f.shotT=FOES[f.kind].shot.cd;}} // a volley at the captain's horn (W1)
   f.t-=dt;
   // sight: noticed when near and in view (sleepers only close by); lost when long unseen or far
@@ -357,7 +358,7 @@ function stepFoe(f,dt){
       if(f.war&&f.stuck>15&&pdp>24){const ty=foeStand(f.hx,f.y+3,f.hz,F.tall||2);if(ty>0&&Math.abs(ty-f.y)<6){f.x=f.hx;f.z=f.hz;f.y=f.gy=ty;f.stuck=0;}else{removeFoe(f);return;}} // a straggler stuck out of sight finds its way (D-067)
       if(f.t<-30&&d>=2.5&&f.wp&&(f.retry||0)<2){f.retry=(f.retry||0)+1;f.hx=f.wp[0]-OX;f.hz=f.wp[1]-OZ;f.t=Math.min(20,d/F.walk);} // a leg overrun: once more straight at the waypoint itself
       else if(d<(f.hex?1.1:2.5)||f.t<-30){if(f.waitA&&!warGo(f)){f.st='idle';f.t=1;}
-        else if(f.way&&f.way.length){const w=f.way.shift();if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{f.waitA=null;warAim(f,w);f.wp=w;f.retry=0;f.rdS=0;f.rdN=0;f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/(f.pace||F.walk)-20);}} // a leg's time: some 30 s over its walk
+        else if(f.way&&f.way.length){const w=f.way.shift();if(w.climb){f.climb=w.climb;f.waitA=null;}else if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{f.waitA=null;warAim(f,w);f.wp=w;f.retry=0;f.rdS=0;f.rdN=0;f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/(f.pace||F.walk)-20);}} // a leg's time: some 30 s over its walk
         else{f.waitA=null;f.hex=false;f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+(f.holdT||20)+Math.random()*25;}}else{f.hdW=Math.atan2(tdx,tdz);f.hd=f.hdW;if(f.rdT>0){f.rdT-=dt;f.hd+=f.rdA;}want=f.pace||F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
     case 'chase':{
@@ -476,12 +477,15 @@ function placeFoe(f,dt){
   if(P.tail)P.tail.rotation.y=Math.sin(foeClock*1.3+f.id)*0.3;
   if(P.flag)P.flag.rotation.y=Math.sin(foeClock*2.1+f.id)*0.25;
   if(P.sling&&f.atkK==='shot'&&f.atk>0)P.sling.rotation.y=foeClock*20;
-  if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-1.6)*0.6;}
+  if(f.dead){const q=Math.min(1,f.dead/0.4);root.rotation.x=-q*1.5708;root.position.y=q*0.25-Math.max(0,f.dead-(f.war?WAR_LIE-1:1.6))*0.6;}
+  else if(f.atkK==='heave'&&f.atk>0&&P.armL){const k=Math.min(1,prog*1.6);P.armL.rotation.x=P.armR.rotation.x=-1.5+0.5*k;} // the ram's crew heave (W2)
+  else if(f.climb&&!f.climb.ph&&P.armL){const k=Math.sin(foeClock*8+f.id);P.armL.rotation.x=-2.6+k*0.4;P.armR.rotation.x=-2.6-k*0.4;if(P.legL){P.legL.rotation.x=-0.4+k*0.5;P.legR.rotation.x=-0.4-k*0.5;}}
+  else if(f.cheer>foeClock&&!f.atk&&!f.foe&&P.armL){const k=Math.abs(Math.sin(foeClock*3+f.id));P.armL.rotation.x=-2.7-0.3*k;P.armR.rotation.x=-2.5-0.4*k;root.position.y=Math.max(0,Math.sin(foeClock*5+f.id))*0.15;}
   if(f.kind==='ember'&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   if(F.mount&&!f.dead)riderPose(f,P,amp);
   if(F.mount&&!f.dead&&Math.floor(f.ph/Math.PI)!==Math.floor(ph0/Math.PI)&&sp>0.5){const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<40&&AX&&settings.sound&&foeHear([f.x,f.y,f.z]))burst(0.06,'bandpass',sp>3?520:760,3,0.22*(1-d/40),0,[f.x,f.y,f.z]);} // hoofbeats
   M.grp.position.set(f.x,f.y,f.z);M.grp.rotation.y=f.yaw;
-  const lod=f.kind!=='ember'&&Math.hypot(f.x-PL.x,f.z-PL.z)>(f.far?30:34);if(lod!==!!f.far)foeLod(f,lod);
+  const lod=f.kind!=='ember'&&(Math.hypot(f.x-PL.x,f.z-PL.z)>(f.far?30:34)||f.dead>1&&f.war);if(lod!==!!f.far)foeLod(f,lod); // (the war's fallen, lying, as one mesh)
   if(f.far){const fm=M.fm;M.fg.position.set(f.x,f.y,f.z);M.fg.rotation.y=f.yaw;fm.position.copy(root.position);fm.position.y+=Math.abs(Math.sin(f.ph))*0.08*f.amp;fm.rotation.copy(root.rotation);fm.scale.copy(root.scale);}
   // light where it stands (eased), the struck flash; the shadow
   f.lt-=dt;if(f.lt<=0){f.lt=0.25;const lx=Math.floor(f.x),ly=Math.floor(f.y+Math.max(0.5,M.box[4]*0.5)),lz=Math.floor(f.z);f.eLT=sky(lx,ly,lz);f.eBT=bl(lx,ly,lz);if(!dt){f.eL=f.eLT;f.eB=f.eBT;}}
@@ -538,11 +542,12 @@ function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
   for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
-  warSoundTick(dt); // the din of the fighting and the battle music (W1)
+  warSoundTick(dt);warWorksFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2)
   foeGrid.clear();for(const g of foes){if(g.dead)continue;const k=(Math.floor(g.x/4)+8)*256+Math.floor(g.z/4)+8;let c=foeGrid.get(k);if(!c)foeGrid.set(k,c=[]);c.push(g);}
   foeDin=Math.min(18,foeDin+dt*12);
   for(let i=foes.length-1;i>=0;i--){const f=foes[i];
-    if(f.dead>2.6){removeFoe(f);continue;}
+    if(f.dead&&f.war&&!f.cntW){f.cntW=1;warFallen(f);} // the war's fallen lie a while (W2)
+    if(f.dead>(f.war?WAR_LIE:2.6)){removeFoe(f);continue;}
     if(f.x<0||f.z<0||f.x>=W||f.z>=D||Math.hypot(f.x-PL.x,f.z-PL.z)>(FOES[f.kind].folk?(f.spot?72:96):f.spot?130:96)){removeFoe(f);continue;}
     stepFoe(f,dt);if(!f.gone)placeFoe(f,dt);}
 }

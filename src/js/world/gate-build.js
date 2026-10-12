@@ -77,7 +77,7 @@ const wgArch=(g,w)=>g+30+Math.round(9*(1-Math.min(1,w/20.5)));
 RB.gwall=(s,p,u,v,X,Z)=>{const P=s.P,g=s.T,cs=P.cs,av=Math.abs(v),au=Math.abs(u),sv=v*cs,q=(y)=>hsh(X*7+y,9721,Z);
   const stone=y=>y<=g+3?OBSBRICK:(y-g)%9===0?BASCARVE:q(y)<0.14?BASCRACK:BASBRICK;
   // the towers
-  if(av>=20&&av<=36&&au<=10){const core=av>=21&&av<=35&&au<=9;
+  if(av>=20&&av<=36&&au<=10&&!(au<=3&&(av===20||av===36))){const core=av>=21&&av<=35&&au<=9; // (the wall runs on into the towers' sides: no gap between the walk and their doors, W2)
     if(!core){for(let y=g-4;y<=g+6;y++)RBP(X,y,Z,y===g+6?BASCARVE:OBSBRICK); // the battered foot
       if(u===10&&(av===25||av===31))RBS(X,Z,g+30,g+46,BANNER);if(u===-10&&av===28)RBS(X,Z,g+20,g+30,BANNER);return;}
     const top=g+64,inner=av>=24&&av<=32&&au<=6,lad=av===24&&u===-6;

@@ -5,6 +5,23 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.39.0 (2026-10-12): W2, the siege works and the gate's fall
+
+Saves from 0.38.0 do not carry over (save key v29): the gates' walls are mended and the war's works are saved.
+
+### Game
+- **The war changes the gate, and it stays changed.** As each gate's war goes on, the dwarves' ram beats a hole through the barred leaf, wider at each stage. The dwarves dig a mine from a shaft behind the siege lines, under the pass, toward the tower on the barred side; the goblins dig a countermine from the yard to meet it. Ladders go up against the towers, and breaches are beaten through their walls at the height of the walk. Graves and cairns fill the field behind the lines, one for every two of the hosts who fall. All of it is saved.
+- **The ram swings:** its dwarven crew heave together and the beam booms on the leaf, shaking the ground and throwing dust and splinters.
+- **Assaults on the walls:** a siege tower is wheeled up to the gate with its drawbridge down on the walk, and soldiers of the hosts climb the ladders and the tower. Early in the siege the defenders throw them down; later they get in through the breaches and win the walk. The orcs pour burning pitch and drop stones on those at the gate's foot (both can hurt you in survival).
+- **Fire:** the orcs' burning pots set the siege works alight where they land (and they aim at the ram's shed); what burns flames and smokes, is left charred, and is rebuilt a quarter of an hour of play later.
+- **In the tunnels** dwarven sappers and goblins dig at the faces (you hear the picks) and fight where the tunnels meet.
+- **The gate falls:** when the four efforts are done the hosts make their last assault, and when they reach the leaf the gate falls. The leaf is shattered, the mine is fired with a great blast and the tower above it breaks and comes down in a heap of rubble, the orcs' camp burns, the horns of all the peoples sound and the soldiers cheer. The banners of the realm, the dwarves and the elves hang on the tower left standing, and victory fires burn in the Leaguer. From then the hosts hold the yard and the walk, their raiding parties march down the Long Descent and the orcs come up it. A war you are not watching falls on its own.
+- **The fallen** of the war lie where they fell for a few minutes, and **crows** circle over them, drop down among them and caw.
+- **The gate's walk** now runs into its towers' doors (there was a one-block gap at each tower).
+
+### Tooling
+- New test case `61-siege`. `tools/shot.mjs --siege=0.55,0.6,0.55` (the ram's, the mine's and the walls' efforts) or `--siege=fall` stages the war's works at the gate about the camera.
+
 ## 0.38.0 (2026-10-12): W1, the war at the gate
 
 Saves from 0.37.0 do not carry over (save key v28): the wars at the gates are saved.

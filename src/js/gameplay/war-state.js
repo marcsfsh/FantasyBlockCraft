@@ -17,7 +17,7 @@ const warSave=()=>({wr:[...WARS.values()],wpc:Math.round(warPlay)});
 // how far an effort has come (0 to 1): its pace at this gate since the war was found, and what the battles have added or taken
 function warEff(w,k){const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));return Math.max(0,Math.min(1,(w.b[k]||0)+(warPlay-w.f)/pace));}
 const warAll=w=>WAR_EFF.every(e=>warEff(w,e[0])>=1);
-function warStage(w){return warAll(w)?'The gate stands ready to fall':'The siege';}
+function warStage(w){return w.s>=2?'The gate has fallen':warAll(w)?'The gate stands ready to fall':'The siege';}
 function warLog(w,s){w.log.push([Math.round(warPlay),s]);if(w.log.length>80)w.log.splice(1,1);saveDirty=true;}
 // the player comes within 200 of a gate's works: its war is found, and from then on it is kept
 function warFound(P){let w=WARS.get(P.id);if(w)return w;
@@ -28,15 +28,21 @@ function warFound(P){let w=WARS.get(P.id);if(w)return w;
 function warStateTick(){
   warPlay+=1;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),200),near=P?warFound(P):null;
   for(const w of WARS.values())for(const [k] of WAR_EFF){const q=Math.floor(warEff(w,k)*4);while(q>(w.m[k]||0)){const m=w.m[k]=(w.m[k]||0)+1,s=WAR_MARK[k][m-1];warLog(w,s+'.');if(w===near)toast(s);
-      if(m===4&&warAll(w)){warLog(w,'All four are done. The hosts make ready for the last assault on the gate.');if(w===near)toast('The hosts make ready for the last assault on the gate');}}}
-  warPanel(near);}
+      if(m===4&&warAll(w)&&w.s!==2){warLog(w,'All four are done. The hosts make ready for the last assault on the gate.');if(w===near)toast('The hosts make ready for the last assault on the gate');}}}
+  // the fall (W2): the last assault's hosts at the leaf; or, the player away, ten minutes after all four were done (half an hour
+  // near, should no assault come)
+  for(const w of WARS.values()){if(w.s>=2||!warAll(w))continue;if(!w.allT)w.allT=Math.round(warPlay);
+    const last=w===near&&warArmies.some(A=>A.last&&A.P===P&&A.m.some(f=>!f.dead&&!f.gone&&wgUV(P,f.x+OX,f.z+OZ)[0]<4));
+    if(last||w!==near&&warPlay-w.allT>600||w===near&&warPlay-w.allT>1800)warFall(w,w===near,w===near?P:null);}
+  if(near)warWorksTick(P,near);warPanel(near);}
 // how a battle went (an army done: every soldier fallen or gone): its mark on the war, in the chronicle and on screen
 function warOutcome(A){
   const w=WARS.get(A.P.id),N=A.m.length;if(!w||A.def||N<10)return;const fell=A.fell||0,reach=A.reach?A.reach.size:0;if(fell+reach<N*0.35)return; // fought out of sight
   const P=A.P,nm=P.name.replace(/^The /,'the ');let s=null;
   if(A.al){if(reach>=N*0.2){w.b.walls=(w.b.walls||0)+0.05;w.b.ram=(w.b.ram||0)+0.03;w.w[0]++;s='The hosts stormed '+P.yard.replace(/^The /,'the ')+': '+reach+' went in through the gap, '+fell+' fell.';}
     else if(fell>=N*0.5){w.w[1]++;s='The hosts were thrown back at the gap of '+nm+'; '+fell+' fell.';}}
-  else{if(reach>=N*0.25){w.b.ram=(w.b.ram||0)-0.02;w.b.sally=(w.b.sally||0)-0.02;w.w[1]++;s='A warhost of '+N+' broke through to the siege lines and set fire to the ram\'s shed before it was driven back; '+fell+' of them fell.';}
+  else{if(reach>=N*0.25){w.b.ram=(w.b.ram||0)-0.02;w.b.sally=(w.b.sally||0)-0.02;w.w[1]++;s='A warhost of '+N+' broke through to the siege lines and set fire to the ram\'s shed before it was driven back; '+fell+' of them fell.';
+      const [rx,rz]=wgXZ(P,18,P.cs*10);warIgnite(w,rx-OX,P.hG+4,rz-OZ,6,40);}
     else if(fell>=N*0.55){w.b.sally=(w.b.sally||0)+0.08;w.w[0]++;s='A warhost of '+N+' was broken before the siege lines; '+fell+' of them fell.';}}
   if(s){warLog(w,s);if(Math.hypot(w.X-(PL.x+OX),w.Z-(PL.z+OZ))<400)toast(s);}}
 // ---- The war panel (Q158): near a found gate, its stage, the four efforts and how many stand on each side about the player
