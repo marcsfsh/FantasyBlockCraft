@@ -10,7 +10,7 @@ function update(dt){
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
-  const speed=PL.fly?(flyFast?20:11):inLiq?2.4:PL.ride?(sprint?11:8):sprint?5.7:4.3; // on horseback faster (E1)
+  const speed=(PL.fly?(flyFast?20:11):inLiq?2.4:PL.ride?(sprint?11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
   const sy=Math.sin(PL.yaw),cy=Math.cos(PL.yaw);
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;
@@ -42,6 +42,7 @@ function update(dt){
   wasWall=wallHit;
   if(TOUCH&&look.id!==null&&!look.moved&&!look.breaking&&performance.now()-look.t0>380){look.breaking=true;act(0);hold=0;holdT=0.25;}
   if(SURV()&&hold===0)mineTick(dt);else if(mineI>=0){mineI=-1;mineP=0;crack.visible=false;}
+  armsTick(dt); // the guard, the draw, the crossbow, the trampling horse (W8a)
   if(hold>=0&&!(hold===2&&oneShot(curId()))&&!(SURV()&&hold===0)){holdT-=dt;if(holdT<=0){act(hold);holdT=brushR?0.32:0.22;}}
   const mv=Math.hypot(PL.vx,PL.vz);if(PL.ground&&mv>0.5)bob+=mv*dt*1.9;
   if(PL.ground&&mv>1){stepD+=mv*dt;if(stepD>1.9){stepD=0;const under=get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z)),sd=SND[BL[under].snd]||SND.stone;burst(0.07,'bandpass',sd[0]*0.55*(0.9+Math.random()*0.2),sd[1],0.13);}}
@@ -79,7 +80,7 @@ function frame(now){
   camera.rotation.set(PL.pitch,PL.yaw,0);
   {let sy2=-1;const fx=Math.floor(PL.x),fz=Math.floor(PL.z);for(let y=Math.floor(PL.y+0.01);y>=Math.floor(PL.y)-24&&y>=0;y--){if(SOLID[get(fx,y,fz)]){sy2=y+1;break;}}
    if(sy2<0||photo||!ready){pShadow.visible=false;}else{const dd=PL.y-sy2;pShadow.visible=true;pShadow.position.set(PL.x,sy2+0.015,PL.z);pShadow.material.opacity=Math.max(0,0.5-dd*0.025);pShadow.scale.setScalar(1+dd*0.03);}}
-  const F0=settings.fov,tf=gliding?F0+13:PL.fly||(Math.hypot(PL.vx,PL.vz)>5)?F0+7:F0;
+  const F0=settings.fov,tf=(gliding?F0+13:PL.fly||(Math.hypot(PL.vx,PL.vz)>5)?F0+7:F0)+armsFov(); // (narrower while a bow is drawn, W8a)
   if(Math.abs(camera.fov-tf)>0.1){camera.fov+=(tf-camera.fov)*Math.min(1,dt*8);camera.updateProjectionMatrix();}
   // held block
   swing=Math.max(0,swing-dt*5);const sw=Math.sin(swing*Math.PI),mv=Math.min(1,Math.hypot(PL.vx,PL.vz)/4);
@@ -87,7 +88,7 @@ function frame(now){
   lagX=Math.max(-0.09,Math.min(0.09,lagX*Math.pow(0.0005,dt)+dyaw*0.5));lagY=Math.max(-0.07,Math.min(0.07,lagY*Math.pow(0.0005,dt)-(PL.pitch-lastPitch)*0.4));lastYaw=PL.yaw;lastPitch=PL.pitch;
   hand.position.set(HAND0.x+Math.cos(bob)*0.025*mv-sw*0.08+lagX,HAND0.y+Math.abs(Math.sin(bob))*0.035*mv-sw*0.14+lagY,HAND0.z+sw*0.1);
   hand.rotation.set(-sw*0.7,-0.62,0.06);hand.scale.setScalar(TOUCH?0.34:0.42);
-  handItem.position.set(hand.position.x+0.02,hand.position.y+0.08,hand.position.z);handItem.rotation.set(-sw*0.9-0.1,-0.35,0.25-sw*0.4);handItem.scale.setScalar(TOUCH?0.48:0.56);
+  handItem.position.set(hand.position.x+0.02,hand.position.y+0.08,hand.position.z);handItem.rotation.set(-sw*0.9-0.1,-0.35,0.25-sw*0.4);handItem.scale.setScalar(TOUCH?0.48:0.56);armsPose();
   const ex=Math.floor(PL.x),ey=Math.floor(PL.y+EYE),ez=Math.floor(PL.z);
   caveF+=((ready&&sky(ex,ey,ez)<0.3?1:0)-caveF)*Math.min(1,dt*1.5);
   matHand.uniforms.bright.value=Math.max(0.22,Math.min(1,Math.max(sky(ex,ey,ez)*U.skyMul.value,bl(ex,ey,ez))));handItem.material.color.setScalar(matHand.uniforms.bright.value);

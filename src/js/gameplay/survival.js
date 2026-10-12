@@ -262,6 +262,7 @@ function act(btn){
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
+  if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&held===326){launchFlare();return;}

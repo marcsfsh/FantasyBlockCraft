@@ -5,6 +5,21 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.48.0 (2026-10-12): the arts of war (W8)
+
+Saves from 0.47.0 do not carry over (save key v38).
+
+### Game
+- **Shields and the guard:** a round, kite, leaf or tower shield (or an orc's hide shield) worn on the new arm slot. With a weapon in hand, the place button raises it: it catches every arrow and most of each blow from the front, and raised just before a blow it parries and staggers the foe. A blow with the shield up is a bash.
+- **Bows and a crossbow:** the hunting bow, the longbow of the realm and the elven bow (hold to draw, let go to loose; the view narrows as you draw), and the dwarven crossbow (load, then loose; its bolt passes through one foe into the next). Arrows and bolts are made at the bench; half come back from the slain; spent ones stick in the ground a while. Bows hunt game too.
+- **Javelins and throwing axes**, thrown with the place button.
+- **From the saddle:** blows grow with your horse's speed, the Knight's Lance at a gallop strikes very hard, and a galloping horse tramples goblins and orcs in its way.
+- **Blows:** a running blow strikes harder; an axe cleaves into a second foe beside the first.
+- Arrows and bolts no longer pass through a creature unharmed when they fly fast.
+
+### Tooling
+- New test case `71-arms`.
+
 ## 0.47.0 (2026-10-12): the war at your command, and hosts of thousands
 
 Saves from 0.46.0 do not carry over (save key v37): the war console's settings are saved.

@@ -1,7 +1,7 @@
 // Equipment slots (belt, pack, bag, and body since D-052): equip and unequip, saved with the world, and dropped into the grave on death.
 setMode('survival');inv.fill(null);
 item(299,'Test Lantern','lump',[200,180,90],{equip:'belt'});item(298,'Test Lantern 2','lump',[200,180,90],{equip:'belt'});
-assert(Object.keys(EQUIP_SLOTS).join()==='belt,pack,bag,body'&&Object.values(equip).every(q=>q===null),'four empty equipment slots: belt, pack, bag and body (armour since D-052)');
+assert(Object.keys(EQUIP_SLOTS).join()==='belt,pack,bag,body,arm'&&Object.values(equip).every(q=>q===null),'five empty equipment slots: belt, pack, bag, body (armour since D-052) and arm (a shield since D-078)');
 {inv[2]={id:381,c:1};assert(equipFrom(2)&&equip.body.id===381&&inv[2]===null,'a coat of armour goes into the body slot');equip.body=null;}
 inv[3]={id:299,c:1};assert(equipFrom(3)&&equip.belt.id===299&&inv[3]===null,'an item goes into the slot it names');
 inv[4]={id:298,c:1};assert(equipFrom(4)&&equip.belt.id===298&&inv[4]&&inv[4].id===299,'equipping a second belt item swaps the first back into the inventory');

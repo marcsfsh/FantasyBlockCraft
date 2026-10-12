@@ -346,6 +346,10 @@
       "about": "The war at the player's command (D-077, creative): the war's clock stopped or hastened, the events that come by themselves stopped, and any event made to happen now (saved as wc)"
     },
     {
+      "path": "gameplay/war-arms.js",
+      "about": "The soldier's arms (W8a, D-078): the shield's guard and parry, bows and the crossbow, javelins and throwing axes, blows from the saddle and the lance, the bash, the running blow and the axe's cleave, spent arrows"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

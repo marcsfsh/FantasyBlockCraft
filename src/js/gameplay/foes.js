@@ -14,8 +14,8 @@ const FOES={
   gfire:{n:'Goblin Firecaller',m:'gfire',hp:9,dmg:1,reach:1.5,walk:1.3,run:4,sight:18,cd:1.2,wind:0.4,shot:{dmg:3,v:10,lo:4,hi:18,cd:3.2,k:'fire'},keep:9,flee:0.3,mass:0.8,drops:[[SULFUR,1,3,0.6],[338,1,2,0.4],[230,1,1,0.05]],cause:'fire'},
   gchief:{n:'Goblin Chieftain',m:'gchief',hp:34,dmg:5,reach:2,walk:1.3,run:4,sight:18,cd:1.2,wind:0.45,mass:0.5,boss:1,drops:[[224,2,5,1],[230,1,2,0.5],[372,1,1,0.35]],cause:'goblin'},
   raider:{n:'Orc Raider',m:'orc',hp:16,dmg:3,reach:2,walk:1.5,run:4.8,sight:22,cd:1.1,wind:0.4,mass:0.6,drops:[[213,1,2,0.5],[200,1,3,0.6],[352,1,1,0.3]],cause:'orc'},
-  bowman:{n:'Orc Bowman',m:'obow',hp:12,dmg:2,reach:2,walk:1.5,run:4.6,sight:26,cd:1.2,wind:0.4,shot:{dmg:3,v:26,lo:5,hi:26,cd:2.4,k:'arrow'},keep:12,mass:0.6,drops:[[201,2,4,0.6],[328,1,3,0.4],[200,1,2,0.4]],cause:'arrow'},
-  brute:{n:'Orc Brute',m:'obrute',hp:32,dmg:6,reach:2.3,walk:1.2,run:3.8,sight:20,cd:1.7,wind:0.6,block:0.6,mass:0.35,drops:[[213,2,4,0.7],[227,1,2,0.3],[362,1,2,0.4]],cause:'orc'},
+  bowman:{n:'Orc Bowman',m:'obow',hp:12,dmg:2,reach:2,walk:1.5,run:4.6,sight:26,cd:1.2,wind:0.4,shot:{dmg:3,v:26,lo:5,hi:26,cd:2.4,k:'arrow'},keep:12,mass:0.6,drops:[[409,2,5,0.6],[328,1,3,0.4],[200,1,2,0.4]],cause:'arrow'},
+  brute:{n:'Orc Brute',m:'obrute',hp:32,dmg:6,reach:2.3,walk:1.2,run:3.8,sight:20,cd:1.7,wind:0.6,block:0.6,mass:0.35,drops:[[404,1,1,0.15],[213,2,4,0.7],[227,1,2,0.3],[362,1,2,0.4]],cause:'orc'},
   ochief:{n:'Orc Warchief',m:'ochief',hp:48,dmg:7,reach:2.5,walk:1.4,run:4.4,sight:28,cd:1.4,wind:0.55,mass:0.3,boss:1,drops:[[227,2,4,1],[224,1,3,0.6],[374,1,1,0.25]],cause:'orc'},
   troll:{n:'Ash Troll',m:'troll',hp:70,dmg:8,reach:3.2,walk:1.1,run:3.6,sight:20,cd:2.2,wind:0.8,shot:{dmg:6,v:15,lo:8,hi:22,cd:7,k:'rock'},mass:0.15,tall:3,drops:[[386,1,2,1],[CINDER,2,5,0.6],[230,1,1,0.1]],cause:'troll'},
   // the Emberlord towers eleven blocks tall: a reach of eight, a whip of eighteen, fire thrown in threes from forty; it never
@@ -369,7 +369,7 @@ function stepFoe(f,dt){
         else if(f.way&&f.way.length){const w=f.way.shift();if(w.climb){f.climb=w.climb;f.waitA=null;}else if(w.A){f.waitA=w;f.st='idle';f.t=1;}else{f.waitA=null;warAim(f,w);f.wp=w;f.retry=0;f.rdS=0;f.rdN=0;f.t=Math.max(0,Math.hypot(f.hx-f.x,f.hz-f.z)/(f.pace||F.walk)-20);}} // a leg's time: some 30 s over its walk
         else{f.waitA=null;f.hex=false;f.st='idle';f.t=2;if(f.back&&!f.backT)f.backT=foeClock+(f.holdT||20)+Math.random()*25;}}else{f.hdW=Math.atan2(tdx,tdz);f.hd=f.hdW;if(f.rdT>0){f.rdT-=dt;f.hd+=f.rdA;}want=f.pace||F.walk*1.3;}break;}
     case 'flee':f.hd=Math.atan2(-dx,-dz)+Math.sin(foeClock*1.7+f.id)*0.4;want=F.run;break;
-    case 'chase':{
+    case 'chase':{if(f.stagger>foeClock){f.atk=0;face=true;break;} // staggered by a parry or a bash (W8a)
       // against a creature its girth counts: the blow lands on its near side
       const toward=Math.atan2(dx,dz),S=F.shot,de=dp-er;face=true;if(F.lord)emberChoose(f,dp,vis,E); // its wings and fire (W7a)
       // ranged: shoot when in range and in view, keeping a distance; otherwise close in
@@ -425,13 +425,13 @@ function foeStrike(f,F){if(F.lord&&emberStrike(f,F))return; // an Emberlord's bl
     else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,f.volley?2.2+k:k);f.volley=0;}
     return;}
   const dx=PL.x-f.x,dz=PL.z-f.z,dp=Math.hypot(dx,dz),dy=PL.y-f.y,tg=foeTarget();
-  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(Math.round(F.dmg*(f.dmgK||1)),F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5);}}
+  if(f.atkK==='blow'){foeCall(f,'blow');if(tg&&dp<F.reach+0.7&&Math.abs(dy)<(F.dyr||2.6)){foeHurtPlayer(Math.round(F.dmg*(f.dmgK||1)),F.cause,dx/(dp||1),dz/(dp||1),F.mass<0.2?9:5,f);}}
   else if(f.atkK==='whip'){burst(0.25,'highpass',2200,0.8,0.3,0,[f.x,f.y+2,f.z]);if(tg&&dp<F.whip.hi+1.2&&Math.abs(dy)<4){foeHurtPlayer(F.whip.dmg,F.cause,-dx/(dp||1)*0.6,-dz/(dp||1)*0.6,4);
     for(let k=0;k<10;k++){const q=k/10;spawnP(f.x+dx*q,f.y+2.2-q*1.2,f.z+dz*q,0,0.6,0,[1,0.5,0.1],0.4,0);}}}
   else if(f.atkK==='shot'){const S=F.shot;for(let k=0;k<(S.n||1);k++)foeShoot(f,S,k);}
 }
 // a hit on the player: the blow, knocked back and up, less through armour
-function foeHurtPlayer(n,cause,ux,uz,kb){if(!foeTarget())return;const before=hp;hurt(armourCut(n),cause);if(hp<before){PL.vx+=ux*kb;PL.vz+=uz*kb;PL.vy=Math.max(PL.vy,3.5);PL.ground=false;}}
+function foeHurtPlayer(n,cause,ux,uz,kb,by){if(!foeTarget())return;const G=armsGuard(n,ux,uz,by,cause);if(G.parry)return;n=G.n;kb*=G.kb; /* a shield's guard (W8a) */const before=hp;hurt(armourCut(n),cause);if(hp<before){PL.vx+=ux*kb;PL.vz+=uz*kb;PL.vy=Math.max(PL.vy,3.5);PL.ground=false;}}
 // ---- Shots: arrows, sling stones, goblin fire, a troll's rock and an Emberlord's fire, flying by speed and weight
 const SHOT_K={arrow:{g:9,sz:0.12,col:[0.42,0.32,0.22]},stone:{g:14,sz:0.14,col:[0.5,0.5,0.52]},fire:{g:0,sz:0.3,col:[1,0.55,0.12],glow:1},rock:{g:16,sz:0.55,col:[0.28,0.27,0.28]},hellfire:{g:0,sz:0.9,col:[1,0.5,0.1],glow:1}};
 const shotGeo=new THREE.BoxGeometry(1,1,1);
@@ -447,20 +447,23 @@ function foeShoot(f,S,k){
   if(foeHear([ex,ey,ez])){if(S.k==='fire'||S.k==='hellfire')burst(0.5,'lowpass',S.k==='fire'?500:220,0.8,S.k==='fire'?0.25:0.4,0,[ex,ey,ez]);else if(S.k==='arrow')burst(0.12,'bandpass',1800,2,0.2,0,[ex,ey,ez]);else burst(0.18,'lowpass',300,1,0.25,0,[ex,ey,ez]);}
 }
 function updShots(dt){
-  for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;s.vy-=K.g*dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.z+=s.vz*dt;
-    let gone=s.life<=0;const id=get(Math.floor(s.x),Math.floor(s.y),Math.floor(s.z));
-    if(!gone&&SOLID[id])gone=true;
-    if(!gone&&s.atP&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
-      const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
+  for(let i=shots.length-1;i>=0;i--){const s=shots[i],K=SHOT_K[s.k];s.life-=dt;let gone=s.life<=0,id=0;
+    const n=Math.max(1,Math.ceil(Math.hypot(s.vx,s.vy,s.vz)*dt/0.45)),h=dt/n; // (in steps of under half a block, so that a fast shot passes nothing by: W8a)
+    for(let st=0;st<n&&!gone;st++){s.vy-=K.g*h;s.x+=s.vx*h;s.y+=s.vy*h;s.z+=s.vz*h;id=get(Math.floor(s.x),Math.floor(s.y),Math.floor(s.z));
+    if(SOLID[id]){gone=true;break;}
+    if(s.atP&&s.x>PL.x-HW-K.sz&&s.x<PL.x+HW+K.sz&&s.z>PL.z-HW-K.sz&&s.z<PL.z+HW+K.sz&&s.y>PL.y-K.sz&&s.y<PL.y+PH+K.sz){
+      const v=Math.hypot(s.vx,s.vz)||1;foeHurtPlayer(s.dmg,s.cause,s.vx/v,s.vz/v,s.k==='rock'?7:2,s);gone=true;break;}
     // a shot strikes a creature of the other side (D-063); it passes its own
-    if(!gone){let hit=null;const one=g=>{if(hit||g.dead||foeSide(g)===s.side)return;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz)hit=g;};
-      if(foes.length>64)foeNear(s.x,s.z,foeRadMax+K.sz,one,s.side?0:1);else for(const g of foes)one(g); // (in a crowd, those about it from the grid)
-      if(hit){const v=Math.hypot(s.vx,s.vz)||1;foeHurtFoe(hit,s.dmg,s.from,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}}
+    {let hit=null;const one=g=>{if(hit||g.dead||(s.byP?g.show||s.hitL.includes(g):foeSide(g)===s.side))return;const r=foeRad(g)+K.sz;if(Math.abs(s.x-g.x)<r&&Math.abs(s.z-g.z)<r&&s.y>g.y-K.sz&&s.y<g.y+g.m.box[4]+K.sz)hit=g;};
+      if(foes.length>64)foeNear(s.x,s.z,foeRadMax+K.sz,one,s.byP?undefined:s.side?0:1);else for(const g of foes)one(g); // (in a crowd, those about it from the grid)
+      if(hit&&s.byP){armsHit(hit,s);if(s.pierce>0){s.pierce--;s.hitL.push(hit);}else gone=true;} // the player's shot (W8a)
+      else if(hit){const v=Math.hypot(s.vx,s.vz)||1;foeHurtFoe(hit,s.dmg,s.from,s.vx/v,s.vz/v,s.k==='rock'?7:2);gone=true;}
+      if(!gone&&s.byP&&armsAnimal(s))gone=true;}}
     if((s.k==='fire'||s.k==='hellfire')&&Math.random()<(s.k==='fire'?0.6:1))spawnP(s.x,s.y,s.z,(Math.random()-.5)*0.5,0.3,(Math.random()-.5)*0.5,[1,0.45+Math.random()*0.3,0.1],0.35,-0.5);
     if(gone){if(s.k==='fire'||s.k==='hellfire')for(let k=0;k<(s.k==='fire'?8:24);k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*2,(Math.random()-.5)*3,[1,0.5,0.1],0.5,4);
       else if(s.k==='rock')for(let k=0;k<6;k++)spawnP(s.x,s.y,s.z,(Math.random()-.5)*3,Math.random()*3,(Math.random()-.5)*3,[0.3,0.3,0.3],0.6,14);
       if(s.k==='pot'){for(let k=0;k<14;k++)spawnP(s.x,s.y+0.4,s.z,(Math.random()-.5)*4,Math.random()*3,(Math.random()-.5)*4,[1,0.5+Math.random()*0.3,0.1],0.6,3);burst(0.5,'lowpass',380,1,0.35,0,[s.x,s.y,s.z]);warSplash(s.x,s.y,s.z,!FOES[s.from.kind].folk);} // a fire pot bursts (W3)
-      scene.remove(s.m);s.m.material.dispose();shots.splice(i,1);continue;}
+      if(SOLID[id]&&(s.k==='arrow'||s.k==='bolt'||s.k==='jav'))armsStick(s);else{scene.remove(s.m);s.m.material.dispose();}shots.splice(i,1);continue;} // (spent arrows stick a while, W8a)
     s.m.position.x=s.x;s.m.position.y=s.y;s.m.position.z=s.z;s.m.rotation.y=Math.atan2(s.vx,s.vz);s.m.rotation.x=K.spin?s.life*14:-Math.atan2(s.vy,Math.hypot(s.vx,s.vz));}
 }
 // ---- The parts in motion: legs and arms in step, a wind-up and a blow, a bow drawn, a sling whirled, wings that beat,
@@ -482,6 +485,7 @@ function placeFoe(f,dt){
     else if(f.atkK==='whip'){P.armL.rotation.x=-1.2*up;P.armL.rotation.z=0.9*up;}}
   else if(f.swing>0){f.swing=Math.max(0,f.swing-dt*5);P.armR.rotation.x=rest(P.armR)[0]+0.7*f.swing;}} // the follow-through
   if(f.st==='sleep'&&P.body){root.rotation.x+=(-1.45-root.rotation.x)*Math.min(1,dt*2);root.position.y=0.25;}
+  else if(f.stagger>foeClock&&!f.dead){root.rotation.x+=(-0.32-root.rotation.x)*Math.min(1,dt*10);} // staggered (W8a)
   else if(!f.dead){root.rotation.x*=1-Math.min(1,dt*6);root.position.y=0;}
   if(!far){if(P.head){P.head.rotation.y=f.lk*0.7;}
   if(P.wingL){const b=Math.sin(foeClock*(f.st==='chase'?3.2:1.4))*0.25;P.wingL.rotation.y=rest(P.wingL)[1]+b;P.wingR.rotation.y=rest(P.wingR)[1]-b;}
@@ -610,21 +614,15 @@ function foeHit(reach){
 }
 let foeHitCD=0;
 function foeAct(btn){
-  if(btn!==0)return false;const f=foeHit(4.6);if(!f)return false;const F=FOES[f.kind],held=curId(),it=ITEMS[held];
-  if(foeHitCD>0)return true;foeHitCD=it&&it.tool==='sword'?0.32:it&&it.tool==='axe'?0.5:0.4;swing=1;
-  let dmg=hitPower(held);const front=Math.abs(angTo(f.yaw,Math.atan2(PL.x-f.x,PL.z-f.z)))<1.05;
-  if(F.block&&front&&f.st!=='sleep'){dmg*=1-F.block;burst(0.12,'bandpass',2600,4,0.25,0,[f.x,f.y+1.2,f.z]);}
-  f.hp-=dmg;f.hurt=1;const kx=f.x-PL.x,kz=f.z-PL.z,kd=Math.hypot(kx,kz)||1;f.kvx=kx/kd*5*F.mass;f.kvz=kz/kd*5*F.mass;if(F.mass>0.3)f.vy=2.5;
-  wearHeld(1);for(let k=0;k<6;k++)spawnP(f.x,f.y+f.m.box[4]*0.6,f.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,isLord(f)?f.fc||[1,0.5,0.1]:[0.5,0.1,0.08],0.5,8);
-  if(F.folk)folkProvoke(f,90);
-  if(f.foe&&foeTarget()&&!F.civ&&(!F.folk||folkWrath(f))){f.foe=null;f.st='chase';f.seen=0;f.vis=true;} // it turns from the creature it fought to the player
-  if(f.st!=='chase'&&f.st!=='flee'&&foeTarget())foeAlert(f);if(f.st==='sleep'){f.st='idle';}foeCall(f,'hurt');
-  if(f.hp<=0)foeSlain(f);
+  if(btn!==0)return false;const f=foeHit(armsReach());if(!f)return false;const held=curId(),it=ITEMS[held];
+  if(foeHitCD>0)return true;foeHitCD=it&&it.tool==='sword'?0.32:it&&it.tool==='axe'?0.5:it&&it.tool==='lance'?0.7:0.4;swing=1;
+  armsBlow(f,held);wearHeld(1); // its power from the arms in hand, the saddle, a run or the shield (W8a)
   return true;
 }
 function foeSlain(f){
   const F=FOES[f.kind],got=[];f.byP=1;f.dead=0.001;f.st='dead';f.sp=0;f.atk=0;if(F.folk)folkProvoke(f,180);
   if(SURV())for(const [id,lo,hi,ch] of F.drops)if(Math.random()<ch){const n=lo+Math.floor(Math.random()*(hi-lo+1)),left=addItem(id,n);if(left)toast('No room for '+nameOf(id));got.push(n+' '+nameOf(id));}
+  const ar=armsSlain(f);if(ar)got.push(ar); // (arrows recovered, W8a)
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
   if(f.lordOf)lordFalls(f);warSwornSlain(f);
 }

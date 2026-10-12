@@ -28,6 +28,15 @@ item(377,'Flamebrand','sword',[255,150,50],{tool:'sword',tier:9,dur:3000});item(
 item(379,'Emberlord\'s Horn','horn',[96,74,60]);item(384,'Emberlord\'s Crown','crown',[72,58,52]);item(385,'Cloak of the Ember Wing','cloak',[74,22,18],{equip:'body',armor:0.5,dur:2000,one:true,fireproof:true});item(386,'Troll Hide','hide',[96,90,86]);
 item(380,'Hide Jerkin','mail',[150,108,70],{equip:'body',armor:0.15,dur:120,one:true});item(381,'Iron Mail','mail',[200,200,196],{equip:'body',armor:0.3,dur:260,one:true});
 item(382,'Steel Plate','mail',[124,134,152],{equip:'body',armor:0.45,dur:420,one:true});item(383,'Moonsilver Mail','mail',[170,176,206],{equip:'body',armor:0.55,dur:800,one:true});
+// The soldier's arms (W8a, D-078): shields for the arm slot (their guard: how much of a blow from the front they catch), bows and a
+// crossbow (draw or load time, the arrow's or bolt's damage and speed), arrows and bolts, javelins and throwing axes, a lance
+item(400,'Round Shield','shield',[150,108,62],{equip:'arm',guard:0.55,slow:0.7,dur:160,one:true,boss:[200,200,196]});item(401,'Kite Shield of the Realm','shield',[196,200,206],{equip:'arm',guard:0.7,slow:0.65,dur:420,one:true,kite:1,boss:[60,80,150]});
+item(402,'Leaf Shield of the Elves','shield',[206,176,96],{equip:'arm',guard:0.65,slow:0.85,dur:520,one:true,leaf:1,boss:[120,40,48]});item(403,'Dwarven Tower Shield','shield',[124,134,152],{equip:'arm',guard:0.85,slow:0.5,dur:700,one:true,tower:1,boss:[182,128,58]});
+item(404,'Orc Hide Shield','shield',[96,80,62],{equip:'arm',guard:0.5,slow:0.7,dur:110,one:true,boss:[60,56,52]});
+item(405,'Hunting Bow','bow',[150,112,62],{tool:'bow',draw:0.8,dmg:5,v:34,dur:240});item(406,'Longbow of the Realm','bow',[120,84,46],{tool:'bow',draw:1.1,dmg:9,v:44,dur:400});
+item(407,'Elven Bow','bow',[206,176,96],{tool:'bow',draw:0.75,dmg:9,v:48,dur:600});item(408,'Dwarven Crossbow','xbow',[124,134,152],{tool:'xbow',load:1.8,dmg:14,v:58,dur:500,once:true});
+item(409,'Arrow','arrow',[140,110,70]);item(410,'Crossbow Bolt','bolt',[110,110,116]);item(411,'Javelin','javelin',[150,112,62],{once:true,throw:{k:'jav',dmg:9,v:25}});item(412,'Throwing Axe','taxe',[200,200,196],{once:true,throw:{k:'axe',dmg:8,v:21}});
+item(413,"Knight's Lance",'lance',[196,200,206],{tool:'lance',dur:300});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -119,6 +128,20 @@ function itemIcon(id){
   else if(it.kind==='horn'){for(let k=0;k<12;k++){const x=3+k,y=12-Math.round(Math.sin(k/11*2.6)*7),w=k<3?3:k<8?2:1;for(let d=0;d<w;d++)px(x,y+d,(d?-24:20)+(k>9?-20:0));}g.fillStyle='rgba(255,150,50,0.9)';g.fillRect(4,12,2,1);g.fillRect(9,7,1,1);}
   else if(it.kind==='crown'){for(let y=7;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===7?24:y===12?-30:0)+((x+y)%3?0:-12));for(const x of [2,5,8,11,13])for(let y=2+(x%2);y<7;y++)px(Math.min(13,x),y,(y<4?30:0));g.fillStyle='rgba(255,140,40,0.95)';for(const x of [4,7,10])g.fillRect(x,9,2,2);}
   else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);g.fillStyle='#2e1a16';g.fillRect(6,2,4,1);}
+  else if(it.kind==='shield'){const B=it.boss||[200,200,196],bx=(x,y,v)=>{g.fillStyle='rgb('+cl(B[0]+v)+','+cl(B[1]+v)+','+cl(B[2]+v)+')';g.fillRect(x,y,1,1);};
+    for(let y=1;y<15;y++)for(let x=1;x<15;x++){const dx=x-7.5,dy=y-7.5,inS=it.kite?(y<6?Math.abs(dx)<6.4:Math.abs(dx)<6.4-(y-6)*0.72):it.leaf?Math.abs(dx)<6.5*Math.sin(Math.PI*(y-0.5)/14):it.tower?(x>2&&x<13&&y>1&&y<15):Math.hypot(dx,dy)<6.6;
+      if(!inS)continue;const rim=it.tower?(x===3||x===12||y===2||y===14):it.kite||it.leaf?false:Math.hypot(dx,dy)>5.6;px(x,y,rim?-34:(x+y)%4===0?-10:dx<0?14:-4);}
+    if(it.kite){for(let y=3;y<12;y++)bx(7,y,0),bx(8,y,-20);for(let x=4;x<12;x++)bx(x,6,0);}else if(it.leaf){for(let y=2;y<14;y++)bx(7,y,y%3?0:-30);}
+    else for(let y=6;y<10;y++)for(let x=6;x<10;x++)bx(x,y,(x<8&&y<8)?30:-10);}
+  else if(it.kind==='bow'||it.kind==='xbow'){if(it.kind==='xbow'){g.fillStyle='#5a4028';for(let k=0;k<9;k++)g.fillRect(4+k,11-k,2,2);}
+    for(let k=0;k<13;k++){const t=k/12,x=Math.round(2+t*11+Math.sin(t*Math.PI)*(it.kind==='xbow'?1.5:3.5)),y=Math.round(14-t*12+Math.sin(t*Math.PI)*(it.kind==='xbow'?1.5:3.5));px(x,y,k%4?0:-24);px(x+1,y,-26);}
+    g.fillStyle='rgba(230,226,210,0.95)';for(let k=0;k<12;k++)g.fillRect(2+k,14-k,1,1);}
+  else if(it.kind==='arrow'||it.kind==='bolt'||it.kind==='javelin'||it.kind==='lance'){const L=it.kind==='bolt'?8:it.kind==='lance'?12:10,x0=13-L,y0=2+L;
+    g.fillStyle=it.kind==='lance'?'#7a5a3a':'#8a6036';for(let k=0;k<=L;k++){g.fillRect(x0+k,y0-k,1,1);if(it.kind==='lance'&&k<L-3)g.fillRect(x0+k+1,y0-k,1,1);}
+    g.fillStyle=it.kind==='lance'?'#c4c8ce':'#c8c8c4';g.fillRect(12,2,2,1);g.fillRect(13,3,1,1);g.fillRect(13,1,1,1);
+    if(it.kind==='arrow'||it.kind==='bolt'){g.fillStyle=it.kind==='arrow'?'#e8e0d0':'#6a6a70';g.fillRect(x0-1,y0,1,2);g.fillRect(x0,y0+1,2,1);}
+    if(it.kind==='lance'){g.fillStyle='#3c4c96';g.fillRect(6,5,3,3);g.fillStyle='#e8e0d0';g.fillRect(7,6,1,1);}}
+  else if(it.kind==='taxe'){g.fillStyle='#634422';for(let k=0;k<8;k++)g.fillRect(4+k,13-k,2,2);for(let y=2;y<9;y++)for(let x=9;x<15;x++){if(Math.hypot(x-9,y-5.5)<5&&x-9>=Math.abs(y-5.5)*0.4)px(x,y,x>12?30:0);}}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}

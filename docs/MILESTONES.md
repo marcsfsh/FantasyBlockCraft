@@ -338,4 +338,36 @@ The war between the alliance (men, riders, high elves, wood elves, dwarves) and 
 
 - **The war at the player's command** (asked by the owner after W7, done in 0.47.0, D-077): in creative, the war console stops or hastens the war's clock, stops the events that come by themselves and makes any of them happen now; hosts of thousands of the alliance or the wastes are summoned and led, or set against the player.
 
+
+## The arts of war (W8; asked by the owner on 2026-10-12: "do a massive expansion of the warfare system in general. you plan it, build it, and surprise me. at least 10 major, 15 average, and 25 minor new features")
+
+Planned without questions, as asked (D-078 to D-082). Built in five stages, each its own release.
+
+- **W8a The soldier's arms** (the player's own fighting; done in 0.48.0, D-078):
+  - Major: **shields and the guard**: four shields (and the orcs' hide shield) worn on a new arm slot; with a weapon in hand the place button raises the shield; blows and shots from the front are caught by its guard, a guard raised just before a blow parries it and staggers the foe; shields wear.
+  - Major: **bows and crossbows**: the hunting bow, the longbow of the realm, the elven bow and the dwarven crossbow, with arrows and bolts; drawn with the place button and loosed on release (a crossbow loads, then looses); arrows fall with the range and strike the wastes, the folk (who take it ill) and game.
+  - Average: **throwing weapons**: javelins and throwing axes.
+  - Average: **mounted combat**: blows from the saddle strike harder with speed, the Knight's Lance couched at a gallop strikes very hard, and a galloping horse tramples small foes.
+  - Minor: a running blow; the axe's cleave into a second foe; the shield bash; the ring and sparks of a parry; staggered foes; arrows recovered from the slain; hunting with bows; the bow's draw narrowing the view; spent arrows stuck in the ground; recipes for all of it, and the quartermasters' gifts.
+- **W8b Morale, formations and the line** (every battle):
+  - Major: **morale and rout**: every soldier's fear rises with friends falling near, being outnumbered, its captain, hero or standard slain and the terror of trolls and drakes, and falls near standards, captains, drums and horns; the broken flee and may rally; armies and hosts that break are told.
+  - Major: **formations**: line, shield wall, wedge, square and loose order for the hosts the player leads, and chosen by the hosts' armies by what they face, each with its effect (the wall stops arrows, the square stops horsemen, the wedge strikes hard, the loose order scatters before engines and fire).
+  - Average: **cavalry charges** that strike, ride through and wheel to charge again; **banners of the warhosts** (orc banner bearers whose fall makes their company quail, taken as trophies); **the Horn of the Hosts** (rallies and steadies); **the wounded** who fall, are mended or carried; **war hounds** of the realms.
+  - Minor: battle barks; war cries by people; captains rallying the fleeing; a hero's last stand; cheers after every battle won; the war panel showing each army's morale.
+- **W8c Engines and the field** (siege and open battle):
+  - Major: **crewing the engines**: the player takes a trebuchet, a captured orc stone-thrower or a bolt thrower, aims where they look and looses.
+  - Major: **pitched battles of the borderlands**: a realm marches to relieve a city or castle besieged by the wastes and the two armies meet on a named field, fought out near the player and settled away, the outcome burning or saving the place.
+  - Average: **the bolt thrower** (a placeable engine); **battle reports** after every battle; **the champions' duel** before a charge or a field battle.
+  - Minor: battle sites on the world map; messengers riding with news; dust raised by marching and charging columns.
+- **W8d The war's business** (strategy and logistics):
+  - Major: **supply and convoys**: each war's supplies, convoys from the bordering realms to the Leaguer, ambushes on them; low supply slows the siege.
+  - Major: **the council of war**: in the Pavilion the lords hear the player's counsel and press the effort chosen.
+  - Major: **war missions**: the captains' tasks (slay a named warchief, burn a forge, free captives, hold the lines, carry a message, recover a fallen standard) with markers and rewards.
+  - Average: **captives** held in the wastes' camps and freed; **war camp life** in the Leaguer; **ambushes** by goblins hidden in the ash; **titles and the war record**.
+  - Minor: battlefield salvage from the fallen of the wastes; recovered standards returned for merit.
+- **W8e The drakes and the night** (terror and atmosphere):
+  - Major: **the ash drakes**: winged beasts of the wastes that circle over battles and dive to burn the lines, shot down by archers and bolt throwers, slain for their scales (drakescale mail).
+  - Average: **night battles** (torches, shorter sight, fire arrows).
+  - Minor: smoke columns over burning works; rain dousing fire pots and fire arrows; fog and dust shortening the archers' range; the orcs' war chant before a charge.
+
 The order of E2 to E5 is not yet decided; confirm it before E1 ends.

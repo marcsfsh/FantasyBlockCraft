@@ -197,13 +197,7 @@ function hitPower(id){const it=ITEMS[id];if(!it||!it.tool)return 1;if(it.tool===
 // Left button: strike. Right button: shear, milk, gather an egg, feed, ride, open a pack, tell a friend to stay or follow.
 function animalAct(btn){
   const a=animalHit(4.5);if(!a)return false;const A=ANIMALS[a.kind],held=curId();
-  if(btn===0){swing=1;const kx=a.x-PL.x,kz=a.z-PL.z,kd=Math.hypot(kx,kz)||1;a.kvx=kx/kd*4;a.kvz=kz/kd*4;a.vy=3.2;a.hurt=1;animalCall(a,true);
-    if(!a.tame)alarm(a,PL.x,PL.z,5);
-    if(a.young){toast('Too young to take. Let it grow.');return true;}
-    a.hp-=hitPower(held);for(let k=0;k<5;k++)spawnP(a.x,a.y+a.m.box[4]*0.6,a.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,[0.6,0.12,0.1],0.5,8);
-    if(a.hp<=0){if(a.tame&&!confirmHunt(a))return true;const pk=a.uid&&boxes.get('mule:'+a.uid);if(pk){for(const q of pk)if(q)addItem(q.id,q.c);boxes.delete('mule:'+a.uid);} // what the mule carried comes to you
-      for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');if(PL.ride===a)dismount();a.dead=0.001;a.st='dead';a.sp=0;}
-    return true;}
+  if(btn===0){swing=1;animalStrike(a,hitPower(held),a.x-PL.x,a.z-PL.z);return true;}
   if(btn!==2)return false;
   if(A.shear&&held===321){if(a.young){toast('A lamb has no fleece to take yet');return true;}if(a.shorn){toast('Its fleece has not grown back yet');return true;}const wl=AM_KINDS.sheep.coats[a.ci][0].black?WOOLK:A.shear;a.shorn=true;a.cool=300;addItem(wl,2);wearHeld(1);drawBar(true);toast('2 '+nameOf(wl));sfxBlock(WOOLW,false,a.x,a.y,a.z);swing=1;return true;}
   if(A.milk&&(!held||!SURV())){if(a.young){toast('Only a grown goat gives milk');return true;}if(a.cool>0){toast('The goat has no more milk for now');return true;}a.cool=240;addItem(360,1);drawBar(true);toast("Goat's Milk");return true;}
@@ -215,6 +209,13 @@ function animalAct(btn){
   if(a.tame){a.stay=!a.stay;a.t=0;a.st='idle';saveDirty=true;toast(a.stay?'It stays here':'It follows you');return true;}
   return false;
 }
+// an animal struck (by a blow or an arrow, W8a): it starts and runs, its herd with it; the young are not taken; slain, its drops
+function animalStrike(a,dmg,kx,kz){const A=ANIMALS[a.kind],kd=Math.hypot(kx,kz)||1;a.kvx=kx/kd*4;a.kvz=kz/kd*4;a.vy=3.2;a.hurt=1;animalCall(a,true);
+  if(!a.tame)alarm(a,PL.x,PL.z,5);
+  if(a.young){toast('Too young to take. Let it grow.');return;}
+  a.hp-=dmg;for(let k=0;k<5;k++)spawnP(a.x,a.y+a.m.box[4]*0.6,a.z,(Math.random()-.5)*2,1+Math.random()*2,(Math.random()-.5)*2,[0.6,0.12,0.1],0.5,8);
+  if(a.hp<=0){if(a.tame&&!confirmHunt(a))return;const pk=a.uid&&boxes.get('mule:'+a.uid);if(pk){for(const q of pk)if(q)addItem(q.id,q.c);boxes.delete('mule:'+a.uid);} // what the mule carried comes to you
+    for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');if(PL.ride===a)dismount();a.dead=0.001;a.st='dead';a.sp=0;}}
 function confirmHunt(a){if(a.warned)return true;a.warned=true;a.hp=1;toast('This is your '+ANIMALS[a.kind].n.toLowerCase().replace('stray ','').replace('wild ','')+'. Strike again to part with it.');return false;}
 // ---- Riding (Q67): a wild horse can be ridden at once; it is faster and jumps higher. Use it again to get off.
 function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast('Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
