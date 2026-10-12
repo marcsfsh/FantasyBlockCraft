@@ -44,7 +44,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -76,10 +76,10 @@ function plants(WCX,WCZ){let F0=null;
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=WCX*CS+lx,Z=WCZ*CS+lz,x=X-OX,z=Z-OZ,ci=x+W*z,g=ground[ci],b=biome[ci];
     if(g+12<H&&world[I(x,g+1,z)]===WATER)waterPlants(x,z,X,Z,g,b); // the sea floor, lakes and pools (M6d)
-    if(g+12<H&&world[I(x,g+1,z)]===AIR&&(world[I(x,g,z)]===GRASS||world[I(x,g,z)]===FARM_D)&&stoneWallAt(X,Z,colInfo(X,Z,TP))&&!smallNear(X,Z,0)&&!sigNear(X,Z,0)&&!realmNear(X,Z,1)){world[I(x,g+1,z)]=hsh(X,8723,Z)<0.3?MOSSY:COBBLE;if(hsh(X,8725,Z)<0.35)world[I(x,g+2,z)]=COBBLE;} // dry-stone walls (M6g)
+    if(g+12<H&&world[I(x,g+1,z)]===AIR&&(world[I(x,g,z)]===GRASS||world[I(x,g,z)]===FARM_D)&&stoneWallAt(X,Z,colInfo(X,Z,TP))&&!TP.wlvl&&!smallNear(X,Z,0)&&!sigNear(X,Z,0)&&!realmNear(X,Z,1)){world[I(x,g+1,z)]=hsh(X,8723,Z)<0.3?MOSSY:COBBLE;if(hsh(X,8725,Z)<0.35)world[I(x,g+2,z)]=COBBLE;} // dry-stone walls (M6g)
     if(g+12<H&&world[I(x,g+1,z)]===AIR){
       const top=world[I(x,g,z)],r=hsh(X,5,Z);
-      if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);const F=forestOf(TP); // mountains and fells only where their land has its own plants
+      if((top===GRASS||FLOORS.has(top)||((top===SAND||top===RSAND)&&(F0=forestOf(colInfo(X,Z,TP)))&&F0.floors&&F0.floors.has(top)))&&!sigNear(X,Z,0)&&!smallNear(X,Z,0)&&(b!==5&&b!==6||(F0=forestOf(colInfo(X,Z,TP)))&&F0.plant)){colInfo(X,Z,TP);if(TP.tsite&&TP.tsite.raw&&woodPath(TP.tsite,X,Z)||TP.wlvl)continue;const F=forestOf(TP); // mountains and fells only where their land has its own plants; none on the wood elves' paths, nor on the gate's works (D-067)
         const tn=TP.town?0:1,heath=tn*(b===4?1:Math.max(0,(TP.dw-0.2)*1.6)),reed=tn*(b===11?1:Math.max(0,(TP.fen-0.25)*1.6)),dark=tn*(b===8?1:Math.max(0,(TP.sw-0.25)*1.6)); // none of the wild growth on a realm's sites (D-061)
         let acc=0,id=0;for(const [pp,k] of [[0.24*heath,HEATHER],[0.07*heath,DBUSH],[0.42*reed,TGRASS],[0.05*reed,DBUSH],[0.012*dark,GLOWSHROOM],[0.09*dark,DBUSH],[b===3?0.05*TP.fwd:0,DBUSH]]){acc+=pp;if(r<acc){id=k;break;}}
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
@@ -99,6 +99,8 @@ function plants(WCX,WCZ){let F0=null;
 // world chunk (WCX,WCZ) at window chunk (lcx,lcz); gx0 and gz0 are set before every step. A step may return false to be called again.
 const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>realmPrep(WCX*CS+8,WCZ*CS+8), // the realms of men about the chunk, planned one province a step (D-060)
+  (lcx,lcz,WCX,WCZ)=>wgPrep(WCX*CS+8,WCZ*CS+8), // the gates of the wastes about it, likewise (D-067)
+  (lcx,lcz,WCX,WCZ)=>stairPrep(WCX*CS+8,WCZ*CS+8), // and the Ember Stairs of the great volcanoes about it (D-067)
   ...[0,4,8,12].map(z0=>(lcx,lcz)=>{for(let z=z0;z<z0+4;z++)for(let x=0;x<CS;x++){colInfo(gx0+x,gz0+z,T);fillCol(lcx*CS+x,lcz*CS+z,gx0+x,gz0+z,T);}}), // the column fill, four rows at a time
   (lcx,lcz)=>lavaSea(lcx,lcz),
   (lcx,lcz,WCX,WCZ)=>{const rx=Math.floor(WCX/CR),rz=Math.floor(WCZ/CR);let n=0; // cave plans of the regions around, one region at a time
@@ -115,8 +117,10 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
+    applyStairs(WCX,WCZ); // the Ember Stair winding up inside each great volcano from its fortress's way in (D-067)
     applyOrcs(WCX,WCZ); // the orcs' camps, watchtowers, forges and fighting pits on the wastes' floor (D-064)
     applyRealms(WCX,WCZ); // the realms of men: their cities, castles, villages, farms, watchtowers and roads (D-060)
+    applyGates(WCX,WCZ); // the gates of the wastes: the gate, the siege, the orcs' yard, the camp of the hosts, the road down (D-067)
     if(gateAt(WCX,WCZ)){genLit=holdNear(WCX,WCZ).inhabited;curI=ruinI(WCX,WCZ);dwGate(gx0+8,gz0+8,rngAt(WCX,1402,WCZ));genLit=false;}},
   (lcx,lcz,WCX,WCZ)=>warrenDress(WCX,WCZ), // the goblin warrens under the wastes: their rock, halls, tunnels and camps (D-052)
   (lcx,lcz,WCX,WCZ)=>{drainCaveWater(lcx,lcz);plants(WCX,WCZ);applyRoads(lcx,lcz);
@@ -144,7 +148,7 @@ function drainCaveWater(lcx,lcz){
     // a block is held up when the one under it is solid or the same fluid
     const held=j=>world[j]===F||SOLID[world[j]],rests=j=>j<WD||held(j-WD);
     const sides=[];let edge=false;if(x>x0)sides.push(i-1);else edge=true;if(x<x0+CS-1)sides.push(i+1);else edge=true;if(z>z0)sides.push(i-W);else edge=true;if(z<z0+CS-1)sides.push(i+W);else edge=true;
-    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ);
+    const trusted=F===WATER?((zone&&y>=RUIN_Y[0]-7&&y<=RUIN_Y[1]+18)||(edge&&plannedWater(x+OX,y,z+OZ))||sigWaterAt(x+OX,y,z+OZ)||dwarfWaterAt(x+OX,y,z+OZ)):plannedLava(x+OX,y,z+OZ)||sigLavaAt(x+OX,y,z+OZ)||warLavaAt(x+OX,y,z+OZ)||fortLavaAt(x+OX,y,z+OZ)||stairLavaAt(x+OX,y,z+OZ);
     const b=i-WD,ok=(F===LAVA&&trusted)||(!(edge&&!trusted)&&held(b)&&(world[b]===F||rests(b))&&sides.every(j=>held(j)&&(world[j]===F||rests(j))));
     if(ok)continue;
     world[i]=AIR;lvl[i]=0;

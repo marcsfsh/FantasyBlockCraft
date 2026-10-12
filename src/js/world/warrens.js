@@ -42,7 +42,7 @@ function warEntrance(B,r){
   for(let k=0;k<36;k++){const X=B.x0+24+Math.floor(r()*(CRB-48)),Z=B.z0+24+Math.floor(r()*(CRB-48)),h=hAt(X,Z);
     colInfo(X,Z,TWR);if(h<TWR.sl+3||TWR.bs>0||TWR.wVolc<0.75||TWR.wet||TWR.lake||TWR.river||TWR.vflow||TWR.vfis||TWR.vcr||TWR.vlake||TWR.rvBot<999)continue;
     let hot=false;for(let d=0;d<8&&!hot;d++)for(const rr of [5,10,15]){colInfo(X+Math.round(Math.cos(d*0.785)*rr),Z+Math.round(Math.sin(d*0.785)*rr),TWR);if(TWR.vflow||TWR.vfis||TWR.vlake||TWR.river||TWR.lake){hot=true;break;}}
-    if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24))continue;
+    if(hot||B.war.ents.some(e=>Math.hypot(e.X-X,e.Z-Z)<40)||fortZone(X,h,Z,24)||wasteGateNear(X,Z,24))continue;
     let sl=0;for(let d=0;d<8;d++){const a=d*0.785,rise=hAt(Math.round(X+Math.cos(a)*7),Math.round(Z+Math.sin(a)*7))-h;sl=Math.max(sl,Math.abs(rise));if(rise>=4&&(!best||rise>best.rise))best={X:X,Z:Z,h:h,a:a,rise:rise};}
     if(sl<=2&&!flat)flat={X:X,Z:Z,h:h,a:r()*6.283,flat:true};}
   return best||flat;

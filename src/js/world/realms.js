@@ -11,7 +11,10 @@ const REALM_SG=16,provC=new Map(),provJ=new Map(),REALM_STEP_MS=6,realmTC=new Ma
 function realmRaw(X,Z){const was=realmSkip;realmSkip=true;try{return colInfoBase(X,Z,TRP);}finally{realmSkip=was;}}
 // the people whose lands a stretch lies in (REALM_CULTS, below), and whether they hold it: one stretch in two (c: its first cell)
 const realmCult=c=>{const k=LANDS[cellLand(c)].k;for(const n in REALM_CULTS)if(REALM_CULTS[n].lands.has(k))return REALM_CULTS[n];return null;};
-const realmHeld=c=>{const C=realmCult(c);return C&&hsh(c.i,9401,c.j)<0.5?C:null;};
+// A people may also share a land with its holders (share: {land: [lo, hi)}, D-066): the dwarves take the High Mountains the
+// high elves leave, where the same hash falls in their band
+const realmHeld=c=>{const C=realmCult(c),q=hsh(c.i,9401,c.j);if(C&&q<0.5)return C;const k=LANDS[cellLand(c)].k;
+  for(const n in REALM_CULTS){const S=REALM_CULTS[n].share;if(S&&S[k]&&q>=S[k][0]&&q<S[k][1])return REALM_CULTS[n];}return null;};
 // A kingdom gathers its people's held stretches in a square of 8 x 8 cells; the oldest of them holds the royal seat
 function kingdomOf(c,C){const ki=Math.floor(c.i/8),kj=Math.floor(c.j/8);let best=null;
   for(let a=0;a<8;a++)for(let b=0;b<8;b++){const s=stretchCell(landSite(ki*8+a,kj*8+b));if(realmHeld(s)===C&&(!best||s.pr>best.pr))best=s;}
@@ -51,8 +54,25 @@ const REALM_CULTS={
     site:{city:{M:24,spread:72,wall:1,terr:5},fort:{M:14,spread:48,wall:1,terr:4},village:{M:14,spread:48,terr:4},outpost:{M:10,spread:64,wall:1,terr:4},farm:{M:12,spread:36,terr:3}},
     R:{city:42,cap:52,cmax:62,small:32,fort:22,village:24,hamlet:18,outpost:8,farm:20},w:{spread:0.08,prom:0.4,pmax:24},
     label:{fort:'% Fastness',outpost:'% Spire',farm:'% Gardens'},kind:{city:'a hidden city of',fort:'a fastness of',village:'a refuge of',outpost:'a watch-spire of',farm:'the gardens of'},
-    capital:'the high seat of',roads:['The Elven Way','A Hidden Path']}};
-const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands]));
+    capital:'the high seat of',roads:['The Elven Way','A Hidden Path']},
+  // the wood elves of the forest kingdoms (D-065): cities in the great trees, the king's halls under a hill, tree-villages,
+  // watch-trees and feasting glades, in the Elder Wood, Autumn Woods, Birch Glades, Ancient Giant Wood, Yew Wood and Silverwood.
+  // Their ground is left as it lies (raw), save the platforms their layout asks for (pads) and the hill over the halls (mound);
+  // the forest's own trees grow on among their works
+  wood:{k:'wood',lands:new Set(['elder','autumn','birch','giant','yew','silver']),names:'woodelf',folkNames:'woodelf',kingdom:'The Forest Kingdom of ',ks:9451,fp:'w_',
+    site:{city:{M:16,spread:48,wall:1,raw:1},fort:{M:14,spread:30,wall:1,raw:1},village:{M:12,spread:36,raw:1},outpost:{M:8,spread:48,raw:1},farm:{M:10,spread:16,raw:1}},
+    R:{city:46,cap:56,cmax:64,small:34,fort:24,village:26,hamlet:18,outpost:8,farm:16},w:{spread:0.1,prom:0.2,pmax:10},
+    label:{fort:'The Halls of %',outpost:'% Watch-tree',farm:'% Glade'},kind:{city:'a city in the trees of',fort:'the halls of',village:'a tree-village of',outpost:'a watch-tree of',farm:'a glade of'},
+    capital:'the king\'s wood of',roads:['The Lamplit Way','A Woodland Path']},
+  // the mountain dwarves (D-066): holds on and in the High Mountains (those the high elves leave) and the Glacier Fields. Their
+  // ground is cut into terraces like the elves' (terr), and under it they delve: a city's halls, forges, cistern and mines go
+  // down into the mountain behind its great gate, cut into a massif raised at its back (the layout's mass, elfGround)
+  dwarf:{k:'dwarf',lands:new Set(['glacier','pine']),share:{mtn:[0.5,1]},names:'dwarf',folkNames:'dwarf',kingdom:'The Mountain Kingdom of ',ks:9461,fp:'d_',
+    site:{city:{M:24,spread:72,wall:1,terr:4},fort:{M:14,spread:56,wall:1,terr:4},village:{M:14,spread:56,terr:3},outpost:{M:10,spread:64,wall:1,terr:3},farm:{M:12,spread:56,terr:3}},
+    R:{city:50,cap:58,cmax:64,small:34,fort:26,village:30,hamlet:24,outpost:9,farm:16},w:{spread:0.08,prom:0.4,pmax:24},
+    label:{fort:'% Bastion',outpost:'% Lookout',farm:'% Mine'},kind:{city:'a mountain hold of',fort:'a bastion of',village:'a mining town of',outpost:'a lookout of',farm:'a mine of'},
+    capital:'the high hold of',roads:['The Stone Road','A Miners\' Track']}};
+const REALM_LANDS=new Set(Object.values(REALM_CULTS).flatMap(C=>[...C.lands,...Object.keys(C.share||{})]));
 function* planProvince(root,key){
   const L=LANDS[cellLand(root)],cells=[root],seen=new Set([key]),r=rngAt(root.i,9405,root.j);
   for(let q=0;q<cells.length&&cells.length<24;q++){const c=cells[q];for(const [a,b] of LN8){const n=landSite(c.i+a,c.j+b),nk=landKey(n.i,n.j);if(seen.has(nk))continue;seen.add(nk);
@@ -64,11 +84,11 @@ function* planProvince(root,key){
   for(let b=0;b<nz;b++){yield;for(let a=0;a<nx;a++){const X=(gx0+a)*S,Z=(gz0+b)*S,k=a+b*nx;landsAt(X,Z,TRL);if(TRL.land!==L.i||!ck.has(TRL.lcell))continue; // only the province's own ground is read
     const o=realmRaw(X,Z);gh[k]=o.h;
     const lk=lakeAt(X,Z);if(lk&&Math.hypot(X-lk.cx,Z-lk.cz)<lk.R+12)continue; // no lake under a site or its margin
-    ok[k]=o.river||o.bank||o.wet||o.h<o.sl+3||o.b===0||o.b===1||o.rvBot<999||o.bs<WB_END+40?1:2;}}
+    ok[k]=o.river||o.bank||o.wet||o.h<o.sl+3||o.b===0||o.b===1||o.rvBot<999||o.bs<WB_END+40||wasteGateNear(X,Z,40)?1:2;}}
   // how far each sample lies from the province's edge (in samples), for castles near the border
   const bd=new Int16Array(N).fill(999),qq=[];for(let k=0;k<N;k++)if(!ok[k]){bd[k]=0;qq.push(k);}
   for(let h=0;h<qq.length;h++){const k=qq[h],a=k%nx,b=(k/nx)|0;for(const [da,db] of [[1,0],[-1,0],[0,1],[0,-1]]){const A=a+da,B=b+db;if(A<0||B<0||A>=nx||B>=nz)continue;const n=A+B*nx;if(bd[n]>bd[k]+1){bd[n]=bd[k]+1;qq.push(n);}}}
-  const C=realmCult(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
+  const C=realmHeld(root),SK=C.site,P={key:key,root:root,L:L,cells:cells,cx:cx,cz:cz,cult:C,kingdom:kingdomOf(root,C),sites:[],roads:[],name:''};
   P.capital=P.kingdom.cap===root.i+','+root.j;P.name=stretchName(key);
   // fit a site of kind k (radius R) at sample (a,b): every sample under it good ground, little height spread; its level (the
   // median), how far it stands above the land around it, how far it is from the province's edge
@@ -87,7 +107,7 @@ function* planProvince(root,key){
   function* clean(X,Z,K,R){const rr=R+4;for(let dz=-rr;dz<=rr;dz+=4){yield;for(let dx=-rr;dx<=rr;dx+=4){if((K.sq?Math.max(Math.abs(dx),Math.abs(dz)):Math.hypot(dx,dz))>rr)continue;
     const o=realmRaw(X+dx,Z+dz);if(o.river||o.bank||o.wet||o.h<o.sl+3||o.rvBot<999)return false;}}return true;}
   function* pick(K,R,score,need){for(let k=0;k<6;k++){const t=yield* best(K,R,score,need);if(!t)return null;if(yield* clean(t.X,t.Z,K,R))return t;ok[Math.round((t.X/S)-gx0)+Math.round((t.Z/S)-gz0)*nx]=1;}return null;}
-  const add=(k,R,t)=>{const K=SK[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,wall:!!(K.sq||K.wall),terr:K.terr||0,prov:P,id:C.k[0]+k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
+  const add=(k,R,t)=>{const K=SK[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,wall:!!(K.sq||K.wall),terr:K.terr||0,raw:K.raw||0,prov:P,id:C.k[0]+k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
   // the city (the riders' hill town): in the middle of the province's good ground, raised if the land allows (the riders want a
   // hill under their hall); the capital the largest
   const n=cells.length,Z_=C.R,Rc=Math.min(Z_.cmax,(P.capital?Z_.cap:Z_.city)+Math.min(3,n-1)*5);
@@ -103,8 +123,8 @@ function* planProvince(root,key){
   const no=Math.max(1,Math.min(6,n));for(let k=0;k<no;k++){const t=yield* pick(SK.outpost,Z_.outpost,(f)=>Math.min(20,f.prom)-f.spread*0.2-f.bd/200,(X,Z)=>far(X,Z,110));if(!t)break;add('outpost',Z_.outpost,t);}
   // farmsteads (the riders' horse farms), near the villages and the city
   const nf=Math.max(2,Math.min(14,n*2));for(let k=0;k<nf;k++){const t=yield* pick(SK.farm,Z_.farm,(f)=>-f.spread*0.5+hsh(k,9415,root.j),(X,Z)=>far(X,Z,60)&&P.sites.some(s=>(s.k==='village'||s.k==='city')&&Math.hypot(s.X-X,s.Z-Z)<s.R+170));if(!t)break;add('farm',Z_.farm,t);}
-  // a terraced site's raw ground, every eight blocks over its core and margin (elfRaw reads it between the samples)
-  for(const s of P.sites)if(s.terr){const E=s.R+s.M+8,n=Math.ceil(2*E/8)+1,a=new Float32Array(n*n);
+  // a terraced or raw site's ground, every eight blocks over its core and margin (elfRaw reads it between the samples)
+  for(const s of P.sites)if(s.terr||s.raw){const E=s.R+s.M+8,n=Math.ceil(2*E/8)+1,a=new Float32Array(n*n);
     for(let b=0;b<n;b++){yield;for(let q=0;q<n;q++)a[q+b*n]=realmRaw(Math.round(s.X-E+q*8),Math.round(s.Z-E+b*8)).h;}s.hg={a:a,n:n,E:E};}
   // names (in the people's styles, no two alike in a province), the way each site faces (toward its road), the roads
   const used=new Set();for(const s of P.sites){const rs=rngAt(Math.round(s.X),9417,Math.round(s.Z));let w='';
@@ -177,12 +197,13 @@ function realmRoadAt(X,Z,m){if(realmSkip)return null;
     if(Math.abs(off)<=rd.w+0.5+(m||0))return {rd:rd,off:off,t:t,along:along};}
   return null;}
 // Is a surface column taken by the realm (a site's core or margin, or a road)? Trees, boulders, ruins and the like keep off
-function realmNear(X,Z,m){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(s.k==='village'||s.k==='farm'||(s.k==='city'&&s.prov.cult.k==='horse')?s.M+30:s.M*0.6)+(m||0))return s;return realmRoadAt(X,Z,m);}
+// (tree: a tree asks; in the wood elves' sites the forest grows on, off their works: woodBusy)
+function realmNear(X,Z,m,tree){if(realmSkip)return null;for(const s of realmTile(X,Z).sites)if(siteDist(s,X,Z)<=s.R+(s.k==='village'||s.k==='farm'||(s.k==='city'&&s.prov.cult.k==='horse')?s.M+30:s.M*0.6)+(m||0)){if(tree&&s.raw&&!woodBusy(s,X,Z,m||0))continue;return s;}return realmRoadAt(X,Z,m);}
 // ---- The ground: each site's core levelled to its height (a city's to its tiers), easing back to the land over its margin.
 // Sets o.town (0 or 1) and o.tsite.
 function realmGround(X,Z,o,h){
   o.town=0;o.tsite=null;if(realmSkip)return h;
-  for(const s of realmTile(X,Z).sites){const d=siteDist(s,X,Z);if(d>=s.R+s.M)continue;const w=(o.river||o.bank)&&d>s.R?0:sstep(s.R+s.M,s.R,d),tg=s.terr?elfGround(s,X,Z):s.k==='city'?cityGround(s,X,Z):s.T;if(!w)continue;
+  for(const s of realmTile(X,Z).sites){const d=siteDist(s,X,Z);if(d>=s.R+s.M)continue;const w=(o.river||o.bank)&&d>s.R?0:sstep(s.R+s.M,s.R,d),tg=s.terr?elfGround(s,X,Z):s.raw?woodGround(s,X,Z,h):s.k==='city'?cityGround(s,X,Z):s.T;if(!w)continue;
     h=h+(tg-h)*w;o.town=1;o.tsite=s;}
   return h;
 }
@@ -197,6 +218,15 @@ function cityFrame(s){if(s.cf)return s.cf;const d=DIRS[s.dir],R=s.R,f={fx:-d[0],
 const cityUV=(s,X,Z)=>{const f=cityFrame(s),dx=X-s.X,dz=Z-s.Z;return [dx*f.fx+dz*f.fz,dx*f.sx+dz*f.sz];};
 function cityTier(s,u,v){const f=cityFrame(s),d=f.round?Math.hypot(u-f.cu,v):Math.max(Math.abs(u-f.cu),Math.abs(v));return f.r2>=0&&d<=f.r2?2:d<=f.r1?1:0;}
 function cityGround(s,X,Z){const [u,v]=cityUV(s,X,Z),f=cityFrame(s);if((f.round?Math.hypot(u,v):Math.max(Math.abs(u),Math.abs(v)))>s.R)return s.T;return s.T+cityTier(s,u,v)*f.step;}
+// ---- The wood elves' ground (D-065): as it lies, save a platform of the layout (pads, level) and the hill raised over the king's
+// halls (L.mound: a dome about (cu, cv) cut off at u = face; within gw of the middle a sheer face for the gate, beyond it the
+// hill's sides slope up from the forecourt), so a layout reads no colInfo
+function woodGround(s,X,Z,h){const [u,v]=siteUV(s,X,Z),L=siteLayout(s);for(const p of L.pads)if(u>=p.u0&&u<=p.u1&&v>=p.v0&&v<=p.v1)return p.y;
+  const m=L.mound;if(m&&u>=m.face){const d=Math.hypot(u-m.cu,v-m.cv)/m.R;if(d<1){let k=m.H*Math.pow(1-d*d,0.7);if(Math.abs(v)>m.gw)k=Math.min(k,(u-m.face)*2.2+(Math.abs(v)-m.gw)*0.6);return Math.max(h,s.T+Math.round(k));}}return h;}
+// is (X,Z) on or by (m) a work of a wood elves' site that wants the forest clear (a part flagged clear)?
+// is (X,Z) on one of a wood site's paths (no plants grow on them)?
+function woodPath(s,X,Z){const L=siteLayout(s);if(!L.paths)return false;const [u,v]=siteUV(s,X,Z);for(const q of L.paths){const ux=q[2]-q[0],vx=q[3]-q[1],l=Math.hypot(ux,vx)||1,t=Math.max(0,Math.min(l,((u-q[0])*ux+(v-q[1])*vx)/l));if(Math.hypot(u-q[0]-ux*t/l,v-q[1]-vx*t/l)<=q[4]+1)return true;}return false;}
+function woodBusy(s,X,Z,m){const [u,v]=siteUV(s,X,Z),L=siteLayout(s);for(const p of L.parts)if(p.clear&&u>=p.bu0-m&&u<=p.bu1+m&&v>=p.bv0-m&&v<=p.bv1+m)return true;return !!(L.busy&&L.busy(u,v,m));}
 // ---- The elves' terraces (D-062): the raw ground under a terraced site, read between its samples, cut into steps of s.terr
 // about the site's level, so the terraces follow the lie of the land; a building's platform (its layout's pads, each a box in the
 // site's frame grown by one) holds its own level
@@ -204,7 +234,11 @@ function elfRaw(s,X,Z){const g=s.hg,n=g.n,fx=(X-s.X+g.E)/8,fz=(Z-s.Z+g.E)/8,ix=M
   return (a[ix+iz*n]*(1-tx)+a[ix+1+iz*n]*tx)*(1-tz)+(a[ix+(iz+1)*n]*(1-tx)+a[ix+1+(iz+1)*n]*tx)*tz;}
 const elfTerrace=(s,X,Z)=>s.T+Math.round((elfRaw(s,X,Z)-s.T)/s.terr)*s.terr;
 function elfPad(s,u,v){for(const p of siteLayout(s).pads)if(u>=p.u0-1&&u<=p.u1+1&&v>=p.v0-1&&v<=p.v1+1)return p;return null;}
-function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);return p?p.y:elfTerrace(s,X,Z);}
+function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);if(p)return p.y;const t=elfTerrace(s,X,Z),M=siteLayout(s).mass;return M?Math.max(t,massifAt(M,u,v)):t;}
+// The massif at the back of a dwarves' hold (D-066): rock raised to M.y + M.H over a box (u from its face M.f to M.b, |v| up to
+// M.w), its face sheer, falling away over M.m to its sides and back in ridges, its top broken; -1 elsewhere
+function massifAt(M,u,v){if(u<M.f)return -1;const du=Math.max(0,u-M.b),dv=Math.max(0,Math.abs(v)-M.w),d=Math.hypot(du,dv)/M.m;if(d>=1)return -1;
+  const k=Math.pow(1-d,1.4)*(1-0.25*Math.abs(Math.sin(u*0.21+v*0.13))*d);return M.y+Math.round(M.H*k+(u>M.f+3?hsh(u>>2,9463,v>>2)*3*d:0));}
 // ---- Names: the readout's line for a site, and the realm a column lies in
 function realmPlace(X,Z){const s=realmSiteAt(X,Z,4),C=s&&s.prov.cult;return s?{s:s,name:s.name,line:(s.k==='city'&&s.prov.capital?C.capital:C.kind[s.k])+' '+s.prov.kingdom.name.replace(/^The /,'the ')}:null;}
 // a road's name: the people's high road or its lanes

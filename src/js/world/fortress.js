@@ -1,5 +1,5 @@
 // ---- Fortresses in the volcanoes (D-052, D-054). The owner asked for balrogs; the name is Tolkien's, so ours are the Emberlords,
-// towering demons of fire and shadow. Each stretch of the wastes has one great volcano (volcanic.js), and in it the Ember Throne:
+// towering demons of fire and shadow. Each basin of the wastes has one great volcano (volcanic.js), and in it the Ember Throne:
 // an Emberlord's fortress built to its lord's size, with a gate between two great towers at the mountain's foot, a broad way in
 // through the rock past troughs of lava, and under the summit a vast throne hall with pillars, rivers of lava in the floor, a dais,
 // the throne and the hoard. The lesser volcanoes hold warholds of the orcs on the same plan at a smaller size. A fortress faces

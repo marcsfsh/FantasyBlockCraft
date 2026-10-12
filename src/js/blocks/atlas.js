@@ -457,6 +457,82 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     const ex=x%8-3.5,ey=y%8-3.5,er=Math.hypot(ex,ey);P(322,x,y,er>3.9?sh([58,48,42],(hn(x,y,445)-.5)*14):sh([132,104,78],(er>3?-38:Math.floor(er)%2?-14:6)+(hn(x,y,446)-.5)*14));
     const px=x%8,py=y%8,seam=px===0||py===0,rv=(px===2||px===6)&&(py===2||py===6),rust=hn(x,0,447)<0.3&&hn(x,y>>2,448)<0.6;
     P(323,x,y,seam?sh([72,72,78],(hn(x,y,449)-.5)*10):rv?sh([168,166,170],(px===2&&py===2?14:0)):rust?sh([132,86,56],(hn(x,y,450)-.5)*22):sh([112,112,120],(py===1?14:py===7?-10:0)+(hn(x,y,451)-.5)*14));}
+  // the wood elves (D-065): goldbough bark, smooth and silver-grey, streaked and pricked with pale lenticels; its end, pale gold
+  // rings in a grey rim; its planks, pale gold, four to a face, finely grained; its leaves, gold with paler tips, open between;
+  // the woodland lamp, a pale light in a cage of curling silver; the woven rail, two rails of withies with a twist between;
+  // carved wood, warm brown with flowing lines like roots and leaves; rootstone, grey stone carved in twisting roots; a
+  // clipped hedge, dense small leaves; the banner of the wood, a golden leaf on green under a carved rod; leaf thatch, rows of
+  // overlapping leaves in green and gold
+  for(const t of [327,328,329,333])clear(t);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const st=hn(x,0,461)<0.3?-10:0,len=hn(x>>1,y>>2,462)<0.07&&y%4===1;
+    P(324,x,y,len?[228,226,214]:sh([170,172,170],st+(hn(x,y>>3,463)-.5)*10+(hn(x,y,464)-.5)*8+(x%5===0?-8:0)));
+    const rr=Math.hypot(x-7.5,y-7.5);P(325,x,y,rr>7?sh([150,152,150],(hn(x,y,465)-.5)*10):sh([216,200,156],(Math.floor(rr*1.3)%2?-14:6)+(hn(x,y,466)-.5)*8));
+    const bd=y%4,sm=(hn(0,y>>2,467)*8)|0,jt=((x+sm)%16)===0;P(326,x,y,bd===3||jt?sh([150,136,100],(hn(x,y,468)-.5)*8):sh([206,192,150],(bd===0?8:0)+(hn(x,y>>2,469)-.5)*12+((x+y*3)%7===0?-6:0)));
+    const lf=hn(x,y,470);if(lf>0.2)P(327,x,y,sh(lf>0.85?[248,222,120]:lf>0.5?[226,182,62]:[188,140,40],(hn(x,y,471)-.5)*24));
+    const cage=(Math.abs(x-7.5)>4.5&&Math.abs(x-7.5)<5.6&&y>3&&y<14)||(y===3||y===14)&&x>=3&&x<=12,curl=y<3&&Math.abs(Math.hypot(x-7.5,y-3)-2.6)<0.6;
+    if(cage||curl)P(328,x,y,sh([206,214,222],(hn(x,y,472)-.5)*14));else if(x>3&&x<12&&y>3&&y<14)P(328,x,y,sh([226,240,255],-Math.hypot(x-7.5,y-8.5)*3.5));
+    const rail=(y>=2&&y<=3)||(y>=11&&y<=12),post=x<=1||x>=14,tw=y>3&&y<11&&Math.abs(((x+y*0.8)%6)-3)<0.8;
+    if(rail||post||tw)P(329,x,y,sh([164,132,84],(rail&&(y===2||y===11)?12:0)+(post&&(x===0||x===15)?-14:0)+(hn(x,y,473)-.5)*14));
+    const fl=Math.sin(x*0.6+Math.sin(y*0.45)*2.2),fl2=Math.sin(y*0.5+Math.cos(x*0.4)*2);P(330,x,y,sh([142,98,60],(Math.abs(fl)<0.18?-30:Math.abs(fl2)<0.15?-20:fl>0?8:0)+(hn(x,y,474)-.5)*10));
+    const rt=Math.abs(Math.sin(x*0.5+Math.sin(y*0.35+x*0.2)*1.8))<0.22,rt2=Math.abs(Math.sin(y*0.7+x*0.15))<0.12;P(331,x,y,sh([150,144,132],(rt?-30:rt2?-18:6)+(hn(x>>1,y>>1,475)-.5)*14+(hn(x,y,476)-.5)*6));
+    P(332,x,y,sh(hn(x,y,477)<0.3?[52,104,40]:[76,132,56],(hn(x,y,478)-.5)*26+((x+y)%4===0?10:0)));
+    if(y===0)P(333,x,y,[150,112,70]);else{const lfx=x-7.5,lfy=y-7,inLeaf=(lfx*lfx)/8+(lfy*lfy)/26<1&&lfy<6,vein=Math.abs(lfx)<0.6&&inLeaf,sw=y>=13&&Math.abs(x-7.5)<(y-12)*1.5;
+      if(!sw)P(333,x,y,x<=1||x>=14?sh([196,160,64],(hn(x,y,479)-.5)*10):vein?[150,110,30]:inLeaf?sh([232,190,70],(hn(x,y,480)-.5)*12+(lfy<0?8:0)):sh([40,86,48],(hn(x,y,481)-.5)*10+(x%4===0?-6:0)));}
+    const ry=y%4,rx=(x+(Math.floor(y/4)%2)*3)%6;P(334,x,y,sh(Math.floor(y/4)%2?[118,140,60]:[176,150,64],(ry===3?-26:ry===0?12:0)+(rx===0?-14:0)+(hn(x,y,482)-.5)*14));
+  }
+  // the mountain dwarves (D-066): granite, warm grey flecked with black, pink and white, dressed in great blocks (two courses to a
+  // face, the joints staggered and their edges chamfered) and in long low courses; knotwork, an angular interlace cut in a band
+  // and inlaid with bronze; the hold's columns, fluted between bronze bands, their tops ringed in bronze; bronze plating in
+  // riveted panels streaked with verdigris; firebrick, small dark-red bricks blackened with soot toward the top; molten iron,
+  // white-gold under a crust that drifts in dark seams; the hold's lamp, a bronze cage round an amber flame; an iron cogwheel on
+  // dark iron; an ore cart, an iron tub banded and riveted on its wheels, heaped with ore; slag, black and glassy with rust and
+  // bubbles; pit props, dark oiled timber banded in iron; the banner of the mountain, a golden anvil under three white peaks on
+  // deep blue; an anvil's polished face and its dark iron body; the hold's flagstones, polished, set in bronze
+  for(const t of [343,351])clear(t);
+  const gran=(x,y,k)=>{const q=hn(x,y,k);return q<0.08?[86,84,86]:q<0.14?[178,152,142]:q>0.95?[204,202,198]:sh([150,146,142],(hn(x>>1,y>>1,k+1)-.5)*12+(q-.5)*10);};
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const row=y>>3,jx=(x+(row?8:0))%16,jy=y%8,edge=jx===0||jy===0,ch=jx===1||jy===1,lo=jx===15||jy===7;
+      P(335,x,y,edge?sh([98,96,94],(hn(x,y,484)-.5)*8):sh(gran(x,y,485),ch?14:lo?-12:0));}
+    {const row=y>>2,jx=(x+[0,6,11,3][row])%16,jy=y%4;P(336,x,y,jx===0||jy===3?sh([100,98,96],(hn(x,y,487)-.5)*8):sh(gran(x,y,488),jy===0?12:0));}
+    {const band=y>=3&&y<=12,kx=x%8,ky=(y-3)%8;let k=false;if(band){const a=[[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[6,5],[6,4],[6,3],[6,2],[5,2],[4,2],[3,2],[3,3],[3,4],[4,4]];
+      k=a.some(([px,py])=>px===kx&&py===ky)&&ky<8;}
+      P(337,x,y,y===2||y===13?sh([110,106,102],0):y<2||y>13?sh(gran(x,y,489),y===0?12:0):k?sh([196,148,72],(hn(x,y,490)-.5)*14+(ky===1||kx===1?14:0)):sh(gran(x,y,491),-16));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(338,x,y,r>7.2?sh([110,106,102],0):r>6?sh([190,142,70],(hn(x,y,492)-.5)*12+(r<6.5?12:0)):sh(gran(x,y,493),Math.floor(r*1.2)%3===0?-6:4));}
+    {const br=y<=1||y>=14,fl=x%4;P(339,x,y,br?sh([194,146,72],(y===0||y===14?16:-10)+(hn(x,y,494)-.5)*12):sh(gran(x,y,495),fl===0?-22:fl===1?10:fl===3?-6:4));}
+    {const px=x%8,py=y%8,rv=(px===1||px===6)&&(py===1||py===6),seam=px===7||py===7,vg=hn(x,y>>1,496)<0.12&&py>2;
+      P(340,x,y,rv?[226,196,120]:seam?[96,66,34]:vg?sh([96,150,120],(hn(x,y,497)-.5)*14):sh([176,124,62],(py===0?18:0)+(hn(x,y,498)-.5)*14+(px===0?10:0)));}
+    {const row=y>>1,jx=(x+(row%2?2:0))%4,soot=Math.max(0,(10-y))*3;P(341,x,y,jx===0||y%2===1?sh([52,40,36],-soot*0.3):sh([128,62,44],(hn(x>>2,row,499)-.5)*20+(hn(x,y,500)-.5)*8-soot));}
+    {const sw=Math.sin(x*0.5+Math.sin(y*0.4)*2.4+hn(0,y>>2,501)*3),cr=Math.abs(sw)<0.16;P(342,x,y,cr?sh([150,58,20],(hn(x,y,502)-.5)*20):sw>0.6?[255,236,150]:sh([250,170,50],(hn(x,y,503)-.5)*24));}
+    {const cage=(x===3||x===12)&&y>=4&&y<=13||(y===4||y===13)&&x>=3&&x<=12,cap=y<=3&&x>=5&&x<=10&&y>=1,hook=y===0&&(x===7||x===8),core=x>4&&x<11&&y>4&&y<13;
+      if(cage||cap||hook)P(343,x,y,sh([184,134,64],(hn(x,y,504)-.5)*16+(cap&&y===1?16:0)));else if(core)P(343,x,y,sh([255,206,110],-Math.hypot(x-7.5,y-9)*7));}
+    {const r=Math.hypot(x-7.5,y-7.5),ang=Math.atan2(y-7.5,x-7.5),tooth=Math.cos(ang*8)>0.2,cog=r<4.6||r<6.6&&tooth,hub=r<1.6,spk=r<4.6&&r>1.6&&(Math.abs(Math.sin(ang*2))<0.25);
+      P(344,x,y,hub?[60,60,64]:cog?sh([150,152,158],(r<4.6&&r>3.6?-18:spk||r>4.6?10:-24)+(hn(x,y,505)-.5)*10):sh([70,72,78],(hn(x,y,506)-.5)*10));
+      P(345,x,y,sh([84,86,92],(x===0||y===0?14:x===15||y===15?-14:0)+(hn(x,y,507)-.5)*12));}
+    {const q=hn(x,y,508);P(346,x,y,q<0.12?sh([196,120,70],(hn(x,y,509)-.5)*20):q<0.16?[220,186,80]:sh([70,64,60],(hn(x>>1,y>>1,510)-.5)*24+(q-.5)*16));
+      const wheel=y>=12&&(Math.hypot(x-3,y-13.5)<2.6||Math.hypot(x-12,y-13.5)<2.6),band=y===2||y===9,rim=y<=1,rivet=(y===2||y===9)&&x%3===1;
+      P(347,x,y,wheel?sh([40,40,44],Math.hypot(x-(x<8?3:12),y-13.5)<1?20:0):y>=12?sh([36,32,30],0):rivet?[176,178,182]:rim?sh([120,122,128],10):band?sh([96,98,104],0):sh([84,72,62],(hn(x,y,511)-.5)*14+(x===0||x===15?-14:0)));}
+    {const q=hn(x,y,512),b=hn(x>>1,y>>1,513);P(348,x,y,q<0.06?[150,80,44]:q>0.93?sh([110,110,120],10):sh([46,44,50],(b-.5)*30+(Math.abs(Math.sin(x*0.7+y*0.3))<0.15?18:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(349,x,y,r>6.8?sh([78,80,86],(hn(x,y,514)-.5)*10):sh([96,70,46],(Math.floor(r*1.4)%2?-14:6)+(hn(x,y,515)-.5)*8));
+      const band=(y>=2&&y<=3)||(y>=12&&y<=13);P(350,x,y,band?sh([86,88,94],(y===2||y===12?16:-8)+(x%5===2?28:0)):sh([88,62,40],(x%4===0?-14:x%4===2?6:0)+(hn(x,y>>2,516)-.5)*12));}
+    if(y===0)P(351,x,y,[170,130,66]);else{const sw=y>=14&&Math.abs(x-7.5)<(y-13)*2.2;
+      if(!sw){const ax=x-7.5,anvil=(y>=9&&y<=10&&Math.abs(ax)<=4.5)||(y===11&&Math.abs(ax)<=1.5)||(y===12&&Math.abs(ax)<=3)||(y===9&&ax<-4.5&&ax>-6.5),
+        peak=y>=3&&y<=7&&(Math.abs(x-7.5)<=(y-2)*0.8||Math.abs(x-3.5)<=(y-4)*0.8&&y>=5||Math.abs(x-11.5)<=(y-4)*0.8&&y>=5),snow=peak&&y<=4;
+        P(351,x,y,x<=1||x>=14?sh([196,160,64],(hn(x,y,517)-.5)*10):anvil?sh([226,184,76],(hn(x,y,518)-.5)*12+(y===9?16:0)):snow?[236,236,240]:peak?[176,180,196]:sh([34,48,104],(hn(x,y,519)-.5)*10+(x%4===0?-6:0)));}}
+    P(352,x,y,sh([176,180,188],(hn(x,y,520)-.5)*10+(x===0||y===0?20:x===15||y===15?-24:0)));
+    P(353,x,y,y<=2?sh([170,174,182],y===0?24:0):(y>=6&&y<=11&&(x<3||x>12))?sh([30,30,34],0):sh([66,68,74],(hn(x,y,521)-.5)*10+(y===3?-16:0)));
+    {const jx=x%8,jy=y%8,gold=jx===0||jy===0;P(354,x,y,gold?sh([190,146,72],(hn(x,y,522)-.5)*12):sh(gran(x,y,523),12+(jx===1||jy===1?10:0)+(hn(x>>2,y>>2,524)-.5)*10));}
+  }
+  // the war at the gate (D-067): tent canvas, linen in panels between darker seams, a stitch line, weathered toward the foot;
+  // gate iron, black plates with studs in a lattice and heavy bands top and bottom, rust bleeding below the studs; a mantlet,
+  // heavy planks bound in iron at top and bottom, scorched in patches, the stubs of arrows standing in it
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const seam=x%8===0,st=x%8===1&&y%3===1,wx=Math.max(0,y-9)*2;P(355,x,y,seam?sh([168,156,128],(hn(x,y,525)-.5)*8):st?[150,138,112]:sh([222,212,186],(hn(x,y,526)-.5)*10+(hn(x>>2,y>>2,527)-.5)*12-wx));}
+    {const band=y<=1||y>=14,sx=(x+(y>>2)*2)%4,sy=y%4,stud=!band&&sx===1&&sy===1,rust=!band&&(sx===1&&sy===2&&hn(x,y,528)<0.6||hn(x,y,529)<0.05);
+      P(356,x,y,band?sh([70,68,72],(y===0||y===14?18:-6)+(x%5===2?22:0)):stud?[148,146,150]:rust?sh([120,66,40],(hn(x,y,530)-.5)*18):sh([58,56,62],(hn(x,y,531)-.5)*12+(hn(x>>2,y>>2,532)-.5)*14+(sy===0?8:0)));}
+    {const band=y===1||y===2||y===13||y===14,pl=x%5===0,rv=band&&x%5===2,sc=hn(x>>1,y>>1,533)<0.18,ar=(x===5&&y>=5&&y<=8)||(x===11&&y>=8&&y<=10)||(x===3&&y>=10&&y<=11),fl=(x===5&&y===4)||(x===11&&y===7)||(x===3&&y===9);
+      P(357,x,y,ar?sh([150,120,80],0):fl?[200,200,196]:rv?[176,176,180]:band?sh([82,84,90],(y===1||y===13?14:-8)):pl?sh([70,50,32],0):sh([138,100,64],(sc?-46:0)+(hn(x,y>>2,534)-.5)*16+(x%5===1?10:0)));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

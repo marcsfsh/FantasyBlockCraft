@@ -11,8 +11,8 @@ const elig=new Map();for(let i=-20;i<20;i++)for(let j=-20;j<20;j++){const c=stre
 const held=[...elig.values()].filter(c=>realmHeld(c)===H),share=held.length/Math.max(1,elig.size);
 info('stretches of Golden Steppe, Heath Moors and Barrow Hills within 6400 blocks:',elig.size,'; held by the riders:',held.length,'('+Math.round(share*100)+'%)');
 assert(elig.size>=30&&share>0.3&&share<0.7,'about half the stretches of the open lands are held by the riders');
-{let cross=0;for(let i=-20;i<20;i++)for(let j=-20;j<20;j++){const c=stretchCell(landSite(i,j)),C=realmHeld(c);if(C&&!C.lands.has(LANDS[cellLand(c)].k))cross++;}
-  assert(cross===0&&!H.lands.has('green')&&!Wc.lands.has('steppe'),'each people holds only its own lands');}
+{let cross=0;for(let i=-20;i<20;i++)for(let j=-20;j<20;j++){const c=stretchCell(landSite(i,j)),C=realmHeld(c);if(C&&!C.lands.has(LANDS[cellLand(c)].k)&&!(C.share&&C.share[LANDS[cellLand(c)].k]))cross++;}
+  assert(cross===0&&!H.lands.has('green')&&!Wc.lands.has('steppe'),'each people holds only its own lands (and those it shares, D-066)');}
 // ---- provinces
 const ps=held.map(c=>provinceOf(c.i,c.j)),count={};for(const P of ps)for(const s of P.sites)count[s.k]=(count[s.k]||0)+1;
 const kings=new Set(ps.map(P=>P.kingdom.name));

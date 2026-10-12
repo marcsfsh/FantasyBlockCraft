@@ -5,6 +5,71 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.37.0 (2026-10-12): the war at the gates of the wastes
+
+Saves from 0.36.0 do not carry over (save key v27): the wastes are remade about their gates.
+
+### Game
+- **The Volcanic Wastes mended.**
+  - Each basin has one great volcano. A basin of several stretches used to raise one for each, so two or three stood together.
+  - No volcano is cut in two: the gorges of the wastes no longer slice through cones (they narrow and stop at a volcano's foot), and where two volcanoes' reaches overlap the higher ground wins instead of the first.
+  - No crystal geode or fossil hangs in the air over a sunken basin's floor.
+  - The gullies down the great volcano are a third as deep and half again as wide, and the lava in them is three deep, thinning toward the foot.
+- **The Ashen Gate.** Every basin of the wastes has one way in for an army, on the side facing the nearest realm. The ring of ash mountains breaks into a pass cut down to the level of the lands outside, and across it the orcs have built a gate of basalt between two towers 64 high, the Emberlord's horned skull over the arch. One leaf is shut and propped with great beams; the other hangs ajar, its bar broken, and there is a way through by its edge.
+  - **The Long Descent:** inside, a broad paved road runs down along the ring's inner wall at one in eight from the gate's yard to the floor of the wastes.
+  - **The Gatewarden's Camp** fills the yard behind the gate: barricades of stakes, a palisade, the warlord's hall, tents of hide, a forge by a trough of lava, a troll's cage, a war drum and two stone-throwers aimed at the gate. Archers walk the gate's top.
+  - **The siege:** at the shut leaf stands the dwarves' ram ("X the Gatebreaker"), its steel head in a bronze collar, slung under a shed of bronze plates on eight wheels. A covered way of mantlets leads back to the siege lines (ditch, rampart, palisade, towers, ballistae), with the dwarves' trebuchets and a siege tower of men behind them.
+  - **The Leaguer:** beyond the lines lies the camp of the allied hosts, 250 blocks square, more than three times the ground of the largest city of men. It has a ditch, rampart and palisade with towers and four gates, streets and a muster field. In the middle the Pavilion of the Three Banners, where men, elves and dwarves hold council, faces a square with the three banners on tall poles. The men's lines of tents, timber halls, smithy and stables; the elves' round pavilions, watch-spire and archery range; the dwarves' granite redoubt with its forges, crane, trebuchet and a second ram; storehouses, wagons, wells, cook-fires and a field hospital.
+  - **The war:** both camps are manned, and while you are near the gate the two sides keep sending raiding parties, scouts and now and then whole armies at each other through the gap. Allied raiders march from the lines into the orcs' yard; orc bands sally out against the lines; elven scouts slip through and on down the long road; goblins creep round the camp; men, elves and dwarves march together, or a warhost pours out with trolls and a warchief. They fight wherever they meet, hold a while, and march home. In creative they never turn on you. The camp's folk have their own words for a passer-by.
+  - **The armies are massive:** about every five to seven minutes near a gate one side sends an army of some 115. When you are in the Leaguer the hosts muster: their companies come out of the quarters by the streets and fall in on the muster field or in the square (men and riders, dwarves, elves, each people in its block) facing the gate; at the horns they march out rank by rank through the camp's great gate, the lines and the gap, half to storm the Gatewarden's Camp and half on down the Long Descent. When you are in the yard or on the road the warhost of the wastes comes up the Long Descent company by company, masses before the gate under its warchiefs with trolls in its ranks, and at the drums charges the siege lines and the camp. The other side calls its defenders to its lines. The first army comes a minute or two after you arrive.
+  - **Battles setting** (pause menu): Small, Large or Massive (the default) armies.
+  - **The engines and the sound of it:** the dwarves' trebuchets loft stones over the wall into the yard and the orcs' throwers send burning pots onto the lines (for the look and the sound; they strike no one). Near the gate you hear the orcs' drums behind the wall, the hosts' horns, the clash of arms along the pass and hammering at the engines; the drums beat harder by night.
+- **The Ember Stair.** Inside every great volcano a way winds up from a door in the Ember Throne's way in, round and round inside the mountain at one in six, two to three turns, up to a gallery open over the crater's lake of fire. It is part orc stronghold (dressed basalt, tiled floors, fire baskets, iron gates; the Gate of the Stair, the Barracks of the Ash Guard, the Forge of the Deep Fire, the Armoury of the Throne, the Shrine of the Emberlord, the Pit of the Stair) and part raw cave of the mountain's fire (cinder and obsidian, crusted lava, veins of magma; the Cavern of Cinders with its pool of lava, the Obsidian Hollow with its spires), each chamber held by orcs, goblins or trolls.
+- The readout names the gate, the ram, the siege lines, the camp and its pavilion, the yard, the road, the stair and its chambers.
+- New blocks (creative, Building): Tent Canvas, Gate Iron, Mantlet.
+- The creative land tour gains the gates' works.
+
+### Engine
+- Creatures far off (beyond 34 blocks) are drawn as one mesh each, so crowds and armies cost far less to draw; the near ones are drawn whole as before. Crowds keep apart by a grid, and their din is capped at some eighteen sounds a second.
+
+### Tooling
+- `tools/shot.mjs --army=al:70` (or `orc`) starts an army at the gate about the camera and marches it that many seconds before the shot.
+- New test case `59-gates`. `47-volcanic` and `55-strife` find their windows round about where the new terrain moved them (D-067).
+
+## 0.36.0 (2026-10-11): the mountain dwarves
+
+Saves from 0.35.0 do not carry over (save key v26): the dwarves are new to the world.
+
+### Game
+- **The mountain dwarves.** The High Mountains the high elves do not hold, and about half the stretches of the Pine Highlands and the Glacier Fields, are provinces of mountain kingdoms. They build on terraces cut into the mountains and delve under them. The old dwarven ruins are unchanged.
+  - **Mountain holds:** walls of dressed granite with square towers and ballistae, a gatehouse with its portcullis, granite houses under steep slate, smithies, smelting furnaces glowing at their mouths, a headframe over the city's mine, treadwheel cranes, trebuchets behind the gate. At the back a massif of rock rises with the great gate cut in its face between two colossal kings of stone.
+  - **Under the mountain:** the gate hall, the great hall on its columns with the king's seat, barracks, a great shaft with its hoist down through every level, the forge hall with its channel of molten iron, a cistern, and deep down a smelting hall and mines spreading in timbered galleries with ore in their walls. More is carved under each hold than stands over it.
+  - **Bastions** with a squat keep, ballistae, a trebuchet and a garrison hall under the keep; **mining towns** round a headframe over two levels of mines; **lookouts** with a ballista and a beacon; **mines** under their headframes; stone roads with lamps on columns.
+  - **Their folk:** axeguards with round shields, hammerers in plate with great hammers, crossbowmen, captains in winged helms, the Mountain King in crimson and gold, thanes, ladies, miners and smiths, all short and broad with braided beards. Neutral until one is struck, never hostile in creative; their horn sounds two deep notes. Their hosts march into the wastes like the other peoples'.
+  - Their places sound of hammers, carts, picks and a deep chant.
+- New blocks (creative, Building): Dwarven Granite, Granite Courses, Knotwork Granite, Hold Column, Bronze Plating, Forge Brick, Molten Iron, Hold Lamp, Iron Cogwheel, Ore Cart, Slag, Pit Prop, Banner of the Mountain, Anvil, Hold Flagstones.
+- The creative land tour gains the dwarves' places.
+
+### Tooling
+- New test case `58-dwarves`.
+
+## 0.35.0 (2026-10-11): the wood elves
+
+Saves from 0.34.0 do not carry over (save key v25): the wood elves are new to the world.
+
+### Game
+- **The wood elves.** The forest kingdoms hold about half the stretches of the Elder Wood, Autumn Woods, Birch Glades, Ancient Giant Wood, Yew Wood and Silverwood. They build in and under the trees on the ground as it lies, and the forest grows on between their works.
+  - **Cities in the trees:** great goldboughs with silver bark and golden crowns, platforms of pale planks round their trunks at shared heights, houses wrapped round the trunks under leaf thatch, stairs winding up, bridges with woven rails from tree to tree, lamps of pale light everywhere. A clipped hedge rings the city, its gate between two goldboughs under a bridge; the king's tree stands at the back with his hall high in it. A spring and an archery range lie by the way.
+  - **The king's halls** under a hill: a forecourt over a stream, a gate of rootstone in the hill's face, a great hall on pillars like trees, the king's seat crowned with antlers, a cellar of casks and a guardroom.
+  - **Tree-villages** round feasting glades, **watch-trees** standing alone, **glades** with long tables, casks and a fire; lamplit ways between them.
+  - **Their folk:** wardens in hooded grey-green cloaks with long bows (they see and shoot farthest of any folk), blades with two long knives, guards of the halls in copper leaf armour with glaives, captains, the king under a crown of autumn leaves, lords, ladies and the folk of the glades. Neutral until one is struck, never hostile in creative; their horn sounds three rising notes. Their hosts march into the wastes like the other peoples'.
+  - Their places sound of birds, distant singing and a harp by day, and of singing, crickets and owls by night.
+- New blocks (creative, under Building and Wood and plants): Goldbough Bark, Goldbough Planks, Goldbough Leaves, Woodland Lamp, Woven Rail, Carved Wood, Rootstone, Clipped Hedge, Banner of the Wood, Leaf Thatch.
+- The creative land tour gains the wood elves' places.
+
+### Tooling
+- New test case `57-woodelves`.
+
 ## 0.34.0 (2026-10-11): lava down the gullies, and the orcs' places
 
 Saves from 0.33.0 do not carry over (save key v24): the volcanoes' gullies and the orcs' places are new to the world.

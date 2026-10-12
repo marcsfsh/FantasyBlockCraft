@@ -18,11 +18,11 @@ function orcCand(i,j){
       if(ok&&hi-lo<=K.sp)p={i:i,j:j,kind:kind,X:X,Z:Z,R:R,g:hAt(X,Z),pr:hsh(i,9609,j)};}}
   orcCandC.set(key,p);return p;
 }
-// clear of the volcanoes' feet, the landmarks, the old sites, the fortresses and the goblins' camps (the
+// clear of the volcanoes' feet, the landmarks, the old sites, the fortresses, the goblins' camps and the gate's works (the
 // cave plans, which the landmarks read, never ask for the orcs, so nothing here asks for itself)
 function orcClear(X,Z,R){
   for(const v of volcanoesNear(X,Z,R+60))if(Math.hypot(v.X-X,v.Z-Z)<(v.great?v.R*1.15+R+10:v.R*0.95+R*0.5))return false; // a lesser cone's gentle foot may hold one; the samples keep it off the flows
-  return !siteNear(X,Z,R+6)&&!fortsNear(X,Z,R+12).length&&!sigNear(X,Z,R+16)&&!warrenSpots(X,Z,R+16).some(s=>s.kind==='camp');
+  return !siteNear(X,Z,R+6)&&!fortsNear(X,Z,R+12).length&&!sigNear(X,Z,R+16)&&!warrenSpots(X,Z,R+16).some(s=>s.kind==='camp')&&!wasteGateNear(X,Z,R+12);
 }
 // the orcs' place of cell (i,j): a candidate not crowded by a stronger neighbour, named
 function orcAt(i,j){

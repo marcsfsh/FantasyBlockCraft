@@ -42,7 +42,9 @@ const TOLKIEN=('aragorn arathorn arda arnor arwen azog bagend balin balrog bard 
  // the Noldor and the other elves of the elder days, their kings, cities and lands, so the elder style (D-062) can never draw one
  'hithlum dorthonion eldamar vanyar teleri noldor sindar avari quenya sindarin hollin lindon himring nevrast vinyamar finarfin fingon turgon '+
  'aredhel maeglin idril ecthelion melian doriath menegroth cirdan gildor rumil orophin gilgalad amanyar calacirya taniquetil formenos aman '+
- 'ossiriand maedhros celegorm curufin caranthir amrod amras angrod aegnor orodreth gwindor beleg mablung elwe olwe ingwe finwe indis').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
+ 'ossiriand maedhros celegorm curufin caranthir amrod amras angrod aegnor orodreth gwindor beleg mablung elwe olwe ingwe finwe indis '+
+ // the elves of the woods in the late age, their kings, captains and cities, so the wood elves (D-065) can never draw one
+ 'carasgaladhon galadhrim egladil cerinamroth tauriel oropher galion lasgalen nimloth celebrant silverlode').split(' ').filter(Boolean).map(s=>s.replace(/[^a-z]/g,''));
 const TOLKIEN_SET=new Set(TOLKIEN);
 const TOLKIEN_ROOTS=['khaz','durin','moria','mordor','gondor','erebor','sauron','morgoth','thror','thrain','thorin','smaug','rivendell','lorien','isengard','numenor','mithril','nazgul','silmaril','gandalf','aragorn','galadriel','legolas','gimli'];
 const normName=s=>s.toLowerCase().replace(/[^a-z]/g,'');

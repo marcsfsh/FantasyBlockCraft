@@ -13,6 +13,18 @@ function wasteCells(X,Z){
   for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++){const c=landSite(ci+a,cj+b);if(LANDS[cellLand(c)].k==='volcanic'&&Math.hypot(c.x-cx,c.z-cz)<WB_FAR+50)L.push(c);}
   wasteTC.set(tk,L);return L;
 }
+// The basin a volcanic cell lies in (D-067): the volcanic cells joined to it, each within 900 of the next (so their discs run
+// together), their middle and their chief (the stretch of most priority among them, which names the basin's great volcano and
+// its gate). The same object for every cell of the basin; key is the chief's.
+const wasteBC=new Map();
+function wasteBasin(c){
+  const k0=landKey(c.i,c.j);let B=wasteBC.get(k0);if(B)return B;if(LANDS[cellLand(c)].k!=='volcanic')return null;if(wasteBC.size>4000)wasteBC.clear();
+  const cells=[c],seen=new Set([k0]);
+  for(let q=0;q<cells.length&&cells.length<400;q++){const a=cells[q];for(let di=-3;di<=3;di++)for(let dj=-3;dj<=3;dj++){const d=landSite(a.i+di,a.j+dj),k=landKey(d.i,d.j);
+    if(seen.has(k)||LANDS[cellLand(d)].k!=='volcanic'||Math.hypot(a.x-d.x,a.z-d.z)>=900)continue;seen.add(k);cells.push(d);}}
+  let cx=0,cz=0,ch=null;for(const d of cells){cx+=d.x/cells.length;cz+=d.z/cells.length;const sc=stretchCell(d);if(!ch||sc.pr>ch.pr||sc.pr===ch.pr&&landKey(sc.i,sc.j)<landKey(ch.i,ch.j))ch=sc;}
+  B={key:'b'+landKey(ch.i,ch.j),cells:cells,cx:cx,cz:cz,chief:ch};for(const d of cells)wasteBC.set(landKey(d.i,d.j),B);return B;
+}
 // The basin at a column, from the warped coordinates landsAt reads cells by: o.bs, how far outside the edge of the basin's
 // floor (negative inside it), and o.bc, the nearest volcanic cell; o.bs is 1e9 where no basin reaches. The distance is a soft
 // minimum over the cells (each fading out by WB_FAR, so it never jumps), which rounds the joins between their discs.

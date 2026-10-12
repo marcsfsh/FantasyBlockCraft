@@ -13,7 +13,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v24',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v27',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -26,10 +26,10 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=24,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=27,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
-const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true},lsGet(SET_KEY)||{});
+const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
 // View distances [near fog, far fog]: Near, Normal, Far, and (with a wider loaded area, D-057) Farther and Farthest; none reaches
 // past VIEW_MAX, eight blocks short of the loaded area's edge (104 in the Near area, 152 in Far, 200 in Farthest)
 const VIEWS=[[34,70],[50,90],[60,98],[84,150],[110,200]],VIEW_MAX=W/2-8;

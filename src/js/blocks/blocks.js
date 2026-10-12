@@ -213,6 +213,34 @@ def(EVWOOD,'Golden Wood',[319,319,319],{snd:'wood'});def(EVMOSAIC,'Elven Mosaic'
 const ORCLOG=1147,ORCIRON=1148;
 def(ORCLOG,'Black Palisade',[322,322,321],{snd:'wood'});def(ORCIRON,'Riveted Iron',[323,323,323],{snd:'stone'});
 setH([ORCLOG],2,'wood');setH([ORCIRON],6,'metal',2);
+// The wood elves (D-065): the goldbough, their great tree, its silver bark, pale planks and golden leaves; their lamps of pale
+// light, woven rails, wood carved in flowing lines, rootstone (stone carved like roots, for the king's halls), clipped hedges,
+// the banner of the wood (a golden leaf on green), and leaf thatch for their roofs
+const WBARK=1149,WPLANK=1150,WLEAF=1151,WLAMP=1152,WRAIL=1153,WCARVE=1154,WROOT=1155,WHEDGE=1156,WBANNER=1157,WTHATCH=1158;
+def(WBARK,'Goldbough Bark',[325,325,324],{snd:'wood'});def(WPLANK,'Goldbough Planks',[326,326,326],{snd:'wood'});def(WLEAF,'Goldbough Leaves',[327,327,327],LEAFD);
+def(WLAMP,'Woodland Lamp',[328,328,328],{opq:false,occ:false,emit:true,lum:14,snd:'glass'});def(WRAIL,'Woven Rail',[329,329,329],{opq:false,occ:false,snd:'wood'});
+def(WCARVE,'Carved Wood',[326,326,330],{snd:'wood'});def(WROOT,'Rootstone',[331,331,331]);def(WHEDGE,'Clipped Hedge',[332,332,332],{snd:'soft'});
+def(WBANNER,'Banner of the Wood',[333,333,333],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(WTHATCH,'Leaf Thatch',[334,334,334],{snd:'soft'});
+NEW_LOGS.push(WBARK);NEW_PLANKS.push(WPLANK);NEW_LEAVES.push(WLEAF);
+// The mountain dwarves (D-066): dressed granite in great blocks and in long courses, granite carved in angular knotwork inlaid
+// with bronze, fluted columns banded in bronze, riveted bronze plating, firebrick black with soot, molten iron that glows in
+// their forges and channels (it never flows), the hold's lamps of bronze, cogwheels of iron, ore carts, slag, pit props of
+// oiled timber banded in iron, the banner of the mountain (a golden anvil under three peaks on deep blue), anvils, and the
+// polished flagstones of their halls
+const DGRAN=1159,DCOURSE=1160,DKNOT=1161,DCOL=1162,DBRONZE=1163,DFORGE=1164,DMOLTEN=1165,DLAMP=1166,DGEAR=1167,DCART=1168,DSLAG=1169,DPROP=1170,DBANNER=1171,DANVIL=1172,DFLAG=1173;
+def(DGRAN,'Dwarven Granite',[335,335,335]);def(DCOURSE,'Granite Courses',[335,335,336]);def(DKNOT,'Knotwork Granite',[335,335,337]);def(DCOL,'Hold Column',[338,338,339]);
+def(DBRONZE,'Bronze Plating',[340,340,340],{snd:'stone'});def(DFORGE,'Forge Brick',[341,341,341]);def(DMOLTEN,'Molten Iron',[342,342,342],{emit:true,ember:true,lum:15});
+def(DLAMP,'Hold Lamp',[343,343,343],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});def(DGEAR,'Iron Cogwheel',[345,345,344],{snd:'stone'});
+def(DCART,'Ore Cart',[346,347,347],{snd:'stone'});def(DSLAG,'Slag',[348,348,348]);def(DPROP,'Pit Prop',[349,349,350],{snd:'wood'});
+def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(DANVIL,'Anvil',[352,353,353],{snd:'stone'});def(DFLAG,'Hold Flagstones',[354,354,354]);
+// The war at the gate of the wastes (D-067): the canvas of the allied hosts' tents, weathered linen in panels with its seams;
+// the iron of the Ashen Gate's leaves, black plates studded in a lattice between heavy bands, rust bleeding from the studs; and
+// the mantlets of the siege lines, heavy planks bound in iron, scorched, with the stubs of arrows in them
+const CANVAS=1174,GATEIRON=1175,MANTLET=1176;
+def(CANVAS,'Tent Canvas',[355,355,355],{snd:'soft'});def(GATEIRON,'Gate Iron',[356,356,356],{snd:'stone'});def(MANTLET,'Mantlet',[357,357,357],{snd:'wood'});
+setH([CANVAS],0.8,'soft');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
+setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
+setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
 setH([EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY],4.5,'stone',1);setH([EVROOF,EVGOLD],4,'metal',2);setH([EVSHINGLE],2.5,'stone',1);setH([EVGLASS,EVLAMP],0.5,'misc');setH([EVBANNER],0,'soft');setH([EVWOOD],2,'wood');
 const NID=4096,COLD_OF=new Uint16Array(NID);COLD_OF[LANTERN]=DLANTERN;COLD_OF[SCONCE]=DSCONCE;COLD_OF[TORCH]=DTORCH;COLD_OF[GLOW]=DGLOW;
 setH([STONE,COBBLE,MOSSY,SBRICK,FURN,WAYPT],4,'stone',1);setH([DEEP],6,'stone',1);setH([GLOWMOSS],1.5,'misc');setH([SANDSTONE,TERO,TERB,TERT],3,'stone',1);setH([BRICK],5,'stone',1);

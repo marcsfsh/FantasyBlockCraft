@@ -79,6 +79,8 @@ const AMB_EV={
   crackle:at=>{for(let i=0;i<2+(Math.random()*3|0);i++)burst(0.03,'highpass',2600+Math.random()*2400,0.7,0.05,i*0.05+Math.random()*0.04,at);},
   // the goblin warrens (D-052): war drums far off in the rock, and goblin chatter
   drums:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1],at[2]+(at[2]-PL.z)*2],beat=[0,0.36,0.72,1.44,1.8,2.16,2.88];for(const t of beat){burst(0.16,'lowpass',110,0.9,0.24,t,far);tone(70,52,0.18,0.12,t,null,far);}},
+  // the war at the gates of the wastes (D-067): steel on steel and on shields somewhere off in the fight
+  clash:at=>{const far=[at[0]+(at[0]-PL.x)*1.5,at[1],at[2]+(at[2]-PL.z)*1.5],n=3+(Math.random()*5|0);for(let i=0;i<n;i++){const t=i*0.22+Math.random()*0.12;burst(0.06,'bandpass',2600+Math.random()*1800,6,0.07,t,far);if(Math.random()<0.4)burst(0.09,'lowpass',420,1,0.06,t+0.05,far);}},
   chatter:at=>{for(let i=0;i<3+(Math.random()*4|0);i++)voice(560+Math.random()*320,700+Math.random()*200,0.09,0.035,{type:'square',form:1300,q:2.2,delay:i*0.13+Math.random()*0.06},at);},
   // the realms of men (D-060): a bell from a tower, the hum of voices in the street, a cart's wheels, a dog
   bell:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1]+8,at[2]+(at[2]-PL.z)*2];for(let i=0;i<3;i++){tone(392,390,2.2,0.05,i*1.6,'triangle',far);tone(588,585,1.6,0.02,i*1.6,null,far);tone(784,780,1.2,0.012,i*1.6,null,far);}},
@@ -93,6 +95,11 @@ const AMB_EV={
   harp:at=>{const far=[at[0]+(at[0]-PL.x)*1.5,at[1]+5,at[2]+(at[2]-PL.z)*1.5],sc=[392,440,523,587,659,784,880,1047],n=5+(Math.random()*4|0),st=Math.random()*3|0;
     for(let i=0;i<n;i++){const f=sc[Math.min(sc.length-1,st+i)];tone(f,f,1.4,0.025,i*0.17,'triangle',far);tone(f*2,f*2,0.6,0.006,i*0.17,null,far);}},
   song:at=>{const far=[at[0]+(at[0]-PL.x)*3,at[1]+10,at[2]+(at[2]-PL.z)*3],ph=[[523,659],[587,698],[659,784],[523,659]];for(let i=0;i<ph.length;i++)for(const f of ph[i])voice(f,f*1.01,1.1,0.012,{type:'sine',form:1400,q:1.2,vib:5,vd:0.02,delay:i*1.05},far);},
+  // the wood elves (D-065): an owl in the high trees by night
+  owl:at=>{const far=[at[0],at[1]+12,at[2]];tone(410,370,0.32,0.04,0,null,far);tone(400,350,0.55,0.04,0.42,null,far);},
+  // the dwarves' chant (D-066): low voices together, slow, a few notes; picks tapping at the rock
+  chant:at=>{const far=[at[0]+(at[0]-PL.x)*2,at[1]-4,at[2]+(at[2]-PL.z)*2],ph=[[98,147],[110,165],[123,185],[110,165],[98,147]];for(let i=0;i<ph.length;i++)for(const f of ph[i])voice(f,f*1.005,1.1,0.016,{type:'sawtooth',form:520,q:1.6,vib:3,vd:0.01,delay:i*1.0},far);},
+  pick:at=>{const n=2+(Math.random()*3|0);for(let i=0;i<n;i++){burst(0.03,'bandpass',3200,6,0.06,i*0.7,at);tone(1500,1400,0.08,0.012,i*0.7,null,at);}},
   boom:at=>{const far=[at[0]+(at[0]-PL.x)*4,at[1],at[2]+(at[2]-PL.z)*4];burst(2.8,'lowpass',85,0.6,0.32,0,far);tone(55,26,2.4,0.22,0,null,far);}
 };
 // Profiles: loop levels {surf, rumble, lava, wind} and events per minute; day and night may differ
@@ -113,7 +120,15 @@ const AMB_LAND={
   riders:{wind:0.05,day:{voices:8,whinny:3,hooves:3,hammer:2,horn:0.4,bird:4,dog:1},night:{cricket:8,whinny:1,dog:1,voices:1}},
   stud:{wind:0.05,day:{whinny:5,hooves:2,bird:8,voices:1},night:{cricket:12,whinny:1}},
   // in the high elves' cities, fastnesses and refuges (D-062): a harp, singing far off, chimes in the wind, birds, a few voices
-  elves:{wind:0.05,day:{harp:3,song:0.8,chime:1.5,bird:8,voices:3},night:{harp:2,song:1,chime:2,cricket:5}}
+  elves:{wind:0.05,day:{harp:3,song:0.8,chime:1.5,bird:8,voices:3},night:{harp:2,song:1,chime:2,cricket:5}},
+  // among the wood elves (D-065): birds all about, singing in the trees, a harp, voices and laughter; by night the songs go on
+  woodelves:{wind:0.06,day:{bird:14,song:1.4,harp:2,voices:4},night:{song:1.8,harp:1.5,cricket:6,owl:1.5,voices:1}},
+  // among the mountain dwarves (D-066): hammers on anvils, carts and voices, picks at the rock, a deep chant now and then, the
+  // mountain's rumble under it all; by night the forges still ring
+  dwarves:{wind:0.06,rumble:0.05,day:{hammer:9,voices:5,cart:2,pick:3,chant:0.6,horn:0.2},night:{hammer:4,voices:1.5,pick:2,chant:0.9,drip:2}},
+  // at the gates of the wastes (D-067): the orcs' drums behind the wall, the hosts' horns, the clash of arms off along the pass,
+  // hammering at the engines, voices; by night the drums beat harder
+  siege:{wind:0.05,rumble:0.03,day:{drums:2,horn:1.2,clash:3,hammer:3,voices:5,crackle:2},night:{drums:3.5,horn:0.6,clash:2,voices:2,crackle:3}}
 };
 const AMB_OF={sea:'sea',isles:'sea',kelp:'sea',chalk:'sea',fjord:'sea',blacksand:'sea',willow:'wet',bog:'wet',moors:'high',mtn:'high',alpine:'high',glacier:'high',tundra:'high',karst:'high',cloud:'wet',
   dry:'dry',steppe:'dry',petrified:'dry',volcanic:'fire',blight:'grey',shadow:'grey',barrow:'grey',crystal:'ring',starfall:'ring',glowcap:'ring'};
@@ -133,8 +148,9 @@ function ambProfile(){
   if(yy<g-4){const X=bx+OX,Z=bz+OZ,cx=Math.floor(X/CS),cz=Math.floor(Z/CS),hold=yy<100&&yy>=20&&ruinZone(cx,cz),L=ambLayer(yy,hold,hold&&holdNear(cx,cz).inhabited);
     if(warrenName(X,yy,Z))return {surf:0,rumble:0.16,lava:0.12,wind:0,ev:{drums:2.5,chatter:3,crackle:8,bubble:3,hammer:1.5},under:true}; // the goblin warrens (D-052)
     if(fortName(X,yy,Z))return {surf:0,rumble:0.26,lava:0.16,wind:0,ev:{boom:1,crackle:10,bubble:4},under:true}; // an Emberlord's fortress
+    if(stairName(X,yy,Z))return {surf:0,rumble:0.22,lava:0.12,wind:0,ev:{drums:1.6,crackle:10,bubble:3,boom:0.5,hammer:1,chatter:1},under:true}; // the Ember Stair (D-067)
     return {surf:0,rumble:L.rumble||0,lava:L.lava||0,wind:0,ev:L.ev,under:true};}
-  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=rs?AMB_LAND[rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
+  const rs=realmSiteAt(bx+OX,bz+OZ,12),P=wasteGateAt(bx+OX,bz+OZ,30)?AMB_LAND.siege:rs?AMB_LAND[rs.prov.cult.k==='dwarf'?'dwarves':rs.prov.cult.k==='wood'?'woodelves':rs.prov.cult.k==='elf'?'elves':rs.prov.cult.k==='horse'?(rs.k==='farm'||rs.k==='outpost'?'stud':'riders'):rs.k==='farm'||rs.k==='outpost'?'farmstead':'town']:ambLand(LWX.k),night=ambNight(),ev=Object.assign({},night?P.night:P.day);
   if(rainAmt>0.4)for(const k of ['bird','gull','cricket'])if(ev[k])ev[k]*=0.2;
   return {surf:P.surf||0,rumble:P.rumble||0,lava:P.lava||0,wind:(P.wind||0)*(1+Math.max(0,yy-SEA-40)/80),ev:ev,under:false};
 }
