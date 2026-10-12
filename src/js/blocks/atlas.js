@@ -533,10 +533,11 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     {const band=y===1||y===2||y===13||y===14,pl=x%5===0,rv=band&&x%5===2,sc=hn(x>>1,y>>1,533)<0.18,ar=(x===5&&y>=5&&y<=8)||(x===11&&y>=8&&y<=10)||(x===3&&y>=10&&y<=11),fl=(x===5&&y===4)||(x===11&&y===7)||(x===3&&y===9);
       P(357,x,y,ar?sh([150,120,80],0):fl?[200,200,196]:rv?[176,176,180]:band?sh([82,84,90],(y===1||y===13?14:-8)):pl?sh([70,50,32],0):sh([138,100,64],(sc?-46:0)+(hn(x,y>>2,534)-.5)*16+(x%5===1?10:0)));}
   }
-  // the banner of a warhost (W8b): a hide of black and dull red on a pole's crossbar, a burning eye with a slit, torn at the foot
+  // the banner of a warhost (W8b): a hide of black and dull red on a pole's crossbar, a horned skull in bone, torn at the foot
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){if(y===0){P(358,x,y,[64,52,44]);continue;}const torn=y>=13&&((x*7+y*3)%5<2||y===15&&x%3!==1);if(torn)continue;
-    const dx=x-7.5,dy=y-6.5,r=Math.hypot(dx*0.8,dy*1.15),edge=x<=0||x>=15;
-    P(358,x,y,edge?sh([40,34,32],0):Math.abs(dx)<0.8&&Math.abs(dy)<2.2?[24,10,8]:r<2.6?sh([250,150,40],(2.6-r)*20):r<3.6?sh([170,50,26],(hn(x,y,560)-.5)*10):y===11||y===12?sh([110,30,24],(hn(x,y,561)-.5)*14):sh([46,34,32],(hn(x,y,562)-.5)*12+(hn(x>>2,y>>2,563)-.5)*10));}
+    const dx=Math.abs(x-7.5),dy=y-7,edge=x<=0||x>=15,eye=dx>=1&&dx<=2.5&&dy>=-1&&dy<=0,nose=dx<=0.5&&dy===1,teeth=dx<=2.5&&dy===4&&x%2,
+      bone=dx<=3.5&&dy>=-3&&dy<=1||dx<=2.5&&dy>=2&&dy<=4||dx>=4&&dx<=5&&dy>=-4&&dy<=-2||dx>=3&&dx<=4&&dy>=-6&&dy<=-5;
+    P(358,x,y,edge?sh([40,34,32],0):eye||nose||teeth?[26,16,14]:bone?sh([220,208,182],(hn(x,y,560)-.5)*14):y===11||y===12?sh([110,30,24],(hn(x,y,561)-.5)*14):sh([46,34,32],(hn(x,y,562)-.5)*12+(hn(x>>2,y>>2,563)-.5)*10));}
   // a bolt thrower (W8c), seen from its side on a cross block: a trestle of two legs, the stock along its top, the bow of steel at
   // its head, a great bolt laid in it, the winch at its foot
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const leg=(y>=9&&(Math.abs(x-4-(y-9)*0.5)<0.8||Math.abs(x-11+(y-9)*0.5)<0.8)),stock=y>=6&&y<=7&&x>=2&&x<=14,bow=x>=12&&x<=13&&y>=1&&y<=12&&Math.abs(y-6.5)>=1,

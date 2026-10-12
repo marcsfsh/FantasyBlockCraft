@@ -164,3 +164,6 @@ Planning a province (`planProvince`, measured in a scratch case over the nine he
 | 3,860 | | | 17.0 / 24.3 | 37.8 / 69.7 | 72 | 2,500 |
 
 Before: sight looked through every creature (most of them its own side), the far ones each drew as a mesh of their own, and all the nearest 34 blocks (141 creatures) whole: 4,480 draw calls. After (D-077): sight looks through the other side's grid cells only, the far ones are instances by kind and coat (about 200 batches), the nearest 40 whole, and those afar step every other frame (standing, every fourth).
+
+
+The arts of war (0.48.0, W8): the same `--host=2500:15` run, built from 0.47.0 and from 0.48.0 one after the other on the same VM: standing 21.9 / 28.4 against 22.0 / 27.3, fighting 39.2 / 62.7 against 42.0 / 66.8 (about 3,250 creatures each). Each soldier's heart (W8b) is taken a slice of the crowd each frame and its cells rebuilt twice a second; with it and the field's frame turned off the run gave 19.2 / 40.4, so they cost about a millisecond. Shots gather the creatures along their way once a frame for all their steps.

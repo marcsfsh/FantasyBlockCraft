@@ -207,11 +207,12 @@
     oxbow:{parts:[...F.orc(),['hood','head',[0,0,0],[-3.5,-0.5,-3.5,7,7,6],0,{head:1}],...xbow('armR',1.5)],coats:F.orcCoats,
       paint(P,c){F.orcPaint(P,c);P.coat(['hood'],[50,44,40],12);xbowPaint(P,[70,50,34],[52,50,54],[110,30,26]);}},
     // the banner bearer of a warhost (W8b): an orc in a horned helm with a tall pole of black wood, a spike at its head, a hide
-    // banner of black and dull red on its crossbar with a burning eye, torn at the foot
+    // banner of black and dull red on its crossbar with a horned skull in bone, torn at the foot
     obanner:{scale:1.08,parts:[...F.orc(),['helm','head',[0,3,0],[-3.5,0,-3.5,7,4,7],0,{head:1}],['hnL','helm',[-3.5,2,0],[-1,0,-0.5,1,4,1],[0,0,0.5],{head:1,nb:1,tp:['y',0,0,0,0]}],['hnR','helm',[3.5,2,0],[0,0,-0.5,1,4,1],[0,0,-0.5],{head:1,nb:1,m:'hnL',tp:['y',0,0,0,0]}],...standard('armR',38)],coats:F.orcCoats,
       paint(P,c){F.orcPaint(P,c);P.coat(['helm'],c.iron,10);P.rows('helm',['F'],2,4,[20,18,20]);P.coat(['hnL'],[210,196,170],8);P.map('pole',ALL,(s,t)=>sh([52,40,32],hz(s,t>>2,951)*10+(t%9===0?-16:0)));P.map('bar',ALL,(s,t)=>sh([52,40,32],hz(s,t,953)*10));P.coat(['fin'],c.iron,8);
-        P.sheet('flag','x',(a,b)=>{if(b>=13&&(a*7+b*3)%5<2)return 'cut';const dx=a-4.5,dy=b-6,r=Math.hypot(dx*0.85,dy*1.1);
-          return Math.abs(dx)<0.8&&Math.abs(dy)<2?[24,10,8]:r<2.4?[250,150,40]:r<3.4?[170,50,26]:b===11?sh([110,30,24],0):sh([46,34,32],hz(a,b,955)*12);});}},
+        P.sheet('flag','x',(a,b)=>{if(b>=13&&(a*7+b*3)%5<2)return 'cut';const dx=Math.abs(a-4.5),dy=b-7,bone=[220,208,182],dark=[26,16,14];
+          if(dx===1.5&&dy===0||dx===0.5&&dy===1||dx<=1.5&&dy===3&&(a%2))return dark;if(dx<=2.5&&dy>=-2&&dy<=1||dx<=1.5&&dy>=2&&dy<=3||dx===3.5&&(dy===-2||dy===-3)||dx===2.5&&dy===-4)return sh(bone,hz(a,b,955)*8);
+          return b===11?sh([110,30,24],0):sh([46,34,32],hz(a,b,955)*12);});}},
     // the war hound of the hosts (W8b): a big hound of the camps in a coat of mail over its back, a spiked collar of leather
     whound:{scale:1.2,parts:[...K('hound').parts,['mail','body',[0,2,0],[-3.5,0,-4.5,7,5,9],0,{nb:1}],['coll','head',[0,1,-1],[-3,-1,-1,6,3,2],0,{head:1,nb:1}]],
       coats:[[{coat:[150,110,70],saddle:[90,64,44],chest:[210,190,160],nose:[30,26,24]},3],[{coat:[52,46,44],saddle:[36,32,30],chest:[176,128,80],nose:[24,20,20],tan:1},2],[{coat:[140,136,130],saddle:[104,100,96],chest:[186,182,176],nose:[30,28,28],shag:1},1]],
