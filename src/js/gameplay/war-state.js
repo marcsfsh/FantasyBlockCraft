@@ -21,8 +21,8 @@ function warStage(w){const fr=w.s>=2?warFront(w):0;if(w.el&&w.el.fate)return 'Th
 function warLog(w,s){w.log.push([Math.round(warPlay),s]);if(w.log.length>80)w.log.splice(1,1);saveDirty=true;}
 // the player comes within 200 of a gate's works: its war is found, and from then on it is kept
 function warFound(P){let w=WARS.get(P.id);if(w)return w;
-  w={id:P.id,n:P.name,X:P.X,Z:P.Z,camp:P.camp,f:Math.round(warPlay),b:{ram:0.02,mine:0,walls:0,sally:0.05},m:{},w:[0,0],log:[]};WARS.set(P.id,w);
-  warLog(w,'You came to '+P.name.replace(/^The /,'the ')+'. The hosts of '+P.camp.replace(/^The /,'the ')+' have it under siege, and '+P.ram+'\'s ram stands at its barred leaf.');
+  w={id:P.id,n:P.name,X:P.X,Z:P.Z,camp:P.camp,f:Math.round(warPlay),b:{ram:0.02,mine:WAR_MEET+0.02,walls:0,sally:0.05},m:{mine:Math.floor((WAR_MEET+0.02)*4)},w:[0,0],log:[]};WARS.set(P.id,w); // (the dwarves have long been digging: their mine has met the goblins' under the pass, its marks passed, D-086)
+  warLog(w,'You came to '+P.name.replace(/^The /,'the ')+'. The hosts of '+P.camp.replace(/^The /,'the ')+' have it under siege, and '+P.ram+'\'s ram stands at its barred leaf. Under the pass the dwarves\' mine has broken into the goblins\' countermine, and they fight there in the dark.');
   toast('The siege of '+P.name.replace(/^The /,'the ')+': you have found the war at the gate');return w;}
 // every second while playing: the war's clock, finding a gate, each effort's marks (a quarter, a half...), and the panel
 function warStateTick(){

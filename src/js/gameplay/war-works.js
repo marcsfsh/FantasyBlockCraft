@@ -36,7 +36,7 @@ function warLeafCells(P,L){const g=P.hG,cs=P.cs,out=[],R=[0,1.8,3.2,5,99][L];
 // hole in the yard to meet it four fifths of the way. Each carved as far as its effort has come, only where rock covers it, and its
 // walls, floor and roof made sound wherever they would open on air, water or lava
 const warMinePts=P=>({A:[P.uL+16,P.cs*66],B:[2,P.cs*28],C:[-14,P.cs*42]});
-const warMineMid=P=>{const M=warMinePts(P);return [M.A[0]+(M.B[0]-M.A[0])*0.8,M.A[1]+(M.B[1]-M.A[1])*0.8];};
+const WAR_MEET=0.6,warMineMid=P=>{const M=warMinePts(P);return [M.A[0]+(M.B[0]-M.A[0])*WAR_MEET,M.A[1]+(M.B[1]-M.A[1])*WAR_MEET];}; // where the countermine meets the mine (three fifths of its way since D-086)
 function warTunnel(P,a,b,t0,t1,out,props){const g=P.hG,y0=g-9,L=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/L,uv=(b[1]-a[1])/L,inn=new Map(),sh=new Map();
   for(let s=t0*L;s<=t1*L;s+=0.5){const cu=a[0]+ux*s,cv=a[1]+uv*s;
     for(let o=-2;o<=2;o+=0.5){const u=Math.round(cu-uv*o),v=Math.round(cv+ux*o),k=u+','+v;if(Math.abs(o)<=1.25){if(!inn.has(k))inn.set(k,[u,v,s,o]);}else if(!sh.has(k))sh.set(k,[u,v]);}}
@@ -54,8 +54,22 @@ function warMineCells(P,me,cm){const M=warMinePts(P),out=[],mid=warMineMid(P),g=
   if(me>0){warShaft(P,M.A,out,true);warTunnel(P,M.A,M.B,0,Math.min(1,me),out,true);}
   if(me>=1)for(let du=-2;du<=2;du++)for(let dv=-2;dv<=2;dv++)for(let y=g-9;y<=g-7;y++)warSet(out,P,M.B[0]+du,M.B[1]+dv,y,y===g-9&&Math.abs(du)<=1&&Math.abs(dv)<=1&&(du+dv)%2===0?TNT:AIR);
   if(cm>0){warShaft(P,M.C,out,false);warTunnel(P,M.C,mid,0,Math.min(1,cm),out,false);}
+  if(cm>=1&&me>=WAR_MEET)warGallery(P,mid,me,out);
   return out;}
-const warCm=w=>Math.max(0,Math.min(1,(warEff(w,'mine')-0.45)/0.35)); // the goblins dig to meet the mine from half way
+const warCm=w=>Math.max(0,Math.min(1,(warEff(w,'mine')-0.25)/0.3)); // the goblins dig to meet the mine from a quarter of its way, and are there first (D-086)
+// The Broken Gallery (D-086): where the two met, the fighting has dug out a long low hall about the meeting, five high, under the
+// pass; propped on the dwarves' side and lit by their lamps, heaped with rubble and the goblins' leavings on the other, a brazier; its walls,
+// floor and roof made sound as the tunnels' are, and only where rock covers it
+function warGallery(P,c,me,out){const g=P.hG,y0=g-9,M=warMinePts(P),L=Math.hypot(M.B[0]-M.A[0],M.B[1]-M.A[1]),au=(M.B[0]-M.A[0])/L,av=(M.B[1]-M.A[1])/L,
+    E=[M.A[0]+(M.B[0]-M.A[0])*Math.min(1,me),M.A[1]+(M.B[1]-M.A[1])*Math.min(1,me)],way=(u,v)=>wgLineD([M.A,E],u,v)<=1.6||wgLineD([M.C,c],u,v)<=1.6; // (the tunnels run on through it)
+  const sound=(u,v,y)=>{const [X,Z]=wgXZ(P,u,v),x=X-OX,z=Z-OZ;if(x>=0&&z>=0&&x<W&&z<D&&!SOLID[get(x,y,z)])out.push([X,y,Z,BASALT]);},inn=new Set();
+  for(let du=-9;du<=9;du++)for(let dv=-9;dv<=9;dv++){const u=Math.round(c[0])+du,v=Math.round(c[1])+dv,a=du*au+dv*av,b=-du*av+dv*au,q=hsh(u*7,9881,v);
+    if(Math.hypot(a/8,b/4.5)>1+(q-0.5)*0.15||warTop(P,u,v)<y0+7)continue;inn.add(u+','+v);sound(u,v,y0-1);sound(u,v,y0+5);
+    const prop=Math.abs(Math.abs(a)-4)<0.5&&Math.abs(Math.abs(b)-2.5)<0.5,dw=a<0; // (the dwarves came from A: a < 0)
+    for(let y=y0;y<=y0+4;y++){let id=AIR;if(prop)id=y===y0+4?PLANKS:dw?DPROP:CHARWOOD;else if(dw&&Math.abs(b)<0.6&&(Math.abs(a+4)<0.6||Math.abs(a+7)<0.6)&&y===y0+4)id=DLAMP;else if(!dw&&y===y0&&Math.abs(a-5)<0.6&&Math.abs(b+2.5)<0.6)id=BRAZIER;
+      else if(!dw&&y===y0&&q<0.18)id=q<0.06?SKULLS:q<0.12?GRAVEL:COBBLE;else if(dw&&y===y0&&Math.abs(a+6)<0.6&&Math.abs(b-2)<0.6)id=DCART;warSet(out,P,u,v,y,id);}}
+  for(let du=-10;du<=10;du++)for(let dv=-10;dv<=10;dv++){const u=Math.round(c[0])+du,v=Math.round(c[1])+dv;if(inn.has(u+','+v))continue;
+    if(!way(u,v)&&[[1,0],[-1,0],[0,1],[0,-1]].some(([e,f])=>inn.has((u+e)+','+(v+f))))for(let y=y0-1;y<=y0+5;y++)sound(u,v,y);}}
 // ---- Ladders and breaches: as the assaults win the walls, ladders stand against the towers' outer faces (two at each quarter: up
 // the battered foot, then the face), and from the half a breach is beaten through each one's wall into the tower at the height of
 // the walk, from where the door onto the walk is open to them
@@ -166,14 +180,15 @@ function warClimbTick(dt,P,w){warClimbT-=dt;if(warClimbT>0||w.s>=2)return;warCli
     if(!p.fall){f.held=1;f.back=null;const A=f.army,i=A.m.indexOf(f);if(i>=0)A.m.splice(i,1);f.army=null;}
     const w0=f.way.shift();warAim(f,w0);f.wp=w0;f.st='return';f.t=20;}}
 // ---- Underground (Q149): when the player is in the tunnels, a few sappers stand at the mine's face and goblins at the
-// countermine's, digging (the ring of picks), and fight where the two meet
+// countermine's, digging (the ring of picks); once the two have met, the battle in the Broken Gallery (warUnderBattle, D-086)
 let warMineT=0,warPickT=0;
 function warMineFight(dt,P,w){if(w.s>=2)return;const g=P.hG;if(PL.y>g-2)return;const M=warMinePts(P),mid=warMineMid(P),ap=w.ap||{},me=ap.me||0,cm=ap.cm||0,[pu,pv]=wgUV(P,PL.x+OX,PL.z+OZ);
-  const at=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],seg=(a,b,t)=>t>0&&wgLineD([a,at(a,b,t)],pu,pv)<14;if(!seg(M.A,M.B,me)&&!seg(M.C,mid,cm))return;
+  const at=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],seg=(a,b,t)=>t>0&&wgLineD([a,at(a,b,t)],pu,pv)<14,met=me>=WAR_MEET&&cm>=1&&Math.hypot(pu-mid[0],pv-mid[1])<60;
+  if(!met&&!seg(M.A,M.B,me)&&!seg(M.C,mid,cm))return;if(met)warUnderBattle(dt,P,w); // the battle in the Broken Gallery (D-086)
   const faces=[];if(me>0.05&&me<1)faces.push(['d_sap',at(M.A,M.B,me-0.04),1]);if(cm>0.05&&cm<1)faces.push(['den',at(M.C,mid,cm-0.04),0]);
   warPickT-=dt;if(warPickT<=0){warPickT=0.6+Math.random()*0.5;for(const [,[u,v]] of faces){const [X,Z]=wgXZ(P,Math.round(u),Math.round(v)),x=X-OX+0.5,z=Z-OZ+0.5;
     if(Math.hypot(x-PL.x,z-PL.z)<40){burst(0.05,'highpass',2600+Math.random()*1400,1.5,0.22,0,[x,g-8,z]);burst(0.12,'bandpass',520,1,0.12,0.02,[x,g-8,z]);}}}
-  warMineT-=dt;if(warMineT>0)return;warMineT=12;if(foes.some(f=>!f.dead&&f.mine===P.id))return;
+  warMineT-=dt;if(warMineT>0||met)return;warMineT=12;if(foes.some(f=>!f.dead&&f.mine===P.id))return;
   for(const [tab,[u,v],folk] of faces){const [X,Z]=wgXZ(P,Math.round(u),Math.round(v));
     for(const f of spawnGroup(tab,folk?2:3,X+0.5-OX,g-9,Z+0.5-OZ,1.2,folk?{prov:'wg:'+P.id,site:wgSite(P)}:{})){f.mine=P.id;f.war=P.id;f.hx=f.x;f.hz=f.z;}}}
 // ---- The gate's fall (Q142, Q146): when the four efforts are done, the next army of the hosts to come against the gate (or, the

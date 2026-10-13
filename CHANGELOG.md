@@ -5,6 +5,21 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.49.0 (2026-10-13): the way in, the camp's life, the hidden way and the war below
+
+Saves from 0.48.0 do not carry over (save key v39).
+
+### Game
+- **A short, straight way to the great volcano:** the Long Descent now runs down the ring's inner wall in one straight line at one in four, and each basin's great volcano stands a short way on from its foot (about 100 to 200 blocks, where it was 600 or more). Beyond a fallen gate the front crosses the basin in about twenty minutes.
+- **The Leaguer is full of life:** companies drill in ranks on two muster fields to a sergeant's call, archers loose at the butts, smiths and the dwarves' forges throw sparks, cooks kneel at the cook-fires, bearers carry loads between the wagons and the stores, the sick lie in the field hospital until they are mended and then go back to the lines, sentries walk the rampart's inner road, and soldiers of the three peoples stand talking and laughing among their tents. The camp has its own sounds: hammers, voices, laughter, horses and carts. Many more people are about when you are in it.
+- **The hidden way:** beside every gate the hosts have cut a secret passage through the ring of ash mountains, from beside the end of the siege lines to the back of the orcs' yard, timbered and lamplit, with a chamber halfway. Its mouths are hidden behind boulders, rubble and hide flaps. Every minute or so a company of the hosts' best (elven blade masters, sharpshooters and wardens of the wood, now and then a household knight) slips through it unseen and falls on the orcs' camp. Walking into it finds it.
+- The orcs' forges, watchtowers and fighting pits always face square to the world, so none is built with gaps.
+- **The war under the gate:** the dwarves' mine has broken into the goblins' countermine under the pass, and in the Broken Gallery where they met a battle goes on without end while you are down there: dwarves and goblins keep coming up their own tunnels to fight, until the gate falls. Go down the ladder in the mine's shaft behind the siege lines.
+
+### Tooling
+- `tools/shot.mjs --life=20` peoples the places about the camera and lets them live 20 seconds before the shot.
+- New test cases `76-leaguer`, `77-hidden` and `78-under`.
+
 ## 0.48.0 (2026-10-12): the arts of war (W8)
 
 Saves from 0.47.0 do not carry over (save key v38).

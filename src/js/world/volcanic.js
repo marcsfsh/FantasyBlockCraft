@@ -6,22 +6,26 @@
 const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
 // ---- The great volcano (D-054, D-055, D-067): every basin of the wastes has one, near its middle, far larger than the rest,
 // the seat of an Emberlord's fortress, rising from the sunken floor high over the ring of ash mountains about it. Placed where
-// the floor holds its whole foot with room to spare (the widest that fits, searched outward from the basin's middle), clear of
-// the way down from its gate (wasteGateOf); its lesser cones about its foot. A basin of several stretches has one all the same,
-// in its chief stretch's name (wasteBasin).
+// the floor holds its whole foot with room to spare (the widest that fits, searched first a short way on from the foot of its
+// gate's road toward the basin's middle, within 180 and then 360 for the widest and within 180 for the rest, so the way from the
+// gate is short: D-083; else from the middle), clear of the way down from its gate (wasteGateOf); its lesser cones about its
+// foot. A basin of several stretches has one all the same, in its chief stretch's name (wasteBasin).
 const GREAT_R=[250,225,200,175,150,125];
 function greatOf(c){
   const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;greatC.set(key,null);
   if(LANDS[cellLand(c)].k==='volcanic'){const B=wasteBasin(c),ch=B.chief;
-    if(ch.i===c.i&&ch.j===c.j)for(const R of GREAT_R){v=greatTry(c,R,B.cx,B.cz,[],B);if(v)break;}}
+    if(ch.i===c.i&&ch.j===c.j){const P=wasteGateOf(B),ft=P&&P.ramp.pts[P.ramp.pts.length-1]; // (near the foot of its gate's road, a short way on: D-083)
+      if(ft){const ex=B.cx-ft[0],ez=B.cz-ft[1],el=Math.hypot(ex,ez)||1;const at=(R,m)=>{const d=R*1.3+90;return greatTry(c,R,ft[0]+ex/el*d,ft[1]+ez/el*d,[],B,m);};
+        for(const [m,big] of [[180,1],[360,1],[180,0]]){for(const R of GREAT_R)if((R>=200)===!!big){v=at(R,m);if(v)break;}if(v)break;}}
+      if(!v)for(const R of GREAT_R){v=greatTry(c,R,B.cx,B.cz,[],B);if(v)break;}}}
   greatC.set(key,v);return v;
 }
 // Is a disc of radius m about (X,Z) on the floor of a basin, and not over the sea?
 function onFloor(X,Z,m,k){landsAt(X,Z,TVC);if(TVC.bs>-m-8||TVC.wVolc<0.95)return false;
   for(let q=0;q<k;q++){const a=q*6.2832/k;landsAt(X+Math.round(Math.cos(a)*m),Z+Math.round(Math.sin(a)*m),TVC2);if(TVC2.bs>-8)return false;}return true;}
-function greatTry(c,R,cx,cz,G,B){
+function greatTry(c,R,cx,cz,G,B,maxd){
   const foot=Math.round(R*1.3)+40;
-  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0,X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
+  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0;if(maxd&&d>maxd)break;const X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
     if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24))continue;if(!onFloor(X,Z,foot,16))continue;if(B&&wasteGateKeep(B,X,Z,foot+16))continue;
     volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)continue;
       const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);

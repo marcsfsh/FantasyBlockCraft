@@ -88,7 +88,56 @@ function campLayout(P,s,L,r){
     {const vv=sv*26;pc('lghosp',190,vv,7,31,sv>0?2:3,{col:WOOLR});take(172,208,vv-5,vv+5);}
     sp('r_market',176,sv*60,6);sp('r_farm',200,sv*80,5);sp('e_garden',190,sv*26,4);sp('e_aid',184,sv*20,4); // (healers and bearers by the field hospital, W3)
     for(let U=136;U<=230;U+=11)for(let V=12;V<=112;V+=8){const vv=sv*V;if(!free(U-4,U+4,vv-3,vv+3))continue;pc('lgtent',U,vv,5,7,0,{col:hsh(U,9749,V)<0.4?WOOLR:WOOLW});take(U-4,U+4,vv-3,vv+3);}}
+  // ---- the camp's life (D-084): companies drilling on the muster field, soldiers among the tents of each people, cooks at the
+  // fires, bearers at the wagons, the sick in the field hospital, sentries on the road inside the rampart, knots of talk, a
+  // second station at the archery range (their places only: the blocks are unchanged)
+  sp('x_muster',29,-24,5);sp('x_muster',29,24,5);sp('w_range',56,-side*106,3);
+  for(const U of [64,92])for(const V of [30,70])sp('r_tents',U,side*V,5);
+  for(const U of [64,96])for(const V of [30,64])sp('e_tents',U,-side*V,5);
+  for(const V of [40,84])sp('d_tents',140,side*V,4);
+  {const sv=-side;for(const U of [162,176,190])sp('x_cook',U,sv*46,2);sp('x_haul',188,sv*72,4);sp('x_sick',190,sv*26,3);}
+  for(const [U,V] of [[9,-70],[9,70],[241,-40],[241,40],[125,-118],[125,118]])sp('x_sentry',U,V,2);
+  sp('x_chat',106,side*44,3);sp('x_chat',100,-side*44,3);sp('x_chat',128,0,3);
 }
+// ---- The hidden way (D-085): beside the pass (on the far side from the road down where it can), the hosts have cut a secret passage through the ring
+// of ash mountains, from beside the end of the siege lines to the back of the orcs' yard, and their best are forever slipping
+// through it (war-under.js). It runs at the gate's height, three wide and three high, timbered every six and lamplit, with a
+// chamber halfway where some wait their turn. Its outer mouth is screened by a tumble of boulders and a hide flap; its inner opens
+// in the yard's side wall behind heaps of rubble. Planned from the shaped ground along its line (colInfo), which must cover it all
+// the way in: none where it cannot (P.hid unset). Route: the way its parties go, from the Leaguer's front gate (gate's frame;
+// a third 1 for an exact point, a fourth 1 where they come out).
+function hidLayout(P,s,L){
+  const g=P.hG,o={},h=(u,v)=>{const [X,Z]=siteXZ(s,u,v);return colInfo(X,Z,o).h;};let sd=-P.side;
+  // its line: the first of a few (across the ring, and where it turns in to the yard) that rock covers from the yard's wall out past
+  // the gate, its outer mouth where the cover ends, on ground about the gate's height
+  let vA=0,ut=0,uo=null,m=0;
+  find:for(const sv of [-P.side,P.side])for(const vv of [84,76,92,68,100])for(const t of [P.uY+14,P.uY+22,P.uY+30,-28,-20]){if(t>-20)continue;sd=sv;vA=sd*vv;ut=t;let ok=true;
+    for(let v=vA;Math.abs(v)>=WG_WY+4&&ok;v-=sd*2)if(h(ut,v)<g+4)ok=false;if(!ok)continue;
+    let u=ut;while(u<P.uF+40&&h(u+1,vA)>=g+4)u++;if(u<8)continue;
+    for(let e=2;e<=45;e++)if(h(u+e,vA)<=g+2){uo=u;m=u+e;break find;}}
+  if(uo===null)return;
+  const um=Math.round((uo+ut)/2),vY=sd*(WG_WY+1),r=rngAt(P.X,9761,P.Z);
+  const H=P.hid={uo:uo,m:m,ut:ut,um:um,vA:vA,vY:vY,sd:sd,line:[[m,vA],[ut,vA],[ut,vY]],n:'The Hidden Way of '+nameWord('highelf',r)};
+  H.route=[[P.uC0+20,0],[P.uC0+2,0],[P.uC0-12,sd*40],[m+10,vA-sd*8],[m+1,vA-sd*2],[m-3,vA,1],[um+4,vA,1],[um-4,vA,1],[ut,vA,1],[ut,sd*(WG_WY+4),1],[ut,sd*(WG_WY-3),1,1]];
+  L.parts.push({k:'ghid',u0:ut-4,u1:m+6,v0:Math.min(vA+sd*7,sd*(WG_WY-4)),v1:Math.max(vA+sd*7,sd*(WG_WY-4)),y:g,H:H});
+  L.spots.push({kind:'x_hid',u:um,v:vA,R:2,y:g});}
+// a column of the hidden way: its floor of trodden cinder, open to its roof (or to the sky where the rock is thin at its mouths),
+// walled, floored and roofed sound wherever it would open on anything but rock; props and lintels every six, a lamp every twelve
+RB.ghid=(s,p,u,v,X,Z)=>{const H=p.H,g=s.T,sd=H.sd,cv=(v-H.vA)*sd,h=colInfo(X,Z,TGB).h,q=hsh(X,9763,Z),a=u-H.um;
+  const ch=Math.abs(a)<=3&&Math.abs(cv)<=3,chW=Math.abs(a)<=4&&Math.abs(cv)<=4,d=wgLineD(H.line,u,v),inn=d<=1.5||ch,wall=!inn&&(d<=2.5||chW);
+  const top=ch?g+5:g+3,roofed=h>=top+1,legA=Math.abs(cv)<=2&&u>H.ut+2&&u<H.uo,pr=legA&&!chW&&(u-H.ut)%6===0;
+  if(inn){if(roofed||h>g+1)RBP(X,g,Z,q<0.45?GRAVEL:q<0.8?CINDER:PATH);PW(X,g-1,Z,BASALT,MODE_FILL);if(h>g)RBS(X,Z,g+1,roofed?top:h,AIR);
+    if(roofed){PW(X,top+1,Z,BASALT,MODE_FILL);if(pr)RBP(X,top+1,Z,PLANKS);
+      if(ch&&a===0&&cv===0)RBP(X,top,Z,DLAMP);
+      if(u===H.uo&&Math.abs(cv)<=1||sd*v===WG_WY+2&&Math.abs(u-H.ut)<=1)RBP(X,top,Z,HIDE);} // the flaps over its mouths
+    if(ch){if(Math.abs(a)===3&&Math.abs(cv)===3){RBP(X,g+1,Z,a>0?CRATE:BARREL);if(a>0&&cv>0)RBP(X,g+2,Z,LANTERN);} // its stores, bedding and a lamp
+      else if(a===-3&&Math.abs(cv)<=1)RBP(X,g+1,Z,HAYBALE);else if(a===3&&cv===-1)RBP(X,g+1,Z,BARREL);}
+    return;}
+  if(wall){const y1=roofed?top+1:g,lamp=roofed&&(legA&&!pr&&cv===2&&(u-H.ut)%12===3||Math.abs(u-H.ut)===2&&Math.abs(cv)>6&&(sd*v)%12===0);for(let y=g-1;y<=y1;y++){if(pr&&y>g&&y<=top)RBP(X,y,Z,DPROP);else if(lamp&&y===g+2)RBP(X,y,Z,DLAMP);else PW(X,y,Z,BASALT,MODE_FILL);}if(pr&&roofed)RBP(X,top+1,Z,PLANKS);return;}
+  // the screen before its outer mouth: a tumble of boulders, the way in round its inner end
+  if(u>=H.m+1&&u<=H.m+3&&cv>=0&&cv<=5&&h<=g+2){const n=1+(q<0.6?1:0)+(q<0.25?1:0)+(cv>=1&&cv<=3?1:0);for(let y=1;y<=n;y++)RBP(X,g+y,Z,q<0.5?BASALT:BASCRACK);return;}
+  // rubble heaped in the yard either side of its inner mouth
+  if(Math.abs(u-H.ut)>=2&&Math.abs(u-H.ut)<=4&&sd*v>=WG_WY-3&&sd*v<=WG_WY&&h<=g+1){RBP(X,g+1,Z,q<0.5?COBBLE:GRAVEL);if(q<0.7&&sd*v>=WG_WY-1)RBP(X,g+2,Z,GRAVEL);}};
 // ---- Column builders of the camp (U = u - P.uC0, V = v)
 const campE=(p,U,V)=>Math.min(U,p.cw-U,p.hv-Math.abs(V)); // how far in from the camp's edge
 const campGateAt=(p,U,V)=>Math.abs(V)<=5&&(U<14||U>p.cw-14)||Math.abs(V)>p.hv-14&&Math.abs(U-p.cw/2)<=4;

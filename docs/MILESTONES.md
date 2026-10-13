@@ -371,3 +371,10 @@ Planned without questions, as asked (D-078 to D-082). Built in five stages, each
   - Minor: smoke columns over burning works; rain dousing fire pots and fire arrows; fog shortening the archers' range; the orcs' war chant before a charge.
 
 The order of E2 to E5 is not yet decided; confirm it before E1 ends.
+
+## After W8: the way in and the life of the siege (asked by the owner on 2026-10-13; done in 0.49.0)
+
+- A short, straight Long Descent at one in four and the great volcano a short way on from its foot; the front about twenty minutes across (D-083).
+- The Leaguer full of people at work: drill, range, smithies, cook-fires, wagons, hospital, sentries, knots of talk, the camp's sounds (D-084).
+- The hidden way through the ring beside every gate, with companies of the hosts' best slipping through it into the orcs' yard (D-085).
+- The mine met by the countermine from the war's start, and the battle without end in the Broken Gallery (D-086).

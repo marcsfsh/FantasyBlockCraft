@@ -18,7 +18,7 @@ assert(!!w&&w.log.length===1,'coming near the gate finds its war, written in its
 const eff=()=>WAR_EFF.map(([k])=>Math.round(warEff(w,k)*100)).join('/');
 const e0=eff();warPlay+=1800;const e1=eff();warPlay+=5400;const e2=eff();
 info('the four efforts (the ram, the mine, the walls, the sallies): at first',e0,'; after half an hour',e1,'; after two hours',e2,';',warStage(w));
-assert(WAR_EFF.every(([k])=>warEff(w,k)>=1)&&warStage(w)==='The gate stands ready to fall'&&e1.split('/').every(v=>+v>15&&+v<60),'the efforts grow with play time, all four done in under two hours');
+assert(WAR_EFF.every(([k])=>warEff(w,k)>=1)&&warStage(w)==='The gate stands ready to fall'&&e1.split('/').every((v,i)=>i===1?+v>=Math.round(WAR_MEET*100):+v>15&&+v<60),'the efforts grow with play time, all four done in under two hours (the mine already past its meeting with the countermine, D-086)');
 warStateTick();info('marks in the chronicle',w.log.length);assert(w.log.length>=17,'each effort\'s quarter marks go into the chronicle');
 {const sv=JSON.parse(JSON.stringify(warSave()));assert(Array.isArray(sv.wr)&&sv.wr.length===1&&sv.wr[0].id===P.id&&sv.wpc===Math.round(warPlay),'the war is saved (wr, wpc)');}
 warPlay=0;WARS.clear();warStateTick();const W0=WARS.get(P.id);

@@ -14,6 +14,7 @@
 //   node tools/shot.mjs --view=... --host=2000:20   a summoned host of 2000 led behind the camera and 1000 of the wastes where it looks,
 //        charging each other for 20 seconds (D-077); prints the foes' update time a frame and the draw calls (--prof also saves a CPU profile)
 //   node tools/shot.mjs --view=... --console   the war console open over the view (D-077)
+//   node tools/shot.mjs --view=... --life=20   the places about the camera peopled and 20 seconds of their life (the Leaguer, the hidden way, the battle under the gate)
 //   node tools/shot.mjs --view=... --siege=0.55,0.6,0.55   the works of the war at the gate about the camera (W2): the ram's, the mine's and the
 //        walls' efforts (0 to 1), --siege=fall for the gate fallen, --siege=front for its first forward camp on the basin's floor (W5), --siege=raid for the nearest farmstead of its border burned by a raid (W6), --siege=lord for its Emberlord showing itself on the gate's wall (W7b), or --siege=dead for its lord fallen: the mountain dead and the monument on its rim (W7c)
 //   --area=0|1|2 starts with the loaded area Near, Far or Farthest (224, 320, 416; D-057), --viewd=0..4 picks the view distance (Far, 2, by default)
@@ -76,6 +77,12 @@ const HOOK=`window.__fbc={
       standMs:m(stand),standP95:p95(stand),fightMs:m(fight),fightP95:p95(fight)};},
   // the war console open over the view (D-077)
   console(){openWarConsole();return HOSTS.length;},
+  // the places about the camera peopled and sec seconds of their life (the Leaguer's work, the hidden way's companies, the battle
+  // under the gate: D-084 to D-086), the gate's works made first
+  life(sec){for(const f of [...foes])removeFoe(f);foeSpots.clear();warClk=1e9;const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);
+    if(P){const w=warFound(P);for(let i=0;i<24;i++){warWorksTick(P,w);let k=0;while(WJ.length&&k++<5000)warJobsFrame();}}
+    const real=performance.now;performance.now=()=>0;try{for(let i=0;i<Math.round(sec/0.05);i++){if(i%20===0)foeSpawnTick();foeT=9;updFoes(0.05);}for(let k=0;k<6;k++)flush();}finally{performance.now=real;}
+    updateEntities(0.01);return foes.length;},
   // the works of the war at the gate about the camera (W2): its efforts set (the ram, the mine, the walls, each 0 to 1) or its fall,
   // and the works made at once, the siege tower in place
   siege(spec){const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),200);if(!P)return -1;const w=warFound(P);
@@ -125,6 +132,7 @@ for(const [name,X,Y,Z,yaw,pitch,t] of views){
   await p.waitForTimeout(1500);
   if(args.bolt!==undefined)await p.evaluate(()=>window.__fbc.bolt());
   if(args.foes!==undefined)await p.evaluate(k=>window.__fbc.stageFoes(k?k.split(','):[],1),args.foes);
+  if(args.life!==undefined){const n=await p.evaluate(k=>window.__fbc.life(k),Number(args.life||20));console.log('life: '+n+' about');await p.waitForTimeout(1000);}
   if(args.siege!==undefined){const n=await p.evaluate(k=>window.__fbc.siege(k),args.siege);console.log('siege '+args.siege+': '+n+' edits');await p.waitForTimeout(1500);}
   if(args.host!==undefined){const [n,sec]=args.host.split(':').map(Number),cdp=args.prof!==undefined?await p.context().newCDPSession(p):null;if(cdp){await cdp.send('Profiler.enable');await cdp.send('Profiler.start');}
     const r=await p.evaluate(a=>window.__fbc.host(a[0],a[1]),[n||1000,sec||0]);console.log('host '+JSON.stringify(r));

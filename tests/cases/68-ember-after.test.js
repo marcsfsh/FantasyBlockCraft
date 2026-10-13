@@ -21,8 +21,8 @@ assert(t0>200&&t1===0&&o1>o0&&d1===d0,'a fallen lord\'s mountain dies: its open 
 {const [x,z]=at(-150,0);gen(x,z);toPL(x,z);const b0=LAND_WX.volcanic.burn;emberAfterTick();for(let i=0;i<400;i++)landWeather(0.5);
   emberFate(w,R,'quenched',null);info('the sky: clear',emberClearK,'; burning',LWX.burn.toFixed(2),'of',b0,'; the war:',warStage(w));
   assert(emberClearK===1&&LWX.burn<0.4&&warStage(w)==='The war is won','the sky over its basin clears, and its war is won');}
-// its servants scatter: one place of the wastes in four keeps its creatures
-{const pl=[],seen=new Set(),FP=warFrontPath(P),px=PL.x,pz=PL.z;for(let i=0;i<FP.length;i+=3){PL.x=FP[i][0]-OX;PL.z=FP[i][1]-OZ;for(const q of foePlaces())if(!q.folk&&q.kind!=='lord'&&!seen.has(q.id)){seen.add(q.id);pl.push(q);}}PL.x=px;PL.z=pz;const keep=pl.filter(q=>hsh(Math.round(q.x),9997,Math.round(q.z))<=0.25||!deadBasinAt(q.x,q.z));
+// its servants scatter: one place of the wastes in four keeps its creatures (along the front and about the mountain, D-083)
+{const pl=[],seen=new Set(),FP=warFrontPath(P).concat(Array.from({length:24},(_,i)=>[G.X+Math.cos(i*0.2618)*(G.R*1.3+30),G.Z+Math.sin(i*0.2618)*(G.R*1.3+30)])),px=PL.x,pz=PL.z;for(let i=0;i<FP.length;i+=3){PL.x=FP[i][0]-OX;PL.z=FP[i][1]-OZ;for(const q of foePlaces())if(!q.folk&&q.kind!=='lord'&&!seen.has(q.id)){seen.add(q.id);pl.push(q);}}PL.x=px;PL.z=pz;const keep=pl.filter(q=>hsh(Math.round(q.x),9997,Math.round(q.z))<=0.25||!deadBasinAt(q.x,q.z));
   info('places of the wastes near',pl.length,'; still peopled',keep.length);assert(pl.length>=4&&keep.length<pl.length*0.5,'its servants scatter: most places of the wastes stand empty');}
 // its relics, owed (it fell away from the player) and given in the Leaguer; each with its use
 setMode('survival');inv.fill(null);for(const k in equip)equip[k]=null;
@@ -35,7 +35,7 @@ setMode('survival');inv.fill(null);for(const k in equip)equip[k]=null;
 {inv[sel]={id:378,c:1};const L=lampLevel();info('the Emberheart in hand: light',L[1]);assert(L[1]>=12,'the Emberheart glows in the hand');inv[sel]=null;}
 setMode('creative');
 // the banners over the gate, the feast and the song in the Leaguer
-{const E=elOf(w);emberAfterTick();const [gx,gz]=at(40,0);gen(gx,gz);toPL(gx,gz);for(let i=0;i<4;i++){emberAfterTick();let k=0;while(WJ.length&&k++<5000)warJobsFrame();}const [bx,bz]=wgXZ(P,0,0),ban=get(bx-OX,P.hG+53,bz-OZ);
+{const E=elOf(w);emberAfterTick();const [gx,gz]=at(40,0);gen(gx,gz);toPL(gx,gz);for(let i=0;i<4;i++){emberAfterTick();let k=0;while(WJ.length&&k++<5000)warJobsFrame();}while(genQ.length)processGenQ();const [bx,bz]=wgXZ(P,0,0),ban=get(bx-OX,P.hG+53,bz-OZ);
   info('the feast',E.feast,'; the banners over the gate',E.ban2,BL[ban].n,'; the chronicle:',w.log.slice(-2).map(l=>l[1]).join(' | '));
   assert(E.feast===1&&E.ban2===1&&ban===EVBANNER&&w.log.some(l=>/victory feast/.test(l[1])),'a victory feast in the Leaguer, and the three banners raised over the Ashen Gate');}
 // the monument on its crater's rim

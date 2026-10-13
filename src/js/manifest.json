@@ -366,6 +366,10 @@
       "about": "The drakes and the night (W8e, D-082): ash drakes over the battles (circling, diving with fire, shot down, their scales), torches and fire arrows at night, shorter sight and reach in the dark, rain and fog, smoke columns over what burns, the orcs' war chant"
     },
     {
+      "path": "gameplay/war-under.js",
+      "about": "The hidden way and the war under the gate (D-085, D-086): companies of the hosts' best slipping through the secret passage into the orcs' yard, and the battle without end between the dwarves and the goblins in the Broken Gallery where the mine met the countermine"
+    },
+    {
       "path": "input/touch.js",
       "about": "Touch controls"
     },

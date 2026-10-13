@@ -1,14 +1,14 @@
 // ---- The Gate of the Wastes (D-067): every basin of the Volcanic Wastes has one way in for an army. Where the ring of ash
 // mountains faces the nearest realm, a pass is cut through it down to the level of the lands outside, and the orcs have shut it
 // with a gate between two towers; one leaf hangs ajar. Inside, a yard is cut into the inner wall for the orcs' camp, and from it a
-// broad road runs down along the wall to the floor, at one in eight. Outside, the pass opens onto the siege lines and the camp of
+// broad road runs down to the floor in one straight line, at one in four (D-083; winding along the wall at one in eight before). Outside, the pass opens onto the siege lines and the camp of
 // the allied hosts, levelled at the gate's height. Plans are pure functions of the seed and the land layout, read from the
 // ground before any volcano, realm or gate touches it (wgRaw, never cached); colInfoBase shapes the ground to them (wgMask,
 // wgShape). Everything else keeps off them (wasteGateNear); the great volcano and its cones too (wasteGateKeep).
 //
 // The gate's frame: u from the gate outward (toward the camp), v across; the gate faces one of the four ways (dir, DIRS), so its
 // works stand square in the world. Inside the ring u is negative.
-const WG_STEP_MS=6,WG_GRADE=1/8,WG_RW=12,WG_WY=50,WG_WG=34,WG_CAMP=[250,125],wgC=new Map(),wgJ=new Map(),wgTC=new Map(),TWG={},TWG2={};let wgSkip=false;
+const WG_STEP_MS=6,WG_GRADE=1/4,WG_RW=12,WG_WY=50,WG_WG=34,WG_CAMP=[250,125],wgC=new Map(),wgJ=new Map(),wgTC=new Map(),TWG={},TWG2={};let wgSkip=false;
 // the ground before the gate's works, the volcanoes and the realms shape it (so the plan cannot depend on itself)
 function wgRaw(X,Z){const a=volcSkip,b=wgSkip,c=realmSkip;volcSkip=wgSkip=realmSkip=true;try{return colInfoBase(Math.round(X),Math.round(Z),TWG);}finally{volcSkip=a;wgSkip=b;realmSkip=c;}}
 const wgBs=(X,Z)=>{landsAt(Math.round(X),Math.round(Z),TWG2);return TWG2.bs;};
@@ -50,8 +50,8 @@ function* planGate(B){
   // the ring's outer foot (uF), past which the ground before the camp (the siege lines) is levelled gently, not cut
   yield;P.uF=170;for(let u=10;u<=170;u+=3)if(wgBs(...wgXZ(P,u,0))>=WB_END||wgRaw(...wgXZ(P,u,0)).h<=hG+1){P.uF=Math.max(60,u);break;}
   P.uC0=P.uF+64;P.uC1=P.uC0+WG_CAMP[0];
-  // the road down: from the yard's inner corner on one side, along the inner wall of the ring, falling one in eight, where the
-  // wall stands at its height (so it runs as a ledge, cut in above and banked out below) until it meets the floor
+  // the road down: from the yard's inner corner on one side, one straight line slanting down the inner wall, falling one in
+  // four, until it meets the floor (D-083)
   const side0=hsh(P.X,9705,P.Z)<0.5?1:-1;let path=null;
   for(const side of [side0,-side0]){yield;path=yield* wgTrace(P,side);if(path){P.side=side;break;}}
   if(!path)return null;P.ramp=path;path.all=path.pts.slice(1).map((_,i)=>i);
@@ -63,25 +63,17 @@ function* planGate(B){
   P.id='wg'+P.X+','+P.Z;P.seed=hsh(P.X,9707,P.Z);
   return P;
 }
-// The road's line: steps of six along the wall, each drawn in or out (at most three blocks) toward where the raw wall stands at
-// the road's height there; smoothed, with its height by its length along. Null if it leaves the inner wall.
+// The road's line (D-083): one straight line from the yard's inner corner, falling one in four, cut down through the inner wall
+// and banked out over lower ground until it meets the floor; steps of six. It slants off the way the gate faces toward its side,
+// the least that brings it down by the floor's edge (so it never runs far out over the floor, where the great volcano stands).
+// Null if no slant keeps it inside the ring.
 function* wgTrace(P,side){
-  const hG=P.hG,[sx,sz]=wgXZ(P,P.uY+8,side*(WG_WY-WG_RW-2));let x=sx,z=sz,L=0,y=hG;const pts=[[x,z]];
-  // first along the yard's inner edge, out of its side
-  for(let k=0;k<200;k++){if(k%4===0)yield;
-    const gx=wgBs(x+6,z)-wgBs(x-6,z),gz=wgBs(x,z+6)-wgBs(x,z-6),gl=Math.hypot(gx,gz)||1,nx=gx/gl,nz=gz/gl;
-    // the way along the wall: across the outward line, on the road's side (the first step goes along v)
-    let tx=-nz*side,tz=nx*side;if(k===0){const [ax,az]=[P.dz*side,-P.dx*side];if(tx*ax+tz*az<0){tx=-tx;tz=-tz;}}
-    else{const px=x-pts[pts.length-2][0],pz=z-pts[pts.length-2][1];if(tx*px+tz*pz<0){tx=-tx;tz=-tz;}}
-    x+=tx*6;z+=tz*6;L+=6;y=hG-L*WG_GRADE;
-    // where along the outward line does the wall stand at y? (a search over 40 either way)
-    const at=e=>wgRaw(x+nx*e,z+nz*e).h;if(at(-40)>=y-1){pts.push([x,z]);break;} // the floor: the road is down
-    let lo=-40,hi=40;if(at(hi)<y)lo=hi;else for(let q=0;q<6;q++){const m=(lo+hi)/2;if(at(m)<y)lo=m;else hi=m;}
-    const e=Math.max(-3,Math.min(3,(lo+hi)/2));x+=nx*e;z+=nz*e;const bs=wgBs(x,z);if(bs<-60||bs>WB_IN+WB_CR)return null;
-    // never back into the yard or the pass
-    const [u,v]=wgUV(P,x,z);if(k>3&&u>P.uY-WG_RW&&Math.abs(v)<WG_WY+WG_RW)return null;
-    pts.push([x,z]);if(k===199)return null;}
-  if(pts.length<8)return null;
+  const hG=P.hG,[sx,sz]=wgXZ(P,P.uY+8,side*(WG_WY-WG_RW-2)),ix=-P.dx,iz=-P.dz,ax=P.dz*side,az=-P.dx*side;let pts=null,best=-1e9;
+  for(let a=0.2;a<1.31;a+=0.1){const dx=ix*Math.cos(a)+ax*Math.sin(a),dz=iz*Math.cos(a)+az*Math.sin(a);let x=sx,z=sz,L=0,bs=0;const pp=[[x,z]];
+    for(let k=0;k<160;k++){if(k%4===0)yield;x+=dx*6;z+=dz*6;L+=6;const y=hG-L*WG_GRADE;bs=wgBs(x,z);if(bs>WB_IN+WB_CR){pp.length=0;break;}pp.push([x,z]);
+      if(bs<-8&&wgRaw(x,z).h>=y-1)break;} // the floor: the road is down
+    if(pp.length>=8&&bs>best){best=bs;pts=pp;if(bs>=-40)break;}}
+  if(!pts)return null;
   // smooth the line, then its lengths and heights; the road levels out on the floor
   const sm=pts.map((p,i)=>{if(i<2||i>pts.length-3)return p;let ax=0,az=0;for(let q=-2;q<=2;q++){ax+=pts[i+q][0]/5;az+=pts[i+q][1]/5;}return [ax,az];});
   const out=[];let l=0,yF=Math.round(wgRaw(...sm[sm.length-1]).h);

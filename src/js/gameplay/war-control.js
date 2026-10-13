@@ -16,7 +16,7 @@ function wcWar(){const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floo
 // an effort (ram, mine, walls, sally) or the front set to v (0 to 1): what the battles have added is set so that, with the clock, it
 // comes to v now; the marks passed are written again when it passes them again
 function wcEffort(w,k,v){v=Math.max(0,Math.min(1,v));
-  if(k==='fr'){if(!(w.s>=2))return false;const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));w.b.fr=v-(warPlay-(w.fallT||0))/pace;saveDirty=true;return true;}
+  if(k==='fr'){if(!(w.s>=2))return false;const pace=warFrontPace(w);w.b.fr=v-(warPlay-(w.fallT||0))/pace;saveDirty=true;return true;}
   const E=WAR_EFF.find(e=>e[0]===k),pace=E[2]*60*(0.85+0.3*hsh(w.X,9861+k.length,w.Z));w.b[k]=v-(warPlay-w.f)/pace;w.m[k]=Math.min(w.m[k]||0,Math.floor(v*4));if(v<1)w.allT=0;saveDirty=true;return true;}
 // the events, now: each returns what to tell the player
 const WC_NEED='Go to the gate first: within 200 blocks of its works';

@@ -1,6 +1,6 @@
 // The war at the gates of the wastes (D-067). The owner's fixes first: one great volcano to a basin, no cone cut in two (no gorge
 // up a volcano), no geode or fossil over the ground, gullies shallower with their lava three deep. Then every basin's gate: the
-// pass cut through the ring at the height of the lands outside, the yard inside, the road down the inner wall at one in eight
+// pass cut through the ring at the height of the lands outside, the yard inside, the road down in one straight line at one in four (D-083)
 // to the floor, the camp of the allied hosts beyond the siege lines, three times the ground of the largest city of men. Built:
 // the gate between its towers, one leaf barred and propped, the other ajar with a way through by its edge, the dwarves' ram at
 // the barred leaf, the camp's pavilions, tents and banners of the three peoples, the orcs' camp in the yard; the places named.
@@ -36,11 +36,13 @@ const P=wasteGateOf(B7),s=wgSite(P),at=(u,v)=>siteXZ(s,u,v).map(Math.round);
   const outside=[];for(let u=P.uC0+20;u<P.uC1;u+=40)for(let v=-100;v<=100;v+=50)outside.push(h(u,v));const level=outside.every(y=>y===P.hG);
   const walls=[h(0,-60),h(0,60),h(-40,-80),h(-40,80)],floor=h(0,0),yard=h(-40,0);
   let steep=0;const pp=P.ramp.pts;for(let i=1;i<pp.length;i++){const dl=pp[i][2]-pp[i-1][2],dy=pp[i-1][3]-pp[i][3];if(dl>0&&dy/dl>WG_GRADE+0.01)steep++;}
+  let dev=0;const a0=pp[0],b0=pp[pp.length-1],lx=b0[0]-a0[0],lz=b0[1]-a0[1],ll=Math.hypot(lx,lz)||1;for(const q of pp)dev=Math.max(dev,Math.abs((q[0]-a0[0])*lz-(q[1]-a0[1])*lx)/ll);
+  const G=greatOf(P.B.chief),gf=G?Math.hypot(G.X-b0[0],G.Z-b0[1])-(G.R*1.3+24):1e9;
   const raw=[];for(let k=0;k<12;k++){const o2=wgRaw(...at(P.uC0+20+k*20,(k%5-2)*40));raw.push(o2.h);}raw.sort((a,b)=>a-b);
-  info(P.name,': the gate at',P.hG,'(the lands outside about',raw[6]+'); its floor',floor,', the yard',yard,'; the ring either side',walls.join(' '),'; the camp level',level,'; the road',Math.round(P.ramp.len),'long from',P.hG,'to',P.ramp.yF,', steeper than one in eight at',steep,'steps; the yard',-P.uY,'deep');
+  info(P.name,': the gate at',P.hG,'(the lands outside about',raw[6]+'); its floor',floor,', the yard',yard,'; the ring either side',walls.join(' '),'; the camp level',level,'; the road',Math.round(P.ramp.len),'long from',P.hG,'to',P.ramp.yF,', steeper than one in four at',steep,'steps, off its line at most',dev.toFixed(1),'; from its foot to the great volcano\'s foot',Math.round(gf),'; the yard',-P.uY,'deep');
   assert(floor===P.hG&&yard===P.hG&&Math.abs(P.hG-raw[6])<=12,'the gate stands at the height of the lands outside, the pass and the yard cut level to it');
   assert(walls.every(y=>y>P.hG+25),'the ring of ash mountains breaks for the pass, its walls high either side');
-  assert(steep===0&&P.ramp.yF<=P.hG-60&&P.ramp.len>=500&&-P.uY>=70,'a very gentle road, one in eight, runs down the inner wall from the yard to the floor');
+  assert(steep===0&&P.ramp.yF<=P.hG-60&&P.ramp.len>=200&&P.ramp.len<=620&&dev<1&&gf<300&&-P.uY>=70,'a straight road, one in four, runs down from the yard to the floor, and the great volcano stands a short way on (D-083)');
   assert(level,'the camp of the hosts is levelled at the gate\'s height');}
 {let big=0,on=0;for(let i=-20;i<20;i++)for(let j=-20;j<20;j++){const Pv=provinceOf(i,j);if(!Pv)continue;for(const t of Pv.sites){if(t.k==='city')big=Math.max(big,(2*t.R)*(2*t.R));if(wasteGateNear(t.X,t.Z,t.R))on++;}}
   assert(on===0,'no site of the realms stands on a gate\'s works');

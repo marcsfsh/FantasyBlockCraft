@@ -14,7 +14,7 @@ const [X,Z]=at(70,0);gen(X,Z);const toPL=(u,v,y)=>{const [x,z]=at(u,v);PL.x=x-OX
 // the walk runs into the towers' doors
 assert(B(0,20,g+48)!==AIR&&B(0,20,g+49)===AIR&&B(0,-20,g+48)!==AIR&&B(0,22,g+50)===AIR,'the gate\'s walk runs on to the doors of its towers');
 playing=false;for(const f of [...foes])removeFoe(f);foeSpots.clear();warS.clear();warArmies.length=0;WARS.clear();warPlay=0;warClk=1e9;WJ.length=0;warTowers.length=0;
-warStateTick();const w=WARS.get(P.id);assert(!!w,'the war is found');jobs();
+const e00=edits.size;warStateTick();const w=WARS.get(P.id);assert(!!w,'the war is found');jobs(); // (the mine has met the countermine from the war's start, D-086: its works are made now)
 const tick=()=>{for(let i=0;i<14;i++){warWorksTick(P,w);jobs();}};
 // the works as the efforts grow: the ram half way, the mine three fifths dug, the walls half won
 const e0=edits.size;w.b={ram:0.55,mine:0.6,walls:0.55,sally:0.3};w.f=warPlay;tick();
@@ -27,7 +27,7 @@ assert(B(0,cs*10,g+5)===AIR&&B(-1,cs*10,g+5)===AIR&&B(0,cs*3,g+20)!==AIR,'the ra
 assert(n>20&&dug>=n*0.9&&sound>=sn*0.9&&cn>5&&cdug>=cn*0.8,'the mine and the countermine are dug as far as their efforts have come, with sound roof and floor');
 assert(B(11,26,g+3)===LADDER&&B(10,26,g+30)===LADDER&&B(10,-30,g+30)===LADDER&&B(8,26,g+50)===AIR&&B(8,-30,g+50)===AIR,'ladders stand on both towers, with breaches above them');
 assert(warTowers.some(T=>T.id===P.id),'a siege tower is wheeled up');
-assert(edits.size-e0>1500,'the works are saved as edits');
+assert(edits.size-e00>1500,'the works are saved as edits');
 {const sv=JSON.parse(JSON.stringify(warSave()));assert(sv.wr[0].ap&&sv.wr[0].ap.leaf===2&&sv.wr[0].ap.lad===2,'what the works have done is saved with the war');}
 // a soldier of the hosts climbs a ladder into the tower and comes out on the walk
 {const [x,z]=at(16,26),y=ground[x-OX+W*(z-OZ)]+1,f=addFoe('rsword',x-OX+0.5,y,z-OZ+0.5,{});f.army={al:true,m:[f]};f.way=[];f.st='idle';f.t=0.5;warClimbT=0;let top=0,up=false;

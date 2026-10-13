@@ -77,7 +77,7 @@ function warUnitsFrame(dt){
     for(const g of foes){if(g.dead||g===f||Math.abs(g.x-f.x)>r||Math.abs(g.z-f.z)>r||Math.hypot(g.x-f.x,g.z-f.z)>r)continue;const G=FOES[g.kind];
       if(F.std&&!G.folk===!F.folk)g.steady=foeClock+1;else if((F.drum||F.rouse)&&!G.folk&&g.kind!=='troll'&&g.kind!=='strollr')g.driven=foeClock+1;else if(F.drive&&(g.kind==='troll'||g.kind==='strollr'))g.driven=foeClock+1;}}
   // healers: those of the hosts about them mended a little, three a second's half
-  for(const f of foes){if(f.dead||!FOES[f.kind].heal||f.st==='flee')continue;let k=0;for(const g of foes){if(g.dead||!FOES[g.kind].folk||g.hp>=g.mhp||Math.hypot(g.x-f.x,g.z-f.z)>6)continue;g.hp=Math.min(g.mhp,g.hp+1.5);if(g.wnd&&g.hp>=g.mhp*0.4)morStand(g);k++;}if(k)f.healFx=0.6;}
+  for(const f of foes){if(f.dead||!FOES[f.kind].heal||f.st==='flee')continue;let k=0;for(const g of foes){if(g.dead||!FOES[g.kind].folk||g.hp>=g.mhp||Math.hypot(g.x-f.x,g.z-f.z)>6)continue;g.hp=Math.min(g.mhp,g.hp+(g.rest?0.15:1.5));if(g.wnd&&g.hp>=g.mhp*0.4)morStand(g);k++;}if(k)f.healFx=0.6;}
   warBearers();warSiegeTrolls();}
 // bearers: each goes to the nearest of the hosts' fallen within 40, lifts them and carries them back toward the field hospital
 // in the Leaguer; out of sight they are gone in

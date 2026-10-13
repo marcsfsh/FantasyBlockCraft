@@ -1,6 +1,6 @@
 // ---- Into the basin and beneath it (W5, D-072; Q138, Q143, Q149, Q175). Once a gate has fallen its war goes on into its basin.
 // The front (`w.fr`, 0 to 1) moves out from the foot of the Long Descent across the floor toward the great volcano's foot with
-// play time (an hour or so, a little different at each gate) and with battles won; four forward camps rise along that way as the
+// play time (twenty minutes or so since D-083, a little different at each gate) and with battles won; four forward camps rise along that way as the
 // front passes them (a palisade ring with a gate toward the road, a watchtower, tents, the peoples' banners and a fire; made as
 // edits like the works, w.ap.fc), each with its garrison. The hosts' armies march down the Long Descent to the front and on, the
 // warhosts come at it from the volcano. The wastes' places are stormed: when every creature of one of their spots has fallen
@@ -19,7 +19,8 @@ function warBasinAt(X,Z){const o={};wasteAt(X,Z,o);return o.bc&&o.bs<40?wasteBas
 function warBasinWar(X,Z){let any=false;for(const w of WARS.values())if(w.s>=2)any=true;if(!any)return null;const B=warBasinAt(X,Z),P=B&&wasteGateOf(B);if(!P)return null;
   const w=WARS.get(P.id);return w&&w.s>=2?{P:P,w:w}:null;}
 // how far the front has come
-function warFront(w){if(!(w.s>=2))return 0;const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
+const warFrontPace=w=>20*60*(0.85+0.3*hsh(w.X,9921,w.Z)); // (twenty minutes or so: the way to the great volcano is short since D-083)
+function warFront(w){if(!(w.s>=2))return 0;const pace=warFrontPace(w);return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
 const warFrontAt=(P,w)=>{const F=warFrontPath(P);return F[Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1)))];};
 // ---- the forward camps: where each stands (the path's point, moved along it to dry ground), and its cells
 function warCampAt(P,k){P.fcs=P.fcs||[];if(P.fcs[k]!==undefined)return P.fcs[k];const F=warFrontPath(P),i0=Math.round(WAR_CAMPS[k]*(F.length-1));let r=null;

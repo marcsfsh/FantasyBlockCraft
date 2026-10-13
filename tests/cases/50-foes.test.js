@@ -72,7 +72,7 @@ setMode('creative');clearFoes();
 clearFoes();
 {const g=[...Array(25).keys()].flatMap(i=>[...Array(25).keys()].map(j=>greatOf(stretchCell(landSite(i-12,j-12))))).filter(Boolean).sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z))[0],F=fortOf(g),S=fortSpots(F);
   gen(Math.round(S.lord.x),Math.round(S.lord.z));PL.x=S.lord.x-OX+8;PL.z=S.lord.z-OZ;PL.y=S.lord.y+1;foeSpots.clear();foeSpawnTick();
-  const lord=foes.find(f=>f.kind==='ember');info(F.name,': its lord',lord?'waits at X '+Math.round(lord.x+OX)+' y '+lord.y+' Z '+Math.round(lord.z+OZ)+', '+lord.m.box[4].toFixed(1)+' blocks tall, held within '+lord.leash+' of its throne':'is missing');
+  const lord=foes.find(f=>FOES[f.kind].lord);info(F.name,': its lord',lord?'waits at X '+Math.round(lord.x+OX)+' y '+lord.y+' Z '+Math.round(lord.z+OZ)+', '+lord.m.box[4].toFixed(1)+' blocks tall, held within '+lord.leash+' of its throne':'is missing');
   assert(lord&&Math.abs(lord.y-S.lord.y)<=1&&lord.m.box[4]>10,'an Emberlord towers over ten blocks tall in its fortress\'s throne hall');
   // it stays near its fortress: it will not follow far beyond the terrace before its gate
   // (tried with a short leash inside the hall: the player well beyond it toward the gate)
@@ -82,7 +82,7 @@ clearFoes();
   assert(far>=8&&far<=14.5&&st1==='chase'&&lord.st!=='chase'&&L0>F.U1,'the Emberlord comes out after the player only so far, and stays near its fortress');hp=20;lord.leash=L0;
   lord.hp=1;inv[0]={id:377,c:1};PL.x=S.lord.x-OX+8;PL.z=S.lord.z-OZ;PL.y=S.lord.y;PL.yaw=Math.PI/2;PL.pitch=0.3;lord.x=PL.x-4;lord.z=PL.z;lord.y=PL.y;lord.hold=1;
   foeHitCD=0;foeAct(0);assert(lord.dead&&fallenLords.size===1&&foeSave().fk.length===1,'a fallen Emberlord is saved as fallen');
-  clearFoes();PL.x=S.lord.x-OX+8;PL.z=S.lord.z-OZ;PL.y=S.lord.y+1;foeSpots.clear();foeSpawnTick();assert(!foes.some(f=>f.kind==='ember'),'and does not come back');setMode('creative');
+  clearFoes();PL.x=S.lord.x-OX+8;PL.z=S.lord.z-OZ;PL.y=S.lord.y+1;foeSpots.clear();foeSpawnTick();assert(!foes.some(f=>FOES[f.kind].lord),'and does not come back');setMode('creative');
   // a warhold in a lesser volcano is held by orcs under a warchief
   clearFoes();const hv=[];for(let i=-30;i<30;i++)for(let j=-30;j<30;j++){const v=volcAt(i,j);if(v&&fortOf(v))hv.push(v);}hv.sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z));
   const H2=fortOf(hv[0]),S2=fortSpots(H2);gen(Math.round(S2.lord.x),Math.round(S2.lord.z));PL.x=S2.lord.x-OX+3;PL.z=S2.lord.z-OZ;PL.y=S2.lord.y+1;foeSpots.clear();foeSpawnTick();

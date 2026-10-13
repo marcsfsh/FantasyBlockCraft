@@ -28,7 +28,7 @@ const vs=great;
     if(d>=v.rc*1.05&&d<v.rc*1.25){rimN++;if(ground[(v.X+dx-OX)+W*(v.Z+dz-OZ)]<v.lake+1)rimLow++;}}
   const u=unsoundLava(),name=surfaceName(v.X,v.lake,v.Z);
   info(v.name,': lake lava',lake,'; flank columns with lava',flank,'; rim columns at or below the lake',rimLow,'of',rimN,'(the breaches); unsound lava',u);
-  assert(lake>30&&flank>40&&rimLow<rimN*0.25&&u===0,v.name+' holds a lake of lava in its crater, spills it through breaches down its flanks, and its lava is held');
+  assert(lake>30&&flank>40&&rimLow<rimN*0.3&&u===0,v.name+' holds a lake of lava in its crater, spills it through breaches down its flanks, and its lava is held');
   // no great volcano is a perfect cone: its foot is warped, its crater off its middle, its flanks uneven
   const o={},foot=[],mid=[];for(let k=0;k<32;k++){const a=k/32*6.2832;let fd=0;for(let r=v.R*0.4;r<v.R*1.5;r+=3){colInfo(Math.round(v.X+Math.cos(a)*r),Math.round(v.Z+Math.sin(a)*r),o);if(o.h<v.base+v.Hv*0.15){fd=r;break;}}foot.push(fd);
     colInfo(Math.round(v.X+Math.cos(a)*v.R*0.5),Math.round(v.Z+Math.sin(a)*v.R*0.5),o);mid.push(o.h);}

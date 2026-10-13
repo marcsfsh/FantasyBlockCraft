@@ -28,7 +28,7 @@ function orcClear(X,Z,R){
 function orcAt(i,j){
   const key=i*65536+j;if(orcC.has(key))return orcC.get(key);if(orcC.size>20000)orcC.clear();let p=orcCand(i,j);
   if(p)for(let a=-1;a<=1&&p;a++)for(let b=-1;b<=1&&p;b++){if(!a&&!b)continue;const n=orcCand(i+a,j+b);if(n&&n.pr>p.pr&&Math.hypot(n.X-p.X,n.Z-p.Z)<n.R+p.R+14)p=null;}
-  if(p){const r=rngAt(i,9611,j);p=Object.assign({},p,{name:ORC_K[p.kind].t+fullName('orc',r,false),dir:Math.floor(r()*8)*Math.PI/4,seed:Math.floor(r()*1e6)});}
+  if(p){const r=rngAt(i,9611,j),n=ORC_K[p.kind].t+fullName('orc',r,false),d8=Math.floor(r()*8);p=Object.assign({},p,{name:n,dir:(p.kind==='camp'?d8:d8&6)*Math.PI/4,seed:Math.floor(r()*1e6)});} // (squared builds face the four ways: a slant frame drops their cells, D-083)
   orcC.set(key,p);return p;
 }
 // the orcs' places whose reach (grown by m) holds (X,Z)

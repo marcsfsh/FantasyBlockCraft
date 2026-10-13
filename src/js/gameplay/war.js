@@ -21,7 +21,7 @@ const warNear=()=>!!wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),160);
 // the spots of the gates near (X,Z): the folk's within 46 blocks, the orcs' within 64
 function warPlaces(X,Z,out){for(const t of wgTile(Math.floor(X),Math.floor(Z))){const P=t.P,s=wgSite(P),w=WARS.get(P.id),won=w&&w.s>=2;
   s.lay.spots.forEach((p,i)=>{const [x,z]=siteXZ(s,p.u,p.v);let kind=p.kind;if(won&&kind[1]!=='_')kind=WAR_HELD[kind]||'r_lines'; // the yard and the walk held by the hosts (W2)
-    const folk=kind[1]==='_';if(Math.hypot(x-X,z-Z)>(folk?46:64))return;
+    const folk=kind[1]==='_';if(Math.hypot(x-X,z-Z)>(folk?56:64))return; // (the Leaguer's places a little farther: D-084)
     out.push({id:P.id+':'+i+(won?'w':''),x:x+0.5,y:p.y+1,z:z+0.5,R:p.R,kind:kind,folk:folk?1:0,s:s});});}}
 const WAR_HELD={owall:'e_lines',ogate:'r_lines',ocamp:'r_lines',oforge:'d_post',opit:'e_lines'};
 // the way between the camp and the orcs' camp (wgWay), in world coordinates, inward from the camp or the other way
@@ -238,7 +238,7 @@ function warSoundTick(dt){warSndT-=dt;if(warSndT>0)return;warSndT=0.25;const F=[
 // comes: now and then an army (the hosts' and the wastes' more or less in turn), raids and scouts all the while (constant fighting,
 // Q141), under the war's cap (warCap: 170 marching at once at the massive size)
 function warTick(){
-  warStateTick();warMarch();warSwornTick();warDeepTick();warCampTick();warSkyTick();drakeTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P||!warAuto('a'))return; /* (stopped from the war console: D-077) */const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
+  warStateTick();warMarch();warSwornTick();warDeepTick();warCampTick();warSkyTick();drakeTick();hidTick();if((warClk-=1)>0)return;warClk=5;const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),160);if(!P||!warAuto('a'))return; /* (stopped from the war console: D-077) */const wv=WARS.get(P.id);if(wv&&wv.el&&wv.el.fate)return; /* (its lord fallen, the war is won: W7c) */
   let st=warS.get(P.id);if(!st){st={raid:15+Math.random()*25,scout:35+Math.random()*40,army:75+Math.random()*75,al:Math.random()<0.5};warS.set(P.id,st);}for(const k of ['raid','scout','army'])st[k]=Math.max(-5,st[k]-5);
   if(Math.random()<0.55)warVolley(P);
   const busy=warArmies.some(A=>A.P===P&&!A.def&&(A.i<A.C.length||A.m.some(f=>!f.dead&&!f.gone)));if(warLive()>=warCap()-20)return; // (raids and scouts go on while an army is out: constant fighting, Q141)

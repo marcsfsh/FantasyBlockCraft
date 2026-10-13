@@ -12,6 +12,8 @@ let WREC=saved&&saved.wrc&&typeof saved.wrc==='object'?saved.wrc:null;if(!WREC)W
 const warCampSave=()=>({wrc:WREC});
 const warNight=()=>Math.sin((curT()-0.25)*Math.PI*2)<-0.05;
 const warSup=w=>w.sp===undefined?0.6:w.sp;
+// is the player in the Leaguer of a gate (its camp, or close before it)?
+const campIn=()=>{const X=PL.x+OX,Z=PL.z+OZ,P=wasteGateAt(Math.floor(X),Math.floor(Z),20);return !!P&&wgUV(P,X,Z)[0]>=P.uC0-20;};
 let MSN=null,campT=0,campSingT=20,campAmbT=240,msnMk=0;const CONVOYS=[];
 // ---- the war record and the titles it earns
 const WAR_TITLES=[['k',10,'the Blooded'],['k',100,'Orc-Bane'],['k',400,'Scourge of the Wastes'],['s',3,'Banner-Taker'],['e',10,'Friend of the Engineers'],['w',5,'Mender of the Fallen'],
@@ -27,7 +29,7 @@ function warCampTick(){
   const rate=warRate();
   for(const w of WARS.values()){if(w.el&&w.el.fate)continue;if(w.sp===undefined)w.sp=0.6;w.sp=Math.max(0,w.sp-0.0004*rate);
     const short=w.sp<0.25,cs=w.cs&&warPlay<w.csT?w.cs:null;if(!short&&!cs)continue;
-    if(w.s>=2){if(warFront(w)<1){const pace=60*60*(0.85+0.3*hsh(w.X,9921,w.Z));w.b.fr=(w.b.fr||0)+(cs==='fr'?0.5:0)*rate/pace-(short?0.3:0)*rate/pace;}continue;}
+    if(w.s>=2){if(warFront(w)<1){const pace=warFrontPace(w);w.b.fr=(w.b.fr||0)+(cs==='fr'?0.5:0)*rate/pace-(short?0.3:0)*rate/pace;}continue;}
     for(const [k] of WAR_EFF){if(warEff(w,k)>=1)continue;const p=effPace(w,k);w.b[k]=(w.b[k]||0)+((cs===k?0.5:cs?-0.15:0)-(short?0.3:0))*rate/p;}}
   const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),300),w=P&&WARS.get(P.id);
   if(w&&!(w.el&&w.el.fate)){if(w.cvT===undefined)w.cvT=warPlay+120+Math.random()*120;if(warPlay>=w.cvT&&warAuto('a')){w.cvT=warPlay+360+Math.random()*120;if(!CONVOYS.some(C=>C.w===w))campConvoy(P,w);}}
@@ -114,16 +116,65 @@ function msnEnd(ok,say){const M=MSN;MSN=null;if(!M)return;if(!ok){toast(say);if(
 function msnEngine(s){if(MSN&&MSN.k==='engines'&&wgUV(MSN.P,s.x+OX,s.z+OZ)[0]<0)MSN.hits++;}
 // ---- every half second: the task's mark, the camp's life, the ambushes springing; at night by the fires a song
 function campFrame(dt){
+  campAmbience(dt);
   if(MSN&&(msnMk-=dt)<=0){msnMk=0.4;const x=MSN.X-OX,z=MSN.Z-OZ,bx=Math.floor(x),bz=Math.floor(z);if(Math.hypot(x-PL.x,z-PL.z)<220&&bx>=0&&bz>=0&&bx<W&&bz<D){const y=ground[bx+W*bz]+1;for(let k=0;k<6;k++)spawnP(x+(Math.random()-.5)*0.6,y+Math.random()*14,z+(Math.random()-.5)*0.6,0,1.5,0,[1,0.85,0.35],1.2,-0.4);}}
   if((campT-=dt)>0)return;campT=0.5;campAmbushSpring();let sit=[];
-  for(const f of foes){if(f.dead||!f.site||f.site.k!=='wgate'||f.war||f.hst||f.cv||f.cap||f.wnd)continue;const F=FOES[f.kind];if(!F.folk||F.civ||F.mount||F.hound||Math.hypot(f.x-PL.x,f.z-PL.z)>60)continue;
-    const c=f.camp;if(c&&(c.t<foeClock||f.foe||f.st==='chase')){f.camp=null;f.t=1;continue;}
+  for(const f of foes){if(f.dead||!f.site||f.site.k!=='wgate'||f.war||f.hst||f.cv||f.cap||f.wnd)continue;const F=FOES[f.kind];if(F.mount||F.hound||Math.hypot(f.x-PL.x,f.z-PL.z)>70)continue;
+    const act=CAMP_ACT[f.spk];if(act&&!f.foe&&f.st!=='chase'){campWork(f,F,act,0.5);if(act==='cook'||act==='rest')sit.push(f);continue;} // (the camp's work: D-084)
+    if(!F.folk||F.civ)continue;const c=f.camp;if(c&&(c.t<foeClock||f.foe||f.st==='chase')){f.camp=null;f.t=1;continue;}
     if(c){if(c.k==='sit')sit.push(f);else if(c.k==='spar'&&!f.atk&&Math.random()<0.45){f.atk=F.wind;f.atkK='spar';}continue;}
     if(f.st!=='idle'||Math.random()>0.03)continue;
     if(Math.random()<0.5){f.camp={k:'sit',t:foeClock+20+Math.random()*25};f.t=99;}
     else{let o=null;for(const g of foes)if(g!==f&&!g.camp&&!g.dead&&g.site===f.site&&g.st==='idle'&&FOES[g.kind].folk&&!FOES[g.kind].civ&&!FOES[g.kind].mount&&Math.hypot(g.x-f.x,g.z-f.z)<6){o=g;break;}
       if(o){const t=foeClock+12+Math.random()*10;f.camp={k:'spar',t:t,o:o};o.camp={k:'spar',t:t,o:f};f.t=o.t=99;}}}
   if(sit.length>=3&&warNight()&&(campSingT-=0.5)<=0){campSingT=40+Math.random()*30;let x=0,z=0;for(const f of sit){x+=f.x;z+=f.z;}x/=sit.length;z/=sit.length;campSong(x,sit[0].y+1,z);if(Math.hypot(x-PL.x,z-PL.z)<30)toast('Soldiers of the hosts sing low by the fires');}}
+// the people of the Leaguer's new places (D-084)
+Object.assign(FOE_HOME,{x_muster:[['rsword',2],['rspear',2],['rpike',1]],r_tents:[['rsword',2],['rspear',2],['rbow',1],['rxbow',0.5]],e_tents:[['esword',2],['ebow',2],['espear',1]],
+  d_tents:[['daxe',2],['dhammer',1],['dxbow',1]],x_cook:[['rman',1],['rwoman',1]],x_haul:[['rbear',1]],x_sick:[['rsword',1],['espear',1],['daxe',1],['hspear',0.5]],x_sentry:[['rspear',1],['ebow',1],['dxbow',0.5]],
+  x_chat:[['rsword',1],['eblade',0.5],['dhammer',1],['rspear',1],['wbow',0.5]]});
+Object.assign(FOLK_N,{muster:[8,10],tents:[3,4],cook:[2,2],haul:[3,4],sick:[3,5],sentry:[1,1],chat:[3,4]});FOLK_LEAD.x_muster='rcapt';
+// ---- The Leaguer's life (D-084): the camp's places each have their work. The muster field drills in ranks to a sergeant's
+// call, every blow on the same beat; archers loose at the butts of the range (their arrows stand in the hay); smiths hammer at the
+// smithy and the dwarves' forges in a spray of sparks; cooks kneel at the cook-fires under the steam; bearers carry loads between
+// the wagons and the storehouses; the sick lie in the field hospital until the healers have mended them, then go; sentries walk
+// the road inside the rampart; soldiers talk and laugh in knots among the tents; and over it all the camp's sounds.
+const CAMP_ACT={x_muster:'drill',r_drill:'drill',h_drill:'drill',d_drill:'drill',w_range:'range',r_smithy:'smith',d_forge:'smith',d_dforge:'smith',x_cook:'cook',x_haul:'haul',x_sick:'sick',x_sentry:'sentry',x_chat:'chat'};
+const CAMP_SHOUT=['Thrust! Recover!','Shields up! Step!','Again! Together!','Hold the line! And strike!','Spears level! Advance!'];
+let campSndT=2,campShoutT=0;
+// the camp's frame: its front (toward the gate) as a facing, a point of the camp in the world (local)
+const campFace=P=>{const s=wgSite(P),[ax,az]=siteXZ(s,P.uC0+20,0),[bx,bz]=siteXZ(s,P.uC0,0);return Math.atan2(bx-ax,bz-az);};
+const campPt=(P,U,V)=>{const [x,z]=siteXZ(wgSite(P),P.uC0+U,V);return [x+0.5-OX,z+0.5-OZ];};
+function campWork(f,F,act,dt){const P=f.site.P;if(!P)return;f.t=Math.max(f.t,5);
+  const sc=foeSpots.get(f.spot),scx=sc?sc.x-OX:f.hx,scz=sc?sc.z-OZ:f.hz;
+  if(act==='drill'){if(!f.drS){const mates=foes.filter(g=>g.spot===f.spot&&!g.dead).sort((a,b)=>a.id-b.id),i=mates.indexOf(f),cx=scx,cz=scz,fa=campFace(P),fx=Math.sin(fa),fz=Math.cos(fa),ax=-fz,az=fx;
+      const hasL=FOLK_LEAD[f.spk]===mates[0].kind,lead=hasL&&i===0,j=hasL?i-1:i,r=Math.floor(j/5),c=j%5;f.drS=lead?[cx+fx*3,cz+fz*3,fa+Math.PI]:[cx-fx*r*1.8+ax*(c-2)*1.6,cz-fz*r*1.8+az*(c-2)*1.6,fa];f.hx=f.drS[0];f.hz=f.drS[1];f.hex=true;f.st='return';f.t=20;f.drL=lead;}
+    if(f.st==='idle'){f.hd=f.drS[2];if(!f.drL&&!f.atk&&Math.floor(foeClock/1.8)!==f.drB){f.drB=Math.floor(foeClock/1.8);f.atk=F.wind;f.atkK='spar';}
+      if(f.drL&&foeClock>campShoutT&&Math.hypot(f.x-PL.x,f.z-PL.z)<24){campShoutT=foeClock+14;toast(F.n+': "'+CAMP_SHOUT[Math.floor(Math.random()*CAMP_SHOUT.length)]+'"');foeCall(f,'alert');}}}
+  else if(act==='range'){const [tx,tz]=campPt(P,104,wgUV(P,f.x+OX,f.z+OZ)[1]+(Math.random()-0.5)*3);f.hd=Math.atan2(tx-f.x,tz-f.z);
+    if(f.st==='idle'&&!f.atk&&F.shot&&Math.random()<0.18){f.pT=[tx,hAt(Math.round(tx+OX),Math.round(tz+OZ))+1.4,tz];f.atk=0.45;f.atkK='pshot';}}
+  else if(act==='smith'){if(f.st==='idle'&&!f.atk&&Math.random()<0.5){f.atk=F.wind;f.atkK='spar';f.smith=1;}}
+  else if(act==='rest'){if(!f.camp)f.camp={k:'sit',t:1e9};f.hd=Math.atan2(scx-f.x,scz-f.z);} // waiting their turn in the hidden way (D-085)
+  else if(act==='cook'){if(!f.camp)f.camp={k:'sit',t:1e9};f.hd=Math.atan2(scx-f.x,scz-f.z);if(Math.random()<0.4)spawnP(scx+(Math.random()-.5),f.y+1.2,scz+(Math.random()-.5),(Math.random()-.5)*0.2,0.8,(Math.random()-.5)*0.2,[0.85,0.85,0.85],1.6,-0.3);}
+  else if(act==='haul'){if(f.st==='idle'&&f.t<=5.5){const back=f.hk=!f.hk,sv=Math.sign(wgUV(P,f.hx+OX,f.hz+OZ)[1])||1,[tx,tz]=back?campPt(P,184+(f.id%3-1)*20,sv*92):[f.hx,f.hz];f.carry=back?1:0;const r=campReach(f,tx+(Math.random()-0.5)*2,tz+(Math.random()-0.5)*2);if(r[2]>=2){f.tx=r[0];f.tz=r[1];f.st='walk';f.t=40;}}}
+  else if(act==='sick'){if(!f.rest){f.rest=1;f.hp=Math.round(f.mhp*0.3);}else if(f.hp>=f.mhp){f.rest=0;f.st='walk';const [tx,tz]=campPt(P,150,(f.id%2?1:-1)*40);f.tx=tx;f.tz=tz;f.t=40;f.spk='';if(Math.hypot(f.x-PL.x,f.z-PL.z)<20)toast(F.n+': "Mended, and back to the lines. My thanks to the healers."');}}
+  else if(act==='sentry'){if(f.st==='idle'&&f.t<=5.5){const [u,v]=wgUV(P,f.hx+OX,f.hz+OZ),side=Math.abs(v)>100;let best=null;
+      for(const d of f.hk?[-28,28]:[28,-28]){const [tx,tz]=siteXZ(wgSite(P),side?u+d:u,side?v:v+d),r=campReach(f,tx+0.5-OX,tz+0.5-OZ);if(!best||r[2]>best[2])best=r;if(r[2]>=10)break;} /* (along the rampart's inner road, as far as the ground lets) */
+      f.hk=!f.hk;if(best[2]>=2){f.tx=best[0];f.tz=best[1];f.st='walk';f.t=40;}}}
+  else if(act==='chat'){if(f.st==='idle')f.hd=Math.atan2(scx-f.x,scz-f.z);
+    if(Math.random()<0.06&&foeHear([f.x,f.y,f.z])){const fem=F.fem,at=[f.x,f.y+1.6,f.z];if(Math.random()<0.3)for(let i=0;i<3;i++)voice((fem?300:170)+Math.random()*60,(fem?260:140),0.18,0.05,{form:900,q:1.4,delay:i*0.16},at);else voice((fem?240:140)+Math.random()*40,(fem?220:120),0.6+Math.random()*0.5,0.04,{form:800,q:1.2,vib:5,vd:0.05},at);}}}
+// how far along the straight way from a soldier toward (tx,tz) the ground lets it walk (a block up or down at a step): [x, z, length]
+function campReach(f,tx,tz){const L=Math.hypot(tx-f.x,tz-f.z),ux=(tx-f.x)/(L||1),uz=(tz-f.z)/(L||1),tall=FOES[f.kind].tall||2;let y=f.y,d=0;
+  for(let s=1;s<=L;s++){const yy=foeStand(f.x+ux*s,y+0.05,f.z+uz*s,tall);if(yy<0||Math.abs(yy-y)>1)break;y=yy;d=s;}return [f.x+ux*d,f.z+uz*d,d];}
+// a practice arrow at the butts (from foeStrike): it flies, harms no one, and stands in the hay
+function campArrow(f){const T=f.pT;if(!T)return;const S={dmg:0,v:30,k:'arrow'},E=f.foe;f.foe={x:T[0],y:T[1]-0.55,z:T[2],yaw:0,sp:0,m:{box:[0,0,0,0,1,0]},dead:0,gone:0};foeShoot(f,S,0);f.foe=E;const s=shots[shots.length-1];if(s){s.atP=false;s.dmg=0;}}
+// the camp's sound: hammers, voices, a laugh, a horse, a dog, now and then
+function campAmbience(dt){if((campSndT-=dt)>0)return;campSndT=1.2+Math.random()*2;const P=wasteGateAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),10);if(!P||wgUV(P,PL.x+OX,PL.z+OZ)[0]<P.uC0-10)return;
+  const L=foes.filter(f=>!f.dead&&f.site&&f.site.P===P&&FOES[f.kind].folk&&Math.hypot(f.x-PL.x,f.z-PL.z)<45);if(!L.length||!AX||!settings.sound)return;const f=L[Math.floor(Math.random()*L.length)],at=[f.x,f.y+1.5,f.z],q=Math.random();
+  if(q<0.3)for(let i=0;i<3;i++)tone(900+Math.random()*300,700,0.12,0.04,i*0.35,'square',at); // a hammer on an anvil, somewhere
+  else if(q<0.6)voice(150+Math.random()*80,130,0.7,0.04,{form:800,q:1.2,vib:4,vd:0.05},at);
+  else if(q<0.75)for(let i=0;i<4;i++)voice(200+Math.random()*80,170,0.15,0.045,{form:1000,q:1.4,delay:i*0.14},at);
+  else if(q<0.88)voice(420,260,0.7,0.05,{form:900,q:2,vib:16,vd:0.18},at); // a horse in the lines
+  else burst(0.4,'lowpass',160,0.9,0.12,0,at);} // a cart's wheels, a load set down
 // a slow song of a few voices about the fires: a phrase in a minor key, answered
 function campSong(x,y,z){if(!AX||!settings.sound||Math.hypot(x-PL.x,z-PL.z)>45)return;const p=panner(x,y,z),N=[220,261.63,246.94,220,196,220,164.81,196,220];
   for(let v=0;v<3;v++){const k=[1,0.5,0.75][v];N.forEach((f,i)=>voice(f*k*(1+(Math.random()-0.5)*0.01),f*k,0.9,0.02,{form:700+v*200,q:1.4,vib:4,vd:0.02,delay:i*0.75+v*0.04},p));}}

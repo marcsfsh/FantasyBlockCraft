@@ -8,7 +8,7 @@ const TGB={};
 function wgSite(P){if(P.s)return P.s;
   const s={k:'wgate',X:P.X,Z:P.Z,dir:P.din,T:P.hG,R:0,M:0,P:P,id:P.id,seed:P.seed,name:P.camp,prov:{cult:REALM_CULTS.white,key:'wg:'+P.id,kingdom:{name:'The Allied Hosts'}}},L={parts:[],spots:[],pads:[]};
   P.s=s;s.lay=L;P.cs=hsh(P.X,9709,P.Z)<0.5?1:-1; // the side of the barred leaf (v > 0 or v < 0); the ram stands before it
-  gateLayout(P,s,L,rngAt(P.X,9711,P.Z));campLayout(P,s,L,rngAt(P.X,9713,P.Z));
+  gateLayout(P,s,L,rngAt(P.X,9711,P.Z));campLayout(P,s,L,rngAt(P.X,9713,P.Z));hidLayout(P,s,L);
   for(const p of L.parts){p.bu0=Math.min(p.u0,p.u1);p.bu1=Math.max(p.u0,p.u1);p.bv0=Math.min(p.v0,p.v1);p.bv1=Math.max(p.v0,p.v1);}
   return s;}
 // the half-width of the level works at u (the pass, the field of the siege lines)
@@ -224,10 +224,11 @@ function wgRoadCol(P,segs,X,Z){const n=wgRoadNear(P,segs,X,Z),d=n[0];if(d>WG_RW+
   if(edge&&low)RBP(X,g+1,Z,BASBRICK);
   if(d>WG_RW-2.5&&d<=WG_RW-1.5&&L%40===20){if(low){RBS(X,Z,g+1,g+3,CHARWOOD);RBP(X,g+4,Z,SKULLS);}else{RBP(X,g+1,Z,BASBRICK);RBP(X,g+2,Z,BRAZIER);}}}
 // ---- Names: the place at (X,Z) among a gate's works (the readout and the map): the road down, the camp (the pavilion in it),
-// the ram, the siege lines and the pass before the gate, the gate itself, the orcs' camp in the yard
+// the ram, the siege lines and the pass before the gate, the gate itself, the orcs' camp in the yard; the hidden way
 function wasteGateName(X,Z){if(wgSkip)return null;for(const t of wgTile(X,Z)){const P=t.P,[u,v]=wgUV(P,X,Z);
   if(t.segs.length&&wgRoadNear(P,t.segs,X,Z)[0]<=WG_RW&&u<P.uY+4)return P.road;
-  let on=false;for(const q of wgPieces(P))if(wgOut(q,u,v)<=2)on=true;if(!on)continue;const cs=wgSite(P)&&P.cs;
+  const cs=wgSite(P)&&P.cs;if(P.hid&&wgLineD(P.hid.line,u,v)<=2.5)return P.hid.n; // the hidden way (D-085)
+  let on=false;for(const q of wgPieces(P))if(wgOut(q,u,v)<=2)on=true;if(!on)continue;
   if(u>=P.uC0)return u>=P.uC0+132&&u<=P.uC0+150&&Math.abs(v)<=13?'The Pavilion of the Three Banners':P.camp;
   if(u>=1&&u<=32&&Math.abs(v*cs-10)<=8)return P.ram;
   if(u>16)return 'The Siege Lines of '+P.camp.replace(/^The /,'the ');
