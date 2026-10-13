@@ -238,6 +238,17 @@ def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:fa
 // the mantlets of the siege lines, heavy planks bound in iron, scorched, with the stubs of arrows in them
 const CANVAS=1174,GATEIRON=1175,MANTLET=1176,OBANNER=1177,BOLTTHR=1178;
 def(CANVAS,'Tent Canvas',[355,355,355],{snd:'soft'});def(GATEIRON,'Gate Iron',[356,356,356],{snd:'stone'});def(MANTLET,'Mantlet',[357,357,357],{snd:'wood'});def(OBANNER,'Banner of the Warhost',[358,358,358],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(BOLTTHR,'Bolt Thrower',[359,359,359],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+// The elves enlarged (D-088): moonstone, pale stone that holds a soft light; the starglass lamp, a star of clear crystal in a
+// silver cage; the elven throne of golden wood and elvenstone, gilt; three elven plants (starbloom, a white star that glows a
+// little; silverfern; dawnlily, pale gold); the leaf-stone that marks the elven ways; weathered elvenstone, cracked and mossed,
+// for the ruins of the elder days; shipwood, white-painted planks of their ships; the elven sail, white with a silver star; the
+// elder chest of elvenstone bound in gold; the awning of an elven market, blue and white
+const MOONSTONE=1179,STARLAMP=1180,ETHRONE=1181,STARBLOOM=1182,SILVFERN=1183,DAWNLILY=1184,LEAFSTONE=1185,EVOLD=1186,EHULL=1187,ESAIL=1188,ECHEST=1189,EAWNING=1190;
+def(MOONSTONE,'Moonstone',[360,360,360],{emit:true,lum:9});def(STARLAMP,'Starglass Lamp',[361,361,361],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});
+def(ETHRONE,'Elven Throne',[362,362,363],{snd:'wood'});def(STARBLOOM,'Starbloom',[364,364,364],Object.assign({},PLANT,{emit:true,lum:4}));def(SILVFERN,'Silverfern',[365,365,365],PLANT);def(DAWNLILY,'Dawnlily',[366,366,366],PLANT);
+def(LEAFSTONE,'Leaf-stone',[306,306,367]);def(EVOLD,'Weathered Elvenstone',[368,368,368]);def(EHULL,'Shipwood',[369,369,369],{snd:'wood'});def(ESAIL,'Elven Sail',[370,370,370],{snd:'soft'});
+def(ECHEST,'Elder Chest',[372,372,371],{snd:'stone'});def(EAWNING,'Market Awning',[373,373,373],{snd:'soft'});
+setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
 setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
 setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');

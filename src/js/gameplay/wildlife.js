@@ -74,6 +74,7 @@ function stepAnimal(a,dt){
   a.hurt=Math.max(0,a.hurt-dt*3);
   if(a.dead){a.dead+=dt;a.sp=0;return;}
   if(a.hold){a.sp=a.holdSp||0;a.hd=a.yaw;return;} // held still (screenshots and tests); holdSp walks it on the spot
+  if(A.boat&&PL.ride!==a){a.sp=0;a.st='idle';return;} // a swan boat lies where it was left, on the water (D-088)
   if(PL.ride===a){a.pen=null;const v=Math.hypot(PL.vx,PL.vz);a.sp=v;if(v>0.6)a.hd=Math.atan2(PL.vx,PL.vz);a.yaw+=angTo(a.yaw,a.hd)*Math.min(1,dt*8);a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;a.st='walk';return;}
   a.t-=dt;
   // fright: a running player inside the shy distance, or any player inside half of it
@@ -174,9 +175,10 @@ function animalCall(a,hurt){
     case 'sheep':voice(290*yg*p,262*yg*p,hurt?0.35:0.7,0.09,{vib:9,vd:0.07,form:900*yg,q:1.4},at);break;
     case 'goat':voice(430*yg*p,395*yg*p,hurt?0.3:0.6,0.08,{vib:13,vd:0.09,form:1300,q:1.4},at);break;
     case 'hen':if(a.young){for(let i=0;i<3;i++)voice(2300,2900,0.07,0.04,{type:'sine',form:2600,q:1,delay:i*0.16},at);}else for(let i=0;i<(hurt?2:4);i++)voice(540*p,420*p,0.07,0.07,{type:'square',form:1100,q:2,delay:i*(hurt?0.09:0.14)},at);break;
-    case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
+    case 'ehorse':case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
+    case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
     case 'boar':for(let i=0;i<(hurt?3:2);i++){burst(0.12,'lowpass',260,1,0.13,i*0.2,at);voice(120*p,88*p,0.15,0.06,{form:300,q:1,delay:i*0.2},at);}break;
     case 'hound':if(a.tame&&!hurt&&Math.random()<0.5)voice(900,1150,0.55,0.04,{type:'sine',form:1200,q:1},at);else for(let i=0;i<2;i++)voice(520*p,360*p,0.12,0.09,{form:900,q:1.4,delay:i*0.25},at);break;
     case 'rabbit':burst(0.06,'lowpass',180,1,0.15,0,at);break;}
@@ -218,8 +220,8 @@ function animalStrike(a,dmg,kx,kz){const A=ANIMALS[a.kind],kd=Math.hypot(kx,kz)|
     for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');if(PL.ride===a)dismount();a.dead=0.001;a.st='dead';a.sp=0;}}
 function confirmHunt(a){if(a.warned)return true;a.warned=true;a.hp=1;toast('This is your '+ANIMALS[a.kind].n.toLowerCase().replace('stray ','').replace('wild ','')+'. Strike again to part with it.');return false;}
 // ---- Riding (Q67): a wild horse can be ridden at once; it is faster and jumps higher. Use it again to get off.
-function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast('Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
-function dismount(){const a=PL.ride;PL.ride=null;if(a){a.st='idle';a.t=3;a.sp=0;a.y=a.gy=Math.max(1,standY(a.x,a.y,a.z));}}
+function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=ANIMALS[a.kind].boat?a.y:Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast(ANIMALS[a.kind].ride||'Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
+function dismount(){const a=PL.ride;PL.ride=null;if(a){a.st='idle';a.t=3;a.sp=0;if(ANIMALS[a.kind].boat){boatLeave(a);return;}a.y=a.gy=Math.max(1,standY(a.x,a.y,a.z));}} // (out of a swan boat onto the shore: D-088)
 // ---- The mule's pack: a container like a chest, kept under the mule's own key with the other containers (cs)
 function openPack(a){if(!SURV()){toast('Packs open in survival');return;}const k='mule:'+a.uid;if(!boxes.has(k))boxes.set(k,new Array(BOX_SLOTS).fill(null));box={k:k,x:Math.floor(a.x),y:Math.floor(a.y),z:Math.floor(a.z)};saveDirty=true;openInv();$('invtitle').textContent="The mule's pack";}
 // ---- Saved with the world: the animals you have befriended (world coordinates)

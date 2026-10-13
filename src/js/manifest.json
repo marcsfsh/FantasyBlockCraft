@@ -122,6 +122,10 @@
       "about": "Landmarks and features of the five old kept lands (M6h)"
     },
     {
+      "path": "world/elder-ruins.js",
+      "about": "The ruins of the elder elves (D-088): fallen towers, broken colonnades, moonwell shrines, theatres, toppled kings and lone arches across the mountains and old woods, each with an elder chest and a name"
+    },
+    {
       "path": "world/volcanic.js",
       "about": "The Volcanic Wastes (D-051): volcanoes in the terrain, lava flows, rivers and fissures, the burnt ground, charred trees, the citadel and the rift"
     },
@@ -270,6 +274,10 @@
       "about": "The folk of the wood elves (D-065), with FOLK_KIT's painters: wardens with hoods, cloaks and long bows, blades with two knives, guards of the halls in copper leaves with glaives, captains, the king with a crown of autumn leaves, lords, ladies, the folk of the glades"
     },
     {
+      "path": "engine/elf-court-models.js",
+      "about": "The elves' court, merchants and mariners (D-088): the king and queen of an elder realm in crowns and mantles, the herald, the merchant, the mariner, the wood's merchant"
+    },
+    {
       "path": "engine/dwarf-models.js",
       "about": "The folk of the mountain dwarves (D-066): axeguards, hammerers, crossbowmen, captains, the king, thanes, ladies, miners and smiths, short and broad with braided beards"
     },
@@ -368,6 +376,14 @@
     {
       "path": "gameplay/war-under.js",
       "about": "The hidden way and the war under the gate (D-085, D-086): companies of the hosts' best slipping through the secret passage into the orcs' yard, and the battle without end between the dwarves and the goblins in the Broken Gallery where the mine met the countermine"
+    },
+    {
+      "path": "gameplay/elves.js",
+      "about": "The elves (D-088): the player's standing with the high elves and the wood elves (saved as ef), their gifts and names, their tongue, wardens at the border, talking, trade for coin, healers, moonwells, leaf-stones, the histories at their lecterns, audiences at the throne and their tasks"
+    },
+    {
+      "path": "gameplay/elf-life.js",
+      "about": "The life of the elves (D-088): festivals under the stars, dawn and dusk with horns and song, motes of light and falling leaves, the archery contest, travellers and the leaving, the white ships sailing west, laments, and their song"
     },
     {
       "path": "input/touch.js",

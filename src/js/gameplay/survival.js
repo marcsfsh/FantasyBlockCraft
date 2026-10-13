@@ -1,7 +1,7 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3}; // meat, eggs and milk since E1
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7}; // meat, eggs and milk since E1; the elves' fare (D-088)
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -85,14 +85,14 @@ const LAMP_ADJ=[-3,0,6]; // the Caves setting (Dark, Normal, Bright) shortens or
 function lampLevel(){
   const adj=LAMP_ADJ[settings.cave||0]||0;
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
-  const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
+  const b=equip.belt;if(b&&ITEMS[b.id].ever)return[1,24+adj];if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj]; // (the starglass lantern needs no oil and reaches further: D-088)
   const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];if(h===378)return[0.95,14+adj]; // the Emberheart glows in the hand (W7c)
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
 let lampWarned=false;
 function lampTick(dt){
-  const b=equip.belt;if(!SURV()||!b||!ITEMS[b.id].lamp)return;
+  const b=equip.belt;if(!SURV()||!b||!ITEMS[b.id].lamp||ITEMS[b.id].ever)return;
   if(b.d<=0||lampDark())b.d-=dt;
   if(b.d<=0){const f=[338,339].find(id=>countOf(id)>0);
     if(f){takeItems(f,1);b.d=Math.max(0,b.d)+ITEMS[f].fuel;lampWarned=false;drawBar(true);}
@@ -252,7 +252,7 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
@@ -261,11 +261,15 @@ function act(btn){
   if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
   if(btn===2&&(morBind()||campSalvage()||morHorn(held)||engAct()))return; // a wounded soldier's wounds bound, the Horn of the Hosts sounded (W8b), an engine of the war worked (W8c)
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
+  if(btn===2&&elfAct())return; // speaking with the elves: trade, healing, tales, tasks, an audience (D-088)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
+  if(btn===2&&held===429){elfWhistle();return;} // the elven whistle calls your steed (D-088)
+  if(btn===2&&held===430){boatPlace();return;} // a swan boat set on the water
+  if(btn===2&&held===420&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+12);drawBar(true);drawStats();toast('The draught is cool and bright; your wounds close');return;} // an elven draught
   if(btn===2&&held===326){launchFlare();return;}
   if(btn===2&&(held===379||held===384)&&emberRelicUse(held))return; // a fallen Emberlord's horn or crown (W7c)
   if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}

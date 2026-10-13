@@ -49,7 +49,7 @@ gen(C.X,C.Z);
   assert(cnt[EVBRICK]>2*A&&cnt[EVCARVE]>0.5*A&&cnt[EVPILLAR]>0.15*A&&cnt[EVGLASS]>0.15*A&&cnt[EVTRACERY]>0.08*A&&cnt[EVROOF]+cnt[EVSHINGLE]>0.5*A,'the city is of elvenstone courses with carved friezes and slender columns, its windows glazed under tracery, roofed in verdigris and shingle');
   assert(cnt[EVGOLD]>0.1*A&&cnt[EVLAMP]>0.02*A&&cnt[EVBANNER]>10&&cnt[DLANTERN]===0&&cnt[SILVL]+cnt[BLOSSOM]>50,'gilt on its rails, its lamps lit, its banners hung, trees on its lawns');
   assert(cnt[WSBRICK]===0&&cnt[FSTONE]===0,'none of the white realm\'s nor the riders\' stone is in it');
-  assert(k.ehall>=8&&k.etower>=8&&k.ewall===1&&k.estatue===2&&k.eyard>=1,'halls, many towers, the wall, statues at the gate and a training ground: the elves are strong in arms');
+  assert(k.ehall>=8&&k.etower>=8&&k.ewall===1&&L.parts.filter(p=>p.k==='estatue'&&!p.king).length===2&&k.eyard>=1,'halls, many towers, the wall, statues at the gate and a training ground: the elves are strong in arms');
   assert(gateOpen,'its gate stands open');
   assert(surfaceName(C.X,C.T+1,C.Z)===C.name&&realmPlace(C.X,C.Z).line.includes(C.prov.kingdom.name.replace(/^The /,'')),'standing in it, the readout names the city and its realm');}
 // ---- the folk: warriors many and strong, lords and ladies; neutral until struck; never in creative

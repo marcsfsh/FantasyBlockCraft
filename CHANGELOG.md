@@ -5,6 +5,27 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.51.0 (2026-10-13): the elves enlarged
+
+Saves from 0.50.0 do not carry over (save key v41).
+
+### Game
+- **The havens:** where a realm of the high elves meets the sea there may be a haven: terraces down to a quay at the water's edge, piers with white ships moored at them (swans at their bows), a mole with a lighthouse whose lamp is a star of starglass, the haven-lord's hall and the shipwrights'. Every few minutes a white ship sets sail into the west and does not come back.
+- **The royal court:** at the high seat of each elder realm the king or the queen sits on a throne at the back of the high hall, a blue runner to it, heralds and courtiers about them; the kings of the elder days stand in stone along the way before it. Ask for an audience.
+- **Friendship with the elves:** the high elves and the wood elves each remember what you do: Stranger, Guest, Friend, Trusted, and at last Star-kin or Leaf-kin. Each rank brings a gift; a friend is given a name in their tongue; a trusted friend is greeted with a bow. Striking one of them costs you dearly.
+- **Speak with them** (use one of their folk): they greet you in their own tongue and tell you what it means. Merchants trade, healers heal, loremasters tell the histories of their realm, lords, captains and the throne give tasks.
+- **Trade and coin:** the elves' markets buy and sell for copper, gold and platinum coin: waybread, wine, honeycakes, draughts, starglass lamps, moonstone, arrows, and for their friends elven bows, leaf-mail, the elven blade, the warden's cloak and the starglass lantern. They buy hides, leather, ingots, gems, drake scales and relics. Friends pay less.
+- **Tasks of the elves:** bring a relic from a ruin of the elder days, gather elven plants, carry a letter to another of their places, slay creatures of the wastes, find one of them who is lost and lead them home, bring venison for the wood elves' feast. Sparks rise over where a task leads.
+- **The ruins of the elder elves** across the mountains, highlands, sea cliffs and old woods: fallen towers, broken colonnades, moonwell shrines, theatres, fallen kings of stone and lone arches, weathered and overgrown, each with an elder chest of relics and a name.
+- **Elven gear:** the elven blade, leaf-mail, the warden's cloak (the wastes' creatures see you only half as far), the starglass lantern (needs no oil), waybread, elven wine, honeycakes and the elven draught.
+- **Steeds:** a friend of the high elves is given an elven horse, the fastest steed there is; a friend of the wood elves a great elk that leaps high. The elven whistle calls it from anywhere. **Swan boats** carry you over lakes and the sea.
+- **Festivals under the stars:** at night the elves gather to dance in a ring, sing and send lanterns up into the sky, every night of the full moon. Keep it with them and you are rested.
+- **More of their life:** wardens meet you at the border of their realms; moonwells heal you once a night; houses of healing, markets, libraries and stables in their cities; the archery contest at their ranges; horns and song at dawn and dusk; motes of light at night and golden leaves falling in the wood elves' lands; travellers on their roads, some going down to the havens for the last time; a lament when one of them falls near you.
+- **Small things:** moonstone, the starglass lamp, the elven throne, starbloom, silverfern and dawnlily; leaf-stones on the elven ways that tell you where the road goes; lamps hung over the wood elves' ways; the elves' places marked on the map with a star or a leaf; the realm's name as you come into it; the histories of the elves in the journal; the ruins in the discovery log; in creative, tours to a haven and to each kind of ruin.
+
+### Tooling
+- New tests: `79-elven-lands`, `80-havens`, `81-court`, `82-elf-friends`, `83-elf-life`.
+
 ## 0.50.0 (2026-10-13): straight down to the Ember Throne
 
 Saves from 0.49.0 do not carry over (save key v40).

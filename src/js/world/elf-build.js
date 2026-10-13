@@ -25,7 +25,7 @@ RB.eground=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>s.R-1.5)return;const g=E
   if(lo<g){for(let y=lo+1;y<g;y++)RBP(X,y,Z,(y-lo)%5===0?EVCARVE:EVBRICK);RBP(X,g,Z,EVCARVE);if(!pd&&d<s.R-3)RBP(X,g+1,Z,EVGOLD);return;}
   if(pd&&u>=pd.u0&&u<=pd.u1&&v>=pd.v0&&v<=pd.v1)return;
   RBP(X,g,Z,GRASS);const q=hsh(X,9701,Z);
-  if(q<0.05)RBP(X,g+1,Z,[FLOWR,FLOWY,LAVENDER,BLUEB,OXEYE][(hsh(X,9703,Z)*5)|0]);else if(q<0.09)RBP(X,g+1,Z,TGRASS);
+  if(q<0.05)RBP(X,g+1,Z,[FLOWR,FLOWY,LAVENDER,BLUEB,OXEYE,STARBLOOM,SILVFERN,DAWNLILY][(hsh(X,9703,Z)*8)|0]);else if(q<0.09)RBP(X,g+1,Z,TGRASS);
   // trees on the lawns, silver-leaved or in blossom, one at most to each cell of seven (p.trees: how many of the cells have one)
   const cu=Math.round((u-3)/7)*7+3,cv=Math.round((v-3)/7)*7+3,du=Math.abs(u-cu),dv=Math.abs(v-cv),m=Math.max(du,dv);
   if(m>2||du===2&&dv===2||hsh(cu,9743,cv)>=p.trees||Math.hypot(cu,cv)>s.R-5||p.way(cu,cv)||EVG(s,cu,cv)!==g||elfPad(s,cu,cv))return;
@@ -59,7 +59,9 @@ RB.ehall=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),pr=p.porch||0,a=a0-1,b=b0-1
       if(W>=13&&(a===3||a===W-4)&&b%4===2&&b<D-2)RBS(X,Z,g+1,g+sh-1,EVPILLAR); // columns down a wide hall
       for(let k=0;k<st;k++){const cy=g+k*sh+sh-1;if(a%4===2&&b%5===2&&!(W>=13&&(a===3||a===W-4)))RBP(X,cy,Z,EVLAMP);}
       if(b===D-2&&Math.abs(dm-2)<0.6)RBS(X,Z,g+2,g+3,EVBANNER);
-      if(p.books&&(a===1||a===W-2)&&b%3===1&&b<D-2)RBS(X,Z,g+1,g+2,BOOKS);}}
+      if(p.books&&(a===1||a===W-2)&&b%3===1&&b<D-2)RBS(X,Z,g+1,g+2,BOOKS);
+      if(p.books&&(a===2||a===W-3)&&b===D-3)RBP(X,g+1,Z,LECTERN); // (lecterns with the realm's histories: D-088)
+      elfRoom(p,a,b,W,D,dm,g,X,Z);}}
   else{RBS(X,Z,g+1,eave,AIR);
     if(porch&&b===-pr){if(a%3===0||a===W-1)RBS(X,Z,g+1,eave-1,EVPILLAR);else{RBP(X,eave-2,Z,EVTRACERY);RBP(X,eave-1,Z,EVCARVE);}RBP(X,eave,Z,EVCARVE);} // an arcade of pointed arches
     // a balcony along the upper storey of the front, where there is no porch
@@ -72,6 +74,19 @@ RB.ehall=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),pr=p.porch||0,a=a0-1,b=b0-1
   // the gables: courses under the roof, a round window in each, a carved rake
   if(inA&&(b===0||b===D-1)){for(let y=eave+1;y<eave+evSweep(pos);y++){const win=dm<=1.01&&y>=eave+2&&y<=eave+3;RBP(X,y,Z,win?EVGLASS:y===eave+evSweep(pos)-1?EVCARVE:EVBRICK);}}
   if(gable&&Math.abs(a-mid)<0.6){RBS(X,Z,ry+1,ry+2,EVPILLAR);RBP(X,ry+3,Z,EVLAMP);}};
+// What a hall holds within, by its use (D-088): the royal court's throne (p.throne: a dais up two steps at the back under the
+// banners, the elven throne on it between starglass lamps on columns, a runner of blue to it from the door); a house of healing
+// (p.heal: beds of white wool along its walls, planters of dawnlily and starbloom down its middle); a library (p.lib: shelves
+// along every wall three high and in rows across, lecterns between them); a stable (p.stable: stalls of gilt rails each side of
+// a strawed way, hay bales at the back)
+function elfRoom(p,a,b,W,D,dm,g,X,Z){
+  if(p.throne){const mid=(W-1)/2;if(b>=D-6&&b<=D-2&&a>=1&&a<=W-2){RBP(X,g+1,Z,EVMOSAIC);if(b>=D-4)RBP(X,g+2,Z,dm<1.6?EVMOSAIC:EVCARVE);}
+    if(b<D-6&&b>=1&&dm<1.01)RBP(X,g,Z,WOOLB);
+    if(b===D-3&&dm<0.6)RBP(X,g+3,Z,ETHRONE);if(b===D-2&&dm<0.6){RBP(X,g+3,Z,EVWOOD);RBP(X,g+4,Z,EVGOLD);}
+    if(b===D-3&&Math.abs(dm-3)<0.6){RBS(X,Z,g+3,g+5,EVPILLAR);RBP(X,g+6,Z,STARLAMP);}return;}
+  if(p.heal){if((a===1||a===W-2)&&b>=2&&b<=D-3&&b%2===0){RBP(X,g+1,Z,WOOLW);}if(dm<0.6&&b>=3&&b<=D-4&&b%3===0){RBP(X,g+1,Z,EVCARVE);RBP(X,g+2,Z,b%2?STARBLOOM:DAWNLILY);}return;}
+  if(p.lib){if((a===1||a===W-2)&&b>=1&&b<=D-2)RBS(X,Z,g+1,g+3,BOOKS);if(b%4===0&&b>=4&&b<=D-5&&dm>=2&&a>=3&&a<=W-4)RBS(X,Z,g+1,g+3,BOOKS);if(b%4===2&&b>=2&&b<=D-4&&dm<0.6)RBP(X,g+1,Z,LECTERN);return;}
+  if(p.stable){if(dm>=2&&b%4===0&&b>=2&&b<=D-3)RBP(X,g+1,Z,EVGOLD);if(dm<2)RBP(X,g,Z,hsh(X,9771,Z)<0.5?HAYBALE:EVSTONE);if(b===D-2&&dm>=2)RBS(X,Z,g+1,g+2,HAYBALE);}}
 // A slender round tower (p.rr its radius, p.H to its gallery over p.y): a flared foot, courses with carved bands, tall narrow windows
 // at the quarters, a door toward p.door; corbels under a gallery with a filigree rail, an open belvedere of columns above, a cone of
 // p.roof swept out at its foot, its finial a lamp or the elves' banner (p.flag); within, golden-wood floors, a ladder, lamps. Its
@@ -102,13 +117,15 @@ RB.epav=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),rp=p.rp,g=p.y,
   RBP(X,g,Z,EVMOSAIC);const ang=Math.atan2(b,a),col=Math.abs(d-rp)<0.6&&Math.abs(Math.sin(ang*4))<0.25;
   for(let y=g+1;y<=top;y++)RBP(X,y,Z,col?EVPILLAR:y===top&&d>rp-1.2?EVCARVE:AIR);
   if(d<0.6)RBP(X,top,Z,EVLAMP);};
-// A pool: a carved rim on a stone kerb round water over a floor of mosaic, a column in its middle bearing a lamp
+// A pool: a carved rim on a stone kerb round water over a floor of mosaic, a column in its middle bearing a lamp. A moonwell
+// (p.moon, D-088): its floor moonstone, its water two deep, a starglass lamp on its column, dawnlilies and starbloom at its rim
 RB.epool=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),rp=p.rp,g=p.y;if(d>rp+0.5)return;
-  if(d>rp-0.6){RBP(X,g,Z,EVSTONE);RBP(X,g+1,Z,EVCARVE);RBS(X,Z,g+2,g+4,AIR);return;}
+  if(d>rp-0.6){RBP(X,g,Z,EVSTONE);RBP(X,g+1,Z,p.moon&&hsh(X,9751,Z)<0.3?(hsh(X,9753,Z)<0.5?DAWNLILY:STARBLOOM):EVCARVE);RBS(X,Z,g+2,g+4,AIR);return;}
+  if(p.moon){RBP(X,g-2,Z,MOONSTONE);if(d<0.6){RBS(X,Z,g-1,g+2,EVPILLAR);RBP(X,g+3,Z,STARLAMP);return;}RBP(X,g-1,Z,WATER);RBP(X,g,Z,WATER);RBS(X,Z,g+1,g+4,AIR);return;}
   RBP(X,g-1,Z,EVMOSAIC);if(d<0.6){RBS(X,Z,g,g+2,EVPILLAR);RBP(X,g+3,Z,EVLAMP);return;}RBP(X,g,Z,WATER);RBS(X,Z,g+1,g+4,AIR);};
 // A garden: lawn with beds of flowers, a cross of paths, silver-leaved trees and blossom (p.trees)
 RB.egarden=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,path=Math.abs(a-(W-1)/2)<1||Math.abs(b-(D-1)/2)<1;RBS(X,Z,g+1,g+6,AIR);
-  RBP(X,g,Z,path?EVSTONE:GRASS);if(!path&&hsh(X,9705,Z)<0.4)RBP(X,g+1,Z,[FLOWR,BLUEB,LAVENDER,OXEYE,MOONP][(hsh(X,9707,Z)*5)|0]);
+  RBP(X,g,Z,path?EVSTONE:GRASS);if(!path&&hsh(X,9705,Z)<0.4)RBP(X,g+1,Z,[FLOWR,BLUEB,LAVENDER,OXEYE,MOONP,STARBLOOM,DAWNLILY][(hsh(X,9707,Z)*7)|0]);
   for(const [tu,tv,k] of p.trees){const da=Math.abs(u-tu),db=Math.abs(v-tv),m=Math.max(da,db);if(m>2)continue;
     if(m===0)RBS(X,Z,g+1,g+4,k?BIRCH:SILV);const lf=k?BLOSSOM:SILVL;if(m<=2&&!(da===2&&db===2))RBS(X,Z,g+4+(m===0?1:0),g+5,lf);if(m<=1)RBP(X,g+6,Z,lf);}};
 // A training ground: sand within a filigree rail, butts of straw with painted faces at the back, racks of golden wood
@@ -125,9 +142,22 @@ RB.estatue=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y,gnd=colInfo(X,Z,TRB).
   if((a===1||a===3)&&b===1)at(6,EVSTONE); // the forearms, brought forward
   if(a===2&&b===0){for(let dy=1;dy<=5;dy++)at(dy,EVPILLAR);at(6,EVCARVE);at(7,EVSTONE);at(8,EVCARVE);} // blade, guard, hands, pommel
   if((a===1||a===3)&&b===0)at(6,EVCARVE); // the guard's quillons
+  if(p.king){ // a king of the elder days (D-088): no sword, but a tall staff in one hand bearing a star, a crown of gold
+    if(a===2&&b===0){for(let dy=1;dy<=6;dy++)at(dy,AIR);at(5,EVSTONE);} // his hands at his breast
+    if((a===1||a===3)&&b===0)at(6,AIR);
+    if(a===4&&b===1){for(let dy=1;dy<=12;dy++)at(dy,EVPILLAR);at(13,STARLAMP);}
+    if(a===2&&b>=2&&b<=3){at(9,EVSTONE);at(10,EVSTONE);}if(a>=1&&a<=3&&b>=1&&b<=4&&!(a===2&&(b===2||b===3)))at(11,a===2||b===1||b===4?EVGOLD:AIR);
+    if(a===2&&(b===2||b===3))at(11,EVSTONE);if((a===1||a===3)&&(b===1||b===4))at(12,EVGOLD);if((a===1||a===3)&&b===3)at(9,EVSTONE);return;}
   if(a===2&&b>=2&&b<=3){at(9,EVSTONE);at(10,EVSTONE);at(11,EVCARVE);} // the head under the helm
   if(a===2&&b===1)at(11,EVCARVE);if(a===2&&b===4)at(10,EVCARVE); // the crest, swept back
   if((a===1||a===3)&&b===3)at(9,EVSTONE);}; // the hair at the shoulders
+// An elven market (D-088): a square paved in mosaic and elvenstone; stalls round its edge facing in, each on four slender columns
+// under an awning of blue and white, a counter of golden wood with wares on it (casks, crates, books, flowers); lamps at its corners
+RB.emarket=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,e=Math.min(a,b,W-1-a,D-1-b),mid=(W-1)/2;RBP(X,g,Z,e>=4&&(a+b)%2===0?EVMOSAIC:EVSTONE);RBS(X,Z,g+1,g+5,AIR);
+  if(e===0&&(a===0||a===W-1)&&(b===0||b===D-1)){RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EVLAMP);return;}
+  if(e<=2&&Math.abs(a-mid)>2&&Math.abs(b-(D-1)/2)>2){const along=a===0||a===W-1||e===a||e===W-1-a?b:a,slot=((along-1)%4+4)%4;
+    if(e===0&&slot===0)RBS(X,Z,g+1,g+3,EVPILLAR);if(e===2&&slot===0)RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EAWNING);
+    if(e===2&&slot!==0){RBP(X,g+1,Z,EVWOOD);if(slot===2)RBP(X,g+2,Z,[BARREL,CRATE,BOOKS,STARBLOOM,DAWNLILY,MOONSTONE][Math.floor(hsh(Math.floor(along/4),9773,Math.round(s.X)+a*3)*6)]);}}};
 // A wall round a city or a fastness (p.r its line, three thick, p.H over the ground at each column, so it steps with the land):
 // courses on a carved plinth, a carved band near the top, a walk behind tall merlons with filigree between; the gate's passage
 // (p.gw either side of the middle, toward -u) open under its arch (p.gh)
@@ -138,7 +168,7 @@ RB.ewall=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v),R=p.r;if(d<R-1.5||d>=R+1.5)retu
   if(d>=R+0.5){const m=((t%4)+4)%4;if(m<2){RBP(X,top+1,Z,EVBRICK);RBP(X,top+2,Z,EVCARVE);}else if(m===2)RBP(X,top+1,Z,EVGOLD);}
   else RBP(X,top,Z,EVSTONE);};
 // ---- Layouts
-function elfLayout(s,L,r){if(s.k==='city')elfCity(s,L,r);else if(s.k==='fort')elfFastness(s,L,r);else if(s.k==='village')elfRefuge(s,L,r);else if(s.k==='farm')elfGardens(s,L,r);else elfSpire(s,L,r);}
+function elfLayout(s,L,r){if(s.k==='haven')elfHaven(s,L,r);else if(s.k==='city')elfCity(s,L,r);else if(s.k==='fort')elfFastness(s,L,r);else if(s.k==='village')elfRefuge(s,L,r);else if(s.k==='farm')elfGardens(s,L,r);else elfSpire(s,L,r);}
 // the shared toolkit of a layout: the ground's level, boxes taken, platforms, halls with their steps, towers and the rest
 function elfKit(s,L){
   const P=L.parts,taken=[],R=s.R,lvl=(u,v)=>s.T+Math.round((evRaw(s,u,v)-s.T)/s.terr)*s.terr;
@@ -159,11 +189,12 @@ function elfKit(s,L){
   const tower=(cu,cv,rr,H,o,force)=>{const e=Math.ceil(rr+2);if(!force&&!free(cu-e,cu+e,cv-e,cv+e))return null;const y=o&&o.y!==undefined?o.y:lvl(cu,cv);
     const p=Object.assign({k:'etower',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rr:rr,H:H,y:y},o||{});P.push(p);if(o&&o.nopad)take(cu-e,cu+e,cv-e,cv+e);else pad(cu-e+1,cu+e-1,cv-e+1,cv+e-1,y);return p;};
   const pav=(cu,cv,rp,o)=>{const e=rp+2;if(!free(cu-e,cu+e,cv-e,cv+e))return null;const y=lvl(cu,cv);P.push(Object.assign({k:'epav',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rp:rp,y:y},o||{}));pad(cu-rp-1,cu+rp+1,cv-rp-1,cv+rp+1,y);return y;};
-  const pool=(cu,cv,rp)=>{const e=rp+1;if(!free(cu-e-1,cu+e+1,cv-e-1,cv+e+1))return null;const y=lvl(cu,cv);P.push({k:'epool',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rp:rp,y:y});pad(cu-e,cu+e,cv-e,cv+e,y);return y;};
+  const pool=(cu,cv,rp,moon)=>{const e=rp+1;if(!free(cu-e-1,cu+e+1,cv-e-1,cv+e+1))return null;const y=lvl(cu,cv);P.push({k:'epool',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rp:rp,y:y,moon:!!moon});pad(cu-e,cu+e,cv-e,cv+e,y);return y;};
   const garden=(cu,cv,w,d,trees)=>{const u0=cu-(d>>1),v0=cv-(w>>1);if(!free(u0-1,u0+d,v0-1,v0+w))return null;const y=lvl(cu,cv);P.push({k:'egarden',u0:u0,u1:u0+d-1,v0:v0,v1:v0+w-1,f:0,y:y,trees:trees.map(([a,b,k])=>[u0+a,v0+b,k])});pad(u0,u0+d-1,v0,v0+w-1,y);return y;};
   const yard=(cu,cv,w,d,f)=>{const ac=f<2,hu=ac?d:w,hv=ac?w:d,u0=Math.round(cu-hu/2),v0=Math.round(cv-hv/2);if(!free(u0-1,u0+hu,v0-1,v0+hv))return null;const y=lvl(cu,cv);
     P.push({k:'eyard',u0:u0,u1:u0+hu-1,v0:v0,v1:v0+hv-1,f:f,y:y});pad(u0,u0+hu-1,v0,v0+hv-1,y);return y;};
-  return {P:P,R:R,lvl:lvl,free:free,take:take,pad:pad,downhill:downhill,hall:hall,tower:tower,pav:pav,pool:pool,garden:garden,yard:yard};}
+  const market=(cu,cv,w)=>{const u0=cu-(w>>1),v0=cv-(w>>1);if(!free(u0-1,u0+w,v0-1,v0+w))return null;const y=lvl(cu,cv);P.push({k:'emarket',u0:u0,u1:u0+w-1,v0:v0,v1:v0+w-1,f:0,y:y});pad(u0,u0+w-1,v0,v0+w-1,y);return y;};
+  return {P:P,R:R,lvl:lvl,free:free,take:take,pad:pad,downhill:downhill,hall:hall,tower:tower,pav:pav,pool:pool,garden:garden,yard:yard,market:market};}
 // the ground part with its way: from the gate (u = -R) up to uEnd, ww either side of the middle; the stairs' tops along it, cached
 function elfGroundPart(s,L,uEnd,ww,trees){const cache=new Map(),onWay=u=>u>=-s.R&&u<=uEnd,
   stairs=u=>{let h=cache.get(u);if(h!==undefined)return h;h=EVG(s,u,0);for(let k=1;k<=14;k++){h=Math.max(h,EVG(s,u+k,0)-k,EVG(s,u-k,0)-k);}cache.set(u,h);return h;};
@@ -180,7 +211,12 @@ function elfCity(s,L,r){
   const hu0=best?best.u0:Math.round(R*0.05);
   const H=K.hall(hu0+bd/2,0,W,D,0,{porch:pr,st:2,sh:7,books:1,roof:EVROOF});
   const wayEnd=H?H.u0-1:R-12;K.take(-R,wayEnd,-4,4);elfGroundPart(s,L,wayEnd,2,0.35);
-  if(H){K.tower(H.u1-4,-(W>>1)-6,3.5,s.prov.capital?44:36,{roof:EVSHINGLE,flag:1,door:3,y:H.y},true);L.spots.push({kind:'hall',u:H.u0+6,v:0,y:H.y+1},{kind:'hall',u:H.u0-3,v:2,y:EVG(s,H.u0-3,2)+1});}
+  if(H){K.tower(H.u1-4,-(W>>1)-6,3.5,s.prov.capital?44:36,{roof:EVSHINGLE,flag:1,door:3,y:H.y},true);L.spots.push({kind:'hall',u:H.u0+6,v:0,y:H.y+1},{kind:'hall',u:H.u0-3,v:2,y:EVG(s,H.u0-3,2)+1});
+    // the court (D-088): the throne at the back of the high hall (the king's or queen's at the high seat, a lord's elsewhere), the
+    // kings of the elder days in stone along the way before it
+    H.throne=1;L.spots.push({kind:s.prov.capital?'throne':'seat',u:H.u1-6,v:0,y:H.y+3});
+    for(const sg of [1,-1])for(const du of [4,12])if(K.free(wayEnd-du-2,wayEnd-du+2,sg*8-3,sg*8+3)){K.take(wayEnd-du-2,wayEnd-du+2,sg*8-3,sg*8+3);P.push({k:'estatue',u0:wayEnd-du-2,u1:wayEnd-du+2,v0:sg*8-2,v1:sg*8+2,f:sg>0?2:3,y:EVG(s,wayEnd-du,sg*8),king:1});}
+    L.spots.push({kind:'court',u:wayEnd-8,v:0,y:EVG(s,wayEnd-8,0)+1});}
   // by the gate: barracks either side of the way, a training ground, the armoury
   const gu=-R+12;for(const sg of [1,-1]){const b=K.hall(gu,sg*13,9,15,sg>0?2:3,{st:2,sh:6,roof:EVSHINGLE});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y+1});}
   const ys=r()<0.5?1:-1,yu=gu+16;const yy=K.yard(yu,ys*15,13,17,ys>0?2:3);if(yy!==null)L.spots.push({kind:'drill',u:yu,v:ys*15,y:yy+1});
@@ -192,6 +228,13 @@ function elfCity(s,L,r){
   const towers=n=>{for(const c of bySteep){if(tl.length>=n)break;if(!apart(c,tl,R*0.45))continue;if(K.tower(c.cu,c.cv,2.5+hsh(c.cu,9723,c.cv),24+Math.round(hsh(c.cu,9725,c.cv)*10),{roof:hsh(c.cv,9727,c.cu)<0.5?EVROOF:EVSHINGLE,door:K.downhill(c.cu,c.cv)}))tl.push([c.cu,c.cv]);}};
   const pavs=n=>{for(const c of byHigh){if(pl.length>=n)break;if(!apart(c,pl,R*0.4))continue;const y=K.pav(c.cu,c.cv,3);if(y!==null){pl.push([c.cu,c.cv]);L.spots.push({kind:'garden',u:c.cu,v:c.cv,y:y+1});}}};
   towers(2);pavs(1);
+  // the market, the house of healing, the library and the stables (D-088), where they fit
+  for(const [cu,cv] of [[gu+30,-ys*17],[gu+30,ys*20],[Math.round(-R*0.1),-ys*18],[Math.round(-R*0.1),ys*18],[Math.round(R*0.2),-ys*20],[Math.round(R*0.2),ys*20],[gu+20,-ys*28],[gu+20,ys*28]]){const y=K.market(cu,cv,15)??K.market(cu,cv,13);if(y!==null){L.spots.push({kind:'market',u:cu,v:cv,y:y+1});break;}}
+  const grid=[];for(let cu=-R+10;cu<R-6;cu+=6)for(let cv=-R+6;cv<R-6;cv+=6){if(Math.abs(cv)<11||Math.hypot(cu,cv)>R-10)continue;grid.push([cu,cv,hsh(cu,9779,cv)]);}grid.sort((a,b)=>a[2]-b[2]);
+  const place=(pref,fn)=>{for(const [cu,cv] of pref.concat(grid))if(fn(cu,cv))return true;return false;};
+  place([[0,ys*18],[0,-ys*18],[Math.round(R*0.3),ys*20],[Math.round(R*0.3),-ys*20]],(cu,cv)=>{const h=K.hall(cu,cv,11,15,K.downhill(cu,cv),{st:2,sh:6,roof:EVROOF,heal:1})||K.hall(cu,cv,9,13,K.downhill(cu,cv),{st:1,sh:6,roof:EVROOF,heal:1});if(h)L.spots.push({kind:'heal',u:h.front[0],v:h.front[1],y:h.y+1});return !!h;});
+  if(s.prov.capital||R>=40)place([[Math.round(R*0.25),-ys*18],[Math.round(R*0.25),ys*18]],(cu,cv)=>{const h=K.hall(cu,cv,13,17,K.downhill(cu,cv),{st:2,sh:7,roof:EVROOF,lib:1})||K.hall(cu,cv,11,15,K.downhill(cu,cv),{st:2,sh:7,roof:EVROOF,lib:1});if(h)L.spots.push({kind:'library',u:h.front[0],v:h.front[1],y:h.y+1});return !!h;});
+  place([[gu+14,-ys*26],[gu+14,ys*26],[gu+26,-ys*26],[gu+26,ys*26]],(cu,cv)=>{const h=K.hall(cu,cv,9,15,K.downhill(cu,cv),{st:1,sh:6,roof:EVSHINGLE,stable:1})||K.hall(cu,cv,9,11,K.downhill(cu,cv),{st:1,sh:6,roof:EVSHINGLE,stable:1});if(h)L.spots.push({kind:'stable',u:Math.round((h.u0+h.u1)/2),v:Math.round((h.v0+h.v1)/2),y:h.y+1,horses:3});return !!h;});
   // halls about the terraces, each facing where the land falls away: tried on a fine grid in a shuffled order, the larger where
   // they fit, the smaller where they do not
   const spots=[];for(let cu=-R+10;cu<R-6;cu+=7)for(let cv=-R+6;cv<R-6;cv+=7){if(Math.abs(cv)<9||Math.hypot(cu,cv)>R-9)continue;spots.push([cu,cv,hsh(cu,9711,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
@@ -201,7 +244,7 @@ function elfCity(s,L,r){
   towers(s.prov.capital?6:4);pavs(3);
   // pools and gardens near the way, wherever there is room
   const near=[];for(let cu=-R+16;cu<R-12;cu+=6)for(const cv of [-10,-14,-18,10,14,18])near.push([cu,cv,hsh(cu,9747,cv)]);near.sort((a,b)=>a[2]-b[2]);
-  let npo=0,ng=0;for(const [cu,cv] of near){if(npo<3){const y=K.pool(cu,cv,3);if(y!==null){npo++;L.spots.push({kind:'garden',u:cu,v:cv+(cv>0?5:-5),y:y+1});continue;}}
+  let npo=0,ng=0;for(const [cu,cv] of near){if(npo<3){const y=K.pool(cu,cv,3,npo===0);if(y!==null){npo++;L.spots.push({kind:'garden',u:cu,v:cv+(cv>0?5:-5),y:y+1});continue;}}
     if(ng<2&&K.garden(cu,cv,11,11,[[2,2,0],[8,2,1],[2,8,1],[8,8,0]])!==null)ng++;}
   // the wall, its towers, the great gate between two towers, statues of warriors before it
   const WH=13;P.push({k:'ewall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:WH,gw:2,gh:8});
@@ -231,7 +274,7 @@ function elfRefuge(s,L,r){
   if(H)L.spots.push({kind:'hall',u:H.u0-3,v:2,y:EVG(s,H.u0-3,2)+1});
   for(const [cu,cv] of [[-6,-12],[-6,12],[8,-13],[8,13]]){const h=K.hall(cu,cv,7,11,K.downhill(cu,cv),{st:1,sh:6,roof:hsh(cu,9729,cv)<0.5?EVROOF:EVSHINGLE});if(h)L.spots.push({kind:'green',u:h.front[0],v:h.front[1],y:EVG(s,h.front[0],h.front[1])+1});}
   const py=K.pav(-Math.round(R*0.45),-9,3);if(py!==null)L.spots.push({kind:'garden',u:-Math.round(R*0.45),v:-9,y:py+1});
-  const qy=K.pool(-Math.round(R*0.4),8,2);if(qy!==null)L.spots.push({kind:'green',u:-Math.round(R*0.4),v:4,y:EVG(s,-Math.round(R*0.4),4)+1});
+  const qy=K.pool(-Math.round(R*0.4),8,3,true)??K.pool(-Math.round(R*0.4),8,2,true);if(qy!==null)L.spots.push({kind:'green',u:-Math.round(R*0.4),v:4,y:EVG(s,-Math.round(R*0.4),4)+1});
   K.garden(Math.round(R*0.05),-15,9,9,[[2,2,1],[6,6,0]]);
   K.tower(Math.round(R*0.55),14,2.5,22,{roof:EVSHINGLE,flag:1,door:K.downhill(Math.round(R*0.55),14)});
   L.spots.push({kind:'lane',u:-R+3,v:0,y:EVG(s,-R+3,0)+1});
@@ -246,11 +289,97 @@ function elfGardens(s,L,r){const K=elfKit(s,L),R=s.R;elfGroundPart(s,L,-R+3,1,0.
   const pv=K.pav(-2,-Math.round(R*0.5),2);if(pv!==null)L.spots.push({kind:'field',u:-2,v:-Math.round(R*0.5)+4,y:pv+1});
   for(const [cu,cv] of [[-Math.round(R*0.35),Math.round(R*0.4)],[Math.round(R*0.1),Math.round(R*0.55)]])if(K.garden(cu,cv,7,7,[[1,1,0],[5,5,1]])!==null)L.spots.push({kind:'field',u:cu,v:cv,y:EVG(s,cu,cv)+1});
 }
-// ---- The elves' roads: the elven way paved in elvenstone between kerbs of courses, a lamp on a column beside it every 48 blocks;
+// ---- The havens of the elves (D-088): the quay on its pad at the harbour's edge (u0 to u1, its face at u1, the water beyond):
+// paved in elvenstone with a band of mosaic, lamps on columns, cargo in casks and crates; its face a wall of courses from the
+// dredged floor, a carved coping with bollards on it
+RB.equay=(s,p,u,v,X,Z)=>{const y=p.y,k=u-p.u0;
+  if(u===p.u1){for(let yy=SEA-6;yy<y;yy++)RBP(X,yy,Z,EVBRICK);RBP(X,y,Z,EVCARVE);RBP(X,y+1,Z,((v%6)+6)%6===0?EVPILLAR:AIR);RBS(X,Z,y+2,y+4,AIR);return;}
+  RBP(X,y,Z,k===p.u1-p.u0-2?EVMOSAIC:EVSTONE);RBS(X,Z,y+1,y+5,AIR);
+  if(k===1&&((v%12)+12)%12===0){RBS(X,Z,y+1,y+3,EVPILLAR);RBP(X,y+4,Z,EVLAMP);}
+  else if(k===2&&((v%5)+5)%5<2&&hsh(Math.floor(v/5),9761,Math.round(s.X))<0.4)RBP(X,y+1,Z,hsh(X,9763,Z)<0.5?BARREL:CRATE);};
+// A pier from the quay out over the harbour (p.cv its middle, a deck p.w-1 either side, from u0 to its head at u1) at the quay's
+// height: golden wood on elvenstone sills, a carved edge with a gilt rail, columns down to the floor every four, lamps along it
+// and at its head
+RB.epier=(s,p,u,v,X,Z)=>{const y=p.y,a=Math.abs(v-p.cv),k=u-p.u0,head=u===p.u1;
+  if(a<p.w&&!head){RBP(X,y,Z,k%4===0?EVSTONE:EVWOOD);RBS(X,Z,y+1,y+4,AIR);return;}
+  RBP(X,y,Z,EVCARVE);RBS(X,Z,y+2,y+4,AIR);
+  if(k%4===0||head){const f=colInfo(X,Z,TRB).h;for(let yy=Math.min(f,SEA-5)+1;yy<y;yy++)RBP(X,yy,Z,EVPILLAR);}
+  if((k%8===4&&a===p.w)||(head&&a===p.w)){RBS(X,Z,y+1,y+2,EVPILLAR);RBP(X,y+3,Z,EVLAMP);}else RBP(X,y+1,Z,EVGOLD);};
+// A white ship of the elves moored along +u (p.u0 its stern, p.L long, p.cv the line of its keel): a hull of shipwood five wide,
+// rounded below and drawn to a point at the bow, standing three blocks out of the water; a deck of golden wood, its gunwale gilt
+// here and there; a raised stern, a lamp on its post; a
+// mast (p.mt from the stern) with a yard and a white sail bellied forward, the banner at its head; at the bow a swan's neck
+// curving up and forward to a gilt beak
+RB.eship=(s,p,u,v,X,Z)=>{const t=u-p.u0,c=v-p.cv,L=p.L,ac=Math.abs(c),dk=SEA+3;
+  const hw=t<0||t>=L?-1:Math.min(2,t<3?1+t*0.5:(L-1-t)*0.55+0.4);
+  if(hw>=0&&ac<=hw+0.01){const edge=ac>=hw-0.5;
+    for(let y=SEA-2;y<=dk;y++){const k=dk-y,w=k>=5?0:k===4?Math.min(hw,1):hw;if(ac<=w+0.01)RBP(X,y,Z,y===dk&&!edge?EVWOOD:EHULL);}
+    if(t<=3){RBP(X,dk+1,Z,edge?EHULL:EVWOOD);RBP(X,dk+2,Z,edge?(t%2?EVGOLD:EHULL):AIR);}else RBP(X,dk+1,Z,edge?(t%3===1?EVGOLD:EHULL):AIR);}
+  if(c===0&&t===0){RBS(X,Z,dk+1,dk+5,EHULL);RBP(X,dk+6,Z,EVLAMP);}
+  const mt=p.mt;if(c===0&&t===mt){RBS(X,Z,dk+1,dk+16,EVWOOD);RBP(X,dk+17,Z,EVBANNER);}
+  if(t===mt+1&&ac<=4){RBP(X,dk+15,Z,EVWOOD);if(ac>2)RBS(X,Z,dk+6,dk+14,ESAIL);}
+  if(t===mt+2&&ac<=2)RBS(X,Z,dk+6,dk+13,ESAIL);
+  if(c===0){if(t===L-1)RBS(X,Z,dk+1,dk+3,EHULL);if(t===L)RBS(X,Z,dk+3,dk+7,EHULL);if(t===L+1)RBP(X,dk+7,Z,EHULL);if(t===L+2)RBP(X,dk+7,Z,EVGOLD);}};
+// The mole: a breakwater five wide from the quay out along one side of the harbour (p.cv), courses from the floor to the quay's
+// height, a parapet along its seaward edge, lamps along it
+RB.emole=(s,p,u,v,X,Z)=>{const y=p.y,a=v-p.cv,f=colInfo(X,Z,TRB).h,k=u-p.u0;for(let yy=Math.min(f,SEA-5)+1;yy<y;yy++)RBP(X,yy,Z,EVBRICK);
+  RBP(X,y,Z,Math.abs(a)===2?EVCARVE:EVSTONE);RBS(X,Z,y+2,y+5,AIR);
+  if(Math.abs(a)===2&&k%10===5){RBP(X,y+1,Z,EVPILLAR);RBP(X,y+2,Z,EVLAMP);}else RBP(X,y+1,Z,a*p.side>=2?EVCARVE:AIR);};
+// The lighthouse at the mole's end: its foot built up from the floor (efound), a slender tower of the elves over it (etower),
+// and in its belvedere the great lamp, a star of starglass three high (elantern)
+RB.efound=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv);if(d>p.r+0.5)return;const f=colInfo(X,Z,TRB).h;for(let yy=Math.min(f,SEA-5)+1;yy<p.y;yy++)RBP(X,yy,Z,EVBRICK);RBP(X,p.y,Z,d>p.r-1?EVCARVE:EVSTONE);RBS(X,Z,p.y+1,p.y+3,AIR);};
+RB.elantern=(s,p,u,v,X,Z)=>{if(Math.hypot(u-p.cu,v-p.cv)>1.6)return;RBS(X,Z,p.y0,p.y0+2,STARLAMP);};
+// The haven's gate: an arch over its way (p.w the half-width of its opening, p.H to the springing over p.y): two piers of courses
+// banded in carving, lamps on them, a pointed arch with a gilt keystone, the banner hung under it
+RB.earch=(s,p,u,v,X,Z)=>{const av=Math.abs(v),g=EVG(s,u,v),y=p.y,w=p.w,top=y+p.H;
+  if(av>w&&av<=w+2){for(let yy=Math.min(g,y)+1;yy<=top+2;yy++)RBP(X,yy,Z,(yy-y)%5===0?EVCARVE:EVBRICK);RBP(X,top+3,Z,EVLAMP);return;}
+  if(av<=w){const lo=top-3+Math.round((1-av/w)*3),hi=top+2+(av<1?1:0);for(let yy=lo;yy<=hi;yy++)RBP(X,yy,Z,yy===lo?EVCARVE:av<0.6&&yy===hi?EVGOLD:EVBRICK);if(av<0.6)RBS(X,Z,lo-2,lo-1,EVBANNER);}};
+// The haven: the way from its gate (an arch between statues) down the terraces to the quay along the water (L.qL, where the
+// land meets it); piers out into the dredged harbour (L.hw either side) with white ships moored at them; a mole along one side,
+// the lighthouse at its end; the haven-lord's hall and the shipwrights' hall over the quay facing the sea, houses about the
+// terraces, a moonwell and a garden, a watch tower by the gate
+function elfHaven(s,L,r){
+  const K=elfKit(s,L),R=s.R,P=K.P,M=s.M,y=SEA+2,side=r()<0.5?1:-1;
+  let qL=R-2;for(const v of [-12,0,12])for(let u=-R+16;u<R+M-4;u++)if(evRaw(s,u,v)<SEA+1){qL=Math.min(qL,u-1);break;}
+  qL=Math.max(-R+22,Math.min(R-2,qL));const hw=R-6,uMax=R+M+4;L.qL=qL;L.hw=hw;
+  K.pad(qL-6,qL,-hw,hw,y);P.push({k:'equay',u0:qL-6,u1:qL+1,v0:-hw,v1:hw,y:y,f:0});
+  elfGroundPart(s,L,qL-7,2,0.4);K.take(-R,qL-7,-3,3);
+  // the gate
+  const gy=K.lvl(-R,0);P.push({k:'earch',u0:-R,u1:-R+1,v0:-6,v1:6,y:gy,w:3,H:8});
+  for(const sg of [1,-1])P.push({k:'estatue',u0:-R-7,u1:-R-3,v0:sg*9-2,v1:sg*9+2,f:0,y:K.lvl(-R-5,sg*9)});
+  L.spots.push({kind:'gate',u:-R-3,v:0,y:gy+1});
+  // the piers and the ships at them, the mole and the lighthouse
+  const deep=(u,v)=>u<=R+M?evRaw(s,u,v)<SEA+1:evRaw(s,u,v)<SEA-4,ships=[];
+  for(const [pv,sv] of [[-side*12,[-side*7,-side*17]],[side*6,[side*11]]]){const u1=Math.min(uMax-2,qL+26);if(u1-qL<10||!deep(qL+4,pv))continue;
+    P.push({k:'epier',u0:qL+2,u1:u1,v0:pv-2,v1:pv+2,cv:pv,w:2,y:y});L.spots.push({kind:'pier',u:u1-2,v:pv,y:y+1});
+    for(const cv of sv){let Ls=Math.min(22,uMax-qL-9);while(Ls>=14&&!(deep(qL+4,cv)&&deep(qL+4+Ls,cv)))Ls-=2;if(Ls<14)continue;
+      P.push({k:'eship',u0:qL+4,u1:qL+6+Ls,v0:cv-4,v1:cv+4,cv:cv,L:Ls,mt:Math.round(Ls*0.45)});ships.push(cv);}}
+  L.ships=ships.length;
+  const mv=-side*(hw+2),uE=Math.min(uMax,qL+32);P.push({k:'emole',u0:qL+1,u1:uE,v0:mv-2,v1:mv+2,cv:mv,side:-side,y:y});
+  const lu=uE+3,LH=30;P.push({k:'efound',u0:lu-6,u1:lu+6,v0:mv-6,v1:mv+6,cu:lu,cv:mv,r:5,y:y});
+  K.tower(lu,mv,4,LH,{roof:EVROOF,nopad:1,door:0,y:y+1,rh:10},true);P.push({k:'elantern',u0:lu-2,u1:lu+2,v0:mv-2,v1:mv+2,cu:lu,cv:mv,y0:y+1+LH+1});L.light=[lu,mv];
+  L.spots.push({kind:'light',u:uE-2,v:mv,y:y+1});
+  for(const v of [-Math.round(hw*0.6),0,Math.round(hw*0.6)])L.spots.push({kind:'quay',u:qL-3,v:v,y:y+1});
+  // the halls over the quay, facing the sea; houses about the terraces; a moonwell, a garden, a watch tower
+  const lh=K.hall(qL-20,-side*Math.round(R*0.42),11,15,1,{st:2,sh:6,porch:2,roof:EVROOF,books:1})||K.hall(qL-17,-side*Math.round(R*0.42),9,13,1,{st:2,sh:6,roof:EVROOF,books:1});
+  if(lh)L.spots.push({kind:'hall',u:lh.front[0],v:lh.front[1],y:lh.y+1});
+  const wh=K.hall(qL-18,side*Math.round(R*0.42),9,13,1,{st:1,sh:7,roof:EVSHINGLE})||K.hall(qL-15,side*Math.round(R*0.42),7,9,1,{st:1,sh:6,roof:EVSHINGLE});
+  if(wh)L.spots.push({kind:'wright',u:wh.front[0],v:wh.front[1],y:wh.y+1});
+  const spots=[];for(let cu=-R+9;cu<qL-10;cu+=7)for(let cv=-R+6;cv<R-6;cv+=7){if(Math.abs(cv)<7||Math.hypot(cu,cv)>R-8)continue;spots.push([cu,cv,hsh(cu,9765,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
+  let nh=0;for(const [cu,cv] of spots){if(nh>=5)break;const h=K.hall(cu,cv,9,11,1,{st:hsh(cu,9767,cv)<0.5?2:1,sh:6,roof:hsh(cu,9769,cv)<0.6?EVROOF:EVSHINGLE})||K.hall(cu,cv,7,9,1,{st:1,sh:6,roof:EVROOF});
+    if(!h)continue;nh++;L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:EVG(s,h.front[0],h.front[1])+1});}
+  for(const [cu,cv] of [[-Math.round(R*0.5),-10],[-Math.round(R*0.5),10],[-Math.round(R*0.2),-11],[-Math.round(R*0.2),11]]){const py=K.pool(cu,cv,3,true)??K.pool(cu,cv,2,true);if(py!==null){L.spots.push({kind:'garden',u:cu,v:cv+(cv>0?5:-5),y:py+1});L.moon=[cu,cv];break;}}
+  K.garden(-Math.round(R*0.3),side*14,9,9,[[2,2,1],[6,6,0]]);
+  K.tower(-R+9,side*(R-11),2.5,22,{roof:EVSHINGLE,flag:1,door:K.downhill(-R+9,side*(R-11))});
+}
+// ---- The elves' roads: the elven way paved in elvenstone between kerbs of courses, a lamp on a column beside it every 48 blocks
+// and a leaf-stone on the other side every 144 (D-088);
 // hidden paths of gravel and stepping stones; bridges of elvenstone on slender piers with filigree rails
 function elfRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%48===24){RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EVLAMP);}return;}
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%48===24){RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EVLAMP);}
+    else if(hi&&!wet&&ao<=rd.w+1.5&&rr.off<0&&Math.floor(rr.along)%144===72){RBP(X,g,Z,EVBRICK);RBS(X,Z,g+1,g+2,LEAFSTONE);RBP(X,g+3,Z,EVCARVE);} // a leaf-stone, that tells the way (D-088)
+    return;}
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?EVCARVE:EVBRICK);if(edge)RBP(X,y+1,Z,EVGOLD);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%6===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,EVPILLAR);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;

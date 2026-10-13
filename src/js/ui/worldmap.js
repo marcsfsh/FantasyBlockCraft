@@ -9,9 +9,9 @@ function exPack(){const R=new Map();for(const k of explored){const cx=ckX(k),cz=
   return [...R].map(([rk,m])=>[rk,btoa(String.fromCharCode(...m))]);}
 function exUnpack(list){for(const [rk,s64] of list){const rx=ckX(rk),rz=ckZ(rk),bin=atob(s64);for(let b=0;b<256;b++)if(bin.charCodeAt(b>>3)&(1<<(b&7)))explored.add(ckey(rx*16+(b>>4),rz*16+(b&15)));}}
 if(saved&&Array.isArray(saved.ex))try{exUnpack(saved.ex);}catch(e){}
-if(saved&&Array.isArray(saved.pl))for(const [n,X,Z] of saved.pl)places.push({n:n,X:X,Z:Z});
+if(saved&&Array.isArray(saved.pl))for(const [n,X,Z,e] of saved.pl)places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});
 if(saved&&Array.isArray(saved.mk))for(const [X,Z,n,c] of saved.mk)markers.push({X:X,Z:Z,n:String(n).slice(0,30),c:c});
-const mapSave=()=>({ex:exPack(),pl:places.map(p=>[p.n,p.X,p.Z]),mk:markers.map(m=>[m.X,m.Z,m.n,m.c])});
+const mapSave=()=>({ex:exPack(),pl:places.map(p=>p.e?[p.n,p.X,p.Z,p.e]:[p.n,p.X,p.Z]),mk:markers.map(m=>[m.X,m.Z,m.n,m.c])});
 function exploreChunk(cx,cz){const k=ckey(cx,cz);if(explored.has(k))return;if(explored.size>=EXPL_CAP)explored.delete(explored.values().next().value);explored.add(k);wmDirty.add(ckey(Math.floor(cx/16),Math.floor(cz/16)));}
 // Places: a named place the readout shows (a site, a hold, a point of interest, remains...) is kept the first time you are there.
 // Lands, their stretches and the general names of cave layers are not places.
@@ -19,8 +19,15 @@ const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.value
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
   for(const p of places)if(p.n===n&&Math.hypot(p.X-X,p.Z-Z)<160)return false;
-  if(places.length>=PLACE_CAP)places.shift();places.push({n:n,X:X,Z:Z});saveDirty=true;return true;
+  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':elderNear(X,Z,2)?'r':''; // the elves' places are marked with their sign (D-088)
+  if(places.length>=PLACE_CAP)places.shift();places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});saveDirty=true;return true;
 }
+// the sign of an elven place on the map (D-088): a star of the high elves in silver and blue, a leaf of the wood elves in gold and
+// green, a broken grey star for a ruin of the elder days
+function wmElfSign(g,x,y,e){g.save();g.translate(x,y);g.lineWidth=1.5;
+  if(e==='w'){g.fillStyle='#d8b040';g.strokeStyle='#2e5a26';g.beginPath();g.moveTo(0,-7);g.quadraticCurveTo(6,0,0,7);g.quadraticCurveTo(-6,0,0,-7);g.fill();g.stroke();g.beginPath();g.moveTo(0,-6);g.lineTo(0,6);g.stroke();}
+  else{g.fillStyle=e==='r'?'#9a9890':'#e6ecf6';g.strokeStyle=e==='r'?'#4a4844':'#1e3060';g.beginPath();for(let k=0;k<12;k++){const r=k%2?2.6:(e==='r'&&k===4?3.5:7),a=k/12*6.283-1.5708;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}
+  g.restore();}
 // ---- Drawing the explored map: regions of 16 x 16 chunks, 4 pixels a chunk (one per 4 blocks), drawn when first needed
 const WM_PAL=[[52,92,150],[186,176,146],[112,158,82],[62,112,58],[138,112,122],[132,132,138],[196,204,210],[122,148,92],[46,76,52],[60,104,170],[168,166,104],[88,118,88]];
 const wmRegions=new Map(),wmDirty=new Set(),TW={};
@@ -67,7 +74,7 @@ function drawWorldMap(){
       const c=landSite(i,j);if(!explored.has(ckey(Math.floor(c.x/CS),Math.floor(c.z/CS))))continue;const n=stretchName(landKey(i,j)),e=seen.get(n);if(e){e.x+=c.x;e.z+=c.z;e.k++;}else seen.set(n,{x:c.x,z:c.z,k:1});}
     for(const [n,e] of seen)g.fillText(n,sx(e.x/e.k),sz(e.z/e.k));}
   g.font='16px VT323, monospace';
-  for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
+  for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;if(p.e)wmElfSign(g,x,y,p.e);else{g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);}g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
   warMapDraw(g,sx,sz); // the wars at the gates found, and their lines (W1, D-068)
   waypoints.forEach(m=>{const k=keyXYZ(m.userData.k),x=sx(k[0]+0.5),y=sz(k[2]+0.5);g.fillStyle=m.userData.c||'#5ff2ff';g.strokeStyle='#111';g.lineWidth=1.5;
     g.beginPath();g.moveTo(x,y-7);g.lineTo(x+6,y);g.lineTo(x,y+7);g.lineTo(x-6,y);g.closePath();g.fill();g.stroke();g.fillStyle='#10202a';g.fillText(wpName(m.userData.k),x,y+18);});

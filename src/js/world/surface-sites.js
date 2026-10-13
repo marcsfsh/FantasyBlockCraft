@@ -153,6 +153,7 @@ function surfaceName(X,Y,Z){
   if(stairwayNear(X,Z,1))return 'A Ruined Stairway';
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
+  {const er=elderNear(X,Z,-1);if(er)return er.name;} // the ruins of the elder elves (D-088)
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)

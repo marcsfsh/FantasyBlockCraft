@@ -14,7 +14,7 @@ FLOORS.add(TMOSS);
 const hiSnow=o=>o.h>SEA+150;
 Object.assign(FOREST,{
   alpine:{trees:0.006,tree:(X,y,Z,r)=>spruceP(X,y,Z,r,false),top:o=>hiSnow(o)?SNOWG:o.rid>0.3?STONE:GRASS,
-    plant:r=>r<0.04?GENTIAN:r<0.06?EDELW:r<0.2?TGRASS:r<0.24?FLOWY:0},
+    plant:r=>r<0.04?GENTIAN:r<0.06?EDELW:r<0.064?STARBLOOM:r<0.2?TGRASS:r<0.24?FLOWY:0}, // (starbloom, an elven flower: D-088)
   glacier:{top:o=>o.dn>0.1?GLACIER:o.dn>-0.2?PSNOW:SNOWG},
   cloud:{trees:0.03,tree:(X,y,Z,r)=>mistP(X,y,Z,r),top:o=>o.dn>-0.1?FMOSS:GRASS,plant:r=>r<0.15?FERN:r<0.153?GLOWSHROOM:r<0.2?TGRASS:0},
   karst:{trees:0.006,tree:(X,y,Z,r)=>{if(hsh(X,8191,Z)<0.65)karstP(X,y,Z,r);else treeP(X,y,Z,LOG,LEAVES,4,r);},top:o=>o.rid>0.18?LIMESTONE:GRASS,

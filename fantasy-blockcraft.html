@@ -240,7 +240,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v40',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v41',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -253,7 +253,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=40,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=41,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -588,6 +588,17 @@ def(DBANNER,'Banner of the Mountain',[351,351,351],{solid:false,opq:false,occ:fa
 // the mantlets of the siege lines, heavy planks bound in iron, scorched, with the stubs of arrows in them
 const CANVAS=1174,GATEIRON=1175,MANTLET=1176,OBANNER=1177,BOLTTHR=1178;
 def(CANVAS,'Tent Canvas',[355,355,355],{snd:'soft'});def(GATEIRON,'Gate Iron',[356,356,356],{snd:'stone'});def(MANTLET,'Mantlet',[357,357,357],{snd:'wood'});def(OBANNER,'Banner of the Warhost',[358,358,358],{solid:false,opq:false,occ:false,cross:true,snd:'soft'});def(BOLTTHR,'Bolt Thrower',[359,359,359],{solid:false,opq:false,occ:false,cross:true,snd:'wood'});
+// The elves enlarged (D-088): moonstone, pale stone that holds a soft light; the starglass lamp, a star of clear crystal in a
+// silver cage; the elven throne of golden wood and elvenstone, gilt; three elven plants (starbloom, a white star that glows a
+// little; silverfern; dawnlily, pale gold); the leaf-stone that marks the elven ways; weathered elvenstone, cracked and mossed,
+// for the ruins of the elder days; shipwood, white-painted planks of their ships; the elven sail, white with a silver star; the
+// elder chest of elvenstone bound in gold; the awning of an elven market, blue and white
+const MOONSTONE=1179,STARLAMP=1180,ETHRONE=1181,STARBLOOM=1182,SILVFERN=1183,DAWNLILY=1184,LEAFSTONE=1185,EVOLD=1186,EHULL=1187,ESAIL=1188,ECHEST=1189,EAWNING=1190;
+def(MOONSTONE,'Moonstone',[360,360,360],{emit:true,lum:9});def(STARLAMP,'Starglass Lamp',[361,361,361],{opq:false,occ:false,emit:true,lum:15,snd:'glass'});
+def(ETHRONE,'Elven Throne',[362,362,363],{snd:'wood'});def(STARBLOOM,'Starbloom',[364,364,364],Object.assign({},PLANT,{emit:true,lum:4}));def(SILVFERN,'Silverfern',[365,365,365],PLANT);def(DAWNLILY,'Dawnlily',[366,366,366],PLANT);
+def(LEAFSTONE,'Leaf-stone',[306,306,367]);def(EVOLD,'Weathered Elvenstone',[368,368,368]);def(EHULL,'Shipwood',[369,369,369],{snd:'wood'});def(ESAIL,'Elven Sail',[370,370,370],{snd:'soft'});
+def(ECHEST,'Elder Chest',[372,372,371],{snd:'stone'});def(EAWNING,'Market Awning',[373,373,373],{snd:'soft'});
+setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
 setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');
 setH([WBARK,WPLANK,WCARVE,WRAIL],2,'wood');setH([WLEAF,WHEDGE,WTHATCH],0.4,'soft');setH([WLAMP],0.5,'misc');setH([WROOT],4,'stone',1);setH([WBANNER],0,'soft');
@@ -644,6 +655,15 @@ item(405,'Hunting Bow','bow',[150,112,62],{tool:'bow',draw:0.8,dmg:5,v:34,dur:24
 item(407,'Elven Bow','bow',[206,176,96],{tool:'bow',draw:0.75,dmg:9,v:48,dur:600});item(408,'Dwarven Crossbow','xbow',[124,134,152],{tool:'xbow',load:1.8,dmg:14,v:58,dur:500,once:true});
 item(409,'Arrow','arrow',[140,110,70]);item(410,'Crossbow Bolt','bolt',[110,110,116]);item(411,'Javelin','javelin',[150,112,62],{once:true,throw:{k:'jav',dmg:9,v:25}});item(412,'Throwing Axe','taxe',[200,200,196],{once:true,throw:{k:'axe',dmg:8,v:21}});
 item(413,"Knight's Lance",'lance',[196,200,206],{tool:'lance',dur:300});item(414,'Horn of the Hosts','horn',[214,190,140],{once:true,horn:1});item(415,'Drake Scale','hide',[78,70,72]);item(416,'Drakescale Mail','mail',[92,80,84],{equip:'body',armor:0.6,dur:900,one:true,fireproof:true});
+// The elves' goods and gear (D-088): their fare (waybread that keeps a traveller for days, wine, honeycakes) and a draught of
+// healing; the starglass lantern for the belt that never needs oil; an elven blade, leaf-mail and the warden's cloak (the wastes'
+// creatures see its wearer at half their sight); relics of the elder days from their ruins; a letter carried for them; the
+// whistle that calls an elven steed; a swan boat to set on the water
+item(417,'Waybread','waybread',[214,190,120]);item(418,'Elven Wine','wine',[150,40,70]);item(419,'Honeycake','cake',[222,170,80]);item(420,'Elven Draught','draught',[170,220,230],{once:true});
+item(421,'Starglass Lantern','lantern',[214,222,236],{equip:'belt',lamp:true,ever:1,one:true});item(422,'Elven Blade','sword',[220,226,234],{tool:'sword',tier:8,dur:2400});
+item(423,'Leaf-mail','mail',[206,176,96],{equip:'body',armor:0.5,dur:1400,one:true});item(424,"Warden's Cloak",'cloak',[80,110,74],{equip:'body',armor:0.25,dur:900,one:true,hide:0.5});
+item(425,'Star-carved Cup','goblet',[220,226,236]);item(426,'Leaf-silver Brooch','brooch',[200,206,214]);item(427,'Elder Circlet','circlet',[226,212,150]);
+item(428,'Letter of the Elves','parchment',[236,228,206]);item(429,'Elven Whistle','whistle',[214,222,236],{once:true});item(430,'Swan Boat','boat',[240,240,236],{once:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -734,7 +754,7 @@ function itemIcon(id){
   else if(it.kind==='heart'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const a=Math.hypot(x-5.5,y-5.5)<3.2||Math.hypot(x-10.5,y-5.5)<3.2||(y>=6&&Math.abs(x-8)<(14-y)*0.75);if(a)px(x,y,(y<5?40:0)+(r()-.5)*30);}g.fillStyle='rgba(255,240,180,0.9)';g.fillRect(5,4,2,1);}
   else if(it.kind==='horn'){for(let k=0;k<12;k++){const x=3+k,y=12-Math.round(Math.sin(k/11*2.6)*7),w=k<3?3:k<8?2:1;for(let d=0;d<w;d++)px(x,y+d,(d?-24:20)+(k>9?-20:0));}g.fillStyle='rgba(255,150,50,0.9)';g.fillRect(4,12,2,1);g.fillRect(9,7,1,1);}
   else if(it.kind==='crown'){for(let y=7;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===7?24:y===12?-30:0)+((x+y)%3?0:-12));for(const x of [2,5,8,11,13])for(let y=2+(x%2);y<7;y++)px(Math.min(13,x),y,(y<4?30:0));g.fillStyle='rgba(255,140,40,0.95)';for(const x of [4,7,10])g.fillRect(x,9,2,2);}
-  else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);g.fillStyle='#2e1a16';g.fillRect(6,2,4,1);}
+  else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}if(id===385){g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);}g.fillStyle=id===385?'#2e1a16':'#c8a858';g.fillRect(6,2,4,1);}
   else if(it.kind==='shield'){const B=it.boss||[200,200,196],bx=(x,y,v)=>{g.fillStyle='rgb('+cl(B[0]+v)+','+cl(B[1]+v)+','+cl(B[2]+v)+')';g.fillRect(x,y,1,1);};
     for(let y=1;y<15;y++)for(let x=1;x<15;x++){const dx=x-7.5,dy=y-7.5,inS=it.kite?(y<6?Math.abs(dx)<6.4:Math.abs(dx)<6.4-(y-6)*0.72):it.leaf?Math.abs(dx)<6.5*Math.sin(Math.PI*(y-0.5)/14):it.tower?(x>2&&x<13&&y>1&&y<15):Math.hypot(dx,dy)<6.6;
       if(!inS)continue;const rim=it.tower?(x===3||x===12||y===2||y===14):it.kite||it.leaf?false:Math.hypot(dx,dy)>5.6;px(x,y,rim?-34:(x+y)%4===0?-10:dx<0?14:-4);}
@@ -749,13 +769,21 @@ function itemIcon(id){
     if(it.kind==='arrow'||it.kind==='bolt'){g.fillStyle=it.kind==='arrow'?'#e8e0d0':'#6a6a70';g.fillRect(x0-1,y0,1,2);g.fillRect(x0,y0+1,2,1);}
     if(it.kind==='lance'){g.fillStyle='#3c4c96';g.fillRect(6,5,3,3);g.fillStyle='#e8e0d0';g.fillRect(7,6,1,1);}}
   else if(it.kind==='taxe'){g.fillStyle='#634422';for(let k=0;k<8;k++)g.fillRect(4+k,13-k,2,2);for(let y=2;y<9;y++)for(let x=9;x<15;x++){if(Math.hypot(x-9,y-5.5)<5&&x-9>=Math.abs(y-5.5)*0.4)px(x,y,x>12?30:0);}}
+  else if(it.kind==='waybread'){for(let y=4;y<13;y++)for(let x=2;x<14;x++){const d=Math.hypot((x-7.5)/6,(y-8.5)/4.2);if(d<1)px(x,y,(d>0.8?-30:0)+(y<7?16:0));}g.fillStyle='#5a8a46';for(let k=0;k<6;k++)g.fillRect(3+k*2,5+(k%2),2,1);g.fillStyle='#3e6a34';g.fillRect(7,4,2,9);}
+  else if(it.kind==='wine'){for(let y=6;y<15;y++)for(let x=5;x<11;x++)px(x,y,(x===5?20:x===10?-24:0)+(y>12?-20:0));g.fillStyle='#d8c070';g.fillRect(5,9,6,2);g.fillStyle='#7a5a3a';g.fillRect(7,1,2,5);}
+  else if(it.kind==='cake'){for(let y=6;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===6?30:y===12?-30:0)+((x+y)%3===0?-10:0));g.fillStyle='#f0d070';g.fillRect(3,5,10,1);g.fillStyle='#ffe6a0';g.fillRect(6,4,4,1);}
+  else if(it.kind==='draught'){for(let y=5;y<15;y++){const w=y<8?1:3;for(let x=8-w;x<8+w;x++)px(x,y,(x<8?24:-10));}g.fillStyle='#e8eef4';g.fillRect(7,2,2,3);g.fillStyle='rgba(255,255,255,0.9)';g.fillRect(6,10,1,2);}
+  else if(it.kind==='brooch'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-7.5)*1.4),lf=d<6&&Math.abs(Math.atan2(y-7.5,x-7.5))>0.3;if(lf)px(x,y,d>5?-30:x<8?20:0);}g.fillStyle='#7ad8f0';g.fillRect(7,7,2,2);}
+  else if(it.kind==='circlet'){for(let a=0;a<40;a++){const t=a/40*6.283,x=Math.round(7.5+Math.cos(t)*6),y=Math.round(9+Math.sin(t)*3);px(x,y,Math.sin(t)>0?-24:16);}g.fillStyle='#e6ecf4';g.fillRect(7,4,2,3);g.fillStyle='#7ad8f0';g.fillRect(7,5,2,1);}
+  else if(it.kind==='whistle'){for(let k=0;k<10;k++){px(3+k,10-Math.round(k*0.4),k<2?-20:10);px(3+k,11-Math.round(k*0.4),-20);}g.fillStyle='#2a2a30';g.fillRect(8,7,1,1);}
+  else if(it.kind==='boat'){for(let x=1;x<15;x++){const d=Math.abs(x-7.5)/7.5,top=10+Math.round(d*d*2);for(let y=top;y<14-Math.round(d*2);y++)px(x,y,(y===top?20:-10));}for(let y=3;y<10;y++)px(13,y,-10);g.fillStyle='#d8b050';g.fillRect(14,3,2,1);for(let y=4;y<10;y++)for(let x=5;x<10;x++)if(x-5<y-3)px(x,y,30);}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385]); // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427]); // (the relics of the elder elves: D-088) // relics for the discovery log (M7)
 // Texture atlas, drawn pixel by pixel
 const TS=16,AC=8,AR=64,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
@@ -1302,6 +1330,42 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
       bolt=y===5&&x>=1&&x<=15,tip=y===5&&x===15,str=x===9&&y>=2&&y<=11&&Math.abs(y-6.5)>=1.5,wh=Math.hypot(x-7.5,y-9.5)<1.6;
     if(tip)P(359,x,y,[200,202,210]);else if(bolt)P(359,x,y,sh([120,90,58],(hn(x,y,570)-.5)*10));else if(bow)P(359,x,y,sh([110,114,124],y<3||y>10?-16:12));else if(str)P(359,x,y,[214,206,184]);
     else if(wh)P(359,x,y,sh([80,82,90],Math.hypot(x-7.5,y-9.5)<0.8?20:-6));else if(stock)P(359,x,y,sh([132,96,60],(y===6?12:-8)+(hn(x,y,571)-.5)*10));else if(leg)P(359,x,y,sh([110,80,50],(hn(x,y,572)-.5)*12));}
+  // the elves enlarged (D-088): moonstone, pale blue-white with milky veins and a glow at its heart; the starglass lamp, a
+  // six-rayed star of clear crystal in a silver cage, open between; the throne's top (a cushion of deep blue in a gilt frame) and
+  // its side (a high back of golden wood carved with a star, gilt at the edges); starbloom, white stars on a slender stem;
+  // silverfern, pale silver fronds; dawnlily, pale gold trumpets; the leaf-stone's face, a leaf in relief over lines of letters;
+  // weathered elvenstone, cracked, stained and mossed; shipwood, white planks with pale seams; the elven sail, white canvas in
+  // panels with a silver star; the elder chest's face (elvenstone bound in gold, a lock of gold) and top; the market awning,
+  // stripes of blue and white with a gilt fringe
+  for(const t of [361,364,365,366])clear(t);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const mv=Math.abs(Math.sin(x*0.45+y*0.3+fbm2(x/5,y/5,2,601.3)*3.2))<0.09,mr=Math.hypot(x-7.5,y-7.5);
+    P(360,x,y,sh([206,216,232],(mv?18:0)+(hn(x>>1,y>>1,602)-.5)*10+(hn(x,y,603)-.5)*6+Math.max(0,10-mr*1.6)));
+    const sa=Math.atan2(y-7.5,x-7.5),sr=Math.hypot(x-7.5,y-7.5),ray=sr<(Math.abs(Math.cos(sa*3))>0.95?6:Math.abs(Math.cos(sa*3))>0.8?3.4:2),cg=(x===1||x===14)&&y>=2&&y<=13||(y===1||y===14)&&x>=1&&x<=14;
+    if(cg)P(361,x,y,sh([200,206,218],(x+y)%3*5));else if(ray)P(361,x,y,sh([232,244,255],-sr*4+(Math.abs(Math.cos(sa*3))>0.95?10:0)),sr<1.5?255:230);
+    const fr=x<=1||x>=14||y<=1||y>=14,cu=x>=3&&x<=12&&y>=3&&y<=12;
+    P(362,x,y,fr?sh([222,182,84],(x===0||y===0?16:-6)+(hn(x,y,604)-.5)*12):cu?sh([42,62,124],(hn(x,y,605)-.5)*10+((x+y)%5===0?-8:0)):sh([198,152,84],(hn(x,y,606)-.5)*10));
+    const edge=x<=1||x>=14,starT=Math.hypot(x-7.5,y-4.5),st=starT<(Math.abs(Math.cos(Math.atan2(y-4.5,x-7.5)*3))>0.9?3.4:1.4),seat=y>=11&&y<=12;
+    P(363,x,y,edge?sh([222,182,84],(x===0?14:-10)+(hn(x,y,607)-.5)*10):st?sh([236,232,214],(starT<1?10:0)):seat?sh([42,62,124],(hn(x,y,608)-.5)*10):sh([198,152,84],(y%5===0?-14:0)+(hn(x,y>>2,609)-.5)*12));
+    // the three plants: on a stem from the foot, starbloom's flowers at three heights, the fern's fronds, the lily's trumpets
+    const stem=Math.abs(x-7.5-Math.sin(y*0.4)*0.8)<0.6&&y>=5;
+    {const fl=[[5,4],[10,6],[7,9]].some(([cx,cy])=>{const r=Math.hypot(x-cx,y-cy),a=Math.atan2(y-cy,x-cx);return r<(Math.abs(Math.cos(a*2.5))>0.85?2.2:0.9);});
+      if(fl)P(364,x,y,sh([248,246,232],(hn(x,y,610)-.5)*10));else if(stem||(y>=11&&Math.abs(x-7.5)<(y-10)*0.7&&hn(x,y,611)<0.5))P(364,x,y,sh([92,140,96],(hn(x,y,612)-.5)*16));}
+    {const fr2=[-1,1].some(s=>{for(let k=0;k<7;k++){const by=4+k*1.6,bx=7.5+s*(1+k*0.15),len=4-Math.abs(k-3)*0.6;if(y>=Math.round(by)-0&&y<=Math.round(by)+1&&s*(x-bx)>=0&&s*(x-bx)<=len&&Math.abs((y-by)-s*(x-bx)*0.35)<0.9)return true;}return false;});
+      if(fr2||(Math.abs(x-7.5)<0.6&&y>=3))P(365,x,y,sh([196,212,206],(fr2?(hn(x,y,613)-.5)*20:-30)));}
+    {const tr=[[5,5],[10,4],[8,8]].some(([cx,cy])=>Math.abs(x-cx)<=(y-cy+1)*0.6+0.3&&y>=cy&&y<=cy+3);
+      if(tr)P(366,x,y,sh([246,214,140],(hn(x,y,614)-.5)*14+(y%2?-8:6)));else if(stem||(Math.abs(x-5.5)<0.5&&y>=8)||(Math.abs(x-10.5)<0.5&&y>=7))P(366,x,y,sh([86,138,78],(hn(x,y,615)-.5)*14));}
+    // the leaf-stone: a leaf in relief at the top, three lines of letters under it, a carved border
+    const lb=x===0||x===15||y===0||y===15,lfx=x-7.5,lfy=y-5,lf=(lfx*lfx)/12+(lfy*lfy)/9<1,lv=lf&&Math.abs(lfx)<0.6,ln=(y===10||y===12||y===14)&&x>=3&&x<=12&&hn(x,y,616)<0.65;
+    P(367,x,y,lb?sh([196,186,162],(hn(x,y,617)-.5)*6):lf?sh([238,230,206],lv?-12:8):ln?sh([150,140,120],0):sh([226,216,190],(hn(x,y,618)-.5)*8));
+    const ck=Math.abs(Math.sin(x*0.9+fbm2(x/4,y/4,2,619.1)*4))<0.08&&hn(x>>2,y>>2,620)<0.6,ms=fbm2(x/5,y/5,2,621.7)>0.25+y*0.01;
+    P(368,x,y,ck?sh([120,112,96],0):ms?sh([96,124,74],(hn(x,y,622)-.5)*20):sh([196,188,166],(hn(x>>1,y>>1,623)-.5)*16+(hn(x,y,624)-.5)*8-(y>12?10:0)));
+    const pk=y%4,sm=((hn(0,y>>2,625)*8)|0),jt=((x+sm)%16)===0;P(369,x,y,pk===3||jt?sh([196,198,200],(hn(x,y,626)-.5)*6):sh([238,238,234],(pk===0?6:0)+(hn(x,y>>2,627)-.5)*8));
+    const sp=x%8===0||y%8===0,sst=Math.hypot(x-7.5,y-7.5),sstar=sst<(Math.abs(Math.cos(Math.atan2(y-7.5,x-7.5)*3))>0.94?4:1.2);P(370,x,y,sstar?sh([206,214,230],(sst<1?14:0)):sh([240,238,230],(sp?-14:0)+(hn(x,y,628)-.5)*6));
+    const band=y>=6&&y<=7||x<=1||x>=14||y<=1||y>=14,lock=x>=6&&x<=9&&y>=6&&y<=10;
+    P(371,x,y,lock?sh([238,196,92],(x===6||y===6?16:-10)):band?sh([222,182,84],(hn(x,y,629)-.5)*14+(x+y)%3*3):sh([226,216,190],(y%4===3?-12:0)+(hn(x,y,630)-.5)*8));
+    P(372,x,y,(x<=1||x>=14||y<=1||y>=14||x===7||x===8)?sh([222,182,84],(hn(x,y,631)-.5)*14):sh([226,216,190],(hn(x,y,632)-.5)*8));
+    const stripe=((x>>2)%2)===0,fringe=y>=14;P(373,x,y,fringe?sh([222,182,84],(x%2?-16:10)):stripe?sh([44,70,140],(hn(x,y,633)-.5)*10):sh([236,236,230],(hn(x,y,634)-.5)*8));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
@@ -1723,10 +1787,11 @@ const REALM_CULTS={
   // the high elves of the elder realms (D-062): hidden cities, fastnesses, refuges, watch-spires and gardens on the mountains,
   // the high meadows, the crags and the sea cliffs. They need no level ground: their sites take rough land (spread), and the
   // ground under them is cut into terraces that follow the land (terr: the step), with a platform under every building
-  elf:{k:'elf',lands:new Set(['mtn','alpine','karst','fjord','chalk']),names:'elder',folkNames:'elder',kingdom:'The Elder Realm of ',ks:9441,fp:'e_',
-    site:{city:{M:24,spread:72,wall:1,terr:5},fort:{M:14,spread:48,wall:1,terr:4},village:{M:14,spread:48,terr:4},outpost:{M:10,spread:64,wall:1,terr:4},farm:{M:12,spread:36,terr:3}},
-    R:{city:42,cap:52,cmax:62,small:32,fort:22,village:24,hamlet:18,outpost:8,farm:20},w:{spread:0.08,prom:0.4,pmax:24},
-    label:{fort:'% Fastness',outpost:'% Spire',farm:'% Gardens'},kind:{city:'a hidden city of',fort:'a fastness of',village:'a refuge of',outpost:'a watch-spire of',farm:'the gardens of'},
+  // (D-088: and where a province meets the sea, a haven: haven, its quays toward the water)
+  elf:{k:'elf',lands:new Set(['mtn','alpine','karst','fjord','chalk']),names:'elder',folkNames:'elder',kingdom:'The Elder Realm of ',ks:9441,fp:'e_',haven:1,
+    site:{city:{M:24,spread:72,wall:1,terr:5},fort:{M:14,spread:48,wall:1,terr:4},village:{M:14,spread:48,terr:4},outpost:{M:10,spread:64,wall:1,terr:4},farm:{M:12,spread:36,terr:3},haven:{M:12,spread:80,terr:4}},
+    R:{city:42,cap:52,cmax:62,small:32,fort:22,village:24,hamlet:18,outpost:8,farm:20,haven:28},w:{spread:0.08,prom:0.4,pmax:24},
+    label:{fort:'% Fastness',outpost:'% Spire',farm:'% Gardens',haven:'% Haven'},kind:{city:'a hidden city of',fort:'a fastness of',village:'a refuge of',outpost:'a watch-spire of',farm:'the gardens of',haven:'a haven of'},
     capital:'the high seat of',roads:['The Elven Way','A Hidden Path']},
   // the wood elves of the forest kingdoms (D-065): cities in the great trees, the king's halls under a hill, tree-villages,
   // watch-trees and feasting glades, in the Elder Wood, Autumn Woods, Birch Glades, Ancient Giant Wood, Yew Wood and Silverwood.
@@ -1780,6 +1845,14 @@ function* planProvince(root,key){
   function* clean(X,Z,K,R){const rr=R+4;for(let dz=-rr;dz<=rr;dz+=4){yield;for(let dx=-rr;dx<=rr;dx+=4){if((K.sq?Math.max(Math.abs(dx),Math.abs(dz)):Math.hypot(dx,dz))>rr)continue;
     const o=realmRaw(X+dx,Z+dz);if(o.river||o.bank||o.wet||o.h<o.sl+3||o.rvBot<999)return false;}}return true;}
   function* pick(K,R,score,need){for(let k=0;k<6;k++){const t=yield* best(K,R,score,need);if(!t)return null;if(yield* clean(t.X,t.Z,K,R))return t;ok[Math.round((t.X/S)-gx0)+Math.round((t.Z/S)-gz0)*nx]=1;}return null;}
+  const inLake=(x,z)=>{const lk=lakeAt(x,z);return !!lk&&Math.hypot(x-lk.cx,z-lk.cz)<lk.R+6;};
+  function* havenPick(){let top=null;const R=Z_.haven;
+    for(let b=2;b<nz-2;b+=2){yield;for(let a=2;a<nx-2;a+=2){const k=a+b*nx;if(ok[k]!==2)continue;if(gh[k]>SEA+24)continue;const X=(gx0+a)*S,Z=(gz0+b)*S;if(!far(X,Z,R+70))continue;
+      for(let d=0;d<4;d++){const [dx,dz]=DIRS[d];if(ok[a+dx+(b+dz)*nx]===2||ok[a-dx+(b-dz)*nx]!==2||ok[a-2*dx+(b-2*dz)*nx]!==2)continue;
+        let wat=0;for(const [k2,sd] of [[14,0],[26,0],[40,0],[30,-16],[30,16]]){const x=X+dx*k2-dz*sd,z=Z+dz*k2+dx*sd,o=realmRaw(x,z);if(o.h<o.sl-2&&!o.river&&o.rvBot===999&&!inLake(x,z))wat++;}
+        if(wat<3)continue;const sc=wat-Math.abs(gh[k]-SEA-8)/6-Math.hypot(X-cx,Z-cz)/400+hsh(X,9467,Z)*0.5;
+        if(!top||sc>top.sc)top={X:X,Z:Z,d:(d+2)%4,sc:sc,f:{T:Math.round(gh[k])}};}}}
+    return top;}
   const add=(k,R,t)=>{const K=SK[k],s={k:k,X:t.X,Z:t.Z,R:R,M:K.M,T:t.f.T,sq:!!K.sq,wall:!!(K.sq||K.wall),terr:K.terr||0,raw:K.raw||0,prov:P,id:C.k[0]+k[0]+t.X+','+t.Z,seed:hsh(t.X,9409,t.Z)};P.sites.push(s);return s;};
   // the city (the riders' hill town): in the middle of the province's good ground, raised if the land allows (the riders want a
   // hill under their hall); the capital the largest
@@ -1788,6 +1861,9 @@ function* planProvince(root,key){
   const city=P.sites[0]&&P.sites[0].k==='city'?P.sites[0]:null;
   // a castle (the riders' hold) on the high ground near the border, well away from the city
   if(n>=2||hsh(root.i,9411,root.j)<0.5){const t=yield* pick(SK.fort,Z_.fort,(f)=>Math.min(14,f.prom)*0.7-f.spread*0.4-Math.abs(f.bd-90)/40,(X,Z)=>far(X,Z,city?190:60));if(t)add('fort',Z_.fort,t);}
+  // a haven (D-088): where the province meets the sea, on its own good ground (two samples deep behind it) with open water before
+  // it, from 14 blocks out; the sea at its back (+u), its gate toward the land; low over the water, well away from the city
+  if(C.haven){const t=yield* havenPick();if(t){const s=add('haven',Z_.haven,t);s.dir=t.d;}}
   // villages, spread out
   const nv=Math.max(2,Math.min(8,Math.round(n*1.1+1)));for(let k=0;k<nv;k++){const t=yield* pick(SK.village,Z_.village,(f)=>-f.spread+hsh(k,9413,root.i)*2,(X,Z)=>far(X,Z,120));if(!t)break;add('village',Z_.village,t);}
   // where the ground is too rough for a village, a hamlet
@@ -1829,6 +1905,7 @@ function realmRoads(P,city){
   else for(let k=1;k<villages.length;k++){K='lane';link(villages[k-1],villages[k]);}
   for(const o of outs){const h=nearest(o,[fort,city].filter(Boolean))||nearest(o,villages);if(h){K=h===city||h===fort?'high':'lane';link(h,o);}}
   for(const f of farms){const h=nearest(f,[...villages,city].filter(Boolean));if(h){K='lane';link(h,f);}}
+  for(const hv of S.filter(s=>s.k==='haven')){const h=city||nearest(hv,villages);if(h){K='high';link(h,hv);}} // the elves' haven (D-088)
   for(const s of S)if(s.dir===undefined)s.dir=(hsh(s.X,9421,s.Z)*4)|0;
   // a road starts and ends at its site's door, never inside it: cut each end back to the edge of the core
   for(const rd of P.roads){let x0=1e9,z0=1e9,x1=-1e9,z1=-1e9;for(const p of [rd.a,rd.b]){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);}
@@ -1907,7 +1984,9 @@ function elfRaw(s,X,Z){const g=s.hg,n=g.n,fx=(X-s.X+g.E)/8,fz=(Z-s.Z+g.E)/8,ix=M
   return (a[ix+iz*n]*(1-tx)+a[ix+1+iz*n]*tx)*(1-tz)+(a[ix+(iz+1)*n]*(1-tx)+a[ix+1+(iz+1)*n]*tx)*tz;}
 const elfTerrace=(s,X,Z)=>s.T+Math.round((elfRaw(s,X,Z)-s.T)/s.terr)*s.terr;
 function elfPad(s,u,v){for(const p of siteLayout(s).pads)if(u>=p.u0-1&&u<=p.u1+1&&v>=p.v0-1&&v<=p.v1+1)return p;return null;}
-function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);if(p)return p.y;const t=elfTerrace(s,X,Z),M=siteLayout(s).mass;return M?Math.max(t,massifAt(M,u,v)):t;}
+function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);if(p)return p.y;
+  if(s.k==='haven'){const L=siteLayout(s);if(u>L.qL&&Math.abs(v)<=L.hw+2)return Math.min(Math.round(elfRaw(s,X,Z)),SEA-5);} // a haven's harbour, dredged (D-088)
+  const t=elfTerrace(s,X,Z),M=siteLayout(s).mass;return M?Math.max(t,massifAt(M,u,v)):t;}
 // The massif at the back of a dwarves' hold (D-066): rock raised to M.y + M.H over a box (u from its face M.f to M.b, |v| up to
 // M.w), its face sheer, falling away over M.m to its sides and back in ridges, its top broken; -1 elsewhere
 function massifAt(M,u,v){if(u<M.f)return -1;const du=Math.max(0,u-M.b),dv=Math.max(0,Math.abs(v)-M.w),d=Math.hypot(du,dv)/M.m;if(d>=1)return -1;
@@ -3063,6 +3142,7 @@ function showText(title,text){
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
 }
 function openLore(X,Y,Z){
+  if(elfLectern(X,Y,Z))return; // the histories of the elves, in their halls (D-088)
   const WX=X+OX,WZ=Z+OZ,cx=Math.floor(WX/CS),cz=Math.floor(WZ/CS),h=holdOf(cx,cz),plaza=roomAt(WX,Y,WZ)==='plaza',k=lecternPage(WX,Y,WZ);
   showText(plaza?'A waymarker of '+h.name:h.name+', page '+(k+1)+' of '+CHRON_N+': '+holdChronicle(cx,cz)[k][0],loreText(WX,Y,WZ));
   if(!plaza)journalPage(cx,cz,k);
@@ -3928,6 +4008,7 @@ function surfaceName(X,Y,Z){
   if(stairwayNear(X,Z,1))return 'A Ruined Stairway';
   const sg=sigNear(X,Z,0);if(sg)return sg.name; // the lands' landmarks and features (M6) are places
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
+  {const er=elderNear(X,Z,-1);if(er)return er.name;} // the ruins of the elder elves (D-088)
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
@@ -3990,7 +4071,7 @@ const FOREST={
   willow:{trees:0.012,glade:true,tree:(X,y,Z,r)=>willowP(X,y,Z,r,WILLOW,WILLOWL)},
   yew:{trees:0.03,tree:(X,y,Z,r)=>{if(hsh(X,8167,Z)<0.8)yewP(X,y,Z,r);else treeP(X,y,Z,LOG,LEAVES,4,r);},
     top:o=>o.dn>0.15?FMOSS:o.dn<-0.3?DIRT:GRASS,plant:r=>r<0.06?FERN:r<0.11?DBUSH:r<0.14?TGRASS:0},
-  silver:{trees:0.016,tree:(X,y,Z,r)=>silverP(X,y,Z,r),plant:r=>r<0.006?MOONP:r<0.04?BLUEB:r<0.14?TGRASS:0}
+  silver:{trees:0.016,tree:(X,y,Z,r)=>silverP(X,y,Z,r),plant:r=>r<0.006?MOONP:r<0.016?SILVFERN:r<0.04?BLUEB:r<0.14?TGRASS:0} // (silverfern: D-088)
 };
 const forestOf=o=>FOREST[LANDS[o.land].k];
 // ---- Signatures (Q124): each stretch of a forest (named after its highest-priority cell) has its landmark, its feature, or,
@@ -4137,7 +4218,7 @@ FLOORS.add(TMOSS);
 const hiSnow=o=>o.h>SEA+150;
 Object.assign(FOREST,{
   alpine:{trees:0.006,tree:(X,y,Z,r)=>spruceP(X,y,Z,r,false),top:o=>hiSnow(o)?SNOWG:o.rid>0.3?STONE:GRASS,
-    plant:r=>r<0.04?GENTIAN:r<0.06?EDELW:r<0.2?TGRASS:r<0.24?FLOWY:0},
+    plant:r=>r<0.04?GENTIAN:r<0.06?EDELW:r<0.064?STARBLOOM:r<0.2?TGRASS:r<0.24?FLOWY:0}, // (starbloom, an elven flower: D-088)
   glacier:{top:o=>o.dn>0.1?GLACIER:o.dn>-0.2?PSNOW:SNOWG},
   cloud:{trees:0.03,tree:(X,y,Z,r)=>mistP(X,y,Z,r),top:o=>o.dn>-0.1?FMOSS:GRASS,plant:r=>r<0.15?FERN:r<0.153?GLOWSHROOM:r<0.2?TGRASS:0},
   karst:{trees:0.006,tree:(X,y,Z,r)=>{if(hsh(X,8191,Z)<0.65)karstP(X,y,Z,r);else treeP(X,y,Z,LOG,LEAVES,4,r);},top:o=>o.rid>0.18?LIMESTONE:GRASS,
@@ -4727,6 +4808,94 @@ function keptBuild(s,r){
       for(let t=-11;t<=9;t++)for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(Math.abs(a)+Math.abs(b)<2||t<-8)PW(X+fx*t-fz*a,g+2+b,Z+fz*t+fx*a,JLOG,MODE_SET);
       for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)if(Math.hypot(a,b)<3.4&&r()<0.75)PW(X+fx*10-fz*a,g+2+b,Z+fz*10+fx*a,r()<0.5?DIRT:JLOG,MODE_SET);
       for(let k=0;k<12;k++){const t=-10+(r()*20|0);PW(X+fx*t,g+4,Z+fz*t,r()<0.5?FMOSS:MUSHB,MODE_AIR);}break;}
+  }
+}
+// ---- The ruins of the elder elves (D-088): what is left of the realms the elves held in the elder days, before they drew back
+// to the mountains and the deep woods. About one chunk in seventy of the mountains, highlands, sea cliffs and old woods (outside
+// the living realms and clear of every other place) holds one: a fallen tower with its drums strewn where it fell, a broken
+// colonnade, a moonwell under a ring of columns, a theatre of tiers about a stage, a king of stone toppled from his plinth, a
+// lone arch over the floor of a vanished hall. Each is weathered elvenstone, mossed and cracked, with elven plants growing in
+// it, an elder chest of relics (ELDERLOOT) and a name of the elder tongue. Pure per chunk; each reaches at most 15 blocks from
+// its middle, so the chunks about it build it (applyElder); it keeps every other feature off (elderNear).
+const ELDER_LANDS={mtn:['tower','theatre','arch','shrine'],alpine:['shrine','tower','arch','theatre'],karst:['tower','arch','theatre'],fjord:['tower','arch','king'],chalk:['theatre','colonnade','king','arch'],
+  cloud:['shrine','tower','colonnade'],elder:['shrine','colonnade','king','arch'],autumn:['colonnade','king','shrine'],birch:['shrine','arch','colonnade'],giant:['king','shrine','tower'],
+  yew:['tower','king','arch'],silver:['shrine','colonnade','theatre'],moors:['king','arch','tower'],pine:['tower','shrine']};
+const ELDER_NAMES={tower:'The Fallen Tower of %',colonnade:'The Broken Colonnade of %',shrine:'The Moonwell of %',theatre:'The Theatre of %',king:'The Fallen King of %',arch:'The Lone Arch of %'};
+// what an elder chest holds: [item, least, most, weight] (the elves' own gear joins it: elves.js)
+const ELDERLOOT=[[204,2,6,8],[205,1,2,3],[228,1,3,4],[230,1,2,2],[224,1,3,4],[407,1,1,1],[402,1,1,0.8],[409,6,16,5],[STARLAMP,1,2,3],[MOONSTONE,2,6,4],[327,1,3,3],[STARBLOOM,2,5,3]];
+const elderC=new Map(),TER={},TER2={};
+function elderAt(WCX,WCZ){
+  const key=WCX*65536+WCZ;if(elderC.has(key))return elderC.get(key);if(elderC.size>20000)elderC.clear();let s=null;
+  if(hsh(WCX,8951,WCZ)<0.05){const X=WCX*CS+8,Z=WCZ*CS+8;colInfo(X,Z,TER);const L=ELDER_LANDS[LANDS[TER.land].k],g=TER.h;
+    if(L&&!TER.wet&&!TER.river&&!TER.bank&&!TER.lake&&TER.rvBot===999&&g>TER.sl+3&&g+34<H&&!surfTaken(X,Z,16)&&!sigNear(X,Z,16)&&!smallNear(X,Z,16)&&!pondNear(X,Z,16)){
+      const kind=L[Math.floor(hsh(WCX,8953,WCZ)*L.length)],R=kind==='theatre'||kind==='king'?13:kind==='tower'?15:12;let lo=g,hi=g;
+      // the ground under it: no water, and no steeper than it can stand on (a theatre is set into a hillside)
+      for(let k=0;k<12;k++){const a=k/12*6.283;for(const d of [R*0.5,R]){const e=colInfo(X+Math.round(Math.cos(a)*d),Z+Math.round(Math.sin(a)*d),TER2);if(e.wet||e.river||e.lake||e.h<e.sl+2)lo=-1e9;lo=Math.min(lo,e.h);hi=Math.max(hi,e.h);}}
+      // no waterfall or hillside stream runs through it
+      for(let a=-3;a<=3&&lo>-1e9;a++)for(let b=-3;b<=3;b++){const f=fallAt(WCX+a,WCZ+b);if(f&&f.path.some(([x,z])=>Math.hypot(x-X,z-Z)<R+3)){lo=-1e9;break;}}
+      if(hi-lo<=(kind==='theatre'?10:6))s={kind:kind,X:X,Z:Z,g:g,R:R,dir:Math.floor(hsh(WCX,8957,WCZ)*4),name:ELDER_NAMES[kind].replace('%',nameWord('elder',rngAt(WCX,8955,WCZ)))};}}
+  elderC.set(key,s);return s;
+}
+function elderNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=elderAt(cx+a,cz+b);if(s&&Math.hypot(X-s.X,Z-s.Z)<=s.R+(m||0))return s;}return null;}
+function applyElder(WCX,WCZ){for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=elderAt(WCX+a,WCZ+b);if(s)elderBuild(s);}}
+const ELD4=[[1,0],[0,1],[-1,0],[0,-1]];
+function elderBuild(s){
+  const r=mkRng(1+Math.floor(hsh(s.X,8961,s.Z)*2147483000)),[fx,fz]=ELD4[s.dir],g=s.g;
+  // local (a, b): a along the ruin's way, b across it
+  const XZ=(a,b)=>[s.X+a*fx-b*fz,s.Z+a*fz+b*fx],P=(a,b,y,id,m)=>{const [x,z]=XZ(a,b);PW(x,y,z,id,m||MODE_SET);},G=(a,b)=>{const [x,z]=XZ(a,b);return hAt(x,z);};
+  const old=(q,id)=>q<0.3?EVOLD:id; // weathered here and there
+  // a floor at y over the ground: courses down to the ground under it, headroom over it where the ground stands higher
+  const floor=(a,b,y,id)=>{const gg=G(a,b);for(let yy=gg+1;yy<y;yy++)P(a,b,yy,EVBRICK);if(gg<y-6)return;P(a,b,y,id);for(let yy=y+1;yy<=Math.max(y+1,gg+1);yy++)P(a,b,yy,AIR);};
+  const plant=(a,b,y,q)=>{const id=q<0.4?STARBLOOM:q<0.7?SILVFERN:DAWNLILY;const [x,z]=XZ(a,b);PW(x,y,z,id,MODE_AIR);};
+  const chest=(a,b,y)=>{P(a,b,y-1,EVBRICK);P(a,b,y,ECHEST);P(a,b,y+1,AIR);};
+  switch(s.kind){
+    case 'tower':{ // a round tower broken off at a ragged height, its door toward -a; its drums and gallery strewn along +a where it fell
+      const rr=3.6;for(let a=-5;a<=5;a++)for(let b=-5;b<=5;b++){const d=Math.hypot(a,b);if(d>rr+1.2)continue;const gg=G(a,b);
+        if(d>rr+0.4){P(a,b,g,EVOLD);for(let yy=gg+1;yy<g;yy++)P(a,b,yy,EVBRICK);continue;} // the flared foot
+        for(let yy=gg+1;yy<g;yy++)P(a,b,yy,EVBRICK);
+        if(d>rr-0.9){const ang=Math.atan2(b,a),top=g+7+Math.round(5*(0.5+0.5*Math.sin(ang*2+s.X))+hsh(a,8963,b)*3),door=a<-2&&Math.abs(b)<=1;
+          for(let y=g;y<=top;y++){const q=hsh(a*7+b,y,8965);P(a,b,y,door&&y>g&&y<=g+3?AIR:(y-g)%6===0?EVCARVE:q<0.35?EVOLD:EVBRICK);}
+          for(let y=top+1;y<=top+3;y++)P(a,b,y,AIR);}
+        else{const q=hsh(a,8967,b);P(a,b,g,q<0.25?GRASS:q<0.55?EVOLD:EVMOSAIC);for(let y=g+1;y<=g+16;y++)P(a,b,y,AIR);if(q<0.12)plant(a,b,g+1,hsh(b,8969,a));}}
+      for(let a=5;a<=15;a++){const k=a-5,w=k<8?1:2;for(let b=-w;b<=w;b++){if(hsh(a,8971,b)<0.22)continue;const gg=G(a,b);P(a,b,gg+1,old(hsh(b,8973,a),k%4===0?EVCARVE:EVBRICK));if(hsh(a,8975,b)<0.3)P(a,b,gg+2,EVOLD);}}
+      for(let b=-3;b<=3;b++){const gg=G(14,b);if(Math.abs(b)>=2)P(14,b,gg+1,EVCARVE);if(b%2===0)P(15,b,G(15,b)+1,EVGOLD);} // the gallery's rail where it came down
+      chest(1,1,g+1);P(-1,-1,g+1,STARLAMP);break;}
+    case 'colonnade':{ // two rows of columns on a stepped floor, some whole under their beam, some broken, their drums fallen beside
+      for(let a=-10;a<=10;a++)for(let b=-6;b<=6;b++){const e=Math.abs(a)===10||Math.abs(b)===6,q=hsh(a,8977,b);floor(a,b,g+1,e?EVCARVE:q<0.18?GRASS:Math.abs(b)<=1?EVMOSAIC:old(q,EVSTONE));if(q<0.06)plant(a,b,g+2,hsh(b,8979,a));}
+      const full=[];for(const b of [-4,4])for(let a=-8;a<=8;a+=4){const q=r(),h=q<0.45?8:q<0.6?5:q<0.8?3:1;for(let y=g+2;y<g+2+h;y++)P(a,b,y,y===g+1+h&&h===8?EVCARVE:old(hsh(a,y,b),EVPILLAR));
+        if(h===8)full.push([a,b]);else{const dd=r()<0.5?1:-1,n=1+Math.floor(r()*3);for(let k=1;k<=n;k++)P(a+dd*k,b,g+2,EVPILLAR);}}
+      for(const [a,b] of full)if(full.some(([a2,b2])=>b2===b&&a2===a+4))for(let k=0;k<=4;k++)P(a+k,b,g+10,EVCARVE);
+      chest(9,0,g+2);break;}
+    case 'shrine':{ // a moonwell: a round floor a step up, a pool over moonstone in its middle held by a kerb, eight columns about it,
+      // some broken, the ring of their beam left where two stand together; starbloom round the water
+      const Y=g+1;const cols=[];for(let k=0;k<8;k++){const h=r()<0.6?7:1+Math.floor(r()*4);cols.push(h);}
+      for(let a=-7;a<=7;a++)for(let b=-7;b<=7;b++){const d=Math.hypot(a,b);if(d>6.6)continue;
+        if(d<2.5){floor(a,b,Y-3,EVOLD);P(a,b,Y-2,MOONSTONE);P(a,b,Y-1,WATER);P(a,b,Y,WATER);P(a,b,Y+1,AIR);continue;}
+        if(d<3.5){floor(a,b,Y-2,EVBRICK);P(a,b,Y-1,EVBRICK);P(a,b,Y,EVCARVE);P(a,b,Y+1,EVCARVE);for(let y=Y+2;y<=Y+9;y++)P(a,b,y,AIR);continue;}
+        const q=hsh(a,8981,b);floor(a,b,Y,d>6?EVCARVE:q<0.15?GRASS:Math.round(d)===5?EVMOSAIC:old(q,EVSTONE));for(let y=Y+1;y<=Y+9;y++)P(a,b,y,AIR);
+        if(d<4.6&&q<0.45)plant(a,b,Y+1,q<0.3?0.1:hsh(b,8983,a));}
+      for(let k=0;k<8;k++){const ang=k*Math.PI/4,a=Math.round(Math.cos(ang)*5.2),b=Math.round(Math.sin(ang)*5.2);for(let y=Y+1;y<=Y+cols[k];y++)P(a,b,y,y===Y+7?EVCARVE:old(hsh(a,y,b),EVPILLAR));
+        if(cols[k]===7&&cols[(k+1)%8]===7){const a2=Math.round(Math.cos(ang+Math.PI/4)*5.2),b2=Math.round(Math.sin(ang+Math.PI/4)*5.2);for(let t=0;t<=4;t++)P(Math.round(a+(a2-a)*t/4),Math.round(b+(b2-b)*t/4),Y+8,EVCARVE);}}
+      chest(0,6,Y+1);break;}
+    case 'theatre':{ // tiers in a half ring (from 5 to 12 out) about a stage, each a block over the one inside it, set into the ground;
+      // the stage on its step, the broken wall behind it with its columns
+      for(let a=-8;a<=13;a++)for(let b=-13;b<=13;b++){const d=Math.hypot(a,b),q=hsh(a,8985,b);
+        if(a>=-1&&d>=5&&d<=12.5){const k=Math.floor((d-5)/1.5),y=g+1+k-(q<0.1?1:0);floor(a,b,y,(d-5)%1.5<0.75?old(q,EVBRICK):old(q,EVSTONE));for(let yy=y+1;yy<=y+4;yy++)P(a,b,yy,AIR);if(q>0.97)plant(a,b,y+1,hsh(b,8987,a));continue;}
+        if(a>=-4&&a<=0&&Math.abs(b)<=5){floor(a,b,g+1,Math.abs(b)===5||a===-4?EVCARVE:q<0.2?EVOLD:EVMOSAIC);for(let yy=g+2;yy<=g+6;yy++)P(a,b,yy,AIR);continue;}
+        if((a===-6||a===-5)&&Math.abs(b)<=7){const top=g+2+Math.floor(hsh(b,8989,0)*6),col=Math.abs(b)%3===0;for(let y=G(a,b)+1;y<=top;y++)P(a,b,y,col?EVPILLAR:old(hsh(a,y,b),EVBRICK));}}
+      chest(-3,4,g+2);P(-3,-4,g+2,STARLAMP);break;}
+    case 'king':{ // a king of stone fallen from his plinth: the plinth and his feet on it, the robe and shoulders lying along +a, his
+      // sword beside him, his crowned head rolled away; fern on the fallen stone
+      for(let a=-10;a<=-6;a++)for(let b=-2;b<=2;b++){const top=g+3;for(let y=G(a,b)+1;y<=top;y++)P(a,b,y,y===top?EVCARVE:EVBRICK);if(a>=-9&&a<=-7&&Math.abs(b)===1){P(a,b,top+1,EVOLD);if(a===-8)P(a,b,top+2,EVOLD);}}
+      for(let a=-4;a<=8;a++){const w=a>=5?3:a>=2?2:a>=-1?2:1;for(let b=-w;b<=w;b++){const gg=G(a,b);P(a,b,gg+1,a>=5&&Math.abs(b)===3?EVCARVE:old(hsh(a,8991,b),EVSTONE));if(Math.abs(b)<w||a>=5)P(a,b,gg+2,old(hsh(b,8993,a),EVSTONE));if(hsh(a,8995,b)<0.12)plant(a,b,gg+3,0.5);}}
+      for(let a=-3;a<=7;a++)P(a,-5,G(a,-5)+1,a===5?EVCARVE:EVPILLAR);for(const b of [-6,-4])P(5,b,G(5,b)+1,EVCARVE);
+      for(let a=10;a<=12;a++)for(let b=3;b<=5;b++){const gg=G(a,b);for(let y=gg+1;y<=gg+3;y++)P(a,b,y,a===12&&y===gg+2?EVGOLD:a===12?EVGOLD:old(hsh(a,y,b),EVSTONE));}
+      chest(-11,0,G(-11,0)+1);break;}
+    default:{ // the lone arch: two piers and a pointed arch between them, the keystone gilt; the broken floor of the hall it stood in
+      for(let a=-2;a<=10;a++)for(let b=-6;b<=6;b++){const q=hsh(a,8997,b);if(q<0.45){const gg=G(a,b);P(a,b,gg,q<0.15?EVOLD:EVMOSAIC);if(q<0.05)plant(a,b,gg+1,hsh(b,8999,a));}}
+      for(const sb of [-1,1])for(let a=-1;a<=0;a++)for(let b=3;b<=4;b++){const bb=b*sb;for(let y=G(a,bb)+1;y<=g+10;y++)P(a,bb,y,(y-g)%5===0?EVCARVE:old(hsh(a,y,bb),EVBRICK));}
+      for(let a=-1;a<=0;a++)for(let b=-3;b<=3;b++){const lo=g+10+Math.round((3-Math.abs(b))*1.5);for(let y=lo;y<=g+15;y++)P(a,b,y,y===g+15&&b===0?EVGOLD:y===lo?EVCARVE:EVBRICK);}
+      chest(2,4,G(2,4)+1);}
   }
 }
 // ---- The Volcanic Wastes remade (D-051): a burnt land under a black and red sky. Volcanoes rise out of the terrain itself, each
@@ -6454,7 +6623,7 @@ RB.eground=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d>s.R-1.5)return;const g=E
   if(lo<g){for(let y=lo+1;y<g;y++)RBP(X,y,Z,(y-lo)%5===0?EVCARVE:EVBRICK);RBP(X,g,Z,EVCARVE);if(!pd&&d<s.R-3)RBP(X,g+1,Z,EVGOLD);return;}
   if(pd&&u>=pd.u0&&u<=pd.u1&&v>=pd.v0&&v<=pd.v1)return;
   RBP(X,g,Z,GRASS);const q=hsh(X,9701,Z);
-  if(q<0.05)RBP(X,g+1,Z,[FLOWR,FLOWY,LAVENDER,BLUEB,OXEYE][(hsh(X,9703,Z)*5)|0]);else if(q<0.09)RBP(X,g+1,Z,TGRASS);
+  if(q<0.05)RBP(X,g+1,Z,[FLOWR,FLOWY,LAVENDER,BLUEB,OXEYE,STARBLOOM,SILVFERN,DAWNLILY][(hsh(X,9703,Z)*8)|0]);else if(q<0.09)RBP(X,g+1,Z,TGRASS);
   // trees on the lawns, silver-leaved or in blossom, one at most to each cell of seven (p.trees: how many of the cells have one)
   const cu=Math.round((u-3)/7)*7+3,cv=Math.round((v-3)/7)*7+3,du=Math.abs(u-cu),dv=Math.abs(v-cv),m=Math.max(du,dv);
   if(m>2||du===2&&dv===2||hsh(cu,9743,cv)>=p.trees||Math.hypot(cu,cv)>s.R-5||p.way(cu,cv)||EVG(s,cu,cv)!==g||elfPad(s,cu,cv))return;
@@ -6488,7 +6657,9 @@ RB.ehall=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),pr=p.porch||0,a=a0-1,b=b0-1
       if(W>=13&&(a===3||a===W-4)&&b%4===2&&b<D-2)RBS(X,Z,g+1,g+sh-1,EVPILLAR); // columns down a wide hall
       for(let k=0;k<st;k++){const cy=g+k*sh+sh-1;if(a%4===2&&b%5===2&&!(W>=13&&(a===3||a===W-4)))RBP(X,cy,Z,EVLAMP);}
       if(b===D-2&&Math.abs(dm-2)<0.6)RBS(X,Z,g+2,g+3,EVBANNER);
-      if(p.books&&(a===1||a===W-2)&&b%3===1&&b<D-2)RBS(X,Z,g+1,g+2,BOOKS);}}
+      if(p.books&&(a===1||a===W-2)&&b%3===1&&b<D-2)RBS(X,Z,g+1,g+2,BOOKS);
+      if(p.books&&(a===2||a===W-3)&&b===D-3)RBP(X,g+1,Z,LECTERN); // (lecterns with the realm's histories: D-088)
+      elfRoom(p,a,b,W,D,dm,g,X,Z);}}
   else{RBS(X,Z,g+1,eave,AIR);
     if(porch&&b===-pr){if(a%3===0||a===W-1)RBS(X,Z,g+1,eave-1,EVPILLAR);else{RBP(X,eave-2,Z,EVTRACERY);RBP(X,eave-1,Z,EVCARVE);}RBP(X,eave,Z,EVCARVE);} // an arcade of pointed arches
     // a balcony along the upper storey of the front, where there is no porch
@@ -6501,6 +6672,19 @@ RB.ehall=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),pr=p.porch||0,a=a0-1,b=b0-1
   // the gables: courses under the roof, a round window in each, a carved rake
   if(inA&&(b===0||b===D-1)){for(let y=eave+1;y<eave+evSweep(pos);y++){const win=dm<=1.01&&y>=eave+2&&y<=eave+3;RBP(X,y,Z,win?EVGLASS:y===eave+evSweep(pos)-1?EVCARVE:EVBRICK);}}
   if(gable&&Math.abs(a-mid)<0.6){RBS(X,Z,ry+1,ry+2,EVPILLAR);RBP(X,ry+3,Z,EVLAMP);}};
+// What a hall holds within, by its use (D-088): the royal court's throne (p.throne: a dais up two steps at the back under the
+// banners, the elven throne on it between starglass lamps on columns, a runner of blue to it from the door); a house of healing
+// (p.heal: beds of white wool along its walls, planters of dawnlily and starbloom down its middle); a library (p.lib: shelves
+// along every wall three high and in rows across, lecterns between them); a stable (p.stable: stalls of gilt rails each side of
+// a strawed way, hay bales at the back)
+function elfRoom(p,a,b,W,D,dm,g,X,Z){
+  if(p.throne){const mid=(W-1)/2;if(b>=D-6&&b<=D-2&&a>=1&&a<=W-2){RBP(X,g+1,Z,EVMOSAIC);if(b>=D-4)RBP(X,g+2,Z,dm<1.6?EVMOSAIC:EVCARVE);}
+    if(b<D-6&&b>=1&&dm<1.01)RBP(X,g,Z,WOOLB);
+    if(b===D-3&&dm<0.6)RBP(X,g+3,Z,ETHRONE);if(b===D-2&&dm<0.6){RBP(X,g+3,Z,EVWOOD);RBP(X,g+4,Z,EVGOLD);}
+    if(b===D-3&&Math.abs(dm-3)<0.6){RBS(X,Z,g+3,g+5,EVPILLAR);RBP(X,g+6,Z,STARLAMP);}return;}
+  if(p.heal){if((a===1||a===W-2)&&b>=2&&b<=D-3&&b%2===0){RBP(X,g+1,Z,WOOLW);}if(dm<0.6&&b>=3&&b<=D-4&&b%3===0){RBP(X,g+1,Z,EVCARVE);RBP(X,g+2,Z,b%2?STARBLOOM:DAWNLILY);}return;}
+  if(p.lib){if((a===1||a===W-2)&&b>=1&&b<=D-2)RBS(X,Z,g+1,g+3,BOOKS);if(b%4===0&&b>=4&&b<=D-5&&dm>=2&&a>=3&&a<=W-4)RBS(X,Z,g+1,g+3,BOOKS);if(b%4===2&&b>=2&&b<=D-4&&dm<0.6)RBP(X,g+1,Z,LECTERN);return;}
+  if(p.stable){if(dm>=2&&b%4===0&&b>=2&&b<=D-3)RBP(X,g+1,Z,EVGOLD);if(dm<2)RBP(X,g,Z,hsh(X,9771,Z)<0.5?HAYBALE:EVSTONE);if(b===D-2&&dm>=2)RBS(X,Z,g+1,g+2,HAYBALE);}}
 // A slender round tower (p.rr its radius, p.H to its gallery over p.y): a flared foot, courses with carved bands, tall narrow windows
 // at the quarters, a door toward p.door; corbels under a gallery with a filigree rail, an open belvedere of columns above, a cone of
 // p.roof swept out at its foot, its finial a lamp or the elves' banner (p.flag); within, golden-wood floors, a ladder, lamps. Its
@@ -6531,13 +6715,15 @@ RB.epav=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),rp=p.rp,g=p.y,
   RBP(X,g,Z,EVMOSAIC);const ang=Math.atan2(b,a),col=Math.abs(d-rp)<0.6&&Math.abs(Math.sin(ang*4))<0.25;
   for(let y=g+1;y<=top;y++)RBP(X,y,Z,col?EVPILLAR:y===top&&d>rp-1.2?EVCARVE:AIR);
   if(d<0.6)RBP(X,top,Z,EVLAMP);};
-// A pool: a carved rim on a stone kerb round water over a floor of mosaic, a column in its middle bearing a lamp
+// A pool: a carved rim on a stone kerb round water over a floor of mosaic, a column in its middle bearing a lamp. A moonwell
+// (p.moon, D-088): its floor moonstone, its water two deep, a starglass lamp on its column, dawnlilies and starbloom at its rim
 RB.epool=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),rp=p.rp,g=p.y;if(d>rp+0.5)return;
-  if(d>rp-0.6){RBP(X,g,Z,EVSTONE);RBP(X,g+1,Z,EVCARVE);RBS(X,Z,g+2,g+4,AIR);return;}
+  if(d>rp-0.6){RBP(X,g,Z,EVSTONE);RBP(X,g+1,Z,p.moon&&hsh(X,9751,Z)<0.3?(hsh(X,9753,Z)<0.5?DAWNLILY:STARBLOOM):EVCARVE);RBS(X,Z,g+2,g+4,AIR);return;}
+  if(p.moon){RBP(X,g-2,Z,MOONSTONE);if(d<0.6){RBS(X,Z,g-1,g+2,EVPILLAR);RBP(X,g+3,Z,STARLAMP);return;}RBP(X,g-1,Z,WATER);RBP(X,g,Z,WATER);RBS(X,Z,g+1,g+4,AIR);return;}
   RBP(X,g-1,Z,EVMOSAIC);if(d<0.6){RBS(X,Z,g,g+2,EVPILLAR);RBP(X,g+3,Z,EVLAMP);return;}RBP(X,g,Z,WATER);RBS(X,Z,g+1,g+4,AIR);};
 // A garden: lawn with beds of flowers, a cross of paths, silver-leaved trees and blossom (p.trees)
 RB.egarden=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,path=Math.abs(a-(W-1)/2)<1||Math.abs(b-(D-1)/2)<1;RBS(X,Z,g+1,g+6,AIR);
-  RBP(X,g,Z,path?EVSTONE:GRASS);if(!path&&hsh(X,9705,Z)<0.4)RBP(X,g+1,Z,[FLOWR,BLUEB,LAVENDER,OXEYE,MOONP][(hsh(X,9707,Z)*5)|0]);
+  RBP(X,g,Z,path?EVSTONE:GRASS);if(!path&&hsh(X,9705,Z)<0.4)RBP(X,g+1,Z,[FLOWR,BLUEB,LAVENDER,OXEYE,MOONP,STARBLOOM,DAWNLILY][(hsh(X,9707,Z)*7)|0]);
   for(const [tu,tv,k] of p.trees){const da=Math.abs(u-tu),db=Math.abs(v-tv),m=Math.max(da,db);if(m>2)continue;
     if(m===0)RBS(X,Z,g+1,g+4,k?BIRCH:SILV);const lf=k?BLOSSOM:SILVL;if(m<=2&&!(da===2&&db===2))RBS(X,Z,g+4+(m===0?1:0),g+5,lf);if(m<=1)RBP(X,g+6,Z,lf);}};
 // A training ground: sand within a filigree rail, butts of straw with painted faces at the back, racks of golden wood
@@ -6554,9 +6740,22 @@ RB.estatue=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),g=p.y,gnd=colInfo(X,Z,TRB).
   if((a===1||a===3)&&b===1)at(6,EVSTONE); // the forearms, brought forward
   if(a===2&&b===0){for(let dy=1;dy<=5;dy++)at(dy,EVPILLAR);at(6,EVCARVE);at(7,EVSTONE);at(8,EVCARVE);} // blade, guard, hands, pommel
   if((a===1||a===3)&&b===0)at(6,EVCARVE); // the guard's quillons
+  if(p.king){ // a king of the elder days (D-088): no sword, but a tall staff in one hand bearing a star, a crown of gold
+    if(a===2&&b===0){for(let dy=1;dy<=6;dy++)at(dy,AIR);at(5,EVSTONE);} // his hands at his breast
+    if((a===1||a===3)&&b===0)at(6,AIR);
+    if(a===4&&b===1){for(let dy=1;dy<=12;dy++)at(dy,EVPILLAR);at(13,STARLAMP);}
+    if(a===2&&b>=2&&b<=3){at(9,EVSTONE);at(10,EVSTONE);}if(a>=1&&a<=3&&b>=1&&b<=4&&!(a===2&&(b===2||b===3)))at(11,a===2||b===1||b===4?EVGOLD:AIR);
+    if(a===2&&(b===2||b===3))at(11,EVSTONE);if((a===1||a===3)&&(b===1||b===4))at(12,EVGOLD);if((a===1||a===3)&&b===3)at(9,EVSTONE);return;}
   if(a===2&&b>=2&&b<=3){at(9,EVSTONE);at(10,EVSTONE);at(11,EVCARVE);} // the head under the helm
   if(a===2&&b===1)at(11,EVCARVE);if(a===2&&b===4)at(10,EVCARVE); // the crest, swept back
   if((a===1||a===3)&&b===3)at(9,EVSTONE);}; // the hair at the shoulders
+// An elven market (D-088): a square paved in mosaic and elvenstone; stalls round its edge facing in, each on four slender columns
+// under an awning of blue and white, a counter of golden wood with wares on it (casks, crates, books, flowers); lamps at its corners
+RB.emarket=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,e=Math.min(a,b,W-1-a,D-1-b),mid=(W-1)/2;RBP(X,g,Z,e>=4&&(a+b)%2===0?EVMOSAIC:EVSTONE);RBS(X,Z,g+1,g+5,AIR);
+  if(e===0&&(a===0||a===W-1)&&(b===0||b===D-1)){RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EVLAMP);return;}
+  if(e<=2&&Math.abs(a-mid)>2&&Math.abs(b-(D-1)/2)>2){const along=a===0||a===W-1||e===a||e===W-1-a?b:a,slot=((along-1)%4+4)%4;
+    if(e===0&&slot===0)RBS(X,Z,g+1,g+3,EVPILLAR);if(e===2&&slot===0)RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EAWNING);
+    if(e===2&&slot!==0){RBP(X,g+1,Z,EVWOOD);if(slot===2)RBP(X,g+2,Z,[BARREL,CRATE,BOOKS,STARBLOOM,DAWNLILY,MOONSTONE][Math.floor(hsh(Math.floor(along/4),9773,Math.round(s.X)+a*3)*6)]);}}};
 // A wall round a city or a fastness (p.r its line, three thick, p.H over the ground at each column, so it steps with the land):
 // courses on a carved plinth, a carved band near the top, a walk behind tall merlons with filigree between; the gate's passage
 // (p.gw either side of the middle, toward -u) open under its arch (p.gh)
@@ -6567,7 +6766,7 @@ RB.ewall=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v),R=p.r;if(d<R-1.5||d>=R+1.5)retu
   if(d>=R+0.5){const m=((t%4)+4)%4;if(m<2){RBP(X,top+1,Z,EVBRICK);RBP(X,top+2,Z,EVCARVE);}else if(m===2)RBP(X,top+1,Z,EVGOLD);}
   else RBP(X,top,Z,EVSTONE);};
 // ---- Layouts
-function elfLayout(s,L,r){if(s.k==='city')elfCity(s,L,r);else if(s.k==='fort')elfFastness(s,L,r);else if(s.k==='village')elfRefuge(s,L,r);else if(s.k==='farm')elfGardens(s,L,r);else elfSpire(s,L,r);}
+function elfLayout(s,L,r){if(s.k==='haven')elfHaven(s,L,r);else if(s.k==='city')elfCity(s,L,r);else if(s.k==='fort')elfFastness(s,L,r);else if(s.k==='village')elfRefuge(s,L,r);else if(s.k==='farm')elfGardens(s,L,r);else elfSpire(s,L,r);}
 // the shared toolkit of a layout: the ground's level, boxes taken, platforms, halls with their steps, towers and the rest
 function elfKit(s,L){
   const P=L.parts,taken=[],R=s.R,lvl=(u,v)=>s.T+Math.round((evRaw(s,u,v)-s.T)/s.terr)*s.terr;
@@ -6588,11 +6787,12 @@ function elfKit(s,L){
   const tower=(cu,cv,rr,H,o,force)=>{const e=Math.ceil(rr+2);if(!force&&!free(cu-e,cu+e,cv-e,cv+e))return null;const y=o&&o.y!==undefined?o.y:lvl(cu,cv);
     const p=Object.assign({k:'etower',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rr:rr,H:H,y:y},o||{});P.push(p);if(o&&o.nopad)take(cu-e,cu+e,cv-e,cv+e);else pad(cu-e+1,cu+e-1,cv-e+1,cv+e-1,y);return p;};
   const pav=(cu,cv,rp,o)=>{const e=rp+2;if(!free(cu-e,cu+e,cv-e,cv+e))return null;const y=lvl(cu,cv);P.push(Object.assign({k:'epav',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rp:rp,y:y},o||{}));pad(cu-rp-1,cu+rp+1,cv-rp-1,cv+rp+1,y);return y;};
-  const pool=(cu,cv,rp)=>{const e=rp+1;if(!free(cu-e-1,cu+e+1,cv-e-1,cv+e+1))return null;const y=lvl(cu,cv);P.push({k:'epool',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rp:rp,y:y});pad(cu-e,cu+e,cv-e,cv+e,y);return y;};
+  const pool=(cu,cv,rp,moon)=>{const e=rp+1;if(!free(cu-e-1,cu+e+1,cv-e-1,cv+e+1))return null;const y=lvl(cu,cv);P.push({k:'epool',u0:cu-e,u1:cu+e,v0:cv-e,v1:cv+e,cu:cu,cv:cv,rp:rp,y:y,moon:!!moon});pad(cu-e,cu+e,cv-e,cv+e,y);return y;};
   const garden=(cu,cv,w,d,trees)=>{const u0=cu-(d>>1),v0=cv-(w>>1);if(!free(u0-1,u0+d,v0-1,v0+w))return null;const y=lvl(cu,cv);P.push({k:'egarden',u0:u0,u1:u0+d-1,v0:v0,v1:v0+w-1,f:0,y:y,trees:trees.map(([a,b,k])=>[u0+a,v0+b,k])});pad(u0,u0+d-1,v0,v0+w-1,y);return y;};
   const yard=(cu,cv,w,d,f)=>{const ac=f<2,hu=ac?d:w,hv=ac?w:d,u0=Math.round(cu-hu/2),v0=Math.round(cv-hv/2);if(!free(u0-1,u0+hu,v0-1,v0+hv))return null;const y=lvl(cu,cv);
     P.push({k:'eyard',u0:u0,u1:u0+hu-1,v0:v0,v1:v0+hv-1,f:f,y:y});pad(u0,u0+hu-1,v0,v0+hv-1,y);return y;};
-  return {P:P,R:R,lvl:lvl,free:free,take:take,pad:pad,downhill:downhill,hall:hall,tower:tower,pav:pav,pool:pool,garden:garden,yard:yard};}
+  const market=(cu,cv,w)=>{const u0=cu-(w>>1),v0=cv-(w>>1);if(!free(u0-1,u0+w,v0-1,v0+w))return null;const y=lvl(cu,cv);P.push({k:'emarket',u0:u0,u1:u0+w-1,v0:v0,v1:v0+w-1,f:0,y:y});pad(u0,u0+w-1,v0,v0+w-1,y);return y;};
+  return {P:P,R:R,lvl:lvl,free:free,take:take,pad:pad,downhill:downhill,hall:hall,tower:tower,pav:pav,pool:pool,garden:garden,yard:yard,market:market};}
 // the ground part with its way: from the gate (u = -R) up to uEnd, ww either side of the middle; the stairs' tops along it, cached
 function elfGroundPart(s,L,uEnd,ww,trees){const cache=new Map(),onWay=u=>u>=-s.R&&u<=uEnd,
   stairs=u=>{let h=cache.get(u);if(h!==undefined)return h;h=EVG(s,u,0);for(let k=1;k<=14;k++){h=Math.max(h,EVG(s,u+k,0)-k,EVG(s,u-k,0)-k);}cache.set(u,h);return h;};
@@ -6609,7 +6809,12 @@ function elfCity(s,L,r){
   const hu0=best?best.u0:Math.round(R*0.05);
   const H=K.hall(hu0+bd/2,0,W,D,0,{porch:pr,st:2,sh:7,books:1,roof:EVROOF});
   const wayEnd=H?H.u0-1:R-12;K.take(-R,wayEnd,-4,4);elfGroundPart(s,L,wayEnd,2,0.35);
-  if(H){K.tower(H.u1-4,-(W>>1)-6,3.5,s.prov.capital?44:36,{roof:EVSHINGLE,flag:1,door:3,y:H.y},true);L.spots.push({kind:'hall',u:H.u0+6,v:0,y:H.y+1},{kind:'hall',u:H.u0-3,v:2,y:EVG(s,H.u0-3,2)+1});}
+  if(H){K.tower(H.u1-4,-(W>>1)-6,3.5,s.prov.capital?44:36,{roof:EVSHINGLE,flag:1,door:3,y:H.y},true);L.spots.push({kind:'hall',u:H.u0+6,v:0,y:H.y+1},{kind:'hall',u:H.u0-3,v:2,y:EVG(s,H.u0-3,2)+1});
+    // the court (D-088): the throne at the back of the high hall (the king's or queen's at the high seat, a lord's elsewhere), the
+    // kings of the elder days in stone along the way before it
+    H.throne=1;L.spots.push({kind:s.prov.capital?'throne':'seat',u:H.u1-6,v:0,y:H.y+3});
+    for(const sg of [1,-1])for(const du of [4,12])if(K.free(wayEnd-du-2,wayEnd-du+2,sg*8-3,sg*8+3)){K.take(wayEnd-du-2,wayEnd-du+2,sg*8-3,sg*8+3);P.push({k:'estatue',u0:wayEnd-du-2,u1:wayEnd-du+2,v0:sg*8-2,v1:sg*8+2,f:sg>0?2:3,y:EVG(s,wayEnd-du,sg*8),king:1});}
+    L.spots.push({kind:'court',u:wayEnd-8,v:0,y:EVG(s,wayEnd-8,0)+1});}
   // by the gate: barracks either side of the way, a training ground, the armoury
   const gu=-R+12;for(const sg of [1,-1]){const b=K.hall(gu,sg*13,9,15,sg>0?2:3,{st:2,sh:6,roof:EVSHINGLE});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y+1});}
   const ys=r()<0.5?1:-1,yu=gu+16;const yy=K.yard(yu,ys*15,13,17,ys>0?2:3);if(yy!==null)L.spots.push({kind:'drill',u:yu,v:ys*15,y:yy+1});
@@ -6621,6 +6826,13 @@ function elfCity(s,L,r){
   const towers=n=>{for(const c of bySteep){if(tl.length>=n)break;if(!apart(c,tl,R*0.45))continue;if(K.tower(c.cu,c.cv,2.5+hsh(c.cu,9723,c.cv),24+Math.round(hsh(c.cu,9725,c.cv)*10),{roof:hsh(c.cv,9727,c.cu)<0.5?EVROOF:EVSHINGLE,door:K.downhill(c.cu,c.cv)}))tl.push([c.cu,c.cv]);}};
   const pavs=n=>{for(const c of byHigh){if(pl.length>=n)break;if(!apart(c,pl,R*0.4))continue;const y=K.pav(c.cu,c.cv,3);if(y!==null){pl.push([c.cu,c.cv]);L.spots.push({kind:'garden',u:c.cu,v:c.cv,y:y+1});}}};
   towers(2);pavs(1);
+  // the market, the house of healing, the library and the stables (D-088), where they fit
+  for(const [cu,cv] of [[gu+30,-ys*17],[gu+30,ys*20],[Math.round(-R*0.1),-ys*18],[Math.round(-R*0.1),ys*18],[Math.round(R*0.2),-ys*20],[Math.round(R*0.2),ys*20],[gu+20,-ys*28],[gu+20,ys*28]]){const y=K.market(cu,cv,15)??K.market(cu,cv,13);if(y!==null){L.spots.push({kind:'market',u:cu,v:cv,y:y+1});break;}}
+  const grid=[];for(let cu=-R+10;cu<R-6;cu+=6)for(let cv=-R+6;cv<R-6;cv+=6){if(Math.abs(cv)<11||Math.hypot(cu,cv)>R-10)continue;grid.push([cu,cv,hsh(cu,9779,cv)]);}grid.sort((a,b)=>a[2]-b[2]);
+  const place=(pref,fn)=>{for(const [cu,cv] of pref.concat(grid))if(fn(cu,cv))return true;return false;};
+  place([[0,ys*18],[0,-ys*18],[Math.round(R*0.3),ys*20],[Math.round(R*0.3),-ys*20]],(cu,cv)=>{const h=K.hall(cu,cv,11,15,K.downhill(cu,cv),{st:2,sh:6,roof:EVROOF,heal:1})||K.hall(cu,cv,9,13,K.downhill(cu,cv),{st:1,sh:6,roof:EVROOF,heal:1});if(h)L.spots.push({kind:'heal',u:h.front[0],v:h.front[1],y:h.y+1});return !!h;});
+  if(s.prov.capital||R>=40)place([[Math.round(R*0.25),-ys*18],[Math.round(R*0.25),ys*18]],(cu,cv)=>{const h=K.hall(cu,cv,13,17,K.downhill(cu,cv),{st:2,sh:7,roof:EVROOF,lib:1})||K.hall(cu,cv,11,15,K.downhill(cu,cv),{st:2,sh:7,roof:EVROOF,lib:1});if(h)L.spots.push({kind:'library',u:h.front[0],v:h.front[1],y:h.y+1});return !!h;});
+  place([[gu+14,-ys*26],[gu+14,ys*26],[gu+26,-ys*26],[gu+26,ys*26]],(cu,cv)=>{const h=K.hall(cu,cv,9,15,K.downhill(cu,cv),{st:1,sh:6,roof:EVSHINGLE,stable:1})||K.hall(cu,cv,9,11,K.downhill(cu,cv),{st:1,sh:6,roof:EVSHINGLE,stable:1});if(h)L.spots.push({kind:'stable',u:Math.round((h.u0+h.u1)/2),v:Math.round((h.v0+h.v1)/2),y:h.y+1,horses:3});return !!h;});
   // halls about the terraces, each facing where the land falls away: tried on a fine grid in a shuffled order, the larger where
   // they fit, the smaller where they do not
   const spots=[];for(let cu=-R+10;cu<R-6;cu+=7)for(let cv=-R+6;cv<R-6;cv+=7){if(Math.abs(cv)<9||Math.hypot(cu,cv)>R-9)continue;spots.push([cu,cv,hsh(cu,9711,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
@@ -6630,7 +6842,7 @@ function elfCity(s,L,r){
   towers(s.prov.capital?6:4);pavs(3);
   // pools and gardens near the way, wherever there is room
   const near=[];for(let cu=-R+16;cu<R-12;cu+=6)for(const cv of [-10,-14,-18,10,14,18])near.push([cu,cv,hsh(cu,9747,cv)]);near.sort((a,b)=>a[2]-b[2]);
-  let npo=0,ng=0;for(const [cu,cv] of near){if(npo<3){const y=K.pool(cu,cv,3);if(y!==null){npo++;L.spots.push({kind:'garden',u:cu,v:cv+(cv>0?5:-5),y:y+1});continue;}}
+  let npo=0,ng=0;for(const [cu,cv] of near){if(npo<3){const y=K.pool(cu,cv,3,npo===0);if(y!==null){npo++;L.spots.push({kind:'garden',u:cu,v:cv+(cv>0?5:-5),y:y+1});continue;}}
     if(ng<2&&K.garden(cu,cv,11,11,[[2,2,0],[8,2,1],[2,8,1],[8,8,0]])!==null)ng++;}
   // the wall, its towers, the great gate between two towers, statues of warriors before it
   const WH=13;P.push({k:'ewall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:WH,gw:2,gh:8});
@@ -6660,7 +6872,7 @@ function elfRefuge(s,L,r){
   if(H)L.spots.push({kind:'hall',u:H.u0-3,v:2,y:EVG(s,H.u0-3,2)+1});
   for(const [cu,cv] of [[-6,-12],[-6,12],[8,-13],[8,13]]){const h=K.hall(cu,cv,7,11,K.downhill(cu,cv),{st:1,sh:6,roof:hsh(cu,9729,cv)<0.5?EVROOF:EVSHINGLE});if(h)L.spots.push({kind:'green',u:h.front[0],v:h.front[1],y:EVG(s,h.front[0],h.front[1])+1});}
   const py=K.pav(-Math.round(R*0.45),-9,3);if(py!==null)L.spots.push({kind:'garden',u:-Math.round(R*0.45),v:-9,y:py+1});
-  const qy=K.pool(-Math.round(R*0.4),8,2);if(qy!==null)L.spots.push({kind:'green',u:-Math.round(R*0.4),v:4,y:EVG(s,-Math.round(R*0.4),4)+1});
+  const qy=K.pool(-Math.round(R*0.4),8,3,true)??K.pool(-Math.round(R*0.4),8,2,true);if(qy!==null)L.spots.push({kind:'green',u:-Math.round(R*0.4),v:4,y:EVG(s,-Math.round(R*0.4),4)+1});
   K.garden(Math.round(R*0.05),-15,9,9,[[2,2,1],[6,6,0]]);
   K.tower(Math.round(R*0.55),14,2.5,22,{roof:EVSHINGLE,flag:1,door:K.downhill(Math.round(R*0.55),14)});
   L.spots.push({kind:'lane',u:-R+3,v:0,y:EVG(s,-R+3,0)+1});
@@ -6675,11 +6887,97 @@ function elfGardens(s,L,r){const K=elfKit(s,L),R=s.R;elfGroundPart(s,L,-R+3,1,0.
   const pv=K.pav(-2,-Math.round(R*0.5),2);if(pv!==null)L.spots.push({kind:'field',u:-2,v:-Math.round(R*0.5)+4,y:pv+1});
   for(const [cu,cv] of [[-Math.round(R*0.35),Math.round(R*0.4)],[Math.round(R*0.1),Math.round(R*0.55)]])if(K.garden(cu,cv,7,7,[[1,1,0],[5,5,1]])!==null)L.spots.push({kind:'field',u:cu,v:cv,y:EVG(s,cu,cv)+1});
 }
-// ---- The elves' roads: the elven way paved in elvenstone between kerbs of courses, a lamp on a column beside it every 48 blocks;
+// ---- The havens of the elves (D-088): the quay on its pad at the harbour's edge (u0 to u1, its face at u1, the water beyond):
+// paved in elvenstone with a band of mosaic, lamps on columns, cargo in casks and crates; its face a wall of courses from the
+// dredged floor, a carved coping with bollards on it
+RB.equay=(s,p,u,v,X,Z)=>{const y=p.y,k=u-p.u0;
+  if(u===p.u1){for(let yy=SEA-6;yy<y;yy++)RBP(X,yy,Z,EVBRICK);RBP(X,y,Z,EVCARVE);RBP(X,y+1,Z,((v%6)+6)%6===0?EVPILLAR:AIR);RBS(X,Z,y+2,y+4,AIR);return;}
+  RBP(X,y,Z,k===p.u1-p.u0-2?EVMOSAIC:EVSTONE);RBS(X,Z,y+1,y+5,AIR);
+  if(k===1&&((v%12)+12)%12===0){RBS(X,Z,y+1,y+3,EVPILLAR);RBP(X,y+4,Z,EVLAMP);}
+  else if(k===2&&((v%5)+5)%5<2&&hsh(Math.floor(v/5),9761,Math.round(s.X))<0.4)RBP(X,y+1,Z,hsh(X,9763,Z)<0.5?BARREL:CRATE);};
+// A pier from the quay out over the harbour (p.cv its middle, a deck p.w-1 either side, from u0 to its head at u1) at the quay's
+// height: golden wood on elvenstone sills, a carved edge with a gilt rail, columns down to the floor every four, lamps along it
+// and at its head
+RB.epier=(s,p,u,v,X,Z)=>{const y=p.y,a=Math.abs(v-p.cv),k=u-p.u0,head=u===p.u1;
+  if(a<p.w&&!head){RBP(X,y,Z,k%4===0?EVSTONE:EVWOOD);RBS(X,Z,y+1,y+4,AIR);return;}
+  RBP(X,y,Z,EVCARVE);RBS(X,Z,y+2,y+4,AIR);
+  if(k%4===0||head){const f=colInfo(X,Z,TRB).h;for(let yy=Math.min(f,SEA-5)+1;yy<y;yy++)RBP(X,yy,Z,EVPILLAR);}
+  if((k%8===4&&a===p.w)||(head&&a===p.w)){RBS(X,Z,y+1,y+2,EVPILLAR);RBP(X,y+3,Z,EVLAMP);}else RBP(X,y+1,Z,EVGOLD);};
+// A white ship of the elves moored along +u (p.u0 its stern, p.L long, p.cv the line of its keel): a hull of shipwood five wide,
+// rounded below and drawn to a point at the bow, standing three blocks out of the water; a deck of golden wood, its gunwale gilt
+// here and there; a raised stern, a lamp on its post; a
+// mast (p.mt from the stern) with a yard and a white sail bellied forward, the banner at its head; at the bow a swan's neck
+// curving up and forward to a gilt beak
+RB.eship=(s,p,u,v,X,Z)=>{const t=u-p.u0,c=v-p.cv,L=p.L,ac=Math.abs(c),dk=SEA+3;
+  const hw=t<0||t>=L?-1:Math.min(2,t<3?1+t*0.5:(L-1-t)*0.55+0.4);
+  if(hw>=0&&ac<=hw+0.01){const edge=ac>=hw-0.5;
+    for(let y=SEA-2;y<=dk;y++){const k=dk-y,w=k>=5?0:k===4?Math.min(hw,1):hw;if(ac<=w+0.01)RBP(X,y,Z,y===dk&&!edge?EVWOOD:EHULL);}
+    if(t<=3){RBP(X,dk+1,Z,edge?EHULL:EVWOOD);RBP(X,dk+2,Z,edge?(t%2?EVGOLD:EHULL):AIR);}else RBP(X,dk+1,Z,edge?(t%3===1?EVGOLD:EHULL):AIR);}
+  if(c===0&&t===0){RBS(X,Z,dk+1,dk+5,EHULL);RBP(X,dk+6,Z,EVLAMP);}
+  const mt=p.mt;if(c===0&&t===mt){RBS(X,Z,dk+1,dk+16,EVWOOD);RBP(X,dk+17,Z,EVBANNER);}
+  if(t===mt+1&&ac<=4){RBP(X,dk+15,Z,EVWOOD);if(ac>2)RBS(X,Z,dk+6,dk+14,ESAIL);}
+  if(t===mt+2&&ac<=2)RBS(X,Z,dk+6,dk+13,ESAIL);
+  if(c===0){if(t===L-1)RBS(X,Z,dk+1,dk+3,EHULL);if(t===L)RBS(X,Z,dk+3,dk+7,EHULL);if(t===L+1)RBP(X,dk+7,Z,EHULL);if(t===L+2)RBP(X,dk+7,Z,EVGOLD);}};
+// The mole: a breakwater five wide from the quay out along one side of the harbour (p.cv), courses from the floor to the quay's
+// height, a parapet along its seaward edge, lamps along it
+RB.emole=(s,p,u,v,X,Z)=>{const y=p.y,a=v-p.cv,f=colInfo(X,Z,TRB).h,k=u-p.u0;for(let yy=Math.min(f,SEA-5)+1;yy<y;yy++)RBP(X,yy,Z,EVBRICK);
+  RBP(X,y,Z,Math.abs(a)===2?EVCARVE:EVSTONE);RBS(X,Z,y+2,y+5,AIR);
+  if(Math.abs(a)===2&&k%10===5){RBP(X,y+1,Z,EVPILLAR);RBP(X,y+2,Z,EVLAMP);}else RBP(X,y+1,Z,a*p.side>=2?EVCARVE:AIR);};
+// The lighthouse at the mole's end: its foot built up from the floor (efound), a slender tower of the elves over it (etower),
+// and in its belvedere the great lamp, a star of starglass three high (elantern)
+RB.efound=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv);if(d>p.r+0.5)return;const f=colInfo(X,Z,TRB).h;for(let yy=Math.min(f,SEA-5)+1;yy<p.y;yy++)RBP(X,yy,Z,EVBRICK);RBP(X,p.y,Z,d>p.r-1?EVCARVE:EVSTONE);RBS(X,Z,p.y+1,p.y+3,AIR);};
+RB.elantern=(s,p,u,v,X,Z)=>{if(Math.hypot(u-p.cu,v-p.cv)>1.6)return;RBS(X,Z,p.y0,p.y0+2,STARLAMP);};
+// The haven's gate: an arch over its way (p.w the half-width of its opening, p.H to the springing over p.y): two piers of courses
+// banded in carving, lamps on them, a pointed arch with a gilt keystone, the banner hung under it
+RB.earch=(s,p,u,v,X,Z)=>{const av=Math.abs(v),g=EVG(s,u,v),y=p.y,w=p.w,top=y+p.H;
+  if(av>w&&av<=w+2){for(let yy=Math.min(g,y)+1;yy<=top+2;yy++)RBP(X,yy,Z,(yy-y)%5===0?EVCARVE:EVBRICK);RBP(X,top+3,Z,EVLAMP);return;}
+  if(av<=w){const lo=top-3+Math.round((1-av/w)*3),hi=top+2+(av<1?1:0);for(let yy=lo;yy<=hi;yy++)RBP(X,yy,Z,yy===lo?EVCARVE:av<0.6&&yy===hi?EVGOLD:EVBRICK);if(av<0.6)RBS(X,Z,lo-2,lo-1,EVBANNER);}};
+// The haven: the way from its gate (an arch between statues) down the terraces to the quay along the water (L.qL, where the
+// land meets it); piers out into the dredged harbour (L.hw either side) with white ships moored at them; a mole along one side,
+// the lighthouse at its end; the haven-lord's hall and the shipwrights' hall over the quay facing the sea, houses about the
+// terraces, a moonwell and a garden, a watch tower by the gate
+function elfHaven(s,L,r){
+  const K=elfKit(s,L),R=s.R,P=K.P,M=s.M,y=SEA+2,side=r()<0.5?1:-1;
+  let qL=R-2;for(const v of [-12,0,12])for(let u=-R+16;u<R+M-4;u++)if(evRaw(s,u,v)<SEA+1){qL=Math.min(qL,u-1);break;}
+  qL=Math.max(-R+22,Math.min(R-2,qL));const hw=R-6,uMax=R+M+4;L.qL=qL;L.hw=hw;
+  K.pad(qL-6,qL,-hw,hw,y);P.push({k:'equay',u0:qL-6,u1:qL+1,v0:-hw,v1:hw,y:y,f:0});
+  elfGroundPart(s,L,qL-7,2,0.4);K.take(-R,qL-7,-3,3);
+  // the gate
+  const gy=K.lvl(-R,0);P.push({k:'earch',u0:-R,u1:-R+1,v0:-6,v1:6,y:gy,w:3,H:8});
+  for(const sg of [1,-1])P.push({k:'estatue',u0:-R-7,u1:-R-3,v0:sg*9-2,v1:sg*9+2,f:0,y:K.lvl(-R-5,sg*9)});
+  L.spots.push({kind:'gate',u:-R-3,v:0,y:gy+1});
+  // the piers and the ships at them, the mole and the lighthouse
+  const deep=(u,v)=>u<=R+M?evRaw(s,u,v)<SEA+1:evRaw(s,u,v)<SEA-4,ships=[];
+  for(const [pv,sv] of [[-side*12,[-side*7,-side*17]],[side*6,[side*11]]]){const u1=Math.min(uMax-2,qL+26);if(u1-qL<10||!deep(qL+4,pv))continue;
+    P.push({k:'epier',u0:qL+2,u1:u1,v0:pv-2,v1:pv+2,cv:pv,w:2,y:y});L.spots.push({kind:'pier',u:u1-2,v:pv,y:y+1});
+    for(const cv of sv){let Ls=Math.min(22,uMax-qL-9);while(Ls>=14&&!(deep(qL+4,cv)&&deep(qL+4+Ls,cv)))Ls-=2;if(Ls<14)continue;
+      P.push({k:'eship',u0:qL+4,u1:qL+6+Ls,v0:cv-4,v1:cv+4,cv:cv,L:Ls,mt:Math.round(Ls*0.45)});ships.push(cv);}}
+  L.ships=ships.length;
+  const mv=-side*(hw+2),uE=Math.min(uMax,qL+32);P.push({k:'emole',u0:qL+1,u1:uE,v0:mv-2,v1:mv+2,cv:mv,side:-side,y:y});
+  const lu=uE+3,LH=30;P.push({k:'efound',u0:lu-6,u1:lu+6,v0:mv-6,v1:mv+6,cu:lu,cv:mv,r:5,y:y});
+  K.tower(lu,mv,4,LH,{roof:EVROOF,nopad:1,door:0,y:y+1,rh:10},true);P.push({k:'elantern',u0:lu-2,u1:lu+2,v0:mv-2,v1:mv+2,cu:lu,cv:mv,y0:y+1+LH+1});L.light=[lu,mv];
+  L.spots.push({kind:'light',u:uE-2,v:mv,y:y+1});
+  for(const v of [-Math.round(hw*0.6),0,Math.round(hw*0.6)])L.spots.push({kind:'quay',u:qL-3,v:v,y:y+1});
+  // the halls over the quay, facing the sea; houses about the terraces; a moonwell, a garden, a watch tower
+  const lh=K.hall(qL-20,-side*Math.round(R*0.42),11,15,1,{st:2,sh:6,porch:2,roof:EVROOF,books:1})||K.hall(qL-17,-side*Math.round(R*0.42),9,13,1,{st:2,sh:6,roof:EVROOF,books:1});
+  if(lh)L.spots.push({kind:'hall',u:lh.front[0],v:lh.front[1],y:lh.y+1});
+  const wh=K.hall(qL-18,side*Math.round(R*0.42),9,13,1,{st:1,sh:7,roof:EVSHINGLE})||K.hall(qL-15,side*Math.round(R*0.42),7,9,1,{st:1,sh:6,roof:EVSHINGLE});
+  if(wh)L.spots.push({kind:'wright',u:wh.front[0],v:wh.front[1],y:wh.y+1});
+  const spots=[];for(let cu=-R+9;cu<qL-10;cu+=7)for(let cv=-R+6;cv<R-6;cv+=7){if(Math.abs(cv)<7||Math.hypot(cu,cv)>R-8)continue;spots.push([cu,cv,hsh(cu,9765,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
+  let nh=0;for(const [cu,cv] of spots){if(nh>=5)break;const h=K.hall(cu,cv,9,11,1,{st:hsh(cu,9767,cv)<0.5?2:1,sh:6,roof:hsh(cu,9769,cv)<0.6?EVROOF:EVSHINGLE})||K.hall(cu,cv,7,9,1,{st:1,sh:6,roof:EVROOF});
+    if(!h)continue;nh++;L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:EVG(s,h.front[0],h.front[1])+1});}
+  for(const [cu,cv] of [[-Math.round(R*0.5),-10],[-Math.round(R*0.5),10],[-Math.round(R*0.2),-11],[-Math.round(R*0.2),11]]){const py=K.pool(cu,cv,3,true)??K.pool(cu,cv,2,true);if(py!==null){L.spots.push({kind:'garden',u:cu,v:cv+(cv>0?5:-5),y:py+1});L.moon=[cu,cv];break;}}
+  K.garden(-Math.round(R*0.3),side*14,9,9,[[2,2,1],[6,6,0]]);
+  K.tower(-R+9,side*(R-11),2.5,22,{roof:EVSHINGLE,flag:1,door:K.downhill(-R+9,side*(R-11))});
+}
+// ---- The elves' roads: the elven way paved in elvenstone between kerbs of courses, a lamp on a column beside it every 48 blocks
+// and a leaf-stone on the other side every 144 (D-088);
 // hidden paths of gravel and stepping stones; bridges of elvenstone on slender piers with filigree rails
 function elfRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%48===24){RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EVLAMP);}return;}
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%48===24){RBS(X,Z,g+1,g+3,EVPILLAR);RBP(X,g+4,Z,EVLAMP);}
+    else if(hi&&!wet&&ao<=rd.w+1.5&&rr.off<0&&Math.floor(rr.along)%144===72){RBP(X,g,Z,EVBRICK);RBS(X,Z,g+1,g+2,LEAFSTONE);RBP(X,g+3,Z,EVCARVE);} // a leaf-stone, that tells the way (D-088)
+    return;}
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?EVCARVE:EVBRICK);if(edge)RBP(X,y+1,Z,EVGOLD);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%6===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,EVPILLAR);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
@@ -6749,8 +7047,8 @@ RB.wgate=(s,p,u,v,X,Z)=>{const av=Math.abs(v),g=hAt(X,Z),gy=p.y;if(av===3){RBS(X
   if(av<3){RBP(X,gy+6,Z,WCARVE);if(av===0)RBP(X,gy+5,Z,WBANNER);}};
 // A spring: a round pool held in rootstone on its pad, a lamp on a rootstone post in its middle
 RB.wpool=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),y=p.y;if(d>p.rp+1)return;
-  if(d<0.8){RBS(X,Z,y-2,y+1,WROOT);RBP(X,y+2,Z,WLAMP);return;}
-  if(d<p.rp){RBP(X,y-2,Z,WROOT);RBP(X,y-1,Z,WATER);RBP(X,y,Z,WATER);RBS(X,Z,y+1,y+3,AIR);return;}
+  if(d<0.8){RBS(X,Z,y-2,y+1,WROOT);RBP(X,y+2,Z,p.moon?STARLAMP:WLAMP);return;}
+  if(d<p.rp){RBP(X,y-2,Z,p.moon?MOONSTONE:WROOT);RBP(X,y-1,Z,WATER);RBP(X,y,Z,WATER);RBS(X,Z,y+1,y+3,AIR);return;} // (a moonwell: its bed moonstone, D-088)
   RBP(X,y,Z,WROOT);if(hsh(X,9745,Z)<0.25)RBP(X,y+1,Z,[FERN,BLUEB,FLOWY][(hsh(X,9747,Z)*3)|0]);};
 // An archery range on its pad: a mossy lawn, a woven rail at the shooting line, three targets (hay on carved stands)
 RB.wrange=(s,p,u,v,X,Z)=>{const y=p.y,[a,b]=[u-p.u0,v-p.v0];RBP(X,y,Z,b%5===2?FMOSS:GRASS);RBS(X,Z,y+1,y+4,AIR);
@@ -6771,6 +7069,16 @@ RB.whut=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rh+
   if(d<p.rh+0.5){RBP(X,y,Z,WPLANK);for(let yy=y+1;yy<ry;yy++)RBP(X,yy,Z,AIR);for(let yy=hAt(X,Z)+1;yy<y;yy++)RBP(X,yy,Z,WROOT);}
   if(d>p.rh-0.5&&d<p.rh+0.5){const door=Math.abs(wAng(a,p.da))*d<1,win=Math.abs(Math.sin(a*3+1))<0.25;for(let yy=y+1;yy<=y+4;yy++)RBP(X,yy,Z,door&&yy<=y+3?AIR:win&&yy===y+2?AIR:yy===y+4?WPLANK:WCARVE);}
   if(d<0.8)RBP(X,y+1,Z,WLAMP);};
+// A market glade of the wood (D-088): stalls in a ring about a lamp on a carved post, each a counter of planks under a cone of
+// leaf thatch on two carved posts, wares on it; the ground mossy
+RB.wmarket=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rr+0.6)return;const g=hAt(X,Z);RBP(X,g,Z,hsh(X,9775,Z)<0.4?FMOSS:LITTER);RBS(X,Z,g+1,g+5,AIR);
+  if(d<0.8){RBS(X,Z,g+1,g+3,WCARVE);RBP(X,g+4,Z,WLAMP);return;}
+  const a=Math.atan2(dv,du),k=Math.round(a/WTAU*p.n),ac=a-k*WTAU/p.n,off=Math.abs(ac)*d;
+  if(d>p.rr-3.6&&d<p.rr-0.4&&off<2.2){const front=d<p.rr-2.4;if(front&&off<1.6){RBP(X,g+1,Z,WPLANK);if(off<0.6)RBP(X,g+2,Z,[BARREL,CRATE,STARBLOOM,SILVFERN,BOOKS][Math.floor(hsh(k,9777,Math.round(s.X))*5)]);}
+    if(!front&&off>1.5)RBS(X,Z,g+1,g+3,WCARVE);RBP(X,g+4,Z,WTHATCH);}};
+// A pen for the wood's steeds (D-088): a ring of woven rails on carved posts about mossy ground, a gap toward the way, a trough
+RB.wpen=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rr+0.6)return;const g=hAt(X,Z);RBP(X,g,Z,FMOSS);RBS(X,Z,g+1,g+3,AIR);
+  if(d>p.rr-0.6&&!(du<0&&Math.abs(dv)<1.5))RBP(X,g+1,Z,Math.round(Math.atan2(dv,du)/WTAU*16)%4===0?WCARVE:WRAIL);else if(Math.abs(du-1)<0.6&&Math.abs(dv)<1.5)RBP(X,g+1,Z,HAYBALE);};
 // ---- The king's halls: a hill raised over them (L.mound in realms.js), its face cut where the way arrives (u = m.face); the
 // forecourt on its pad before it, crossed by a stream held in rootstone under a bridge; the gate a pointed arch of rootstone in
 // the face between carved pillars, lamps either side, the banner over it, carved doors standing open; within, a great hall
@@ -6861,20 +7169,27 @@ function woodCity(s,L,r){const K=woodKit(s,L,r),R=s.R,big=s.prov.capital;L.hedge
   K.P.push({k:'wgate',u0:-R-1,u1:-R+1,v0:-3,v1:3,y:wvRaw(s,-R,0)});
   // the king's tree
   const ku=Math.round(R*0.45),king=K.tree(ku,0,big?4:3,[{y:18},{y:30,house:1},{y:44,house:1,hall:1}],{cr:big?17:14,H:big?78:66});
+  // the market glade and the steeds' pen (D-088), kept clear of the goldboughs
+  const mu=Math.round(R*0.05),mv=18,nu=Math.round(-R*0.62),nv=-12;
   // goldboughs on a loose grid, off the way and clear of each other
   const sp=21,n0=Math.ceil(R/sp);for(let a=-n0;a<=n0;a++)for(let b=-n0;b<=n0;b++){const cu=a*sp+Math.round((r()-0.5)*6),cv=b*sp+Math.round((r()-0.5)*6),tr=r()<0.3?3:2;
-    if(Math.hypot(cu,cv)>R-12||(Math.abs(cv)<9&&cu<ku+6)||!K.far(cu,cv,19))continue;
+    if(Math.hypot(cu,cv)>R-12||(Math.abs(cv)<9&&cu<ku+6)||!K.far(cu,cv,19)||Math.hypot(cu-mu,cv-mv)<16||Math.hypot(cu-nu,cv-nv)<12)continue;
     const lv=[{y:16},{y:26,house:r()<0.55},{y:36,house:r()<0.4}].filter(()=>r()<0.8);if(!lv.length)lv.push({y:26,house:1});K.tree(cu,cv,tr,lv);}
   K.bridges(30,3);
   // the way from the gate to the king's tree, paths to every stair; the spring and the range beside the way
   K.path(-R-2,0,ku-6,0,1.5);K.toStairs(ku-6);
-  const pu=Math.round(-R*0.4),pv=10;if(K.far(pu,pv,9)){K.P.push({k:'wpool',u0:pu-5,u1:pu+5,v0:pv-5,v1:pv+5,cu:pu,cv:pv,rp:3,y:s.T,clear:1});K.pad(pu-5,pu+5,pv-5,pv+5,s.T);K.path(pu,1,pu,pv-4,0.6);K.spot('garden',pu,pv-6,s.T);}
+  const pu=Math.round(-R*0.4),pv=10;if(K.far(pu,pv,9)){K.P.push({k:'wpool',u0:pu-5,u1:pu+5,v0:pv-5,v1:pv+5,cu:pu,cv:pv,rp:3,y:s.T,clear:1,moon:1});K.pad(pu-5,pu+5,pv-5,pv+5,s.T);K.path(pu,1,pu,pv-4,0.6);K.spot('garden',pu,pv-6,s.T);}
   const ru=Math.round(-R*0.4),rv=-14;if(K.far(ru+5,rv-3,10)){K.P.push({k:'wrange',u0:ru,u1:ru+12,v0:rv-8,v1:rv,y:s.T,clear:1});K.pad(ru,ru+12,rv-8,rv,s.T);K.spot('range',ru+2,rv-4,s.T);}
+  // the market glade and the pen beside the way, where the gate trees and the king's tree leave room
+  if(K.far(mu,mv,14)){K.P.push({k:'wmarket',u0:mu-9,u1:mu+9,v0:mv-9,v1:mv+9,cu:mu,cv:mv,rr:8,n:6,clear:1});K.path(mu,1,mu,mv-8,0.6);K.spot('market',mu,mv-3,wvRaw(s,mu,mv));}
+  if(K.far(nu,nv,11)){K.P.push({k:'wpen',u0:nu-6,u1:nu+6,v0:nv-6,v1:nv+6,cu:nu,cv:nv,rr:5,clear:1});K.path(nu-5,nv,nu-5,-1,0.6);K.spot('stable',nu,nv,wvRaw(s,nu,nv),{horses:2});}
   K.ground();
   // where the folk are: the gate, its bridge, the way, the platforms, the king's hall
   K.spot('gate',-R+2,0,wvRaw(s,-R+2,0));if(g1)K.spot('deck',-R+3,0,g1.fl[0].y,{R:2});K.spot('street',Math.round(-R*0.15),0,wvRaw(s,Math.round(-R*0.15),0));
   if(king){const h=king.fl[king.fl.length-1];K.spot('hall',ku+Math.round(Math.cos(king.a0)*(king.tr+3)),Math.round(Math.sin(king.a0)*(king.tr+3)),h.y,{R:2});K.spot('deck',ku+Math.round(Math.cos(king.a0)*(king.tr+3)),Math.round(Math.sin(king.a0)*(king.tr+3)),king.fl[0].y,{R:2});}
   for(const t of K.trees.filter(t=>t!==king&&t!==g1&&t!==g2).slice(0,big?4:3)){const f=t.fl[0];K.spot('deck',t.cu+Math.round(Math.cos(t.a0+1)*(t.tr+2.5)),t.cv+Math.round(Math.sin(t.a0+1)*(t.tr+2.5)),f.y,{R:1.5});}
+  // the healers in a house high in a tree (D-088)
+  {const t=K.trees.find(t=>t!==king&&t.fl.some(f=>f.house&&!f.hall));if(t){const f=t.fl.find(f=>f.house&&!f.hall);K.spot('heal',t.cu+Math.round(Math.cos(t.a0+Math.PI)*(t.tr+2.6)),t.cv+Math.round(Math.sin(t.a0+Math.PI)*(t.tr+2.6)),f.y,{R:1});}}
 }
 // The king's halls under the hill: the hill's face toward the way, the forecourt with its stream and bridge, the gate, the hall,
 // the cellar and the guardroom; goldboughs on the hill's shoulders
@@ -6911,12 +7226,14 @@ function woodGlade(s,L,r){const K=woodKit(s,L,r),R=s.R,gr=R-3;
 // woodland paths of litter; bridges of planks with woven rails on posts of bark
 function woodRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%32===16){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}return;}
+  const arch=hi&&!wet&&Math.floor(rr.along)%64===48; // an arch of carved wood over the way with a lamp hung under it (D-088)
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%32===16){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}else if(arch&&ao<=rd.w+1.5){RBS(X,Z,g+1,g+6,WCARVE);RBP(X,g+7,Z,WLAMP);}return;}
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?WCARVE:WPLANK);if(edge)RBP(X,y+1,Z,WRAIL);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%6===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,WBARK);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
   RBP(X,g,Z,hi&&ao>rd.w-0.5?FMOSS:hsh(X,9751,Z)<0.2?FMOSS:LITTER);
   for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
+  if(arch){RBS(X,Z,g+4,g+5,AIR);RBP(X,g+6,Z,WCARVE);if(ao<0.5)RBP(X,g+5,Z,WLAMP);}
 }
 // ---- Building the mountain dwarves (D-066), in the frame and parts of realm-build.js. They live on and in the mountains: their
 // sites are cut into terraces like the elves' (elfTerrace), every building on a platform of its own, and under them they delve.
@@ -8100,7 +8417,7 @@ function features(WCX,WCZ,self,noLife){
   // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2)||elderNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -8110,7 +8427,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2)&&!elderNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -8151,6 +8468,7 @@ function plants(WCX,WCZ){let F0=null;
         // foraging (M4b, Q52): bilberry patches in woods and on the moors, brown mushrooms in the woods, wild turnips in open country
         const fr=hsh(X,7,Z),fg=!tn?0:(b===3||b===4||b===8)&&fr<0.06&&fbm2(X/28,Z/28,1,4311.3)>0.2?BERRYB:(b===3||b===8)&&fr>0.994?MUSHB:(b===2||b===7||b===10)&&fr>0.994?WTURN:0;
         if(fg)world[I(x,g+1,z)]=fg;
+        else if(TP.tsite&&TP.tsite.raw&&r<0.035)world[I(x,g+1,z)]=[SILVFERN,STARBLOOM,DAWNLILY][(hsh(X,8,Z)*3)|0]; // the elven plants about the wood elves' places (D-088)
         else if(F&&F.plant){const p=F.plant(r,X,Z,TP);if(p)world[I(x,g+1,z)]=p;}
         else if(id)world[I(x,g+1,z)]=id;
         else if(b===2&&TP.fwd<0.4&&Math.abs(fbm2(X/46,Z/46,1,4201.1))<0.011&&!realmNear(X,Z,1)){world[I(x,g+1,z)]=LEAVES;if(r<0.7&&g+2<H)world[I(x,g+2,z)]=LEAVES;} // hedgerows
@@ -8180,7 +8498,8 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ); // the forests' landmarks and features (M6b) after the old sites
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ);applyElder(WCX,WCZ); // the ruins of the elder elves (D-088)
+    // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
     applyStairs(WCX,WCZ); // the Ember Stair winding up inside each great volcano from its fortress's way in (D-067)
@@ -9324,7 +9643,7 @@ function explode(cx,cy,cz){emberBlast(cx,cy,cz); // an Emberlord near its end, c
     const x=bx+dx,y=by+dy,z=bz+dz;if(x<0||z<0||y<0||x>=W||z>=D||y>=H)continue;
     const id=world[I(x,y,z)];if(!id||id===BEDROCK||id===OBSID||BL[id].liquid)continue;
     if(id===TNT){prime(x,y,z,0.5+Math.random()*1.0);continue;}
-    if(id===GRAVE||id===CRATE||id===DWCHEST||id===BARREL)continue; // blasts never destroy graves or containers (their contents would be lost or teleported)
+    if(id===GRAVE||id===CRATE||id===DWCHEST||id===BARREL||id===ECHEST)continue; // blasts never destroy graves or containers (their contents would be lost or teleported)
     if(Math.random()<0.35){const c=TAVG[BL[id].t[2]];for(let k=0;k<2;k++)spawnP(x+.5,y+.5,z+.5,dx*2.2+(Math.random()-.5)*3,dy*1.5+3+Math.random()*4,dz*2.2+(Math.random()-.5)*3,c,1+Math.random()*0.8,16);}
     setBlock(x,y,z,AIR);
   }
@@ -9476,7 +9795,7 @@ function dropsFor(id,tool){
     case CHARWOOD:case SMOULDER:return[[200,1+(Math.random()<0.3?1:0)]];case VENT:return[[CINDER,1]];case LAVACRUST:return[[CINDER,1]];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
-    case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
+    case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case ECHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
     case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.17?[[331,1]]:r<0.47?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
   }
   if(id===GRAVE)return[];
@@ -9650,7 +9969,7 @@ function renderBlueprints(box){
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3}; // meat, eggs and milk since E1
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7}; // meat, eggs and milk since E1; the elves' fare (D-088)
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -9734,14 +10053,14 @@ const LAMP_ADJ=[-3,0,6]; // the Caves setting (Dark, Normal, Bright) shortens or
 function lampLevel(){
   const adj=LAMP_ADJ[settings.cave||0]||0;
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
-  const b=equip.belt;if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj];
+  const b=equip.belt;if(b&&ITEMS[b.id].ever)return[1,24+adj];if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj]; // (the starglass lantern needs no oil and reaches further: D-088)
   const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];if(h===378)return[0.95,14+adj]; // the Emberheart glows in the hand (W7c)
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
 let lampWarned=false;
 function lampTick(dt){
-  const b=equip.belt;if(!SURV()||!b||!ITEMS[b.id].lamp)return;
+  const b=equip.belt;if(!SURV()||!b||!ITEMS[b.id].lamp||ITEMS[b.id].ever)return;
   if(b.d<=0||lampDark())b.d-=dt;
   if(b.d<=0){const f=[338,339].find(id=>countOf(id)>0);
     if(f){takeItems(f,1);b.d=Math.max(0,b.d)+ITEMS[f].fuel;lampWarned=false;drawBar(true);}
@@ -9901,7 +10220,7 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
@@ -9910,11 +10229,15 @@ function act(btn){
   if(btn===0&&foeAct(btn))return; // a foe first, if one is nearer than any animal (D-052)
   if(btn===2&&(morBind()||campSalvage()||morHorn(held)||engAct()))return; // a wounded soldier's wounds bound, the Horn of the Hosts sounded (W8b), an engine of the war worked (W8c)
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
+  if(btn===2&&elfAct())return; // speaking with the elves: trade, healing, tales, tasks, an audience (D-088)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
   if(btn===2&&held===273){readTablet();return;} // rune tablets are read (M7)
   if(btn===2&&held===322){throwGrapnel();return;}
+  if(btn===2&&held===429){elfWhistle();return;} // the elven whistle calls your steed (D-088)
+  if(btn===2&&held===430){boatPlace();return;} // a swan boat set on the water
+  if(btn===2&&held===420&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+12);drawBar(true);drawStats();toast('The draught is cool and bright; your wounds close');return;} // an elven draught
   if(btn===2&&held===326){launchFlare();return;}
   if(btn===2&&(held===379||held===384)&&emberRelicUse(held))return; // a fallen Emberlord's horn or crown (W7c)
   if(btn===2&&(PLANT_OF[held]||held===251)){const fh=raycast(eyePos(),camDir(),6);if(fh&&farmUse(fh,held))return;if(!FOOD[held])return;}
@@ -10019,13 +10342,13 @@ function lockOrPlay(){
 // you build starts empty. Contents are saved with the world (save data `cs`). A container that holds anything (or a world one
 // never opened) cannot be broken: empty it first. In survival the inventory screen shows the container beside the pack;
 // tapping a slot on either side moves that stack across. Creative only looks inside.
-const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL]);
+const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST]);
 let box=null; // the open container: {k, x, y, z} in window coordinates
 if(saved&&Array.isArray(saved.cs))saved.cs.forEach(([k,sl])=>{const a=new Array(BOX_SLOTS).fill(null);(sl||[]).forEach(([i,id,c,d])=>{if(i<BOX_SLOTS&&(ITEMS[id]||BL[id]))a[i]={id:id,c:c,d:d||0};});boxes.set(k,a);});
 const boxSave=()=>[...boxes].map(([k,a])=>[k,a.map((q,i)=>q&&[i,q.id,q.c,q.d||0]).filter(Boolean)]);
 // The loot a world container holds when first opened, decided by where it sits (the tables are in underground-sites.js)
 function lootOf(id,WX,Y,WZ){
-  const dw=id===DWCHEST,TBL=dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0);
+  const dw=id===DWCHEST||id===ECHEST,TBL=id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
   let tot=0;for(const l of TBL)tot+=l[3];
   const out=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}out.push([it[0],it[1]+Math.floor(r()*(it[2]-it[1]+1))]);}
   return out;
@@ -10076,7 +10399,7 @@ function renderBox(col){
   col.appendChild(g);
   const all=document.createElement('button');all.className='wide';all.textContent='Take everything';all.addEventListener('click',()=>{boxTakeAll();renderSInv();});col.appendChild(all);
 }
-function isBox(id){return id===CHEST||id===CRATE||id===DWCHEST||id===BARREL;}
+function isBox(id){return BOX_IDS.has(id);}
 // ---- Animal models (E1 refined, D-050). Every kind is built from boxes measured in pixels, sixteen to a block like the terrain's
 // textures. Each box is unwrapped onto a small texture (the box layout: top and bottom above a strip of the four sides) painted
 // from hashed noise per kind and coat, so the animals have the same crisp pixel look as the blocks. Parts hang from pivots,
@@ -11179,6 +11502,70 @@ const FOLK_KIT=(function(){
   });
   MODEL_KIT.wood={coats,leafSign,leaves,vine,ears,hairB,elfFace,hood,hoodPaint,bow,bowPaint,knife,knifePaint,jerkin,jerkinPaint,kit,COP,GOLD,SILV,DEEP,MOSS,CLOAK,BARKC};
 })();
+// ---- The elves' court, their merchants and mariners (D-088), with the high elves' and the wood's parts and painters
+// (MODEL_KIT.elf, MODEL_KIT.wood): the king of an elder realm in a lord's robes under a long mantle of deep blue bordered in white,
+// the star on its back, a crown of gold with a pale stone, a sceptre bearing a star; the queen in a gown under a mantle and
+// crown; the herald in a tabard of blue with the star over his robe, a horn at his hip; the merchant with a pack and a scroll;
+// the mariner in a sea-grey cloak with a coil of rope on his shoulder; the wood's merchant in a tunic with a pack and a basket.
+(function(){
+  const {ALL,SIDE,sh,hz,cloth,plate,leather,band}=FOLK_KIT,E=MODEL_KIT.elf,WD=MODEL_KIT.wood,{GOLD,BLUE,WHITE,sign}=E;
+  const base=k=>AM_KINDS[k].parts.map(p=>p.slice());
+  const recoat=(k,o)=>AM_KINDS[k].coats.map(([c,w],i)=>[Object.assign({},c,typeof o==='function'?o(c,i):o),w]);
+  const crown=()=>[['crown','head',[0,5,0],[-3.75,0,-3.75,7.5,2,7.5],0,{head:1}],['crownP','crown',[0,2,3.75],[-0.5,0,-0.5,1,2,1],0,{head:1,nb:1,tp:['y',1,0,0,0]}]];
+  const crownPaint=P=>{plate(P,['crown'],GOLD);P.map('crown',SIDE,(s,t)=>t===2&&s%3===1?[150,220,240]:t===0?sh(GOLD,-24):null);P.map('crownP',ALL,()=>[226,236,246,200]);};
+  const mantle=(len)=>[['mantle','body',[0,10.5,-2.9],[-5,-len,-0.5,10,len,1],[0.06,0,0],{nb:1,tp:['-y',1.25,1,0,0]}]];
+  const mantlePaint=(P,col)=>{cloth(P,['mantle'],col,{off:2});P.map('mantle',ALL,(s,t,w,h)=>s<2||s>=w-2||t>=h-2?((s*7+t*3)%9===0?[30,30,34]:[238,238,242]):null);sign(P,'mantle','B',2,10,WHITE,GOLD);};
+  Object.assign(AM_KINDS,{
+    eking:{res:2,tex:256,scale:1.12,parts:[...base('elord'),...crown(),...mantle(22),['scep','armR',[1.5,-10,0.5],[-0.5,-4,-0.5,1,17,1],[0.12,0,0],{nb:1}],['scepS','scep',[0,13,0],[-1,0,-1,2,2,2],0,{nb:1}]],
+      coats:recoat('elord',()=>({cl:[236,236,240],cl2:[30,48,96]})),
+      paint(P,c){AM_KINDS.elord.paint(P,c);crownPaint(P);mantlePaint(P,BLUE);P.map('scep',ALL,(s,t)=>t%5===0?sh(GOLD,20):sh(GOLD,-10));P.map('scepS',ALL,()=>[230,242,255,200]);}},
+    equeen:{res:2,tex:256,scale:1.1,parts:[...base('elady'),...crown(),...mantle(23)],coats:recoat('elady',(c,i)=>({cl:[[236,238,242],[200,214,236],[226,226,214],[214,200,226]][i%4]})),
+      paint(P,c){AM_KINDS.elady.paint(P,c);crownPaint(P);mantlePaint(P,BLUE);}},
+    eherald:{res:2,tex:256,scale:1.08,parts:[...base('elord'),['tabard','body',[0,0,0],[-4.9,-8,-2.9,9.8,18,5.8]],['horn','body',[4.6,2,0],[-0.5,-1,-2,1,2,4],0,{nb:1,tp:['z',1,0.5,0,0]}]],
+      coats:recoat('elord',()=>({cl:[30,48,96],cl2:[236,236,240]})),
+      paint(P,c){AM_KINDS.elord.paint(P,c);cloth(P,['tabard'],BLUE);P.map('tabard',['L','R'],(s,t)=>sh(GOLD,-10));sign(P,'tabard','F',-3,3,WHITE,GOLD);sign(P,'tabard','B',-3,3,WHITE,GOLD);
+        P.map('tabard',['F','B'],(s,t,w,h)=>t>=h-1?sh(GOLD,0):null);plate(P,['horn'],[230,214,170]);band(P,'horn',SIDE,0,1,GOLD);}},
+    emerch:{res:2,tex:256,scale:1.06,parts:[...base('elord').filter(p=>p[0]!=='circ'),['pack','body',[0,3,-3.2],[-3.5,-1,-2.5,7,9,3],0,{nb:1}],['roll','pack',[0,8,0],[-4,0,-1,8,2,2],0,{nb:1}],
+        ['scroll','armR',[1.5,-10,1.5],[-0.75,-0.75,-2.5,1.5,1.5,5],[0.3,0,0],{nb:1}]],
+      coats:recoat('elord',(c,i)=>({cl:[[120,84,50],[70,96,70],[96,70,90],[60,80,110]][i%4],cl2:[200,190,160]})),
+      paint(P,c){AM_KINDS.elord.paint(P,c);leather(P,['pack'],[110,76,46]);band(P,'pack',SIDE,6,7,GOLD);cloth(P,['roll'],[160,40,50]);P.map('scroll',ALL,(s,t,w,h,f)=>f==='T'||f==='D'?[180,150,90]:[236,228,206]);}},
+    emariner:{res:2,tex:256,scale:1.08,parts:[...base('elord').filter(p=>p[0]!=='circ'),['cloak','body',[0,10.5,-2.9],[-4.75,-20,-0.5,9.5,20,1],[0.1,0,0],{nb:1}],['coil','body',[2.8,7,0],[-1.2,-3,-3,2.4,6,6],[0,0,0.2],{nb:1}]],
+      coats:recoat('elord',()=>({cl:[96,110,124],cl2:[200,206,212]})),
+      paint(P,c){AM_KINDS.elord.paint(P,c);cloth(P,['cloak'],[110,124,136],{off:2});P.map('cloak',ALL,(s,t,w,h)=>t>=h-2?[230,232,236]:null);
+        P.map('coil',ALL,(s,t)=>sh([196,170,120],((s+t)%3===0?-24:6)+hz(s,t,701)*8));}},
+    wmerch:{res:2,tex:256,scale:1.06,parts:[...base('wfolk'),['pack','body',[0,3,-3.2],[-3.5,-1,-2.5,7,9,3],0,{nb:1}],['basket','armR',[1.5,-10,1.5],[-2,-2,-2,4,3,4],0,{nb:1}]],
+      coats:recoat('wfolk',(c,i)=>({cl:[[110,84,54],[76,104,60],[120,100,60]][i%3]})),
+      paint(P,c){AM_KINDS.wfolk.paint(P,c);leather(P,['pack'],[110,76,46]);band(P,'pack',SIDE,6,7,[200,170,90]);P.map('basket',ALL,(s,t,w,h,f)=>f==='T'?((s+t)%2?[220,60,60]:[230,200,90]):sh([170,130,80],((s+t)%2?-14:8)));}}
+  });
+  // ---- the steeds of the elves (D-088): the elven horse, silver-white, pale gold or moon-grey under a saddle-cloth of deep blue
+  // bordered in gold with a silver star, a bridle of blue; the great elk of the wood elves, half again a deer's size, its antlers
+  // wide and many-tined, a saddle-cloth of green and gold; and the swan boat, a hull of white with feathered sides, a gilt seat and
+  // a swan's neck curving up from the bow to a gilt beak
+  const H=AM_KINDS.horse,DE=AM_KINDS.deer,TACK=[['saddle','body',[0,10,-1],[-4,0,-4,8,1,7]],['cantle','saddle',[0,1,-4],[-3,0,0,6,2,1]],['scloth','body',[0,0,-1],[-5.25,3,-5.5,10.5,7.5,10]]];
+  const tackPaint=(P,col,trim,star)=>{P.coat(['saddle','cantle'],[96,64,40],6);P.coat(['scloth'],col,5);for(const f of ['L','R','T'])P.rows('scloth',[f],0,1,trim);if(star){P.rect('scloth','L',3,3,2,2,[236,240,246]);P.rect('scloth','R',3,3,2,2,[236,240,246]);}};
+  AM_KINDS.ehorse={parts:[...H.parts.map(p=>p.slice()),...TACK],scale:1.06,tex:256,
+    coats:[[{coat:[232,232,228],mane:[246,246,242],low:[214,214,210],name:'silver'},3],[{coat:[214,206,186],mane:[246,236,206],low:[196,186,166],name:'pale gold'},2],[{coat:[178,180,184],mane:[236,236,240],low:[150,150,156],dapple:1,name:'moon-grey'},2]],
+    paint(P,c,f){H.paint(P,c,f);tackPaint(P,[30,48,96],[224,188,98],1);P.rows('head',['L','R'],1,2,[30,48,96]);}};
+  const ant=DE.parts.filter(p=>/^(ant|tine)/.test(p[0])).map(p=>{const q=p.slice(),o=Object.assign({},q[5]||{});delete o.only;q[5]=o;return q;});
+  AM_KINDS.elk={parts:[...DE.parts.filter(p=>!/^(ant|tine)/.test(p[0])).map(p=>p.slice()),...ant,['tineL3','antL',[0,7,0],[-0.5,0,0,1,1,3],[-1.1,0,0],{m:'tineL1'}],['tineR3','antR',[0,7,0],[-0.5,0,0,1,1,3],[-1.1,0,0],{m:'tineL1'}],
+      ['saddle','body',[0,8,-1],[-3.5,0,-3,7,1,6]],['scloth','body',[0,0,-1],[-4.25,2,-4,8.5,6.5,8]]].map(p=>p[0]==='antL'||p[0]==='antR'?[p[0],p[1],p[2],[-0.5,0,-0.5,1,10,1],p[4],p[5]]:p),scale:1.55,tex:256,
+    coats:[[{coat:[150,108,66],back:[118,82,48],belly:[226,206,170],rump:[236,226,206],nose:[38,30,28],hoof:[44,38,34],ant:[232,226,206]},3],[{coat:[150,146,136],back:[120,116,108],belly:[220,214,200],rump:[236,232,222],nose:[40,36,34],hoof:[44,40,38],ant:[226,226,230]},1]],
+    paint(P,c,f){DE.paint(P,c,f);P.coat(['antL','tineL1'],c.ant,10);P.coat(['saddle'],[96,64,40],6);P.coat(['scloth'],[60,96,52],5);for(const fc of ['L','R','T'])P.rows('scloth',[fc],0,1,[214,182,84]);}};
+  AM_KINDS.swanboat={parts:[['hull',null,[0,8,0],[-11,-6,-18,22,8,30]],['bow','hull',[0,0,12],[-11,-6,0,22,8,14],0,{tp:['z',0.15,1,0,2]}],['stern','hull',[0,0,-18],[-11,-6,-8,22,8,8],0,{tp:['-z',0.6,1,0,1]}],
+      ['wingL','hull',[-11,2,-4],[-1,-6,-14,2,9,24],[0,0,-0.15],{tp:['y',1,0.7,0,-2]}],['wingR','hull',[11,2,-4],[-1,-6,-14,2,9,24],[0,0,0.15],{m:'wingL',tp:['y',1,0.7,0,-2]}],
+      ['seat','hull',[0,2,-4],[-9,0,-3,18,2,6]],['neck','bow',[0,1,12],[-2,0,-2,4,22,4],[-0.2,0,0]],['shead','neck',[0,22,0],[-2,-2,-2,4,5,8],[0.35,0,0]],['beak','shead',[0,-0.5,6],[-1,-1,0,2,2,5],0,{tp:['z',0.5,0.5,0,-0.5]}]],
+    coats:[[{coat:[240,240,236]},1]],tex:256,
+    paint(P,c,f){P.coat(['hull','bow','stern','wingL','neck','shead'],c.coat,5);P.rows('hull',['L','R','F','B'],0,1,[224,188,98]);P.coat(['seat'],[198,152,84],8);P.coat(['beak'],[224,188,98],8);P.eyes('shead',1,1,[18,14,14]);
+      P.rows('wingL',['L','R'],2,3,[214,214,210]);P.rows('wingL',['L','R'],5,6,[214,214,210]);P.face('hull','T',[198,152,84],8);}};
+  // a white ship of the havens under sail (seen setting out into the west, elf-life.js): the swan boat's lines at four times its
+  // size with a mast, a yard and a bellied white sail with the silver star, the banner at the masthead
+  AM_KINDS.whiteship={scale:4,tex:256,parts:[['hull',null,[0,6,0],[-12,-6,-30,24,9,48]],['bow','hull',[0,0,18],[-12,-6,0,24,9,16],0,{tp:['z',0.1,1,0,3]}],['stern','hull',[0,0,-30],[-12,-6,-6,24,11,6],0,{tp:['-z',0.6,1,0,2]}],
+      ['neck','bow',[0,3,16],[-2,0,-2,4,20,4],[-0.25,0,0]],['shead','neck',[0,20,0],[-2,-2,-2,4,5,8],[0.4,0,0]],['beak','shead',[0,-0.5,6],[-1,-1,0,2,2,5],0,{tp:['z',0.5,0.5,0,-0.5]}],
+      ['mast','hull',[0,3,0],[-1,0,-1,2,44,2]],['yard','mast',[0,40,1],[-16,-1,-1,32,2,2]],['sail','yard',[0,-1,1],[-15,-30,-0.5,30,30,1],[0.12,0,0]],['flag','mast',[0,44,0],[-0.5,-6,0,1,6,8]]],
+    coats:[[{coat:[240,240,236]},1]],
+    paint(P,c,f){P.coat(['hull','bow','stern','neck','shead'],c.coat,5);P.rows('hull',['L','R'],0,1,[224,188,98]);P.face('hull','T',[198,152,84],8);P.coat(['beak'],[224,188,98],8);P.eyes('shead',1,1,[18,14,14]);
+      P.coat(['mast','yard'],[198,152,84],8);P.coat(['sail'],[242,240,234],4);P.rect('sail','F',13,10,4,8,[206,214,230]);P.rect('sail','F',11,12,8,4,[206,214,230]);P.rect('sail','B',13,10,4,8,[206,214,230]);P.coat(['flag'],[30,48,96],6);}};
+})();
 // ---- The folk of the mountain dwarves (D-066), built and painted like the other folk (FOLK_KIT): boxes measured in pixels, two
 // texels to a pixel. A dwarf stands a little under a block and a half: short thick legs, a broad deep body, heavy arms reaching to
 // the hip, a big nose, bushy brows, and a beard falling to the belt, its ends braided and bound in bronze and gold. Their
@@ -11711,6 +12098,7 @@ function stepAnimal(a,dt){
   a.hurt=Math.max(0,a.hurt-dt*3);
   if(a.dead){a.dead+=dt;a.sp=0;return;}
   if(a.hold){a.sp=a.holdSp||0;a.hd=a.yaw;return;} // held still (screenshots and tests); holdSp walks it on the spot
+  if(A.boat&&PL.ride!==a){a.sp=0;a.st='idle';return;} // a swan boat lies where it was left, on the water (D-088)
   if(PL.ride===a){a.pen=null;const v=Math.hypot(PL.vx,PL.vz);a.sp=v;if(v>0.6)a.hd=Math.atan2(PL.vx,PL.vz);a.yaw+=angTo(a.yaw,a.hd)*Math.min(1,dt*8);a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;a.st='walk';return;}
   a.t-=dt;
   // fright: a running player inside the shy distance, or any player inside half of it
@@ -11811,9 +12199,10 @@ function animalCall(a,hurt){
     case 'sheep':voice(290*yg*p,262*yg*p,hurt?0.35:0.7,0.09,{vib:9,vd:0.07,form:900*yg,q:1.4},at);break;
     case 'goat':voice(430*yg*p,395*yg*p,hurt?0.3:0.6,0.08,{vib:13,vd:0.09,form:1300,q:1.4},at);break;
     case 'hen':if(a.young){for(let i=0;i<3;i++)voice(2300,2900,0.07,0.04,{type:'sine',form:2600,q:1,delay:i*0.16},at);}else for(let i=0;i<(hurt?2:4);i++)voice(540*p,420*p,0.07,0.07,{type:'square',form:1100,q:2,delay:i*(hurt?0.09:0.14)},at);break;
-    case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
+    case 'ehorse':case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
+    case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
     case 'boar':for(let i=0;i<(hurt?3:2);i++){burst(0.12,'lowpass',260,1,0.13,i*0.2,at);voice(120*p,88*p,0.15,0.06,{form:300,q:1,delay:i*0.2},at);}break;
     case 'hound':if(a.tame&&!hurt&&Math.random()<0.5)voice(900,1150,0.55,0.04,{type:'sine',form:1200,q:1},at);else for(let i=0;i<2;i++)voice(520*p,360*p,0.12,0.09,{form:900,q:1.4,delay:i*0.25},at);break;
     case 'rabbit':burst(0.06,'lowpass',180,1,0.15,0,at);break;}
@@ -11855,8 +12244,8 @@ function animalStrike(a,dmg,kx,kz){const A=ANIMALS[a.kind],kd=Math.hypot(kx,kz)|
     for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');if(PL.ride===a)dismount();a.dead=0.001;a.st='dead';a.sp=0;}}
 function confirmHunt(a){if(a.warned)return true;a.warned=true;a.hp=1;toast('This is your '+ANIMALS[a.kind].n.toLowerCase().replace('stray ','').replace('wild ','')+'. Strike again to part with it.');return false;}
 // ---- Riding (Q67): a wild horse can be ridden at once; it is faster and jumps higher. Use it again to get off.
-function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast('Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
-function dismount(){const a=PL.ride;PL.ride=null;if(a){a.st='idle';a.t=3;a.sp=0;a.y=a.gy=Math.max(1,standY(a.x,a.y,a.z));}}
+function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=ANIMALS[a.kind].boat?a.y:Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast(ANIMALS[a.kind].ride||'Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
+function dismount(){const a=PL.ride;PL.ride=null;if(a){a.st='idle';a.t=3;a.sp=0;if(ANIMALS[a.kind].boat){boatLeave(a);return;}a.y=a.gy=Math.max(1,standY(a.x,a.y,a.z));}} // (out of a swan boat onto the shore: D-088)
 // ---- The mule's pack: a container like a chest, kept under the mule's own key with the other containers (cs)
 function openPack(a){if(!SURV()){toast('Packs open in survival');return;}const k='mule:'+a.uid;if(!boxes.has(k))boxes.set(k,new Array(BOX_SLOTS).fill(null));box={k:k,x:Math.floor(a.x),y:Math.floor(a.y),z:Math.floor(a.z)};saveDirty=true;openInv();$('invtitle').textContent="The mule's pack";}
 // ---- Saved with the world: the animals you have befriended (world coordinates)
@@ -11972,6 +12361,10 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   e_street:[['elord',2],['elady',2],['elore',1],['esword',0.6]],e_garden:[['elady',2],['elord',1.5],['elore',1.5]],e_barracks:[['esword',2],['espear',2],['ebow',1]],
   e_drill:[['esword',2],['ebow',2],['espear',1]],e_smithy:[['elore',1]],e_keep:[['esword',2],['espear',1],['ebow',1]],e_green:[['elord',1],['elady',2],['elore',1]],
   e_lane:[['elady',1],['elord',1]],e_farm:[['elady',1],['elord',1]],e_field:[['elady',1],['elore',1]],e_post:[['espear',2],['ebow',2]],e_patrol:[['eknight',1]],
+  // the havens (D-088): folk on the quays and piers, shipwrights, the lighthouse's watch
+  e_throne:[['esword',2],['elord',1]],e_seat:[['esword',1],['elord',1]],e_court:[['elord',2],['elady',2],['elore',1]],e_market:[['elady',2],['elord',1]],e_heal:[['eheal',2],['elady',1]],
+  e_library:[['elore',3]],e_stable:[['elady',1],['elord',1]],w_market:[['wfolk',2],['wlady',1]],w_heal:[['wlady',1],['wfolk',1]],w_stable:[['wfolk',1]],
+  e_quay:[['elady',2],['elord',2],['elore',1]],e_pier:[['elord',1],['elady',1]],e_wright:[['esmith',2],['elord',0.5]],e_light:[['ebow',1],['espear',1]],
   // a host of each people that marches through the Volcanic Wastes against its creatures (D-063)
   r_host:[['rsword',2],['rspear',2],['rbow',1.5]],h_host:[['hrider',3],['hbow',1],['hspear',0.5]],e_host:[['esword',2],['espear',2],['ebow',2],['eknight',1]],
   // the wood elves' places (D-065): wardens on the gate, the platforms and the watch-trees; the halls kept by guards; folk in the glades
@@ -11985,9 +12378,9 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   d_hall:[['dlord',1],['dlady',1],['daxe',1],['dhammer',0.6]],d_keep:[['dhammer',3],['dlord',1]],d_barracks:[['daxe',2],['dhammer',1],['dxbow',1]],d_dforge:[['dsmith',3],['dminer',1]],
   d_smelt:[['dsmith',2],['dminer',2]],d_drill:[['daxe',2],['dhammer',2]],d_post:[['dxbow',2],['daxe',1]],d_patrol:[['daxe',1],['dxbow',1]],d_host:[['daxe',3],['dhammer',2],['dxbow',2]]});
 const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
-    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5],forge:[1,2],mine:[2,3],deep:[2,3],door:[2,3],court:[2,3],wall:[1,2],dforge:[2,4],smelt:[2,3]},
+    stable:[1,2],paddock:[1,1],deck:[2,3],quay:[2,3],pier:[1,2],wright:[1,2],light:[1,2],throne:[3,3],seat:[2,2],court:[2,3],heal:[2,3],library:[2,3],range:[2,3],cellar:[1,2],glade:[3,5],forge:[1,2],mine:[2,3],deep:[2,3],door:[2,3],court:[2,3],wall:[1,2],dforge:[2,4],smelt:[2,3]},
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
-    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
+    e_hall:'elord',e_keep:'ecapt',e_wright:'esmith',e_throne:'elord',e_seat:'elord',e_heal:'eheal',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={},foeGrid=new Map(),foeGridS=[new Map(),new Map()];let foeFrame=0;let foeT=0,foeId=1,foeClock=0,foeSnd=0,foeRadMax=1;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -12044,7 +12437,7 @@ function foeSpawnTick(){
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     if(folk){const k=s.kind.slice(2),N=FOLK_N[k]||[1,2],night=ambNight()&&!['gate','gatein','post','citgate','barracks','keep','citadel'].includes(k);
-      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
+      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:s.kind==='e_throne'?(hsh(s.s.prov.kingdom.key.length,9831,[...s.s.prov.kingdom.key].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'eking':'equeen'):FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
       if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.stair==='cavern'&&Math.random()<0.5?'troll':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
@@ -12085,7 +12478,7 @@ const folkWrath=f=>!!f.prov&&(realmWrath.get(f.prov)||0)>0;
 function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
   for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
     if(G.civ){if(Math.hypot(g.x-PL.x,g.z-PL.z)<18){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;g.ct=Math.random()*0.8;}}
-  if(!was){toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
+  if(!was){elfStruck(f);toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
 // a patrol on the king's road (two to four soldiers, now and then with their captain), out of sight, walking the road
 function folkPatrol(){
   if(folkCount()>=FOLK_CAP-4||Math.random()>0.25)return;const X=PL.x+OX,Z=PL.z+OZ,T=realmTile(Math.floor(X),Math.floor(Z));
@@ -12098,7 +12491,7 @@ function folkPatrol(){
 // the horses of a riders' paddock (D-061): put out once while the player is near, penned until one is ridden away
 function folkHorses(s,x,z){for(const a of [...animals])if(a.spot===s.id&&!a.tame)removeAnimal(a);
   for(let i=0;i<s.horses;i++){const xx=x+(Math.random()-0.5)*4,zz=z+(Math.random()-0.5)*4,yy=standY(xx,s.y+1,zz);if(yy<0||wetAt(xx,yy,zz))continue;
-    addAnimal('horse',xx,yy,zz,{spot:s.id,pen:{x:x,z:z,r:2.6},young:i>0&&Math.random()<0.3});}}
+    addAnimal(/^e_/.test(s.kind)?'ehorse':/^w_/.test(s.kind)?'elk':'horse',xx,yy,zz,{spot:s.id,pen:{x:x,z:z,r:2.6},young:i>0&&Math.random()<0.3&&!/^[ew]_/.test(s.kind)});}} // (the elves' stables keep elven horses, the wood's pens great elk: D-088)
 // what the folk say to a passer-by (the place and the kingdom by name)
 const FOLK_SAY={
   guard:['Hail, traveller. Keep the peace within these walls.','The roads of {k} are watched. Go safely.','Walk freely, stranger, but draw no blade here.','Mind the king\'s law in {p}.','Nothing stirs on the border tonight. Long may it stay so.'],
@@ -12144,7 +12537,7 @@ const FOLK_SAY={
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||F.hound||f.wnd||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const eg=elfPeopleOf(f)&&elfGreet(f,F);if(eg){toast(eg);foeCall(f,'idle');return;}const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast((f.hero?f.hero.n:F.n)+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -12195,7 +12588,7 @@ function foeHurtFoe(g,n,by,ux,uz,kb,blow){
   if(!g.foe&&g.st!=='chase'&&!g.rout&&!g.wnd&&!by.gone&&!by.dead){g.foe=by;g.eseen=0;foeRally(g,by);}else foeCall(g,'hurt');
   if(g.hp<=0&&!morWound(g,by))foeFalls(g,by);warCleave(g,n,by,ux,uz,blow); // (or lies wounded: W8b)
 }
-function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;g.wnd=0;g.rout=0;morDeath(g);if(g.lordOf)lordFalls(g);warHeroFell(g,by);
+function foeFalls(g,by){const G=FOES[g.kind];elfLament(g);g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;g.wnd=0;g.rout=0;morDeath(g);if(g.lordOf)lordFalls(g);warHeroFell(g,by);
   if(G.boss&&!g.lordOf&&Math.hypot(g.x-PL.x,g.z-PL.z)<48){const n=FOES[by.kind].n.toLowerCase();toast('The '+G.n.toLowerCase()+' is slain by a'+(/^[aeiou]/.test(n)?'n ':' ')+n);}}
 const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
 function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee'||g.foe)continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
@@ -12221,7 +12614,7 @@ function stepFoe(f,dt){
   if(f.scanT<=0){f.scanT=0.4+Math.random()*0.2;foeScan(f,F,tg);}
   const E=f.foe,dx=E?E.x-f.x:pdx,dz=E?E.z-f.z:pdz,dp=E?Math.hypot(dx,dz):pdp,dy=E?E.y-f.y:pdy,vis=E?f.eseen===0:f.vis,er=E?foeRad(E):0;
   if(!tg&&!E){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
-  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(tg&&f.vis&&pdp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||pdp<14)))foeAlert(f);}
+  else if(f.st!=='chase'&&f.st!=='flee'){const rr=(f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight)*(F.folk?1:cloakHide());if(tg&&f.vis&&pdp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||pdp<14)))foeAlert(f);}
   else if(f.st==='chase'&&!E){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||pdp>F.sight*2.5){f.st='return';f.atk=0;}}
   if(f.leash&&f.st==='chase'&&!E&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
   if(F.folk&&f.st==='chase'&&!E&&!folkWrath(f)){f.st='return';f.atk=0;} // the realm's wrath has passed
@@ -12388,6 +12781,7 @@ function placeFoe(f,dt){
   else if(f.atkK==='heave'&&f.atk>0&&P.armL){const k=Math.min(1,prog*1.6);P.armL.rotation.x=P.armR.rotation.x=-1.5+0.5*k;} // the ram's crew heave (W2)
   else if(f.climb&&!f.climb.ph&&P.armL){const k=Math.sin(foeClock*8+f.id);P.armL.rotation.x=-2.6+k*0.4;P.armR.rotation.x=-2.6-k*0.4;if(P.legL){P.legL.rotation.x=-0.4+k*0.5;P.legR.rotation.x=-0.4-k*0.5;}}
   else if(F.drum&&!f.atk&&P.armL){const k=Math.sin(foeClock*9+f.id);P.armL.rotation.x=-0.9+k*0.5;P.armR.rotation.x=-0.9-k*0.5;} // the drummer beats (W3)
+  else if(f.bow>foeClock&&!f.atk&&!f.foe&&P.body){const k=Math.min(1,(f.bow-foeClock)*1.2,(2-(f.bow-foeClock))*3);P.body.rotation.x=0.55*Math.max(0,k);if(P.armR)P.armR.rotation.x=-0.6*Math.max(0,k);} // a bow (D-088)
   else if(f.cheer>foeClock&&!f.atk&&!f.foe&&P.armL){const k=Math.abs(Math.sin(foeClock*3+f.id));P.armL.rotation.x=-2.7-0.3*k;P.armR.rotation.x=-2.5-0.4*k;root.position.y=Math.max(0,Math.sin(foeClock*5+f.id))*0.15;}
   if(F.lord&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   if(F.mount&&!f.dead&&!far)riderPose(f,P,amp);
@@ -12450,7 +12844,7 @@ function emberPose(f,P,root,prog){
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
-  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
+  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();elfFrame(dt);
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
   warSoundTick(dt);warWorksFrame(dt);warNightFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt);morFrame(dt);fieldFrame(dt);campFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
   foeFrame++;foeGrid.clear();foeGridS[0].clear();foeGridS[1].clear();foeRadMax=1;
@@ -12517,7 +12911,7 @@ function foeSlain(f){
   const ar=armsSlain(f);if(ar)got.push(ar); // (arrows recovered, W8a)
   const bn=morSlain(f);if(bn)got.push(bn);morDeath(f,1);fieldSlain(f);warRecSlain(f); // (a warhost's banner taken; their hearts sink: W8b)
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
-  if(f.lordOf)lordFalls(f);warSwornSlain(f);
+  if(f.lordOf)lordFalls(f);warSwornSlain(f);elfSlain(f);elfLament(f);
 }
 function lordFalls(f){fallenLords.add(f.lordOf);saveDirty=true;if(!f.L)showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
   burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
@@ -14217,7 +14611,7 @@ function armsPose(){const it=ITEMS[curId()],q=shieldOn();
 const armsStuck=[];
 entityKind({name:'spent arrows',list:armsStuck,persist:false,shift:(dx,dz)=>{for(const s of armsStuck){s.m.position.x-=dx;s.m.position.z-=dz;}},clear:()=>{for(const s of armsStuck)scene.remove(s.m);armsStuck.length=0;},
   update:dt=>{for(let i=armsStuck.length-1;i>=0;i--){const s=armsStuck[i];s.t-=dt;if(s.t<=0){scene.remove(s.m);s.m.material.dispose();armsStuck.splice(i,1);}}}});
-function armsStick(s){s.m.position.set(s.x-s.vx*0.012,s.y-s.vy*0.012,s.z-s.vz*0.012);armsStuck.push({m:s.m,t:30});if(armsStuck.length>150){const o=armsStuck.shift();scene.remove(o.m);o.m.material.dispose();}}
+function armsStick(s){elfArrowIn(s);s.m.position.set(s.x-s.vx*0.012,s.y-s.vy*0.012,s.z-s.vz*0.012);armsStuck.push({m:s.m,t:30});if(armsStuck.length>150){const o=armsStuck.shift();scene.remove(o.m);o.m.material.dispose();}}
 // ---- Morale and the line (W8b, D-078). Every soldier of either side has a heart for the fight (`f.fear` against its nerve,
 // `morNerve`): it sinks as it is hurt, as its fellows fall about it (the fallen of the last few seconds by cells of eight blocks,
 // `MOR_D`; a captain or a standard counts four, one slain by the player two), when the other side outnumbers it, and near the
@@ -14757,6 +15151,385 @@ function warUnderBattle(dt,P,w){if((underT-=dt)>0)return;underT=3;const M=warMin
       const d=Math.hypot(x-PL.x,z-PL.z);if(d>=14&&d<70&&d>bd){bd=d;best=[x,z];}}
     if(!best)continue;const G=spawnGroup(tab,Math.min(4,N-n),best[0],g-9,best[1],1.2,folk?{prov:'wg:'+P.id,site:wgSite(P),lead:null}:{lead:Math.random()<0.15?'gchief':null});
     for(const f of G){f.mine=P.id;f.war=P.id;f.way=[[c[0]+0.5+(Math.random()-0.5)*6,c[1]+0.5+(Math.random()-0.5)*6]];const w0=f.way.shift();warAim(f,w0);f.wp=w0;f.st='return';f.t=20;}}}
+// ---- The elves (D-088): the player's standing with each people of the elves, and what they share with a friend.
+//
+// Standing: the high elves (of the elder realms, e) and the wood elves (of the forest kingdoms, w) each keep a count of the
+// player's deeds (EF.e, EF.w, saved as ef), and call the player by it: Stranger, Guest, Friend, Trusted, and at the last Star-kin
+// or Leaf-kin (ELF_AT). It rises with tasks done for them, with trade, with their places and the ruins of their elder days
+// found, with tales read at their lecterns, with creatures of the wastes slain near them and festivals kept with them
+// (elf-life.js); it falls when one of them is struck, and much further when one is slain. Each new rank brings a gift from that
+// people (ELF_GIFTS); at Friend they give the player a name in their tongue, and from Trusted they bow in greeting.
+// Talking (use one of their folk): a greeting in their tongue, with its meaning; then what that one can do: merchants trade
+// (coin comes back to the world with them: copper, gold and platinum; prices by standing), healers heal, loremasters tell
+// the tales of their realm and give tasks, lords and captains give tasks, the king, queen or lord on the throne grants an
+// audience. Tasks (EF.q): a relic to bring from a ruin of the elder days, elven plants to gather, a letter to carry to another of
+// their places, creatures of the wastes to slay, a lost one to bring home, venison for the wood elves' feast; sparks rise over
+// where a task leads. Wardens meet the player who comes into one of their realms. Moonwells heal once a night; a leaf-stone tells
+// the way; the lecterns in their halls keep the histories of each realm (EF.tl, the journal's Elder Days).
+const ELF_AT=[0,10,30,70,140];
+const ELF_P={e:{k:'elf',n:'the high elves',ranks:['Stranger','Guest of the Elder Realms','Friend of the Elder Realms','Trusted of the Elder Realms','Star-kin'],names:'elder',realm:'the Elder Realms'},
+  w:{k:'wood',n:'the wood elves',ranks:['Stranger','Guest of the Woods','Friend of the Woods','Trusted of the Woods','Leaf-kin'],names:'woodelf',realm:'the Forest Kingdoms'}};
+// what each rank is given: [[item, count]...]
+const ELF_GIFTS={e:[null,[[417,4],[418,2]],[[421,1],[420,2]],[[423,1],[422,1],[429,1]],[[407,1],[MOONSTONE,6],[STARLAMP,3],[427,1]]],
+  w:[null,[[417,4],[419,3]],[[407,1],[409,32]],[[424,1],[429,1],[420,2]],[[422,1],[402,1],[WLAMP,6]]]};
+let EF=saved&&saved.ef&&typeof saved.ef==='object'?saved.ef:null;
+if(!EF)EF={e:0,w:0,ne:'',nw:'',ge:0,gw:0,q:null,qn:0,tl:[],fe:0,dr:-1,hl:-1e9,au:{},pt:0,sl:0};
+const elfSave=()=>({ef:EF}),elfMet=new Set();
+// the people a folk belongs to (by its place's realm, or its kind), or null
+const ELF_KINDS={e:new Set(['espear','esword','ebow','ecapt','eknight','elord','elady','elore','esmith','eheal','eking','equeen','eherald','emerch','emariner']),w:new Set(['wbow','wknife','wguard','wcapt','wking','wlord','wlady','wfolk','wmerch'])};
+function elfPeopleOf(f){const C=f&&f.site&&f.site.prov&&f.site.prov.cult;if(C&&C.k==='elf')return 'e';if(C&&C.k==='wood')return 'w';if(!f)return null;return ELF_KINDS.e.has(f.kind)?'e':ELF_KINDS.w.has(f.kind)?'w':null;}
+const elfRank=p=>{let r=0;while(r+1<ELF_AT.length&&EF[p]>=ELF_AT[r+1])r++;return r;};
+const elfRankName=p=>ELF_P[p].ranks[elfRank(p)];
+const elfName=p=>EF[p==='e'?'ne':'nw']||'';
+function elfGain(p,n,why){if(!p||!n)return;const r0=elfRank(p);EF[p]=Math.max(-60,Math.min(400,EF[p]+n));saveDirty=true;const r1=elfRank(p);
+  if(why)toast(why+' ('+(n>0?'+':'')+n+' with '+ELF_P[p].n+')');
+  if(r1>r0)setTimeout(()=>elfRankUp(p,r1),why?1600:0);}
+function elfRankUp(p,r){toast(ELF_P[p].n[0].toUpperCase()+ELF_P[p].n.slice(1)+' now call you '+ELF_P[p].ranks[r]);if(r>=2&&!elfName(p))elfNaming(p);
+  const gk=p==='e'?'ge':'gw';if(EF[gk]>=r)return;EF[gk]=r;const L=ELF_GIFTS[p][r];if(!L)return;const got=[];if(SURV())for(const [id,c] of L){const left=addItem(id,c);if(left)toast('No room for '+nameOf(id));got.push((c>1?c+' ':'')+nameOf(id));}
+  if(got.length)setTimeout(()=>toast('In token of it '+ELF_P[p].n+' give you '+got.join(', ')),2400);drawBar(true);saveDirty=true;}
+// the name they give a friend: a word of their tongue (the same in every world of this seed) and what it means
+const ELF_EPI={e:['Starwalker','the Far-come','Friend of the Lamps','the Wayfarer','Light-bearer'],w:['Leaf-walker','the Quiet Foot','Friend of the Boughs','Bright-eye','the Wanderer']};
+function elfNaming(p){const r=rngAt(SEED&0xffff,p==='e'?9811:9813,(SEED>>16)&0xffff),w=nameWord(ELF_P[p].names,r),ep=ELF_EPI[p][Math.floor(r()*ELF_EPI[p].length)];
+  EF[p==='e'?'ne':'nw']=w+' '+ep;saveDirty=true;setTimeout(()=>showText('A name among '+ELF_P[p].n,'The elves gather about you, and the eldest of them speaks. "Among us you will be '+w+', '+ep+'. It is not given lightly, and it will not be forgotten while '+(p==='e'?'the stars turn':'the woods stand')+'."'),3200);}
+// ---- their tongue: greetings and sayings, each with its meaning (its words checked against the blocklist, 15-names)
+const ELF_TONGUE=[['Saelith ynnor','Well met beneath the stars'],['Tavael oressa, quilar','Walk in light, traveller'],['Liathe nysse sorae','The road is long, but the night is kind'],
+  ['Faerel auvrin vael','Rest here; the watch is kept'],['Ynnor saeth, vaelis','The stars keep you, friend'],['Orrin tavael quessa','Go in peace, and come again'],['Sylvar ithae','The leaves remember'],
+  ['Shaen tavrel, ynnor sael','Go softly; the trees will know you'],['Quessa naeth oryn','Our hall is open to you'],['Vaelis, auvrin tae','Friend, sit with us']];
+const elfSay=k=>{const t=ELF_TONGUE[k%ELF_TONGUE.length];return '"'+t[0]+'" ('+t[1]+')';};
+// a greeting from one of their folk, by the player's standing; a bow from Trusted on
+function elfGreet(f,F){const p=elfPeopleOf(f),r=elfRank(p),nm=elfName(p),k=Math.floor(Math.random()*ELF_TONGUE.length),who=(f.nm||F.n)+': ';
+  if(r>=3){f.bow=foeClock+2;return who+elfSay(k).replace(/\)$/,', '+(nm.split(' ')[0])+')');}
+  if(r>=1&&Math.random()<0.6)return who+elfSay(k)+(nm?' Welcome back, '+nm.split(' ')[0]+'.':'');
+  return null;} // a stranger hears the old greetings (FOLK_SAY)
+// ---- struck and slain
+function elfStruck(f){const p=elfPeopleOf(f);if(p)elfGain(p,-6,'You struck one of '+ELF_P[p].n);}
+function elfSlain(f){const F=FOES[f.kind],p=elfPeopleOf(f);if(F.folk){if(p)elfGain(p,-20,'You slew one of '+ELF_P[p].n);return;}
+  if(EF.q&&EF.q.k==='slay'){EF.q.c=Math.max(0,EF.q.c-1);if(!EF.q.c)toast('Enough of the wastes\' creatures are slain; tell the elves of it');}
+  let near=null;foeNear(f.x,f.z,30,g=>{if(!near&&!g.dead&&FOES[g.kind].folk)near=elfPeopleOf(g);},0);if(near){EF.sl++;if(EF.sl%3===0)elfGain(near,1,null);}}
+// ---- the coin of the world (Q7: it comes back with the folk who trade): copper, gold (ten) and platinum (a hundred)
+const COIN=[[205,100],[204,10],[203,1]];
+const purse=()=>COIN.reduce((a,[id,v])=>a+countOf(id)*v,0);
+function payCoin(v){if(!SURV())return true;const have=purse();if(have<v)return false;for(const [id] of COIN)takeItems(id,countOf(id));giveCoin(have-v);return true;}
+function giveCoin(v){if(!SURV())return;for(const [id,c] of COIN){const n=Math.floor(v/c);if(n){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));v-=n*c;}}drawBar(true);}
+const coinWord=v=>{const p=[];for(const [id,c] of COIN){const n=Math.floor(v/c);if(n){p.push(n+' '+['platinum','gold','copper'][COIN.findIndex(q=>q[0]===id)]);v-=n*c;}}return p.length?p.join(', '):'nothing';};
+// what their merchants sell ([item, price in copper, the least standing]) and buy ([item, price])
+const ELF_GOODS={e:[[417,6],[418,8],[419,5],[420,15],[409,1],[STARBLOOM,2],[SILVFERN,2],[DAWNLILY,2],[MOONSTONE,4],[STARLAMP,12],[EVLAMP,8],[421,60,1],[407,80,2],[423,140,2],[422,180,3],[430,40,2]],
+  w:[[417,6],[418,7],[419,4],[420,15],[409,1],[SILVFERN,2],[STARBLOOM,2],[WLAMP,6],[407,70,1],[402,90,2],[424,150,2],[421,70,3],[430,40,2]]};
+const ELF_BUYS=[[352,3],[362,6],[350,3],[202,1],[207,2],[332,1],[WOOLW,2],[223,4],[224,12],[228,30],[230,40],[415,25],[386,20],[425,60],[426,50],[427,90],[STARBLOOM,1],[DAWNLILY,1]];
+const ELF_BUYK=[1.5,1.25,1,0.85,0.7],ELF_SELLK=[0.6,0.75,0.9,1,1.1];
+const elfPrice=(p,c)=>Math.max(1,Math.round(c*ELF_BUYK[elfRank(p)])),elfOffer=(p,c)=>Math.max(1,Math.round(c*ELF_SELLK[elfRank(p)]));
+function elfBuy(p,id,c,n){const v=elfPrice(p,c)*n;if(!payCoin(v))return 'You have not the coin ('+coinWord(v)+')';const left=SURV()?addItem(id,n):0;if(left)toast('No room for '+nameOf(id));if(!SURV())addItem(id,n);
+  drawBar(true);saveDirty=true;if(v>=20)elfGain(p,1,null);return 'You buy '+(n>1?n+' ':'')+nameOf(id)+' for '+coinWord(v);}
+function elfSell(p,id,c,n){if(SURV()){if(countOf(id)<n)return 'You have no '+nameOf(id);takeItems(id,n);}const v=elfOffer(p,c)*n;giveCoin(v);saveDirty=true;if(v>=20)elfGain(p,1,null);return 'You sell '+(n>1?n+' ':'')+nameOf(id)+' for '+coinWord(v);}
+// ---- the panel: who speaks, what they say, and buttons for what they will do
+function elfPanel(title,render){invOpen=true;hold=-1;['invgrid','invname','sinv','bplist','invsearch'].forEach(id=>{$(id).style.display='none';});$('lore').style.display='block';$('invtitle').textContent=title;
+  const draw=msg=>{const el=$('lore');el.innerHTML='';if(msg){const m=document.createElement('div');m.textContent=msg;m.style.marginBottom='8px';m.style.fontStyle='italic';el.appendChild(m);}
+    const text=t=>{const d=document.createElement('div');d.textContent=t;d.style.marginBottom='6px';el.appendChild(d);return d;};
+    const row=()=>{const r=document.createElement('div');r.className='wcrow';el.appendChild(r);return r;};
+    const btn=(r,label,fn)=>{const b=document.createElement('button');b.className='wide';b.style.marginTop='0';b.textContent=label;b.addEventListener('click',()=>{const m2=fn();if(m2!==false)draw(typeof m2==='string'?m2:'');});r.appendChild(b);return b;};
+    render({text:text,row:row,btn:btn,redraw:draw});};
+  draw('');$('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;}
+const ELF_TRADE=new Set(['emerch','wmerch']),ELF_TASK=new Set(['elore','elord','ecapt','wcapt','wlord','eherald','emariner']),ELF_COURT=new Set(['eking','equeen','wking']);
+// using one of their folk (from act): true if it was one of them
+function elfAct(){const f=foeHit(4.6);if(!f||f.dead||!FOES[f.kind].folk||f.foe||folkWrath(f))return false;const p=elfPeopleOf(f);if(!p||f.war||f.host||f.hst||(f.site&&f.site.k==='wgate'))return false;elfTalk(f,p);return true;}
+function elfTalk(f,p){const F=FOES[f.kind],s=f.site,r=elfRank(p),heal=F.heal||(f.spk&&/_heal$/.test(f.spk)),k=Math.floor(Math.random()*ELF_TONGUE.length);
+  f.st='idle';f.t=6;f.yaw=f.hd=Math.atan2(PL.x-f.x,PL.z-f.z);if(r>=3)f.bow=foeClock+2;
+  elfPanel((f.nm||F.n)+(s?', '+s.name:''),U=>{
+    U.text((r>=1?elfSay(k):'"'+(FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard)[0].replace('{p}',s?s.name:'the realm').replace('{k}',s?s.prov.kingdom.name.replace(/^The /,'the '):'the realm')+'"'));
+    U.text('You are '+ELF_P[p].ranks[r]+' among '+ELF_P[p].n+(elfName(p)?', and they call you '+elfName(p):'')+'. Standing '+EF[p]+(r+1<ELF_AT.length?' ('+ELF_AT[r+1]+' for '+ELF_P[p].ranks[r+1]+')':'')+'.');
+    if(EF.q){const q=EF.q;U.text('Your task: '+q.n+'.');const b=U.row();if(q.p===p&&elfTaskReady(q))U.btn(b,'Tell them the task is done',()=>elfTaskDone(f));U.btn(b,'Give up your task',()=>{EF.q=null;saveDirty=true;return 'You give up the task. The elves say nothing of it.';});}
+    const b=U.row();
+    if(ELF_TRADE.has(f.kind))U.btn(b,'Trade',()=>{elfTrade(f,p);return false;});
+    if(heal)U.btn(b,'Ask to be healed',()=>elfHeal(p));
+    if(f.kind==='elore'||f.kind==='emariner')U.btn(b,'Ask for a tale',()=>{elfTale(s,p,true);return false;});
+    if(ELF_COURT.has(f.kind)||(s&&f.spk&&/_(throne|seat)$/.test(f.spk)&&F.civ))U.btn(b,'Ask for an audience',()=>elfAudience(f,p));
+    if((ELF_TASK.has(f.kind)||ELF_COURT.has(f.kind))&&!EF.q)U.btn(b,'Ask for a task',()=>{const q=elfTaskGive(f,p);if(q){closeInv();return false;}return 'There is nothing they need of you now.';});
+    if(f.spk&&/_stable$/.test(f.spk))U.btn(b,'Ask for a steed',()=>elfSteedAsk(f,p));
+    if(f.spk&&/_(range|drill)$/.test(f.spk)&&!F.civ)U.btn(b,'Enter the archery contest',()=>elfContest(f,p));
+    U.btn(b,'Farewell',()=>{closeInv();return false;});});
+  foeCall(f,'idle');tone(640,820,0.18,0.05);hint('elves');}
+// the market: their goods, and what they will buy of the player's
+function elfTrade(f,p){elfPanel('The market of '+(f.site?f.site.name:ELF_P[p].realm),U=>{
+  U.text('Your purse: '+coinWord(purse())+(SURV()?'':' (in creative the elves give freely)')+'. Prices for '+ELF_P[p].ranks[elfRank(p)]+(elfRank(p)<2?': they are better for a friend.':'.'));
+  U.text('They sell:');for(const [id,c,need] of ELF_GOODS[p]){const r=U.row();if((need||0)>elfRank(p)){U.text('  '+nameOf(id)+': for '+ELF_P[p].ranks[need]+' and above');continue;}
+    U.btn(r,nameOf(id)+' ('+coinWord(elfPrice(p,c))+')',()=>elfBuy(p,id,c,1));if(stackMax(id)>1)U.btn(r,'Four',()=>elfBuy(p,id,c,4));}
+  const mine=ELF_BUYS.filter(([id])=>!SURV()||countOf(id)>0);U.text(mine.length?'They will buy:':'They would buy hides and leather, ingots, gems, drake scales, relics of the elder days and the like; you have none of these.');
+  for(const [id,c] of mine){const r=U.row();U.btn(r,'Sell '+nameOf(id)+' ('+coinWord(elfOffer(p,c))+(SURV()?', you have '+countOf(id):'')+')',()=>elfSell(p,id,c,1));}
+  U.btn(U.row(),'Back',()=>{elfTalk(f,p);return false;});});}
+// a healer's care: whole again; from Friend a draught to take away, once in a while
+function elfHeal(p){if(SURV()){hp=20;drawStats();}let msg='The healer lays cool hands on your wounds, and they close. You are whole again.';
+  if(elfRank(p)>=2&&EF.pt-EF.hl>600){EF.hl=EF.pt;if(SURV())addItem(420,2);msg+=' "Take these for the road." (2 Elven Draughts)';drawBar(true);}saveDirty=true;tone(880,1320,0.4,0.05);return msg;}
+// ---- the moonwells: a drink of their water heals, once a night
+function moonwellAt(x,y,z){for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)if(get(x+dx,y+dy,z+dz)===MOONSTONE&&get(x+dx,y+dy+1,z+dz)===WATER)return true;return false;}
+function useMoonwell(x,y,z){if(!moonwellAt(x,y,z))return false;if(EF.dr===dayN){toast('The moonwell\'s water is still; it has given you what it can tonight');return true;}
+  EF.dr=dayN;saveDirty=true;if(SURV()){hp=20;food=Math.min(20,food+6);drawStats();}toast('You drink from the moonwell. The water is cold and tastes of starlight; your wounds close and your weariness lifts');
+  for(let k=0;k<30;k++)spawnP(PL.x+(Math.random()-.5)*2,PL.y+Math.random()*2,PL.z+(Math.random()-.5)*2,(Math.random()-.5)*0.6,0.8+Math.random(),(Math.random()-.5)*0.6,[0.8,0.9,1],1.4,-0.2);tone(990,1480,0.6,0.05);return true;}
+// ---- a leaf-stone: which way its road runs, and how far to the places at either end
+function useLeafStone(x,y,z){const X=x+OX,Z=z+OZ;let rr=null;for(let d=0;d<=4&&!rr;d++)for(const [a,b] of [[d,0],[-d,0],[0,d],[0,-d]]){rr=realmRoadAt(X+a,Z+b,1);if(rr)break;}
+  if(!rr){showText('A leaf-stone','Its letters are worn too smooth to read.');return true;}
+  const P=rr.rd.P,ends=[rr.rd.a,rr.rd.b].map(e=>{let best=null,bd=1e9;for(const s of P.sites){const d=Math.hypot(s.X-e[0],s.Z-e[1])-s.R;if(d<bd){bd=d;best=s;}}return best;}).filter(Boolean);
+  const lines=ends.map(s=>s.name+', '+Math.round(Math.hypot(s.X-X,s.Z-Z)/10)*10+' paces to the '+dirWord(s.X-X,s.Z-Z));
+  showText('A leaf-stone of '+P.kingdom.name.replace(/^The /,'the '),'Under the carved leaf, in the letters of the elves: "'+realmRoadName(rr.rd)+'." And beneath, '+lines.join('; ')+'. '+elfSay(Math.floor(X+Z)&7));tone(520,640,0.2,0.05);return true;}
+// ---- the histories of a realm, read at the lecterns in their halls and told by their loremasters: eight tales for each kingdom,
+// in the same order wherever they are read; the journal keeps those read (the Elder Days)
+const ELF_TALE_N=8;
+function elfTales(key,name,p){const r=rngAt(hsh(key.length,9821,0)*1e6|0,9823,[...key].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)&0xffff),nm=()=>nameWord(p==='w'?'woodelf':'elder',r),k1=nm(),k2=nm(),k3=nm(),q1=nm(),st=nm(),rr=nm(),hv=nm();
+  const realm=name.replace(/^The /,'the ');
+  return p==='w'?[
+    ['The Waking of the Wood','Before there were kings, '+realm+' was only the wood, and the wood was full of song. '+k1+', who heard it first, gathered the wanderers under one bough and named it a kingdom.'],
+    ['The First Goldbough','The first goldbough was planted by '+q1+' over the grave of a friend. Every great tree of the kingdom is said to be grown from its seed, and every lamp in its boughs lit from its first lamp.'],
+    ['The Long Hunt','In the days of '+k2+' the dark things came up out of the old woods, and the wardens hunted them for seven years. The bows of the wood were made then, and the wardens have never put them down.'],
+    ['The Halls under the Hill','When the hunt was over, '+k2+' raised a hill over his halls, so that his people would always have a place no fire could reach. The hill still stands, and the king still sits in it.'],
+    ['The Feast of '+st,'Once in every year the wood keeps the feast of '+st+', who sang for nine nights without rest. Whoever comes to the glades that night is fed, stranger or friend.'],
+    ['The Fire in the East','The fire of the wastes has burned in the east since before '+k3+' was born. The wood elves send their wardens to stand with men and dwarves against it, though they love the trees more than any war.'],
+    ['The Stars over the Wood','The wood elves name the stars after the trees: the Silver Bough in the north, '+rr+'\'s Crown overhead in summer, and low in the west the Falling Leaf, which they say is the last star of autumn.'],
+    ['The Leaving','Some of the wood\'s people grow weary of the long years and go west to the sea, to the havens of their kin, and are not seen again. The wood is quieter every age; its lamps are fewer. It is not yet empty.']]:[
+    ['The Founding','In the elder days '+k1+' led the people of '+realm+' up out of the lowlands into the mountains, and founded the high seat where the light of the stars falls first.'],
+    ['The Lamps of '+q1,q1+', the wisest of the loremasters, made the first starglass from the light of a falling star. Every elven lamp since was lit from hers, and none has gone out.'],
+    ['The War of the Fire','When the Emberlords first came up out of the deep, the elves of the elder realms met them in the burning lands with the men of the south. '+k2+' fell there, and was carried home on the shields of his guard.'],
+    ['The Elder Realms','Once the elves held many lands that are empty now: towers on every height, theatres in the woods, moonwells under the hills. Their ruins still stand, and their names are kept in the halls of '+realm+'.'],
+    ['The Moonwells','Where the elves found water that held the light of the moon, they set moonstone under it and built a shrine over it. A drink from a moonwell heals; once in a night, they say, and no more.'],
+    ['The Stars of the Elves','The elves name the stars: the Lamp of '+q1+' in the north, which never sets; '+st+'\'s Crown in summer; the Long Road across the sky, which the dead walk; and the Ship, low over the sea in autumn.'],
+    ['The Haven of '+hv,'At '+hv+' the white ships were built, with swans at their prows. From there the elves who are weary of the world sail west, and do not come back.'],
+    ['The Dwindling','The elves are fewer every age. '+k3+' keeps the high seat now, and the watch on the walls is kept as it always was. But the halls are quieter than they were, and many of the lamps burn in empty rooms.']];}
+function elfTale(s,p,told){if(!s){showText('A tale','The elf smiles, and says nothing.');return;}const K=s.prov.kingdom,T=elfTales(K.key,K.name,p),read=EF.tl.filter(x=>x.startsWith(K.key+':')).map(x=>+x.split(':')[1]);
+  let k=0;while(k<ELF_TALE_N&&read.includes(k))k++;const fresh=k<ELF_TALE_N;if(!fresh)k=Math.floor(Math.random()*ELF_TALE_N);
+  showText((told?'A tale of ':'The histories of ')+K.name.replace(/^The /,'the ')+' ('+(k+1)+' of '+ELF_TALE_N+'): '+T[k][0],T[k][1]+(fresh?'\n\nThe tale is written into your journal.':''));
+  if(fresh){EF.tl.push(K.key+':'+k);EF.tln=EF.tln||{};EF.tln[K.key]=[K.name,p];saveDirty=true;elfGain(p,1,null);}tone(500,620,0.25,0.06);}
+// a lectern in one of their halls (from openLore): the histories of its realm
+function elfLectern(x,y,z){const s=realmSiteAt(x+OX,z+OZ,4),C=s&&s.prov.cult;if(!C||(C.k!=='elf'&&C.k!=='wood'))return false;elfTale(s,C.k==='elf'?'e':'w',false);return true;}
+function elfJournal(out){const keys=[...new Set(EF.tl.map(x=>x.split(':')[0]))];out.push('','THE ELDER DAYS');
+  if(!keys.length)out.push('No histories of the elves read yet. The lecterns in their halls keep the tales of each realm, and their loremasters tell them.');
+  for(const key of keys){const [n,p]=EF.tln&&EF.tln[key]||['A realm of the elves','e'],T=elfTales(key,n,p),got=EF.tl.filter(x=>x.startsWith(key+':')).map(x=>+x.split(':')[1]);
+    out.push('','The Histories of '+n.replace(/^The /,'')+' ('+got.length+' of '+ELF_TALE_N+')');for(let k=0;k<ELF_TALE_N;k++)out.push(got.includes(k)?(k+1)+'. '+T[k][0]+'. '+T[k][1]:(k+1)+'. (a tale not yet read)');}
+  out.push('','YOUR STANDING WITH THE ELVES');for(const p of ['e','w'])out.push(ELF_P[p].n[0].toUpperCase()+ELF_P[p].n.slice(1)+': '+elfRankName(p)+' ('+EF[p]+')'+(elfName(p)?', called '+elfName(p):''));}
+// ---- an audience at the throne: the ruler's welcome by the player's standing, a royal gift once in each kingdom for each rank
+// from Guest, the naming from Friend if not yet named, and a task of the crown from Trusted
+function elfAudience(f,p){const s=f.site,K=s?s.prov.kingdom:null,r=elfRank(p),F=FOES[f.kind],who=F.n.replace(/ of the .*$/,'');if(!K)return 'They nod to you.';
+  if(r<1)return 'The '+who.toLowerCase()+' of '+K.name.replace(/^The /,'the ')+' regards you a long moment. "You are a stranger in my halls. Be welcome, and keep our peace. When the elves know you better, come again."';
+  const key=K.key,given=EF.au[key]||0;let msg='The '+who.toLowerCase()+' of '+K.name.replace(/^The /,'the ')+' rises to greet you. "'+(r>=3?'Our trusted friend returns. ':r>=2?'A friend of the elves is always welcome at this throne. ':'Be welcome, guest. ')+'"';
+  if(given<r){EF.au[key]=r;saveDirty=true;const g=[[0,0],[417,6],[421,1],[STARLAMP,4],[423,1]][r],gift=r>=4&&p==='w'?[424,1]:g;if(SURV()&&gift[0]){addItem(gift[0],gift[1]);drawBar(true);}if(gift[0])msg+=' A gift from the throne: '+(gift[1]>1?gift[1]+' ':'')+nameOf(gift[0])+'.';elfGain(p,2,null);}
+  if(r>=2&&!elfName(p))elfNaming(p);
+  if(r>=3&&!EF.q)msg+=' "If you would serve the throne, ask, and I will give you a task of the crown."';return msg;}
+// ---- tasks
+// what each giver may ask: the loremasters relics and tales' plants, the lords letters and lost ones, the captains the wastes
+const ELF_TK={elore:['relic','gather','relic'],emariner:['letter','gather'],elord:['letter','lost','gather'],eherald:['letter'],ecapt:['slay','lost','relic'],wcapt:['slay','hunt','lost'],wlord:['hunt','letter','lost'],eking:['relic','letter','slay'],equeen:['relic','lost','letter'],wking:['hunt','relic','slay']};
+const ELF_RELIC=[425,426,427];
+function elfTaskGive(f,p,kind){if(EF.q)return null;const s=f.site;if(!s)return null;const ks=ELF_TK[f.kind]||['gather'],K=kind||ks[Math.floor(Math.random()*ks.length)],X0=PL.x+OX,Z0=PL.z+OZ,crown=ELF_COURT.has(f.kind);
+  let q={k:K,p:p,from:s.id,fn:s.name,fx:s.X,fz:s.Z,t0:EF.pt,crown:crown?1:0};
+  if(K==='relic'){let best=null,bd=1e9;const cx=Math.floor(X0/CS),cz=Math.floor(Z0/CS);for(let a=-45;a<=45;a++)for(let b=-45;b<=45;b++){const e=elderAt(cx+a,cz+b);if(!e)continue;const d=Math.hypot(e.X-X0,e.Z-Z0);if(d>60&&d<bd){bd=d;best=e;}}
+    if(!best)return null;const it=ELF_RELIC[Math.floor(Math.random()*3)];Object.assign(q,{X:best.X,Z:best.Z,it:it,got:0,n:'bring the '+nameOf(it)+' from '+best.name+' back to '+s.name,rw:crown?120:50});}
+  else if(K==='gather'){const it=[STARBLOOM,SILVFERN,DAWNLILY][Math.floor(Math.random()*3)],n=4+Math.floor(Math.random()*3);Object.assign(q,{it:it,need:n,n:'gather '+n+' '+nameOf(it)+' for '+s.name,rw:20});}
+  else if(K==='letter'){const t=elfOtherSite(s,p);if(!t)return null;Object.assign(q,{X:t.X,Z:t.Z,tn:t.name,n:'carry a letter from '+s.name+' to '+t.name,rw:crown?80:30+Math.round(Math.hypot(t.X-s.X,t.Z-s.Z)/40)});if(SURV())addItem(428,1);}
+  else if(K==='slay'){const n=5+Math.floor(Math.random()*4);Object.assign(q,{c:n,n:'slay '+n+' creatures of the wastes and tell '+s.name+' of it',rw:crown?120:60});}
+  else if(K==='hunt'){Object.assign(q,{it:350,need:4,n:'bring 4 Raw Venison to '+s.name+' for the feast',rw:20});}
+  else if(K==='lost'){let pt=null;for(let k=0;k<30&&!pt;k++){const a=Math.random()*6.283,d=120+Math.random()*130,X=Math.round(s.X+Math.cos(a)*d),Z=Math.round(s.Z+Math.sin(a)*d),o=colInfo(X,Z,TEL);if(!o.wet&&!o.river&&!o.lake&&o.h>o.sl+2&&!realmSiteAt(X,Z,10)&&!wasteGateNear(X,Z,40)&&o.wVolc<0.2)pt=[X,Z];}
+    if(!pt)return null;const who=nameWord(ELF_P[p].names,Math.random);Object.assign(q,{X:pt[0],Z:pt[1],who:who,found:0,n:'find '+who+', who went out from '+s.name+' and has not come home, and bring '+who+' back',rw:crown?100:45});}
+  EF.q=q;EF.qn=(EF.qn||0);saveDirty=true;const d=q.X!==undefined?Math.hypot(q.X-X0,q.Z-Z0):0;
+  toast((crown?'A task of the crown':'A task of the elves')+': '+q.n+'.'+(q.X!==undefined?' It lies '+dirWord(q.X-X0,q.Z-Z0)+', '+Math.round(d)+' blocks off; sparks rise over it.':''));hint('etask');return q;}
+const TEL={};
+// another place of the same people to carry a letter to: within 1500 blocks, not the giver's own
+function elfOtherSite(s,p){const C=s.prov.cult,ci=Math.floor(s.X/LS),cj=Math.floor(s.Z/LS),seen=new Set(),out=[];
+  for(let a=-5;a<=5;a++)for(let b=-5;b<=5;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);if(realmHeld(c)!==C)continue;
+    for(const t of provinceOf(c.i,c.j).sites)if(t!==s&&t.k!=='farm'&&t.k!=='outpost'){const d=Math.hypot(t.X-s.X,t.Z-s.Z);if(d>200&&d<1500)out.push([d,t]);}}
+  out.sort((a,b)=>a[0]-b[0]);return out.length?out[Math.floor(Math.random()*Math.min(4,out.length))][1]:null;}
+// is the task ready to be told as done (to any of its people)?
+function elfTaskReady(q){if(q.k==='gather'||q.k==='hunt')return !SURV()||countOf(q.it)>=q.need;if(q.k==='slay')return q.c<=0;return false;}
+function elfTaskDone(f){const q=EF.q;if(!q)return '';if(q.k==='gather'||q.k==='hunt'){if(SURV())takeItems(q.it,q.need);}return elfReward(q);}
+function elfReward(q){EF.q=null;EF.qn=(EF.qn||0)+1;saveDirty=true;giveCoin(q.rw);const extra=Math.random()<0.4?[417,420,419][Math.floor(Math.random()*3)]:0;if(extra&&SURV())addItem(extra,1);drawBar(true);
+  elfGain(q.p,q.crown?16:10,null);const msg='Task done: '+q.n.replace(/^./,c=>c.toUpperCase())+'. They give you '+coinWord(q.rw)+(extra?' and '+nameOf(extra):'')+'.';toast(msg);
+  ['e'].forEach(()=>tone(660,990,0.35,0.05));return msg;}
+// once a second: the tasks that end where the player goes (a relic found and brought back, a letter carried, a lost one led home)
+let elfMk=0,elfLost=null;
+function elfTaskTick(){const q=EF.q;if(!q)return;const X=PL.x+OX,Z=PL.z+OZ;
+  if(q.k==='relic'){if(!q.got&&Math.hypot(q.X-X,q.Z-Z)<9){q.got=1;if(SURV())addItem(q.it,1);drawBar(true);saveDirty=true;toast('Among the stones you find the '+nameOf(q.it)+'. Bring it back to '+q.fn);}
+    else if(q.got&&Math.hypot(q.fx-X,q.fz-Z)<40){if(SURV()&&countOf(q.it)<1)return;if(SURV())takeItems(q.it,1);elfReward(q);}}
+  else if(q.k==='letter'&&Math.hypot(q.X-X,q.Z-Z)<30){if(SURV()&&countOf(428)<1){toast('You have lost the letter');EF.q=null;saveDirty=true;return;}if(SURV())takeItems(428,1);toast('You give the letter into the hands of the elves of '+q.tn);elfReward(q);}
+  else if(q.k==='lost'){const L=elfLost&&!elfLost.dead&&!elfLost.gone?elfLost:null;
+    if(!L&&Math.hypot(q.X-X,q.Z-Z)<70){const x=(q.found?PL.x+2:q.X-OX+0.5),z=(q.found?PL.z+2:q.Z-OZ+0.5),bx=Math.floor(x),bz=Math.floor(z);
+      if(bx>2&&bz>2&&bx<W-3&&bz<D-3&&genDone[(bx>>4)+(bz>>4)*NCX]){const y=foeStand(x,ground[bx+W*bz]+1,z,2);if(y>0){elfLost=addFoe(q.p==='e'?'elady':'wfolk',x,y,z,{st:'idle',t:99,lost:1,nm:q.who});}}}
+    else if(L&&!q.found&&Math.hypot(L.x-PL.x,L.z-PL.z)<5){q.found=1;saveDirty=true;toast(q.who+': "You have come for me? Then I will follow you home."');}
+    if(L&&q.found){L.hx=PL.x;L.hz=PL.z;if(Math.hypot(L.x-PL.x,L.z-PL.z)>3){L.st='return';L.t=3;}if(Math.hypot(L.x+OX-q.fx,L.z+OZ-q.fz)<35){L.lost=0;elfLost=null;toast(q.who+' is home');elfReward(q);}}}}
+// the sparks over where a task leads (every frame, from elfFrame)
+function elfMarks(dt){const q=EF.q;if(!q||(elfMk-=dt)>0)return;elfMk=0.4;let X,Z;if((q.k==='relic'&&!q.got)||q.k==='letter'||(q.k==='lost'&&!q.found)){X=q.X;Z=q.Z;}else if(q.k==='relic'||q.k==='lost'){X=q.fx;Z=q.fz;}else return;
+  const x=X-OX,z=Z-OZ,bx=Math.floor(x),bz=Math.floor(z);if(Math.hypot(x-PL.x,z-PL.z)>240||bx<0||bz<0||bx>=W||bz>=D)return;const y=ground[bx+W*bz]+1;
+  for(let k=0;k<6;k++)spawnP(x+(Math.random()-.5)*0.6,y+Math.random()*16,z+(Math.random()-.5)*0.6,0,1.5,0,[0.75,0.9,1],1.2,-0.4);}
+// ---- wardens at the border: the first time the player comes into one of their provinces (each time the world is loaded), two
+// wardens come out to meet them and hail them by their standing; the realm's name on the screen
+let elfProv='',elfBorderT=0;
+function elfBorder(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),P=realmOfColumn(X,Z),C=P&&P.cult,p=C&&(C.k==='elf'?'e':C.k==='wood'?'w':null);
+  const key=p?P.key:'';if(key===elfProv)return;const was=elfProv;elfProv=key;if(!p||elfMet.has(key))return;elfMet.add(key);
+  showName(P.kingdom.name);if(!was||!playing)return;
+  const a=PL.yaw,d=16,x=PL.x-Math.sin(a)*d,z=PL.z-Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return;
+  const G=spawnGroup(C.fp+'ward',2,x,ground[bx+W*bz]+1,z,2,{prov:P.key,site:P.sites[0]});for(const f of G){f.ward=1;f.hx=PL.x;f.hz=PL.z;f.st='return';f.t=12;f.yaw=f.hd=Math.atan2(PL.x-f.x,PL.z-f.z);}
+  if(G.length)elfWard={G:G,p:p,P:P,t:20};}
+let elfWard=null;
+function elfWardTick(){const W0=elfWard;if(!W0)return;W0.t-=1;const f=W0.G.find(g=>!g.dead&&!g.gone);if(!f||W0.t<=0){elfWard=null;return;}
+  for(const g of W0.G){g.hx=PL.x;g.hz=PL.z;}if(Math.hypot(f.x-PL.x,f.z-PL.z)>5)return;elfWard=null;const r=elfRank(W0.p),nm=elfName(W0.p),K=W0.P.kingdom.name.replace(/^The /,'the ');
+  for(const g of W0.G){g.st='idle';g.t=8;g.yaw=g.hd=Math.atan2(PL.x-g.x,PL.z-g.z);if(r>=3)g.bow=foeClock+2;}
+  toast(FOES[f.kind].n+': '+(r<1?'"Halt, stranger. You have come into '+K+'. Strangers walk here by our leave: keep to the ways and draw no blade, and you will come to no harm."':
+    r<2?elfSay(0)+' "Go freely, guest of '+K+'."':elfSay(4)+' "Welcome home, '+(nm?nm.split(' ')[0]:'friend')+'. The watch is glad of you."'));foeCall(f,'idle');}
+// ---- each second (from elfFrame): the clock, the border, the wardens, the tasks; the ruins found
+let elfT=0;
+function elfFrame(dt){if(!ready)return;EF.pt+=dt;elfMarks(dt);elfLife(dt);if((elfT-=dt)>0)return;elfT=1;
+  elfBorder();elfWardTick();elfTaskTick();
+  const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),er=elderNear(X,Z,-2);if(er&&discover('e',er.name))elfGain('e',1,null);
+}
+// one of their places found (discoverTick): they hear of it
+function elfPlaceFound(rp){const C=rp.s.prov.cult;if(C.k==='elf'||C.k==='wood')elfGain(C.k==='elf'?'e':'w',2,null);}
+// ---- their folk: the court, the merchants, the mariners, the wardens at the border
+Object.assign(FOE_HOME,{e_ward:[['ebow',1],['espear',1]],w_ward:[['wbow',1],['wknife',1]]});
+Object.assign(FOES,{
+  eking:{n:'King of the Elder Realm',m:'eking',hp:44,dmg:3,reach:2,walk:1.1,run:4.6,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'elf'},
+  equeen:{n:'Queen of the Elder Realm',m:'equeen',hp:40,dmg:2,reach:1.8,walk:1.1,run:4.6,sight:20,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,fem:1,drops:[[224,2,4,0.6]],cause:'elf'},
+  eherald:{n:'Herald of the Court',m:'eherald',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:20,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[206,1,2,0.4]],cause:'elf'},
+  emerch:{n:'Merchant of the Elves',m:'emerch',hp:16,dmg:1,reach:1.6,walk:1.1,run:4.6,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[204,1,2,0.5]],cause:'elf'},
+  emariner:{n:'Mariner of the Elves',m:'emariner',hp:20,dmg:2,reach:1.8,walk:1.15,run:4.8,sight:22,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[206,1,2,0.4]],cause:'elf'},
+  wmerch:{n:'Merchant of the Wood',m:'wmerch',hp:16,dmg:1,reach:1.6,walk:1.15,run:5,sight:18,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[204,1,2,0.5]],cause:'wood'}});
+Object.assign(FOE_HOME,{e_market:[['emerch',2],['elady',1]],w_market:[['wmerch',2],['wfolk',1]],e_throne:[['eherald',1],['esword',1]],e_court:[['elord',2],['elady',2],['eherald',1],['elore',1]],
+  e_quay:[['emariner',2],['elady',1],['elord',1]],e_pier:[['emariner',2],['elord',0.5]]});
+Object.assign(FOLK_N,{ward:[2,2]});Object.assign(FOLK_LEAD,{e_market:'emerch',w_market:'wmerch',e_quay:'emariner'});
+Object.assign(FOLK_SAY,{eking:['Be welcome in {p}. The light of {k} is yours to share.','My fathers held these mountains when the stars were young.','The world grows quieter every year. We remember it loud.'],
+  equeen:['Be welcome in {p}, traveller. Stay as long as you will.','The lamps of {k} were lit long before your kingdom was founded.','Every age is shorter than the last, they say. I do not believe it.'],
+  eherald:['You stand in the court of {k}. Bow, if you will, and be welcome.','The throne hears all who come in peace.','I bear the word of the throne to every hall of {k}.'],
+  emerch:['Fine things from every hall of {k}. Look, and take your time.','Coin is coin, but a friend pays less.','Starglass, waybread, wine of the mountains. What will you have?'],
+  emariner:['The sea calls, they say. It has called me a long while.','The white ships go west and do not come back.','Mind the ropes on the quay.'],
+  wmerch:['Honeycakes, wine, arrows straight as moonbeams. Come and see.','Coin is welcome here, and so are friends.','The wood is generous, if you know where to look.']});
+// ---- the steeds of the elves and the swan boat (D-088): an elven horse from the stables of the high elves, a great elk from
+// the wood elves' pens, for a Friend; the whistle calls it from wherever it was left; a swan boat set on the water carries the
+// player over it, faster when they row hard, and never onto land
+Object.assign(ANIMALS,{
+  ehorse:{n:'Elven Horse',hp:16,walk:1.5,run:8,shy:0,stride:2.4,amp:0.6,turn:3.4,graze:1,sleeps:0,drops:[],g:[],herd:[1,1],w:0,youngP:0,calls:[30,80],mount:true,gallop:15,steed:1,ride:'Riding the elven horse. Sprint to gallop; use it again to get down.'},
+  elk:{n:'Great Elk',hp:20,walk:1.4,run:7,shy:0,stride:2.8,amp:0.7,turn:3,graze:1,sleeps:0,drops:[],g:[],herd:[1,1],w:0,youngP:0,calls:[40,90],mount:true,gallop:13,leap:14,steed:1,ride:'Riding the great elk. Sprint to run; it leaps high. Use it again to get down.'},
+  swanboat:{n:'Swan Boat',hp:12,walk:0.1,run:0.1,shy:0,stride:2,amp:0,turn:3,drops:[[430,1]],g:[],herd:[1,1],w:0,youngP:0,mount:true,boat:1,ride:'In the swan boat. Move to row, sprint to row hard; use the boat again to step out.'}});
+const elfSteedOf=()=>animals.find(a=>a.tame&&!a.dead&&ANIMALS[a.kind].steed);
+function elfSteedAsk(f,p){const r=elfRank(p),kind=p==='e'?'ehorse':'elk',nm=ANIMALS[kind].n.toLowerCase();
+  if(r<2)return '"We do not give our '+(p==='e'?'horses':'elk')+' to those we do not know. Come back as a friend of '+ELF_P[p].n+'."';
+  if(elfSteedOf()||wildPending.some(q=>ANIMALS[q[0]]&&ANIMALS[q[0]].steed))return '"Your '+nm+' knows you already. Whistle, and it will come."';
+  const a=PL.yaw,x=PL.x-Math.sin(a+0.8)*2.5,z=PL.z-Math.cos(a+0.8)*2.5,y=standY(x,PL.y+1,z);if(y<0)return '"There is no room here to bring it out."';
+  const s=addAnimal(kind,x,y,z,{tame:true,uid:Date.now().toString(36)+'s',st:'idle',t:2});s.yaw=s.hd=Math.atan2(PL.x-x,PL.z-z);saveDirty=true;animalCall(s,false);
+  if(SURV()&&countOf(429)<1)addItem(429,1);drawBar(true);return 'They lead out '+(p==='e'?'a silver '+nm:'a '+nm+' with antlers like a crown')+' and put its rein in your hand. "It is yours, and it will come when you whistle." (an Elven Whistle)';}
+// the whistle: the steed comes, from wherever it is in the world
+function elfWhistle(){const s=elfSteedOf();tone(1800,2400,0.25,0.06);tone(2400,1900,0.2,0.05,0.25);
+  if(s){s.stay=false;s.st='follow';s.t=1;if(Math.hypot(s.x-PL.x,s.z-PL.z)>40)s.stuck=99;toast('You whistle, and your '+ANIMALS[s.kind].n.toLowerCase()+' comes');return true;}
+  const i=wildPending.findIndex(q=>ANIMALS[q[0]]&&ANIMALS[q[0]].steed);if(i<0){toast('You whistle, but no steed of yours hears it. The stables of the elves keep them for their friends.');return true;}
+  const q=wildPending.splice(i,1)[0],x=PL.x-Math.sin(PL.yaw+0.8)*2.5,z=PL.z-Math.cos(PL.yaw+0.8)*2.5,y=standY(x,PL.y+1,z);
+  addAnimal(q[0],x,y>0?y:PL.y,z,{tame:true,uid:String(q[5]||''),ci:q[6]|0,st:'idle',t:2});saveDirty=true;toast('You whistle, and after a while your '+ANIMALS[q[0]].n.toLowerCase()+' comes running');return true;}
+// the swan boat: set on open water where the player looks, the boat floating on it
+function boatPlace(){const e=eyePos(),d=camDir();for(let t=1;t<7;t+=0.25){const x=Math.floor(e.x+d.x*t),y=Math.floor(e.y+d.y*t),z=Math.floor(e.z+d.z*t),id=get(x,y,z);
+    if(SOLID[id]&&!isWetId(id))break;if(isWetId(id)&&!isWetId(get(x,y+1,z))&&!SOLID[get(x,y+1,z)]){if(SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;drawBar(true);}
+      const b=addAnimal('swanboat',x+0.5,y+0.65,z+0.5,{tame:true,uid:Date.now().toString(36)+'b',st:'idle',t:9});b.yaw=b.hd=PL.yaw+Math.PI;saveDirty=true;toast('The swan boat floats on the water. Use it to step in.');return true;}}
+  toast('A swan boat must be set on open water');return true;}
+// rowing: over water only (a bump at the shore), level on its surface
+function boatStep(dt,wx,wz,sprint){const a=PL.ride,sp=sprint?9:5.5,k=Math.min(1,2.6*dt);PL.vx+=(wx*sp-PL.vx)*k;PL.vz+=(wz*sp-PL.vz)*k;PL.vy=0;PL.ground=true;
+  const wy=Math.floor(a.y-0.65),v=Math.hypot(PL.vx,PL.vz),ok=(x,z)=>isWetId(get(Math.floor(x),wy,Math.floor(z)))&&!SOLID[get(Math.floor(x),wy+1,Math.floor(z))];
+  if(v>0.01){const nx=PL.x+PL.vx*dt,nz=PL.z+PL.vz*dt,fx=nx+PL.vx/v*1.4,fz=nz+PL.vz/v*1.4;if(ok(nx,nz)&&ok(fx,fz)){PL.x=nx;PL.z=nz;}else{PL.vx*=-0.2;PL.vz*=-0.2;}}
+  PL.y=wy+0.65;a.x=PL.x;a.z=PL.z;a.y=a.gy=PL.y;if(v>2&&Math.random()<dt*6)spawnP(PL.x-PL.vx/v*1.5,wy+1.05,PL.z-PL.vz/v*1.5,(Math.random()-.5)*0.5,0.4,(Math.random()-.5)*0.5,[0.85,0.92,1],0.5,6);}
+// stepping out of the boat: onto the nearest dry ground beside it, if there is any
+function boatLeave(a){const wy=Math.floor(a.y-0.65);for(let r=1;r<=4;r++)for(let k=0;k<12;k++){const an=k/12*6.283,x=a.x+Math.cos(an)*r,z=a.z+Math.sin(an)*r,y=standY(x,wy+2,z);if(y>0&&!wetAt(x,y,z)&&!isWetId(get(Math.floor(x),y-1,Math.floor(z)))){PL.x=x;PL.z=z;PL.y=y;return;}}}
+// a warden's cloak in the body slot: the wastes' creatures see its wearer at half their sight (foes.js)
+function cloakHide(){const q=equip.body;return q&&ITEMS[q.id]&&ITEMS[q.id].hide?ITEMS[q.id].hide:1;}
+// ---- The life of the elves (D-088): what they do about the player in their lands, day and night.
+//
+// Festivals under the stars: on one night in two at each of their places (every night of the full moon), the elves keep festival
+// where they gather (the high elves' gardens, courts and quays, the wood elves' glades and market): a ring of dancers circling,
+// singers about them, a song with harps, lanterns rising into the sky. Whoever keeps it with them a while is rested, and the
+// elves think the better of them (once a night). Dawn and dusk: horns from their places and the folk turning to the light to
+// sing. Lights: motes of pale light drifting at night in their lands; golden leaves falling in the wood elves'. The archery
+// contest at their ranges and training grounds (speak with an archer there): a minute to put arrows in the butts, prizes by the
+// score. Travellers on their roads, some of them leaving for the havens with all they have; the white ships that sail from the
+// havens into the west. A lament when one of them falls near the player. Their places on the map: a star for the high elves',
+// a leaf for the wood elves', a broken star for the ruins of the elder days.
+let elfLand=null,elfLandT=0;
+// which people's land the player is in (once a second): 'e', 'w' or null
+function elfLandNow(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ)),C=P&&P.cult;return C&&C.k==='elf'?'e':C&&C.k==='wood'?'w':null;}
+// ---- the song: phrases of chords sung by many voices over a harp, at a place (the festival, dawn and dusk, a lament in a minor key)
+const ELF_SONG=[[[523,659,784],[587,740,880],[659,784,988],[587,740,880]],[[440,554,659],[494,587,740],[554,659,831],[440,554,659]],[[392,494,587],[440,523,659],[494,587,740],[523,659,784]]];
+const ELF_LAMENT=[[440,523,659],[392,466,587],[349,440,523],[330,392,494]];
+function elfSong(at,lament,k){const ph=lament?ELF_LAMENT:ELF_SONG[(k||0)%ELF_SONG.length];for(let i=0;i<ph.length;i++){for(const f of ph[i])voice(f,f*1.005,lament?1.6:1.15,lament?0.014:0.016,{type:'sine',form:1300,q:1.1,vib:5,vd:0.015,delay:i*(lament?1.5:1.1)},at);
+    tone(ph[i][0]/2,ph[i][0]/2,1.3,0.02,i*(lament?1.5:1.1),'triangle',at);tone(ph[i][2],ph[i][2],0.5,0.012,i*(lament?1.5:1.1)+0.3,'triangle',at);}}
+// ---- festivals
+const FEST_SPOT={e:new Set(['market','quay','green','garden','court']),w:new Set(['market','glade','garden'])};
+let FEST=null,festT=0;
+const festTonight=s=>hsh(Math.round(s.X)+dayN*7,9841,Math.round(s.Z))<0.5||dayN%8===0;
+// the widest ring about (x, z) at height y that the dancers can walk all round (twelve points of it standing clear), or 0
+function festRing(x,z,y){for(const r of [4.5,3.5,2.8]){let ok=true;for(let k=0;k<12&&ok;k++){const a=k/12*6.283,px=x+Math.cos(a)*r,pz=z+Math.sin(a)*r,bx=Math.floor(px),bz=Math.floor(pz);
+    if(bx<1||bz<1||bx>=W-1||bz>=D-1||!genDone[(bx>>4)+(bz>>4)*NCX]){ok=false;break;}const sy=foeStand(px,y+1,pz,2);if(sy<0||Math.abs(sy-y)>1)ok=false;}if(ok)return r;}return 0;}
+// the nearest place keeping festival tonight within reach of the player, where there is room to dance
+function festFind(){const X=PL.x+OX,Z=PL.z+OZ,C0=[];
+  for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites){const C=s.prov.cult;if((C.k!=='elf'&&C.k!=='wood')||Math.hypot(s.X-X,s.Z-Z)>s.R+70||!festTonight(s))continue;const p=C.k==='elf'?'e':'w';
+    for(const q of siteLayout(s).spots){if(!FEST_SPOT[p].has(q.kind))continue;const [x,z]=siteXZ(s,q.u,q.v),d=Math.hypot(x-X,z-Z);if(d<70)C0.push({s:s,p:p,X:x+0.5,Z:z+0.5,y:q.y,d:d,moon:dayN%8===0});}}
+  C0.sort((a,b)=>a.d-b.d);for(const c of C0){const r=festRing(c.X-OX,c.Z-OZ,c.y);if(r){c.r=r;return c;}}return null;}
+// a festival begins: dancers in a ring about its middle, singers outside it
+function festBegin(F0){const x=F0.X-OX,z=F0.Z-OZ,tab=F0.s.prov.cult.fp+(F0.p==='e'?'court':'glade'),G=[],rr=F0.r||4.5,n=Math.round((F0.moon?12:8)*rr/4.5);
+  for(let i=0;i<n;i++){const a=i/n*6.283,g=spawnGroup(tab,1,x+Math.cos(a)*rr,F0.y,z+Math.sin(a)*rr,0.8,{prov:F0.s.prov.key,site:F0.s})[0];if(!g)continue;g.fest={a:a,r:rr};g.st='return';g.t=5;G.push(g);}
+  for(let i=0;i<3;i++){const a=i/3*6.283+0.5,g=spawnGroup(tab,1,x+Math.cos(a)*(rr+3.5),F0.y,z+Math.sin(a)*(rr+3.5),0.8,{prov:F0.s.prov.key,site:F0.s})[0];if(!g)continue;g.sing=1;g.st='idle';g.t=999;G.push(g);}
+  FEST=Object.assign(F0,{G:G,kept:0,songT:2,told:0,lanT:0});return FEST;}
+function festEnd(){if(!FEST)return;for(const g of FEST.G)if(!g.dead&&!g.gone){g.fest=null;g.sing=0;if(Math.hypot(g.x-PL.x,g.z-PL.z)>40)removeFoe(g);else{g.st='idle';g.t=2;}}FEST=null;}
+// every frame: the dance goes round, the lanterns rise, the song is sung
+function festFrame(dt){const F0=FEST;if(!F0)return;const x=F0.X-OX,z=F0.Z-OZ;
+  for(const g of F0.G){if(g.dead||g.gone||g.foe)continue;if(g.fest){const R=g.fest.r;g.fest.a+=dt/R;const a=g.fest.a,tx=x+Math.cos(a)*R,tz=z+Math.sin(a)*R,dx=tx-g.x,dz=tz-g.z,d=Math.hypot(dx,dz),st=Math.min(d,(d>1.5?2.4:1.3)*dt);g.st='dance';g.t=5; // (stepped here round the ring, not by the folk's own walking)
+      if(d>0.01){const nx=g.x+dx/d*st,nz=g.z+dz/d*st,ny=foeStand(nx,g.y+1,nz,2);if(ny>0&&Math.abs(ny-g.y)<=1.2){g.x=nx;g.z=nz;g.y=g.gy=ny;}}g.sp=Math.min(2,st/Math.max(dt,1e-3));g.hd=g.yaw=Math.atan2(-Math.sin(a),Math.cos(a));if(Math.random()<dt*0.15)g.cheer=foeClock+1.2;}
+    else if(g.sing){g.hd=g.yaw=Math.atan2(x-g.x,z-g.z);}}
+  if((F0.lanT-=dt)<=0){F0.lanT=F0.moon?0.25:0.4;const a=Math.random()*6.283,r=Math.random()*5;spawnP(x+Math.cos(a)*r,F0.y+1.5,z+Math.sin(a)*r,(Math.random()-.5)*0.3,0.9+Math.random()*0.5,(Math.random()-.5)*0.3,[1,0.82,0.48],14,-0.02);}
+  if((F0.songT-=dt)<=0){F0.songT=6+Math.random()*3;if(Math.hypot(x-PL.x,z-PL.z)<60)elfSong([x,F0.y+2,z],false,Math.floor(Math.random()*3));}}
+// once a second: festivals begun at night and ended at day; keeping one with the elves
+function festTick(){if(!ambNight()){if(FEST)festEnd();return;}
+  if(FEST&&Math.hypot(FEST.X-OX-PL.x,FEST.Z-OZ-PL.z)>130)festEnd();
+  if(!FEST){if((festT-=1)>0)return;festT=10;const F0=festFind();if(F0&&folkCount()<FOLK_CAP+10)festBegin(F0);return;}
+  const d=Math.hypot(FEST.X-OX-PL.x,FEST.Z-OZ-PL.z);if(d<40&&!FEST.told){FEST.told=1;toast('The elves of '+FEST.s.name+' keep festival under the stars'+(FEST.moon?': the feast of the full moon':''));}
+  if(d<18){FEST.kept+=1;if(FEST.kept>=25&&EF.fe!==dayN){EF.fe=dayN;saveDirty=true;if(SURV()){hp=20;food=Math.min(20,food+6);drawStats();}elfGain(FEST.p,FEST.moon?6:3,'You kept the festival with the elves of '+FEST.s.name+', and you are rested');}}}
+// ---- motes of light at night in their lands, golden leaves in the wood elves'
+let moteT=0,leafT=0;
+function elfLights(dt){if(!elfLand)return;const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D||PL.y<ground[bx+W*bz]-4)return;
+  if(ambNight()&&(moteT-=dt)<=0){moteT=0.12;const a=Math.random()*6.283,r=3+Math.random()*12;spawnP(PL.x+Math.cos(a)*r,PL.y+0.5+Math.random()*3,PL.z+Math.sin(a)*r,(Math.random()-.5)*0.25,(Math.random()-.4)*0.25,(Math.random()-.5)*0.25,elfLand==='w'?[0.8,1,0.6]:[0.8,0.88,1],7,-0.01);}
+  if(elfLand==='w'&&(leafT-=dt)<=0){leafT=0.2;const a=Math.random()*6.283,r=Math.random()*12;spawnP(PL.x+Math.cos(a)*r,PL.y+7+Math.random()*6,PL.z+Math.sin(a)*r,0.3+(Math.random()-.5)*0.4,-0.5,(Math.random()-.5)*0.4,[0.96,0.74,0.26],12,0.02);}}
+// ---- dawn and dusk: horns from their places, the folk turned to the light, singing
+let elfTod=-1;
+function elfDawnDusk(){const t=curT(),was=elfTod;elfTod=t;if(was<0||!elfLand)return;const dawn=was<0.24&&t>=0.24,dusk=was<0.76&&t>=0.76;if(!dawn&&!dusk)return;
+  const X=PL.x+OX,Z=PL.z+OZ;let s=null,bd=160;for(const q of realmTile(Math.floor(X),Math.floor(Z)).sites){const C=q.prov.cult;if(C.k!=='elf'&&C.k!=='wood')continue;const d=Math.hypot(q.X-X,q.Z-Z);if(d<bd){bd=d;s=q;}}
+  if(!s)return;const at=[s.X-OX,s.T+12,s.Z-OZ];warSignal('muster',elfLand,at);setTimeout(()=>warSignal('muster',elfLand,at),2600);
+  let n=0;foeNear(PL.x,PL.z,50,g=>{if(g.dead||g.foe||!FOES[g.kind].folk||elfPeopleOf(g)!==elfLand)return;g.st='idle';g.t=25;g.yaw=g.hd=dawn?Math.PI/2:-Math.PI/2;g.dawn=foeClock+25;n++;},0);
+  if(n)setTimeout(()=>elfSong([PL.x+6,PL.y+3,PL.z],false,dawn?2:1),1500);toast(dawn?'Horns at the dawn: the elves of '+s.name+' turn to the light and sing':'Horns at dusk: the elves of '+s.name+' sing the light down');}
+// ---- the archery contest at a range or training ground: a minute to put arrows in the butts (a straw butt one, its painted
+// eye two); arrows for three, more and the elves' regard for six, an elven bow for ten
+let CONTEST=null;
+function elfContest(f,p){if(CONTEST)return 'A contest is already under way';const x=f.x,z=f.z;let n=0;for(let dx=-24;dx<=24;dx++)for(let dz=-24;dz<=24;dz++)for(let dy=-4;dy<=6;dy++){const id=get(Math.floor(x)+dx,Math.floor(f.y)+dy,Math.floor(z)+dz);if(id===HAYBALE||id===WOOLR)n++;}
+  if(!n)return 'There are no butts here to shoot at';CONTEST={p:p,x:x,z:z,t:60,pts:0,n:0,who:FOES[f.kind].n};closeInv();toast('The contest begins: a minute to put your arrows in the butts. A straw butt is one, its painted eye two');return false;}
+// an arrow of the player's stuck (war-arms.js): in a butt near the contest, it scores
+function elfArrowIn(s){const C=CONTEST;if(!C||!s.byP||Math.hypot(s.x-C.x,s.z-C.z)>30)return;let best=0;
+  for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(let dz=-1;dz<=1;dz++){const id=get(Math.floor(s.x+dx*0.45),Math.floor(s.y+dy*0.45),Math.floor(s.z+dz*0.45));if(id===WOOLR)best=2;else if(id===HAYBALE&&best<1)best=1;}
+  if(best){C.pts+=best;C.n++;toast((best===2?'In the eye! ':'In the butt. ')+C.pts+' so far');}}
+function contestTick(){const C=CONTEST;if(!C)return;C.t-=1;if(C.t===30)toast('Half the minute gone: '+C.pts);if(C.t>0)return;CONTEST=null;
+  const got=[];if(C.pts>=3){if(SURV())addItem(409,16);got.push('16 arrows');}if(C.pts>=6)elfGain(C.p,3,null);if(C.pts>=10&&SURV()&&countOf(407)<1){addItem(407,1);got.push('an Elven Bow');}drawBar(true);
+  toast('The contest is over: '+C.pts+' with '+C.n+' arrows. '+(C.pts>=10?'The elves cheer: none of them did better. ':C.pts>=6?'The elves nod: well shot. ':C.pts>=3?'Not bad, for one who is not an elf. ':'The elves are kind about it. ')+(got.length?'The prize: '+got.join(' and ')+'.':''));}
+// ---- travellers on their roads, some leaving for the havens; the white ships sailing west
+Object.assign(FOE_HOME,{e_trav:[['elady',2],['elord',2],['elore',1]],w_trav:[['wfolk',2],['wlady',1],['wlord',0.5]]});
+let travT=20;
+function elfTravel(){if(!elfLand||(travT-=1)>0)return;travT=40+Math.random()*30;if(folkCount()>=FOLK_CAP-6||foes.some(f=>f.trav&&!f.dead))return;
+  const X=PL.x+OX,Z=PL.z+OZ,roads=realmTile(Math.floor(X),Math.floor(Z)).roads.filter(r=>r.k==='high'&&(r.P.cult.k==='elf'||r.P.cult.k==='wood'));if(!roads.length)return;
+  const rd=roads[Math.floor(Math.random()*roads.length)],t=Math.random(),px=rd.a[0]+(rd.b[0]-rd.a[0])*t,pz=rd.a[1]+(rd.b[1]-rd.a[1])*t,d=Math.hypot(px-X,pz-Z);if(d<30||d>75)return;
+  const x=px-OX,z=pz-OZ,bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return;
+  const hv=rd.P.sites.find(s=>s.k==='haven'),toHv=hv&&[rd.a,rd.b].some(e=>Math.hypot(e[0]-sitePort(hv)[0],e[1]-sitePort(hv)[1])<3),leave=!!hv&&Math.random()<0.5,
+    dir=leave&&toHv?(Math.hypot(rd.b[0]-sitePort(hv)[0],rd.b[1]-sitePort(hv)[1])<3?1:-1):Math.random()<0.5?1:-1;
+  const G=spawnGroup(rd.P.cult.fp+'trav',2+Math.floor(Math.random()*3),x,ground[bx+W*bz]+1,z,2,{prov:rd.P.key,site:rd.P.sites[0]});
+  for(const f of G){f.road={rd:rd,dir:dir,along:t*rd.len};f.trav=1;f.leave=leave?1:0;f.carry=leave;f.st='idle';f.t=0.5;}}
+function elfTravelMeet(){for(const f of foes){if(!f.leave||f.dead||f.met||Math.hypot(f.x-PL.x,f.z-PL.z)>8)continue;for(const g of foes)if(g.leave&&Math.hypot(g.x-f.x,g.z-f.z)<12)g.met=1;
+  toast('Elves on the road with all they own, going down to the haven. "The sea calls us, and we go. Fare well, '+(elfName(elfPeopleOf(f))||'traveller').split(' ')[0]+'."');return;}}
+// a white ship setting sail from a haven near the player, every few minutes: out along the harbour and away west over the sea
+const elfShips=[];let shipT=40;
+function elfShipTick(){if((shipT-=1)>0)return;shipT=200+Math.random()*160;const X=PL.x+OX,Z=PL.z+OZ;let hv=null;for(const s of realmTile(Math.floor(X),Math.floor(Z)).sites)if(s.k==='haven'&&Math.hypot(s.X-X,s.Z-Z)<200)hv=s;
+  if(!hv)return;const L=siteLayout(hv),[x0,z0]=siteXZ(hv,L.qL+12,0),[x1,z1]=siteXZ(hv,L.qL+13,0),m=amBuild('whiteship',0,{});scene.add(m.grp);
+  const sh={m:m,X:x0,Z:z0,dx:x1-x0,dz:z1-z0,t:0,y:SEA+0.4};m.grp.rotation.y=Math.atan2(sh.dx,sh.dz);elfShips.push(sh);toast('A white ship sails from '+hv.name+' into the west, and does not turn back');}
+function elfShipFrame(dt){for(let i=elfShips.length-1;i>=0;i--){const s=elfShips[i];s.t+=dt;const v=Math.min(3,0.3+s.t*0.08);s.X+=s.dx*v*dt;s.Z+=s.dz*v*dt;const x=s.X-OX,z=s.Z-OZ;
+    s.m.grp.position.set(x,s.y+Math.sin(s.t*0.8)*0.08,z);const u=s.m.mat.uniforms;if(u.eL)u.eL.value=1;
+    if(s.t>150||x<-40||z<-40||x>W+40||z>D+40){scene.remove(s.m.grp);scene.remove(s.m.shadow);s.m.mat.dispose();s.m.shadow.material.dispose();elfShips.splice(i,1);}}}
+// ---- a lament for one of them fallen near the player (foeSlain, foeFalls)
+let lamentT=0;
+function elfLament(f){if(!f||f.war||f.hst||lamentT>foeClock||!FOES[f.kind].folk||!elfPeopleOf(f)||Math.hypot(f.x-PL.x,f.z-PL.z)>40)return;lamentT=foeClock+25;
+  setTimeout(()=>{elfSong([f.x,f.y+2,f.z],true);toast('The elves sing a lament for '+(f.nm||'the fallen'));},1200);}
+// ---- each frame (from elfFrame): festivals, lights, the ships; each second: the land, dawn and dusk, the contest, travellers
+function elfLife(dt){festFrame(dt);elfLights(dt);elfShipFrame(dt);if((elfLandT-=dt)>0)return;elfLandT=1;elfLand=elfLandNow();festTick();elfDawnDusk();contestTick();elfTravel();elfTravelMeet();elfShipTick();}
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -14822,9 +15595,9 @@ function exPack(){const R=new Map();for(const k of explored){const cx=ckX(k),cz=
   return [...R].map(([rk,m])=>[rk,btoa(String.fromCharCode(...m))]);}
 function exUnpack(list){for(const [rk,s64] of list){const rx=ckX(rk),rz=ckZ(rk),bin=atob(s64);for(let b=0;b<256;b++)if(bin.charCodeAt(b>>3)&(1<<(b&7)))explored.add(ckey(rx*16+(b>>4),rz*16+(b&15)));}}
 if(saved&&Array.isArray(saved.ex))try{exUnpack(saved.ex);}catch(e){}
-if(saved&&Array.isArray(saved.pl))for(const [n,X,Z] of saved.pl)places.push({n:n,X:X,Z:Z});
+if(saved&&Array.isArray(saved.pl))for(const [n,X,Z,e] of saved.pl)places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});
 if(saved&&Array.isArray(saved.mk))for(const [X,Z,n,c] of saved.mk)markers.push({X:X,Z:Z,n:String(n).slice(0,30),c:c});
-const mapSave=()=>({ex:exPack(),pl:places.map(p=>[p.n,p.X,p.Z]),mk:markers.map(m=>[m.X,m.Z,m.n,m.c])});
+const mapSave=()=>({ex:exPack(),pl:places.map(p=>p.e?[p.n,p.X,p.Z,p.e]:[p.n,p.X,p.Z]),mk:markers.map(m=>[m.X,m.Z,m.n,m.c])});
 function exploreChunk(cx,cz){const k=ckey(cx,cz);if(explored.has(k))return;if(explored.size>=EXPL_CAP)explored.delete(explored.values().next().value);explored.add(k);wmDirty.add(ckey(Math.floor(cx/16),Math.floor(cz/16)));}
 // Places: a named place the readout shows (a site, a hold, a point of interest, remains...) is kept the first time you are there.
 // Lands, their stretches and the general names of cave layers are not places.
@@ -14832,8 +15605,15 @@ const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.value
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
   for(const p of places)if(p.n===n&&Math.hypot(p.X-X,p.Z-Z)<160)return false;
-  if(places.length>=PLACE_CAP)places.shift();places.push({n:n,X:X,Z:Z});saveDirty=true;return true;
+  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':elderNear(X,Z,2)?'r':''; // the elves' places are marked with their sign (D-088)
+  if(places.length>=PLACE_CAP)places.shift();places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});saveDirty=true;return true;
 }
+// the sign of an elven place on the map (D-088): a star of the high elves in silver and blue, a leaf of the wood elves in gold and
+// green, a broken grey star for a ruin of the elder days
+function wmElfSign(g,x,y,e){g.save();g.translate(x,y);g.lineWidth=1.5;
+  if(e==='w'){g.fillStyle='#d8b040';g.strokeStyle='#2e5a26';g.beginPath();g.moveTo(0,-7);g.quadraticCurveTo(6,0,0,7);g.quadraticCurveTo(-6,0,0,-7);g.fill();g.stroke();g.beginPath();g.moveTo(0,-6);g.lineTo(0,6);g.stroke();}
+  else{g.fillStyle=e==='r'?'#9a9890':'#e6ecf6';g.strokeStyle=e==='r'?'#4a4844':'#1e3060';g.beginPath();for(let k=0;k<12;k++){const r=k%2?2.6:(e==='r'&&k===4?3.5:7),a=k/12*6.283-1.5708;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}
+  g.restore();}
 // ---- Drawing the explored map: regions of 16 x 16 chunks, 4 pixels a chunk (one per 4 blocks), drawn when first needed
 const WM_PAL=[[52,92,150],[186,176,146],[112,158,82],[62,112,58],[138,112,122],[132,132,138],[196,204,210],[122,148,92],[46,76,52],[60,104,170],[168,166,104],[88,118,88]];
 const wmRegions=new Map(),wmDirty=new Set(),TW={};
@@ -14880,7 +15660,7 @@ function drawWorldMap(){
       const c=landSite(i,j);if(!explored.has(ckey(Math.floor(c.x/CS),Math.floor(c.z/CS))))continue;const n=stretchName(landKey(i,j)),e=seen.get(n);if(e){e.x+=c.x;e.z+=c.z;e.k++;}else seen.set(n,{x:c.x,z:c.z,k:1});}
     for(const [n,e] of seen)g.fillText(n,sx(e.x/e.k),sz(e.z/e.k));}
   g.font='16px VT323, monospace';
-  for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
+  for(const p of places){const x=sx(p.X),y=sz(p.Z);if(x<-80||y<-20||x>w+80||y>h+20)continue;if(p.e)wmElfSign(g,x,y,p.e);else{g.fillStyle='#3a2a16';g.fillRect(x-2,y-2,4,4);}g.fillStyle='#2a1c0e';g.fillText(p.n,x,y-6);}
   warMapDraw(g,sx,sz); // the wars at the gates found, and their lines (W1, D-068)
   waypoints.forEach(m=>{const k=keyXYZ(m.userData.k),x=sx(k[0]+0.5),y=sz(k[2]+0.5);g.fillStyle=m.userData.c||'#5ff2ff';g.strokeStyle='#111';g.lineWidth=1.5;
     g.beginPath();g.moveTo(x,y-7);g.lineTo(x+6,y);g.lineTo(x,y+7);g.lineTo(x-6,y);g.closePath();g.fill();g.stroke();g.fillStyle='#10202a';g.fillText(wpName(m.userData.k),x,y+18);});
@@ -14943,10 +15723,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size],['s','Places of the realms of men',null],['o','Places of the orcs',null],['p','Folk of the realms',()=>Object.keys(FOES).filter(k=>FOES[k].folk).length]];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size],['s','Places of the realms of men',null],['o','Places of the orcs',null],['e','Ruins of the elder elves',null],['p','Folk of the realms',()=>Object.keys(FOES).filter(k=>FOES[k].folk).length]];
 const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below','The Goblin Warrens'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[],s:[],p:[],o:[]}};
+const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[],s:[],p:[],o:[],e:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -14965,7 +15745,7 @@ function discoverTick(dt){
   discT-=dt;if(discT>0||!ready)return;discT=1;
   if(LWX.k)discover('l',LWX.k);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;
-  {const rp=realmPlace(X,Z);if(rp&&yy>=ground[bx+W*bz]-3)discover('s',rp.name);} // a city, castle, village, watchtower or farmstead of the realms (D-060)
+  {const rp=realmPlace(X,Z);if(rp&&yy>=ground[bx+W*bz]-3&&discover('s',rp.name))elfPlaceFound(rp);} // a city, castle, village, watchtower or farmstead of the realms (D-060)
   {const op=orcNear(X,Z,0);if(op&&yy>=ground[bx+W*bz]-6)discover('o',op.name);} // the orcs' places on the wastes (D-064)
   if(yy<ground[bx+W*bz]-3){discover('y',warrenName(X,yy,Z)?LAYER_BANDS[6]:LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
     if(yy<100&&ruinZone(cx,cz))discover('h',holdOf(cx,cz).name);const m=remainsNear(X,yy,Z);if(m)discover('r',m.name);}
@@ -14983,6 +15763,7 @@ function journalText(){
   for(let i=0;i<Math.min(JN.t,TABLETS.length);i++)out.push((i+1)+'. '+TABLETS[i]);
   warJournal(out); // the wars of the wastes, a chronicle for each gate found (W1, D-068)
   emberJournal(out); // the Emberlords the player has seen, and their stories (W7a)
+  elfJournal(out); // the histories of the elves read, and the player's standing with them (D-088)
   out.push('','DISCOVERIES');
   for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');
@@ -15081,6 +15862,10 @@ function realmTour(kind,ck){
   const [x,z]=sitePort(best),d=DIRS[best.dir];goTo(Math.round(x+d[0]*6),Math.round(z+d[1]*6));PL.yaw=Math.atan2(d[0],d[1]);
   toast(best.name+', '+(realmPlace(best.X,best.Z)||{line:''}).line+', '+Math.round(bd)+' blocks from where you were');return{X:best.X,Z:best.Z,d:Math.round(bd),s:best};
 }
+// The nearest ruin of the elder elves of a kind (D-088), standing a little off it, facing it
+function elderTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
+  for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=elderAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
+  if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast(best.name+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
 // The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
 function gateTour(kind){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
@@ -15323,6 +16108,8 @@ const HINTS={
   f_fhound:()=>'A flame hound, called by an Emberlord. Fast and fierce; strike it as it comes.',
   f_ldemon:()=>'A lesser demon, called by an Emberlord when it tears at the mountain. As tough as an orc warchief, with a jagged blade.',
   parry:()=>'Parried! A shield raised just before a blow turns it aside and staggers the one who struck. Held up, it catches arrows and much of every blow from the front.',
+  elves:()=>'One of the elves. Use ('+ctl('place')+') one of their folk to speak with them: their merchants trade for coin, their healers heal, their loremasters tell the tales of their realm and give tasks, and the throne grants an audience. Every kindness raises your standing with them.',
+  etask:()=>'A task of the elves. Where it leads, a mark of sparks rises; when it is done, speak with any of their folk (or come back to where you were given it). Speak with them, too, to give it up.',
   task:()=>'A mark of sparks rises over the place of your task. The war panel shows how long you have; the council (use a lord of the hosts) lets you give it up.',
   engine:()=>'Look where the shot should land: a mark of sparks shows it. Use ('+ctl('place')+') to loose; engineers of the hosts about the engine wind it back quicker. Walk away to leave it.',
   bolt:()=>'A bolt thrower takes a crossbow bolt for each great bolt it looses, through as many as four foes in a line.',
@@ -15365,7 +16152,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,OBANNER,BOLTTHR,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,STARBLOOM,SILVFERN,DAWNLILY,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,MOONSTONE,STARLAMP,ETHRONE,LEAFSTONE,EVOLD,EHULL,ESAIL,ECHEST,EAWNING,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,OBANNER,BOLTTHR,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -15417,12 +16204,13 @@ for(const b of $('hostbar').querySelectorAll('button'))b.addEventListener('click
     for(const L of LANDS)if(L.fam===f){const o=document.createElement('option');o.value=L.i;o.textContent=L.n+(L.built?'':' (planned)');g.appendChild(o);}sel.appendChild(g);}
   for(const [pre,label,list] of [['r','The realms of men',[['capital','A royal city'],['city','A city'],['fort','A castle'],['village','A village'],['outpost','A watchtower'],['farm','A farmstead']]],
     ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm']]],
-    ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves']]],
+    ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves'],['haven','A haven']]],
     ['w','The wood elves',[['capital','The king\'s wood'],['city','A city in the trees'],['fort','The king\'s halls'],['village','A tree-village'],['outpost','A watch-tree'],['farm','A glade']]],
     ['d','The mountain dwarves',[['capital','The high hold'],['city','A mountain hold'],['fort','A bastion'],['village','A mining town'],['outpost','A lookout'],['farm','A mine']]],
-    ['g','The gates of the wastes',[['gate','The Ashen Gate'],['ram','The ram at the gate'],['lines','The siege lines'],['camp','The camp of the hosts'],['pavilion','The Pavilion of the Three Banners'],['yard','The orcs\' camp in the yard'],['road','The long road down']]]]){
+    ['g','The gates of the wastes',[['gate','The Ashen Gate'],['ram','The ram at the gate'],['lines','The siege lines'],['camp','The camp of the hosts'],['pavilion','The Pavilion of the Three Banners'],['yard','The orcs\' camp in the yard'],['road','The long road down']]],
+    ['x','The ruins of the elder elves',[['tower','A fallen tower'],['colonnade','A broken colonnade'],['shrine','A moonwell shrine'],['theatre','A theatre'],['king','A fallen king'],['arch','A lone arch']]]]){
     const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='x:'?elderTour(v.slice(2)):rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});
@@ -15470,7 +16258,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),...warCampSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),...warCampSave(),...elfSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -15994,10 +16782,11 @@ function update(dt){
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
-  const speed=(PL.fly?(flyFast?20:11):inLiq?2.4:PL.ride?(sprint?11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
+  const speed=(PL.fly?(flyFast?20:11):inLiq&&!PL.ride?2.4:PL.ride?(sprint?ANIMALS[PL.ride.kind].gallop||11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
   const sy=Math.sin(PL.yaw),cy=Math.cos(PL.yaw);
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;
+  if(PL.ride&&ANIMALS[PL.ride.kind].boat){boatStep(dt,wx,wz,sprint);survivalTick(dt,false,Math.hypot(PL.vx,PL.vz)*dt,false);armsTick(dt);return;} // rowing a swan boat (D-088)
   if(PL.ground||PL.fly||inLiq)gliding=false;
   if(gliding){const gs=9+Math.max(0,-PL.pitch)*10,kk=Math.min(1,1.6*dt);PL.vx+=(-sy*gs+cy*str*3-PL.vx)*kk;PL.vz+=(-cy*gs-sy*str*3-PL.vz)*kk;}
   else{
@@ -16006,7 +16795,7 @@ function update(dt){
   }
   if(PL.fly){const tv=((jump?1:0)-(down?1:0))*speed;PL.vy+=(tv-PL.vy)*Math.min(1,10*dt);}
   else if(inLiq){PL.vy-=7*dt;if(jump)PL.vy=Math.min(PL.vy+22*dt,3.4);PL.vy*=1-Math.min(1,2.2*dt);if(PL.vy<-3.5)PL.vy=-3.5;}
-  else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=PL.ride?10.6:8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
+  else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=PL.ride?ANIMALS[PL.ride.kind].leap||10.6:8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
   // climbing (M4): on a ladder, piton or rope, jump climbs, down or sprint descends, and nothing holds the player still
   const climb=!PL.fly&&!inLiq&&onClimb();
   if(climb){gliding=false;PL.vy=jump||(fwd>0.3&&wasWall)?3.2:(shift||tch.down||PAD.down)?-3.6:0;}

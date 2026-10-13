@@ -103,6 +103,10 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   e_street:[['elord',2],['elady',2],['elore',1],['esword',0.6]],e_garden:[['elady',2],['elord',1.5],['elore',1.5]],e_barracks:[['esword',2],['espear',2],['ebow',1]],
   e_drill:[['esword',2],['ebow',2],['espear',1]],e_smithy:[['elore',1]],e_keep:[['esword',2],['espear',1],['ebow',1]],e_green:[['elord',1],['elady',2],['elore',1]],
   e_lane:[['elady',1],['elord',1]],e_farm:[['elady',1],['elord',1]],e_field:[['elady',1],['elore',1]],e_post:[['espear',2],['ebow',2]],e_patrol:[['eknight',1]],
+  // the havens (D-088): folk on the quays and piers, shipwrights, the lighthouse's watch
+  e_throne:[['esword',2],['elord',1]],e_seat:[['esword',1],['elord',1]],e_court:[['elord',2],['elady',2],['elore',1]],e_market:[['elady',2],['elord',1]],e_heal:[['eheal',2],['elady',1]],
+  e_library:[['elore',3]],e_stable:[['elady',1],['elord',1]],w_market:[['wfolk',2],['wlady',1]],w_heal:[['wlady',1],['wfolk',1]],w_stable:[['wfolk',1]],
+  e_quay:[['elady',2],['elord',2],['elore',1]],e_pier:[['elord',1],['elady',1]],e_wright:[['esmith',2],['elord',0.5]],e_light:[['ebow',1],['espear',1]],
   // a host of each people that marches through the Volcanic Wastes against its creatures (D-063)
   r_host:[['rsword',2],['rspear',2],['rbow',1.5]],h_host:[['hrider',3],['hbow',1],['hspear',0.5]],e_host:[['esword',2],['espear',2],['ebow',2],['eknight',1]],
   // the wood elves' places (D-065): wardens on the gate, the platforms and the watch-trees; the halls kept by guards; folk in the glades
@@ -116,9 +120,9 @@ Object.assign(FOE_HOME,{r_gate:[['rspear',3],['rbow',1]],r_gatein:[['rspear',2],
   d_hall:[['dlord',1],['dlady',1],['daxe',1],['dhammer',0.6]],d_keep:[['dhammer',3],['dlord',1]],d_barracks:[['daxe',2],['dhammer',1],['dxbow',1]],d_dforge:[['dsmith',3],['dminer',1]],
   d_smelt:[['dsmith',2],['dminer',2]],d_drill:[['daxe',2],['dhammer',2]],d_post:[['dxbow',2],['daxe',1]],d_patrol:[['daxe',1],['dxbow',1]],d_host:[['daxe',3],['dhammer',2],['dxbow',2]]});
 const FOLK_N={gate:[2,3],gatein:[2,2],barracks:[2,3],drill:[3,4],keep:[2,2],market:[2,3],street:[1,2],smithy:[1,2],citadel:[2,2],hall:[2,3],citgate:[2,2],green:[2,3],lane:[1,1],farm:[2,2],field:[1,2],post:[2,3],patrol:[2,3],
-    stable:[1,2],paddock:[1,1],deck:[2,3],range:[2,3],cellar:[1,2],glade:[3,5],forge:[1,2],mine:[2,3],deep:[2,3],door:[2,3],court:[2,3],wall:[1,2],dforge:[2,4],smelt:[2,3]},
+    stable:[1,2],paddock:[1,1],deck:[2,3],quay:[2,3],pier:[1,2],wright:[1,2],light:[1,2],throne:[3,3],seat:[2,2],court:[2,3],heal:[2,3],library:[2,3],range:[2,3],cellar:[1,2],glade:[3,5],forge:[1,2],mine:[2,3],deep:[2,3],door:[2,3],court:[2,3],wall:[1,2],dforge:[2,4],smelt:[2,3]},
   FOLK_LEAD={r_barracks:'rcapt',r_keep:'rcapt',r_smithy:'rsmith',r_hall:'rnoble',r_farm:'rfarmer',h_hall:'hthane',h_keep:'hcapt',h_drill:'hcapt',h_smithy:'hsmith',h_farm:'hherd',h_gatein:'hcapt',
-    e_hall:'elord',e_keep:'ecapt',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
+    e_hall:'elord',e_keep:'ecapt',e_wright:'esmith',e_throne:'elord',e_seat:'elord',e_heal:'eheal',e_drill:'ecapt',e_smithy:'esmith',e_gatein:'ecapt',e_barracks:'ecapt',r_host:'rcapt',h_host:'hcapt',e_host:'ecapt',w_hall:'wking',w_keep:'wking',w_gate:'wcapt',w_host:'wcapt',d_keep:'dking',d_gate:'dcapt',d_host:'dcapt',d_drill:'dcapt',d_barracks:'dcapt'};
 const FOE_N={den:[3,5],store:[2,3],forge:[3,3],pen:[2,3],shrine:[2,3],lava:[2,3],chief:[3,4],camp:[3,5],band:[2,5],gate:[4,5],ocamp:[4,6],ogate:[2,2],otower:[2,3],ofoot:[1,2],oforge:[3,4],opit:[3,4]};
 const foes=[],shots=[],foeSpots=new Map(),TFO={},foeGrid=new Map(),foeGridS=[new Map(),new Map()];let foeFrame=0;let foeT=0,foeId=1,foeClock=0,foeSnd=0,foeRadMax=1;
 const fallenLords=new Set(saved&&Array.isArray(saved.fk)?saved.fk.map(String):[]),foeSave=()=>({fk:[...fallenLords]});
@@ -175,7 +179,7 @@ function foeSpawnTick(){
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     if(folk){const k=s.kind.slice(2),N=FOLK_N[k]||[1,2],night=ambNight()&&!['gate','gatein','post','citgate','barracks','keep','citadel'].includes(k);
-      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
+      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:s.kind==='e_throne'?(hsh(s.s.prov.kingdom.key.length,9831,[...s.s.prov.kingdom.key].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'eking':'equeen'):FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
       if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.stair==='cavern'&&Math.random()<0.5?'troll':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
@@ -216,7 +220,7 @@ const folkWrath=f=>!!f.prov&&(realmWrath.get(f.prov)||0)>0;
 function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
   for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
     if(G.civ){if(Math.hypot(g.x-PL.x,g.z-PL.z)<18){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;g.ct=Math.random()*0.8;}}
-  if(!was){toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
+  if(!was){elfStruck(f);toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
 // a patrol on the king's road (two to four soldiers, now and then with their captain), out of sight, walking the road
 function folkPatrol(){
   if(folkCount()>=FOLK_CAP-4||Math.random()>0.25)return;const X=PL.x+OX,Z=PL.z+OZ,T=realmTile(Math.floor(X),Math.floor(Z));
@@ -229,7 +233,7 @@ function folkPatrol(){
 // the horses of a riders' paddock (D-061): put out once while the player is near, penned until one is ridden away
 function folkHorses(s,x,z){for(const a of [...animals])if(a.spot===s.id&&!a.tame)removeAnimal(a);
   for(let i=0;i<s.horses;i++){const xx=x+(Math.random()-0.5)*4,zz=z+(Math.random()-0.5)*4,yy=standY(xx,s.y+1,zz);if(yy<0||wetAt(xx,yy,zz))continue;
-    addAnimal('horse',xx,yy,zz,{spot:s.id,pen:{x:x,z:z,r:2.6},young:i>0&&Math.random()<0.3});}}
+    addAnimal(/^e_/.test(s.kind)?'ehorse':/^w_/.test(s.kind)?'elk':'horse',xx,yy,zz,{spot:s.id,pen:{x:x,z:z,r:2.6},young:i>0&&Math.random()<0.3&&!/^[ew]_/.test(s.kind)});}} // (the elves' stables keep elven horses, the wood's pens great elk: D-088)
 // what the folk say to a passer-by (the place and the kingdom by name)
 const FOLK_SAY={
   guard:['Hail, traveller. Keep the peace within these walls.','The roads of {k} are watched. Go safely.','Walk freely, stranger, but draw no blade here.','Mind the king\'s law in {p}.','Nothing stirs on the border tonight. Long may it stay so.'],
@@ -275,7 +279,7 @@ const FOLK_SAY={
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||F.hound||f.wnd||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const eg=elfPeopleOf(f)&&elfGreet(f,F);if(eg){toast(eg);foeCall(f,'idle');return;}const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast((f.hero?f.hero.n:F.n)+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -326,7 +330,7 @@ function foeHurtFoe(g,n,by,ux,uz,kb,blow){
   if(!g.foe&&g.st!=='chase'&&!g.rout&&!g.wnd&&!by.gone&&!by.dead){g.foe=by;g.eseen=0;foeRally(g,by);}else foeCall(g,'hurt');
   if(g.hp<=0&&!morWound(g,by))foeFalls(g,by);warCleave(g,n,by,ux,uz,blow); // (or lies wounded: W8b)
 }
-function foeFalls(g,by){const G=FOES[g.kind];g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;g.wnd=0;g.rout=0;morDeath(g);if(g.lordOf)lordFalls(g);warHeroFell(g,by);
+function foeFalls(g,by){const G=FOES[g.kind];elfLament(g);g.dead=0.001;g.st='dead';g.sp=0;g.atk=0;g.foe=null;g.wnd=0;g.rout=0;morDeath(g);if(g.lordOf)lordFalls(g);warHeroFell(g,by);
   if(G.boss&&!g.lordOf&&Math.hypot(g.x-PL.x,g.z-PL.z)<48){const n=FOES[by.kind].n.toLowerCase();toast('The '+G.n.toLowerCase()+' is slain by a'+(/^[aeiou]/.test(n)?'n ':' ')+n);}}
 const foeTarget=()=>SURV()&&!dead&&playing; // in creative (and when dead or paused) foes take no notice of the player
 function foeAlert(f){for(const g of foes){if(g.dead||g.st==='chase'||g.st==='flee'||g.foe)continue;if(g===f||(g.grp===f.grp&&Math.hypot(g.x-f.x,g.z-f.z)<20)){if(FOES[g.kind].civ){g.st='flee';g.t=4+Math.random()*3;continue;}g.st='chase';g.seen=0;g.t=0;if(g!==f&&Math.random()<0.5)g.ct=Math.random()*0.6;}}
@@ -352,7 +356,7 @@ function stepFoe(f,dt){
   if(f.scanT<=0){f.scanT=0.4+Math.random()*0.2;foeScan(f,F,tg);}
   const E=f.foe,dx=E?E.x-f.x:pdx,dz=E?E.z-f.z:pdz,dp=E?Math.hypot(dx,dz):pdp,dy=E?E.y-f.y:pdy,vis=E?f.eseen===0:f.vis,er=E?foeRad(E):0;
   if(!tg&&!E){if(f.st==='chase'||f.st==='flee'){f.st='return';f.atk=0;}}
-  else if(f.st!=='chase'&&f.st!=='flee'){const rr=f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight;if(tg&&f.vis&&pdp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||pdp<14)))foeAlert(f);}
+  else if(f.st!=='chase'&&f.st!=='flee'){const rr=(f.st==='sleep'?Math.min(4,F.sight*0.3):F.sight)*(F.folk?1:cloakHide());if(tg&&f.vis&&pdp<rr&&(!F.folk||folkWrath(f)&&(!F.civ||pdp<14)))foeAlert(f);}
   else if(f.st==='chase'&&!E){f.seen=f.vis?0:f.seen+dt;if(f.seen>8||pdp>F.sight*2.5){f.st='return';f.atk=0;}}
   if(f.leash&&f.st==='chase'&&!E&&Math.hypot(PL.x-f.hx,PL.z-f.hz)>f.leash+12){f.st='return';f.atk=0;}
   if(F.folk&&f.st==='chase'&&!E&&!folkWrath(f)){f.st='return';f.atk=0;} // the realm's wrath has passed
@@ -519,6 +523,7 @@ function placeFoe(f,dt){
   else if(f.atkK==='heave'&&f.atk>0&&P.armL){const k=Math.min(1,prog*1.6);P.armL.rotation.x=P.armR.rotation.x=-1.5+0.5*k;} // the ram's crew heave (W2)
   else if(f.climb&&!f.climb.ph&&P.armL){const k=Math.sin(foeClock*8+f.id);P.armL.rotation.x=-2.6+k*0.4;P.armR.rotation.x=-2.6-k*0.4;if(P.legL){P.legL.rotation.x=-0.4+k*0.5;P.legR.rotation.x=-0.4-k*0.5;}}
   else if(F.drum&&!f.atk&&P.armL){const k=Math.sin(foeClock*9+f.id);P.armL.rotation.x=-0.9+k*0.5;P.armR.rotation.x=-0.9-k*0.5;} // the drummer beats (W3)
+  else if(f.bow>foeClock&&!f.atk&&!f.foe&&P.body){const k=Math.min(1,(f.bow-foeClock)*1.2,(2-(f.bow-foeClock))*3);P.body.rotation.x=0.55*Math.max(0,k);if(P.armR)P.armR.rotation.x=-0.6*Math.max(0,k);} // a bow (D-088)
   else if(f.cheer>foeClock&&!f.atk&&!f.foe&&P.armL){const k=Math.abs(Math.sin(foeClock*3+f.id));P.armL.rotation.x=-2.7-0.3*k;P.armR.rotation.x=-2.5-0.4*k;root.position.y=Math.max(0,Math.sin(foeClock*5+f.id))*0.15;}
   if(F.lord&&!f.dead&&f.st!=='sleep')emberPose(f,P,root,prog);
   if(F.mount&&!f.dead&&!far)riderPose(f,P,amp);
@@ -581,7 +586,7 @@ function emberPose(f,P,root,prog){
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
-  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();
+  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();elfFrame(dt);
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
   warSoundTick(dt);warWorksFrame(dt);warNightFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt);morFrame(dt);fieldFrame(dt);campFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
   foeFrame++;foeGrid.clear();foeGridS[0].clear();foeGridS[1].clear();foeRadMax=1;
@@ -648,7 +653,7 @@ function foeSlain(f){
   const ar=armsSlain(f);if(ar)got.push(ar); // (arrows recovered, W8a)
   const bn=morSlain(f);if(bn)got.push(bn);morDeath(f,1);fieldSlain(f);warRecSlain(f); // (a warhost's banner taken; their hearts sink: W8b)
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
-  if(f.lordOf)lordFalls(f);warSwornSlain(f);
+  if(f.lordOf)lordFalls(f);warSwornSlain(f);elfSlain(f);elfLament(f);
 }
 function lordFalls(f){fallenLords.add(f.lordOf);saveDirty=true;if(!f.L)showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
   burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}

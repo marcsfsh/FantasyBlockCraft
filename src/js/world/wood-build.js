@@ -61,8 +61,8 @@ RB.wgate=(s,p,u,v,X,Z)=>{const av=Math.abs(v),g=hAt(X,Z),gy=p.y;if(av===3){RBS(X
   if(av<3){RBP(X,gy+6,Z,WCARVE);if(av===0)RBP(X,gy+5,Z,WBANNER);}};
 // A spring: a round pool held in rootstone on its pad, a lamp on a rootstone post in its middle
 RB.wpool=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),y=p.y;if(d>p.rp+1)return;
-  if(d<0.8){RBS(X,Z,y-2,y+1,WROOT);RBP(X,y+2,Z,WLAMP);return;}
-  if(d<p.rp){RBP(X,y-2,Z,WROOT);RBP(X,y-1,Z,WATER);RBP(X,y,Z,WATER);RBS(X,Z,y+1,y+3,AIR);return;}
+  if(d<0.8){RBS(X,Z,y-2,y+1,WROOT);RBP(X,y+2,Z,p.moon?STARLAMP:WLAMP);return;}
+  if(d<p.rp){RBP(X,y-2,Z,p.moon?MOONSTONE:WROOT);RBP(X,y-1,Z,WATER);RBP(X,y,Z,WATER);RBS(X,Z,y+1,y+3,AIR);return;} // (a moonwell: its bed moonstone, D-088)
   RBP(X,y,Z,WROOT);if(hsh(X,9745,Z)<0.25)RBP(X,y+1,Z,[FERN,BLUEB,FLOWY][(hsh(X,9747,Z)*3)|0]);};
 // An archery range on its pad: a mossy lawn, a woven rail at the shooting line, three targets (hay on carved stands)
 RB.wrange=(s,p,u,v,X,Z)=>{const y=p.y,[a,b]=[u-p.u0,v-p.v0];RBP(X,y,Z,b%5===2?FMOSS:GRASS);RBS(X,Z,y+1,y+4,AIR);
@@ -83,6 +83,16 @@ RB.whut=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rh+
   if(d<p.rh+0.5){RBP(X,y,Z,WPLANK);for(let yy=y+1;yy<ry;yy++)RBP(X,yy,Z,AIR);for(let yy=hAt(X,Z)+1;yy<y;yy++)RBP(X,yy,Z,WROOT);}
   if(d>p.rh-0.5&&d<p.rh+0.5){const door=Math.abs(wAng(a,p.da))*d<1,win=Math.abs(Math.sin(a*3+1))<0.25;for(let yy=y+1;yy<=y+4;yy++)RBP(X,yy,Z,door&&yy<=y+3?AIR:win&&yy===y+2?AIR:yy===y+4?WPLANK:WCARVE);}
   if(d<0.8)RBP(X,y+1,Z,WLAMP);};
+// A market glade of the wood (D-088): stalls in a ring about a lamp on a carved post, each a counter of planks under a cone of
+// leaf thatch on two carved posts, wares on it; the ground mossy
+RB.wmarket=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rr+0.6)return;const g=hAt(X,Z);RBP(X,g,Z,hsh(X,9775,Z)<0.4?FMOSS:LITTER);RBS(X,Z,g+1,g+5,AIR);
+  if(d<0.8){RBS(X,Z,g+1,g+3,WCARVE);RBP(X,g+4,Z,WLAMP);return;}
+  const a=Math.atan2(dv,du),k=Math.round(a/WTAU*p.n),ac=a-k*WTAU/p.n,off=Math.abs(ac)*d;
+  if(d>p.rr-3.6&&d<p.rr-0.4&&off<2.2){const front=d<p.rr-2.4;if(front&&off<1.6){RBP(X,g+1,Z,WPLANK);if(off<0.6)RBP(X,g+2,Z,[BARREL,CRATE,STARBLOOM,SILVFERN,BOOKS][Math.floor(hsh(k,9777,Math.round(s.X))*5)]);}
+    if(!front&&off>1.5)RBS(X,Z,g+1,g+3,WCARVE);RBP(X,g+4,Z,WTHATCH);}};
+// A pen for the wood's steeds (D-088): a ring of woven rails on carved posts about mossy ground, a gap toward the way, a trough
+RB.wpen=(s,p,u,v,X,Z)=>{const du=u-p.cu,dv=v-p.cv,d=Math.hypot(du,dv);if(d>p.rr+0.6)return;const g=hAt(X,Z);RBP(X,g,Z,FMOSS);RBS(X,Z,g+1,g+3,AIR);
+  if(d>p.rr-0.6&&!(du<0&&Math.abs(dv)<1.5))RBP(X,g+1,Z,Math.round(Math.atan2(dv,du)/WTAU*16)%4===0?WCARVE:WRAIL);else if(Math.abs(du-1)<0.6&&Math.abs(dv)<1.5)RBP(X,g+1,Z,HAYBALE);};
 // ---- The king's halls: a hill raised over them (L.mound in realms.js), its face cut where the way arrives (u = m.face); the
 // forecourt on its pad before it, crossed by a stream held in rootstone under a bridge; the gate a pointed arch of rootstone in
 // the face between carved pillars, lamps either side, the banner over it, carved doors standing open; within, a great hall
@@ -173,20 +183,27 @@ function woodCity(s,L,r){const K=woodKit(s,L,r),R=s.R,big=s.prov.capital;L.hedge
   K.P.push({k:'wgate',u0:-R-1,u1:-R+1,v0:-3,v1:3,y:wvRaw(s,-R,0)});
   // the king's tree
   const ku=Math.round(R*0.45),king=K.tree(ku,0,big?4:3,[{y:18},{y:30,house:1},{y:44,house:1,hall:1}],{cr:big?17:14,H:big?78:66});
+  // the market glade and the steeds' pen (D-088), kept clear of the goldboughs
+  const mu=Math.round(R*0.05),mv=18,nu=Math.round(-R*0.62),nv=-12;
   // goldboughs on a loose grid, off the way and clear of each other
   const sp=21,n0=Math.ceil(R/sp);for(let a=-n0;a<=n0;a++)for(let b=-n0;b<=n0;b++){const cu=a*sp+Math.round((r()-0.5)*6),cv=b*sp+Math.round((r()-0.5)*6),tr=r()<0.3?3:2;
-    if(Math.hypot(cu,cv)>R-12||(Math.abs(cv)<9&&cu<ku+6)||!K.far(cu,cv,19))continue;
+    if(Math.hypot(cu,cv)>R-12||(Math.abs(cv)<9&&cu<ku+6)||!K.far(cu,cv,19)||Math.hypot(cu-mu,cv-mv)<16||Math.hypot(cu-nu,cv-nv)<12)continue;
     const lv=[{y:16},{y:26,house:r()<0.55},{y:36,house:r()<0.4}].filter(()=>r()<0.8);if(!lv.length)lv.push({y:26,house:1});K.tree(cu,cv,tr,lv);}
   K.bridges(30,3);
   // the way from the gate to the king's tree, paths to every stair; the spring and the range beside the way
   K.path(-R-2,0,ku-6,0,1.5);K.toStairs(ku-6);
-  const pu=Math.round(-R*0.4),pv=10;if(K.far(pu,pv,9)){K.P.push({k:'wpool',u0:pu-5,u1:pu+5,v0:pv-5,v1:pv+5,cu:pu,cv:pv,rp:3,y:s.T,clear:1});K.pad(pu-5,pu+5,pv-5,pv+5,s.T);K.path(pu,1,pu,pv-4,0.6);K.spot('garden',pu,pv-6,s.T);}
+  const pu=Math.round(-R*0.4),pv=10;if(K.far(pu,pv,9)){K.P.push({k:'wpool',u0:pu-5,u1:pu+5,v0:pv-5,v1:pv+5,cu:pu,cv:pv,rp:3,y:s.T,clear:1,moon:1});K.pad(pu-5,pu+5,pv-5,pv+5,s.T);K.path(pu,1,pu,pv-4,0.6);K.spot('garden',pu,pv-6,s.T);}
   const ru=Math.round(-R*0.4),rv=-14;if(K.far(ru+5,rv-3,10)){K.P.push({k:'wrange',u0:ru,u1:ru+12,v0:rv-8,v1:rv,y:s.T,clear:1});K.pad(ru,ru+12,rv-8,rv,s.T);K.spot('range',ru+2,rv-4,s.T);}
+  // the market glade and the pen beside the way, where the gate trees and the king's tree leave room
+  if(K.far(mu,mv,14)){K.P.push({k:'wmarket',u0:mu-9,u1:mu+9,v0:mv-9,v1:mv+9,cu:mu,cv:mv,rr:8,n:6,clear:1});K.path(mu,1,mu,mv-8,0.6);K.spot('market',mu,mv-3,wvRaw(s,mu,mv));}
+  if(K.far(nu,nv,11)){K.P.push({k:'wpen',u0:nu-6,u1:nu+6,v0:nv-6,v1:nv+6,cu:nu,cv:nv,rr:5,clear:1});K.path(nu-5,nv,nu-5,-1,0.6);K.spot('stable',nu,nv,wvRaw(s,nu,nv),{horses:2});}
   K.ground();
   // where the folk are: the gate, its bridge, the way, the platforms, the king's hall
   K.spot('gate',-R+2,0,wvRaw(s,-R+2,0));if(g1)K.spot('deck',-R+3,0,g1.fl[0].y,{R:2});K.spot('street',Math.round(-R*0.15),0,wvRaw(s,Math.round(-R*0.15),0));
   if(king){const h=king.fl[king.fl.length-1];K.spot('hall',ku+Math.round(Math.cos(king.a0)*(king.tr+3)),Math.round(Math.sin(king.a0)*(king.tr+3)),h.y,{R:2});K.spot('deck',ku+Math.round(Math.cos(king.a0)*(king.tr+3)),Math.round(Math.sin(king.a0)*(king.tr+3)),king.fl[0].y,{R:2});}
   for(const t of K.trees.filter(t=>t!==king&&t!==g1&&t!==g2).slice(0,big?4:3)){const f=t.fl[0];K.spot('deck',t.cu+Math.round(Math.cos(t.a0+1)*(t.tr+2.5)),t.cv+Math.round(Math.sin(t.a0+1)*(t.tr+2.5)),f.y,{R:1.5});}
+  // the healers in a house high in a tree (D-088)
+  {const t=K.trees.find(t=>t!==king&&t.fl.some(f=>f.house&&!f.hall));if(t){const f=t.fl.find(f=>f.house&&!f.hall);K.spot('heal',t.cu+Math.round(Math.cos(t.a0+Math.PI)*(t.tr+2.6)),t.cv+Math.round(Math.sin(t.a0+Math.PI)*(t.tr+2.6)),f.y,{R:1});}}
 }
 // The king's halls under the hill: the hill's face toward the way, the forecourt with its stream and bridge, the gate, the hall,
 // the cellar and the guardroom; goldboughs on the hill's shoulders
@@ -223,10 +240,12 @@ function woodGlade(s,L,r){const K=woodKit(s,L,r),R=s.R,gr=R-3;
 // woodland paths of litter; bridges of planks with woven rails on posts of bark
 function woodRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%32===16){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}return;}
+  const arch=hi&&!wet&&Math.floor(rr.along)%64===48; // an arch of carved wood over the way with a lamp hung under it (D-088)
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%32===16){RBS(X,Z,g+1,g+2,WCARVE);RBP(X,g+3,Z,WLAMP);}else if(arch&&ao<=rd.w+1.5){RBS(X,Z,g+1,g+6,WCARVE);RBP(X,g+7,Z,WLAMP);}return;}
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?WCARVE:WPLANK);if(edge)RBP(X,y+1,Z,WRAIL);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%6===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,WBARK);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
   RBP(X,g,Z,hi&&ao>rd.w-0.5?FMOSS:hsh(X,9751,Z)<0.2?FMOSS:LITTER);
   for(let y=g+1;y<=g+3;y++){const id=world[I(x,y,z)];if(id&&!SOLID[id])RBP(X,y,Z,AIR);else if(SOLID[id]&&y===g+1)RBP(X,y,Z,AIR);}
+  if(arch){RBS(X,Z,g+4,g+5,AIR);RBP(X,g+6,Z,WCARVE);if(ao<0.5)RBP(X,g+5,Z,WLAMP);}
 }

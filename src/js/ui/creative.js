@@ -91,6 +91,10 @@ function realmTour(kind,ck){
   const [x,z]=sitePort(best),d=DIRS[best.dir];goTo(Math.round(x+d[0]*6),Math.round(z+d[1]*6));PL.yaw=Math.atan2(d[0],d[1]);
   toast(best.name+', '+(realmPlace(best.X,best.Z)||{line:''}).line+', '+Math.round(bd)+' blocks from where you were');return{X:best.X,Z:best.Z,d:Math.round(bd),s:best};
 }
+// The nearest ruin of the elder elves of a kind (D-088), standing a little off it, facing it
+function elderTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
+  for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=elderAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
+  if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast(best.name+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
 // The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
 function gateTour(kind){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;

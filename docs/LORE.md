@@ -54,3 +54,26 @@ Every people named by a land has a naming style in `core/names.js`. Dwarf names 
 | High elf | Aenoriel, Ithadir, Vaeoriel Quaoriel, Naridel, Ilmesse, Caloriel Quander |
 | Drow | Draryn, Malaeth, Quarlyn Velryn, Nhelith, Jharzith, Ilvlyn Velnyss |
 | Beastfolk | Arrtail, Hofka, Brintail Rhatail, Marrek, Grrun, Fangtail Rharro |
+
+## The elves (D-088)
+
+Drafts for the owner, in `gameplay/elves.js`.
+
+**Their tongue** (`ELF_TONGUE`): words of our own, checked against the blocklist (`82-elf-friends`).
+
+| Saying | Its meaning |
+|---|---|
+| Saelith ynnor | Well met beneath the stars |
+| Tavael oressa, quilar | Walk in light, traveller |
+| Liathe nysse sorae | The road is long, but the night is kind |
+| Faerel auvrin vael | Rest here; the watch is kept |
+| Ynnor saeth, vaelis | The stars keep you, friend |
+| Orrin tavael quessa | Go in peace, and come again |
+| Sylvar ithae | The leaves remember |
+| Shaen tavrel, ynnor sael | Go softly; the trees will know you |
+| Quessa naeth oryn | Our hall is open to you |
+| Vaelis, auvrin tae | Friend, sit with us |
+
+**The name they give a friend** (`elfNaming`): a word in the people's naming style and an epithet: Starwalker, the Far-come, Friend of the Lamps, the Wayfarer, Light-bearer (the high elves); Leaf-walker, the Quiet Foot, Friend of the Boughs, Bright-eye, the Wanderer (the wood elves).
+
+**The histories** (`elfTales`): eight tales for each kingdom, its names drawn for that kingdom. The high elves: The Founding; The Lamps of (a loremaster); The War of the Fire; The Elder Realms; The Moonwells; The Stars of the Elves (the Lamp of the north that never sets, a Crown of summer, the Long Road the dead walk, the Ship low over the sea in autumn); The Haven of (a haven); The Dwindling. The wood elves: The Waking of the Wood; The First Goldbough; The Long Hunt; The Halls under the Hill; The Feast of (a singer); The Fire in the East; The Stars over the Wood (the Silver Bough, a Crown, the Falling Leaf); The Leaving.

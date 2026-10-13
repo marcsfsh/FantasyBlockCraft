@@ -66,6 +66,7 @@ function showText(title,text){
   $('inv').style.display='grid';if(document.pointerLockElement)document.exitPointerLock();if(TOUCH)playing=false;
 }
 function openLore(X,Y,Z){
+  if(elfLectern(X,Y,Z))return; // the histories of the elves, in their halls (D-088)
   const WX=X+OX,WZ=Z+OZ,cx=Math.floor(WX/CS),cz=Math.floor(WZ/CS),h=holdOf(cx,cz),plaza=roomAt(WX,Y,WZ)==='plaza',k=lecternPage(WX,Y,WZ);
   showText(plaza?'A waymarker of '+h.name:h.name+', page '+(k+1)+' of '+CHRON_N+': '+holdChronicle(cx,cz)[k][0],loreText(WX,Y,WZ));
   if(!plaza)journalPage(cx,cz,k);

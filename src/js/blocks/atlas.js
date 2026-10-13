@@ -544,6 +544,42 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
       bolt=y===5&&x>=1&&x<=15,tip=y===5&&x===15,str=x===9&&y>=2&&y<=11&&Math.abs(y-6.5)>=1.5,wh=Math.hypot(x-7.5,y-9.5)<1.6;
     if(tip)P(359,x,y,[200,202,210]);else if(bolt)P(359,x,y,sh([120,90,58],(hn(x,y,570)-.5)*10));else if(bow)P(359,x,y,sh([110,114,124],y<3||y>10?-16:12));else if(str)P(359,x,y,[214,206,184]);
     else if(wh)P(359,x,y,sh([80,82,90],Math.hypot(x-7.5,y-9.5)<0.8?20:-6));else if(stock)P(359,x,y,sh([132,96,60],(y===6?12:-8)+(hn(x,y,571)-.5)*10));else if(leg)P(359,x,y,sh([110,80,50],(hn(x,y,572)-.5)*12));}
+  // the elves enlarged (D-088): moonstone, pale blue-white with milky veins and a glow at its heart; the starglass lamp, a
+  // six-rayed star of clear crystal in a silver cage, open between; the throne's top (a cushion of deep blue in a gilt frame) and
+  // its side (a high back of golden wood carved with a star, gilt at the edges); starbloom, white stars on a slender stem;
+  // silverfern, pale silver fronds; dawnlily, pale gold trumpets; the leaf-stone's face, a leaf in relief over lines of letters;
+  // weathered elvenstone, cracked, stained and mossed; shipwood, white planks with pale seams; the elven sail, white canvas in
+  // panels with a silver star; the elder chest's face (elvenstone bound in gold, a lock of gold) and top; the market awning,
+  // stripes of blue and white with a gilt fringe
+  for(const t of [361,364,365,366])clear(t);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const mv=Math.abs(Math.sin(x*0.45+y*0.3+fbm2(x/5,y/5,2,601.3)*3.2))<0.09,mr=Math.hypot(x-7.5,y-7.5);
+    P(360,x,y,sh([206,216,232],(mv?18:0)+(hn(x>>1,y>>1,602)-.5)*10+(hn(x,y,603)-.5)*6+Math.max(0,10-mr*1.6)));
+    const sa=Math.atan2(y-7.5,x-7.5),sr=Math.hypot(x-7.5,y-7.5),ray=sr<(Math.abs(Math.cos(sa*3))>0.95?6:Math.abs(Math.cos(sa*3))>0.8?3.4:2),cg=(x===1||x===14)&&y>=2&&y<=13||(y===1||y===14)&&x>=1&&x<=14;
+    if(cg)P(361,x,y,sh([200,206,218],(x+y)%3*5));else if(ray)P(361,x,y,sh([232,244,255],-sr*4+(Math.abs(Math.cos(sa*3))>0.95?10:0)),sr<1.5?255:230);
+    const fr=x<=1||x>=14||y<=1||y>=14,cu=x>=3&&x<=12&&y>=3&&y<=12;
+    P(362,x,y,fr?sh([222,182,84],(x===0||y===0?16:-6)+(hn(x,y,604)-.5)*12):cu?sh([42,62,124],(hn(x,y,605)-.5)*10+((x+y)%5===0?-8:0)):sh([198,152,84],(hn(x,y,606)-.5)*10));
+    const edge=x<=1||x>=14,starT=Math.hypot(x-7.5,y-4.5),st=starT<(Math.abs(Math.cos(Math.atan2(y-4.5,x-7.5)*3))>0.9?3.4:1.4),seat=y>=11&&y<=12;
+    P(363,x,y,edge?sh([222,182,84],(x===0?14:-10)+(hn(x,y,607)-.5)*10):st?sh([236,232,214],(starT<1?10:0)):seat?sh([42,62,124],(hn(x,y,608)-.5)*10):sh([198,152,84],(y%5===0?-14:0)+(hn(x,y>>2,609)-.5)*12));
+    // the three plants: on a stem from the foot, starbloom's flowers at three heights, the fern's fronds, the lily's trumpets
+    const stem=Math.abs(x-7.5-Math.sin(y*0.4)*0.8)<0.6&&y>=5;
+    {const fl=[[5,4],[10,6],[7,9]].some(([cx,cy])=>{const r=Math.hypot(x-cx,y-cy),a=Math.atan2(y-cy,x-cx);return r<(Math.abs(Math.cos(a*2.5))>0.85?2.2:0.9);});
+      if(fl)P(364,x,y,sh([248,246,232],(hn(x,y,610)-.5)*10));else if(stem||(y>=11&&Math.abs(x-7.5)<(y-10)*0.7&&hn(x,y,611)<0.5))P(364,x,y,sh([92,140,96],(hn(x,y,612)-.5)*16));}
+    {const fr2=[-1,1].some(s=>{for(let k=0;k<7;k++){const by=4+k*1.6,bx=7.5+s*(1+k*0.15),len=4-Math.abs(k-3)*0.6;if(y>=Math.round(by)-0&&y<=Math.round(by)+1&&s*(x-bx)>=0&&s*(x-bx)<=len&&Math.abs((y-by)-s*(x-bx)*0.35)<0.9)return true;}return false;});
+      if(fr2||(Math.abs(x-7.5)<0.6&&y>=3))P(365,x,y,sh([196,212,206],(fr2?(hn(x,y,613)-.5)*20:-30)));}
+    {const tr=[[5,5],[10,4],[8,8]].some(([cx,cy])=>Math.abs(x-cx)<=(y-cy+1)*0.6+0.3&&y>=cy&&y<=cy+3);
+      if(tr)P(366,x,y,sh([246,214,140],(hn(x,y,614)-.5)*14+(y%2?-8:6)));else if(stem||(Math.abs(x-5.5)<0.5&&y>=8)||(Math.abs(x-10.5)<0.5&&y>=7))P(366,x,y,sh([86,138,78],(hn(x,y,615)-.5)*14));}
+    // the leaf-stone: a leaf in relief at the top, three lines of letters under it, a carved border
+    const lb=x===0||x===15||y===0||y===15,lfx=x-7.5,lfy=y-5,lf=(lfx*lfx)/12+(lfy*lfy)/9<1,lv=lf&&Math.abs(lfx)<0.6,ln=(y===10||y===12||y===14)&&x>=3&&x<=12&&hn(x,y,616)<0.65;
+    P(367,x,y,lb?sh([196,186,162],(hn(x,y,617)-.5)*6):lf?sh([238,230,206],lv?-12:8):ln?sh([150,140,120],0):sh([226,216,190],(hn(x,y,618)-.5)*8));
+    const ck=Math.abs(Math.sin(x*0.9+fbm2(x/4,y/4,2,619.1)*4))<0.08&&hn(x>>2,y>>2,620)<0.6,ms=fbm2(x/5,y/5,2,621.7)>0.25+y*0.01;
+    P(368,x,y,ck?sh([120,112,96],0):ms?sh([96,124,74],(hn(x,y,622)-.5)*20):sh([196,188,166],(hn(x>>1,y>>1,623)-.5)*16+(hn(x,y,624)-.5)*8-(y>12?10:0)));
+    const pk=y%4,sm=((hn(0,y>>2,625)*8)|0),jt=((x+sm)%16)===0;P(369,x,y,pk===3||jt?sh([196,198,200],(hn(x,y,626)-.5)*6):sh([238,238,234],(pk===0?6:0)+(hn(x,y>>2,627)-.5)*8));
+    const sp=x%8===0||y%8===0,sst=Math.hypot(x-7.5,y-7.5),sstar=sst<(Math.abs(Math.cos(Math.atan2(y-7.5,x-7.5)*3))>0.94?4:1.2);P(370,x,y,sstar?sh([206,214,230],(sst<1?14:0)):sh([240,238,230],(sp?-14:0)+(hn(x,y,628)-.5)*6));
+    const band=y>=6&&y<=7||x<=1||x>=14||y<=1||y>=14,lock=x>=6&&x<=9&&y>=6&&y<=10;
+    P(371,x,y,lock?sh([238,196,92],(x===6||y===6?16:-10)):band?sh([222,182,84],(hn(x,y,629)-.5)*14+(x+y)%3*3):sh([226,216,190],(y%4===3?-12:0)+(hn(x,y,630)-.5)*8));
+    P(372,x,y,(x<=1||x>=14||y<=1||y>=14||x===7||x===8)?sh([222,182,84],(hn(x,y,631)-.5)*14):sh([226,216,190],(hn(x,y,632)-.5)*8));
+    const stripe=((x>>2)%2)===0,fringe=y>=14;P(373,x,y,fringe?sh([222,182,84],(x%2?-16:10)):stripe?sh([44,70,140],(hn(x,y,633)-.5)*10):sh([236,236,230],(hn(x,y,634)-.5)*8));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

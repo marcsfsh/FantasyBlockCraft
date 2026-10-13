@@ -37,6 +37,15 @@ item(405,'Hunting Bow','bow',[150,112,62],{tool:'bow',draw:0.8,dmg:5,v:34,dur:24
 item(407,'Elven Bow','bow',[206,176,96],{tool:'bow',draw:0.75,dmg:9,v:48,dur:600});item(408,'Dwarven Crossbow','xbow',[124,134,152],{tool:'xbow',load:1.8,dmg:14,v:58,dur:500,once:true});
 item(409,'Arrow','arrow',[140,110,70]);item(410,'Crossbow Bolt','bolt',[110,110,116]);item(411,'Javelin','javelin',[150,112,62],{once:true,throw:{k:'jav',dmg:9,v:25}});item(412,'Throwing Axe','taxe',[200,200,196],{once:true,throw:{k:'axe',dmg:8,v:21}});
 item(413,"Knight's Lance",'lance',[196,200,206],{tool:'lance',dur:300});item(414,'Horn of the Hosts','horn',[214,190,140],{once:true,horn:1});item(415,'Drake Scale','hide',[78,70,72]);item(416,'Drakescale Mail','mail',[92,80,84],{equip:'body',armor:0.6,dur:900,one:true,fireproof:true});
+// The elves' goods and gear (D-088): their fare (waybread that keeps a traveller for days, wine, honeycakes) and a draught of
+// healing; the starglass lantern for the belt that never needs oil; an elven blade, leaf-mail and the warden's cloak (the wastes'
+// creatures see its wearer at half their sight); relics of the elder days from their ruins; a letter carried for them; the
+// whistle that calls an elven steed; a swan boat to set on the water
+item(417,'Waybread','waybread',[214,190,120]);item(418,'Elven Wine','wine',[150,40,70]);item(419,'Honeycake','cake',[222,170,80]);item(420,'Elven Draught','draught',[170,220,230],{once:true});
+item(421,'Starglass Lantern','lantern',[214,222,236],{equip:'belt',lamp:true,ever:1,one:true});item(422,'Elven Blade','sword',[220,226,234],{tool:'sword',tier:8,dur:2400});
+item(423,'Leaf-mail','mail',[206,176,96],{equip:'body',armor:0.5,dur:1400,one:true});item(424,"Warden's Cloak",'cloak',[80,110,74],{equip:'body',armor:0.25,dur:900,one:true,hide:0.5});
+item(425,'Star-carved Cup','goblet',[220,226,236]);item(426,'Leaf-silver Brooch','brooch',[200,206,214]);item(427,'Elder Circlet','circlet',[226,212,150]);
+item(428,'Letter of the Elves','parchment',[236,228,206]);item(429,'Elven Whistle','whistle',[214,222,236],{once:true});item(430,'Swan Boat','boat',[240,240,236],{once:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -127,7 +136,7 @@ function itemIcon(id){
   else if(it.kind==='heart'){for(let y=2;y<14;y++)for(let x=2;x<14;x++){const a=Math.hypot(x-5.5,y-5.5)<3.2||Math.hypot(x-10.5,y-5.5)<3.2||(y>=6&&Math.abs(x-8)<(14-y)*0.75);if(a)px(x,y,(y<5?40:0)+(r()-.5)*30);}g.fillStyle='rgba(255,240,180,0.9)';g.fillRect(5,4,2,1);}
   else if(it.kind==='horn'){for(let k=0;k<12;k++){const x=3+k,y=12-Math.round(Math.sin(k/11*2.6)*7),w=k<3?3:k<8?2:1;for(let d=0;d<w;d++)px(x,y+d,(d?-24:20)+(k>9?-20:0));}g.fillStyle='rgba(255,150,50,0.9)';g.fillRect(4,12,2,1);g.fillRect(9,7,1,1);}
   else if(it.kind==='crown'){for(let y=7;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===7?24:y===12?-30:0)+((x+y)%3?0:-12));for(const x of [2,5,8,11,13])for(let y=2+(x%2);y<7;y++)px(Math.min(13,x),y,(y<4?30:0));g.fillStyle='rgba(255,140,40,0.95)';for(const x of [4,7,10])g.fillRect(x,9,2,2);}
-  else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);g.fillStyle='#2e1a16';g.fillRect(6,2,4,1);}
+  else if(it.kind==='cloak'){for(let y=2;y<15;y++){const w=3+Math.round((y-2)*0.35);for(let x=8-w;x<8+w;x++){const e=(y>12&&(x+y)%3===0);if(e)continue;px(x,y,(x===8-w?20:x===7+w?-24:0)+(y>11?-14:0));}}if(id===385){g.fillStyle='rgba(255,96,26,0.9)';for(let x=3;x<13;x+=2)g.fillRect(x,14,1,1);}g.fillStyle=id===385?'#2e1a16':'#c8a858';g.fillRect(6,2,4,1);}
   else if(it.kind==='shield'){const B=it.boss||[200,200,196],bx=(x,y,v)=>{g.fillStyle='rgb('+cl(B[0]+v)+','+cl(B[1]+v)+','+cl(B[2]+v)+')';g.fillRect(x,y,1,1);};
     for(let y=1;y<15;y++)for(let x=1;x<15;x++){const dx=x-7.5,dy=y-7.5,inS=it.kite?(y<6?Math.abs(dx)<6.4:Math.abs(dx)<6.4-(y-6)*0.72):it.leaf?Math.abs(dx)<6.5*Math.sin(Math.PI*(y-0.5)/14):it.tower?(x>2&&x<13&&y>1&&y<15):Math.hypot(dx,dy)<6.6;
       if(!inS)continue;const rim=it.tower?(x===3||x===12||y===2||y===14):it.kite||it.leaf?false:Math.hypot(dx,dy)>5.6;px(x,y,rim?-34:(x+y)%4===0?-10:dx<0?14:-4);}
@@ -142,10 +151,18 @@ function itemIcon(id){
     if(it.kind==='arrow'||it.kind==='bolt'){g.fillStyle=it.kind==='arrow'?'#e8e0d0':'#6a6a70';g.fillRect(x0-1,y0,1,2);g.fillRect(x0,y0+1,2,1);}
     if(it.kind==='lance'){g.fillStyle='#3c4c96';g.fillRect(6,5,3,3);g.fillStyle='#e8e0d0';g.fillRect(7,6,1,1);}}
   else if(it.kind==='taxe'){g.fillStyle='#634422';for(let k=0;k<8;k++)g.fillRect(4+k,13-k,2,2);for(let y=2;y<9;y++)for(let x=9;x<15;x++){if(Math.hypot(x-9,y-5.5)<5&&x-9>=Math.abs(y-5.5)*0.4)px(x,y,x>12?30:0);}}
+  else if(it.kind==='waybread'){for(let y=4;y<13;y++)for(let x=2;x<14;x++){const d=Math.hypot((x-7.5)/6,(y-8.5)/4.2);if(d<1)px(x,y,(d>0.8?-30:0)+(y<7?16:0));}g.fillStyle='#5a8a46';for(let k=0;k<6;k++)g.fillRect(3+k*2,5+(k%2),2,1);g.fillStyle='#3e6a34';g.fillRect(7,4,2,9);}
+  else if(it.kind==='wine'){for(let y=6;y<15;y++)for(let x=5;x<11;x++)px(x,y,(x===5?20:x===10?-24:0)+(y>12?-20:0));g.fillStyle='#d8c070';g.fillRect(5,9,6,2);g.fillStyle='#7a5a3a';g.fillRect(7,1,2,5);}
+  else if(it.kind==='cake'){for(let y=6;y<13;y++)for(let x=2;x<14;x++)px(x,y,(y===6?30:y===12?-30:0)+((x+y)%3===0?-10:0));g.fillStyle='#f0d070';g.fillRect(3,5,10,1);g.fillStyle='#ffe6a0';g.fillRect(6,4,4,1);}
+  else if(it.kind==='draught'){for(let y=5;y<15;y++){const w=y<8?1:3;for(let x=8-w;x<8+w;x++)px(x,y,(x<8?24:-10));}g.fillStyle='#e8eef4';g.fillRect(7,2,2,3);g.fillStyle='rgba(255,255,255,0.9)';g.fillRect(6,10,1,2);}
+  else if(it.kind==='brooch'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-7.5)*1.4),lf=d<6&&Math.abs(Math.atan2(y-7.5,x-7.5))>0.3;if(lf)px(x,y,d>5?-30:x<8?20:0);}g.fillStyle='#7ad8f0';g.fillRect(7,7,2,2);}
+  else if(it.kind==='circlet'){for(let a=0;a<40;a++){const t=a/40*6.283,x=Math.round(7.5+Math.cos(t)*6),y=Math.round(9+Math.sin(t)*3);px(x,y,Math.sin(t)>0?-24:16);}g.fillStyle='#e6ecf4';g.fillRect(7,4,2,3);g.fillStyle='#7ad8f0';g.fillRect(7,5,2,1);}
+  else if(it.kind==='whistle'){for(let k=0;k<10;k++){px(3+k,10-Math.round(k*0.4),k<2?-20:10);px(3+k,11-Math.round(k*0.4),-20);}g.fillStyle='#2a2a30';g.fillRect(8,7,1,1);}
+  else if(it.kind==='boat'){for(let x=1;x<15;x++){const d=Math.abs(x-7.5)/7.5,top=10+Math.round(d*d*2);for(let y=top;y<14-Math.round(d*2);y++)px(x,y,(y===top?20:-10));}for(let y=3;y<10;y++)px(13,y,-10);g.fillStyle='#d8b050';g.fillRect(14,3,2,1);for(let y=4;y<10;y++)for(let x=5;x<10;x++)if(x-5<y-3)px(x,y,30);}
   else if(it.kind==='pick'){
     for(let k=0;k<10;k++){g.fillStyle=k%3?'#8a6036':'#634422';g.fillRect(2+k,13-k,2,2);}
     for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-2,y-14);if(d>=9.6&&d<=12&&Math.abs((x-2)-(14-y))<=7)px(x,y,(d>11?-36:d<10.4?28:0));}
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385]); // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427]); // (the relics of the elder elves: D-088) // relics for the discovery log (M7)

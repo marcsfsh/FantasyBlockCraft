@@ -378,3 +378,10 @@ The order of E2 to E5 is not yet decided; confirm it before E1 ends.
 - The Leaguer full of people at work: drill, range, smithies, cook-fires, wagons, hospital, sentries, knots of talk, the camp's sounds (D-084).
 - The hidden way through the ring beside every gate, with companies of the hosts' best slipping through it into the orcs' yard (D-085).
 - The mine met by the countermine from the war's start, and the battle without end in the Broken Gallery (D-086).
+
+## The elves enlarged (asked by the owner on 2026-10-13: "a massive expansion of the elven kingdom and elves in general. 10 major new features, 10 average, and 10 minor"; done in 0.51.0, D-088)
+
+- Major: the havens and their white ships; the royal court; standing with each people; trade for coin; tasks; the ruins of the elder elves; elven arms and gear; the elven horse and the great elk; festivals under the stars; the histories of the elves.
+- Average: wardens at the border; moonwells; elven plants; swan boats; the elven tongue and a name; lights in their lands; houses of healing; the archery contest; dawn and dusk; travellers and the leaving.
+- Minor: horns at dawn and dusk; moonstone, the starglass lamp and the throne; leaf-stones; statues of the elder kings; falling golden leaves; bows from a friend; signs on the map; the arrival and a discovery section; a lament; elven fare.
+

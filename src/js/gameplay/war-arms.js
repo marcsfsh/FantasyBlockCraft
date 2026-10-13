@@ -92,4 +92,4 @@ function armsPose(){const it=ITEMS[curId()],q=shieldOn();
 const armsStuck=[];
 entityKind({name:'spent arrows',list:armsStuck,persist:false,shift:(dx,dz)=>{for(const s of armsStuck){s.m.position.x-=dx;s.m.position.z-=dz;}},clear:()=>{for(const s of armsStuck)scene.remove(s.m);armsStuck.length=0;},
   update:dt=>{for(let i=armsStuck.length-1;i>=0;i--){const s=armsStuck[i];s.t-=dt;if(s.t<=0){scene.remove(s.m);s.m.material.dispose();armsStuck.splice(i,1);}}}});
-function armsStick(s){s.m.position.set(s.x-s.vx*0.012,s.y-s.vy*0.012,s.z-s.vz*0.012);armsStuck.push({m:s.m,t:30});if(armsStuck.length>150){const o=armsStuck.shift();scene.remove(o.m);o.m.material.dispose();}}
+function armsStick(s){elfArrowIn(s);s.m.position.set(s.x-s.vx*0.012,s.y-s.vy*0.012,s.z-s.vz*0.012);armsStuck.push({m:s.m,t:30});if(armsStuck.length>150){const o=armsStuck.shift();scene.remove(o.m);o.m.material.dispose();}}

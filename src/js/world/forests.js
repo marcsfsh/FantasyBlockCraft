@@ -53,7 +53,7 @@ const FOREST={
   willow:{trees:0.012,glade:true,tree:(X,y,Z,r)=>willowP(X,y,Z,r,WILLOW,WILLOWL)},
   yew:{trees:0.03,tree:(X,y,Z,r)=>{if(hsh(X,8167,Z)<0.8)yewP(X,y,Z,r);else treeP(X,y,Z,LOG,LEAVES,4,r);},
     top:o=>o.dn>0.15?FMOSS:o.dn<-0.3?DIRT:GRASS,plant:r=>r<0.06?FERN:r<0.11?DBUSH:r<0.14?TGRASS:0},
-  silver:{trees:0.016,tree:(X,y,Z,r)=>silverP(X,y,Z,r),plant:r=>r<0.006?MOONP:r<0.04?BLUEB:r<0.14?TGRASS:0}
+  silver:{trees:0.016,tree:(X,y,Z,r)=>silverP(X,y,Z,r),plant:r=>r<0.006?MOONP:r<0.016?SILVFERN:r<0.04?BLUEB:r<0.14?TGRASS:0} // (silverfern: D-088)
 };
 const forestOf=o=>FOREST[LANDS[o.land].k];
 // ---- Signatures (Q124): each stretch of a forest (named after its highest-priority cell) has its landmark, its feature, or,

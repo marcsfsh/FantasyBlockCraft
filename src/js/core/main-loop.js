@@ -10,10 +10,11 @@ function update(dt){
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
-  const speed=(PL.fly?(flyFast?20:11):inLiq?2.4:PL.ride?(sprint?11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
+  const speed=(PL.fly?(flyFast?20:11):inLiq&&!PL.ride?2.4:PL.ride?(sprint?ANIMALS[PL.ride.kind].gallop||11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
   const sy=Math.sin(PL.yaw),cy=Math.cos(PL.yaw);
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;
+  if(PL.ride&&ANIMALS[PL.ride.kind].boat){boatStep(dt,wx,wz,sprint);survivalTick(dt,false,Math.hypot(PL.vx,PL.vz)*dt,false);armsTick(dt);return;} // rowing a swan boat (D-088)
   if(PL.ground||PL.fly||inLiq)gliding=false;
   if(gliding){const gs=9+Math.max(0,-PL.pitch)*10,kk=Math.min(1,1.6*dt);PL.vx+=(-sy*gs+cy*str*3-PL.vx)*kk;PL.vz+=(-cy*gs-sy*str*3-PL.vz)*kk;}
   else{
@@ -22,7 +23,7 @@ function update(dt){
   }
   if(PL.fly){const tv=((jump?1:0)-(down?1:0))*speed;PL.vy+=(tv-PL.vy)*Math.min(1,10*dt);}
   else if(inLiq){PL.vy-=7*dt;if(jump)PL.vy=Math.min(PL.vy+22*dt,3.4);PL.vy*=1-Math.min(1,2.2*dt);if(PL.vy<-3.5)PL.vy=-3.5;}
-  else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=PL.ride?10.6:8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
+  else{PL.vy-=28*dt;if(jump&&(PL.ground||airT<0.1)&&PL.vy<=0.5){PL.vy=PL.ride?ANIMALS[PL.ride.kind].leap||10.6:8.4;airT=1;exh+=0.05;}if(gliding)PL.vy=Math.max(PL.vy,-(2.2+Math.max(0,-PL.pitch)*7));if(PL.vy<-50)PL.vy=-50;}
   // climbing (M4): on a ladder, piton or rope, jump climbs, down or sprint descends, and nothing holds the player still
   const climb=!PL.fly&&!inLiq&&onClimb();
   if(climb){gliding=false;PL.vy=jump||(fwd>0.3&&wasWall)?3.2:(shift||tch.down||PAD.down)?-3.6:0;}
