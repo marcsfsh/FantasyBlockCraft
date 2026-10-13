@@ -181,7 +181,8 @@ function animalCall(a,hurt){
     case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
     case 'boar':for(let i=0;i<(hurt?3:2);i++){burst(0.12,'lowpass',260,1,0.13,i*0.2,at);voice(120*p,88*p,0.15,0.06,{form:300,q:1,delay:i*0.2},at);}break;
     case 'hound':if(a.tame&&!hurt&&Math.random()<0.5)voice(900,1150,0.55,0.04,{type:'sine',form:1200,q:1},at);else for(let i=0;i<2;i++)voice(520*p,360*p,0.12,0.09,{form:900,q:1.4,delay:i*0.25},at);break;
-    case 'rabbit':burst(0.06,'lowpass',180,1,0.15,0,at);break;}
+    case 'rabbit':burst(0.06,'lowpass',180,1,0.15,0,at);break;
+    case 'swanboat':burst(0.5,'lowpass',420,0.8,0.08,0,at);voice(660*p,520*p,0.3,0.04,{type:'sine',form:900,q:1},at);break;} // the water at its hull, a creak of its timbers (D-088)
 }
 // ---- Aiming at an animal: the nearest box the view ray passes through, within reach and nearer than the block in the way
 // the distance along a ray to where it enters a box, or -1

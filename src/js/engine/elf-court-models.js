@@ -17,7 +17,7 @@
       paint(P,c){AM_KINDS.elord.paint(P,c);crownPaint(P);mantlePaint(P,BLUE);P.map('scep',ALL,(s,t)=>t%5===0?sh(GOLD,20):sh(GOLD,-10));P.map('scepS',ALL,()=>[230,242,255,200]);}},
     equeen:{res:2,tex:256,scale:1.1,parts:[...base('elady'),...crown(),...mantle(23)],coats:recoat('elady',(c,i)=>({cl:[[236,238,242],[200,214,236],[226,226,214],[214,200,226]][i%4]})),
       paint(P,c){AM_KINDS.elady.paint(P,c);crownPaint(P);mantlePaint(P,BLUE);}},
-    eherald:{res:2,tex:256,scale:1.08,parts:[...base('elord'),['tabard','body',[0,0,0],[-4.9,-8,-2.9,9.8,18,5.8]],['horn','body',[4.6,2,0],[-0.5,-1,-2,1,2,4],0,{nb:1,tp:['z',1,0.5,0,0]}]],
+    eherald:{res:2,tex:256,scale:1.08,parts:[...base('elord'),['tabard','body',[0,0,0],[-5,-8,-3,10,18,6]],['horn','body',[4.6,2,0],[-0.5,-1,-2,1,2,4],0,{nb:1,tp:['z',1,0.5,0,0]}]],
       coats:recoat('elord',()=>({cl:[30,48,96],cl2:[236,236,240]})),
       paint(P,c){AM_KINDS.elord.paint(P,c);cloth(P,['tabard'],BLUE);P.map('tabard',['L','R'],(s,t)=>sh(GOLD,-10));sign(P,'tabard','F',-3,3,WHITE,GOLD);sign(P,'tabard','B',-3,3,WHITE,GOLD);
         P.map('tabard',['F','B'],(s,t,w,h)=>t>=h-1?sh(GOLD,0):null);plate(P,['horn'],[230,214,170]);band(P,'horn',SIDE,0,1,GOLD);}},
@@ -25,7 +25,7 @@
         ['scroll','armR',[1.5,-10,1.5],[-0.75,-0.75,-2.5,1.5,1.5,5],[0.3,0,0],{nb:1}]],
       coats:recoat('elord',(c,i)=>({cl:[[120,84,50],[70,96,70],[96,70,90],[60,80,110]][i%4],cl2:[200,190,160]})),
       paint(P,c){AM_KINDS.elord.paint(P,c);leather(P,['pack'],[110,76,46]);band(P,'pack',SIDE,6,7,GOLD);cloth(P,['roll'],[160,40,50]);P.map('scroll',ALL,(s,t,w,h,f)=>f==='T'||f==='D'?[180,150,90]:[236,228,206]);}},
-    emariner:{res:2,tex:256,scale:1.08,parts:[...base('elord').filter(p=>p[0]!=='circ'),['cloak','body',[0,10.5,-2.9],[-4.75,-20,-0.5,9.5,20,1],[0.1,0,0],{nb:1}],['coil','body',[2.8,7,0],[-1.2,-3,-3,2.4,6,6],[0,0,0.2],{nb:1}]],
+    emariner:{res:2,tex:256,scale:1.08,parts:[...base('elord').filter(p=>p[0]!=='circ'),['cloak','body',[0,10.5,-2.9],[-4.75,-20,-0.5,9.5,20,1],[0.1,0,0],{nb:1}],['coil','body',[2.8,7,0],[-1.5,-3,-3,3,6,6],[0,0,0.2],{nb:1}]],
       coats:recoat('elord',()=>({cl:[96,110,124],cl2:[200,206,212]})),
       paint(P,c){AM_KINDS.elord.paint(P,c);cloth(P,['cloak'],[110,124,136],{off:2});P.map('cloak',ALL,(s,t,w,h)=>t>=h-2?[230,232,236]:null);
         P.map('coil',ALL,(s,t)=>sh([196,170,120],((s+t)%3===0?-24:6)+hz(s,t,701)*8));}},
@@ -37,14 +37,14 @@
   // bordered in gold with a silver star, a bridle of blue; the great elk of the wood elves, half again a deer's size, its antlers
   // wide and many-tined, a saddle-cloth of green and gold; and the swan boat, a hull of white with feathered sides, a gilt seat and
   // a swan's neck curving up from the bow to a gilt beak
-  const H=AM_KINDS.horse,DE=AM_KINDS.deer,TACK=[['saddle','body',[0,10,-1],[-4,0,-4,8,1,7]],['cantle','saddle',[0,1,-4],[-3,0,0,6,2,1]],['scloth','body',[0,0,-1],[-5.25,3,-5.5,10.5,7.5,10]]];
+  const H=AM_KINDS.horse,DE=AM_KINDS.deer,TACK=[['saddle','body',[0,10,-1],[-4,0,-4,8,1,7]],['cantle','saddle',[0,1,-4],[-3,0,0,6,2,1]],['scloth','body',[0,0,-1],[-5.5,3,-5.5,11,7,10]]];
   const tackPaint=(P,col,trim,star)=>{P.coat(['saddle','cantle'],[96,64,40],6);P.coat(['scloth'],col,5);for(const f of ['L','R','T'])P.rows('scloth',[f],0,1,trim);if(star){P.rect('scloth','L',3,3,2,2,[236,240,246]);P.rect('scloth','R',3,3,2,2,[236,240,246]);}};
   AM_KINDS.ehorse={parts:[...H.parts.map(p=>p.slice()),...TACK],scale:1.06,tex:256,
     coats:[[{coat:[232,232,228],mane:[246,246,242],low:[214,214,210],name:'silver'},3],[{coat:[214,206,186],mane:[246,236,206],low:[196,186,166],name:'pale gold'},2],[{coat:[178,180,184],mane:[236,236,240],low:[150,150,156],dapple:1,name:'moon-grey'},2]],
     paint(P,c,f){H.paint(P,c,f);tackPaint(P,[30,48,96],[224,188,98],1);P.rows('head',['L','R'],1,2,[30,48,96]);}};
   const ant=DE.parts.filter(p=>/^(ant|tine)/.test(p[0])).map(p=>{const q=p.slice(),o=Object.assign({},q[5]||{});delete o.only;q[5]=o;return q;});
   AM_KINDS.elk={parts:[...DE.parts.filter(p=>!/^(ant|tine)/.test(p[0])).map(p=>p.slice()),...ant,['tineL3','antL',[0,7,0],[-0.5,0,0,1,1,3],[-1.1,0,0],{m:'tineL1'}],['tineR3','antR',[0,7,0],[-0.5,0,0,1,1,3],[-1.1,0,0],{m:'tineL1'}],
-      ['saddle','body',[0,8,-1],[-3.5,0,-3,7,1,6]],['scloth','body',[0,0,-1],[-4.25,2,-4,8.5,6.5,8]]].map(p=>p[0]==='antL'||p[0]==='antR'?[p[0],p[1],p[2],[-0.5,0,-0.5,1,10,1],p[4],p[5]]:p),scale:1.55,tex:256,
+      ['saddle','body',[0,8,-1],[-3.5,0,-3,7,1,6]],['scloth','body',[0,0,-1],[-4.5,2,-4,9,6,8]]].map(p=>p[0]==='antL'||p[0]==='antR'?[p[0],p[1],p[2],[-0.5,0,-0.5,1,10,1],p[4],p[5]]:p),scale:1.55,tex:256,
     coats:[[{coat:[150,108,66],back:[118,82,48],belly:[226,206,170],rump:[236,226,206],nose:[38,30,28],hoof:[44,38,34],ant:[232,226,206]},3],[{coat:[150,146,136],back:[120,116,108],belly:[220,214,200],rump:[236,232,222],nose:[40,36,34],hoof:[44,40,38],ant:[226,226,230]},1]],
     paint(P,c,f){DE.paint(P,c,f);P.coat(['antL','tineL1'],c.ant,10);P.coat(['saddle'],[96,64,40],6);P.coat(['scloth'],[60,96,52],5);for(const fc of ['L','R','T'])P.rows('scloth',[fc],0,1,[214,182,84]);}};
   AM_KINDS.swanboat={parts:[['hull',null,[0,8,0],[-11,-6,-18,22,8,30]],['bow','hull',[0,0,12],[-11,-6,0,22,8,14],0,{tp:['z',0.15,1,0,2]}],['stern','hull',[0,0,-18],[-11,-6,-8,22,8,8],0,{tp:['-z',0.6,1,0,1]}],
