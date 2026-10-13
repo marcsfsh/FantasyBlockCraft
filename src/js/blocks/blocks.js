@@ -248,6 +248,22 @@ def(MOONSTONE,'Moonstone',[360,360,360],{emit:true,lum:9});def(STARLAMP,'Stargla
 def(ETHRONE,'Elven Throne',[362,362,363],{snd:'wood'});def(STARBLOOM,'Starbloom',[364,364,364],Object.assign({},PLANT,{emit:true,lum:4}));def(SILVFERN,'Silverfern',[365,365,365],PLANT);def(DAWNLILY,'Dawnlily',[366,366,366],PLANT);
 def(LEAFSTONE,'Leaf-stone',[306,306,367]);def(EVOLD,'Weathered Elvenstone',[368,368,368]);def(EHULL,'Shipwood',[369,369,369],{snd:'wood'});def(ESAIL,'Elven Sail',[370,370,370],{snd:'soft'});
 def(ECHEST,'Elder Chest',[372,372,371],{snd:'stone'});def(EAWNING,'Market Awning',[373,373,373],{snd:'soft'});
+// The white realm enlarged (D-089): the silver tree of the royal citadel (white bark, silver leaves with pale blossom); the notice
+// board of a market or a green; the hanging signs of the inn and the smithy; the tapestry of the realm and the shield hung in a
+// hall; the effigy on a tomb; the stained glass of the hallows; the milestone of the king's roads, its letters cut; heartsease,
+// the healers' herb; a headstone; the tilt barrier of the lists, striped; the throne of the realm in black and silver; the
+// maypole, wound with ribbons; tarred planks and the sail of the realm for its ships; weathered whitestone for the ruins of the
+// old kingdom and the chest of the old kings; pavilion cloth, striped; and the banner of the player's own arms
+const SILVBARK=1191,SILVLEAF=1192,NOTICE=1193,INNSIGN=1194,SMITHSIGN=1195,RTAP=1196,WSHIELD=1197,EFFIGY=1198,STGLASS=1199,MILESTONE=1200,HEARTSEASE=1201,HEADSTONE=1202,TILTRAIL=1203,RTHRONE=1204,MAYPOLE=1205,TARHULL=1206,RSAIL=1207,OLDSTONE=1208,OLDCHEST=1209,PAVCLOTH=1210,MYARMS=1211;
+const HANG={solid:false,opq:false,occ:false,cross:true,snd:'soft'};
+def(SILVBARK,'Silver Bark',[375,375,374],{snd:'wood'});def(SILVLEAF,'Silver Leaves',[376,376,376],LEAFD);def(NOTICE,'Notice Board',[9,9,377],{snd:'wood'});
+def(INNSIGN,'Inn Sign',[378,378,378],Object.assign({},HANG,{snd:'wood'}));def(SMITHSIGN,"Smith's Sign",[379,379,379],Object.assign({},HANG,{snd:'wood'}));def(RTAP,'Tapestry of the Realm',[380,380,380],HANG);
+def(WSHIELD,'Shield of the Realm',[381,381,381],Object.assign({},HANG,{snd:'wood'}));def(EFFIGY,'Tomb Effigy',[382,270,383]);def(STGLASS,'Stained Glass',[384,384,384],{opq:false,occ:false,snd:'glass'});
+def(MILESTONE,'Milestone',[270,270,385]);def(HEARTSEASE,'Heartsease',[386,386,386],PLANT);def(HEADSTONE,'Headstone',[395,395,387]);def(TILTRAIL,'Tilt Barrier',[388,388,388],{snd:'wood'});
+def(RTHRONE,'Throne of the Realm',[389,389,390]);def(MAYPOLE,'Maypole',[392,392,391],{snd:'wood'});def(TARHULL,'Tarred Planks',[393,393,393],{snd:'wood'});def(RSAIL,'Sail of the Realm',[394,394,394],{snd:'soft'});
+def(OLDSTONE,'Weathered Whitestone',[395,395,395]);def(OLDCHEST,'Chest of the Old Kings',[397,397,396]);def(PAVCLOTH,'Pavilion Cloth',[398,398,398],{snd:'soft'});def(MYARMS,'Banner of Your Arms',[399,399,399],HANG);
+setH([NOTICE,TILTRAIL,MAYPOLE,TARHULL,SILVBARK],2,'wood');setH([SILVLEAF],0.4,'soft');setH([INNSIGN,SMITHSIGN,WSHIELD],0.6,'wood');setH([RTAP,MYARMS],0,'soft');setH([RSAIL,PAVCLOTH],0.8,'soft');
+setH([EFFIGY,MILESTONE,HEADSTONE,RTHRONE,OLDSTONE],4,'stone',1);setH([STGLASS],0.5,'misc');setH([HEARTSEASE],0,'soft');setH([OLDCHEST],2.5,'stone');
 setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
 setH([DGRAN,DCOURSE,DKNOT,DCOL,DFLAG],5,'stone',1);setH([DBRONZE,DGEAR,DCART,DANVIL],5,'metal',2);setH([DFORGE,DSLAG],3,'stone',1);setH([DMOLTEN],5,'stone',2);setH([DLAMP],0.5,'misc');setH([DPROP],2,'wood');setH([DBANNER],0,'soft');

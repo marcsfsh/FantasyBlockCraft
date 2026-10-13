@@ -175,7 +175,8 @@ function animalCall(a,hurt){
     case 'sheep':voice(290*yg*p,262*yg*p,hurt?0.35:0.7,0.09,{vib:9,vd:0.07,form:900*yg,q:1.4},at);break;
     case 'goat':voice(430*yg*p,395*yg*p,hurt?0.3:0.6,0.08,{vib:13,vd:0.09,form:1300,q:1.4},at);break;
     case 'hen':if(a.young){for(let i=0;i<3;i++)voice(2300,2900,0.07,0.04,{type:'sine',form:2600,q:1,delay:i*0.16},at);}else for(let i=0;i<(hurt?2:4);i++)voice(540*p,420*p,0.07,0.07,{type:'square',form:1100,q:2,delay:i*(hurt?0.09:0.14)},at);break;
-    case 'ehorse':case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
+    case 'ehorse':case 'charger':case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
+    case 'ox':voice(150*p,120*p,hurt?0.5:1.3,0.09,{vib:4,vd:0.05,form:420,q:1.2},at);break; // the ox's low call (D-089)
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
     case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)

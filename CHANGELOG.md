@@ -5,6 +5,30 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.52.0 (2026-10-13): the white realm enlarged
+
+Saves from 0.51.0 do not carry over (save key v42).
+
+### Game
+- **The court:** in every great hall of the white realm the throne of the realm stands on a dais under the tapestry of the realm, with shields and banners, lamps, a black runner to it and the kings of old in stone along the walls. In a royal city the king or the queen sits there with the guard of the citadel, heralds and courtiers; in a lesser city the lord of the province. Ask for an audience: a stranger is sent away, a friend of the realm is welcomed with a gift.
+- **Renown and ranks:** the white realm remembers what you do: Stranger, Freeman, Friend of the Realm, Esquire, and from the throne Knight and at last Lord. Each rank brings a gift; the realm's folk bow to its knights.
+- **Knighthood and arms:** an esquire of great renown kneels at a throne and is dubbed. The heralds ask for your arms (a field, a charge and a tincture of your choosing), painted on the Banner of Your Arms; you are given the plate of the realm, four banners of your arms and a groom's whistle, and any stable of the realm gives you a charger in your colours. A knight of greater renown is made lord of a village.
+- **Speak with them** (use one of their folk): merchants trade for coin, innkeepers give a bed for the night (you wake there after a fall), a meal and a rumour; healers heal and sell heartsease salve; smiths mend all you wear and forge the realm's arms by rank; grooms sell horses; the crier tells the news of the war; the wardens of the hallows tell the chronicles of the kings; captains, lords, heralds and the throne give tasks.
+- **Tasks of the realm** from the notice boards in every square and green and from its captains and lords: carry a writ, a bounty on the wastes' creatures, supplies, venison for a lord's table, a relic from the ruins of the old kingdom, a lost child found and led home, a merchant's wagon guarded to the next town.
+- **The tourney:** the lists stand by most cities, a tilt down a fenced field between stands of the realm's colours, pavilions and the royal box. Once a day by daylight four knights joust in two bouts and a final while the crowd cheers. An esquire or a knight on horseback with a lance may ride against the champion: break lances, unhorse them, and win three gold and the champion's circlet.
+- **The ports:** where a province meets the sea there may be a port: a quay on terraces down to the water, piers with cogs of tarred planks under the sail of the realm, cranes, a lighthouse with its fire, warehouses and the harbourmaster's hall. Cogs come in and put out every few minutes.
+- **The hallows of the kings:** by each royal city a walled place of the dead: tombs with their effigies along a silent street, the house of the kings with stained glass and the lectern of their chronicle, graves in rows under yews, and the warden at the gate.
+- **The ruins of the old kingdom** across the gentle lands, outside the living realms: the Kings' Gate (two colossi either side of an old road), a crowned king of stone at a crossroads, fallen cities, old beacons and the tombs of forgotten kings, in weathered whitestone, each with a chest of the old kings and a name.
+- **Caravans** of merchants with a wagon and an ox travel the king's roads near you; in a province bordering a gate's war they may be ambushed.
+- **The city's day:** bells every three hours, the town crier in the square, lamplighters at dusk, market day every third day, the night watch on the avenue, a minstrel at the inn of an evening, smoke from the chimneys, children at play.
+- **Beacons:** light the fire on one of the realm's watchtowers and every watchtower of the kingdom lights in turn, and the realm's knights ride to you. A raid's alarm lights them too.
+- **More of their life:** the silver tree in the court of every royal citadel (its petals fall once an Emberlord has fallen); houses of healing with beds and heartsease; inns under their signs; the village fair every fourth evening with dancers round the maypole, a bonfire and a fiddle (keep it and you are fed); shepherds and ploughmen in the fields by day; churchyards by the chapels; the passing bell for one of the folk fallen near you; strike one of the folk and you may pay amends to a captain or a lord, slay one and you are outlawed in that kingdom for a while.
+- **Small things:** milestones on the king's roads tell the way and the distance; the inn's and the smith's signs; tapestries and shields in the halls; the realm's places and the old kingdom's ruins marked on the map; the province's name as you come into it; the chronicles of the kings in the journal and the ruins in the discovery log; in creative, tours to the lists, the hallows, the ports and the old ruins.
+- **New fare and gear:** cheese, ale, the meat pie, the wine of the south, heartsease salve, the horn of the realm (blow it in the realm and its soldiers come), the longsword and the plate of the realm, the writ, the champion's circlet, a chain of office and three relics of the old kings. New blocks under Building, Wood and plants and Decoration.
+
+### Tooling
+- New tests: `84-men-places`, `85-men-renown`, `86-men-court`, `87-men-life`.
+
 ## 0.51.0 (2026-10-13): the elves enlarged
 
 Saves from 0.50.0 do not carry over (save key v41).

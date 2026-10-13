@@ -3,13 +3,13 @@
 // you build starts empty. Contents are saved with the world (save data `cs`). A container that holds anything (or a world one
 // never opened) cannot be broken: empty it first. In survival the inventory screen shows the container beside the pack;
 // tapping a slot on either side moves that stack across. Creative only looks inside.
-const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST]);
+const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST,OLDCHEST]);
 let box=null; // the open container: {k, x, y, z} in window coordinates
 if(saved&&Array.isArray(saved.cs))saved.cs.forEach(([k,sl])=>{const a=new Array(BOX_SLOTS).fill(null);(sl||[]).forEach(([i,id,c,d])=>{if(i<BOX_SLOTS&&(ITEMS[id]||BL[id]))a[i]={id:id,c:c,d:d||0};});boxes.set(k,a);});
 const boxSave=()=>[...boxes].map(([k,a])=>[k,a.map((q,i)=>q&&[i,q.id,q.c,q.d||0]).filter(Boolean)]);
 // The loot a world container holds when first opened, decided by where it sits (the tables are in underground-sites.js)
 function lootOf(id,WX,Y,WZ){
-  const dw=id===DWCHEST||id===ECHEST,TBL=id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
+  const dw=id===DWCHEST||id===ECHEST||id===OLDCHEST,TBL=id===OLDCHEST?OLDLOOT:id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
   let tot=0;for(const l of TBL)tot+=l[3];
   const out=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}out.push([it[0],it[1]+Math.floor(r()*(it[2]-it[1]+1))]);}
   return out;

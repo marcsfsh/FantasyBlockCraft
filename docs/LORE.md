@@ -77,3 +77,30 @@ Drafts for the owner, in `gameplay/elves.js`.
 **The name they give a friend** (`elfNaming`): a word in the people's naming style and an epithet: Starwalker, the Far-come, Friend of the Lamps, the Wayfarer, Light-bearer (the high elves); Leaf-walker, the Quiet Foot, Friend of the Boughs, Bright-eye, the Wanderer (the wood elves).
 
 **The histories** (`elfTales`): eight tales for each kingdom, its names drawn for that kingdom. The high elves: The Founding; The Lamps of (a loremaster); The War of the Fire; The Elder Realms; The Moonwells; The Stars of the Elves (the Lamp of the north that never sets, a Crown of summer, the Long Road the dead walk, the Ship low over the sea in autumn); The Haven of (a haven); The Dwindling. The wood elves: The Waking of the Wood; The First Goldbough; The Long Hunt; The Halls under the Hill; The Feast of (a singer); The Fire in the East; The Stars over the Wood (the Silver Bough, a Crown, the Falling Leaf); The Leaving.
+
+## The white realm (D-089)
+
+Drafts for the owner, in `gameplay/men.js` and `world/old-kingdom.js`.
+
+**Ranks** (`MEN_RANK`): Stranger, Freeman of the Realm, Friend of the Realm, Esquire of the Realm, Knight of the Realm, Lord of the Realm. A knight is hailed "good knight", a lord "my lord".
+
+**The chronicles of the kings** (`menTales`): eight for each kingdom, read at the lectern in the house of the kings at its hallows and kept in the journal; the kings' names are drawn for each kingdom in the realm's naming style.
+
+| Chronicle | What it tells |
+|---|---|
+| The Founding | When the old kingdom fell, the first king gathered its last lords at the fords of the south and raised the white tower; the star over the tower is the realm's sign still. |
+| The Silver Tree | A king brought a seedling of silver from the ruins of the old kings and set it in the citadel's court; while it lives the line of the kings will not fail, and it flowers when the realm is saved. |
+| The Kings' Gate | Two kings of stone stand where the old road crosses the hills, their hands raised against the east; nobody now living knows their names. A king had their faces cleaned of moss, and wept. |
+| The War of the Ash | In one king's days the fire of the wastes came west, and the realm stood with the elves and the dwarves before the Ashen Gate. The king did not come home; his shield hangs in the great hall. |
+| The Beacons | A king set beacons on every height from the border to the royal city, so that a fire lit at the edge of the realm is seen at the king's window before the night is out. |
+| The Long Peace | Under a king the roads were paved and kerbed, a lamp on every milestone, and a child could walk from the border to the sea with a purse of gold and keep it. |
+| The Ships of (a king) | A king built the harbours and the cogs of the realm; some have not come back, and their names are read in the hallows every spring. |
+| The Dwindling | The realm is smaller than it was. The lists, the courts and the markets are as they were, but the old kingdom's cities are grass, and the east is burning. |
+
+**The ruins of the old kingdom** (`OLD_NAMES`): The Kings' Gate of (a name), The Crowned King of (a name), The Fallen City of (a name), The Old Beacon of (a name), The Tomb of King (a name of men). Their chests hold the crown of an old king, the seal of the old kings and the cup of the old kings.
+
+**The knight's arms** (`ARMS_F`, `ARMS_C`, `ARMS_T`), chosen at the heralds' table and told in words ("a tree in silver on blue"): fields of black, red, blue, green, white or gold; a star, a tower, a sword, a tree, a ship or a crown; in silver, gold or black.
+
+**What the folk say** (`FOLK_SAY`), among others: the king, "Be welcome in (the city), traveller. The king's peace is on you here." The queen, "The silver tree has not flowered in my lifetime. I hope to see it." The warden of the hallows, "Speak softly. The kings sleep here." The knight of the tourney, "There is no shame in a fall at the tilt; only in not riding." The watchman, "The tenth hour, and all is well." A child, "We're playing at the War of the Ash! I'm the king!"
+
+**The crier's news** (`menNews`): the hosts still before the Ashen Gate, or the gate fallen and the hosts marching on; raiders burning farms on the border and the beacons lit; an Emberlord fallen and the silver tree in flower; the king's orders for the roads and the beacons; jousting at the lists.

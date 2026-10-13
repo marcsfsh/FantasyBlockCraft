@@ -385,3 +385,9 @@ The order of E2 to E5 is not yet decided; confirm it before E1 ends.
 - Average: wardens at the border; moonwells; elven plants; swan boats; the elven tongue and a name; lights in their lands; houses of healing; the archery contest; dawn and dusk; travellers and the leaving.
 - Minor: horns at dawn and dusk; moonstone, the starglass lamp and the throne; leaf-stones; statues of the elder kings; falling golden leaves; bows from a friend; signs on the map; the arrival and a discovery section; a lament; elven fare.
 
+
+## The white realm enlarged (asked by the owner on 2026-10-13: "Next, the same level of expansion to the Gondor men kingdom"; done in 0.52.0, D-089)
+
+- Major: the court and its throne; knighthood and arms; renown and speaking with the folk; the realm's tasks; the tourney at the lists; the ports; the hallows of the kings; the ruins of the old kingdom; caravans on the king's roads; the city's day.
+- Average: the silver tree; houses of healing and heartsease; the inn; beacons lit across a kingdom; the chronicles of the kings; the village fair; stables and the charger; justice (amends and outlawry); the countryside at work; smiths who mend and forge.
+- Minor: milestones that speak; the crier; bells and the passing bell; chimney smoke; children; signs; tapestries and shields in the halls; churchyards; the kings in stone in the great hall; the map's signs, the province's name on arrival, creative tours and the journal's chronicles.

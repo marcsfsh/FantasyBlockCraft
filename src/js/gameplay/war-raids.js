@@ -92,7 +92,7 @@ function raidLiveTick(w,B,r,s,L,d){const live=L.m.filter(f=>!f.dead&&!f.gone),ag
   // the beacons on the province's watchtowers, from hill to hill
   if(!L.beac&&age>=6){L.beac=1;let n=0;for(const e of B.S){const o=e.s;if(o.prov!==s.prov||o.k!=='outpost')continue;const x=Math.round(o.X)-OX,z=Math.round(o.Z)-OZ;if(x<1||z<1||x>=W-1||z>=D-1||!genDone[(x>>4)+(z>>4)*NCX])continue;
       let y=Math.min(H-3,o.T+48);while(y>o.T-2&&!SOLID[get(x,y,z)])y--;if(get(x,y+1,z)!==AIR)continue;setBlock(x,y+1,z,BRAZIER,true);w.rd.bk.push([x+OX,y+1,z+OZ,Math.round(warPlay)]);n++;}
-    toast(n?'The beacons are lit on the heights of '+s.prov.name:'The alarm is raised in '+s.prov.name);}
+    toast(n?'The beacons are lit on the heights of '+s.prov.name:'The alarm is raised in '+s.prov.name);if(s.prov.cult.k==='white'){const o=s.prov.sites.find(q=>q.k==='outpost');if(o)menBeaconChain(o);}} // (and the white realm's beacons answer, one after another, across the kingdom: D-089)
   // the realm rides out: from its city or castle (the nearest), its soldiers and knights, along the way to the raid
   if(!L.rel&&age>=25){L.rel=1;let src=null,sd=1e9;for(const e of B.S){const o=e.s;if(o.prov!==s.prov||o===s||o.k!=='city'&&o.k!=='fort')continue;const q=Math.hypot(o.X-s.X,o.Z-s.Z);if(q<sd){sd=q;src=o;}}
     const a=src?sitePort(src):[s.X-(B.cx-s.X)*0.4,s.Z-(B.cz-s.Z)*0.4],route=raidRoute(a,[s.X,s.Z]),o={prov:s.prov.key,site:src||s,lead:FOLK_LEAD[fp+'host']||null},k=warSz();

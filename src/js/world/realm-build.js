@@ -293,7 +293,7 @@ const TRB={};
 // ---- Layouts
 function siteLayout(s){if(s.lay)return s.lay;const L={parts:[],spots:[],pads:[]};s.lay=L;
   const r=rngAt(Math.round(s.X),9521,Math.round(s.Z));
-  if(s.prov.cult.k==='dwarf')dwarfLayout(s,L,r);else if(s.prov.cult.k==='wood')woodLayout(s,L,r);else if(s.prov.cult.k==='elf')elfLayout(s,L,r);else if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
+  if(s.prov.cult.k==='white'&&MEN_LAYOUT[s.k])MEN_LAYOUT[s.k](s,L,r);else if(s.prov.cult.k==='dwarf')dwarfLayout(s,L,r);else if(s.prov.cult.k==='wood')woodLayout(s,L,r);else if(s.prov.cult.k==='elf')elfLayout(s,L,r);else if(s.prov.cult.k==='horse')riderLayout(s,L,r);else if(s.k==='city')cityLayout(s,L,r);else if(s.k==='village')villageLayout(s,L,r);else if(s.k==='farm')farmLayout(s,L,r);else if(s.k==='fort')fortLayout(s,L,r);else outpostLayout(s,L,r);
   // the margins about houses, towers and walls, where their relief stands
   for(const p of L.parts){if(p.k==='house'){if(!p.mg){const o=p.ov||0;p.mg=[o,o,o,o];}if(p.gnd===undefined)p.gnd=s.k!=='city';}
     else if(p.k==='tower'){const e=p.mg===undefined?1:p.mg;p.u0-=e;p.u1+=e;p.v0-=e;p.v1+=e;}else if(p.k==='cwall'){p.u0--;p.u1++;p.v0--;p.v1++;}}
@@ -326,7 +326,7 @@ function cityLayout(s,L,r){
   const tierOf=(c)=>{const ts=new Set();for(const [uu,vv] of [[c.u0-1,c.v0-1],[c.u1+1,c.v0-1],[c.u0-1,c.v1+1],[c.u1+1,c.v1+1],[(c.u0+c.u1)>>1,(c.v0+c.v1)>>1]])ts.add(cityTier(s,uu,vv));return ts.size===1?[...ts][0]:-1;};
   // the special buildings by the gate and on the avenue
   const special=new Map(),want=(ci,cj,sg,k)=>{special.set(ci+','+cj+','+sg,k);};
-  const sgA=r()<0.5?1:-1;want(0,0,sgA,'barracks');want(0,1,sgA,'barracks2');want(1,0,sgA,'yard');want(1,1,sgA,'yard2');want(0,0,-sgA,'smithy');want(0,1,-sgA,'stable');
+  const sgA=r()<0.5?1:-1;want(0,0,sgA,'barracks');want(0,1,sgA,'barracks2');want(1,0,sgA,'yard');want(1,1,sgA,'yard2');want(0,0,-sgA,'smithy');want(0,1,-sgA,'stable');want(1,0,-sgA,'heal');want(1,1,-sgA,'heal2');
   for(const c of cells){if(taken(c.u0,c.u1,c.v0,c.v1))continue;const t=tierOf(c);if(t<0)continue;const g=tierY(t),key=c.ci+','+c.cj+','+c.sg,sp=special.get(key);
     const faceAv=c.cj===0?(c.sg>0?2:3):0; // toward the avenue, or toward the gate
     if(sp==='barracks'||sp==='barracks2'){if(sp==='barracks'){const other=cells.find(q=>q.ci===c.ci&&q.cj===1&&q.sg===c.sg);if(other&&tierOf(other)===t&&!taken(other.u0,other.u1,other.v0,other.v1)){
@@ -335,20 +335,24 @@ function cityLayout(s,L,r){
     if(sp==='yard'||sp==='yard2'){if(sp==='yard'){const other=cells.find(q=>q.ci===c.ci&&q.cj===1&&q.sg===c.sg);if(other&&tierOf(other)===t){const v0=Math.min(c.v0,other.v0),v1=Math.max(c.v1,other.v1);
         P.push({k:'yard',u0:c.u0,u1:c.u1,v0:v0,v1:v1,f:0,y:g});L.spots.push({kind:'drill',u:(c.u0+c.u1)/2,v:(v0+v1)/2,y:g});lots.push([c.u0,c.u1,v0,v1]);}}continue;}
     if(sp==='smithy'){P.push({k:'smithy',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v1,f:faceAv,y:g});L.spots.push({kind:'smithy',u:(c.u0+c.u1)/2,v:c.sg*3,y:g});continue;}
-    if(sp==='stable'){P.push({k:'stable',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v1,f:0,y:g});continue;}
+    if(sp==='stable'){P.push({k:'stable',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v1,f:0,y:g});L.spots.push({kind:'stable',u:c.u0-2,v:(c.v0+c.v1)/2,y:g});continue;} // (its groom, D-089)
+    if(sp==='heal'||sp==='heal2'){if(sp==='heal'){const other=cells.find(q=>q.ci===c.ci&&q.cj===1&&q.sg===c.sg);if(other&&tierOf(other)===t&&!taken(other.u0,other.u1,other.v0,other.v1)){ // the house of healing (D-089)
+        const v0=Math.min(c.v0,other.v0),v1=Math.max(c.v1,other.v1),h=housePart(c.u0,c.u1,v0,v1,0,[1,1,1,1],{y:g,st:2,sh:5,mat:'stone',roof:SLATE,door:Math.floor((v1-v0)/2),dw:2,dh:3,lamp:true,ridge:'a',chim:[2,8]});
+        P.push(h,menInside(h,'heal'));L.heal=h;L.spots.push({kind:'heal',u:c.u0-2,v:(v0+v1)/2,y:g});lots.push([c.u0,c.u1,v0,v1]);}}continue;}
     const q=r();
     if(q<0.11){gardens.push([c.u0,c.u1,c.v0,c.v1]);P.push({k:'garden',u0:c.u0,u1:c.u1,v0:c.v0,v1:c.v1,f:0,y:g,bl:r()<0.5});continue;}
     if(q<0.4&&c.cj>0){ // two narrow houses side by side, their gables to the lane
       const w1=4+(r()<0.5?1:0),f0=faceAv;const st1=r()<0.5?3:2,st2=r()<0.5?3:2,m1=r()<0.5?'stone':'timber',m2=r()<0.5?'stone':'timber';
-      P.push(housePart(c.u0,c.u1,c.v0,c.v0+w1-1,f0,[1,0,1,1],{y:g,st:st1,sh:4,mat:m1,roof:SLATE,door:Math.floor(w1/2),lamp:true,ridge:'b',chim:[1,8]}));
-      P.push(housePart(c.u0,c.u1,c.v0+w1,c.v1,f0,[0,1,1,1],{y:g,st:st2,sh:4,mat:m2,roof:SLATE,door:Math.floor((9-w1)/2),lamp:true,ridge:'b',chim:[1,8]}));
+      P.push(housePart(c.u0,c.u1,c.v0,c.v0+w1-1,f0,[1,0,1,1],{y:g,st:st1,sh:4,mat:m1,roof:SLATE,door:Math.floor(w1/2),lamp:true,ridge:'b',chim:[1,8],gen:2}));
+      P.push(housePart(c.u0,c.u1,c.v0+w1,c.v1,f0,[0,1,1,1],{y:g,st:st2,sh:4,mat:m2,roof:SLATE,door:Math.floor((9-w1)/2),lamp:true,ridge:'b',chim:[1,8],gen:2}));
       L.spots.push({kind:'street',u:c.u0-2,v:(c.v0+c.v1)/2,y:g});continue;}
     const st=r()<0.45?3:2,mat=r()<0.55?'stone':'timber';
-    P.push(housePart(c.u0,c.u1,c.v0,c.v1,faceAv,[1,1,1,1],{y:g,st:st,sh:4,mat:mat,roof:SLATE,door:4,lamp:true,ridge:r()<0.5?'a':'b',chim:[1,8]}));
+    P.push(housePart(c.u0,c.u1,c.v0,c.v1,faceAv,[1,1,1,1],{y:g,st:st,sh:4,mat:mat,roof:SLATE,door:4,lamp:true,ridge:r()<0.5?'a':'b',chim:[1,8],gen:1}));
     if(q>0.75)L.spots.push({kind:'street',u:c.u0-2,v:(c.v0+c.v1)/2,y:g});}
   // the square: flagstones, the fountain, stalls round it, lamps
   const scu=(sq.u0+sq.u1)>>1,sg0=tierY(cityTier(s,scu,0));
   P.push({k:'fountain',u0:scu-3,u1:scu+3,v0:-3,v1:3,cu:scu,cv:0,y:sg0});
+  P.push({k:'mnotice',u0:scu-1,u1:scu-1,v0:6,v1:6,y:sg0});L.spots.push({kind:'crier',u:scu-2,v:5,y:sg0}); // the notice board and the crier (D-089)
   const wools=[WOOLR,WOOLB,WOOLY,WOOLG];let nst=0;
   for(const sg of [1,-1])for(let k=0;k<3;k++){const v0=sg>0?8+k*5:-(8+k*5)-3,u0=sq.u0+1;P.push({k:'stall',u0:u0,u1:u0+2,v0:v0,v1:v0+3,f:0,y:sg0,wool:wools[(nst++)%4],c:k});
     P.push({k:'stall',u0:sq.u1-3,u1:sq.u1-1,v0:v0,v1:v0+3,f:1,y:sg0,wool:wools[(nst++)%4],c:k});}
@@ -365,11 +369,18 @@ function cityLayout(s,L,r){
       for(let k=gardens.length-1;k>=0;k--){const q=gardens[k];if(q[0]>=best.u0&&q[1]<=best.u1&&q[2]>=best.v0&&q[3]<=best.v1)gardens.splice(k,1);}
       lots.push([best.u0,best.u1,best.v0,best.v1]);P.push({k:'dome',u0:best.u0,u1:best.u1,v0:best.v0,v1:best.v1,f:best.cj===0?(best.sg>0?2:3):0,y:g,H:9});
       L.spots.push({kind:'street',u:best.u0-2,v:(best.v0+best.v1)/2,y:g});}}
+  // the house of healing where there was no room for it by the gate, and the inn: houses of the city given to them (D-089)
+  {const gens=[...P.filter(q=>q.gen===1),...P.filter(q=>q.gen===2)],at=h=>{const [fu,fv]=partAt(h,1+h.door,-1);return {u:fu,v:fv,y:h.y};};
+    if(!L.heal){const h=gens.find(q=>q.mat==='stone')||gens[0];if(h){L.heal=h;h.st=Math.max(h.st,2);P.push(menInside(h,'heal'));L.spots.push(Object.assign({kind:'heal'},at(h)));}}
+    const ih=gens.filter(q=>q!==L.heal).sort((a,b)=>Math.abs((a.u0+a.u1)/2-scu)+Math.abs((a.v0+a.v1)/2)-Math.abs((b.u0+b.u1)/2-scu)-Math.abs((b.v0+b.v1)/2))[0];
+    if(ih){L.inn=ih;P.push(menInside(ih,'inn'),menSign(ih,INNSIGN));L.spots.push(Object.assign({kind:'inn'},at(ih)));}}
   // the citadel: a court before the great hall, the white tower behind it, gardens either side; guards at its arch
   {const ct=s.tiers>=3?2:1,g=tierY(ct),tw=s.tiers>=3?4:3,tu=cu+rt-tw-2,hu1=tu-tw-2,hw=Math.min(7,rt-5),hd=Math.max(7,Math.min(18,hu1-(cu-rt+8)-2)),hu0=hu1-hd-1;
     P.push(housePart(hu0+2,hu1,-hw,hw,0,[1,1,0,1],{y:g,st:1,sh:8,mat:'stone',roof:SLATE,door:hw,dw:2,dh:4,lamp:true,ridge:'b',porch:2,pil:true,floor:WSTONE,gnd:true}));
+    P.push({k:'mthrone',u0:hu0+3,u1:hu1-1,v0:-hw+1,v1:hw-1,f:0,y:g,hf:hu0+2,hb:hu1,hw:hw});L.spots.push({kind:'throne',u:hu1-4,v:0,y:g},{kind:'court',u:hu0+2+Math.round(hd/2),v:3,y:g}); // the throne (D-089)
     {const H=s.tiers>=3?40:30;P.push({k:'tower',u0:tu-tw,u1:tu+tw,v0:-tw,v1:tw,cu:tu,cv:0,h2:tw,H:H,y:g,roof:true,batt:true,band:Math.round(H*0.6)});}
-    P.push({k:'statue',u0:hu0-6,u1:hu0-4,v0:-1,v1:1,cu:hu0-5,cv:0,y:g});
+    if(s.prov.capital){const rc=Math.max(2.5,Math.min(4,(hu0-(cu-rt))/2-1)),e=Math.max(3,Math.ceil(rc));P.push({k:'mtree',u0:hu0-5-e,u1:hu0-5+e,v0:-e,v1:e,cu:hu0-5,cv:0,y:g,rc:rc});L.tree=[hu0-5,0,g];} // the silver tree (D-089)
+    else P.push({k:'statue',u0:hu0-6,u1:hu0-4,v0:-1,v1:1,cu:hu0-5,cv:0,y:g});
     for(const sg of [1,-1]){const gv0=sg>0?hw+3:-rt+2,gv1=sg>0?rt-2:-hw-3;if(gv1-gv0>=4){gardens.push([cu-rt+3,cu+rt-3,gv0,gv1]);P.push({k:'garden',u0:cu-rt+3,u1:cu+rt-3,v0:gv0,v1:gv1,f:0,y:g,bl:true});}}
     for(const vv of [3,-3])P.push({k:'lamp',u0:hu0-3,u1:hu0-3,v0:vv,v1:vv,f:0,y:g});
     L.spots.push({kind:'citadel',u:hu0-8,v:0,y:g},{kind:'hall',u:hu0+Math.round(hd/2),v:0,y:g},{kind:'citgate',u:cu-rt+2,v:0,y:g});}
@@ -397,14 +408,15 @@ function villageLayout(s,L,r){
   order.forEach((q,i)=>{const [cu0,cv0,f]=q,kind=kinds[i]||'cottage',w=kind==='chapel'?7:kind==='inn'?9:7,d=kind==='chapel'?11:kind==='inn'?11:9;
     if(Math.max(Math.abs(cu0),Math.abs(cv0))+Math.max(w,d)/2>R-1)return;
     if(kind==='smithy'){P.push(partC('smithy',cu0,cv0,7,6,f,{y:g}));L.spots.push({kind:'smithy',u:cu0,v:cv0,y:g});return;}
-    if(kind==='chapel'){P.push(partC('house',cu0,cv0,w+2,d+2,f,{W:w,D:d,mg:[1,1,1,1],y:g,st:1,sh:6,mat:'stone',roof:SLATE,door:3,dw:1,dh:3,lamp:true,ridge:'b',floor:WSTONE,butt:true,rose:true}));
+    if(kind==='chapel'){P.push(partC('house',cu0,cv0,w+2,d+2,f,{W:w,D:d,mg:[1,1,1,1],y:g,st:1,sh:6,mat:'stone',roof:SLATE,door:3,dw:1,dh:3,lamp:true,ridge:'b',floor:WSTONE,butt:true,rose:true,chapel:1}));
       const p=P[P.length-1],bt=f===0?[p.u1-2,cv0]:f===1?[p.u0+2,cv0]:f===2?[cu0,p.v1-2]:[cu0,p.v0+2];P.push({k:'tower',u0:bt[0]-1,u1:bt[0]+1,v0:bt[1]-1,v1:bt[1]+1,cu:bt[0],cv:bt[1],h2:1,H:16,y:g,roof:true,mg:0,bell:true});return;}
-    const ov=1,W=w-2*ov,D=d-2*ov;P.push(partC('house',cu0,cv0,w,d,f,{W:W,D:D,y:g,st:kind==='inn'?2:1,sh:4,mat:kind==='inn'?'timber':'cottage',ov:ov,roof:THATCH,door:Math.floor(W/2),dw:1,dh:2,lamp:kind==='inn',ridge:'b',chim:kind==='inn'?[1,D-1]:null,xchim:kind!=='inn'}));
+    const ov=1,W=w-2*ov,D=d-2*ov;P.push(partC('house',cu0,cv0,w,d,f,{W:W,D:D,y:g,st:kind==='inn'?2:1,sh:4,mat:kind==='inn'?'timber':'cottage',ov:ov,roof:THATCH,door:Math.floor(W/2),dw:1,dh:2,lamp:kind==='inn',ridge:'b',chim:kind==='inn'?[1,D-1]:null,xchim:kind!=='inn',inn:kind==='inn'?1:0}));
     if(kind==='inn')L.spots.push({kind:'green',u:cu0*0.6,v:cv0*0.6,y:g});
     // a kitchen garden or a haystack behind
     const bu=f===0?cu0+d/2+2:f===1?cu0-d/2-2:cu0,bv=f===2?cv0+d/2+2:f===3?cv0-d/2-2:cv0;if(Math.max(Math.abs(bu),Math.abs(bv))<R-2){if(hsh(i,9525,Math.round(s.Z))<0.5)P.push({k:'hay',u0:Math.round(bu)-2,u1:Math.round(bu)+2,v0:Math.round(bv)-2,v1:Math.round(bv)+2,cu:Math.round(bu),cv:Math.round(bv),y:g});}});
   L.spots.push({kind:'green',u:-4,v:4,y:g},{kind:'green',u:4,v:-4,y:g},{kind:'lane',u:-R+4,v:0,y:g});
   fieldsRound(s,L,r,6);
+  menVillage(s,L,rg,small); // the maypole, the notice board, the inn's and the smith's signs, the churchyard (D-089)
 }
 // A farmstead: a farmhouse and a great barn across a yard, a well, haystacks; its fields about it
 function farmLayout(s,L,r){
@@ -428,7 +440,7 @@ function fortLayout(s,L,r){
   P.push(housePart(2,14,-6,6,0,[1,1,1,1],{y:g,st:4,sh:5,mat:'stone',roof:SLATE,door:6,dw:2,dh:3,lamp:true,ridge:'b',pil:true,floor:WSTONE,batt:true}));
   for(const [a,b] of [[2,-6],[2,6],[14,-6],[14,6]])P.push({k:'tower',u0:a-1,u1:a+1,v0:b-1,v1:b+1,cu:a,cv:b,h2:1,H:24,y:g,ban:a===14});
   P.push(housePart(-14,9,13,18,2,[1,1,1,1],{y:g,st:2,sh:4,mat:'stone',roof:SLATE,door:12,lamp:true,ridge:'a',chim:[2,5]}));
-  P.push({k:'stable',u0:-14,u1:5,v0:-18,v1:-13,f:3,y:g});
+  P.push({k:'stable',u0:-14,u1:5,v0:-18,v1:-13,f:3,y:g});L.spots.push({kind:'stable',u:-4,v:-11,y:g}); // (its groom, D-089)
   P.push({k:'yard',u0:-15,u1:-6,v0:-9,v1:6,f:0,y:g});
   P.push({k:'well',u0:-3,u1:-1,v0:8,v1:10,cu:-2,cv:9,y:g});
   P.push({k:'cwall',u0:-R,u1:R,v0:-R,v1:R,f:0,r:R,H:12,gw:2,gh:6});
@@ -457,7 +469,7 @@ function realmRoadCol(X,Z,x,z){
   const rr=realmRoadAt(X,Z,1);if(!rr)return;const s=realmSiteAt(X,Z,0);if(s||wasteGateNear(X,Z,0))return;if(rr.rd.P.cult.k==='horse')return riderRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='elf')return elfRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='wood')return woodRoadCol(X,Z,x,z,rr);if(rr.rd.P.cult.k==='dwarf')return dwarfRoadCol(X,Z,x,z,rr);const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off);
   const wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
   if(ao>rd.w+0.5){ // just beside the road: the milestones
-    if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBS(X,Z,g+1,g+2,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;}
+    if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g,Z,WSBRICK);RBP(X,g+1,Z,MILESTONE);RBP(X,g+2,Z,WSPILLAR);RBP(X,g+3,Z,LANTERN);}return;} // (its face cut with the way, D-089)
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,hi?WSBRICK:PLANKS);if(edge)RBP(X,y+1,Z,hi?WSBRICK:PLANKS);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%6===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,hi?WSBRICK:LOG);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;

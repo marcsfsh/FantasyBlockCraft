@@ -28,7 +28,8 @@ function provinceOf(i,j){
 // ---- Planning a province: its cells, a grid of samples of the raw ground every REALM_SG blocks (in or out of it, usable or
 // not), then the sites in order (the city, the castle, villages, watchtowers, farmsteads), then the roads between them
 const SITE_K={ // R the core, M the margin over which the ground eases back, spread the most the raw ground may vary under it, round or square
-  city:{M:20,spread:16,sq:1},fort:{R:22,M:12,spread:12,sq:1},village:{R:26,M:12,spread:9},outpost:{R:8,M:8,spread:14,sq:1},farm:{R:12,M:8,spread:6}};
+  city:{M:20,spread:16,sq:1},fort:{R:22,M:12,spread:12,sq:1},village:{R:26,M:12,spread:9},outpost:{R:8,M:8,spread:14,sq:1},farm:{R:12,M:8,spread:6},
+  lists:{M:12,spread:8,sq:1},hallows:{M:10,spread:11,sq:1},port:{M:12,spread:80,terr:3}}; // (the white realm's lists, hallows and ports, D-089)
 // The peoples of the realms, each on its own lands with its own sites, names, readout and roads:
 //   white: the high men of the southern realms (D-060): walled cities of white stone in square tiers, castles, villages,
 //     watchtowers and farmsteads
@@ -39,8 +40,8 @@ const SITE_K={ // R the core, M the margin over which the ground eases back, spr
 // prominence it wants under it)
 const REALM_CULTS={
   white:{k:'white',lands:new Set(['green','farm','orchard','flower','terrace']),names:'realm',folkNames:'human',kingdom:'The Kingdom of ',ks:9403,fp:'r_',
-    site:SITE_K,R:{city:40,cap:50,cmax:64,small:34,fort:22,village:26,hamlet:18,outpost:8,farm:12},w:{spread:0.6,prom:0.35,pmax:12},
-    label:{fort:'Castle %',outpost:'% Watch',farm:'% Farm'},kind:{city:'a city of',fort:'a castle of',village:'a village of',outpost:'a watchtower of',farm:'a farmstead of'},
+    site:SITE_K,R:{city:40,cap:50,cmax:64,small:34,fort:22,village:26,hamlet:18,outpost:8,farm:12,lists:30,hallows:24,port:36},w:{spread:0.6,prom:0.35,pmax:12},lists:1,hallows:1,port:1,
+    label:{fort:'Castle %',outpost:'% Watch',farm:'% Farm',lists:'The Lists of %',hallows:'The Hallows of %',port:'Port %'},kind:{city:'a city of',fort:'a castle of',village:'a village of',outpost:'a watchtower of',farm:'a farmstead of',lists:'the lists of',hallows:'the tombs of the kings of',port:'a port of'},
     capital:'the royal city of',roads:["The King's Road",'A Country Lane']},
   horse:{k:'horse',lands:new Set(['steppe','moors','barrow']),names:'rider',folkNames:'rider',kingdom:'The Riders of ',ks:9431,fp:'h_',
     site:{city:{M:22,spread:24,wall:1},fort:{M:12,spread:12,wall:1},village:{M:12,spread:9},outpost:{M:8,spread:16,wall:1},farm:{M:10,spread:7}},
@@ -109,7 +110,7 @@ function* planProvince(root,key){
     const o=realmRaw(X+dx,Z+dz);if(o.river||o.bank||o.wet||o.h<o.sl+3||o.rvBot<999)return false;}}return true;}
   function* pick(K,R,score,need){for(let k=0;k<6;k++){const t=yield* best(K,R,score,need);if(!t)return null;if(yield* clean(t.X,t.Z,K,R))return t;ok[Math.round((t.X/S)-gx0)+Math.round((t.Z/S)-gz0)*nx]=1;}return null;}
   const inLake=(x,z)=>{const lk=lakeAt(x,z);return !!lk&&Math.hypot(x-lk.cx,z-lk.cz)<lk.R+6;};
-  function* havenPick(){let top=null;const R=Z_.haven;
+  function* havenPick(R){let top=null;
     for(let b=2;b<nz-2;b+=2){yield;for(let a=2;a<nx-2;a+=2){const k=a+b*nx;if(ok[k]!==2)continue;if(gh[k]>SEA+24)continue;const X=(gx0+a)*S,Z=(gz0+b)*S;if(!far(X,Z,R+70))continue;
       for(let d=0;d<4;d++){const [dx,dz]=DIRS[d];if(ok[a+dx+(b+dz)*nx]===2||ok[a-dx+(b-dz)*nx]!==2||ok[a-2*dx+(b-2*dz)*nx]!==2)continue;
         let wat=0;for(const [k2,sd] of [[14,0],[26,0],[40,0],[30,-16],[30,16]]){const x=X+dx*k2-dz*sd,z=Z+dz*k2+dx*sd,o=realmRaw(x,z);if(o.h<o.sl-2&&!o.river&&o.rvBot===999&&!inLake(x,z))wat++;}
@@ -126,7 +127,10 @@ function* planProvince(root,key){
   if(n>=2||hsh(root.i,9411,root.j)<0.5){const t=yield* pick(SK.fort,Z_.fort,(f)=>Math.min(14,f.prom)*0.7-f.spread*0.4-Math.abs(f.bd-90)/40,(X,Z)=>far(X,Z,city?190:60));if(t)add('fort',Z_.fort,t);}
   // a haven (D-088): where the province meets the sea, on its own good ground (two samples deep behind it) with open water before
   // it, from 14 blocks out; the sea at its back (+u), its gate toward the land; low over the water, well away from the city
-  if(C.haven){const t=yield* havenPick();if(t){const s=add('haven',Z_.haven,t);s.dir=t.d;}}
+  if(C.haven||C.port){const hk=C.haven?'haven':'port',t=yield* havenPick(Z_[hk]);if(t){const s=add(hk,Z_[hk],t);s.dir=t.d;}} // (and the white realm's port, D-089)
+  // the white realm's lists by a city, and in a royal province the hallows of its kings (D-089): near the city, clear of its margin
+  if(C.lists&&city){const t=yield* pick(SK.lists,Z_.lists,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-80)/25,(X,Z)=>far(X,Z,Z_.lists+SK.lists.M+24)&&Math.hypot(X-city.X,Z-city.Z)<city.R+200);if(t)add('lists',Z_.lists,t);}
+  if(C.hallows&&city&&P.capital){const t=yield* pick(SK.hallows,Z_.hallows,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-60)/25,(X,Z)=>far(X,Z,Z_.hallows+SK.hallows.M+24)&&Math.hypot(X-city.X,Z-city.Z)<city.R+240);if(t)add('hallows',Z_.hallows,t);}
   // villages, spread out
   const nv=Math.max(2,Math.min(8,Math.round(n*1.1+1)));for(let k=0;k<nv;k++){const t=yield* pick(SK.village,Z_.village,(f)=>-f.spread+hsh(k,9413,root.i)*2,(X,Z)=>far(X,Z,120));if(!t)break;add('village',Z_.village,t);}
   // where the ground is too rough for a village, a hamlet
@@ -168,7 +172,8 @@ function realmRoads(P,city){
   else for(let k=1;k<villages.length;k++){K='lane';link(villages[k-1],villages[k]);}
   for(const o of outs){const h=nearest(o,[fort,city].filter(Boolean))||nearest(o,villages);if(h){K=h===city||h===fort?'high':'lane';link(h,o);}}
   for(const f of farms){const h=nearest(f,[...villages,city].filter(Boolean));if(h){K='lane';link(h,f);}}
-  for(const hv of S.filter(s=>s.k==='haven')){const h=city||nearest(hv,villages);if(h){K='high';link(h,hv);}} // the elves' haven (D-088)
+  for(const hv of S.filter(s=>s.k==='haven'||s.k==='port')){const h=city||nearest(hv,villages);if(h){K='high';link(h,hv);}} // the elves' haven (D-088), the white realm's port (D-089)
+  for(const ls of S.filter(s=>s.k==='lists'||s.k==='hallows'))if(city){K='high';link(city,ls);} // the lists and the hallows (D-089)
   for(const s of S)if(s.dir===undefined)s.dir=(hsh(s.X,9421,s.Z)*4)|0;
   // a road starts and ends at its site's door, never inside it: cut each end back to the edge of the core
   for(const rd of P.roads){let x0=1e9,z0=1e9,x1=-1e9,z1=-1e9;for(const p of [rd.a,rd.b]){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);}
@@ -248,7 +253,7 @@ function elfRaw(s,X,Z){const g=s.hg,n=g.n,fx=(X-s.X+g.E)/8,fz=(Z-s.Z+g.E)/8,ix=M
 const elfTerrace=(s,X,Z)=>s.T+Math.round((elfRaw(s,X,Z)-s.T)/s.terr)*s.terr;
 function elfPad(s,u,v){for(const p of siteLayout(s).pads)if(u>=p.u0-1&&u<=p.u1+1&&v>=p.v0-1&&v<=p.v1+1)return p;return null;}
 function elfGround(s,X,Z){const [u,v]=siteUV(s,X,Z),p=elfPad(s,u,v);if(p)return p.y;
-  if(s.k==='haven'){const L=siteLayout(s);if(u>L.qL&&Math.abs(v)<=L.hw+2)return Math.min(Math.round(elfRaw(s,X,Z)),SEA-5);} // a haven's harbour, dredged (D-088)
+  if(s.k==='haven'||s.k==='port'){const L=siteLayout(s);if(u>L.qL&&Math.abs(v)<=L.hw+2)return Math.min(Math.round(elfRaw(s,X,Z)),SEA-5);} // a haven's harbour, dredged (D-088; a port's, D-089)
   const t=elfTerrace(s,X,Z),M=siteLayout(s).mass;return M?Math.max(t,massifAt(M,u,v)):t;}
 // The massif at the back of a dwarves' hold (D-066): rock raised to M.y + M.H over a box (u from its face M.f to M.b, |v| up to
 // M.w), its face sheer, falling away over M.m to its sides and back in ridges, its top broken; -1 elsewhere

@@ -46,6 +46,15 @@ item(421,'Starglass Lantern','lantern',[214,222,236],{equip:'belt',lamp:true,eve
 item(423,'Leaf-mail','mail',[206,176,96],{equip:'body',armor:0.5,dur:1400,one:true});item(424,"Warden's Cloak",'cloak',[80,110,74],{equip:'body',armor:0.25,dur:900,one:true,hide:0.5});
 item(425,'Star-carved Cup','goblet',[220,226,236]);item(426,'Leaf-silver Brooch','brooch',[200,206,214]);item(427,'Elder Circlet','circlet',[226,212,150]);
 item(428,'Letter of the Elves','parchment',[236,228,206]);item(429,'Elven Whistle','whistle',[214,222,236],{once:true});item(430,'Swan Boat','boat',[240,240,236],{once:true});
+// The white realm's goods and gear (D-089): its fare (cheese, ale, meat pies, the wine of the south) and the healers' heartsease
+// salve; the horn of the realm, which calls its soldiers to whoever blows it; the realm's longsword and its plate, black and
+// silver; a writ carried for it; the champion's circlet from the lists and a lord's chain of office; relics of the old kings from
+// the ruins of the old kingdom; the groom's whistle that calls a knight's charger
+item(431,'Cheese','cake',[236,206,120]);item(432,'Ale','wine',[196,150,60]);item(433,'Meat Pie','tart',[196,136,76]);item(434,'Wine of the South','wine',[120,28,44]);
+item(435,'Heartsease Salve','draught',[150,104,200],{once:true});item(436,'Horn of the Realm','horn',[232,232,238],{once:true,horn:1});
+item(437,'Longsword of the Realm','sword',[214,220,230],{tool:'sword',tier:7,dur:1800});item(438,'Plate of the Realm','mail',[60,62,76],{equip:'body',armor:0.58,dur:1400,one:true});
+item(439,'Writ of the Realm','parchment',[232,226,206]);item(440,"Champion's Circlet",'circlet',[214,176,84]);item(441,'Chain of Office','brooch',[214,176,84]);
+item(442,'Crown of an Old King','crown',[196,188,160]);item(443,'Seal of the Old Kings','tablet',[186,176,150]);item(444,'Cup of the Old Kings','goblet',[206,200,180]);item(445,"Groom's Whistle",'whistle',[200,200,206],{once:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -165,4 +174,4 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427]); // (the relics of the elder elves: D-088) // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)

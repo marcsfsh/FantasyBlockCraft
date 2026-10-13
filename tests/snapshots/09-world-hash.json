@@ -10,7 +10,7 @@
     "blocks:surface:y291-383": "b80f54d0",
     "columns:ground-biome-heightmap": "7ba4cd17",
     "light:block-light": "a41480b8",
-    "plan:terrain-16k": "73e798a0",
+    "plan:terrain-16k": "28eefd44",
     "plan:city-81x81-cells": "53527697",
     "blocks:surface:y291-511": "867aadbc"
   },
@@ -25,7 +25,7 @@
     "blocks:surface:y291-383": "b6ebc871",
     "columns:ground-biome-heightmap": "f1701b65",
     "light:block-light": "cf5dd410",
-    "plan:terrain-16k": "045c2809",
+    "plan:terrain-16k": "68bbfe34",
     "plan:city-81x81-cells": "15ae469a",
     "blocks:surface:y291-511": "419efac1"
   }

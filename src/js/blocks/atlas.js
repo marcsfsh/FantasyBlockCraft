@@ -580,6 +580,70 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(371,x,y,lock?sh([238,196,92],(x===6||y===6?16:-10)):band?sh([222,182,84],(hn(x,y,629)-.5)*14+(x+y)%3*3):sh([226,216,190],(y%4===3?-12:0)+(hn(x,y,630)-.5)*8));
     P(372,x,y,(x<=1||x>=14||y<=1||y>=14||x===7||x===8)?sh([222,182,84],(hn(x,y,631)-.5)*14):sh([226,216,190],(hn(x,y,632)-.5)*8));
     const stripe=((x>>2)%2)===0,fringe=y>=14;P(373,x,y,fringe?sh([222,182,84],(x%2?-16:10)):stripe?sh([44,70,140],(hn(x,y,633)-.5)*10):sh([236,236,230],(hn(x,y,634)-.5)*8));}
+  // the white realm enlarged (D-089). The silver tree's bark, pale and silvered with dark lenticels, and its rings; its leaves, silver
+  // green with pale blossom among them; the notice board, papers pinned to boards in a dark frame; the hanging signs on their
+  // brackets (a tankard for the inn, an anvil and hammer for the smithy); the tapestry of the realm, the sign in white on black
+  // under a rod, bordered in silver over a golden fringe; a black kite shield with the sign, hung; the effigy on a tomb, a king
+  // lying with his hands on his sword, and the tomb's side, a carved arcade; stained glass in lead; the milestone's face, its star
+  // and its letters cut; heartsease, purple and gold; a headstone; the tilt barrier striped black and white; the throne of the
+  // realm, its cushion and its high back with the sign; the maypole wound with ribbons; tarred planks; the sail of the realm,
+  // white with the sign in black; weathered whitestone, yellowed, cracked and mossed; the chest of the old kings and its lid;
+  // pavilion cloth in red and white; and the banner of the player's own arms, blank until arms are granted (men.js paints it)
+  for(const t of [376,378,379,380,381,384,386,399])clear(t);
+  const SG=(x,y,ox,oy)=>SIGN(x-ox,y-oy);
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    const len=hn(x>>1,y,701)<0.12&&hn(x>>2,y>>1,702)<0.6;P(374,x,y,len?sh([70,74,84],(hn(x,y,703)-.5)*14):sh([222,226,234],(hn(x,y>>1,704)-.5)*14+(x%5===0?-8:0)+(hn(x,y,705)-.5)*6));
+    const rr=Math.hypot(x-7.5,y-7.5);P(375,x,y,rr>6.5?sh([222,226,234],(hn(x,y,706)-.5)*10):sh([214,200,170],(Math.floor(rr)%2?-12:6)+(hn(x,y,707)-.5)*8));
+    const lf=hn(x,y,708),bl=hn(x>>1,y>>1,709)<0.16&&lf>0.3;if(bl)P(376,x,y,sh([246,244,250],(hn(x,y,710)-.5)*10+(x%2?-6:4)));else if(lf>0.24)P(376,x,y,sh(lf>0.8?[226,234,232]:lf>0.5?[186,204,198]:[146,168,160],(hn(x,y,711)-.5)*18));
+    const fr=x===0||x===15||y===0||y===15,pp=[[2,2,6,7],[8,1,13,5],[9,7,13,13],[2,9,7,14]].find(q=>x>=q[0]&&x<=q[2]&&y>=q[1]&&y<=q[3]);
+    P(377,x,y,fr?sh([82,58,36],(hn(x,y,712)-.5)*10):pp?(x===pp[0]+1&&y===pp[1]?[170,40,40]:(y-pp[1])%2===1&&x>pp[0]&&x<pp[2]?sh([120,110,96],(hn(x,y,713)-.5)*20):sh([232,222,196],(hn(x,y,714)-.5)*10)):sh([150,112,70],(y%4===0?-14:0)+(hn(x,y>>2,715)-.5)*14));
+    // the hanging signs: a bracket along the top, two chains, the board
+    const br=y===1&&x>=1,ch=(x===3||x===12)&&y>=2&&y<=3,bd=x>=1&&x<=14&&y>=4&&y<=14,bfr=bd&&(x===1||x===14||y===4||y===14);
+    for(const t of [378,379]){if(br)P(t,x,y,[60,60,66]);else if(ch)P(t,x,y,y%2?[90,90,96]:[130,130,136]);else if(bfr)P(t,x,y,sh([74,52,32],(hn(x,y,716)-.5)*10));else if(bd)P(t,x,y,sh([120,84,50],(hn(x,y,717)-.5)*12));}
+    if(bd&&!bfr){const mug=x>=5&&x<=9&&y>=7&&y<=12,foam=x>=5&&x<=9&&y===6,hdl=(x===10||x===11)&&y>=8&&y<=11&&!(x===10&&(y===9||y===10));if(foam)P(378,x,y,[242,238,226]);else if(mug)P(378,x,y,sh([214,176,84],(x===5?16:x===9?-16:0)+(y%2?-4:4)));else if(hdl)P(378,x,y,[176,140,64]);
+      const anv=(y===9&&x>=3&&x<=12)||(y===10&&x>=5&&x<=10)||(y>=11&&y<=12&&x>=6&&x<=9)||(y===13&&x>=4&&x<=11),hm=(y===6&&x>=8&&x<=12)||(x===10&&y>=7&&y<=8);if(anv)P(379,x,y,sh([70,72,80],y===9?24:0));else if(hm)P(379,x,y,x===10&&y>6?[140,100,60]:[150,152,160]);}
+    // the tapestry: a rod along the top, the black field bordered in silver, a fringe of gold at its foot, the sign in white
+    if(y===0)P(380,x,y,[150,110,60]);else if(y>=14)P(380,x,y,(x+y)%2?sh([214,176,84],8):sh([214,176,84],-20));else{const bo=x===0||x===15||y===1||y===13,f=SG(x,y,0,0);P(380,x,y,bo?[200,204,212]:f===1?[238,240,244]:f===2?[60,64,80]:sh([24,26,40],(hn(x,y,718)-.5)*8+((x+y)%7===0?6:0)));}
+    // a kite shield: wide at its top, coming to a point at its foot, a silver rim, the sign on black
+    {const hw=y<=8?6.5:6.5-(y-8)*0.95;if(y>=1&&Math.abs(x-7.5)<=hw){const rim=Math.abs(x-7.5)>hw-1||y===1,f=SG(x,y+1,0,0);P(381,x,y,rim?[204,210,220]:f===1?[238,240,244]:f===2?[60,64,80]:sh([28,30,42],(hn(x,y,719)-.5)*8+(x<7?8:0)));}}
+    // the effigy: a king lying on the slab, his head on a cushion, crowned, hands folded on the sword down his breast
+    {const sl=x===0||x===15||y===0||y===15,hd=Math.hypot(x-7.5,y-3)<2.3,crn=y===1&&x>=6&&x<=9,cush=y>=1&&y<=4&&x>=3&&x<=12&&!hd,body=y>=5&&y<=14&&Math.abs(x-7.5)<3.2-(y>11?(y-11)*0.4:0),sw=x>=7&&x<=8&&y>=6&&y<=14,hilt=y===6&&x>=6&&x<=9;
+      P(382,x,y,sl?sh([196,192,178],(hn(x,y,720)-.5)*8-10):crn?[214,176,84]:hd?sh([226,222,210],x<7?8:-8):hilt?[200,170,90]:sw?sh([210,206,196],x===7?10:-10):body?sh([220,216,204],(x<7?10:-10)+(y%3===0?-6:0)):cush?sh([180,176,164],(hn(x,y,721)-.5)*8):sh([190,186,172],(hn(x,y,722)-.5)*8));}
+    {const ar=Math.min(Math.abs((x%8)-3.5),9),arc=y>=4&&y<=12&&ar<2.5&&!(y<6&&ar>2.5-(6-y)*0.9),pil=y>=4&&y<=12&&(x%8===7||x%8===0);P(383,x,y,y<=1||y>=14?sh([214,210,198],y===0||y===14?10:-14):arc?sh([150,146,136],(hn(x,y,723)-.5)*6):pil?sh([226,222,212],(hn(x,y,724)-.5)*6):sh([206,202,190],(hn(x,y,725)-.5)*8));}
+    // stained glass: lead in diamonds, panes of blue, red, gold and green, a star at the heart
+    {const ld=x===0||y===0||x===15||y===15||(x+y)%5===0||(x-y+20)%5===0,st=Math.hypot(x-7.5,y-7.5)<2.2,q=(((x+y)/5|0)*3+((x-y+20)/5|0))%4;
+      P(384,x,y,ld?[52,52,58]:st?[246,232,160]:[[70,96,190],[176,52,52],[220,180,70],[72,150,90]][q].map((c,i)=>c+(hn(x,y,726)-.5)*20),ld?255:st?220:175);}
+    // the milestone: a border, a star cut at the top, three lines of letters, a deep-cut figure below
+    {const bo=x===0||x===15||y===0||y===15,stA=Math.atan2(y-3.5,x-7.5),stR=Math.hypot(x-7.5,y-3.5),star=stR<(Math.abs(Math.cos(stA*4))>0.9?2.6:1),ln=(y===7||y===9||y===11)&&x>=3&&x<=12&&hn(x,y,727)<0.62,fig=y>=13&&y<=14&&x>=6&&x<=9;
+      P(385,x,y,bo?sh([184,180,168],(hn(x,y,728)-.5)*8):star||fig?[118,114,106]:ln?[140,136,126]:sh([226,222,210],(hn(x,y,729)-.5)*8));}
+    // heartsease: leaves at its foot, three flowers, purple above and gold at the heart
+    {const stem=(Math.abs(x-5.5-Math.sin(y*0.5)*0.6)<0.6||Math.abs(x-10.5+Math.sin(y*0.4)*0.6)<0.6)&&y>=6,lv=y>=11&&hn(x,y,730)<0.5&&Math.abs(x-7.5)<(y-9)*0.9;
+      const fl=[[5,5],[10,4],[8,9]].map(([cx,cy])=>[Math.hypot(x-cx,y-cy),y-cy]).find(q=>q[0]<2.3);
+      if(fl)P(386,x,y,fl[0]<0.8?[246,214,70]:fl[1]<0?sh([118,72,170],(hn(x,y,731)-.5)*14):sh([150,104,200],(hn(x,y,732)-.5)*14));else if(stem||lv)P(386,x,y,sh([74,128,62],(hn(x,y,733)-.5)*16));}
+    // a headstone: weathered grey, a sunk panel, a star at its head, lines cut, lichen
+    {const pan=x>=3&&x<=12&&y>=3&&y<=13,stR=Math.hypot(x-7.5,y-5),star=stR<1.5,ln=(y===8||y===10||y===12)&&x>=5&&x<=10&&hn(x,y,734)<0.6,li=hn(x>>1,y>>1,735)<0.12;
+      P(387,x,y,li?sh([150,160,100],(hn(x,y,736)-.5)*14):star?[96,96,100]:ln?[110,110,112]:pan?sh([160,160,158],(hn(x,y,737)-.5)*8):sh([176,176,172],(hn(x,y,738)-.5)*12+(x===0||y===0?8:x===15||y===15?-12:0)));}
+    // the tilt barrier: a rail along its top, painted in black and white bands slanting
+    P(388,x,y,y<=1?sh([120,86,52],y===0?12:-6):((x+y)>>2)%2?sh([236,234,226],(hn(x,y,739)-.5)*8):sh([30,32,40],(hn(x,y,740)-.5)*8));
+    // the throne: a cushion of black in a silver frame; its high back of black with the sign in white, silver at its edges
+    P(389,x,y,x<=1||x>=14||y<=1||y>=14?sh([200,204,212],(x===0||y===0?14:-8)):sh([30,32,44],(hn(x,y,741)-.5)*10+((x+y)%5===0?-6:0)));
+    {const ed=x<=1||x>=14||y===0,f=SG(x,y+1,0,0),seat=y>=13;P(390,x,y,ed?sh([200,204,212],(x===0?14:-10)):seat?sh([60,62,74],(y===13?16:0)):f===1?[238,240,244]:f===2?[60,64,80]:sh([28,30,42],(hn(x,y,742)-.5)*8));}
+    // the maypole: white, wound with ribbons of red, blue and gold; its top
+    {const q=((x+y*2)%12+12)%12;P(391,x,y,q<2?sh([196,48,48],q*10):q>=4&&q<6?sh([52,84,170],(q-4)*10):q>=8&&q<10?sh([226,186,70],(q-8)*10):sh([238,236,228],(hn(x,y,743)-.5)*8));P(392,x,y,sh([214,200,170],(Math.floor(Math.hypot(x-7.5,y-7.5))%2?-10:6)));}
+    // tarred planks: black-brown boards, their seams pale with oakum, a sheen of tar
+    {const pk=y%4,sm=((hn(0,y>>2,744)*8)|0),jt=((x+sm)%16)===0;P(393,x,y,pk===3?[120,104,78]:jt?[20,16,14]:sh([46,36,28],(pk===0?10:0)+(hn(x,y>>2,745)-.5)*10+(hn(x,y,746)<0.05?24:0)));}
+    // the sail of the realm: white canvas in panels, the sign in black
+    {const sp=x%8===0||y%8===0,f=SG(x,y,0,0);P(394,x,y,f===1?[30,32,42]:f===2?[220,222,226]:sh([238,236,226],(sp?-14:0)+(hn(x,y,747)-.5)*6));}
+    // weathered whitestone: courses of yellowed blocks, joints dark, cracks, moss in the hollows, lichen
+    {const row=y>>2,off=row%2?4:0,jx=(x+off)%8,jy=y%4,jn=jx===0||jy===3,ck=Math.abs(Math.sin(x*0.8+fbm2(x/4,y/4,2,748.1)*4))<0.07&&hn(x>>2,y>>2,749)<0.5,ms=fbm2(x/5,y/5,2,750.3)>0.3+y*0.006,li=hn(x,y,751)<0.04;
+      P(395,x,y,ck?[110,104,90]:ms?sh([96,120,70],(hn(x,y,752)-.5)*20):li?[190,190,120]:jn?sh([140,134,118],(hn(x,y,753)-.5)*8):sh([206,198,176],(hn(x>>2,row,754)-.5)*14+(jy===0?8:0)+(hn(x,y,755)-.5)*8));}
+    // the chest of the old kings: weathered whitestone bound in bronze, a lock, the sign on its lid
+    {const band=x<=1||x>=14||y<=1||y>=14||y===7,lock=x>=6&&x<=9&&y>=6&&y<=10;P(396,x,y,lock?sh([170,120,60],(x===6||y===6?16:-10)):band?sh([150,104,56],(hn(x,y,756)-.5)*16):sh([206,198,176],(y%4===3?-12:0)+(hn(x,y,757)-.5)*10));
+      const f=SG(x,y,0,0);P(397,x,y,x<=1||x>=14||y<=1||y>=14?sh([150,104,56],(hn(x,y,758)-.5)*14):f?[226,220,200]:sh([196,188,166],(hn(x,y,759)-.5)*10));}
+    // pavilion cloth: broad stripes of red and white, a gold hem
+    P(398,x,y,y>=14?sh([214,176,84],(x%2?-14:8)):((x>>2)%2)?sh([236,232,222],(hn(x,y,760)-.5)*8):sh([176,40,40],(hn(x,y,761)-.5)*10));
+    // the banner of your arms, before any are granted: a pole, and plain white cloth edged in grey
+    if(x===1)P(399,x,y,sh([110,84,52],(hn(1,y,762)-.5)*12));else if(y===0)P(399,x,y,[150,140,110]);else if(x>=2&&!(y>12&&Math.abs(x-8.5)<(y-12)*1.5))P(399,x,y,x===2||x===15||y===1||y===15?[170,170,176]:sh([236,236,232],(hn(x,y,763)-.5)*8));}
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

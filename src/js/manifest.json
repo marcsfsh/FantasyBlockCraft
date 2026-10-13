@@ -126,6 +126,10 @@
       "about": "The ruins of the elder elves (D-088): fallen towers, broken colonnades, moonwell shrines, theatres, toppled kings and lone arches across the mountains and old woods, each with an elder chest and a name"
     },
     {
+      "path": "world/old-kingdom.js",
+      "about": "The ruins of the old kingdom of men (D-089): the Kings' Gate of two colossi, the crowned king at a crossroads, fallen cities, old beacons and the tombs of forgotten kings across the gentle lands, the steppe and the moors, each with a chest of the old kings"
+    },
+    {
       "path": "world/volcanic.js",
       "about": "The Volcanic Wastes (D-051): volcanoes in the terrain, lava flows, rivers and fissures, the burnt ground, charred trees, the citadel and the rift"
     },
@@ -164,6 +168,10 @@
     {
       "path": "world/dwarf-build.js",
       "about": "Building the mountain dwarves (D-066): terraces, granite houses, smithies, furnaces, headframes, cranes, engines of war, the hold's massif and great gate, and the sealed workings below (halls, forges, cistern, shafts, mines)"
+    },
+    {
+      "path": "world/realm-more.js",
+      "about": "The white realm enlarged (D-089): the throne and the kings in stone in every great hall, the silver tree of the royal citadel, houses of healing, inns, notice boards, signs, maypoles and churchyards; the lists, the hallows of the kings and the ports"
     },
     {
       "path": "world/gate-build.js",
@@ -286,6 +294,10 @@
       "about": "The war's soldiers and creatures (W3, D-070): knights, lancers, pikemen, crossbowmen, household knights, horse archers, outriders, mounted archers, glaive wardens, blade masters, skirmishers, sharpshooters, axe throwers, shieldbreakers, ironclads, sappers, engineers, healers, bearers and standard bearers; wolf riders, pot-throwers, drummers, fire shamans, siege trolls, war beasts, shield orcs, skulkers, troll drivers and orc crossbowmen, built from each people's parts (MODEL_KIT)"
     },
     {
+      "path": "engine/men-court-models.js",
+      "about": "The white realm's court and people (D-089): the king and queen, the guard of the citadel, the herald, healers, innkeepers, minstrels, criers, the watch, children, shepherds, sailors, the wardens of the hallows and the knights of the tourney; the charger, the ox, the wagon and the cog"
+    },
+    {
       "path": "engine/ember-models.js",
       "about": "The Emberlords remade (W7a, D-074): three builds (horns and arms) and four fires of the one kind, about twenty blocks tall; the fire spirits, flame hounds and lesser demons they call"
     },
@@ -384,6 +396,14 @@
     {
       "path": "gameplay/elf-life.js",
       "about": "The life of the elves (D-088): festivals under the stars, dawn and dusk with horns and song, motes of light and falling leaves, the archery contest, travellers and the leaving, the white ships sailing west, laments, and their song"
+    },
+    {
+      "path": "gameplay/men.js",
+      "about": "The white realm (D-089): renown and its ranks, speaking with the folk, trade for coin, the inn, healers, smiths, grooms, the crier, tasks from the notice boards and the court, knighthood and the player's arms, lordship, amends and outlawry, the horn of the realm, milestones, effigies and the chronicles of the kings; the new folk, the charger and the ox"
+    },
+    {
+      "path": "gameplay/men-life.js",
+      "about": "The life of the white realm (D-089): the tourney at the lists, caravans on the king's roads, bells, the crier, lamplighters, market day, the night watch, minstrels, chimney smoke, beacons lit across a kingdom, the village fair, shepherds and ploughmen, ships at its ports, the silver tree in flower, the passing bell"
     },
     {
       "path": "input/touch.js",
