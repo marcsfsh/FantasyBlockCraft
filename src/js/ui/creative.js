@@ -99,6 +99,10 @@ function elderTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x
 function oldTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
   for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=oldAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
   if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast(best.name+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
+// The nearest ruin of the forefathers of a kind (D-090), or a rider's cairn
+function fathersTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
+  for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=fathersAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
+  if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast((best.name||'A rider\'s cairn')+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
 // The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
 function gateTour(kind){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;

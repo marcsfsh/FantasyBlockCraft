@@ -155,6 +155,7 @@ function surfaceName(X,Y,Z){
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   {const er=elderNear(X,Z,-1);if(er)return er.name;} // the ruins of the elder elves (D-088)
   {const ok=oldNear(X,Z,-1);if(ok)return ok.name;} // the ruins of the old kingdom (D-089)
+  {const fa=fathersNear(X,Z,-1);if(fa&&fa.name)return fa.name;} // the ruins of the forefathers (D-090)
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)

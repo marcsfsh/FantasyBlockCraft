@@ -644,6 +644,47 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(398,x,y,y>=14?sh([214,176,84],(x%2?-14:8)):((x>>2)%2)?sh([236,232,222],(hn(x,y,760)-.5)*8):sh([176,40,40],(hn(x,y,761)-.5)*10));
     // the banner of your arms, before any are granted: a pole, and plain white cloth edged in grey
     if(x===1)P(399,x,y,sh([110,84,52],(hn(1,y,762)-.5)*12));else if(y===0)P(399,x,y,[150,140,110]);else if(x>=2&&!(y>12&&Math.abs(x-8.5)<(y-12)*1.5))P(399,x,y,x===2||x===15||y===1||y===15?[170,170,176]:sh([236,236,232],(hn(x,y,763)-.5)*8));}
+  // the riders enlarged (D-090). Barrowbloom: thin stems, small white flowers of six points with gold hearts; the bee skep, coils
+  // of golden straw bound with darker bands, its door at the foot, and its crown; the tapestry of the riders, the white horse on
+  // green under a gilt border, a fringe of gold; their round shield of green boards, a gilt rim, the horse in white; the horse
+  // stone, grey and lichened, a running horse cut into its face under a band of knotwork; the high seat, carved oak gilded, two
+  // horse heads crossed at its back, its cushion green with gold at the corners; the race pennon of green and gold on its pole;
+  // the picture stone, its panels carved with a sun, riders and a ship under sail, a little old paint left in the cuts; the
+  // hoard chest of the forefathers, dark oak in knotwork iron; the feasting board, a platter of bread and meat, horns and a cup;
+  // and the grey standing stone, grained and lichened, moss at its foot
+  for(const t of [400,403,404,409])clear(t);
+  const HR=['................','...........1....','..........111...','.........11111..','........111..11.','.......111......','.11111111111....',
+    '1..11111111.....','1..111111111....','...11.....11....','..1..1...1..1...','.1....1.1....1..'];
+  const HS=(x,y)=>x>=0&&y>=0&&x<16&&y<12&&HR[y][x]==='1';
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const st=(Math.abs(x-4.5-Math.sin(y*0.6)*0.7)<0.6&&y>=5)||(Math.abs(x-11-Math.sin(y*0.5+1)*0.7)<0.6&&y>=3)||(Math.abs(x-8-Math.sin(y*0.4+2)*0.5)<0.6&&y>=8),
+      fl=[[4.5,4],[11,2.5],[8,7.5],[13,8]].map(([cx,cy])=>[Math.hypot(x-cx,y-cy),Math.atan2(y-cy,x-cx)]).find(q=>q[0]<(Math.abs(Math.cos(q[1]*3))>0.5?2.1:1.1)),lv=y>=12&&hn(x,y,1001)<0.4&&Math.abs(x-7.5)<(y-10)*1.4;
+      if(fl)P(400,x,y,fl[0]<0.7?[236,196,70]:sh([246,246,240],(hn(x,y,1002)-.5)*10-(fl[0]>1.4?12:0)));else if(st||lv)P(400,x,y,sh([84,130,70],(hn(x,y,1003)-.5)*18));}
+    {const coil=y%3,bind=((x+(y>>2)*3)%6)===0;P(401,x,y,y>=11&&x>=6&&x<=9?(y===11?[60,44,24]:[34,24,14]):bind&&coil===1?sh([150,110,52],(hn(x,y,1004)-.5)*10):sh([220,180,96],(coil===0?-22:coil===1?8:0)+(hn(x,y,1005)-.5)*16));
+      const r=Math.hypot(x-7.5,y-7.5);P(402,x,y,r<1.5?[150,110,52]:sh([220,180,96],(Math.floor(r*1.2)%2?-18:6)+(hn(x,y,1006)-.5)*14));}
+    if(y===0)P(403,x,y,[150,110,60]);else if(y>=14)P(403,x,y,(x+y)%2?sh([214,176,84],8):sh([214,176,84],-20));
+    else{const bo=x===0||x===15||y===1||y===13,f=HS(x,y-1);P(403,x,y,bo?[220,182,90]:f?sh([240,238,228],(hn(x,y,1007)-.5)*8):sh([50,92,48],(hn(x,y,1008)-.5)*10+((x*3+y)%7===0?-8:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5);if(r<7.6){const rim=r>6.4,f=HS(x,y-2)&&r<6.2;P(404,x,y,rim?sh([214,176,84],(x<7?12:-10)):f?[240,238,228]:sh([50,92,48],(x%3===0?-14:0)+(hn(x,y,1009)-.5)*10));}}
+    {const band=y<=2,cut=HS(x,y-3)&&y>=3,edge=HS(x+1,y-3)!==HS(x,y-3)||HS(x,y-2)!==HS(x,y-3),kn=band&&((x+y*2)%4===0||y===1&&x%2===0),li=hn(x>>1,y>>1,1010)<0.13;
+      P(405,x,y,band?(kn?[96,96,98]:sh([150,150,146],(hn(x,y,1011)-.5)*8)):cut?(edge?[92,92,94]:[118,118,116]):li?sh([160,166,110],(hn(x,y,1012)-.5)*14):sh([146,146,142],(hn(x,y,1013)-.5)*16+(x===0||y===15?-10:0)));
+      P(406,x,y,hn(x>>1,y>>1,1014)<0.14?sh([160,166,110],(hn(x,y,1015)-.5)*14):sh([150,150,146],(hn(x,y,1016)-.5)*14+(x===0||y===0?8:x===15||y===15?-10:0)));}
+    {const ed=x<=1||x>=14||y<=1,hd=(Math.abs(x-y*0.6-3)<1.2||Math.abs(x+y*0.6-12.5)<1.2)&&y>=2&&y<=7,ey=(x===4||x===11)&&y===3,knot=y>=9&&((x+y)%4===0||(x-y+16)%4===0);
+      P(407,x,y,ed?sh([214,176,84],(x===0||y===0?16:-6)):ey?[30,20,12]:hd?sh([214,176,84],(hn(x,y,1017)-.5)*10):knot?[70,44,24]:sh([104,70,40],(hn(x,y,1018)-.5)*12+(x%4===0?-6:0)));
+      const cr=(x<=2||x>=13)&&(y<=2||y>=13);P(408,x,y,cr?[214,176,84]:x===0||y===0||x===15||y===15?[34,64,36]:sh([50,92,48],(hn(x,y,1019)-.5)*10+((x+y)%4===0?-8:0)));}
+    {if(x<=1)P(409,x,y,y===0?[214,176,84]:sh([140,104,62],x===0?10:-8));else{const tip=(x-2)*0.42,inF=y>=1&&y<=10&&Math.abs(y-5.5)<=4.5-tip;if(inF)P(409,x,y,Math.abs(y-5.5)<1.1?[226,186,80]:sh([50,92,48],(hn(x,y,1020)-.5)*10));}}
+    {const pan=y===4||y===9,sun=Math.hypot(x-7.5,y-2)<1.6,rid=y>=5&&y<=8&&(((x>=2&&x<=5)&&(y===6||y===7))||((x>=9&&x<=12)&&(y===6||y===7))||(y===5&&(x===4||x===11))||(y===8&&(x===2||x===5||x===9||x===12))),
+      hull=y===13&&x>=2&&x<=13||y===12&&(x===1||x===14)||y===14&&x>=4&&x<=11,mast=x===7&&y>=10&&y<=12,sail=y>=10&&y<=11&&x>=5&&x<=10,cut=sun||rid||hull||mast||sail||pan,paint=cut&&hn(x,y,1021)<0.3;
+      P(410,x,y,paint?(hn(x,y,1022)<0.5?[150,60,50]:[210,206,190]):cut?[102,100,96]:sh([150,148,142],(hn(x,y,1023)-.5)*14+(hn(x>>1,y>>1,1024)<0.1?-20:0)));
+      P(411,x,y,sh([150,148,142],(hn(x,y,1025)-.5)*14+(Math.hypot(x-7.5,y-7.5)>6?-12:0)));}
+    {const band=y<=1||y>=14||x<=1||x>=14||y===7,riv=band&&(x+y)%3===0,lock=x>=6&&x<=9&&y>=6&&y<=10,kn=band&&((x*2+y)%5===0);
+      P(412,x,y,lock?sh([70,72,78],(x===6||y===6?20:-6)):riv?[150,150,156]:band?sh(kn?[96,98,104]:[58,60,66],(hn(x,y,1026)-.5)*10):sh([62,42,26],(y%4===3?-12:0)+(hn(x,y>>2,1027)-.5)*12));
+      const st=x===4||x===11||y===7,boss=Math.hypot(x-7.5,y-7.5)<2;P(413,x,y,boss?sh([110,112,118],(x+y)%2?-10:14):st?sh([58,60,66],(hn(x,y,1028)-.5)*10):sh([62,42,26],(x%4===3?-12:0)+(hn(x>>2,y,1029)-.5)*12));}
+    {const pl=Math.hypot(x-7.5,y-6.5),bread=Math.hypot(x-6.5,y-5.5)<1.6,meat=Math.hypot(x-9,y-7.5)<1.5,cup=Math.hypot(x-3,y-12)<1.6,horn=y===12&&x>=9&&x<=14||y===11&&x===14;
+      P(414,x,y,cup?(Math.hypot(x-3,y-12)<0.9?[150,96,40]:[214,176,84]):horn?sh([226,214,180],(x-9)*3):bread?sh([210,160,90],(hn(x,y,1030)-.5)*14):meat?sh([150,72,52],(hn(x,y,1031)-.5)*14):pl<3.6?sh([176,178,184],pl>3?-20:0):sh([140,100,60],(y%4===0?-14:0)+(hn(x,y>>2,1032)-.5)*12));}
+    {const gr=(hn(x,0,1033)*6|0)%3===0,li=hn(x>>1,y>>1,1034)<0.14,ms=y>=13&&hn(x,y,1035)<0.6;
+      P(415,x,y,ms?sh([86,120,66],(hn(x,y,1036)-.5)*18):li?sh([170,170,116],(hn(x,y,1037)-.5)*16):sh([128,128,126],(gr?-10:0)+(hn(x,y>>1,1038)-.5)*16+(x===0?8:x===15?-10:0)));
+      P(416,x,y,hn(x>>1,y>>1,1039)<0.16?sh([170,170,116],(hn(x,y,1040)-.5)*14):sh([134,134,130],(hn(x,y,1041)-.5)*14));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

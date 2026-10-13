@@ -1,7 +1,7 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089)
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3,446:3,447:4,448:6,449:8}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089); the riders' (D-090)
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -252,7 +252,7 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[FCHEST]:openBox,[HSTONE]:useHorseStone,[PICSTONE]:usePicStone,[SKEP]:useSkep,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
@@ -263,6 +263,7 @@ function act(btn){
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
   if(btn===2&&elfAct())return; // speaking with the elves: trade, healing, tales, tasks, an audience (D-088)
   if(btn===2&&menAct())return; // speaking with the folk of the white realm (D-089)
+  if(btn===2&&riderAct())return; // speaking with the riders' folk (D-090)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
@@ -270,6 +271,8 @@ function act(btn){
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&(held===429||held===445)){elfWhistle();return;} // the elven whistle (or the groom's) calls your steed (D-088, D-089)
   if(btn===2&&held===436&&menHorn())return; // the horn of the realm calls its soldiers (D-089)
+  if(btn===2&&held===453&&riderHorn())return; // the war-horn of the riders calls a riding (D-090)
+  if(btn===2&&held===452&&useBarding())return; // barding put on your horse (D-090)
   if(btn===2&&held===435&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+8);drawBar(true);drawStats();toast('The salve soothes your wounds');return;} // heartsease salve
   if(btn===2&&held===430){boatPlace();return;} // a swan boat set on the water
   if(btn===2&&held===420&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+12);drawBar(true);drawStats();toast('The draught is cool and bright; your wounds close');return;} // an elven draught

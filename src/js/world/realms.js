@@ -44,9 +44,9 @@ const REALM_CULTS={
     label:{fort:'Castle %',outpost:'% Watch',farm:'% Farm',lists:'The Lists of %',hallows:'The Hallows of %',port:'Port %'},kind:{city:'a city of',fort:'a castle of',village:'a village of',outpost:'a watchtower of',farm:'a farmstead of',lists:'the lists of',hallows:'the tombs of the kings of',port:'a port of'},
     capital:'the royal city of',roads:["The King's Road",'A Country Lane']},
   horse:{k:'horse',lands:new Set(['steppe','moors','barrow']),names:'rider',folkNames:'rider',kingdom:'The Riders of ',ks:9431,fp:'h_',
-    site:{city:{M:22,spread:24,wall:1},fort:{M:12,spread:12,wall:1},village:{M:12,spread:9},outpost:{M:8,spread:16,wall:1},farm:{M:10,spread:7}},
-    R:{city:38,cap:46,cmax:58,small:32,fort:20,village:24,hamlet:16,outpost:9,farm:16},w:{spread:0.3,prom:0.8,pmax:20},
-    label:{fort:'% Hold',outpost:'% Beacon',farm:'% Stud'},kind:{city:'a hill town of',fort:'a hold of',village:'a steading of',outpost:'a beacon of',farm:'a horse farm of'},
+    site:{city:{M:22,spread:24,wall:1},fort:{M:12,spread:12,wall:1},village:{M:12,spread:9},outpost:{M:8,spread:16,wall:1},farm:{M:10,spread:7},course:{M:10,spread:8},barrows:{M:10,spread:10}},course:1,barrows:1,
+    R:{city:38,cap:46,cmax:58,small:32,fort:20,village:24,hamlet:16,outpost:9,farm:16,course:32,barrows:28},w:{spread:0.3,prom:0.8,pmax:20},
+    label:{fort:'% Hold',outpost:'% Beacon',farm:'% Stud',course:'The Course of %',barrows:'The Mounds of %'},kind:{city:'a hill town of',fort:'a hold of',village:'a steading of',outpost:'a beacon of',farm:'a horse farm of',course:'the race course of',barrows:'the mounds of the kings of'},
     capital:'the king\'s seat of',roads:["The Riders' Road",'A Cart Track']},
   // the high elves of the elder realms (D-062): hidden cities, fastnesses, refuges, watch-spires and gardens on the mountains,
   // the high meadows, the crags and the sea cliffs. They need no level ground: their sites take rough land (spread), and the
@@ -131,6 +131,10 @@ function* planProvince(root,key){
   // the white realm's lists by a city, and in a royal province the hallows of its kings (D-089): near the city, clear of its margin
   if(C.lists&&city){const t=yield* pick(SK.lists,Z_.lists,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-80)/25,(X,Z)=>far(X,Z,Z_.lists+SK.lists.M+24)&&Math.hypot(X-city.X,Z-city.Z)<city.R+200);if(t)add('lists',Z_.lists,t);}
   if(C.hallows&&city&&P.capital){const t=yield* pick(SK.hallows,Z_.hallows,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-60)/25,(X,Z)=>far(X,Z,Z_.hallows+SK.hallows.M+24)&&Math.hypot(X-city.X,Z-city.Z)<city.R+240);if(t)add('hallows',Z_.hallows,t);}
+  // the riders' race course by a hill town, and in a royal province the mounds of its kings (D-090), clear of the town and the
+  // kings' mounds along its road
+  if(C.course&&city){const t=yield* pick(SK.course,Z_.course,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-90)/25,(X,Z)=>far(X,Z,Z_.course+SK.course.M+40)&&Math.hypot(X-city.X,Z-city.Z)<city.R+220);if(t)add('course',Z_.course,t);}
+  if(C.barrows&&city&&P.capital){const t=yield* pick(SK.barrows,Z_.barrows,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-70)/25,(X,Z)=>far(X,Z,Z_.barrows+SK.barrows.M+40)&&Math.hypot(X-city.X,Z-city.Z)<city.R+240);if(t)add('barrows',Z_.barrows,t);}
   // villages, spread out
   const nv=Math.max(2,Math.min(8,Math.round(n*1.1+1)));for(let k=0;k<nv;k++){const t=yield* pick(SK.village,Z_.village,(f)=>-f.spread+hsh(k,9413,root.i)*2,(X,Z)=>far(X,Z,120));if(!t)break;add('village',Z_.village,t);}
   // where the ground is too rough for a village, a hamlet
@@ -173,7 +177,7 @@ function realmRoads(P,city){
   for(const o of outs){const h=nearest(o,[fort,city].filter(Boolean))||nearest(o,villages);if(h){K=h===city||h===fort?'high':'lane';link(h,o);}}
   for(const f of farms){const h=nearest(f,[...villages,city].filter(Boolean));if(h){K='lane';link(h,f);}}
   for(const hv of S.filter(s=>s.k==='haven'||s.k==='port')){const h=city||nearest(hv,villages);if(h){K='high';link(h,hv);}} // the elves' haven (D-088), the white realm's port (D-089)
-  for(const ls of S.filter(s=>s.k==='lists'||s.k==='hallows'))if(city){K='high';link(city,ls);} // the lists and the hallows (D-089)
+  for(const ls of S.filter(s=>s.k==='lists'||s.k==='hallows'||s.k==='course'||s.k==='barrows'))if(city){K='high';link(city,ls);} // the lists and the hallows (D-089), the riders' course and mounds (D-090)
   for(const s of S)if(s.dir===undefined)s.dir=(hsh(s.X,9421,s.Z)*4)|0;
   // a road starts and ends at its site's door, never inside it: cut each end back to the edge of the core
   for(const rd of P.roads){let x0=1e9,z0=1e9,x1=-1e9,z1=-1e9;for(const p of [rd.a,rd.b]){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);}

@@ -124,7 +124,7 @@ function menNews(){const L=[];for(const w of Object.values(WARS||{})){L.push(w.s
 // choosing; at the last a lordship
 function menAudience(f){const s=f.site,K=s?s.prov.kingdom:null,r=menRank(),royal=MEN_COURT.has(f.kind),who=royal?FOES[f.kind].n.replace(/ of the .*$/,'').toLowerCase():'lord of '+(s?s.prov.name:'the province');if(!K)return 'They nod to you.';
   if(r<1)return 'The '+who+' regards you. "You are a stranger in my hall. Keep the king\'s peace, and be welcome. Come again when the realm knows your name."';
-  const given=MN.au[K.key]||0;let msg='The '+who+' rises to greet you. "'+(r>=4?'Our knight returns to us. ':r>=2?'A friend of the realm is always welcome here. ':'Be welcome, freeman. ')+'"';
+  const given=MN.au[K.key]||0;let msg='The '+who+' rises to greet you. "'+(r>=4?'Our knight returns to us.':r>=2?'A friend of the realm is always welcome here.':'Be welcome, freeman.')+'"';
   if(given<r&&r<4){MN.au[K.key]=r;saveDirty=true;const g=[[0,0],[431,3],[434,2],[204,6]][r];if(SURV()&&g[0]){addItem(g[0],g[1]);drawBar(true);}if(g[0])msg+=' A gift from the throne: '+(g[1]>1?g[1]+' ':'')+nameOf(g[0])+'.';menGain(2,null);}
   if(r===3&&MN.r>=MEN_AT[4]){closeInv();setTimeout(()=>menDub(f,K),200);return false;}
   if(r>=4&&MN.r>=MEN_AT[5]&&!MN.lord&&royal){closeInv();setTimeout(()=>menLordship(f,K),200);return false;}

@@ -130,6 +130,10 @@
       "about": "The ruins of the old kingdom of men (D-089): the Kings' Gate of two colossi, the crowned king at a crossroads, fallen cities, old beacons and the tombs of forgotten kings across the gentle lands, the steppe and the moors, each with a chest of the old kings"
     },
     {
+      "path": "world/forefathers.js",
+      "about": "The forefathers of the riders (D-090): their ruins on the open lands outside the realms (white horses cut into chalk hillsides, stone rings, stone ships, burned halls, picture stones), each with a hoard chest and a name; the cairns of fallen riders in the riders' provinces; fathersAt, fathersNear, applyFathers"
+    },
+    {
       "path": "world/volcanic.js",
       "about": "The Volcanic Wastes (D-051): volcanoes in the terrain, lava flows, rivers and fissures, the burnt ground, charred trees, the citadel and the rift"
     },
@@ -172,6 +176,10 @@
     {
       "path": "world/realm-more.js",
       "about": "The white realm enlarged (D-089): the throne and the kings in stone in every great hall, the silver tree of the royal citadel, houses of healing, inns, notice boards, signs, maypoles and churchyards; the lists, the hallows of the kings and the ports"
+    },
+    {
+      "path": "world/rider-more.js",
+      "about": "The riders enlarged (D-090): the race course by a hill town and the mounds of the kings by the king's seat (layouts and builders), the bee skeps of their steadings and horse farms"
     },
     {
       "path": "world/gate-build.js",
@@ -298,6 +306,10 @@
       "about": "The white realm's court and people (D-089): the king and queen, the guard of the citadel, the herald, healers, innkeepers, minstrels, criers, the watch, children, shepherds, sailors, the wardens of the hallows and the knights of the tourney; the charger, the ox, the wagon and the cog"
     },
     {
+      "path": "engine/rider-court-models.js",
+      "about": "The riders' court and the folk of their life (D-090): the king and the queen, doorwardens, the counsellor, shieldmaidens, the lay-singer, the horse-healer, the horse-dealer, children, the warden of the mounds, the riders of the race; the windsteed and the steppe cattle"
+    },
+    {
       "path": "engine/ember-models.js",
       "about": "The Emberlords remade (W7a, D-074): three builds (horns and arms) and four fires of the one kind, about twenty blocks tall; the fire spirits, flame hounds and lesser demons they call"
     },
@@ -404,6 +416,14 @@
     {
       "path": "gameplay/men-life.js",
       "about": "The life of the white realm (D-089): the tourney at the lists, caravans on the king's roads, bells, the crier, lamplighters, market day, the night watch, minstrels, chimney smoke, beacons lit across a kingdom, the village fair, shepherds and ploughmen, ships at its ports, the silver tree in flower, the passing bell"
+    },
+    {
+      "path": "gameplay/riders.js",
+      "about": "The riders of the plains (D-090): standing (RH, saved as rh), their tongue, speaking with their folk, trade, horses, tending and shoeing, the high seat (audience, oath, thaneship), tasks, the songs of the kings, horse stones, picture stones, skeps, the war-horn, the peace of the golden hall, the new folk and beasts"
+    },
+    {
+      "path": "gameplay/rider-life.js",
+      "about": "The life of the riders (D-090): the race, the feast and the boast, the horse fair, wild herds and windsteeds, herders at work, sparring, the riders of the border, the dawn horn, the hall's smoke, wolves at night, the passing horn"
     },
     {
       "path": "input/touch.js",

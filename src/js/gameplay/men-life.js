@@ -134,19 +134,19 @@ function menSmoke(dt){if((smokeT-=dt)>0)return;smokeT=0.5;let n=0;
 // ---- beacons: lit at one watchtower of a kingdom (by the player, or by a raid), answered by every beacon of the kingdom in turn;
 // a great fire stands over each while it burns
 const BEACONS=[];
-function useBeacon(x,y,z){const s=realmSiteAt(x+OX,z+OZ,3);if(!s||s.k!=='outpost'||s.prov.cult.k!=='white')return false;if(BEACONS.some(b=>b.s===s&&b.t>0))return true;
-  menBeaconChain(s);menGain(1,null);const n=menRidersCome();toast('You light the beacon of '+s.name+'. Across the hills, one after another, the beacons of the realm answer it.'+(n?' Riders of the realm are coming.':''));return true;}
+function useBeacon(x,y,z){const s=realmSiteAt(x+OX,z+OZ,3),ck=s&&s.prov.cult.k;if(!s||s.k!=='outpost'||(ck!=='white'&&ck!=='horse'))return false;if(BEACONS.some(b=>b.s===s&&b.t>0))return true; // (and the riders' beacons, D-090)
+  menBeaconChain(s);if(ck==='horse')riderGain(1,null);else menGain(1,null);const n=menRidersCome();toast('You light the beacon of '+s.name+'. Across the hills, one after another, the beacons of '+(ck==='horse'?'the riders':'the realm')+' answer it.'+(n?(ck==='horse'?' A riding is coming.':' Riders of the realm are coming.'):''));return true;}
 function menBeaconChain(s0){const K=s0.prov.kingdom,ci=Math.floor(s0.X/LS),cj=Math.floor(s0.Z/LS),seen=new Set(),L=[];
   for(let a=-6;a<=6;a++)for(let b=-6;b<=6;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);if(realmHeld(c)!==s0.prov.cult)continue;const P=provinceOf(c.i,c.j);if(!P||P.kingdom.key!==K.key)continue;
     for(const s of P.sites)if(s.k==='outpost')L.push([Math.hypot(s.X-s0.X,s.Z-s0.Z),s]);}
   L.sort((a,b)=>a[0]-b[0]);L.forEach(([d,s],i)=>BEACONS.push({s:s,t:-(i*3),life:90,told:i<3||i===L.length-1,last:i===L.length-1,n:L.length}));return L.length;}
 function beaconFrame(dt){for(let i=BEACONS.length-1;i>=0;i--){const b=BEACONS[i],was=b.t;b.t+=dt;if(was<0&&b.t>=0&&b.told)toast(b.last&&b.n>3?'The last beacon burns: '+b.n+' beacons are lit across '+b.s.prov.kingdom.name.replace(/^The /,'the ')+'.':'The beacon of '+b.s.name+' is lit!');
-    if(b.t<0)continue;if(b.t>b.life){BEACONS.splice(i,1);continue;}const L=siteLayout(b.s),tw=L.parts.find(p=>p.k==='tower');if(!tw)continue;const [x,,z]=menAt(b.s,tw.cu,tw.cv,0),y=tw.y+tw.H+4;
+    if(b.t<0)continue;if(b.t>b.life){BEACONS.splice(i,1);continue;}const L=siteLayout(b.s),tw=L.parts.find(p=>p.k==='tower'||p.k==='pyre');if(!tw)continue;const [x,,z]=menAt(b.s,tw.cu,tw.cv,0),y=tw.k==='pyre'?tw.y+7:tw.y+tw.H+4;
     if(Math.hypot(x-PL.x,z-PL.z)>W)continue;if(Math.random()<dt*30)spawnP(x+(Math.random()-.5)*1.6,y,z+(Math.random()-.5)*1.6,(Math.random()-.5)*0.6,2.5+Math.random()*2,(Math.random()-.5)*0.6,[1,0.45+Math.random()*0.3,0.1],1.4,-0.6);
     if(Math.random()<dt*6)spawnP(x,y+3,z,(Math.random()-.5)*0.5,1.5,(Math.random()-.5)*0.5,[0.3,0.3,0.3],4,-0.3);}}
 // riders of the realm come to the player, answering a beacon
-function menRidersCome(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));if(!P||P.cult.k!=='white')return 0;const a=PL.yaw+3.14,x=PL.x+Math.sin(a)*28,z=PL.z+Math.cos(a)*28,bx=Math.floor(x),bz=Math.floor(z);
-  if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return 0;let n=0;for(let i=0;i<3;i++){const f=addFoe('rknight',x+i*2,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6});if(f){f.aid=MN.pt+90;f.hx=PL.x;f.hz=PL.z;n++;}}return n;}
+function menRidersCome(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));if(!P||(P.cult.k!=='white'&&P.cult.k!=='horse'))return 0;const a=PL.yaw+3.14,x=PL.x+Math.sin(a)*28,z=PL.z+Math.cos(a)*28,bx=Math.floor(x),bz=Math.floor(z);
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return 0;let n=0;for(let i=0;i<3;i++){const f=addFoe(P.cult.k==='horse'?'hrider':'rknight',x+i*2,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6});if(f){f.aid=MN.pt+90;f.hx=PL.x;f.hz=PL.z;n++;}}return n;}
 // ---- the village fair (every fourth evening): dancing about the maypole, a bonfire, a fiddle; keeping it feeds the player
 let FAIR=null;
 function fairTick(){const t=curT(),on=dayN%4===1&&t>0.7&&t<0.97;if(!on){if(FAIR)fairEnd();return;}

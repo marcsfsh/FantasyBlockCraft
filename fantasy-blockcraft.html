@@ -240,7 +240,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v42',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v43',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -253,7 +253,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=42,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=43,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -613,6 +613,17 @@ def(MILESTONE,'Milestone',[270,270,385]);def(HEARTSEASE,'Heartsease',[386,386,38
 def(RTHRONE,'Throne of the Realm',[389,389,390]);def(MAYPOLE,'Maypole',[392,392,391],{snd:'wood'});def(TARHULL,'Tarred Planks',[393,393,393],{snd:'wood'});def(RSAIL,'Sail of the Realm',[394,394,394],{snd:'soft'});
 def(OLDSTONE,'Weathered Whitestone',[395,395,395]);def(OLDCHEST,'Chest of the Old Kings',[397,397,396]);def(PAVCLOTH,'Pavilion Cloth',[398,398,398],{snd:'soft'});def(MYARMS,'Banner of Your Arms',[399,399,399],HANG);
 setH([NOTICE,TILTRAIL,MAYPOLE,TARHULL,SILVBARK],2,'wood');setH([SILVLEAF],0.4,'soft');setH([INNSIGN,SMITHSIGN,WSHIELD],0.6,'wood');setH([RTAP,MYARMS],0,'soft');setH([RSAIL,PAVCLOTH],0.8,'soft');
+// The riders enlarged (D-090): barrowbloom, small and white, on the kings' mounds and the cairns of the fallen; the bee skep of
+// coiled straw; the tapestry of the riders (the white horse on green under a gilt border) and their round shield, hung; the
+// horse stone that tells the way beside the riders' roads; the high seat of the riders, carved and gilded; the race pennon of
+// green and gold on its pole; the picture stone of the forefathers, carved with ships, horses and riders; the hoard chest of
+// the forefathers, dark oak in knotwork iron; the feasting board, laid; and the grey standing stone of the old rings
+const BARROWBLOOM=1212,SKEP=1213,HTAP=1214,HSHIELD=1215,HSTONE=1216,HSEAT=1217,PENNON=1218,PICSTONE=1219,FCHEST=1220,FEASTBOARD=1221,STANDSTONE=1222;
+def(BARROWBLOOM,'Barrowbloom',[400,400,400],PLANT);def(SKEP,'Bee Skep',[401,9,402],{snd:'soft'});def(HTAP,'Tapestry of the Riders',[403,403,403],HANG);
+def(HSHIELD,'Shield of the Riders',[404,404,404],Object.assign({},HANG,{snd:'wood'}));def(HSTONE,'Horse Stone',[405,294,406]);def(HSEAT,'High Seat of the Riders',[407,292,408],{snd:'wood'});
+def(PENNON,'Race Pennon',[409,409,409],Object.assign({},HANG,{snd:'wood'}));def(PICSTONE,'Picture Stone',[410,410,411]);def(FCHEST,'Hoard Chest of the Forefathers',[412,412,413],{snd:'wood'});
+def(FEASTBOARD,'Feasting Board',[292,292,414],{snd:'wood'});def(STANDSTONE,'Standing Stone',[415,415,416]);
+setH([BARROWBLOOM,HTAP],0,'soft');setH([SKEP],0.6,'soft');setH([HSHIELD,PENNON],0.6,'wood');setH([HSEAT,FEASTBOARD,FCHEST],2,'wood');setH([HSTONE,PICSTONE,STANDSTONE],4,'stone',1);
 setH([EFFIGY,MILESTONE,HEADSTONE,RTHRONE,OLDSTONE],4,'stone',1);setH([STGLASS],0.5,'misc');setH([HEARTSEASE],0,'soft');setH([OLDCHEST],2.5,'stone');
 setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
@@ -689,6 +700,17 @@ item(435,'Heartsease Salve','draught',[150,104,200],{once:true});item(436,'Horn 
 item(437,'Longsword of the Realm','sword',[214,220,230],{tool:'sword',tier:7,dur:1800});item(438,'Plate of the Realm','mail',[60,62,76],{equip:'body',armor:0.58,dur:1400,one:true});
 item(439,'Writ of the Realm','parchment',[232,226,206]);item(440,"Champion's Circlet",'circlet',[214,176,84]);item(441,'Chain of Office','brooch',[214,176,84]);
 item(442,'Crown of an Old King','crown',[196,188,160]);item(443,'Seal of the Old Kings','tablet',[186,176,150]);item(444,'Cup of the Old Kings','goblet',[206,200,180]);item(445,"Groom's Whistle",'whistle',[200,200,206],{once:true});
+// the riders' fare and gear (D-090): mead from the hall, honey from the skeps, oatcakes and smoked meat for the road; the horn bow,
+// quick to draw and loose from the saddle; the riders' long mail; barding for a horse (put on with use, it takes half the harm
+// meant for your steed); the war-horn of the riders, which calls a riding of horsemen to a sworn rider; the oath-ring and the
+// thane's brooch; the winner's bridle from the race; three relics of the forefathers from their ruins; the war-arrow carried to
+// muster the riders; and a halter, for leading a horse that is not yet yours
+item(446,'Mead','wine',[222,170,64]);item(447,'Honey','bowl',[230,170,46]);item(448,'Oatcake','bread',[206,172,112]);item(449,'Smoked Meat','meat',[132,66,46]);
+item(450,'Horn Bow','bow',[116,86,50],{tool:'bow',draw:0.55,dmg:7,v:42,dur:420});item(451,'Mail of the Riders','mail',[126,130,138],{equip:'body',armor:0.5,dur:1100,one:true});
+item(452,'Barding of the Riders','cloak',[50,92,48],{once:true});item(453,'War-horn of the Riders','horn',[226,214,180],{once:true});
+item(454,'Oath-ring','circlet',[214,176,84]);item(455,"Thane's Brooch",'brooch',[214,176,84]);item(456,"Winner's Bridle",'fibre',[214,176,84]);
+item(457,'Bracteate of the Forefathers','coin',[226,186,80]);item(458,'Golden Horn of the Forefathers','horn',[230,190,80]);item(459,'Arm-ring of the Forefathers','circlet',[200,170,90]);
+item(460,'War-arrow','arrow',[176,40,40],{once:true});item(461,'Halter','fibre',[150,110,70],{once:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -808,7 +830,7 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444,456,457,458,459]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
 // Texture atlas, drawn pixel by pixel
 const TS=16,AC=8,AR=64,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
@@ -1455,6 +1477,47 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     P(398,x,y,y>=14?sh([214,176,84],(x%2?-14:8)):((x>>2)%2)?sh([236,232,222],(hn(x,y,760)-.5)*8):sh([176,40,40],(hn(x,y,761)-.5)*10));
     // the banner of your arms, before any are granted: a pole, and plain white cloth edged in grey
     if(x===1)P(399,x,y,sh([110,84,52],(hn(1,y,762)-.5)*12));else if(y===0)P(399,x,y,[150,140,110]);else if(x>=2&&!(y>12&&Math.abs(x-8.5)<(y-12)*1.5))P(399,x,y,x===2||x===15||y===1||y===15?[170,170,176]:sh([236,236,232],(hn(x,y,763)-.5)*8));}
+  // the riders enlarged (D-090). Barrowbloom: thin stems, small white flowers of six points with gold hearts; the bee skep, coils
+  // of golden straw bound with darker bands, its door at the foot, and its crown; the tapestry of the riders, the white horse on
+  // green under a gilt border, a fringe of gold; their round shield of green boards, a gilt rim, the horse in white; the horse
+  // stone, grey and lichened, a running horse cut into its face under a band of knotwork; the high seat, carved oak gilded, two
+  // horse heads crossed at its back, its cushion green with gold at the corners; the race pennon of green and gold on its pole;
+  // the picture stone, its panels carved with a sun, riders and a ship under sail, a little old paint left in the cuts; the
+  // hoard chest of the forefathers, dark oak in knotwork iron; the feasting board, a platter of bread and meat, horns and a cup;
+  // and the grey standing stone, grained and lichened, moss at its foot
+  for(const t of [400,403,404,409])clear(t);
+  const HR=['................','...........1....','..........111...','.........11111..','........111..11.','.......111......','.11111111111....',
+    '1..11111111.....','1..111111111....','...11.....11....','..1..1...1..1...','.1....1.1....1..'];
+  const HS=(x,y)=>x>=0&&y>=0&&x<16&&y<12&&HR[y][x]==='1';
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const st=(Math.abs(x-4.5-Math.sin(y*0.6)*0.7)<0.6&&y>=5)||(Math.abs(x-11-Math.sin(y*0.5+1)*0.7)<0.6&&y>=3)||(Math.abs(x-8-Math.sin(y*0.4+2)*0.5)<0.6&&y>=8),
+      fl=[[4.5,4],[11,2.5],[8,7.5],[13,8]].map(([cx,cy])=>[Math.hypot(x-cx,y-cy),Math.atan2(y-cy,x-cx)]).find(q=>q[0]<(Math.abs(Math.cos(q[1]*3))>0.5?2.1:1.1)),lv=y>=12&&hn(x,y,1001)<0.4&&Math.abs(x-7.5)<(y-10)*1.4;
+      if(fl)P(400,x,y,fl[0]<0.7?[236,196,70]:sh([246,246,240],(hn(x,y,1002)-.5)*10-(fl[0]>1.4?12:0)));else if(st||lv)P(400,x,y,sh([84,130,70],(hn(x,y,1003)-.5)*18));}
+    {const coil=y%3,bind=((x+(y>>2)*3)%6)===0;P(401,x,y,y>=11&&x>=6&&x<=9?(y===11?[60,44,24]:[34,24,14]):bind&&coil===1?sh([150,110,52],(hn(x,y,1004)-.5)*10):sh([220,180,96],(coil===0?-22:coil===1?8:0)+(hn(x,y,1005)-.5)*16));
+      const r=Math.hypot(x-7.5,y-7.5);P(402,x,y,r<1.5?[150,110,52]:sh([220,180,96],(Math.floor(r*1.2)%2?-18:6)+(hn(x,y,1006)-.5)*14));}
+    if(y===0)P(403,x,y,[150,110,60]);else if(y>=14)P(403,x,y,(x+y)%2?sh([214,176,84],8):sh([214,176,84],-20));
+    else{const bo=x===0||x===15||y===1||y===13,f=HS(x,y-1);P(403,x,y,bo?[220,182,90]:f?sh([240,238,228],(hn(x,y,1007)-.5)*8):sh([50,92,48],(hn(x,y,1008)-.5)*10+((x*3+y)%7===0?-8:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5);if(r<7.6){const rim=r>6.4,f=HS(x,y-2)&&r<6.2;P(404,x,y,rim?sh([214,176,84],(x<7?12:-10)):f?[240,238,228]:sh([50,92,48],(x%3===0?-14:0)+(hn(x,y,1009)-.5)*10));}}
+    {const band=y<=2,cut=HS(x,y-3)&&y>=3,edge=HS(x+1,y-3)!==HS(x,y-3)||HS(x,y-2)!==HS(x,y-3),kn=band&&((x+y*2)%4===0||y===1&&x%2===0),li=hn(x>>1,y>>1,1010)<0.13;
+      P(405,x,y,band?(kn?[96,96,98]:sh([150,150,146],(hn(x,y,1011)-.5)*8)):cut?(edge?[92,92,94]:[118,118,116]):li?sh([160,166,110],(hn(x,y,1012)-.5)*14):sh([146,146,142],(hn(x,y,1013)-.5)*16+(x===0||y===15?-10:0)));
+      P(406,x,y,hn(x>>1,y>>1,1014)<0.14?sh([160,166,110],(hn(x,y,1015)-.5)*14):sh([150,150,146],(hn(x,y,1016)-.5)*14+(x===0||y===0?8:x===15||y===15?-10:0)));}
+    {const ed=x<=1||x>=14||y<=1,hd=(Math.abs(x-y*0.6-3)<1.2||Math.abs(x+y*0.6-12.5)<1.2)&&y>=2&&y<=7,ey=(x===4||x===11)&&y===3,knot=y>=9&&((x+y)%4===0||(x-y+16)%4===0);
+      P(407,x,y,ed?sh([214,176,84],(x===0||y===0?16:-6)):ey?[30,20,12]:hd?sh([214,176,84],(hn(x,y,1017)-.5)*10):knot?[70,44,24]:sh([104,70,40],(hn(x,y,1018)-.5)*12+(x%4===0?-6:0)));
+      const cr=(x<=2||x>=13)&&(y<=2||y>=13);P(408,x,y,cr?[214,176,84]:x===0||y===0||x===15||y===15?[34,64,36]:sh([50,92,48],(hn(x,y,1019)-.5)*10+((x+y)%4===0?-8:0)));}
+    {if(x<=1)P(409,x,y,y===0?[214,176,84]:sh([140,104,62],x===0?10:-8));else{const tip=(x-2)*0.42,inF=y>=1&&y<=10&&Math.abs(y-5.5)<=4.5-tip;if(inF)P(409,x,y,Math.abs(y-5.5)<1.1?[226,186,80]:sh([50,92,48],(hn(x,y,1020)-.5)*10));}}
+    {const pan=y===4||y===9,sun=Math.hypot(x-7.5,y-2)<1.6,rid=y>=5&&y<=8&&(((x>=2&&x<=5)&&(y===6||y===7))||((x>=9&&x<=12)&&(y===6||y===7))||(y===5&&(x===4||x===11))||(y===8&&(x===2||x===5||x===9||x===12))),
+      hull=y===13&&x>=2&&x<=13||y===12&&(x===1||x===14)||y===14&&x>=4&&x<=11,mast=x===7&&y>=10&&y<=12,sail=y>=10&&y<=11&&x>=5&&x<=10,cut=sun||rid||hull||mast||sail||pan,paint=cut&&hn(x,y,1021)<0.3;
+      P(410,x,y,paint?(hn(x,y,1022)<0.5?[150,60,50]:[210,206,190]):cut?[102,100,96]:sh([150,148,142],(hn(x,y,1023)-.5)*14+(hn(x>>1,y>>1,1024)<0.1?-20:0)));
+      P(411,x,y,sh([150,148,142],(hn(x,y,1025)-.5)*14+(Math.hypot(x-7.5,y-7.5)>6?-12:0)));}
+    {const band=y<=1||y>=14||x<=1||x>=14||y===7,riv=band&&(x+y)%3===0,lock=x>=6&&x<=9&&y>=6&&y<=10,kn=band&&((x*2+y)%5===0);
+      P(412,x,y,lock?sh([70,72,78],(x===6||y===6?20:-6)):riv?[150,150,156]:band?sh(kn?[96,98,104]:[58,60,66],(hn(x,y,1026)-.5)*10):sh([62,42,26],(y%4===3?-12:0)+(hn(x,y>>2,1027)-.5)*12));
+      const st=x===4||x===11||y===7,boss=Math.hypot(x-7.5,y-7.5)<2;P(413,x,y,boss?sh([110,112,118],(x+y)%2?-10:14):st?sh([58,60,66],(hn(x,y,1028)-.5)*10):sh([62,42,26],(x%4===3?-12:0)+(hn(x>>2,y,1029)-.5)*12));}
+    {const pl=Math.hypot(x-7.5,y-6.5),bread=Math.hypot(x-6.5,y-5.5)<1.6,meat=Math.hypot(x-9,y-7.5)<1.5,cup=Math.hypot(x-3,y-12)<1.6,horn=y===12&&x>=9&&x<=14||y===11&&x===14;
+      P(414,x,y,cup?(Math.hypot(x-3,y-12)<0.9?[150,96,40]:[214,176,84]):horn?sh([226,214,180],(x-9)*3):bread?sh([210,160,90],(hn(x,y,1030)-.5)*14):meat?sh([150,72,52],(hn(x,y,1031)-.5)*14):pl<3.6?sh([176,178,184],pl>3?-20:0):sh([140,100,60],(y%4===0?-14:0)+(hn(x,y>>2,1032)-.5)*12));}
+    {const gr=(hn(x,0,1033)*6|0)%3===0,li=hn(x>>1,y>>1,1034)<0.14,ms=y>=13&&hn(x,y,1035)<0.6;
+      P(415,x,y,ms?sh([86,120,66],(hn(x,y,1036)-.5)*18):li?sh([170,170,116],(hn(x,y,1037)-.5)*16):sh([128,128,126],(gr?-10:0)+(hn(x,y>>1,1038)-.5)*16+(x===0?8:x===15?-10:0)));
+      P(416,x,y,hn(x>>1,y>>1,1039)<0.16?sh([170,170,116],(hn(x,y,1040)-.5)*14):sh([134,134,130],(hn(x,y,1041)-.5)*14));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}
@@ -1870,9 +1933,9 @@ const REALM_CULTS={
     label:{fort:'Castle %',outpost:'% Watch',farm:'% Farm',lists:'The Lists of %',hallows:'The Hallows of %',port:'Port %'},kind:{city:'a city of',fort:'a castle of',village:'a village of',outpost:'a watchtower of',farm:'a farmstead of',lists:'the lists of',hallows:'the tombs of the kings of',port:'a port of'},
     capital:'the royal city of',roads:["The King's Road",'A Country Lane']},
   horse:{k:'horse',lands:new Set(['steppe','moors','barrow']),names:'rider',folkNames:'rider',kingdom:'The Riders of ',ks:9431,fp:'h_',
-    site:{city:{M:22,spread:24,wall:1},fort:{M:12,spread:12,wall:1},village:{M:12,spread:9},outpost:{M:8,spread:16,wall:1},farm:{M:10,spread:7}},
-    R:{city:38,cap:46,cmax:58,small:32,fort:20,village:24,hamlet:16,outpost:9,farm:16},w:{spread:0.3,prom:0.8,pmax:20},
-    label:{fort:'% Hold',outpost:'% Beacon',farm:'% Stud'},kind:{city:'a hill town of',fort:'a hold of',village:'a steading of',outpost:'a beacon of',farm:'a horse farm of'},
+    site:{city:{M:22,spread:24,wall:1},fort:{M:12,spread:12,wall:1},village:{M:12,spread:9},outpost:{M:8,spread:16,wall:1},farm:{M:10,spread:7},course:{M:10,spread:8},barrows:{M:10,spread:10}},course:1,barrows:1,
+    R:{city:38,cap:46,cmax:58,small:32,fort:20,village:24,hamlet:16,outpost:9,farm:16,course:32,barrows:28},w:{spread:0.3,prom:0.8,pmax:20},
+    label:{fort:'% Hold',outpost:'% Beacon',farm:'% Stud',course:'The Course of %',barrows:'The Mounds of %'},kind:{city:'a hill town of',fort:'a hold of',village:'a steading of',outpost:'a beacon of',farm:'a horse farm of',course:'the race course of',barrows:'the mounds of the kings of'},
     capital:'the king\'s seat of',roads:["The Riders' Road",'A Cart Track']},
   // the high elves of the elder realms (D-062): hidden cities, fastnesses, refuges, watch-spires and gardens on the mountains,
   // the high meadows, the crags and the sea cliffs. They need no level ground: their sites take rough land (spread), and the
@@ -1957,6 +2020,10 @@ function* planProvince(root,key){
   // the white realm's lists by a city, and in a royal province the hallows of its kings (D-089): near the city, clear of its margin
   if(C.lists&&city){const t=yield* pick(SK.lists,Z_.lists,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-80)/25,(X,Z)=>far(X,Z,Z_.lists+SK.lists.M+24)&&Math.hypot(X-city.X,Z-city.Z)<city.R+200);if(t)add('lists',Z_.lists,t);}
   if(C.hallows&&city&&P.capital){const t=yield* pick(SK.hallows,Z_.hallows,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-60)/25,(X,Z)=>far(X,Z,Z_.hallows+SK.hallows.M+24)&&Math.hypot(X-city.X,Z-city.Z)<city.R+240);if(t)add('hallows',Z_.hallows,t);}
+  // the riders' race course by a hill town, and in a royal province the mounds of its kings (D-090), clear of the town and the
+  // kings' mounds along its road
+  if(C.course&&city){const t=yield* pick(SK.course,Z_.course,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-90)/25,(X,Z)=>far(X,Z,Z_.course+SK.course.M+40)&&Math.hypot(X-city.X,Z-city.Z)<city.R+220);if(t)add('course',Z_.course,t);}
+  if(C.barrows&&city&&P.capital){const t=yield* pick(SK.barrows,Z_.barrows,(f,X,Z)=>-f.spread*0.5-Math.abs(Math.hypot(X-city.X,Z-city.Z)-city.R-70)/25,(X,Z)=>far(X,Z,Z_.barrows+SK.barrows.M+40)&&Math.hypot(X-city.X,Z-city.Z)<city.R+240);if(t)add('barrows',Z_.barrows,t);}
   // villages, spread out
   const nv=Math.max(2,Math.min(8,Math.round(n*1.1+1)));for(let k=0;k<nv;k++){const t=yield* pick(SK.village,Z_.village,(f)=>-f.spread+hsh(k,9413,root.i)*2,(X,Z)=>far(X,Z,120));if(!t)break;add('village',Z_.village,t);}
   // where the ground is too rough for a village, a hamlet
@@ -1999,7 +2066,7 @@ function realmRoads(P,city){
   for(const o of outs){const h=nearest(o,[fort,city].filter(Boolean))||nearest(o,villages);if(h){K=h===city||h===fort?'high':'lane';link(h,o);}}
   for(const f of farms){const h=nearest(f,[...villages,city].filter(Boolean));if(h){K='lane';link(h,f);}}
   for(const hv of S.filter(s=>s.k==='haven'||s.k==='port')){const h=city||nearest(hv,villages);if(h){K='high';link(h,hv);}} // the elves' haven (D-088), the white realm's port (D-089)
-  for(const ls of S.filter(s=>s.k==='lists'||s.k==='hallows'))if(city){K='high';link(city,ls);} // the lists and the hallows (D-089)
+  for(const ls of S.filter(s=>s.k==='lists'||s.k==='hallows'||s.k==='course'||s.k==='barrows'))if(city){K='high';link(city,ls);} // the lists and the hallows (D-089), the riders' course and mounds (D-090)
   for(const s of S)if(s.dir===undefined)s.dir=(hsh(s.X,9421,s.Z)*4)|0;
   // a road starts and ends at its site's door, never inside it: cut each end back to the edge of the core
   for(const rd of P.roads){let x0=1e9,z0=1e9,x1=-1e9,z1=-1e9;for(const p of [rd.a,rd.b]){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);z0=Math.min(z0,p[1]);z1=Math.max(z1,p[1]);}
@@ -4105,6 +4172,7 @@ function surfaceName(X,Y,Z){
   const sm=smallNear(X,Z,-4);if(sm)return SMALL_NAMES[sm.kind];
   {const er=elderNear(X,Z,-1);if(er)return er.name;} // the ruins of the elder elves (D-088)
   {const ok=oldNear(X,Z,-1);if(ok)return ok.name;} // the ruins of the old kingdom (D-089)
+  {const fa=fathersNear(X,Z,-1);if(fa&&fa.name)return fa.name;} // the ruins of the forefathers (D-090)
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
@@ -5084,6 +5152,96 @@ function oldBuild(s){
       for(let b=-5;b<=5;b++)if(hsh(b,9011,s.X)<0.7)P(-6,b,g+8,old(r(),WSTRIM));
       P(5,0,g+2,EFFIGY);P(4,0,g+2,WSROUGH);P(6,0,g+2,WSROUGH);P(5,2,g+2,WSPILLAR);P(5,2,g+3,LANTERN);
       chest(7,-3,g+2);}
+  }
+}
+// ---- The forefathers of the riders (D-090): what is left of the people the riders came from, long ago, out of the north, on
+// the open lands the living kingdoms do not hold: the steppe, the moors, the barrow hills, the chalk, the green hills, the
+// frozen tundra and the bogs. About one chunk in nine of those lands is tried for one (most fail on the ground, the water or a place near): a white horse
+// cut through the turf into the chalk of a hillside, its back uphill so that it is read from the valley, a cairn over a hoard
+// above it; a ring of standing stones about an altar stone; a ship of standing stones, taller at stem and stern, a picture
+// stone at its middle; the burned hall, its footings, charred posts and fallen beams, its long hearth cold; and a row of picture
+// stones before a mound. Each has a hoard chest of the forefathers (FATHERLOOT) and a name in the riders' style.
+// And within the riders' own provinces, the cairns of riders fallen on the plains: a heap of fieldstones, a spear in it, a
+// shield hung on it, barrowbloom about it (one chunk in about forty of their open ground, off their sites and roads).
+// Pure per chunk like the old kingdom's ruins; each reaches at most 22 blocks from its middle, so the chunks about it build it
+// (applyFathers); fathersNear keeps every other feature off. They keep off the elder elves' ruins and the old kingdom's (they ask
+// elderNear and oldNear; those never ask for these).
+const FATHER_LANDS={steppe:['horse','ring','ship','stones','hall'],moors:['horse','ring','hall','stones','ship'],barrow:['ship','stones','ring','horse'],chalk:['horse','ring','ship'],green:['horse','ring'],tundra:['horse','ring','ship','stones','hall'],bog:['stones','ship']};
+const FATHER_NAMES={horse:'The White Horse of %',ring:'The Stone Ring of %',ship:'The Stone Ship of %',hall:'The Burned Hall of %',stones:'The Picture Stones of %'};
+// what a hoard chest holds: [item, least, most, weight] (the relics of the forefathers are rare)
+const FATHERLOOT=[[457,1,1,1.2],[458,1,1,0.6],[459,1,1,0.9],[204,2,6,6],[205,1,2,2],[224,1,2,3],[223,1,2,3],[206,2,4,4],[201,4,8,3],[446,1,2,3],[228,1,2,1.5]];
+// the white horse: a galloping horse, eighteen cells by eleven, its head to high a and its back to high b (uphill)
+const HF_ROWS=['..............1...','.............111..','............11111.','...........111.111','..........111.....','..1111111111......','.11111111111......',
+  '11111111111.......','1.11....111.......','..1.1....1.1......','.1...1..1...1.....'];
+const fatC=new Map(),TFA={},TFA2={};
+// a candidate stands only where no chunk two about it draws a lower hash (so no two ruins crowd one another)
+const fatLow=(WCX,WCZ,q)=>{for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if((a||b)&&hsh(WCX+a,9651,WCZ+b)<q)return false;return true;};
+function fathersAt(WCX,WCZ){
+  const key=WCX*65536+WCZ;if(fatC.has(key))return fatC.get(key);if(fatC.size>20000)fatC.clear();let s=null;const q=hsh(WCX,9651,WCZ);
+  if(q<0.11){const X=WCX*CS+8,Z=WCZ*CS+8;colInfo(X,Z,TFA);const g=TFA.h,P=realmOfColumn(X,Z);
+    if(!TFA.wet&&!TFA.river&&!TFA.bank&&!TFA.lake&&TFA.rvBot===999&&g>TFA.sl+3&&g+40<H){
+      if(P&&P.cult.k==='horse'){ // a rider's cairn
+        if(q<0.025&&!realmNear(X,Z,6)&&!realmRoadAt(X,Z,4)&&!sigNear(X,Z,4)&&!smallNear(X,Z,4)&&!pondNear(X,Z,4)&&!surfTaken(X,Z,4)){let lo=g,hi=g;
+          for(const [a,b] of [[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,-2]]){const e=colInfo(X+a,Z+b,TFA2);if(e.wet||e.river||e.lake)lo=-1e9;lo=Math.min(lo,e.h);hi=Math.max(hi,e.h);}
+          if(hi-lo<=2)s={kind:'cairn',X:X,Z:Z,g:g,R:3,dir:0,name:null};}}
+      else if(!P&&q<0.11&&fatLow(WCX,WCZ,q)){const L=FATHER_LANDS[LANDS[TFA.land].k];
+        if(L&&!surfTaken(X,Z,22)&&!sigNear(X,Z,22)&&!smallNear(X,Z,22)&&!pondNear(X,Z,22)&&!elderNear(X,Z,24)&&!oldNear(X,Z,24)){
+          const kind=L[Math.floor(hsh(WCX,9655,WCZ)*L.length)],R=kind==='horse'?20:kind==='ship'?16:kind==='hall'?14:kind==='stones'?12:11;let lo=g,hi=g,ux=0,uz=0;
+          for(let k=0;k<12;k++){const a=k/12*6.283;for(const d of [R*0.5,R]){const e=colInfo(X+Math.round(Math.cos(a)*d),Z+Math.round(Math.sin(a)*d),TFA2);const x=X+Math.round(Math.cos(a)*d),z=Z+Math.round(Math.sin(a)*d);if(e.wet||e.river||e.lake||e.h<e.sl+2||oldRoadAt(x,z)||realmRoadAt(x,z,2))lo=-1e9;lo=Math.min(lo,e.h);hi=Math.max(hi,e.h);ux+=Math.cos(a)*(e.h-g);uz+=Math.sin(a)*(e.h-g);}}
+          for(let dx=-R;dx<=R&&lo>-1e9;dx+=3)for(let dz=-R;dz<=R;dz+=3)if(Math.hypot(dx,dz)<=R+1&&oldRoadAt(X+dx,Z+dz)){lo=-1e9;break;} // no old road across it
+          for(let a=-3;a<=3&&lo>-1e9;a++)for(let b=-3;b<=3;b++){const f=fallAt(WCX+a,WCZ+b);if(f&&f.path.some(([x,z])=>Math.hypot(x-X,z-Z)<R+3)){lo=-1e9;break;}}
+          const sp=hi-lo,ok=kind==='horse'?sp>=5&&sp<=30&&lo>-1e9:sp<=(kind==='stones'?10:kind==='ring'?9:kind==='ship'?8:7);
+          if(ok){const rn=rngAt(WCX,9657,WCZ),nm=nameWord('rider',rn);let dir=Math.floor(hsh(WCX,9659,WCZ)*4);
+            if(kind==='horse'){let best=-1e9;for(let d=0;d<4;d++){const [fx,fz]=ELD4[d],v=-fz*ux+fx*uz;if(v>best){best=v;dir=d;}}} // its back (local +b) uphill
+            s={kind:kind,X:X,Z:Z,g:g,R:R,dir:dir,name:FATHER_NAMES[kind].replace('%',nm)};}}}}}
+  fatC.set(key,s);return s;
+}
+function fathersNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const s=fathersAt(cx+a,cz+b);if(s&&Math.hypot(X-s.X,Z-s.Z)<=s.R+(m||0))return s;}return null;}
+function applyFathers(WCX,WCZ){for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const s=fathersAt(WCX+a,WCZ+b);if(s)fathersBuild(s);}}
+function fathersBuild(s){
+  const r=mkRng(1+Math.floor(hsh(s.X,9661,s.Z)*2147483000)),[fx,fz]=ELD4[s.dir],g=s.g;
+  // local (a, b): a along the ruin, b across it (for the white horse, b uphill)
+  const XZ=(a,b)=>[s.X+a*fx-b*fz,s.Z+a*fz+b*fx],P=(a,b,y,id,m)=>{const [x,z]=XZ(a,b);PW(x,y,z,id,m||MODE_SET);},G=(a,b)=>{const [x,z]=XZ(a,b);return hAt(x,z);};
+  const bloom=(a,b)=>{const gg=G(a,b);P(a,b,gg+1,BARROWBLOOM,MODE_AIR);};
+  const stone=(a,b,h,id)=>{const gg=G(a,b);for(let y=gg+1;y<=gg+h;y++)P(a,b,y,id||STANDSTONE);};
+  const chest=(a,b)=>{const gg=G(a,b);P(a,b,gg,FSTONE);P(a,b,gg+1,FCHEST);P(a,b,gg+2,AIR);};
+  switch(s.kind){
+    case 'cairn':{for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(Math.abs(a)+Math.abs(b)===2&&hsh(a+s.X,9663,b+s.Z)<0.5)continue;const gg=G(a,b);P(a,b,gg+1,FSTONE);}
+      const gg=G(0,0);P(0,0,gg+2,FSTONE);P(0,0,gg+3,STAKES);P(1,0,gg+2,HSHIELD,MODE_AIR);
+      for(const [a,b] of [[2,1],[-2,0],[1,-2],[-1,2],[2,-1]])if(hsh(a+s.X,9665,b+s.Z)<0.7)bloom(a,b);break;}
+    case 'horse':{ // the white horse: the figure two blocks to each of its cells, its turf cut away to chalk two deep
+      for(let a=-18;a<18;a++)for(let b=-11;b<=10;b++){const cx=Math.floor((a+18)/2),cy=Math.floor((10-b)/2);if(!(cy>=0&&cy<11&&HF_ROWS[cy][cx]==='1'))continue;
+        const gg=G(a,b);P(a,b,gg,CHALK);P(a,b,gg-1,CHALK);P(a,b,gg+1,AIR);P(a,b,gg+2,AIR);}
+      // the cairn over the hoard on the hilltop above it
+      for(let a=-1;a<=1;a++)for(let b=14;b<=16;b++){if(a===0&&b===15)continue;const gg=G(a,b);P(a,b,gg+1,FSTONE);if(Math.abs(a)+Math.abs(b-15)===1)P(a,b,gg+2,FSTONE);}
+      chest(0,15);{const gg=G(0,15);P(0,15,gg+2,STANDSTONE);}break;}
+    case 'ring':{ // twelve standing stones about an altar stone, some fallen
+      for(let k=0;k<12;k++){const an=k*Math.PI/6+0.13,a=Math.round(Math.cos(an)*8),b=Math.round(Math.sin(an)*8),q=r();
+        if(q<0.22){const da=Math.round(Math.cos(an+1.6)),db=Math.round(Math.sin(an+1.6)),gg=G(a,b);P(a,b,gg+1,STANDSTONE);P(a+da,b+db,G(a+da,b+db)+1,STANDSTONE);}
+        else stone(a,b,2+Math.floor(r()*3));}
+      for(const b of [-1,0,1]){const gg=G(0,b);P(0,b,gg+1,STANDSTONE);}
+      for(let k=0;k<10;k++)bloom(Math.round(r()*12-6),Math.round(r()*12-6));
+      chest(2,0);break;}
+    case 'ship':{ // a ship of stones fourteen either side of its middle: the stones along her sides, her stem and stern tall; a
+      // picture stone amidships
+      for(let a=-14;a<=14;a+=2){const w=Math.round(5*Math.sqrt(Math.max(0,1-(a/14.5)*(a/14.5)))),h=Math.abs(a)>=12?4:Math.abs(a)>=8?2:1;
+        if(Math.abs(a)===14){stone(a,0,4);continue;}for(const sd of [1,-1])if(r()>0.12)stone(a,sd*w,h);}
+      stone(0,0,3,PICSTONE);for(let k=0;k<6;k++)bloom(Math.round(r()*16-8),Math.round(r()*6-3));
+      chest(3,0);break;}
+    case 'hall':{ // the burned hall: footings of fieldstone round a long floor, two rows of charred posts, beams fallen across the
+      // floor, ash, the long hearth cold in the middle
+      for(let a=-12;a<=11;a++)for(let b=-5;b<=4;b++){const ea=a===-12||a===11,eb=b===-5||b===4,gg=G(a,b);
+        if(ea||eb){if(!(a===-12&&Math.abs(b+0.5)<=1)&&hsh(a+s.X,9667,b+s.Z)>0.15)P(a,b,gg+1,FSTONE);continue;}
+        const q=hsh(a+s.X,9669,b+s.Z);P(a,b,gg,q<0.3?ASH:q<0.45?GRAVEL:DIRT);
+        if((b===-3||b===2)&&a%4===0&&a>-12&&a<11){const h=1+Math.floor(r()*3);for(let y=gg+1;y<=gg+h;y++)P(a,b,y,CHARWOOD);}
+        else if(b===-1&&a>=-6&&a<=5&&(a===-6||a===5))P(a,b,gg+1,FSTONE);}
+      for(let k=0;k<3;k++){const a0=-9+Math.floor(r()*14),b=-2+Math.floor(r()*4);for(let a=a0;a<a0+4;a++)P(a,b,G(a,b)+1,CHARWOOD);}
+      for(let a=-5;a<=4;a++){const gg=G(a,0);P(a,0,gg,FSTONE);P(a,-1,G(a,-1),FSTONE);}
+      chest(9,-1);break;}
+    default:{ // the picture stones: five in an arc before a mound, the hoard in a setting of stones at the mound's foot
+      for(let a=2;a<=11;a++)for(let b=-6;b<=6;b++){const d=Math.hypot(a-7,b);if(d>5.5)continue;const gg=G(a,b),h=Math.round(3*(1-(d/5.5)*(d/5.5)));for(let y=gg+1;y<=gg+h;y++)P(a,b,y,y===gg+h?GRASS:DIRT);if(h>0&&hsh(a,9671,b+s.Z)<0.3)P(a,b,gg+h+1,BARROWBLOOM,MODE_AIR);}
+      for(const b of [-8,-4,0,4,8]){const a=-4+Math.round(Math.abs(b)*0.4);stone(a,b,2+(b===0?1:0),PICSTONE);}
+      for(const [a,b] of [[1,-1],[1,1],[0,0],[2,0]]){const gg=G(a,b);P(a,b,gg+1,FSTONE);}chest(1,0);}
   }
 }
 // ---- The Volcanic Wastes remade (D-051): a burnt land under a black and red sky. Volcanoes rise out of the terrain itself, each
@@ -6602,7 +6760,9 @@ RB.gatebeam=(s,p,u,v,X,Z)=>{const g=p.y,top=g+p.H,av=Math.abs(v);RBS(X,Z,top-3,t
 // The king's golden hall (a thane's hall in a lesser town): on a fieldstone terrace with steps before it, a long hall (p.W across,
 // p.D deep, p.sh to its eaves) of carved and gilded oak under a steep roof of golden thatch, its ridge gilded, crossed horse heads
 // on its gables; a porch on carved pillars before its doors; within, two rows of carved pillars under the open roof, a long hearth
-// down the middle, tapestries and shields on the walls, lamps, and at the far end a dais with the high seat under the banners
+// down the middle, tapestries and shields on the walls, lamps, and at the far end a dais with the high seat under the banners;
+// since D-090 the riders' own tapestries, the high seat of carved and gilded oak, and feasting boards down either side of the
+// hearth between the pillars (gaps every six for passing)
 RB.ghall=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),tm=2,pr=3,W=p.W,D=p.D,TW=W+2*tm,TD=D+pr+2*tm,ca=a-tm,cb=b-tm-pr,g=p.y,fl=g+2,eave=fl+p.sh,mid=(W-1)/2;
   if(a<0||b<0||a>=TW||b>=TD)return;const inA=ca>=0&&ca<W,core=inA&&cb>=0&&cb<D,porch=inA&&cb>=-pr&&cb<0,dm=Math.abs(ca-mid);
   // the steps up to the terrace, the terrace, its low wall and lamps
@@ -6623,9 +6783,10 @@ RB.ghall=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),tm=2,pr=3,W=p.W,D=p.D,TW=W+2*
         if(dais&&dy===1)id=PLANKS;
         if((ca===2||ca===W-3)&&cb%3===1&&cb<D-4)id=CTIMBER; // the pillars
         else if(dm<0.6&&cb>=3&&cb<=D-7&&dy===0)id=HEARTH;
-        else if((ca===1||ca===W-2)&&cb%4===2&&cb<D-4&&dy>=2&&dy<=4)id=TAPESTRY;
-        else if(dm<0.6&&cb===D-3&&dy===2)id=GILDED; // the high seat
-        else if(dm<0.6&&cb===D-2&&dy>=2&&dy<=4)id=GILDED;
+        else if((ca===1||ca===W-2)&&cb%4===2&&cb<D-4&&dy>=2&&dy<=4)id=HTAP;
+        else if((ca===3||ca===W-4)&&cb>=3&&cb<=D-7&&cb%6!==0&&dy===1)id=FEASTBOARD;
+        else if(dm<0.6&&cb===D-3&&dy===2)id=HSEAT; // the high seat
+        else if(dm<0.6&&cb===D-2&&dy>=2&&dy<=3)id=HSEAT;else if(dm<0.6&&cb===D-2&&dy===4)id=GILDED;
         else if(Math.abs(dm-2)<0.6&&cb===D-2&&dy>=3&&dy<=5)id=HBANNER;
         else if((ca===2||ca===W-3)&&cb%6===4&&y===eave)id=LANTERN;}
       if(id!==AIR||!wall)RBP(X,y,Z,id);else RBP(X,y,Z,AIR);}
@@ -6677,7 +6838,7 @@ RB.rtower=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),rr=p.rr,g=p.
 RB.tring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),g=p.y;if(d>p.r+0.5)return;RBP(X,g,Z,d>p.r-0.6?GRASS:hsh(X,9613,Z)<0.6?SAND:GRAVEL);RBS(X,Z,g+1,g+3,AIR);
   if(d>p.r-0.6&&!(Math.abs(v-p.cv)<=1&&u<p.cu))RBP(X,g+1,Z,FENCE);};
 // ---- Layouts of the riders' places
-function riderLayout(s,L,r){if(s.k==='city')riderTown(s,L,r);else if(s.k==='fort')riderHold(s,L,r);else if(s.k==='village')riderSteading(s,L,r);else if(s.k==='farm')riderStud(s,L,r);else riderBeacon(s,L,r);}
+function riderLayout(s,L,r){if(s.k==='course')riderCourse(s,L,r);else if(s.k==='barrows')riderBarrows(s,L,r);else if(s.k==='city')riderTown(s,L,r);else if(s.k==='fort')riderHold(s,L,r);else if(s.k==='village')riderSteading(s,L,r);else if(s.k==='farm')riderStud(s,L,r);else riderBeacon(s,L,r);}
 // a longhouse of the riders: wattle and daub under turf or golden thatch, a steep roof with the horse heads on its gables, carved
 // door posts, a hearth within; on its core (u0..u1, v0..v1), its front facing f
 // (its ridge runs along its longer side, so the roof spans the shorter)
@@ -6713,7 +6874,8 @@ function riderTown(s,L,r){
   // by the gate: stables and a paddock on one side, a smithy and stalls on the other, a well by the way
   const sg=r()<0.5?1:-1,gu=-R+8;
   if(free(gu,gu+8,sg*6,sg*20)){const a=sg>0?6:-20;P.push({k:'stable',u0:gu,u1:gu+5,v0:a,v1:a+14,f:0,y:g0,roof:TURF});P.push({k:'paddock',u0:gu+7,u1:gu+15,v0:a,v1:a+14,f:0,y:g0});take(gu-1,gu+16,a-1,a+15);
-    L.spots.push({kind:'stable',u:gu-2,v:a+7,y:g0},{kind:'paddock',u:gu+11,v:a+7,y:g0,horses:3});}
+    L.spots.push({kind:'stable',u:gu-2,v:a+7,y:g0},{kind:'paddock',u:gu+11,v:a+7,y:g0,horses:3},{kind:'leech',u:gu-2,v:a+2,y:g0});L.fair={u:gu+11,v:a+7,y:g0}; // (the horse-healer and the horse fair, D-090)
+  }
   if(free(gu,gu+6,-sg*18,-sg*6)){const a=sg>0?-13:7;P.push({k:'smithy',u0:gu,u1:gu+5,v0:a,v1:a+6,f:3*(sg>0?1:0)+2*(sg>0?0:1),y:g0,roof:GTHATCH});take(gu-1,gu+6,a-1,a+7);L.spots.push({kind:'smithy',u:gu+2,v:a+(sg>0?8:-2),y:g0});
     for(let k=0;k<2;k++){const u0=gu+8+k*5;P.push({k:'stall',u0:u0,u1:u0+2,v0:sg>0?-9:5,v1:sg>0?-6:8,f:sg>0?3:2,y:g0,wool:[WOOLG,WOOLY][k],c:k});}
     L.spots.push({kind:'market',u:gu+11,v:-sg*5,y:g0});}
@@ -6727,7 +6889,8 @@ function riderTown(s,L,r){
   for(const vv of [8,-8])P.push({k:'ladder',u0:-R+3,u1:-R+3,v0:vv,v1:vv,f:0,y0:g0+1,y1:g0+5});
   // the kings' mounds along the road before the royal seat
   if(s.prov.capital)for(let k=0;k<6;k++){const sd=k%2?1:-1,cu0=-R-12-Math.floor(k/2)*11,cv0=sd*(11+(k%3)*2);P.push({k:'mound',u0:cu0-5,u1:cu0+5,v0:cv0-5,v1:cv0+5,cu:cu0,cv:cv0,r:5,hm:4});}
-  L.spots.push({kind:'gate',u:-R-8,v:0,y:g0},{kind:'gatein',u:-R+6,v:0,y:g0},{kind:'hall',u:hu0+(D>>1)+5,v:0,y:tierY(top)+2},{kind:'citgate',u:hu0-1,v:0,y:tierY(top)},{kind:'street',u:Math.round(cu-f.r1-8),v:0,y:g0});
+  L.hall={u0:hu0+5,u1:hu0+D+4,W:W,D:D,y:tierY(top)+2,mid:0}; // (the feast, D-090)
+  L.spots.push({kind:'gate',u:-R-8,v:0,y:g0},{kind:'gatein',u:-R+6,v:0,y:g0},{kind:'hall',u:hu0+(D>>1)+5,v:0,y:tierY(top)+2},{kind:'seat',u:hu0+D+1,v:0,y:tierY(top)+3},{kind:'hdoor',u:hu0+3,v:0,y:tierY(top)+2},{kind:'hcourt',u:hu0+D-1,v:0,y:tierY(top)+2},{kind:'scop',u:hu0+7,v:0,y:tierY(top)+2},{kind:'citgate',u:hu0-1,v:0,y:tierY(top)},{kind:'street',u:Math.round(cu-f.r1-8),v:0,y:g0});
 }
 // The hold: a round wall of fieldstone on its bank over a ditch, the gate in it under the horse heads; within, a round keep at
 // the back with a gallery round its top, a hall (a longhouse), stables, a ring for training, a well, hay
@@ -6761,6 +6924,7 @@ function riderSteading(s,L,r){
     const bu=f===0?cu0+d/2+2:f===1?cu0-d/2-2:cu0,bv=f===2?cv0+d/2+2:f===3?cv0-d/2-2:cv0;if(Math.max(Math.abs(bu),Math.abs(bv))<R-3&&hsh(i,9621,Math.round(s.Z))<0.5)P.push({k:'hay',u0:Math.round(bu)-2,u1:Math.round(bu)+2,v0:Math.round(bv)-2,v1:Math.round(bv)+2,cu:Math.round(bu),cv:Math.round(bv),y:g});});
   L.spots.push({kind:'green',u:-3,v:3,y:g},{kind:'green',u:3,v:-3,y:g},{kind:'lane',u:-R+4,v:0,y:g});
   fieldsRound(s,L,r,3);
+  if(!small)P.push({k:'hskeps',u0:R+1,u1:R+3,v0:2,v1:8,pts:[[R+2,3],[R+2,5],[R+2,7]]}); // bee skeps by the lane out (D-090)
 }
 // a fence of wattle hurdles round a steading (p.r its line), open where the lanes leave it
 RB.hurdle=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d<p.r-0.7||d>=p.r+0.7||Math.abs(u)<=2||Math.abs(v)<=2)return;RBP(X,p.y+1,Z,WATTLE);if(hsh(X,9623,Z)<0.3)RBP(X,p.y+2,Z,STAKES);};
@@ -6773,6 +6937,7 @@ function riderStud(s,L,r){
   P.push({k:'hay',u0:5,u1:9,v0:-12,v1:-8,cu:7,cv:-10,y:g});
   L.spots.push({kind:'farm',u:-3,v:-2,y:g},{kind:'paddock',u:-8,v:7,y:g,horses:3},{kind:'paddock',u:4,v:8,y:g,horses:3});
   fieldsRound(s,L,r,2);
+  P.push({k:'hskeps',u0:-12,u1:-8,v0:-10,v1:-8,pts:[[-11,-9],[-9,-9]],y:g}); // (D-090)
 }
 // A beacon on the heights: a palisade ring of stakes, the beacon (a crib of logs under its fire basket, kept lit), a timber
 // lookout and a hut of turf
@@ -6788,7 +6953,7 @@ function riderBeacon(s,L,r){
 // lanes of earth; timber bridges on piles of logs; beside the riders' road a carved post with the horse heads every 72 blocks
 function riderRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBS(X,Z,g+1,g+2,CTIMBER);RBP(X,g+3,Z,HORNS);}return;}
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g+1,Z,HSTONE);RBP(X,g+2,Z,CTIMBER);RBP(X,g+3,Z,HORNS);}return;} // (a horse stone at its foot, D-090)
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,PLANKS);if(edge)RBP(X,y+1,Z,LOG);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%5===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,LOG);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
@@ -8130,6 +8295,71 @@ function portLayout(s,L,r){
     const h=K.house(cu,cv,7,9,f,{st:st,sh:4,mat:mat,roof:SLATE,ridge:'b',lamp:true,chim:[1,7]})||K.house(cu,cv,5,7,f,{st:1,sh:4,mat:'cottage',roof:THATCH,ridge:'b',xchim:true});
     if(!h)continue;nh++;L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:EVG(s,h.front[0],h.front[1])+1});}
 }
+// ---- The riders enlarged (D-090): two new places of the riders of the plains, in the frame and parts of their others
+// (rider-build.js; riderLayout sends these here), and the bee skeps of their steadings and horse farms.
+//   the race course by a hill town: a track of beaten earth five wide round a long oval (two straights and two bends) between
+//     rail fences, pennons of green and gold along its outer rail, the start and finish line chalked across the far straight
+//     between carved posts with the horse heads, a stand of planks along the near straight under golden thatch, and a long
+//     stable for the racers; the gate toward the town (L.track: the oval's straights and bends, read by the race)
+//   the mounds of the kings by the king's seat: a field ringed by a turf bank, the way of the kings up its middle from a gate of
+//     carved posts, six mounds either side of it with a horse stone at the foot of each, barrowbloom on them all, and at its head
+//     the founder's mound, greatest of all, its door of standing stones open on a passage to the chamber where the first king lies
+//     on a bier of stone with his shield hung over him; the warden's turf hut by the gate
+// ---- the race course (p.y the ground): grass; the track round the oval (d its distance from the oval's middle line: Ls the half
+// length of a straight, Rr the bends' radius), its rails, the chalk line, the pennons
+const courseD=(u,v,Ls)=>Math.abs(u)<=Ls?Math.abs(v):Math.hypot(Math.abs(u)-Ls,v);
+RB.hcground=(s,p,u,v,X,Z)=>{const g=p.y,d=courseD(u,v,p.Ls),e=d-p.Rr;if(Math.hypot(u,v)>s.R-1)return;RBS(X,Z,g+1,g+4,AIR);
+  if(Math.abs(e)<=2.5){const line=Math.abs(u)<=0.5&&v>0;RBP(X,g,Z,line?CHALK:hsh(X,9631,Z)<0.25?GRAVEL:PATH);return;}
+  RBP(X,g,Z,GRASS);
+  if(Math.abs(e+3)<0.5){RBP(X,g+1,Z,FENCE);return;} // the inner rail
+  if(Math.abs(e-3)<0.5){if(u<0&&Math.abs(u)>p.Ls&&Math.abs(v)<=2)return; // the way in, at the bend toward the gate
+    const t=Math.round(Math.abs(u)<=p.Ls?u+(v>0?0:200):(Math.atan2(v,Math.abs(u)-p.Ls)*p.Rr+(u>0?400:600)));
+    if(((t%10)+10)%10===0){RBS(X,Z,g+1,g+2,LOG);RBP(X,g+3,Z,PENNON);}else RBP(X,g+1,Z,FENCE);return;}
+  if(e<-3.5&&hsh(X,9633,Z)<0.05)RBP(X,g+1,Z,hsh(X,9635,Z)<0.5?TGRASS:OXEYE);};
+// the posts either side of the line: carved oak under the horse heads, a pennon on each
+RB.hcpost=(s,p,u,v,X,Z)=>{const g=p.y;RBS(X,Z,g+1,g+3,CTIMBER);RBP(X,g+4,Z,HORNS);};
+// the stand along the near straight (its back toward -v): three steps of planks, a rail behind, posts carrying a roof of golden
+// thatch over the top step
+RB.hcstand=(s,p,u,v,X,Z)=>{const [a,b,W,D]=partAB(p,u,v),g=p.y,k=b;RBS(X,Z,g+1,g+8,AIR);
+  if(k<=2){RBS(X,Z,g+1,g+1+k,PLANKS);}else{RBS(X,Z,g+1,g+3,PLANKS);RBP(X,g+4,Z,FENCE);}
+  if(k===3&&(a===0||a===W-1||a%5===0))RBS(X,Z,g+4,g+6,LOG);
+  if(k>=1)RBP(X,g+7,Z,GTHATCH);if(k===1||k===3)RBP(X,g+7,Z,a%2?GTHATCH:HBANNER);};
+function riderCourse(s,L,r){const R=s.R,g=s.T,P=L.parts,Ls=13,Rr=13;
+  P.push({k:'hcground',u0:-R,u1:R,v0:-R,v1:R,f:0,y:g,Ls:Ls,Rr:Rr});
+  for(const vv of [Rr-4,Rr+4])P.push({k:'hcpost',u0:0,u1:0,v0:vv,v1:vv,f:0,y:g});
+  P.push({k:'hcstand',u0:-11,u1:11,v0:-Rr-8,v1:-Rr-5,f:3,y:g});
+  P.push({k:'stable',u0:-8,u1:6,v0:Rr+6,v1:Rr+11,f:2,y:g,roof:TURF});
+  L.track={Ls:Ls,Rr:Rr,y:g};
+  L.spots.push({kind:'cstand',u:-4,v:-Rr-6,y:g+2},{kind:'cstand',u:5,v:-Rr-6,y:g+2},{kind:'cjudge',u:2,v:Rr+4,y:g},{kind:'cpav',u:-1,v:Rr+5,y:g},{kind:'lane',u:-R+3,v:0,y:g});}
+// ---- the mounds of the kings: the ground (grass, the way of gravel and flags up the middle, the turf bank round the field with
+// its gap at the gate)
+RB.hbground=(s,p,u,v,X,Z)=>{const g=p.y,d=Math.hypot(u,v);if(d>s.R-0.5)return;RBS(X,Z,g+1,g+4,AIR);
+  if(d>s.R-3.5){if(u<0&&Math.abs(v)<=2){RBP(X,g,Z,GRAVEL);return;}RBP(X,g,Z,DIRT);RBP(X,g+1,Z,GRASS);if(hsh(X,9637,Z)<0.2)RBP(X,g+2,Z,BARROWBLOOM);return;}
+  if(Math.abs(v)<=1&&u<p.wu){RBP(X,g,Z,Math.abs(v)===1||hsh(X,9639,Z)<0.4?FSTONE:GRAVEL);return;}
+  RBP(X,g,Z,GRASS);if(hsh(X,9641,Z)<0.06)RBP(X,g+1,Z,hsh(X,9643,Z)<0.6?BARROWBLOOM:TGRASS);};
+// a king's mound (p.cu, p.cv its middle, p.r its radius, p.hm its height): earth under turf, barrowbloom over it; the founder's
+// (p.door) has a passage of standing stones from its foot toward -u under lintels of fieldstone, to a chamber of stone where he
+// lies on his bier, his shield hung over him, a lamp at his head
+RB.hbarrow=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),g=p.y;if(d>p.r)return;const h=Math.max(1,Math.round(p.hm*(1-(d/p.r)*(d/p.r))));
+  RBS(X,Z,g+1,g+h-1,DIRT);RBP(X,g+h,Z,GRASS);RBP(X,g+h+1,Z,hsh(X,9645,Z)<0.3?BARROWBLOOM:AIR);
+  if(!p.door)return;const ch=Math.max(Math.abs(a),Math.abs(b))<=2,pas=a<0&&Math.abs(b)<=2;
+  if(ch||pas){const top=g+4;if(Math.abs(b)===2||ch&&Math.abs(a)===2&&!(a===-2&&Math.abs(b)<=1)){RBS(X,Z,g+1,top-1,STANDSTONE);RBP(X,top,Z,FSTONE);return;}
+    RBP(X,g,Z,FSTONE);RBS(X,Z,g+1,top-1,AIR);RBP(X,top,Z,FSTONE);if(top+1<g+h)RBS(X,Z,top+1,g+h-1,DIRT);
+    if(ch&&a===0&&b===0)RBP(X,g+1,Z,STANDSTONE);else if(ch&&a===1&&b===0){RBP(X,g+1,Z,STANDSTONE);RBP(X,g+2,Z,BRAZIER);}else if(ch&&a===0&&Math.abs(b)===1)RBP(X,g+3,Z,HSHIELD);}};
+// a horse stone at a mound's foot, toward the way
+RB.hbstone=(s,p,u,v,X,Z)=>{RBP(X,p.y+1,Z,HSTONE);RBP(X,p.y+2,Z,HSTONE);RBP(X,p.y+3,Z,BARROWBLOOM);};
+function riderBarrows(s,L,r){const R=s.R,g=s.T,P=L.parts,fu=R-12;
+  P.push({k:'hbground',u0:-R,u1:R,v0:-R,v1:R,f:0,y:g,wu:fu-8});
+  for(const cu of [-12,1])for(const sd of [1,-1]){const cv=sd*11;P.push({k:'hbarrow',u0:cu-6,u1:cu+6,v0:cv-6,v1:cv+6,cu:cu,cv:cv,r:6,hm:5,y:g});P.push({k:'hbstone',u0:cu,u1:cu,v0:sd*4,v1:sd*4,y:g});}
+  for(const sd of [1,-1]){const cu=-R+9,cv=sd*17;if(Math.hypot(cu,cv)+4<R-3){P.push({k:'hbarrow',u0:cu-4,u1:cu+4,v0:cv-4,v1:cv+4,cu:cu,cv:cv,r:4,hm:3,y:g});}}
+  P.push({k:'hbarrow',u0:fu-9,u1:fu+9,v0:-9,v1:9,cu:fu,cv:0,r:9,hm:8,y:g,door:1});P.push({k:'hbstone',u0:fu-10,u1:fu-10,v0:3,v1:3,y:g});P.push({k:'hbstone',u0:fu-10,u1:fu-10,v0:-3,v1:-3,y:g});
+  for(const sd of [1,-1])P.push({k:'hcpost',u0:-R+2,u1:-R+2,v0:sd*3,v1:sd*3,f:0,y:g});
+  P.push(housePart(-R+6,-R+9,5,8,2,[0,0,0,0],{y:g,st:1,sh:3,mat:'wattle',roof:TURF,pitch:2,horns:true,ridge:'b',door:1}));
+  L.founder={u:fu,v:0,y:g+1};
+  L.spots.push({kind:'bwarden',u:-R+7,v:3,y:g},{kind:'bmourn',u:fu-13,v:2,y:g},{kind:'bmourn',u:-4,v:-3,y:g});}
+// ---- bee skeps (p.pts in the site's frame): a stand of planks, the skep on it; on the site's ground (p.y) or the land's
+RB.hskeps=(s,p,u,v,X,Z)=>{if(!p.pts.some(q=>q[0]===u&&q[1]===v))return;const g=p.y!==undefined?p.y:colInfo(X,Z,TRB).h;const o=p.y===undefined?colInfo(X,Z,TRB):null;if(o&&(o.wet||o.river||o.lake))return;
+  RBP(X,g+1,Z,PLANKS);RBP(X,g+2,Z,SKEP);RBP(X,g+3,Z,AIR);};
 // ---- Building the Gate of the Wastes (D-067). The gate's works are one site in the gate's frame (u outward, v across, as
 // siteUV gives it; the yard at u < 0, the camp of the allied hosts far out at u > 0), its level the gate's height, with a layout
 // of parts like a realm's: the gate between its towers, its leaves (one barred and propped, the other ajar), the dwarves' ram
@@ -8873,7 +9103,7 @@ function features(WCX,WCZ,self,noLife){
   // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2)||elderNear(X,Z,2)||oldNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2)||elderNear(X,Z,2)||oldNear(X,Z,2)||fathersNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -8883,7 +9113,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2)&&!elderNear(X,Z,2)&&!oldNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2)&&!elderNear(X,Z,2)&&!oldNear(X,Z,2)&&!fathersNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -8954,7 +9184,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ);applyElder(WCX,WCZ);applyOld(WCX,WCZ); // the ruins of the elder elves (D-088)
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ);applyElder(WCX,WCZ);applyOld(WCX,WCZ);applyFathers(WCX,WCZ); // the ruins of the elder elves (D-088)
     // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
@@ -10425,7 +10655,7 @@ function renderBlueprints(box){
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089)
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3,446:3,447:4,448:6,449:8}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089); the riders' (D-090)
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -10676,7 +10906,7 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[FCHEST]:openBox,[HSTONE]:useHorseStone,[PICSTONE]:usePicStone,[SKEP]:useSkep,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
@@ -10687,6 +10917,7 @@ function act(btn){
   if(btn===2&&warOathAct())return; // the oath to the alliance, or where the sworn stand (W4)
   if(btn===2&&elfAct())return; // speaking with the elves: trade, healing, tales, tasks, an audience (D-088)
   if(btn===2&&menAct())return; // speaking with the folk of the white realm (D-089)
+  if(btn===2&&riderAct())return; // speaking with the riders' folk (D-090)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
@@ -10694,6 +10925,8 @@ function act(btn){
   if(btn===2&&held===322){throwGrapnel();return;}
   if(btn===2&&(held===429||held===445)){elfWhistle();return;} // the elven whistle (or the groom's) calls your steed (D-088, D-089)
   if(btn===2&&held===436&&menHorn())return; // the horn of the realm calls its soldiers (D-089)
+  if(btn===2&&held===453&&riderHorn())return; // the war-horn of the riders calls a riding (D-090)
+  if(btn===2&&held===452&&useBarding())return; // barding put on your horse (D-090)
   if(btn===2&&held===435&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+8);drawBar(true);drawStats();toast('The salve soothes your wounds');return;} // heartsease salve
   if(btn===2&&held===430){boatPlace();return;} // a swan boat set on the water
   if(btn===2&&held===420&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+12);drawBar(true);drawStats();toast('The draught is cool and bright; your wounds close');return;} // an elven draught
@@ -10801,13 +11034,13 @@ function lockOrPlay(){
 // you build starts empty. Contents are saved with the world (save data `cs`). A container that holds anything (or a world one
 // never opened) cannot be broken: empty it first. In survival the inventory screen shows the container beside the pack;
 // tapping a slot on either side moves that stack across. Creative only looks inside.
-const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST,OLDCHEST]);
+const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST,OLDCHEST,FCHEST]);
 let box=null; // the open container: {k, x, y, z} in window coordinates
 if(saved&&Array.isArray(saved.cs))saved.cs.forEach(([k,sl])=>{const a=new Array(BOX_SLOTS).fill(null);(sl||[]).forEach(([i,id,c,d])=>{if(i<BOX_SLOTS&&(ITEMS[id]||BL[id]))a[i]={id:id,c:c,d:d||0};});boxes.set(k,a);});
 const boxSave=()=>[...boxes].map(([k,a])=>[k,a.map((q,i)=>q&&[i,q.id,q.c,q.d||0]).filter(Boolean)]);
 // The loot a world container holds when first opened, decided by where it sits (the tables are in underground-sites.js)
 function lootOf(id,WX,Y,WZ){
-  const dw=id===DWCHEST||id===ECHEST||id===OLDCHEST,TBL=id===OLDCHEST?OLDLOOT:id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
+  const dw=id===DWCHEST||id===ECHEST||id===OLDCHEST||id===FCHEST,TBL=id===FCHEST?FATHERLOOT:id===OLDCHEST?OLDLOOT:id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
   let tot=0;for(const l of TBL)tot+=l[3];
   const out=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}out.push([it[0],it[1]+Math.floor(r()*(it[2]-it[1]+1))]);}
   return out;
@@ -12485,6 +12718,72 @@ const FOLK_KIT=(function(){
     paint(P,c,f){P.coat(['hull','bow','aft','fore'],c.coat,6);P.rows('hull',['L','R'],0,1,[120,104,78]);P.rows('aft',['L','R','B'],0,1,[120,104,78]);P.face('hull','T',[150,112,70],8);P.face('aft','T',[150,112,70],8);P.face('fore','T',[150,112,70],8);
       P.coat(['mast','yard'],[118,86,54],8);P.coat(['sail'],[238,236,226],4);R.sign(P,'sail','F',8,6,[30,32,42]);R.sign(P,'sail','B',8,6,[30,32,42]);P.coat(['flag'],[24,24,32],6);}};
 })();
+// ---- The riders' court and the folk of their life (D-090), from their own parts and painters (FOLK_KIT, MODEL_KIT.rider): the
+// king of the riders in green and gold under a long green mantle with the white horse on its back, a circlet of gold with its
+// tines, his beard grey; the queen in her gown and mantle under the circlet, the cup of welcome in her hand; the doorwardens of
+// the golden hall in gilded helms; the king's counsellor in a long dark robe with a staff; the shieldmaidens, armed as the guards
+// with their braids under the helm; the lay-singer with his lyre; the horse-healer in a pale hood with a satchel of herbs; the
+// horse-dealer in a broad hat with a whip; children (a boy with a hobby horse); the warden of the mounds in grey with a
+// lantern; and the riders of the race in their silks. Their beasts: the windsteed, a great horse of the wild herds, silver-white
+// with a mane like spray; the steppe cattle, shaggy and long-horned.
+(function(){
+  const {ALL,SIDE,sh,hz,cloth,plate,leather,band,GOLD}=FOLK_KIT,R=MODEL_KIT.rider,GREEN=R.GREEN;
+  const base=(k,drop)=>AM_KINDS[k].parts.filter(p=>!(drop||[]).includes(p[0])).map(p=>p.slice());
+  const recoat=(k,o)=>AM_KINDS[k].coats.map(([c,w],i)=>[Object.assign({},c,typeof o==='function'?o(c,i):o),w]);
+  // a painter that passes over the parts a model has dropped (as the white realm's court does)
+  const skip=(P,names)=>{const set=new Set(names);return new Proxy(P,{get(t,k){const f=t[k];if(typeof f!=='function')return f;
+    return (n,...a)=>Array.isArray(n)?f.call(t,n.filter(x=>!set.has(x)),...a):set.has(n)?undefined:f.call(t,n,...a);}});};
+  const circlet=()=>[['hcrown','head',[0,4.5,0],[-3.75,0,-3.75,7.5,1.5,7.5],0,{head:1}],['hcrownT','hcrown',[0,1.5,3.75],[-0.5,0,-0.5,1,1.5,1],0,{head:1,nb:1}]];
+  const circletPaint=P=>{plate(P,['hcrown'],GOLD);P.map('hcrown',SIDE,(s,t)=>s%4===1?[170,40,40]:t===0?sh(GOLD,-24):null);plate(P,['hcrownT'],GOLD);};
+  const mantle=len=>['cape','body',[0,10.5,-2.4],[-4.5,-len,-0.5,9,len,1],[0.06,0,0],{nb:1}];
+  const mantlePaint=(P,len)=>{cloth(P,['cape'],[30,58,34],{off:2});R.woven(P,'cape',SIDE,len*2-8,len*2,GOLD,[30,58,34]);R.horseSign(P,'cape','B',1,10,sh(GOLD,10));};
+  const SILKS=[[40,110,60],[214,176,84],[236,234,224],[160,40,40],[50,70,150],[30,30,34]];
+  const rdrop=[...R.helmParts(),...R.shieldParts([-3.5,-5,0]),...R.spear(40,0.75)].map(p=>p[0]);
+  Object.assign(AM_KINDS,{
+    hking:{res:2,tex:256,scale:1.06,parts:[...base('hthane').map(p=>p[0]==='cape'?mantle(22):p),...circlet()],
+      coats:recoat('hthane',(c,i)=>({hair:[[196,190,180],[214,206,186],[168,160,150]][i%3],beard:1})),
+      paint(P,c){AM_KINDS.hthane.paint(P,c);mantlePaint(P,22);circletPaint(P);}},
+    hqueen:{res:2,tex:256,scale:1.03,parts:[...base('hwoman'),mantle(22),...circlet(),['cup','armR',[1.5,-10.5,1],[-1,-1.5,-1,2,3,2],0,{nb:1}]],
+      coats:recoat('hwoman',(c,i)=>({cl:[[60,98,64],[226,220,200],[120,40,40]][i%3],emb:GOLD})),
+      paint(P,c){AM_KINDS.hwoman.paint(P,c);mantlePaint(P,22);circletPaint(P);plate(P,['cup'],GOLD);P.map('cup',['T'],()=>[150,96,40]);}},
+    hdoor:{res:2,tex:256,scale:1.04,parts:base('hspear'),coats:recoat('hspear',()=>({beard:1})),
+      paint(P,c){AM_KINDS.hspear.paint(P,c);plate(P,['helm','brim'],GOLD);P.map('helm',SIDE,(s)=>s%4===0?sh(GOLD,-24):null);}},
+    hcouns:{res:2,tex:256,parts:[...base('hman'),['robe','body',[0,1,0],[-4.5,-13,-2.5,9,14,5],0,{tp:['-y',1.2,1.2,0,0]}],['staff','armR',[1.5,-10,0.5],[-0.5,-8,-0.5,1,27,1],[0.15,0,0],{nb:1}]],
+      coats:recoat('hman',(c,i)=>({hair:[[196,190,180],[170,164,156]][i%2],beard:1,cl:[[44,52,74],[64,44,60],[52,60,50]][i%3],emb:GOLD})),
+      paint(P,c){AM_KINDS.hman.paint(P,c);cloth(P,['robe'],c.cl);R.woven(P,'robe',SIDE,20,27,GOLD,c.cl);P.map('staff',ALL,(s,t)=>t>=48?sh(GOLD,0):sh([110,80,52],hz(s,t>>2,1051)*14));}},
+    hmaid:{res:2,tex:256,parts:[...base('hspear'),['braidL','head',[-2.5,1,1.5],[-1,-9,-0.5,2,9,1.5],[0,0,0.05],{head:1,nb:1}],['braidR','head',[2.5,1,1.5],[-1,-9,-0.5,2,9,1.5],[0,0,-0.05],{head:1,nb:1,m:'braidL'}]],
+      coats:recoat('hspear',(c,i)=>({beard:0,hair:[[226,196,120],[200,160,96],[232,214,164]][i%3]})),
+      paint(P,c){AM_KINDS.hspear.paint(P,c);P.map('braidL',ALL,(s,t,w,h)=>t>=h-2?sh(GOLD,-10):sh(c.hair,((t+s)%3===0?-20:6)+hz(s,t,1053)*8));}},
+    hscop:{res:2,tex:256,parts:[...base('hman'),['lyre','armL',[1,-8,2],[-2,-3,0,4,7,1],[0.6,0,0.2],{nb:1}]],
+      coats:recoat('hman',(c,i)=>({cl:[[120,40,40],[60,40,90],[40,90,60]][i%3],emb:GOLD})),
+      paint(P,c){AM_KINDS.hman.paint(P,c);P.map('lyre',ALL,(s,t,w,h)=>s<=1||s>=w-2||t>=h-2?sh([130,90,50],hz(s,t,1055)*10):t<=1?sh([110,74,40],0):s%2===0?[226,206,140]:[0,0,0,1]);}},
+    hleech:{res:2,tex:256,parts:[...base('hherd'),['satch','body',[-3.5,2,1],[-1,-3,-1.5,2,3.5,3],0,{nb:1}]],coats:recoat('hherd',()=>({hd:[196,186,150]})),
+      paint(P,c){AM_KINDS.hherd.paint(P,c);leather(P,['satch'],[120,84,50]);P.map('satch',['T'],(s,t)=>(s+t)%2?[90,150,80]:[200,190,120]);}},
+    hdealer:{res:2,tex:256,parts:[...base('hman'),['hat','head',[0,6,0],[-4,0,-4,8,1,8],0,{head:1}],['hatC','hat',[0,1,0],[-2.5,0,-2.5,5,2,5],0,{head:1}],['whip','armR',[1.5,-10,0.5],[-0.5,-6,-0.5,1,14,1],[0.6,0,0],{nb:1}]],
+      coats:recoat('hman',(c,i)=>({cl:[[150,62,44],[70,82,110],[176,150,100]][i%3]})),
+      paint(P,c){AM_KINDS.hman.paint(P,c);P.map('hat',ALL,(s,t)=>sh([96,76,52],hz(s,t,1057)*10));P.map('hatC',ALL,(s,t)=>t===0?sh(GOLD,-20):sh([96,76,52],hz(s,t,1059)*10));P.map('whip',ALL,(s,t)=>t>=20?sh([60,44,30],0):sh([120,88,56],hz(s,t,1061)*10));}},
+    hchild:{res:2,tex:256,scale:0.62,parts:[...base('hman'),['hobby','armR',[1.5,-9,0.5],[-0.5,-10,-0.5,1,14,1],[0.5,0,0],{nb:1}],['hobbyH','hobby',[0,4,0],[-1,0,-0.5,2,3,4],0,{nb:1}]],
+      coats:recoat('hman',(c,i)=>({beard:0,cl:[[150,70,50],[70,110,160],[90,130,70],[180,150,70]][i%4]})),
+      paint(P,c){AM_KINDS.hman.paint(P,c);P.map('hobby',ALL,(s,t)=>sh([130,96,60],hz(s,t,1063)*10));P.map('hobbyH',ALL,(s,t,w,h,f)=>f==='F'&&t===1?[30,24,20]:t>=h-1?[60,46,34]:sh([226,222,212],hz(s,t,1065)*8));}},
+    hgirl:{res:2,tex:256,scale:0.6,parts:base('hwoman'),coats:recoat('hwoman',(c,i)=>({cl:[[180,60,80],[90,120,180],[200,170,90],[100,150,110]][i%4]})),paint(P,c){AM_KINDS.hwoman.paint(P,c);}},
+    hwarden:{res:2,tex:256,parts:[...base('hherd',['staff','crook','crook2']),['lant','armR',[1.5,-10.5,1],[-1,-3,-1,2,3,2],0,{nb:1}]],coats:recoat('hherd',()=>({hd:[110,110,104],beard:1,hair:[196,190,180]})),
+      paint(P,c){AM_KINDS.hherd.paint(skip(P,['staff','crook','crook2']),c);P.map('lant',ALL,(s,t,w,h)=>s===0||s===w-1||t===0||t===h-1?sh(GOLD,-30):[255,226,140]);}},
+    hracer:{res:2,tex:256,parts:base('hrider',rdrop),coats:recoat('hrider',(c,i)=>({silk:SILKS[i%SILKS.length]})),
+      paint(P,c){AM_KINDS.hrider.paint(skip(P,rdrop),c);cloth(P,['coat','cape'],c.silk);band(P,'coat',SIDE,0,3,sh(c.silk,-40));cloth(P,['scloth'],c.silk,{off:1});band(P,'scloth',SIDE,0,2,GOLD);}}
+  });
+  // ---- the windsteed: the wild horse grown greater, silver-white, its mane and tail like blown spray
+  const HS=AM_KINDS.horse;
+  AM_KINDS.windsteed={parts:HS.parts.map(p=>p.slice()),scale:1.14,tex:HS.tex,coats:[[{coat:[232,234,238],mane:[250,250,252],low:[206,208,216],name:'silver'},3],[{coat:[214,216,222],mane:[244,244,248],low:[190,192,200],dapple:1,name:'dappled silver'},1]],
+    paint(P,c,f){P.coat(['body','neck','head','muzzle','earL','legFL','legFR','legBL','legBR'],c.coat,5);P.coat(['mane','tail'],c.mane,10);P.hair('mane');P.hair('tail');
+      if(c.dapple)P.spots('body',['T','L','R','B'],[246,246,250],0.2,0,4);for(const l of ['legFL','legFR','legBL','legBR']){P.rows(l,['L','F','R','B'],8,14,c.low);P.rows(l,['L','F','R','B'],12,14,[70,66,62]);}
+      P.rows('muzzle',['F'],2,4,[120,110,110]);P.px('muzzle','F',0,1,[40,34,34]);P.px('muzzle','F',3,1,[40,34,34]);P.eyes('head',2,1,[30,40,60]);}};
+  // ---- steppe cattle: the ox's frame, shaggy, with long horns sweeping out and up
+  const OX=AM_KINDS.ox;
+  AM_KINDS.kine={tex:128,scale:1,parts:OX.parts.map(p=>p[0]==='hornL'?['hornL','head',[-3,1,3],[-6,0,-1,6,2,2],[0,0,-0.5],{head:1,tp:['-x',0.4,0.4,0,1]}]:p[0]==='hornR'?['hornR','head',[3,1,3],[0,0,-1,6,2,2],[0,0,0.5],{head:1,tp:['x',0.4,0.4,0,1]}]:p.slice()),
+    coats:[[{coat:[128,82,48],low:[96,60,36],horn:[232,220,190],name:'brown'},3],[{coat:[60,50,44],low:[40,34,30],horn:[226,214,184],name:'black'},2],[{coat:[196,166,112],low:[150,124,84],horn:[230,218,188],name:'dun'},2]],
+    paint(P,c,f){P.coat(['body','head','dewlap','legFL','legFR','legBL','legBR','tail'],c.coat,18);P.coat(['muzzle'],[176,140,130],6);P.coat(['hornL','hornR'],c.horn,6);P.eyes('head',2,2,[20,16,14]);
+      for(const l of ['legFL','legFR','legBL','legBR']){P.rows(l,['L','F','R','B'],5,8,c.low);P.rows(l,['L','F','R','B'],7,8,[40,34,30]);}P.rows('tail',['L','F','R','B'],7,10,c.low);}};
+})();
 // ---- The Emberlords remade (W7a, D-074; Q179, Q181, Q183): one kind, each lord its own. Every lord is about twenty blocks tall
 // (the scale of the D-055 model grown from about twelve; every part a whole number of texels across, or its paint lands in the
 // wrong channels), in one of three builds: the swept horns and the burning great sword
@@ -12766,6 +13065,8 @@ function animalCall(a,hurt){
     case 'hen':if(a.young){for(let i=0;i<3;i++)voice(2300,2900,0.07,0.04,{type:'sine',form:2600,q:1,delay:i*0.16},at);}else for(let i=0;i<(hurt?2:4);i++)voice(540*p,420*p,0.07,0.07,{type:'square',form:1100,q:2,delay:i*(hurt?0.09:0.14)},at);break;
     case 'ehorse':case 'charger':case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
     case 'ox':voice(150*p,120*p,hurt?0.5:1.3,0.09,{vib:4,vd:0.05,form:420,q:1.2},at);break; // the ox's low call (D-089)
+    case 'windsteed':voice(1320*p,560*p,hurt?0.5:1.4,0.07,{vib:9,vd:0.06,form:1600,q:1},at);voice(700*p,420*p,0.5,0.04,{form:1100,q:1,delay:0.9},at);if(!hurt)burst(0.3,'lowpass',620,0.7,0.08,1.5,at);break; // the windsteed's high, ringing neigh (D-090)
+    case 'kine':voice(180*yg*p,130*yg*p,hurt?0.5:1.5,0.09,{vib:3,vd:0.05,form:460,q:1.1},at);break; // the steppe cattle's lowing (D-090)
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
     case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
@@ -12795,6 +13096,7 @@ function animalAct(btn){
   if(A.shear&&held===321){if(a.young){toast('A lamb has no fleece to take yet');return true;}if(a.shorn){toast('Its fleece has not grown back yet');return true;}const wl=AM_KINDS.sheep.coats[a.ci][0].black?WOOLK:A.shear;a.shorn=true;a.cool=300;addItem(wl,2);wearHeld(1);drawBar(true);toast('2 '+nameOf(wl));sfxBlock(WOOLW,false,a.x,a.y,a.z);swing=1;return true;}
   if(A.milk&&(!held||!SURV())){if(a.young){toast('Only a grown goat gives milk');return true;}if(a.cool>0){toast('The goat has no more milk for now');return true;}a.cool=240;addItem(360,1);drawBar(true);toast("Goat's Milk");return true;}
   if(A.egg&&(!held||!SURV())){if(a.young){toast('A chick lays no eggs');return true;}if(a.cool>0){toast('No egg yet');return true;}a.cool=300;addItem(355,1);drawBar(true);toast('An egg');return true;}
+  if(a.kind==='windsteed'&&!a.tame&&windTame(a))return true; // only a sworn rider may lay a hand on a windsteed (D-090)
   if(A.mount){if(a.young){toast('A foal is too small to ride');return true;}if(PL.ride===a)dismount();else mount(a);return true;}
   if(A.tame&&!a.tame){if(A.tame.includes(held)){const q=inv[sel];if(SURV()){q.c--;if(!q.c)inv[sel]=null;}drawBar(true);a.tame=true;a.uid=a.uid||(Date.now().toString(36)+a.id);a.st='follow';a.t=1;a.herd=a.id;saveDirty=true;animalCall(a,false);toast('The '+A.n.toLowerCase().replace('stray ','').replace('wild ','')+' will follow you now');tone(520,780,0.2,0.06,0,null,[a.x,a.y+0.6,a.z]);}
     else toast('The '+A.n.toLowerCase()+' sniffs your hand. '+(a.kind==='hound'?'It would like some meat.':'It would like some crops.'));return true;}
@@ -12811,18 +13113,18 @@ function animalStrike(a,dmg,kx,kz){const A=ANIMALS[a.kind],kd=Math.hypot(kx,kz)|
     for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');if(PL.ride===a)dismount();a.dead=0.001;a.st='dead';a.sp=0;}}
 function confirmHunt(a){if(a.warned)return true;a.warned=true;a.hp=1;toast('This is your '+ANIMALS[a.kind].n.toLowerCase().replace('stray ','').replace('wild ','')+'. Strike again to part with it.');return false;}
 // ---- Riding (Q67): a wild horse can be ridden at once; it is faster and jumps higher. Use it again to get off.
-function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=ANIMALS[a.kind].boat?a.y:Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast(ANIMALS[a.kind].ride||'Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
+function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=ANIMALS[a.kind].boat?a.y:Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast((a.nm?'Riding '+a.nm+'. ':'')+(ANIMALS[a.kind].ride||'Riding. Sprint to gallop; use the horse again to get off.'));animalCall(a,false);}
 function dismount(){const a=PL.ride;PL.ride=null;if(a){a.st='idle';a.t=3;a.sp=0;if(ANIMALS[a.kind].boat){boatLeave(a);return;}a.y=a.gy=Math.max(1,standY(a.x,a.y,a.z));}} // (out of a swan boat onto the shore: D-088)
 // ---- The mule's pack: a container like a chest, kept under the mule's own key with the other containers (cs)
 function openPack(a){if(!SURV()){toast('Packs open in survival');return;}const k='mule:'+a.uid;if(!boxes.has(k))boxes.set(k,new Array(BOX_SLOTS).fill(null));box={k:k,x:Math.floor(a.x),y:Math.floor(a.y),z:Math.floor(a.z)};saveDirty=true;openInv();$('invtitle').textContent="The mule's pack";}
 // ---- Saved with the world: the animals you have befriended (world coordinates)
-const wildRec=a=>[a.kind,+(a.x+OX).toFixed(1),+a.y.toFixed(1),+(a.z+OZ).toFixed(1),a.stay?1:0,a.uid,a.ci,a.young?1:0];
+const wildRec=a=>[a.kind,+(a.x+OX).toFixed(1),+a.y.toFixed(1),+(a.z+OZ).toFixed(1),a.stay?1:0,a.uid,a.ci,a.young?1:0,(a.shod?1:0)|(a.bard?2:0),a.nm||'']; // (a horse shod or barded by the riders, and its name: D-090)
 const wildSave=()=>({an:animals.filter(a=>a.tame&&!a.dead).map(wildRec).concat(wildPending)});
 let wildPending=saved&&Array.isArray(saved.an)?saved.an:[];
 // befriended animals come back once the world around them is loaded
-function wildRestore(){if(!wildPending.length||!ready)return;const keep=[];for(const r of wildPending){const [k,X,Y,Z,st,uid,ci,yg]=r,x=X-OX,z=Z-OZ;if(!ANIMALS[k])continue;
+function wildRestore(){if(!wildPending.length||!ready)return;const keep=[];for(const r of wildPending){const [k,X,Y,Z,st,uid,ci,yg,hb,nm]=r,x=X-OX,z=Z-OZ;if(!ANIMALS[k])continue;
   if(x<0||z<0||x>=W||z>=D||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX]){keep.push(r);continue;}const y=standY(x,Y,z);
-  addAnimal(k,x,y>0?y:Y,z,{tame:true,stay:!!st,uid:String(uid||''),ci:ci|0,young:!!yg,st:'idle',t:1});}wildPending=keep;}
+  const a=addAnimal(k,x,y>0?y:Y,z,{tame:true,stay:!!st,uid:String(uid||''),ci:ci|0,young:!!yg,st:'idle',t:1});if(a){if(hb&1)a.shod=1;if(hb&2)a.bard=1;if(nm)a.nm=String(nm).slice(0,24);}}wildPending=keep;}
 // ---- Foes (D-052): the first hostile creatures, all of the Volcanic Wastes. Orc warbands (raiders, bowmen, brutes, now and
 // then a warchief) and ash trolls roam its surface and hold the Ashen Citadel; goblins (cutters, slingers, firecallers and a
 // chieftain) live in the warrens below and keep camp at their ways in; an Emberlord waits in each fortress in the great
@@ -13004,7 +13306,7 @@ function foeSpawnTick(){
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     if(folk){const k=s.kind.slice(2),N=FOLK_N[k]||[1,2],night=ambNight()&&!['gate','gatein','post','citgate','barracks','keep','citadel'].includes(k);
-      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:s.kind==='r_throne'?menThroneLead(s.s):s.kind==='e_throne'?(hsh(s.s.prov.kingdom.key.length,9831,[...s.s.prov.kingdom.key].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'eking':'equeen'):FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
+      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:s.kind==='r_throne'?menThroneLead(s.s):s.kind==='h_seat'?riderSeatLead(s.s):s.kind==='e_throne'?(hsh(s.s.prov.kingdom.key.length,9831,[...s.s.prov.kingdom.key].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'eking':'equeen'):FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
       if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.stair==='cavern'&&Math.random()<0.5?'troll':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
@@ -13041,11 +13343,11 @@ function hostOf(X,Z){
 // creative. Patrols walk the king's roads; folk greet the player who comes close and looks at them.
 const FOLK_CAP=34,realmWrath=new Map();let folkGreetT=0;
 const folkCount=()=>{let n=0;for(const f of foes)if(FOES[f.kind].folk&&!f.dead&&!f.hst)n++;return n;}; // (a summoned host's soldiers do not count: D-077)
-const folkWrath=f=>!!f.prov&&((realmWrath.get(f.prov)||0)>0||menOutlaw(f)); // (or the player outlawed in its kingdom, D-089)
+const folkWrath=f=>!!f.prov&&((realmWrath.get(f.prov)||0)>0||menOutlaw(f)||riderOutlaw(f)); // (or the player outlawed in its kingdom, D-089; banished by the riders, D-090)
 function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
   for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
     if(G.civ){if(Math.hypot(g.x-PL.x,g.z-PL.z)<18){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;g.ct=Math.random()*0.8;}}
-  if(!was){elfStruck(f);menStruck(f);toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
+  if(!was){elfStruck(f);menStruck(f);riderStruck(f);toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
 // a patrol on the king's road (two to four soldiers, now and then with their captain), out of sight, walking the road
 function folkPatrol(){
   if(folkCount()>=FOLK_CAP-4||Math.random()>0.25)return;const X=PL.x+OX,Z=PL.z+OZ,T=realmTile(Math.floor(X),Math.floor(Z));
@@ -13104,7 +13406,7 @@ const FOLK_SAY={
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||F.hound||f.wnd||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const eg=elfPeopleOf(f)&&elfGreet(f,F)||menPeopleOf(f)&&!f.host&&menGreet(f,F);if(eg){toast(eg);foeCall(f,'idle');return;}const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const eg=elfPeopleOf(f)&&elfGreet(f,F)||menPeopleOf(f)&&!f.host&&menGreet(f,F)||riderPeopleOf(f)&&!f.host&&riderGreet(f,F);if(eg){toast(eg);foeCall(f,'idle');return;}const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast((f.hero?f.hero.n:F.n)+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -13411,7 +13713,7 @@ function emberPose(f,P,root,prog){
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
-  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();elfFrame(dt);menFrame(dt);
+  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();elfFrame(dt);menFrame(dt);riderFrame(dt);
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
   warSoundTick(dt);warWorksFrame(dt);warNightFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt);morFrame(dt);fieldFrame(dt);campFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
   foeFrame++;foeGrid.clear();foeGridS[0].clear();foeGridS[1].clear();foeRadMax=1;
@@ -13478,12 +13780,13 @@ function foeSlain(f){
   const ar=armsSlain(f);if(ar)got.push(ar); // (arrows recovered, W8a)
   const bn=morSlain(f);if(bn)got.push(bn);morDeath(f,1);fieldSlain(f);warRecSlain(f); // (a warhost's banner taken; their hearts sink: W8b)
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
-  if(f.lordOf)lordFalls(f);warSwornSlain(f);elfSlain(f);elfLament(f);menSlain(f);menPassing(f);
+  if(f.lordOf)lordFalls(f);warSwornSlain(f);elfSlain(f);elfLament(f);menSlain(f);menPassing(f);riderSlain(f);riderPassing(f);
 }
 function lordFalls(f){fallenLords.add(f.lordOf);saveDirty=true;if(!f.L)showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
   burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
 // armour (D-052): a coat in the body slot takes a share of every blow from a foe, and wears
-function armourCut(n){const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[q.id];q.d=(q.d||0)+1;if(q.d>=it.dur){equip.body=null;toast('Your '+it.n+' is worn through');}return Math.max(1,Math.round(n*(1-it.armor)));}
+function armourCut(n){if(PL.ride&&PL.ride.bard)n=Math.max(1,Math.round(n*0.67)); // a barded horse takes a third off its rider's harm (D-090)
+  const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[q.id];q.d=(q.d||0)+1;if(q.d>=it.dur){equip.body=null;toast('Your '+it.n+' is worn through');}return Math.max(1,Math.round(n*(1-it.armor)));}
 // ---- War at the gates of the wastes (D-067). The camp of the allied hosts, its siege works and the orcs' yard behind the
 // gate are peopled from the spots of the gate's layout (warPlaces, through foePlaces): soldiers of men, elves and dwarves in
 // their quarters, at the lines, the engines and the ram; orcs in their camp, at their forge and the troll's cage, archers on the
@@ -14533,7 +14836,7 @@ function raidLiveTick(w,B,r,s,L,d){const live=L.m.filter(f=>!f.dead&&!f.gone),ag
   // the beacons on the province's watchtowers, from hill to hill
   if(!L.beac&&age>=6){L.beac=1;let n=0;for(const e of B.S){const o=e.s;if(o.prov!==s.prov||o.k!=='outpost')continue;const x=Math.round(o.X)-OX,z=Math.round(o.Z)-OZ;if(x<1||z<1||x>=W-1||z>=D-1||!genDone[(x>>4)+(z>>4)*NCX])continue;
       let y=Math.min(H-3,o.T+48);while(y>o.T-2&&!SOLID[get(x,y,z)])y--;if(get(x,y+1,z)!==AIR)continue;setBlock(x,y+1,z,BRAZIER,true);w.rd.bk.push([x+OX,y+1,z+OZ,Math.round(warPlay)]);n++;}
-    toast(n?'The beacons are lit on the heights of '+s.prov.name:'The alarm is raised in '+s.prov.name);if(s.prov.cult.k==='white'){const o=s.prov.sites.find(q=>q.k==='outpost');if(o)menBeaconChain(o);}} // (and the white realm's beacons answer, one after another, across the kingdom: D-089)
+    toast(n?'The beacons are lit on the heights of '+s.prov.name:'The alarm is raised in '+s.prov.name);if(s.prov.cult.k==='white'||s.prov.cult.k==='horse'){const o=s.prov.sites.find(q=>q.k==='outpost');if(o)menBeaconChain(o);}} // (and the white realm's beacons answer, one after another, across the kingdom: D-089)
   // the realm rides out: from its city or castle (the nearest), its soldiers and knights, along the way to the raid
   if(!L.rel&&age>=25){L.rel=1;let src=null,sd=1e9;for(const e of B.S){const o=e.s;if(o.prov!==s.prov||o===s||o.k!=='city'&&o.k!=='fort')continue;const q=Math.hypot(o.X-s.X,o.Z-s.Z);if(q<sd){sd=q;src=o;}}
     const a=src?sitePort(src):[s.X-(B.cx-s.X)*0.4,s.Z-(B.cz-s.Z)*0.4],route=raidRoute(a,[s.X,s.Z]),o={prov:s.prov.key,site:src||s,lead:FOLK_LEAD[fp+'host']||null},k=warSz();
@@ -14562,8 +14865,8 @@ function raidBorderTick(){for(const f of foes)if((f.ref||f.roam)&&!f.dead&&(Math
   const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),pv=realmOfColumn(X,Z);if(!pv)return;let w=null,B=null;
   for(const v of WARS.values()){const b=RAID_B.get(v.id);if(b&&b.done&&b.keys.has(pv.key)){w=v;B=b;break;}}if(!w)return;
   if(warAuto('r')){raidRoamT-=1;raidAmbT-=1;}const C=pv.cult,fp=C.fp; // (stopped from the war console, they come only when called: D-077)
-  if(raidRoamT<=0){raidRoamT=240+Math.random()*150;const dx=B.cx-X,dz=B.cz-Z,dl=Math.hypot(dx,dz)||1,ux=dx/dl,uz=dz/dl,sd=Math.random()<0.5?1:-1;
-    const a=[X+ux*90-uz*sd*60,Z+uz*90+ux*sd*60],b=[X-ux*40+uz*sd*120,Z-uz*40-ux*sd*120],g=warParty({id:w.id},'owolf',Math.round(3+2*Math.random()),raidRoute(a,b));
+  if(raidRoamT<=0){raidRoamT=240+Math.random()*150;const dx=B.cx-X,dz=B.cz-Z,dl=Math.hypot(dx,dz)||1,ux=dx/dl,uz=dz/dl,sd0=Math.random()<0.5?1:-1,n=Math.round(3+2*Math.random());let g=null;
+    for(const sd of [sd0,-sd0]){const a=[X+ux*90-uz*sd*60,Z+uz*90+ux*sd*60],b=[X-ux*40+uz*sd*120,Z-uz*40-ux*sd*120];g=warParty({id:w.id},'owolf',n,raidRoute(a,b));if(g)break;} // (the other flank if the first falls outside the loaded world)
     if(g){for(const f of g){f.roam=1;f.war=null;}toast('Wolf riders of the wastes roam the borderlands');foeCall(g[0],'alert');}}
   if(raidAmbT<=0&&realmRoadAt(X,Z,1)){raidAmbT=300+Math.random()*180;const R=realmRoadAt(X,Z,1).rd,ex=(R.b[0]-R.a[0])/(R.len||1),ez=(R.b[1]-R.a[1])/(R.len||1),dir=Math.random()<0.5?1:-1;
     const st=(x,z)=>x<4||z<4||x>=W-4||z>=D-4?-1:foeStand(x,ground[Math.floor(x)+W*Math.floor(z)]+2,z,2),tx=PL.x+ex*dir*20,tz=PL.z+ez*dir*20,ty=st(tx,tz);if(ty<0)return;
@@ -15145,6 +15448,7 @@ function armsSpark(f,ring){const e=eyePos(),d=camDir(),x=e.x+d.x*0.9,y=e.y-0.25,
   if(ring){tone(1900,1700,0.25,0.12);tone(2600,2300,0.4,0.06,0.02);}else burst(0.12,'bandpass',520,2,0.35);}
 // a blow of the player's on a creature, from melee or shot: its harm and push, the folk provoked, the struck turning on the player
 function foeStruck(f,dmg,kx,kz,o){o=o||{};const F=FOES[f.kind];if(f.dead)return;
+  if(f.spar&&riderSparHit(f))return;if(F.folk&&riderHallPeace(f))return; // a sparring touch; the peace of the riders' golden hall (D-090)
   if(F.block&&f.st!=='sleep'&&!o.pierce&&Math.abs(angTo(f.yaw,Math.atan2(PL.x-f.x,PL.z-f.z)))<1.05){dmg*=1-F.block*(o.shot?0.7:1);burst(0.12,'bandpass',2600,4,0.25,0,[f.x,f.y+1.2,f.z]);}
   f.hp-=dmg;f.hurt=1;const kl=Math.hypot(kx,kz)||1,kb=(o.kb||5)*F.mass;f.kvx=kx/kl*kb;f.kvz=kz/kl*kb;if(F.mass>0.3)f.vy=Math.max(f.vy,o.kb>6?3.5:2.5);
   if(o.stagger&&F.mass>0.3&&!F.lord){f.stagger=foeClock+o.stagger;f.atk=0;}
@@ -15639,8 +15943,9 @@ function drakeStep(f,dt){
   if(f.br>0){f.br-=dt;if(f.y-gy<12)drakeBreath(f,dt);} // (its fire reaches the ground only from low)
   if((f.wbT=(f.wbT||0)-dt)<=0){f.wbT=f.st==='dive'?1.2:0.55;const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<70&&foeHear([f.x,f.y,f.z]))burst(0.35,'lowpass',140,0.9,0.22*(1-d/70),0,[f.x,f.y,f.z]);}}
 // a dive: at one of the other side under it (or the player, in survival, three times in ten when near)
-function drakeDive(f,cx,cz){let best=null,bd=1e9;
-  foeNear(cx,cz,60,g=>{if(g.dead||g.wnd||g.cap||FOES[g.kind].fly||Math.hypot(g.x-cx,g.z-cz)>60)return;const d=Math.hypot(g.x-f.x,g.z-f.z)+Math.random()*20;if(d<bd){bd=d;best=g;}},0); // (the hosts' soldiers)
+function drakeDive(f,cx,cz){let best=null,bd=1e9,bestC=null,bdC=1e9;
+  foeNear(cx,cz,60,g=>{if(g.dead||g.wnd||g.cap||FOES[g.kind].fly||Math.hypot(g.x-cx,g.z-cz)>60)return;const d=Math.hypot(g.x-f.x,g.z-f.z)+Math.random()*20;if(FOES[g.kind].civ){if(d<bdC){bdC=d;bestC=g;}}else if(d<bd){bd=d;best=g;}},0); // (the hosts' soldiers; townsfolk only where no soldier is near)
+  if(!best)best=bestC;
   if(foeTarget()&&Math.hypot(PL.x-cx,PL.z-cz)<60&&(!best||Math.random()<0.3)){f.dvP=1;f.foe=null;}else if(best){f.dvP=0;f.foe=best;}else return;
   f.st='dive';f.t=9;f.br=0;}
 // its fire: along the way it flies, down to the ground before it; the other side's soldiers there and the player are burned
@@ -16223,7 +16528,7 @@ function menNews(){const L=[];for(const w of Object.values(WARS||{})){L.push(w.s
 // choosing; at the last a lordship
 function menAudience(f){const s=f.site,K=s?s.prov.kingdom:null,r=menRank(),royal=MEN_COURT.has(f.kind),who=royal?FOES[f.kind].n.replace(/ of the .*$/,'').toLowerCase():'lord of '+(s?s.prov.name:'the province');if(!K)return 'They nod to you.';
   if(r<1)return 'The '+who+' regards you. "You are a stranger in my hall. Keep the king\'s peace, and be welcome. Come again when the realm knows your name."';
-  const given=MN.au[K.key]||0;let msg='The '+who+' rises to greet you. "'+(r>=4?'Our knight returns to us. ':r>=2?'A friend of the realm is always welcome here. ':'Be welcome, freeman. ')+'"';
+  const given=MN.au[K.key]||0;let msg='The '+who+' rises to greet you. "'+(r>=4?'Our knight returns to us.':r>=2?'A friend of the realm is always welcome here.':'Be welcome, freeman.')+'"';
   if(given<r&&r<4){MN.au[K.key]=r;saveDirty=true;const g=[[0,0],[431,3],[434,2],[204,6]][r];if(SURV()&&g[0]){addItem(g[0],g[1]);drawBar(true);}if(g[0])msg+=' A gift from the throne: '+(g[1]>1?g[1]+' ':'')+nameOf(g[0])+'.';menGain(2,null);}
   if(r===3&&MN.r>=MEN_AT[4]){closeInv();setTimeout(()=>menDub(f,K),200);return false;}
   if(r>=4&&MN.r>=MEN_AT[5]&&!MN.lord&&royal){closeInv();setTimeout(()=>menLordship(f,K),200);return false;}
@@ -16540,19 +16845,19 @@ function menSmoke(dt){if((smokeT-=dt)>0)return;smokeT=0.5;let n=0;
 // ---- beacons: lit at one watchtower of a kingdom (by the player, or by a raid), answered by every beacon of the kingdom in turn;
 // a great fire stands over each while it burns
 const BEACONS=[];
-function useBeacon(x,y,z){const s=realmSiteAt(x+OX,z+OZ,3);if(!s||s.k!=='outpost'||s.prov.cult.k!=='white')return false;if(BEACONS.some(b=>b.s===s&&b.t>0))return true;
-  menBeaconChain(s);menGain(1,null);const n=menRidersCome();toast('You light the beacon of '+s.name+'. Across the hills, one after another, the beacons of the realm answer it.'+(n?' Riders of the realm are coming.':''));return true;}
+function useBeacon(x,y,z){const s=realmSiteAt(x+OX,z+OZ,3),ck=s&&s.prov.cult.k;if(!s||s.k!=='outpost'||(ck!=='white'&&ck!=='horse'))return false;if(BEACONS.some(b=>b.s===s&&b.t>0))return true; // (and the riders' beacons, D-090)
+  menBeaconChain(s);if(ck==='horse')riderGain(1,null);else menGain(1,null);const n=menRidersCome();toast('You light the beacon of '+s.name+'. Across the hills, one after another, the beacons of '+(ck==='horse'?'the riders':'the realm')+' answer it.'+(n?(ck==='horse'?' A riding is coming.':' Riders of the realm are coming.'):''));return true;}
 function menBeaconChain(s0){const K=s0.prov.kingdom,ci=Math.floor(s0.X/LS),cj=Math.floor(s0.Z/LS),seen=new Set(),L=[];
   for(let a=-6;a<=6;a++)for(let b=-6;b<=6;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);if(realmHeld(c)!==s0.prov.cult)continue;const P=provinceOf(c.i,c.j);if(!P||P.kingdom.key!==K.key)continue;
     for(const s of P.sites)if(s.k==='outpost')L.push([Math.hypot(s.X-s0.X,s.Z-s0.Z),s]);}
   L.sort((a,b)=>a[0]-b[0]);L.forEach(([d,s],i)=>BEACONS.push({s:s,t:-(i*3),life:90,told:i<3||i===L.length-1,last:i===L.length-1,n:L.length}));return L.length;}
 function beaconFrame(dt){for(let i=BEACONS.length-1;i>=0;i--){const b=BEACONS[i],was=b.t;b.t+=dt;if(was<0&&b.t>=0&&b.told)toast(b.last&&b.n>3?'The last beacon burns: '+b.n+' beacons are lit across '+b.s.prov.kingdom.name.replace(/^The /,'the ')+'.':'The beacon of '+b.s.name+' is lit!');
-    if(b.t<0)continue;if(b.t>b.life){BEACONS.splice(i,1);continue;}const L=siteLayout(b.s),tw=L.parts.find(p=>p.k==='tower');if(!tw)continue;const [x,,z]=menAt(b.s,tw.cu,tw.cv,0),y=tw.y+tw.H+4;
+    if(b.t<0)continue;if(b.t>b.life){BEACONS.splice(i,1);continue;}const L=siteLayout(b.s),tw=L.parts.find(p=>p.k==='tower'||p.k==='pyre');if(!tw)continue;const [x,,z]=menAt(b.s,tw.cu,tw.cv,0),y=tw.k==='pyre'?tw.y+7:tw.y+tw.H+4;
     if(Math.hypot(x-PL.x,z-PL.z)>W)continue;if(Math.random()<dt*30)spawnP(x+(Math.random()-.5)*1.6,y,z+(Math.random()-.5)*1.6,(Math.random()-.5)*0.6,2.5+Math.random()*2,(Math.random()-.5)*0.6,[1,0.45+Math.random()*0.3,0.1],1.4,-0.6);
     if(Math.random()<dt*6)spawnP(x,y+3,z,(Math.random()-.5)*0.5,1.5,(Math.random()-.5)*0.5,[0.3,0.3,0.3],4,-0.3);}}
 // riders of the realm come to the player, answering a beacon
-function menRidersCome(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));if(!P||P.cult.k!=='white')return 0;const a=PL.yaw+3.14,x=PL.x+Math.sin(a)*28,z=PL.z+Math.cos(a)*28,bx=Math.floor(x),bz=Math.floor(z);
-  if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return 0;let n=0;for(let i=0;i<3;i++){const f=addFoe('rknight',x+i*2,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6});if(f){f.aid=MN.pt+90;f.hx=PL.x;f.hz=PL.z;n++;}}return n;}
+function menRidersCome(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));if(!P||(P.cult.k!=='white'&&P.cult.k!=='horse'))return 0;const a=PL.yaw+3.14,x=PL.x+Math.sin(a)*28,z=PL.z+Math.cos(a)*28,bx=Math.floor(x),bz=Math.floor(z);
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return 0;let n=0;for(let i=0;i<3;i++){const f=addFoe(P.cult.k==='horse'?'hrider':'rknight',x+i*2,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6});if(f){f.aid=MN.pt+90;f.hx=PL.x;f.hz=PL.z;n++;}}return n;}
 // ---- the village fair (every fourth evening): dancing about the maypole, a bonfire, a fiddle; keeping it feeds the player
 let FAIR=null;
 function fairTick(){const t=curT(),on=dayN%4===1&&t>0.7&&t<0.97;if(!on){if(FAIR)fairEnd();return;}
@@ -16591,6 +16896,384 @@ function menPassing(f){if(!f||f.war||f.hst||passT>foeClock||!FOES[f.kind].folk||
 // ---- each frame (from menFrame): the tourney's riding, the caravans, the fair, beacons, ships, smoke, petals; each second the rest
 function menLife(dt){tourFrame(dt);carFrame(dt);fairFrame(dt);beaconFrame(dt);menShipFrame(dt);if(menLand||MEN_SHIPS.length){menSmoke(dt);menTreeBloom(dt);}if((menLandT-=dt)>0)return;menLandT=1;
   menLand=menLandNow();tourTick();carTick();fairTick();menShipTick();if(menLand||WATCH.size){menBells();menCrier();menDusk();menWatch();menMarketDay();menMinstrel();menWork();}}
+// ---- The riders of the plains (D-090): the player's standing with the horse-lords, and what they offer those they know.
+//
+// Standing (RH.r, saved as rh) rises with tasks done for them, trade, their places and the forefathers' ruins found, the songs of
+// their kings heard, creatures of the wastes slain near their folk, the feast kept in the hall, races won and bouts sparred; it
+// falls when one of their folk is struck and much further when one is slain. Its ranks (RH_AT): Stranger, Guest of the Hall,
+// Hall-friend, Friend of the Riders; a Sworn Rider only by the oath at a high seat of the riders (RH.sw), and a sworn rider of
+// great standing is made a Thane by a king or a queen, given a steading to keep. Each rank brings a gift.
+// Speaking with the folk (use one of them): they greet in their own tongue (words of our own) and say what it means; then what
+// that one can do: merchants trade; the horse-dealer sells horses; the horse-healer tends your horse, shoes it (a shod horse
+// gallops a tenth faster) and puts barding on it (a barded horse takes a third off the blows its rider takes); smiths mend and
+// forge the riders' arms; herds name your horse; the lay-singer and the warden of the mounds sing the songs of the kings; the
+// marshals, thanes, the counsellor and the high seat give tasks: the war-arrow carried to another place before time runs out, a
+// strayed horse found and led home, creatures of the wastes slain, supplies, venison, a relic of the forefathers. The doorwardens
+// keep the peace of the golden hall: no blow is struck within it. Justice: whoever strikes their folk may pay amends to a marshal
+// or a thane; whoever slays one is banished from that kingdom a while. The war-horn of the riders calls a riding to a sworn rider.
+const RH_AT=[0,10,30,70,140,240],RH_RANK=['Stranger','Guest of the Hall','Hall-friend','Friend of the Riders','Sworn Rider','Thane of the Riders'];
+const RH_GIFTS=[null,[[448,3],[446,1]],[[447,2],[449,3]],[[450,1],[409,12]],[[454,1],[453,1],[451,1],[452,1]],[[455,1],[205,2]]];
+let RH=saved&&saved.rh&&typeof saved.rh==='object'?saved.rh:null;
+if(!RH)RH={r:0,sw:0,th:'',g:0,q:null,qn:0,sg:[],sgn:{},au:{},out:{},pt:0,hn:-1e9,fe:-1,rw:0,sp:0,boast:0,sl:0};
+const riderSave=()=>({rh:RH});
+const RIDER_KINDS=new Set(['hspear','hbow','hcapt','hrider','hman','hwoman','hherd','hthane','hsmith','hking','hqueen','hdoor','hcouns','hmaid','hscop','hleech','hdealer','hchild','hgirl','hwarden','hracer','hlancer','hharch','hout']);
+function riderPeopleOf(f){if(!f)return false;const C=f.site&&f.site.prov&&f.site.prov.cult;if(C)return C.k==='horse';return RIDER_KINDS.has(f.kind);}
+const riderRank=()=>{let r=0;while(r+1<RH_AT.length&&RH.r>=RH_AT[r+1])r++;return RH.sw?Math.max(4,r):Math.min(3,r);};
+const riderRankName=()=>RH_RANK[riderRank()];
+function riderGain(n,why){if(!n)return;const r0=riderRank();RH.r=Math.max(-80,Math.min(500,RH.r+n));saveDirty=true;const r1=riderRank();
+  if(why)toast(why+' ('+(n>0?'+':'')+n+' standing with the riders)');if(r1>r0)setTimeout(()=>riderRankUp(r1),why?1600:0);}
+function riderRankUp(r){toast('The riders now name you '+RH_RANK[r]);if(r===3)setTimeout(()=>toast('A friend of the riders of great standing may swear the oath at a high seat of the riders'),2600);riderGift(r);}
+function riderGift(r){if(RH.g>=r)return;RH.g=r;const L=RH_GIFTS[r];if(!L)return;const got=[];if(SURV())for(const [id,c] of L){const left=addItem(id,c);if(left)toast('No room for '+nameOf(id));got.push((c>1?c+' ':'')+nameOf(id));}
+  if(got.length)setTimeout(()=>toast('In token of it the riders give you '+got.join(', ')),2400);drawBar(true);saveDirty=true;}
+// ---- their tongue: greetings with what they mean
+const RIDER_TONGUE=[['Holdra venn, ferrin','Well met, wayfarer'],['Grasa ronn thi helda','The grass and the wind keep you'],['Sela una hrosk','Hearth and horse'],['Vindr tharn, ferrin','Ride swift, wayfarer'],
+  ['Medra fullan!','A full cup!'],['Holdu wethra, skildra','Keep the oath, shield-friend'],['Ernas oldra sweran','The old ones sleep in the mounds'],['Tharn hrosk, varm heorth','A swift horse and a warm hearth'],['Vela sunnar','Fair sun to you'],['Ferrin, saeta oss','Wayfarer, sit with us']];
+const riderTongue=()=>{const t=RIDER_TONGUE[Math.floor(Math.random()*RIDER_TONGUE.length)];return '"'+t[0]+'" ('+t[1]+')';};
+function riderGreet(f,F){const r=riderRank(),who=(f.nm||F.n)+': ';if(r>=4){f.bow=foeClock+2;return who+riderTongue()+(RH.th?' My lord thane.':' Sworn rider.');}
+  if(r>=2&&Math.random()<0.6)return who+riderTongue();return null;}
+// ---- struck, slain, banished
+const riderOutlaw=f=>!!(f&&f.site&&f.site.prov&&f.site.prov.cult.k==='horse'&&(RH.out[f.site.prov.kingdom.key]||0)>RH.pt);
+function riderStruck(f){if(riderPeopleOf(f))riderGain(-6,'You struck one of the riders\' folk');}
+function riderSlain(f){const F=FOES[f.kind];if(F.folk){if(riderPeopleOf(f)&&f.site&&!f.war&&!f.host){riderGain(-25,'You slew one of the riders\' folk');const K=f.site.prov.kingdom;RH.out[K.key]=RH.pt+900;saveDirty=true;
+      setTimeout(()=>toast('You are banished from '+K.name.replace(/^The /,'the ')+'. Its riders will take you on sight, unless you pay the blood-price to one of its marshals or thanes.'),2400);}return;}
+  if(RH.q&&RH.q.k==='bounty'){RH.q.c=Math.max(0,RH.q.c-1);if(!RH.q.c)toast('The riders\' bounty is earned; claim it');}
+  let near=false;foeNear(f.x,f.z,30,g=>{if(!near&&!g.dead&&FOES[g.kind].folk&&riderPeopleOf(g))near=true;},0);if(near){RH.sl++;if(RH.sl%3===0)riderGain(1,null);}}
+function riderAmends(f){const s=f.site,K=s&&s.prov.kingdom,out=K&&(RH.out[K.key]||0)>RH.pt,v=out?200:30;
+  if(!payCoin(v))return 'They want '+coinWord(v)+' as the blood-price, and you have not got it.';realmWrath.delete(f.prov);if(out)delete RH.out[K.key];saveDirty=true;
+  for(const g of foes)if(g.prov===f.prov&&!g.dead){g.foe=null;if(g.st==='chase'||g.st==='flee'){g.st='return';g.t=4;}}
+  riderGain(2,null);return 'You pay '+coinWord(v)+'. "It is paid, and it is forgotten. Ride in peace."';}
+// ---- the peace of the golden hall: within a hall of the riders no blow is struck at their folk
+let peaceT=0;
+function riderHallAt(X,Z){const s=realmSiteAt(X,Z,2);if(!s||s.prov.cult.k!=='horse'||s.k!=='city')return null;const H=siteLayout(s).hall;if(!H)return null;const [u,v]=siteUV(s,X,Z);
+  return u>=H.u0&&u<=H.u1&&Math.abs(v)<=(H.W>>1)?s:null;}
+function riderHallPeace(f){if(!riderPeopleOf(f)||f.war||f.host||folkWrath(f)||!SURV())return false;if(!riderHallAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ)))return false;
+  if(peaceT<=foeClock){peaceT=foeClock+4;toast('The doorwardens\' eyes are on you. No blade is drawn in the golden hall.');}return true;}
+// ---- the panel and the folk who do more than greet
+const RIDER_TASK=new Set(['hcapt','hthane','hking','hqueen','hcouns']),RIDER_COURT=new Set(['hking','hqueen']);
+function riderAct(){const f=foeHit(4.6);if(!f||f.dead||!FOES[f.kind].folk||f.foe&&!folkWrath(f))return false;if(!riderPeopleOf(f)||f.war||f.host||f.hst||f.race||(f.site&&f.site.k==='wgate'))return false;
+  if(folkWrath(f)){if(f.kind==='hcapt'||f.kind==='hthane'||RIDER_COURT.has(f.kind)){riderTalk(f,1);return true;}return false;}riderTalk(f);return true;}
+function riderTalk(f,wrath){const F=FOES[f.kind],s=f.site,r=riderRank(),spk=f.spk||'',seat=RIDER_COURT.has(f.kind)||spk==='h_seat'&&f.kind==='hthane';
+  f.st='idle';f.t=6;f.yaw=f.hd=Math.atan2(PL.x-f.x,PL.z-f.z);if(r>=4&&!wrath)f.bow=foeClock+2;
+  elfPanel((f.nm||F.n)+(s?', '+s.name:''),U=>{
+    if(wrath){U.text('"You owe a blood-price here. Pay it, and ride in peace again."');const b=U.row();U.btn(b,'Pay the blood-price',()=>riderAmends(f));U.btn(b,'Farewell',()=>{closeInv();return false;});return;}
+    U.text(riderTongue()+' "'+(FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.hguard)[Math.floor(Math.random()*3)].replace('{p}',s?s.name:'the plains').replace('{k}',s?s.prov.kingdom.name.replace(/^The /,'the '):'the plains')+'"');
+    U.text('You are '+RH_RANK[r]+(RH.th?' (Thane of '+RH.th+')':'')+' among the riders. Standing '+RH.r+(r<3&&r+1<RH_AT.length?' ('+RH_AT[r+1]+' for '+RH_RANK[r+1]+')':r===3?(RH.r>=RH_AT[4]?' (enough to swear the oath at a high seat)':' ('+RH_AT[4]+' to swear the oath)'):'')+'.');
+    if(RH.q){const q=RH.q;U.text('Your task: '+q.n+'.');const b=U.row();if(riderTaskReady(q))U.btn(b,'Tell them the task is done',()=>riderTaskDone());U.btn(b,'Give up your task',()=>{RH.q=null;saveDirty=true;return 'You give up the task.';});}
+    const b=U.row();
+    if(spk==='h_market'||spk==='h_stall')U.btn(b,'Trade',()=>{riderTradePanel(f);return false;});
+    if(f.kind==='hdealer'||spk==='h_fair')U.btn(b,'Buy a horse',()=>{riderHorsePanel(f);return false;});
+    if(f.kind==='hleech'||spk==='h_leech'){U.btn(b,'Tend your horse',()=>riderTend(0));U.btn(b,'Shoe your horse (6 copper)',()=>riderTend(1));U.btn(b,'Buy barding (60 copper)',()=>riderBuy(452,60,1));}
+    if(f.kind==='hsmith'||spk==='h_smithy'){U.btn(b,'Mend your arms and tools',()=>menMend());U.btn(b,'Have arms forged',()=>{riderForgePanel(f);return false;});}
+    if(f.kind==='hherd'||spk==='h_stable'||spk==='h_paddock')U.btn(b,'Ask them to name your horse',()=>riderNameHorse());
+    if(f.kind==='hscop'||f.kind==='hwarden'||spk==='h_scop')U.btn(b,'Ask for a song of the kings',()=>{riderSong(s,true);return false;});
+    if(f.kind==='hmaid'||f.kind==='hcapt'&&(spk==='h_drill'||spk==='h_keep'))U.btn(b,'Spar with them',()=>{closeInv();riderSpar(f);return false;});
+    if(spk==='h_cjudge'||spk==='h_cpav')U.btn(b,'Ask about the race',()=>riderRaceAsk(f));
+    if(seat)U.btn(b,'Ask for an audience',()=>riderAudience(f));
+    if((RIDER_TASK.has(f.kind)||seat)&&!RH.q)U.btn(b,'Ask for a task',()=>{const q=riderTaskGive(f.site,null,RIDER_COURT.has(f.kind));if(q){closeInv();return false;}return 'There is nothing the riders need of you now.';});
+    U.btn(b,'Farewell',()=>{closeInv();return false;});});
+  foeCall(f,'idle');tone(440,554,0.16,0.05);hint('riders');}
+// ---- trade: the riders' goods ([item, price in copper, the least rank]) and what they buy
+const RIDER_GOODS=[[448,2],[449,4],[447,3],[446,4],[206,2],[409,1],[461,8],[405,30,1],[450,70,2],[452,60,2],[453,90,3],[451,220,4]];
+const RIDER_BUYS=[[202,1],[350,3],[351,2],[352,3],[WOOLW,2],[223,4],[224,12],[227,10],[415,25],[457,60],[458,90],[459,70],[456,40]];
+const RIDER_BUYK=[1.4,1.2,1,0.9,0.75,0.65],RIDER_SELLK=[0.6,0.75,0.85,0.95,1.05,1.15];
+const riderPrice=c=>Math.max(1,Math.round(c*RIDER_BUYK[riderRank()])),riderOffer=c=>Math.max(1,Math.round(c*RIDER_SELLK[riderRank()]));
+function riderBuy(id,c,n,fixed){const v=(fixed?c:riderPrice(c))*n;if(!payCoin(v))return 'You have not the coin ('+coinWord(v)+')';const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));
+  drawBar(true);saveDirty=true;if(v>=20)riderGain(1,null);return 'You buy '+(n>1?n+' ':'')+nameOf(id)+' for '+coinWord(v);}
+function riderSell(id,c,n){if(SURV()){if(countOf(id)<n)return 'You have no '+nameOf(id);takeItems(id,n);}const v=riderOffer(c)*n;giveCoin(v);saveDirty=true;if(v>=20)riderGain(1,null);return 'You sell '+(n>1?n+' ':'')+nameOf(id)+' for '+coinWord(v);}
+function riderTradePanel(f){const r=riderRank();elfPanel('The stalls of '+(f.site?f.site.name:'the riders'),U=>{
+  U.text('Your purse: '+coinWord(purse())+(SURV()?'':' (in creative the riders give freely)')+'. Prices for '+RH_RANK[r]+(r<2?': they are better for a friend of the hall.':'.'));
+  U.text('They sell:');for(const [id,c,need] of RIDER_GOODS){if((need||0)>r){U.text('  '+nameOf(id)+': for '+RH_RANK[need]+' and above');continue;}const row=U.row();
+    U.btn(row,nameOf(id)+' ('+coinWord(riderPrice(c))+')',()=>riderBuy(id,c,1));if(stackMax(id)>1)U.btn(row,'Four',()=>riderBuy(id,c,4));}
+  const mine=RIDER_BUYS.filter(([id])=>!SURV()||countOf(id)>0);U.text(mine.length?'They will buy:':'They would buy grain, wool, hides and leather, ingots, drake scales and the relics of the forefathers; you have none of these.');
+  for(const [id,c] of mine){const row=U.row();U.btn(row,'Sell '+nameOf(id)+' ('+coinWord(riderOffer(c))+(SURV()?', you have '+countOf(id):'')+')',()=>riderSell(id,c,1));}
+  U.btn(U.row(),'Back',()=>{riderTalk(f);return false;});});}
+function riderForgePanel(f){const r=riderRank();elfPanel('The forge of '+(f.site?f.site.name:'the riders'),U=>{U.text('"Shoes for horses and heads for spears, and mail for those who ride with us."');
+  for(const [id,c,need] of [[405,30,1],[450,70,2],[381,60,2],[451,220,4]]){const row=U.row();if(need>r){U.text('  '+nameOf(id)+': for '+RH_RANK[need]+' and above');continue;}U.btn(row,nameOf(id)+' ('+coinWord(riderPrice(c))+')',()=>riderBuy(id,c,1));}
+  U.btn(U.row(),'Back',()=>{riderTalk(f);return false;});});}
+// ---- horses: the dealer's horses of four breeds; the horse-healer's tending, shoeing and barding; the herds' names
+const RIDER_BREEDS=[['A dun of the steppe, hardy',3,60],['A grey, quick',2,90],['A bay, steady',0,70],['A black, strong',4,110]];
+function riderHorsePanel(f){elfPanel('The horse-dealer of '+(f.site?f.site.name:'the riders'),U=>{U.text('"Every horse here was foaled on the grass. Choose, and she is yours."');
+  for(const [n,ci,c] of RIDER_BREEDS){const row=U.row();U.btn(row,n+' ('+coinWord(riderPrice(c))+')',()=>{const v=riderPrice(c);if(!payCoin(v))return 'You have not the coin ('+coinWord(v)+')';riderLeadOut('horse',ci);riderGain(1,null);return 'The dealer leads out the horse and puts its rein in your hand. It is yours.';});}
+  U.btn(U.row(),'Back',()=>{riderTalk(f);return false;});});}
+function riderLeadOut(kind,ci){const a=PL.yaw,x=PL.x-Math.sin(a+0.8)*2.5,z=PL.z-Math.cos(a+0.8)*2.5,y=standY(x,PL.y+1,z);
+  const h=addAnimal(kind,x,y>0?y:PL.y,z,{tame:true,uid:Date.now().toString(36)+'r',ci:ci|0,st:'idle',t:2});h.yaw=h.hd=Math.atan2(PL.x-x,PL.z-z);saveDirty=true;animalCall(h,false);return h;}
+const riderMyHorse=()=>{let b=null,bd=14;for(const a of animals)if(a.tame&&!a.dead&&ANIMALS[a.kind].mount&&!ANIMALS[a.kind].boat){const d=Math.hypot(a.x-PL.x,a.z-PL.z);if(d<bd){bd=d;b=a;}}return b;};
+function riderTend(k){const a=riderMyHorse();if(!a)return 'Bring your horse to me, and I will see to it.';
+  if(k===0){a.hp=ANIMALS[a.kind].hp;return 'The horse-healer runs her hands down its legs and looks at its teeth. "Sound, and well."';}
+  if(a.shod)return '"Its shoes are good for a while yet."';if(!payCoin(6))return 'Shoeing is 6 copper, and you have not got it.';a.shod=1;saveDirty=true;burst(0.3,'bandpass',2400,4,0.2);return 'Your horse is shod with the riders\' iron. It will gallop the better for it.';}
+const RIDER_HNAMES=['Swiftmane','Windfoot','Grassrunner','Greyflank','Sunmane','Stormhoof','Fleetwind','Duskmane','Brightfoot','Hillrunner'];
+function riderNameHorse(){const a=riderMyHorse();if(!a)return '"Bring your horse here, and I will give it a name."';if(a.nm)return '"Its name is '+a.nm+'. It knows it well."';
+  a.nm=RIDER_HNAMES[Math.floor(Math.random()*RIDER_HNAMES.length)];saveDirty=true;animalCall(a,false);return '"A horse should have a name." They whisper it into its ear: '+a.nm+'.';}
+// barding put on the horse you are near (use it while holding it)
+function useBarding(){const a=riderMyHorse();if(!a){toast('Barding is put on a horse of your own; stand by it');return true;}if(a.bard){toast('Your horse is barded already');return true;}
+  if(SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;}a.bard=1;saveDirty=true;drawBar(true);toast('You put the riders\' barding on your horse. Blows meant for its rider will be the lighter.');return true;}
+// ---- the high seat: an audience with the king or the queen (a thane on a lesser seat): a welcome by the player's standing, a
+// gift once for each rank; the oath for a friend of great standing; at the last the thaneship and a steading to keep
+const riderSeatLead=s=>{if(!s.prov.capital)return 'hthane';const k=s.prov.kingdom.key;return hsh(k.length,9921,[...k].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'hking':'hqueen';};
+function riderAudience(f){const s=f.site,K=s?s.prov.kingdom:null,r=riderRank(),royal=RIDER_COURT.has(f.kind),who=royal?FOES[f.kind].n.replace(/ of the .*$/,'').toLowerCase():'thane of '+(s?s.prov.name:'the province');if(!K)return 'They nod to you.';
+  if(r<1)return 'The '+who+' looks long at you. "A stranger in the golden hall. Sit by the fire and be welcome; come again when the riders know your name."';
+  const given=RH.au[K.key]||0;let msg='The '+who+' rises. "'+(r>=4?'Our sworn rider returns.':r>=2?'A friend of the hall is ever welcome.':'Be welcome, guest.')+'"';
+  if(given<r&&r<4){RH.au[K.key]=r;saveDirty=true;const g=[[0,0],[446,2],[449,3],[204,6]][r];if(SURV()&&g[0]){addItem(g[0],g[1]);drawBar(true);}if(g[0])msg+=' A gift from the high seat: '+(g[1]>1?g[1]+' ':'')+nameOf(g[0])+'.';riderGain(2,null);}
+  if(r===3&&RH.r>=RH_AT[4]){closeInv();setTimeout(()=>riderOath(f,K),200);return false;}
+  if(r>=4&&RH.r>=RH_AT[5]&&!RH.th&&royal){closeInv();setTimeout(()=>riderThane(f,K),200);return false;}
+  if(r>=2&&!RH.q)msg+=' "If you would serve the riders, ask, and you shall have a task."';return msg;}
+// the oath: the player kneels before the high seat with a hand on the hilt held out to them, and swears
+function riderOath(f,K){f.bow=foeClock+4;tone(294,392,0.6,0.07);tone(392,494,0.6,0.07,0.6);tone(494,587,1,0.07,1.2);
+  showText('The oath','You kneel before the high seat of '+K.name.replace(/^The /,'the ')+' and lay your hand on the hilt held out to you. "I will ride when the riders ride, and hold where they hold, and keep faith with the high seat while the grass grows." The hall answers with a shout and the stamping of feet: "'+RIDER_TONGUE[5][0]+'!"');
+  RH.sw=1;saveDirty=true;setTimeout(()=>riderGift(4),2600);setTimeout(()=>toast('Blow the war-horn of the riders, and a riding will come to you'),5200);}
+function riderThane(f,K){const vs=f.site.prov.sites.filter(s=>s.k==='village'),v=vs[0]||f.site;RH.th=v.name;saveDirty=true;
+  showText('A thaneship','The '+FOES[f.kind].n.toLowerCase()+' takes a brooch of gold from the counsellor and pins it to your cloak. "For your deeds the steading of '+v.name+' is yours to keep, and its hearth and its herds. Rise, Thane of '+v.name+'."');riderGift(5);tone(392,587,1,0.07);}
+// ---- tasks: from the marshals, thanes, the counsellor and the high seat (and the boast at the feast, rider-life.js)
+const RIDER_TK=['arrow','stray','bounty','supply','hunt','relic'],RIDER_SUPPLY=[[HAYBALE,6],[202,8],[352,4],[447,3],[WOOLW,6]],RIDER_RELIC=[457,458,459];
+function riderTaskGive(s,kind,crown,boast){if(RH.q||!s)return null;const K=kind||RIDER_TK[Math.floor(Math.random()*RIDER_TK.length)],X0=PL.x+OX,Z0=PL.z+OZ;
+  let q={k:K,from:s.id,fn:s.name,fx:s.X,fz:s.Z,t0:RH.pt,crown:crown?1:0,boast:boast?1:0};
+  if(K==='arrow'){const t=riderOtherSite(s);if(!t)return null;const d=Math.hypot(t.X-s.X,t.Z-s.Z),lim=Math.round(60+d/5);Object.assign(q,{X:t.X,Z:t.Z,tn:t.name,lim:lim,n:'carry the war-arrow from '+s.name+' to '+t.name+' within '+Math.round(lim/60*10)/10+' minutes',rw:(crown?50:20)+Math.round(d/35)});if(SURV())addItem(460,1);}
+  else if(K==='bounty'){const n=5+Math.floor(Math.random()*4);Object.assign(q,{c:n,n:'slay '+n+' creatures of the wastes for the riders of '+s.name,rw:crown?110:55});}
+  else if(K==='supply'){const [it,n]=RIDER_SUPPLY[Math.floor(Math.random()*RIDER_SUPPLY.length)];Object.assign(q,{it:it,need:n,n:'bring '+n+' '+nameOf(it)+' to '+s.name,rw:12+n*2});}
+  else if(K==='hunt')Object.assign(q,{it:350,need:4,n:'bring 4 Raw Venison for the hall of '+s.name,rw:22});
+  else if(K==='relic'){let best=null,bd=1e9;const cx=Math.floor(X0/CS),cz=Math.floor(Z0/CS);for(let a=-50;a<=50;a++)for(let b=-50;b<=50;b++){const o=fathersAt(cx+a,cz+b);if(!o||!o.name)continue;const d=Math.hypot(o.X-X0,o.Z-Z0);if(d>60&&d<bd){bd=d;best=o;}}
+    if(!best)return null;const it=RIDER_RELIC[Math.floor(Math.random()*3)];Object.assign(q,{X:best.X,Z:best.Z,it:it,got:0,n:'bring the '+nameOf(it)+' from '+best.name+' to '+s.name,rw:crown?120:55});}
+  else if(K==='stray'){let pt=null;for(let k=0;k<30&&!pt;k++){const a=Math.random()*6.283,d=100+Math.random()*120,X=Math.round(s.X+Math.cos(a)*d),Z=Math.round(s.Z+Math.sin(a)*d),o=colInfo(X,Z,TEL);if(!o.wet&&!o.river&&!o.lake&&o.h>o.sl+2&&!realmSiteAt(X,Z,10)&&!wasteGateNear(X,Z,40)&&o.wVolc<0.2)pt=[X,Z];}
+    if(!pt)return null;const nm=RIDER_HNAMES[Math.floor(Math.random()*RIDER_HNAMES.length)];Object.assign(q,{X:pt[0],Z:pt[1],who:nm,found:0,n:'find '+nm+', a horse of '+s.name+' that strayed, and lead it home',rw:crown?80:36});}
+  if(boast)q.rw*=2;RH.q=q;saveDirty=true;const d=q.X!==undefined?Math.hypot(q.X-X0,q.Z-Z0):0;
+  toast((boast?'Your boast':crown?'A task of the high seat':'A task of the riders')+': '+q.n+'.'+(q.X!==undefined?' It lies '+dirWord(q.X-X0,q.Z-Z0)+', '+Math.round(d)+' blocks off; sparks rise over it.':''));hint('htask');return q;}
+// another place of the riders (a hall, a hold or a steading) 150 to 1500 blocks off
+function riderOtherSite(s){const P=s.prov,C=P.cult,ci=Math.floor(s.X/LS),cj=Math.floor(s.Z/LS),seen=new Set(),out=[];
+  for(let a=-5;a<=5;a++)for(let b=-5;b<=5;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);if(realmHeld(c)!==C)continue;
+    for(const t of provinceOf(c.i,c.j).sites)if(t!==s&&(t.k==='city'||t.k==='fort'||t.k==='village')){const d=Math.hypot(t.X-s.X,t.Z-s.Z);if(d>150&&d<1500)out.push([d,t]);}}
+  out.sort((a,b)=>a[0]-b[0]);return out.length?out[Math.floor(Math.random()*Math.min(4,out.length))][1]:null;}
+function riderTaskReady(q){if(q.k==='supply'||q.k==='hunt')return !SURV()||countOf(q.it)>=q.need;if(q.k==='bounty')return q.c<=0;return false;}
+function riderTaskDone(){const q=RH.q;if(!q)return '';if(q.k==='supply'||q.k==='hunt'){if(SURV())takeItems(q.it,q.need);}return riderReward(q);}
+function riderReward(q){RH.q=null;RH.qn=(RH.qn||0)+1;saveDirty=true;giveCoin(q.rw);const extra=Math.random()<0.35?[446,449,447][Math.floor(Math.random()*3)]:0;if(extra&&SURV())addItem(extra,1);drawBar(true);
+  riderGain(q.crown||q.boast?14:8,null);const msg=(q.boast?'Your boast is made good: ':'Task done: ')+q.n.replace(/^./,c=>c.toUpperCase())+'. You are paid '+coinWord(q.rw)+(extra?' and given '+nameOf(extra):'')+'.';toast(msg);tone(587,880,0.35,0.05);return msg;}
+function riderFail(why){const q=RH.q;RH.q=null;saveDirty=true;toast(why);if(q&&q.boast)riderGain(-4,'An empty boast');}
+// once a second: tasks that end where the player goes
+let riderStray=null,riderMk=0;
+function riderTaskTick(){const q=RH.q;if(!q)return;const X=PL.x+OX,Z=PL.z+OZ;
+  if(q.k==='arrow'){if(RH.pt-q.t0>q.lim){riderFail('Too late: the war-arrow did not come to '+q.tn+' in time');if(SURV()&&countOf(460))takeItems(460,1);drawBar(true);return;}
+    if(Math.hypot(q.X-X,q.Z-Z)<30){if(SURV()&&countOf(460)<1){riderFail('You have lost the war-arrow');return;}if(SURV())takeItems(460,1);toast('You put the war-arrow into the hands of the marshal of '+q.tn+'. The riders there make ready.');riderReward(q);}}
+  else if(q.k==='relic'){if(!q.got&&Math.hypot(q.X-X,q.Z-Z)<10){q.got=1;if(SURV())addItem(q.it,1);drawBar(true);saveDirty=true;toast('Among the old stones you find the '+nameOf(q.it)+'. Bring it to '+q.fn);}
+    else if(q.got&&Math.hypot(q.fx-X,q.fz-Z)<45){if(SURV()&&countOf(q.it)<1)return;if(SURV())takeItems(q.it,1);riderReward(q);}}
+  else if(q.k==='stray'){const L=riderStray&&!riderStray.dead&&animals.includes(riderStray)?riderStray:null;
+    if(!L&&Math.hypot(q.X-X,q.Z-Z)<70){const x=(q.found?PL.x+2:q.X-OX+0.5),z=(q.found?PL.z+2:q.Z-OZ+0.5),bx=Math.floor(x),bz=Math.floor(z);
+      if(bx>2&&bz>2&&bx<W-3&&bz<D-3&&genDone[(bx>>4)+(bz>>4)*NCX]){const y=standY(x,ground[bx+W*bz]+2,z);if(y>0){riderStray=addAnimal('horse',x,y,z,{stray:1,st:'idle',t:9});riderStray.nm=q.who;}}}
+    else if(L&&!q.found&&Math.hypot(L.x-PL.x,L.z-PL.z)<5){q.found=1;saveDirty=true;L.tame=true;L.st='follow';L.t=1;toast(q.who+' knows the riders\' halter. It follows you.');}
+    if(L&&q.found){if(L.st!=='follow'&&Math.hypot(L.x-PL.x,L.z-PL.z)>4){L.st='follow';L.t=1;}if(Math.hypot(L.x+OX-q.fx,L.z+OZ-q.fz)<40){removeAnimal(L);riderStray=null;toast(q.who+' trots home to the paddock');riderReward(q);}}}}
+function riderMarks(dt){const q=RH.q;if(!q||(riderMk-=dt)>0)return;riderMk=0.4;let X,Z;if((q.k==='relic'&&!q.got)||q.k==='arrow'||(q.k==='stray'&&!q.found)){X=q.X;Z=q.Z;}else if(q.k==='relic'||q.k==='stray'){X=q.fx;Z=q.fz;}else return;
+  const x=X-OX,z=Z-OZ,bx=Math.floor(x),bz=Math.floor(z);if(Math.hypot(x-PL.x,z-PL.z)>240||bx<0||bz<0||bx>=W||bz>=D)return;const y=ground[bx+W*bz]+1;
+  for(let k=0;k<6;k++)spawnP(x+(Math.random()-.5)*0.6,y+Math.random()*16,z+(Math.random()-.5)*0.6,0,1.5,0,[0.6,1,0.5],1.2,-0.4);}
+// ---- the songs of the kings: eight for each kingdom, sung by the lay-singers in the halls and the wardens of the mounds
+const RIDER_SONG_N=8;
+function riderKings(key){const r=rngAt(hsh(key.length,9923,0)*1e6|0,9925,[...key].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)&0xffff),k=[];for(let i=0;i<9;i++)k.push(nameWord('rider',r));return k;}
+function riderSongs(key,name){const k=riderKings(key),realm=name.replace(/^The /,'the ');return [
+  ['The Coming out of the North',k[0]+' led the riders down out of the cold north with their herds, a hundred winters ago and more, and the grass of the plains was the sea they had dreamed of. Where his horse first drank, the first hall stood.'],
+  ['The White Horse on the Hill','On the hills they found the horses of their forefathers, cut white into the chalk, and '+k[1]+' said: here our fathers rode before us. The white horse running became the sign of '+realm+'.'],
+  ['The Golden Hall',k[2]+' raised the golden hall on the hill, its posts carved with every horse he had loved, its roof gilded, so that a rider on the plain could see it shining from a day away.'],
+  ['The Windsteed','A great horse ran with the wild herds, silver as spray, and no one could come near it. '+k[3]+' walked after it for a summer, and at the end of the summer it let him lay a hand on its neck. The windsteeds carry only those who are sworn.'],
+  ['The Long Ride','When the white realm was hard pressed, '+k[4]+' rode with every horse in the land, three days and three nights across the plains, and came to the field at dawn. The songs of the white realm remember it too.'],
+  ['The Mounds of the Kings',k[5]+' was laid in the first of the great mounds, his horse beside him, and the barrowbloom came up white on it the next spring. It has bloomed on the mounds of the kings ever since.'],
+  ['The War of the Ash','In the days of '+k[6]+' the fire came west out of the wastes, and the riders rode with the elves and the dwarves to the Ashen Gate. Many horses came back without their riders. The war is not over.'],
+  ['The Grass Grows Long',k[7]+' keeps the high seat now. The herds are fewer than they were, and the halls of the forefathers are ash on the hills. But the grass grows long, and the riders still ride.']];}
+function riderSong(s,told){if(!s){showText('A song','The singer has no song tonight.');return;}const K=s.prov.kingdom,T=riderSongs(K.key,K.name),heard=RH.sg.filter(x=>x.startsWith(K.key+':')).map(x=>+x.split(':')[1]);
+  let k=0;while(k<RIDER_SONG_N&&heard.includes(k))k++;const fresh=k<RIDER_SONG_N;if(!fresh)k=Math.floor(Math.random()*RIDER_SONG_N);
+  showText('A song of '+K.name.replace(/^The /,'the ')+' ('+(k+1)+' of '+RIDER_SONG_N+'): '+T[k][0],T[k][1]+(fresh?'\n\nThe song is written into your journal.':''));
+  if(fresh){RH.sg.push(K.key+':'+k);RH.sgn[K.key]=K.name;saveDirty=true;riderGain(1,null);}[392,440,494,440,392,330,392].forEach((fq,i)=>tone(fq,fq*1.005,0.5,0.03,i*0.45,'triangle'));}
+function riderJournal(out){const keys=Object.keys(RH.sgn);out.push('','THE SONGS OF THE RIDERS');
+  if(!keys.length)out.push('No songs of the riders heard yet. Their lay-singers sing them in the golden halls, and the wardens of the mounds.');
+  for(const key of keys){const n=RH.sgn[key],T=riderSongs(key,n),got=RH.sg.filter(x=>x.startsWith(key+':')).map(x=>+x.split(':')[1]);
+    out.push('','The Songs of '+n.replace(/^The /,'')+' ('+got.length+' of '+RIDER_SONG_N+')');for(let k=0;k<RIDER_SONG_N;k++)out.push(got.includes(k)?(k+1)+'. '+T[k][0]+'. '+T[k][1]:(k+1)+'. (not yet heard)');}
+  out.push('','YOUR STANDING WITH THE RIDERS',RH_RANK[riderRank()]+' ('+RH.r+')'+(RH.th?'. Thane of '+RH.th:'')+(RH.rw?'. Races won: '+RH.rw:'')+(RH.sp?'. Bouts won at sparring: '+RH.sp:''));}
+// ---- a horse stone beside the riders' road: the road, and how far to the places at either end
+function useHorseStone(x,y,z){const X=x+OX,Z=z+OZ;let rr=null;for(let d=0;d<=4&&!rr;d++)for(const [a,b] of [[d,0],[-d,0],[0,d],[0,-d]]){rr=realmRoadAt(X+a,Z+b,1);if(rr)break;}
+  if(!rr){showText('A horse stone','A horse is cut in the stone, running. The rest is worn away.');return true;}const P=rr.rd.P,ends=[rr.rd.a,rr.rd.b].map(e=>{let best=null,bd=1e9;for(const s of P.sites){const d=Math.hypot(s.X-e[0],s.Z-e[1])-s.R;if(d<bd){bd=d;best=s;}}return best;}).filter(Boolean);
+  showText('A horse stone of '+P.kingdom.name.replace(/^The /,'the '),'Under the running horse: "'+realmRoadName(rr.rd)+', '+P.name+'." Below, cut deep, '+ends.map(s=>s.name+', '+Math.round(Math.hypot(s.X-X,s.Z-Z)/10)*10+' paces '+dirWord(s.X-X,s.Z-Z)).join('; ')+'.');tone(392,440,0.2,0.05);return true;}
+// a picture stone: what is carved on it
+function usePicStone(x,y,z){const o=fathersNear(x+OX,z+OZ,3);showText(o&&o.name||'A picture stone','Carved in panels down the stone: a sun over the sea; a ship with a great square sail and her oars out; riders with spears, their horses running; and at the foot a horse with no rider. Traces of red and white paint are left in the cuts.');tone(330,392,0.3,0.05);return true;}
+// a bee skep: honey once a day (from a steading's or a farm's; the bees mind)
+let skepDay={};
+function useSkep(x,y,z){const k=(x+OX)+','+y+','+(z+OZ);if(skepDay[k]===dayN){toast('The bees are busy; there is no more honey to take today');return true;}skepDay[k]=dayN;
+  if(SURV()){addItem(447,1);drawBar(true);if(Math.random()<0.25)hurt(1,'stung');}for(let i=0;i<8;i++)spawnP(x+0.5,y+0.8,z+0.5,(Math.random()-.5)*2,Math.random(),(Math.random()-.5)*2,[0.9,0.75,0.2],0.15,0);
+  burst(0.6,'bandpass',220,8,0.1);toast('Honey from the skep');return true;}
+// ---- the war-horn of the riders: a sworn rider blows it and a riding comes (eight horsemen and a marshal, in their lands; the
+// riders' folk near by elsewhere) and rides with the player for two minutes; once in five minutes
+function riderHorn(){if(riderRank()<4){toast('The war-horn of the riders answers only a sworn rider\'s breath');return true;}if(RH.pt-RH.hn<300){toast('The horn\'s call is still in the hills; wait a while before you blow it again');return true;}
+  RH.hn=RH.pt;saveDirty=true;tone(147,196,1.2,0.09);tone(196,247,1.6,0.08,0.9);let n=0;
+  for(const f of foes){if(f.dead||!FOES[f.kind].folk||FOES[f.kind].civ||!riderPeopleOf(f)||folkWrath(f)||f.war||f.host||f.race||Math.hypot(f.x-PL.x,f.z-PL.z)>80)continue;f.aid=MN.pt+120;f.hx=PL.x;f.hz=PL.z;f.st='return';f.t=6;n++;}
+  const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));
+  if(n<4&&P&&P.cult.k==='horse')for(let k=0;k<12&&n<9;k++){const a=PL.yaw+3.14+(k-6)*0.25,d=26,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
+    if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])continue;const f=addFoe(n===0?'hcapt':'hrider',x,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6,riding:1});if(f){f.aid=MN.pt+120;f.hx=PL.x;f.hz=PL.z;n++;}}
+  toast(n?'You blow the war-horn of the riders. A riding comes over the grass to your side.':'You blow the war-horn of the riders, but no rider is near enough to hear.');return true;}
+// ---- coming into a province of the riders: its name, and the riders of its border come to see who rides there (rider-life.js)
+let riderProv='',riderBorderSeen=0; // (the first look only notes where the player is: no riders come to one already within)
+function riderBorder(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ)),key=P&&P.cult.k==='horse'?P.key:'';if(key===riderProv&&riderBorderSeen)return;const was=riderProv,first=!riderBorderSeen;riderProv=key;riderBorderSeen=1;if(!key||!was&&!ready)return;showName(P.name+', '+P.kingdom.name);if(!first)riderBorderRiders(P);}
+// ---- each frame (from foes.js): the clock, the marks, the life; each second the border, the tasks, the forefathers' ruins found
+let riderT=0;
+function riderFrame(dt){if(!ready)return;RH.pt+=dt;riderMarks(dt);riderLife(dt);if((riderT-=dt)>0)return;riderT=1;
+  riderBorder();riderTaskTick();
+  const o=fathersNear(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),-2);if(o&&o.name&&discover('g',o.name))riderGain(2,null);}
+function riderPlaceFound(rp){if(rp.s.prov.cult.k==='horse')riderGain(2,null);}
+// ---- the riders' new folk (models: rider-court-models.js) and where they stand
+Object.assign(FOES,{
+  hking:{n:'King of the Riders',m:'hking',hp:44,dmg:4,reach:2,walk:1.05,run:4.4,sight:20,cd:1.2,wind:0.4,mass:0.6,folk:1,civ:1,drops:[[224,2,4,0.6]],cause:'rider'},
+  hqueen:{n:'Queen of the Riders',m:'hqueen',hp:40,dmg:2,reach:1.8,walk:1.05,run:4.4,sight:20,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,fem:1,drops:[[224,2,4,0.6]],cause:'rider'},
+  hdoor:{n:'Doorwarden of the Hall',m:'hdoor',hp:36,dmg:6,reach:2.8,walk:1.3,run:4.6,sight:24,cd:1.2,wind:0.45,block:0.5,mass:0.45,folk:1,say:'hdoor',drops:[[223,1,2,0.4],[206,1,2,0.5]],cause:'rider'},
+  hcouns:{n:'Counsellor of the King',m:'hcouns',hp:14,dmg:1,reach:1.6,walk:1,run:4,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[204,1,2,0.5]],cause:'rider'},
+  hmaid:{n:'Shieldmaiden of the Riders',m:'hmaid',hp:26,dmg:5,reach:2.8,walk:1.35,run:4.8,sight:26,cd:1.1,wind:0.4,block:0.5,mass:0.55,folk:1,fem:1,say:'hmaid',drops:[[223,1,1,0.3],[206,1,2,0.5]],cause:'rider'},
+  hscop:{n:'Lay-singer',m:'hscop',hp:10,dmg:1,reach:1.6,walk:1.1,run:4.4,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[203,2,6,0.5]],cause:'rider'},
+  hleech:{n:'Horse-healer',m:'hleech',hp:12,dmg:1,reach:1.6,walk:1.1,run:4.4,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,fem:1,heal:1,drops:[[447,1,1,0.4]],cause:'rider'},
+  hdealer:{n:'Horse-dealer',m:'hdealer',hp:14,dmg:1,reach:1.6,walk:1.15,run:4.5,sight:16,cd:1.2,wind:0.4,mass:0.65,folk:1,civ:1,drops:[[203,2,6,0.5]],cause:'rider'},
+  hchild:{n:'Child of the Riders',m:'hchild',hp:6,dmg:0,reach:1,walk:1.3,run:5,sight:14,cd:1.5,wind:0.4,mass:0.9,folk:1,civ:1,tall:1.2,say:'hchild',drops:[],cause:'rider'},
+  hgirl:{n:'Child of the Riders',m:'hgirl',hp:6,dmg:0,reach:1,walk:1.3,run:5,sight:14,cd:1.5,wind:0.4,mass:0.9,folk:1,civ:1,fem:1,tall:1.2,say:'hchild',drops:[],cause:'rider'},
+  hwarden:{n:'Warden of the Mounds',m:'hwarden',hp:14,dmg:1,reach:1.6,walk:1,run:4,sight:16,cd:1.2,wind:0.4,mass:0.7,folk:1,civ:1,drops:[[446,1,1,0.4]],cause:'rider'},
+  hracer:{n:'Rider of the Race',m:'hracer',hp:30,dmg:3,reach:2.4,walk:1.7,run:8,sight:30,cd:1.3,wind:0.4,mass:0.25,tall:3,mount:1,folk:1,civ:1,say:'hracer',drops:[[206,1,2,0.5]],cause:'horse'}});
+Object.assign(FOE_HOME,{h_seat:[['hdoor',1]],h_hdoor:[['hdoor',2]],h_hcourt:[['hthane',1],['hmaid',1],['hwoman',1]],h_scop:[['hman',1]],h_leech:[['hherd',1]],
+  h_cstand:[['hman',2],['hwoman',2],['hchild',1],['hgirl',1]],h_cjudge:[['hman',1]],h_cpav:[['hherd',1],['hman',1]],h_bwarden:[['hman',1]],h_bmourn:[['hwoman',1],['hman',0.6]],h_fair:[['hman',1],['hherd',1]]});
+FOE_HOME.h_street.push(['hchild',0.7],['hgirl',0.5]);FOE_HOME.h_green.push(['hchild',1],['hgirl',0.8]);FOE_HOME.h_drill.push(['hmaid',1]);FOE_HOME.h_barracks.push(['hmaid',0.8]);FOE_HOME.h_gatein.push(['hmaid',0.5]);
+Object.assign(FOLK_N,{seat:[2,2],hdoor:[2,2],hcourt:[3,4],scop:[1,1],leech:[1,1],cstand:[3,5],cjudge:[1,2],cpav:[2,2],bwarden:[1,1],bmourn:[1,2]});
+Object.assign(FOLK_LEAD,{h_hcourt:'hcouns',h_scop:'hscop',h_leech:'hleech',h_cjudge:'hthane',h_bwarden:'hwarden',h_fair:'hdealer'});
+Object.assign(FOLK_SAY,{hking:['Be welcome in {p}, traveller. Sit by the fire.','My fathers came out of the north with nothing but their horses.','The east is burning. When the war-arrow comes, we ride.'],
+  hqueen:['Drink, and be welcome in {p}.','The cup goes round the hall, and every rider drinks from it.','{k} is the grass and the horses. The rest is only wood and gold.'],
+  hdoor:['Lay aside your blade at the door. It will be here when you come out.','No blade is drawn in the golden hall.','Go in, and keep the peace of the hall.'],
+  hcouns:['The king hears all who come with respect.','Words are weighed in this hall more carefully than gold.','I have counselled two kings of {k}. They both listened, mostly.'],
+  hmaid:['I ride with the riders of {p}. Do not look so surprised.','Will you spar with me? I promise to be gentle.','My shield has turned an orc\'s axe. It will turn yours.'],
+  hscop:['Shall I sing of the Long Ride? Or of the windsteed?','A song for a cup of mead, wayfarer.','Every horse in the songs was real once.'],
+  hleech:['Bring me your horse, and I will look it over.','A lame horse is a lost rider.','Steady now. Let me see that hoof.'],
+  hdealer:['Every horse here was foaled on the grass. Choose well.','A grey for speed, a black for strength, a dun for the long road.','You will not find a better horse this side of the mountains.'],
+  hchild:['Are you a rider? Where is your horse?','I am a king of the riders and this is my horse!','My father rides with the marshal!'],
+  hwarden:['Walk softly. The kings sleep under the grass.','The barrowbloom came up white again this spring.','Every king of {k} lies here, but the last.'],
+  hracer:['I will win the race this time. You will see.','The grey is quick, but my mare has heart.','The course is long. Keep something for the last bend.']});
+// ---- the windsteed and the steppe cattle
+Object.assign(ANIMALS,{
+  windsteed:{n:'Windsteed',hp:22,walk:1.6,run:9,shy:9,stride:2.5,amp:0.6,turn:3.4,graze:1,sleeps:0,drops:[],g:[],herd:[1,1],w:0,youngP:0,calls:[30,80],mount:true,gallop:16,steed:1,ride:'Riding the windsteed. Sprint to gallop; no horse runs faster.'},
+  kine:{n:'Steppe Cattle',hp:14,walk:0.9,run:4,shy:4,stride:1.6,amp:0.5,turn:2.4,graze:1,sleeps:1,drops:[[352,2],[354,3]],g:[],herd:[3,6],w:0,youngP:0.3,calls:[20,50]}});
+// ---- The life of the riders (D-090): what the horse-lords do about the player, day and night.
+//
+// The race: once a day at each race course, while the player is near by daylight, four riders in their silks line up at the
+// chalk line and ride two laps of the oval, the stands cheering as they pass; ask the judge, be mounted at the line when the horn
+// sounds, and ride it with them (pass the pennons in order round the track). The feast: every evening the golden hall fills,
+// the boards are crowded, the cup goes round, the lay-singer sings; keep the feast and you are fed, and a boast made before the
+// high seat while the feast is on is a task worth twice as much (and costs a little standing if it is not made good). The horse
+// fair every third day by the paddock at a hill town's gate: dealers and horses for sale. The wild herds of the plains: a herd
+// of wild horses now and then on the riders' lands, and with a few of them a windsteed, which lets only a sworn rider lay a hand
+// on it. The herders at work: horse-herds with their horses, cowherds with steppe cattle, at the farms and steadings by day.
+// Sparring at the drill ring with a shieldmaiden or a marshal: three touches wins. The riders of the border ride up to see who
+// comes into their lands. A horn at dawn from the walls of the hill towns and holds; smoke from the golden hall of an evening;
+// wolves howling far off at night; a low horn for one of the folk fallen near by.
+const TRLH={};
+// the riders' life draws from its own stream, so the shared one (and all that hangs on it elsewhere) runs as before
+const rlRnd=mkRng(90931);
+function riderLandNow(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));return !!(P&&P.cult.k==='horse');}
+function riderSitesNear(m){const X=PL.x+OX,Z=PL.z+OZ;return realmTile(Math.floor(X),Math.floor(Z)).sites.filter(s=>s.prov.cult.k==='horse'&&Math.hypot(s.X-X,s.Z-Z)<s.R+m);}
+const riderAt=(s,u,v,y)=>{const [X,Z]=siteXZ(s,u,v);return [X-OX+0.5,y,Z-OZ+0.5];};
+function riderCheer(at,big){for(let i=0;i<(big?14:7);i++)voice(300+rlRnd()*240,280+rlRnd()*220,0.5,0.012,{form:860+rlRnd()*600,q:1,delay:i*0.06},at);}
+// ---- the race
+let RACE=null;const raceDone=new Set();
+const trackLen=T=>4*T.Ls+2*Math.PI*T.Rr;
+// a point on the oval (u, v in the course's frame), p blocks along it from the chalk line, `lane` out from its middle line
+function trackPt(T,p,lane){const L=trackLen(T);p=((p%L)+L)%L;const R=T.Rr+lane;
+  if(p<T.Ls)return [p,R];p-=T.Ls;if(p<Math.PI*T.Rr){const a=Math.PI/2-p/T.Rr;return [T.Ls+Math.cos(a)*R,Math.sin(a)*R];}
+  p-=Math.PI*T.Rr;if(p<2*T.Ls)return [T.Ls-p,-R];p-=2*T.Ls;if(p<Math.PI*T.Rr){const a=-Math.PI/2-p/T.Rr;return [-T.Ls+Math.cos(a)*R,Math.sin(a)*R];}
+  p-=Math.PI*T.Rr;return [-T.Ls+p,R];}
+function raceFind(){if(!(curT()>0.3&&curT()<0.68))return null;for(const s of riderSitesNear(60))if(s.k==='course'&&!raceDone.has(s.id+':'+dayN))return s;return null;}
+function raceStart(s){raceDone.add(s.id+':'+dayN);const L=siteLayout(s),T=L.track,y=T.y+1,K=[];
+  for(let i=0;i<4;i++){const lane=-1.5+i,[u,v]=trackPt(T,-3,lane),[x,,z]=riderAt(s,u,v,y),f=addFoe('hracer',x,foeStand(x,y+1,z,3)>0?foeStand(x,y+1,z,3):y,z,{site:s,prov:s.prov.key,ci:(i+dayN)%6,st:'idle',t:99});if(!f)continue;
+    f.nm=nameWord('rider',Math.random);f.race=1;f.hold=1;f.holdSp=0;f.lane=lane;f.p=-3;f.sp=7+rlRnd()*1.4;K.push(f);}
+  RACE={s:s,T:T,K:K,laps:2,ph:'muster',t:8,done:[],pl:null,plWant:0,cheerT:0};
+  toast('A race at '+s.name+'! The riders line up at the chalk line.');hint('race');return RACE;}
+function racePlace(f,p){const R=RACE,[u,v]=trackPt(R.T,p,f.lane),[x,,z]=riderAt(R.s,u,v,R.T.y+1),dx=x-f.x,dz=z-f.z;if(Math.hypot(dx,dz)>0.02)f.yaw=f.hd=Math.atan2(dx,dz);f.x=x;f.z=z;const ny=foeStand(x,R.T.y+2,z,3);if(ny>0)f.y=f.gy=ny;}
+function raceFrame(dt){const R=RACE;if(!R)return;if(R.K.some(f=>f.dead||f.foe)){raceEnd(true);return;}const Lp=trackLen(R.T),goal=R.laps*Lp;
+  for(const f of R.K){if(R.ph==='run'&&f.p<goal){f.sp=Math.max(6.2,Math.min(9.2,f.sp+(rlRnd()-0.5)*dt*2));f.p+=f.sp*dt;if(f.p>=goal){f.p=goal;R.done.push({who:f.nm,t:R.time});}}
+    racePlace(f,f.p);f.holdSp=R.ph==='run'&&f.p<goal?f.sp:0;}
+  if(R.ph==='run'){R.time+=dt;if((R.cheerT-=dt)<=0){R.cheerT=3;const [x,,z]=riderAt(R.s,0,-R.T.Rr-6,R.T.y+3);if(R.K.some(f=>Math.hypot(f.x-x,f.z-z)<14))riderCheer([x,R.T.y+3,z],false);}
+    const P=R.pl;if(P&&!P.fin){const [u,v]=trackPt(R.T,P.cp*Lp/8+Lp/8,0),[x,,z]=riderAt(R.s,u,v,0);if(Math.hypot(x-PL.x,z-PL.z)<7&&PL.ride){P.cp++;if(P.cp>=R.laps*8){P.fin=1;R.done.push({who:'you',t:R.time,me:1});}}}}}
+// once a second: the race's order (the line-up, the horn, the finish, the player's place)
+function raceTick(){const R=RACE;if(!R){if(rlRnd()<0.2){const s=raceFind();if(s&&folkCount()<FOLK_CAP+8)raceStart(s);}return;}
+  const s=R.s;if(Math.hypot(s.X-OX-PL.x,s.Z-OZ-PL.z)>s.R+120){raceEnd(true);return;}
+  if(R.ph==='muster'){if((R.t-=1)>0)return;if(R.plWant){const [u,v]=trackPt(R.T,0,0),[x,,z]=riderAt(s,u,v,0);if(PL.ride&&Math.hypot(x-PL.x,z-PL.z)<14){R.pl={cp:0,fin:0};toast('You are at the line with them.');}else toast('You are not mounted at the chalk line; the race goes without you.');}
+    R.ph='run';R.time=0;tone(196,262,0.9,0.08);tone(262,330,1,0.07,0.5);toast('The horn! The riders are away.');riderCheer(riderAt(s,0,-R.T.Rr-6,R.T.y+3),true);return;}
+  if(R.ph==='run'){const all=R.K.every(f=>f.p>=R.laps*trackLen(R.T)),plDone=!R.pl||R.pl.fin||R.time>R.laps*trackLen(R.T)/5.2;if(!all||!plDone)return;
+    const order=R.done.slice().sort((a,b)=>a.t-b.t),i=order.findIndex(q=>q.me);toast('The race at '+s.name+' is run. '+(order[0].me?'You are first past the line!':order[0].who+' wins'+(i>0?'; you came in '+['','second','third','fourth','fifth'][i]:'')+'.'));
+    if(i===0)racePlayerWins();else if(i===1){giveCoin(10);riderGain(3,'Second in the race at '+s.name);}riderCheer(riderAt(s,0,-R.T.Rr-6,R.T.y+3),true);raceEnd(false);}}
+function racePlayerWins(){RH.rw=(RH.rw||0)+1;saveDirty=true;const got=['3 gold'];giveCoin(30);if(SURV()&&!countOf(456)&&RH.rw===1){addItem(456,1);got.push("the Winner's Bridle");}drawBar(true);
+  riderGain(10,'You won the race at '+RACE.s.name);toast('The stands roar. Your prize: '+got.join(' and ')+'.');}
+function raceEnd(abort){const R=RACE;if(!R)return;for(const f of R.K)if(!f.dead){f.hold=0;f.race=0;if(Math.hypot(f.x-PL.x,f.z-PL.z)>40)removeFoe(f);else{f.st='idle';f.t=3;}}RACE=null;}
+function riderRaceAsk(f){if(!RACE)return '"There is no race today. Come back another day, by daylight."';if(RACE.ph!=='muster')return '"They are away already! Wait for the next one."';
+  RACE.plWant=1;return '"Then ride! Be mounted at the chalk line when the horn sounds, and pass every pennon of the course, twice round."';}
+// ---- the feast in the golden hall
+let FEAST=null;const feastDone=new Set();
+function feastTick(){const t=curT(),on=t>0.74&&t<0.96;if(!on){if(FEAST)feastEnd();return;}
+  if(FEAST&&Math.hypot(FEAST.x-PL.x,FEAST.z-PL.z)>130)feastEnd();
+  if(!FEAST){for(const s of riderSitesNear(70)){if(s.k!=='city'||feastDone.has(s.id+':'+dayN))continue;const L=siteLayout(s),H=L.hall;if(!H)continue;feastDone.add(s.id+':'+dayN);
+      const vf=(H.W-1)/2-4,G=[];for(let cb=3;cb<=H.D-7;cb+=2){if(cb%6===0)continue;for(const sd of [1,-1]){if(G.length>=14)break;const [x,y,z]=riderAt(s,H.u0+cb,sd*vf,H.y+1),g=spawnGroup('h_feast',1,x,y,z,0.3,{prov:s.prov.key,site:s})[0];
+        if(g){g.hold=1;g.holdSp=0;g.feast=1;g.x=x;g.z=z;g.yaw=g.hd=sd>0?Math.atan2(...dirUV(s,0,1)):Math.atan2(...dirUV(s,0,-1));G.push(g);}}}
+      const [bx,by,bz]=riderAt(s,H.u1-5,0,H.y+1),bearer=addFoe(s.prov.capital&&riderSeatLead(s)==='hking'?'hqueen':'hwoman',bx,by,bz,{prov:s.prov.key,site:s,st:'idle',t:99});if(bearer){bearer.feast=1;G.push(bearer);}
+      FEAST={s:s,x:bx,y:by,z:bz,G:G,kept:0,told:0,songT:4,bearer:bearer};break;}return;}
+  const inHall=riderHallAt(Math.floor(PL.x+OX),Math.floor(PL.z+OZ))===FEAST.s;
+  if(inHall&&!FEAST.told){FEAST.told=1;toast('The hall of '+FEAST.s.name+' keeps its feast: the boards are full, the hearth roars, and the cup goes round. Make a boast before the high seat, if you dare.');}
+  if(inHall&&FEAST.bearer&&!FEAST.cup&&Math.hypot(FEAST.bearer.x-PL.x,FEAST.bearer.z-PL.z)<7){FEAST.cup=1;toast((FEAST.bearer.kind==='hqueen'?'The queen':'The lady of the hall')+' brings you the cup: "'+RIDER_TONGUE[4][0]+'" ('+RIDER_TONGUE[4][1]+')');tone(523,659,0.4,0.04);}
+  if(inHall){FEAST.kept++;if(FEAST.kept>=20&&RH.fe!==dayN){RH.fe=dayN;saveDirty=true;if(SURV()){food=Math.min(20,food+8);hp=Math.min(20,hp+4);drawStats();}riderGain(3,'You kept the feast in the hall of '+FEAST.s.name);}}}
+function feastFrame(dt){const F=FEAST;if(!F)return;for(const g of F.G)if(!g.dead&&g.feast&&rlRnd()<dt*0.12)g.cheer=foeClock+1;
+  if((F.songT-=dt)<=0){F.songT=22;if(Math.hypot(F.x-PL.x,F.z-PL.z)<40){[392,440,494,523,494,440,392,330,392].forEach((fq,i)=>tone(fq,fq*1.004,0.55,0.022,i*0.5,'triangle',[F.x,F.y+1.5,F.z]));riderCheer([F.x,F.y+1.5,F.z],false);}}}
+function feastEnd(){if(!FEAST)return;for(const g of FEAST.G)if(!g.dead&&!g.gone){g.feast=0;g.hold=0;if(Math.hypot(g.x-PL.x,g.z-PL.z)>40)removeFoe(g);else{g.st='idle';g.t=2;}}FEAST=null;}
+// the way the site's +u and +v point in the world (for facing)
+const dirUV=(s,du,dv)=>{const [a,b]=siteXZ(s,0,0),[c,d]=siteXZ(s,du,dv);return [c-a,d-b];};
+function riderBoast(f){if(!FEAST||FEAST.s!==f.site)return '"Boasts are made at the feast."';if(RH.boast===dayN)return '"You have made your boast tonight. Make it good."';if(RH.q)return '"Make good the task you have before you boast another."';
+  RH.boast=dayN;saveDirty=true;const q=riderTaskGive(f.site,null,0,1);if(!q)return '"Nothing to boast of tonight? Then drink."';riderCheer([PL.x,PL.y+2,PL.z],true);closeInv();return false;}
+// ---- the horse fair: every third day by daylight, dealers and horses by the paddock at a hill town's gate
+let FAIRH=null;
+function horseFairTick(){const on=dayN%3===2&&curT()>0.3&&curT()<0.7;if(!on){if(FAIRH)horseFairEnd();return;}if(FAIRH){if(Math.hypot(FAIRH.x-PL.x,FAIRH.z-PL.z)>140)horseFairEnd();return;}
+  for(const s of riderSitesNear(60)){if(s.k!=='city')continue;const L=siteLayout(s);if(!L.fair)continue;const [x,y,z]=riderAt(s,L.fair.u,L.fair.v,L.fair.y+1),bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])continue;
+    const G=spawnGroup('h_fair',3,x-6,y,z,2,{prov:s.prov.key,site:s,lead:'hdealer'}),A=[];for(let i=0;i<5;i++){const ax=x+(rlRnd()-0.5)*6,az=z+(rlRnd()-0.5)*6,ay=standY(ax,y+1,az);if(ay>0)A.push(addAnimal('horse',ax,ay,az,{pen:{x:x,z:z,r:4},fair:1}));}
+    FAIRH={s:s,x:x,z:z,G:G,A:A};toast('It is the horse fair at '+s.name+'. The dealers have brought their best.');break;}}
+function horseFairEnd(){if(!FAIRH)return;for(const g of FAIRH.G)if(!g.dead&&Math.hypot(g.x-PL.x,g.z-PL.z)>40)removeFoe(g);for(const a of FAIRH.A)if(!a.tame&&!a.dead&&animals.includes(a)&&PL.ride!==a)removeAnimal(a);FAIRH=null;}
+// ---- the wild herds of the plains and the windsteeds
+let herdT=20;
+function wildHerdTick(){if((herdT-=1)>0)return;herdT=50+rlRnd()*50;if(!riderLandNow()&&!['steppe','moors','barrow'].includes(LANDS[colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TRLH).land].k))return;
+  let n=0;for(const a of animals)if(a.kind==='horse'&&!a.tame&&Math.hypot(a.x-PL.x,a.z-PL.z)<120)n++;if(n>=6)return;
+  const a0=rlRnd()*6.283,x=PL.x+Math.cos(a0)*60,z=PL.z+Math.sin(a0)*60,bx=Math.floor(x),bz=Math.floor(z);if(bx<4||bz<4||bx>=W-4||bz>=D-4||!genDone[(bx>>4)+(bz>>4)*NCX])return;
+  const id=1e6+Math.floor(rlRnd()*1e6),k=6+Math.floor(rlRnd()*4),ws=!animals.some(a=>a.kind==='windsteed'&&!a.tame)&&rlRnd()<0.22;
+  for(let i=0;i<k;i++){const ax=x+(rlRnd()-0.5)*10,az=z+(rlRnd()-0.5)*10,ay=standY(ax,ground[bx+W*bz]+3,az);if(ay<0||wetAt(ax,ay,az))continue;addAnimal(i===0&&ws?'windsteed':'horse',ax,ay,az,{herd:id,young:i>2&&rlRnd()<0.3});}
+  if(ws)toast('Far off across the grass a great horse runs with a wild herd, silver as spray.');}
+// a windsteed: only a sworn rider may lay a hand on it (from animalAct)
+function windTame(a){if(riderRank()<4){toast('The windsteed tosses its head and wheels away. It lets no one near but a sworn rider of the riders.');alarm(a,PL.x,PL.z,8);return true;}
+  if(a.tame)return false;a.tame=true;a.uid=a.uid||(Date.now().toString(36)+'w');a.herd=a.id;a.st='idle';a.t=2;saveDirty=true;animalCall(a,false);riderGain(5,'The windsteed lets you lay a hand on its neck. It is yours');return true;}
+// ---- the herders at work: a horse-herd with horses or a cowherd with steppe cattle, at the farms and steadings by day
+const HWORK=new Set();
+function riderWork(){if(ambNight())return;for(const s of riderSitesNear(70)){if((s.k!=='farm'&&s.k!=='village')||HWORK.has(s.id))continue;const q=siteLayout(s).spots.find(p=>p.kind==='field');if(!q)continue;
+    const [X,Z]=siteXZ(s,q.u,q.v),x=X-OX+0.5,z=Z-OZ+0.5,bx=Math.floor(x),bz=Math.floor(z);if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])continue;HWORK.add(s.id);const y=ground[bx+W*bz]+1;
+    const kine=hsh(Math.round(s.X),9927,Math.round(s.Z))<0.5;addFoe('hherd',x,y,z,{prov:s.prov.key,site:s,st:'idle',t:3,spk:'h_field'});
+    for(let i=0;i<4;i++){const ax=x+2+rlRnd()*4,az=z+rlRnd()*4-2,ay=standY(ax,y+1,az);if(ay>0)addAnimal(kine?'kine':'horse',ax,ay,az,{pen:{x:x,z:z,r:8},young:i===3&&rlRnd()<0.5});}}
+  for(const id of [...HWORK]){if(!riderSitesNear(160).some(s=>s.id===id))HWORK.delete(id);}}
+// ---- sparring: three touches wins; the opponent stands and swings, the player's guard turns a swing
+let SPAR=null;
+function riderSpar(f){if(SPAR)return;f.spar={me:0,them:0,t:45,sw:2.2};f.hold=1;f.holdSp=0;SPAR=f;toast('"With the flat of the blade, then. Three touches!" Strike when you can; raise your guard when they swing.');tone(330,440,0.3,0.05);}
+function riderSparHit(f){const S=f.spar;if(!S)return false;S.me++;tone(660,880,0.15,0.05);toast('A touch! ('+S.me+' to '+S.them+')');f.kvx=(f.x-PL.x)*2;f.kvz=(f.z-PL.z)*2;if(S.me>=3)sparEnd(f,1);return true;}
+function sparFrame(dt){const f=SPAR;if(!f)return;const S=f.spar;if(!S||f.dead){SPAR=null;return;}const d=Math.hypot(f.x-PL.x,f.z-PL.z);f.yaw=f.hd=Math.atan2(PL.x-f.x,PL.z-f.z);
+  if(d>12||(S.t-=dt)<=0){sparEnd(f,0);return;}if((S.sw-=dt)>0)return;S.sw=1.8+rlRnd()*0.8;f.cheer=foeClock+0.6;
+  if(d<3.6){const guard=typeof armsGuarding==='function'&&armsGuarding();if(guard){tone(900,700,0.12,0.05);toast('You turn the blade on your guard.');}else{S.them++;tone(220,180,0.2,0.05);toast('Touched! ('+S.me+' to '+S.them+')');if(S.them>=3)sparEnd(f,-1);}}}
+function sparEnd(f,res){f.spar=null;f.hold=0;f.st='idle';f.t=2;SPAR=null;
+  if(res>0){RH.sp=(RH.sp||0)+1;saveDirty=true;riderGain(4,'You won the bout with '+(f.nm||FOES[f.kind].n));}else toast(res<0?'"Three touches. Again tomorrow?"':'"Enough for today. A fair bout."');}
+// ---- the riders of the border: a few horsemen ride up when the player comes into a province of theirs (once in ten minutes)
+let borderT=-1e9;
+function riderBorderRiders(P){if(RH.pt-borderT<600)return;borderT=RH.pt;const a=PL.yaw,x=PL.x-Math.sin(a)*30,z=PL.z-Math.cos(a)*30,bx=Math.floor(x),bz=Math.floor(z);
+  if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])return;let n=0;
+  for(let i=0;i<3;i++){const f=addFoe(i?'hrider':'hcapt',x+i*2,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6});if(f){f.aid=MN.pt+25;f.hx=PL.x;f.hz=PL.z;n++;}}
+  if(n)setTimeout(()=>toast('Riders of '+P.name+' come up at a gallop: "Halt and be known! You ride in '+P.kingdom.name.replace(/^The /,'the ')+'." '+(riderRank()>=2?'They know you, and ride on with a salute.':'They look you over, and let you pass.')),2500);}
+// ---- the dawn horn, the hall's smoke, wolves at night, the passing horn
+let dawnDay=-1,wolfT=40,hsmokeT=0;
+function riderDawn(){const t=curT();if(t<0.24||t>0.3||dawnDay===dayN)return;let s=null,bd=150;for(const q of riderSitesNear(150))if(q.k==='city'||q.k==='fort'){const d=Math.hypot(q.X-OX-PL.x,q.Z-OZ-PL.z);if(d<bd){bd=d;s=q;}}
+  if(!s)return;dawnDay=dayN;const at=riderAt(s,0,0,s.T+8);tone(196,262,1.4,0.06,0,'sawtooth',at);tone(262,294,1.6,0.05,1.2,'sawtooth',at);toast('A horn sounds at dawn from the walls of '+s.name);}
+function riderHallSmoke(dt){if((hsmokeT-=dt)>0)return;hsmokeT=0.3;const t=curT();if(t>0.3&&t<0.7)return;for(const s of riderSitesNear(90)){if(s.k!=='city')continue;const H=siteLayout(s).hall;if(!H)continue;const [x,,z]=riderAt(s,(H.u0+H.u1)/2,0,0);
+  spawnP(x+(rlRnd()-.5),H.y+14+rlRnd(),z+(rlRnd()-.5),(rlRnd()-.5)*0.3,0.8+rlRnd()*0.4,(rlRnd()-.5)*0.3,[0.62,0.6,0.58],3,-0.15);}}
+function riderWolves(dt){if((wolfT-=dt)>0)return;wolfT=60+rlRnd()*80;if(!ambNight())return;const land=LANDS[colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TRLH).land].k;if(!riderLandNow()&&!['steppe','moors','barrow','tundra'].includes(land))return;
+  const a=rlRnd()*6.283,at=[PL.x+Math.cos(a)*90,PL.y+4,PL.z+Math.sin(a)*90];tone(440,620,1.2,0.03,0,'sine',at);tone(620,380,1.8,0.03,1.1,'sine',at);if(rlRnd()<0.5)tone(520,700,1,0.02,2.6,'sine',at);}
+let rpassT=0;
+function riderPassing(f){if(!f||f.war||f.hst||rpassT>foeClock||!FOES[f.kind].folk||!riderPeopleOf(f)||Math.hypot(f.x-PL.x,f.z-PL.z)>50)return;rpassT=foeClock+30;setTimeout(()=>{const at=[f.x,f.y+4,f.z];tone(147,147,2.2,0.07,0,'sawtooth',at);tone(110,110,2.4,0.05,2,'sawtooth',at);},1500);}
+// ---- each frame (from riderFrame)
+let rlifeT=0;
+function riderLife(dt){raceFrame(dt);feastFrame(dt);sparFrame(dt);riderHallSmoke(dt);riderWolves(dt);if((rlifeT-=dt)>0)return;rlifeT=1;
+  raceTick();feastTick();horseFairTick();wildHerdTick();riderWork();riderDawn();}
+Object.assign(FOE_HOME,{h_feast:[['hman',2],['hwoman',2],['hspear',1],['hmaid',0.6],['hthane',0.4]]});
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -16666,7 +17349,7 @@ const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.value
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
   for(const p of places)if(p.n===n&&Math.hypot(p.X-X,p.Z-Z)<160)return false;
-  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':ck==='white'?'m':elderNear(X,Z,2)?'r':oldNear(X,Z,2)?'o':''; // the elves' places are marked with their sign (D-088), the white realm's and the old kingdom's with theirs (D-089)
+  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':ck==='white'?'m':ck==='horse'?'h':elderNear(X,Z,2)?'r':oldNear(X,Z,2)?'o':fathersNear(X,Z,2)&&fathersNear(X,Z,2).name?'g':''; // the elves' places are marked with their sign (D-088), the white realm's and the old kingdom's with theirs (D-089), the riders' and the forefathers' (D-090)
   if(places.length>=PLACE_CAP)places.shift();places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});saveDirty=true;return true;
 }
 // the sign of an elven place on the map (D-088): a star of the high elves in silver and blue, a leaf of the wood elves in gold and
@@ -16674,6 +17357,9 @@ function notePlace(n,X,Z){
 function wmElfSign(g,x,y,e){g.save();g.translate(x,y);g.lineWidth=1.5;
   if(e==='m'||e==='o'){g.fillStyle=e==='o'?'#a8a294':'#f2f2ee';g.strokeStyle=e==='o'?'#4a4640':'#20222c';g.fillRect(-2.5,-4,5,10);g.strokeRect(-2.5,-4,5,10); // a white tower under a star (the old kingdom's broken, grey)
     if(e==='m'){g.beginPath();for(let k=0;k<16;k++){const r=k%2?1.2:(k%4===0?3.6:2.4),a=k/16*6.283-1.5708;g.lineTo(Math.cos(a)*r,-8+Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}else{g.beginPath();g.moveTo(-2.5,-4);g.lineTo(0,-6);g.lineTo(2.5,-5);g.stroke();}g.restore();return;}
+  if(e==='h'){g.fillStyle='#32602e';g.strokeStyle='#d6b054';g.beginPath();g.arc(0,0,6,0,6.283);g.fill();g.stroke();g.fillStyle='#f0eee4'; // the riders: a white horse's head on a round green shield
+    g.beginPath();g.moveTo(-2.5,4);g.lineTo(-1,-1);g.lineTo(-2.5,-3);g.lineTo(1,-4);g.lineTo(3.5,-1);g.lineTo(2,0);g.lineTo(0.5,-1.5);g.lineTo(1.5,4);g.closePath();g.fill();g.restore();return;}
+  if(e==='g'){g.fillStyle='#8c8c86';g.strokeStyle='#3c3c38';for(let k=0;k<7;k++){const a=k/7*6.283;g.fillRect(Math.cos(a)*5-1,Math.sin(a)*5-1.5,2,3);g.strokeRect(Math.cos(a)*5-1,Math.sin(a)*5-1.5,2,3);}g.restore();return;} // the forefathers: a ring of stones
   if(e==='w'){g.fillStyle='#d8b040';g.strokeStyle='#2e5a26';g.beginPath();g.moveTo(0,-7);g.quadraticCurveTo(6,0,0,7);g.quadraticCurveTo(-6,0,0,-7);g.fill();g.stroke();g.beginPath();g.moveTo(0,-6);g.lineTo(0,6);g.stroke();}
   else{g.fillStyle=e==='r'?'#9a9890':'#e6ecf6';g.strokeStyle=e==='r'?'#4a4844':'#1e3060';g.beginPath();for(let k=0;k<12;k++){const r=k%2?2.6:(e==='r'&&k===4?3.5:7),a=k/12*6.283-1.5708;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}
   g.restore();}
@@ -16786,10 +17472,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size],['s','Places of the realms of men',null],['o','Places of the orcs',null],['e','Ruins of the elder elves',null],['k','Ruins of the old kingdom',null],['p','Folk of the realms',()=>Object.keys(FOES).filter(k=>FOES[k].folk).length]];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size],['s','Places of the realms of men',null],['o','Places of the orcs',null],['e','Ruins of the elder elves',null],['k','Ruins of the old kingdom',null],['g','Ruins of the forefathers',null],['p','Folk of the realms',()=>Object.keys(FOES).filter(k=>FOES[k].folk).length]];
 const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below','The Goblin Warrens'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[],s:[],p:[],o:[],e:[],k:[]}};
+const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[],s:[],p:[],o:[],e:[],k:[],g:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -16808,7 +17494,7 @@ function discoverTick(dt){
   discT-=dt;if(discT>0||!ready)return;discT=1;
   if(LWX.k)discover('l',LWX.k);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;
-  {const rp=realmPlace(X,Z);if(rp&&yy>=ground[bx+W*bz]-3&&discover('s',rp.name)){elfPlaceFound(rp);menPlaceFound(rp);}} // a city, castle, village, watchtower or farmstead of the realms (D-060)
+  {const rp=realmPlace(X,Z);if(rp&&yy>=ground[bx+W*bz]-3&&discover('s',rp.name)){elfPlaceFound(rp);menPlaceFound(rp);riderPlaceFound(rp);}} // a city, castle, village, watchtower or farmstead of the realms (D-060)
   {const op=orcNear(X,Z,0);if(op&&yy>=ground[bx+W*bz]-6)discover('o',op.name);} // the orcs' places on the wastes (D-064)
   if(yy<ground[bx+W*bz]-3){discover('y',warrenName(X,yy,Z)?LAYER_BANDS[6]:LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
     if(yy<100&&ruinZone(cx,cz))discover('h',holdOf(cx,cz).name);const m=remainsNear(X,yy,Z);if(m)discover('r',m.name);}
@@ -16828,6 +17514,7 @@ function journalText(){
   emberJournal(out); // the Emberlords the player has seen, and their stories (W7a)
   elfJournal(out); // the histories of the elves read, and the player's standing with them (D-088)
   menJournal(out); // the chronicles of the kings, and the player's renown in the white realm (D-089)
+  riderJournal(out); // the songs of the riders' kings, and the player's standing with the riders (D-090)
   out.push('','DISCOVERIES');
   for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');
@@ -16934,6 +17621,10 @@ function elderTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x
 function oldTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
   for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=oldAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
   if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast(best.name+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
+// The nearest ruin of the forefathers of a kind (D-090), or a rider's cairn
+function fathersTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
+  for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=fathersAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
+  if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast((best.name||'A rider\'s cairn')+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
 // The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
 function gateTour(kind){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
@@ -17179,6 +17870,9 @@ const HINTS={
   elves:()=>'One of the elves. Use ('+ctl('place')+') one of their folk to speak with them: their merchants trade for coin, their healers heal, their loremasters tell the tales of their realm and give tasks, and the throne grants an audience. Every kindness raises your standing with them.',
   men:()=>'One of the folk of the white realm. Use ('+ctl('place')+') them to speak: merchants trade, innkeepers give you a bed and the rumours of the roads, healers heal, smiths mend and forge, the crier tells the news, and captains, lords and the throne give tasks. Notice boards in the markets and on the greens offer more. Your renown grows with every service, and an esquire of great renown may be knighted at a throne.',
   mtask:()=>'A task of the realm. Where it leads, golden sparks rise; when it is done, tell any captain, lord or notice board of the realm (or come back where you were given it). A wagon you guard must be kept within sight.',
+  riders:()=>'The riders of the plains greet you in their own tongue. Merchants trade, the horse-dealer sells horses, the horse-healer tends and shoes your horse, the lay-singer sings the songs of the kings, and marshals, thanes and the high seat give tasks. Strike none of their folk, and draw no blade in the golden hall.',
+  htask:()=>'A task of the riders. Where it leads, green sparks rise; when it is done, tell any marshal, thane or the high seat (or come back where you were given it). The war-arrow must come where it is sent before its time runs out.',
+  race:()=>'A race at the course. Four riders ride two laps of the oval. Ask the judge at the line to ride it with them, be mounted at the chalk line when the horn sounds, and pass every pennon round the track.',
   tourney:()=>'A tourney at the lists. Knights ride against each other down the tilt. An esquire or knight of the realm may ride a bout: ask the herald, mount, take a lance in hand and charge down the near lane when the horn sounds, aiming at your opponent as you pass.',
   etask:()=>'A task of the elves. Where it leads, a mark of sparks rises; when it is done, speak with any of their folk (or come back to where you were given it). Speak with them, too, to give it up.',
   task:()=>'A mark of sparks rises over the place of your task. The war panel shows how long you have; the council (use a lord of the hosts) lets you give it up.',
@@ -17223,7 +17917,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,STARBLOOM,SILVFERN,DAWNLILY,HEARTSEASE,SILVBARK,SILVLEAF,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,MOONSTONE,STARLAMP,ETHRONE,LEAFSTONE,EVOLD,EHULL,ESAIL,ECHEST,EAWNING,NOTICE,INNSIGN,SMITHSIGN,RTAP,WSHIELD,EFFIGY,STGLASS,MILESTONE,HEADSTONE,TILTRAIL,RTHRONE,MAYPOLE,TARHULL,RSAIL,OLDSTONE,OLDCHEST,PAVCLOTH,MYARMS,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,OBANNER,BOLTTHR,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,STARBLOOM,SILVFERN,DAWNLILY,HEARTSEASE,BARROWBLOOM,SILVBARK,SILVLEAF,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,MOONSTONE,STARLAMP,ETHRONE,LEAFSTONE,EVOLD,EHULL,ESAIL,ECHEST,EAWNING,NOTICE,INNSIGN,SMITHSIGN,RTAP,WSHIELD,EFFIGY,STGLASS,MILESTONE,HEADSTONE,TILTRAIL,RTHRONE,MAYPOLE,TARHULL,RSAIL,OLDSTONE,OLDCHEST,PAVCLOTH,MYARMS,HTAP,HSHIELD,HSTONE,HSEAT,PENNON,PICSTONE,FCHEST,FEASTBOARD,STANDSTONE,SKEP,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,OBANNER,BOLTTHR,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -17274,15 +17968,16 @@ for(const b of $('hostbar').querySelectorAll('button'))b.addEventListener('click
 {const sel=$('toursel');for(const f in LAND_FAM){const g=document.createElement('optgroup');g.label=LAND_FAM[f];
     for(const L of LANDS)if(L.fam===f){const o=document.createElement('option');o.value=L.i;o.textContent=L.n+(L.built?'':' (planned)');g.appendChild(o);}sel.appendChild(g);}
   for(const [pre,label,list] of [['r','The realms of men',[['capital','A royal city'],['city','A city'],['fort','A castle'],['village','A village'],['outpost','A watchtower'],['farm','A farmstead'],['lists','The lists'],['hallows','The hallows of the kings'],['port','A port']]],
-    ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm']]],
+    ['h','The riders of the plains',[['capital','The king\'s seat'],['city','A hill town'],['fort','A hold'],['village','A steading'],['outpost','A beacon'],['farm','A horse farm'],['course','A race course'],['barrows','The mounds of the kings']]],
     ['e','The high elves',[['capital','The high seat'],['city','A hidden city'],['fort','A fastness'],['village','A refuge'],['outpost','A watch-spire'],['farm','Gardens of the elves'],['haven','A haven']]],
     ['w','The wood elves',[['capital','The king\'s wood'],['city','A city in the trees'],['fort','The king\'s halls'],['village','A tree-village'],['outpost','A watch-tree'],['farm','A glade']]],
     ['d','The mountain dwarves',[['capital','The high hold'],['city','A mountain hold'],['fort','A bastion'],['village','A mining town'],['outpost','A lookout'],['farm','A mine']]],
     ['g','The gates of the wastes',[['gate','The Ashen Gate'],['ram','The ram at the gate'],['lines','The siege lines'],['camp','The camp of the hosts'],['pavilion','The Pavilion of the Three Banners'],['yard','The orcs\' camp in the yard'],['road','The long road down']]],
     ['x','The ruins of the elder elves',[['tower','A fallen tower'],['colonnade','A broken colonnade'],['shrine','A moonwell shrine'],['theatre','A theatre'],['king','A fallen king'],['arch','A lone arch']]],
-    ['k','The ruins of the old kingdom',[['colossi','The Kings\' Gate'],['crossroads','A crowned king at a crossroads'],['citadel','A fallen city'],['beacon','An old beacon'],['tomb','The tomb of a forgotten king']]]]){
+    ['k','The ruins of the old kingdom',[['colossi','The Kings\' Gate'],['crossroads','A crowned king at a crossroads'],['citadel','A fallen city'],['beacon','An old beacon'],['tomb','The tomb of a forgotten king']]],
+    ['f','The ruins of the forefathers',[['horse','A white horse on a hillside'],['ring','A stone ring'],['ship','A stone ship'],['hall','A burned hall'],['stones','Picture stones'],['cairn','A rider\'s cairn']]]]){
     const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='x:'?elderTour(v.slice(2)):rk==='k:'?oldTour(v.slice(2)):rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='x:'?elderTour(v.slice(2)):rk==='k:'?oldTour(v.slice(2)):rk==='f:'?fathersTour(v.slice(2)):rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});
@@ -17330,7 +18025,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),...warCampSave(),...elfSave(),...menSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),...warCampSave(),...elfSave(),...menSave(),...riderSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -17854,7 +18549,7 @@ function update(dt){
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
-  const speed=(PL.fly?(flyFast?20:11):inLiq&&!PL.ride?2.4:PL.ride?(sprint?ANIMALS[PL.ride.kind].gallop||11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
+  const speed=(PL.fly?(flyFast?20:11):inLiq&&!PL.ride?2.4:PL.ride?(sprint?(ANIMALS[PL.ride.kind].gallop||11)*(PL.ride.shod?1.1:1):8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
   const sy=Math.sin(PL.yaw),cy=Math.cos(PL.yaw);
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;

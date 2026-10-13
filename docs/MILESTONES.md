@@ -391,3 +391,9 @@ The order of E2 to E5 is not yet decided; confirm it before E1 ends.
 - Major: the court and its throne; knighthood and arms; renown and speaking with the folk; the realm's tasks; the tourney at the lists; the ports; the hallows of the kings; the ruins of the old kingdom; caravans on the king's roads; the city's day.
 - Average: the silver tree; houses of healing and heartsease; the inn; beacons lit across a kingdom; the chronicles of the kings; the village fair; stables and the charger; justice (amends and outlawry); the countryside at work; smiths who mend and forge.
 - Minor: milestones that speak; the crier; bells and the passing bell; chimney smoke; children; signs; tapestries and shields in the halls; churchyards; the kings in stone in the great hall; the map's signs, the province's name on arrival, creative tours and the journal's chronicles.
+
+## The riders enlarged (asked by the owner on 2026-10-13: "The other kingdom of men next"; done in 0.53.0, D-090)
+
+- Major: the court in the golden hall; standing with the riders and the oath; the riding at the war-horn; speaking with them in their tongue, and trade; their tasks; the race at the course; the wild herds and the windsteeds; the mounds of the kings; the ruins of the forefathers; the feast in the hall and the boast.
+- Average: the lay-singer and the songs of the kings; shieldmaidens and sparring; the peace of the golden hall; the horse-healer and the farrier; skeps and mead; the riders' gear; the horse fair; herders and steppe cattle; cairns of fallen riders and the passing horn; the riders of the border.
+- Minor: the riders' tongue; horse stones that tell the way; horses named by the herds; children with hobby horses; the dawn horn and the hall's smoke; the riders' tapestries and shields; barrowbloom; map signs, the arrival, the discovery log, the journal and creative tours; wolves at night; the riders' fare.

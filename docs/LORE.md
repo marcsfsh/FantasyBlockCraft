@@ -104,3 +104,45 @@ Drafts for the owner, in `gameplay/men.js` and `world/old-kingdom.js`.
 **What the folk say** (`FOLK_SAY`), among others: the king, "Be welcome in (the city), traveller. The king's peace is on you here." The queen, "The silver tree has not flowered in my lifetime. I hope to see it." The warden of the hallows, "Speak softly. The kings sleep here." The knight of the tourney, "There is no shame in a fall at the tilt; only in not riding." The watchman, "The tenth hour, and all is well." A child, "We're playing at the War of the Ash! I'm the king!"
 
 **The crier's news** (`menNews`): the hosts still before the Ashen Gate, or the gate fallen and the hosts marching on; raiders burning farms on the border and the beacons lit; an Emberlord fallen and the silver tree in flower; the king's orders for the roads and the beacons; jousting at the lists.
+
+## The riders (D-090)
+
+Drafts for the owner, in `gameplay/riders.js` and `world/forefathers.js`.
+
+**Ranks** (`RH_RANK`): Stranger, Guest of the Hall, Hall-friend, Friend of the Riders, Sworn Rider, Thane of the Riders.
+
+**Their tongue** (`RIDER_TONGUE`): words of our own, checked against the blocklist (`89-rider-standing`).
+
+| Saying | Its meaning |
+|---|---|
+| Holdra venn, ferrin | Well met, wayfarer |
+| Grasa ronn thi helda | The grass and the wind keep you |
+| Sela una hrosk | Hearth and horse |
+| Vindr tharn, ferrin | Ride swift, wayfarer |
+| Medra fullan! | A full cup! |
+| Holdu wethra, skildra | Keep the oath, shield-friend |
+| Ernas oldra sweran | The old ones sleep in the mounds |
+| Tharn hrosk, varm heorth | A swift horse and a warm hearth |
+| Vela sunnar | Fair sun to you |
+| Ferrin, saeta oss | Wayfarer, sit with us |
+
+**The songs of the kings** (`riderSongs`): eight for each kingdom, sung by the lay-singers and the wardens of the mounds and kept in the journal; the kings' names are drawn for each kingdom in the riders' naming style.
+
+| Song | What it tells |
+|---|---|
+| The Coming out of the North | The first king led the riders down out of the cold north with their herds; where his horse first drank, the first hall stood. |
+| The White Horse on the Hill | They found the horses of their forefathers cut white into the chalk of the hills; the white horse running became their sign. |
+| The Golden Hall | A king raised the golden hall on the hill, its posts carved with every horse he had loved, its roof gilded so it shone a day's ride away. |
+| The Windsteed | A king walked after a great silver horse of the wild herds for a summer until it let him lay a hand on its neck; the windsteeds carry only the sworn. |
+| The Long Ride | When the white realm was hard pressed, a king rode with every horse in the land three days and nights across the plains and came to the field at dawn. |
+| The Mounds of the Kings | A king was laid in the first of the great mounds with his horse beside him, and the barrowbloom came up white on it the next spring. |
+| The War of the Ash | The fire came west out of the wastes, and the riders rode with the elves and the dwarves to the Ashen Gate. The war is not over. |
+| The Grass Grows Long | The herds are fewer than they were, and the halls of the forefathers are ash on the hills; but the grass grows long, and the riders still ride. |
+
+**The ruins of the forefathers** (`FATHER_NAMES`): The White Horse of (a name), The Stone Ring of (a name), The Stone Ship of (a name), The Burned Hall of (a name), The Picture Stones of (a name). Their hoard chests hold the bracteate, the golden horn and the arm-ring of the forefathers. A picture stone shows a sun over the sea, a ship under a square sail with her oars out, riders with spears, and at its foot a horse with no rider.
+
+**The oath** (`riderOath`): "I will ride when the riders ride, and hold where they hold, and keep faith with the high seat while the grass grows." The hall answers: "Holdu wethra, skildra!"
+
+**Horses the herds name** (`RIDER_HNAMES`): Swiftmane, Windfoot, Grassrunner, Greyflank, Sunmane, Stormhoof, Fleetwind, Duskmane, Brightfoot, Hillrunner.
+
+**What the folk say** (`FOLK_SAY`), among others: the king, "My fathers came out of the north with nothing but their horses." The queen, "The cup goes round the hall, and every rider drinks from it." A doorwarden, "Lay aside your blade at the door. It will be here when you come out." A shieldmaiden, "My shield has turned an orc's axe. It will turn yours." The warden of the mounds, "The barrowbloom came up white again this spring." A child, "I am a king of the riders and this is my horse!"

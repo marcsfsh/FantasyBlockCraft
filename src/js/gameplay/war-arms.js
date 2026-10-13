@@ -59,6 +59,7 @@ function armsSpark(f,ring){const e=eyePos(),d=camDir(),x=e.x+d.x*0.9,y=e.y-0.25,
   if(ring){tone(1900,1700,0.25,0.12);tone(2600,2300,0.4,0.06,0.02);}else burst(0.12,'bandpass',520,2,0.35);}
 // a blow of the player's on a creature, from melee or shot: its harm and push, the folk provoked, the struck turning on the player
 function foeStruck(f,dmg,kx,kz,o){o=o||{};const F=FOES[f.kind];if(f.dead)return;
+  if(f.spar&&riderSparHit(f))return;if(F.folk&&riderHallPeace(f))return; // a sparring touch; the peace of the riders' golden hall (D-090)
   if(F.block&&f.st!=='sleep'&&!o.pierce&&Math.abs(angTo(f.yaw,Math.atan2(PL.x-f.x,PL.z-f.z)))<1.05){dmg*=1-F.block*(o.shot?0.7:1);burst(0.12,'bandpass',2600,4,0.25,0,[f.x,f.y+1.2,f.z]);}
   f.hp-=dmg;f.hurt=1;const kl=Math.hypot(kx,kz)||1,kb=(o.kb||5)*F.mass;f.kvx=kx/kl*kb;f.kvz=kz/kl*kb;if(F.mass>0.3)f.vy=Math.max(f.vy,o.kb>6?3.5:2.5);
   if(o.stagger&&F.mass>0.3&&!F.lord){f.stagger=foeClock+o.stagger;f.atk=0;}

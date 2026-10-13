@@ -55,6 +55,17 @@ item(435,'Heartsease Salve','draught',[150,104,200],{once:true});item(436,'Horn 
 item(437,'Longsword of the Realm','sword',[214,220,230],{tool:'sword',tier:7,dur:1800});item(438,'Plate of the Realm','mail',[60,62,76],{equip:'body',armor:0.58,dur:1400,one:true});
 item(439,'Writ of the Realm','parchment',[232,226,206]);item(440,"Champion's Circlet",'circlet',[214,176,84]);item(441,'Chain of Office','brooch',[214,176,84]);
 item(442,'Crown of an Old King','crown',[196,188,160]);item(443,'Seal of the Old Kings','tablet',[186,176,150]);item(444,'Cup of the Old Kings','goblet',[206,200,180]);item(445,"Groom's Whistle",'whistle',[200,200,206],{once:true});
+// the riders' fare and gear (D-090): mead from the hall, honey from the skeps, oatcakes and smoked meat for the road; the horn bow,
+// quick to draw and loose from the saddle; the riders' long mail; barding for a horse (put on with use, it takes half the harm
+// meant for your steed); the war-horn of the riders, which calls a riding of horsemen to a sworn rider; the oath-ring and the
+// thane's brooch; the winner's bridle from the race; three relics of the forefathers from their ruins; the war-arrow carried to
+// muster the riders; and a halter, for leading a horse that is not yet yours
+item(446,'Mead','wine',[222,170,64]);item(447,'Honey','bowl',[230,170,46]);item(448,'Oatcake','bread',[206,172,112]);item(449,'Smoked Meat','meat',[132,66,46]);
+item(450,'Horn Bow','bow',[116,86,50],{tool:'bow',draw:0.55,dmg:7,v:42,dur:420});item(451,'Mail of the Riders','mail',[126,130,138],{equip:'body',armor:0.5,dur:1100,one:true});
+item(452,'Barding of the Riders','cloak',[50,92,48],{once:true});item(453,'War-horn of the Riders','horn',[226,214,180],{once:true});
+item(454,'Oath-ring','circlet',[214,176,84]);item(455,"Thane's Brooch",'brooch',[214,176,84]);item(456,"Winner's Bridle",'fibre',[214,176,84]);
+item(457,'Bracteate of the Forefathers','coin',[226,186,80]);item(458,'Golden Horn of the Forefathers','horn',[230,190,80]);item(459,'Arm-ring of the Forefathers','circlet',[200,170,90]);
+item(460,'War-arrow','arrow',[176,40,40],{once:true});item(461,'Halter','fibre',[150,110,70],{once:true});
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -174,4 +185,4 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444,456,457,458,459]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)

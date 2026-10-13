@@ -10,7 +10,7 @@ function update(dt){
   const inLiq=liquidAt(PL.x,PL.y+0.3,PL.z)||liquidAt(PL.x,PL.y+1.0,PL.z);
   const sprint=!PL.fly&&(!SURV()||food>6)&&(shift||sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96));
   const flyFast=sprintLatch||PAD.sprint||(TOUCH&&Math.hypot(tch.jx,tch.jy)>0.96);
-  const speed=(PL.fly?(flyFast?20:11):inLiq&&!PL.ride?2.4:PL.ride?(sprint?ANIMALS[PL.ride.kind].gallop||11:8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
+  const speed=(PL.fly?(flyFast?20:11):inLiq&&!PL.ride?2.4:PL.ride?(sprint?(ANIMALS[PL.ride.kind].gallop||11)*(PL.ride.shod?1.1:1):8):sprint?5.7:4.3)*(PL.fly||PL.ride?1:armsSlow()); // on horseback faster (E1); slower behind a raised shield or with a bow drawn (W8a)
   const sy=Math.sin(PL.yaw),cy=Math.cos(PL.yaw);
   let wx=-sy*fwd+cy*str,wz=-cy*fwd-sy*str;const wl=Math.hypot(wx,wz);if(wl>1){wx/=wl;wz/=wl;}
   const onIce=PL.ground&&get(Math.floor(PL.x),Math.floor(PL.y-0.05),Math.floor(PL.z))===ICE;

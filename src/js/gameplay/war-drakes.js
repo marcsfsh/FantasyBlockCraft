@@ -33,8 +33,9 @@ function drakeStep(f,dt){
   if(f.br>0){f.br-=dt;if(f.y-gy<12)drakeBreath(f,dt);} // (its fire reaches the ground only from low)
   if((f.wbT=(f.wbT||0)-dt)<=0){f.wbT=f.st==='dive'?1.2:0.55;const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<70&&foeHear([f.x,f.y,f.z]))burst(0.35,'lowpass',140,0.9,0.22*(1-d/70),0,[f.x,f.y,f.z]);}}
 // a dive: at one of the other side under it (or the player, in survival, three times in ten when near)
-function drakeDive(f,cx,cz){let best=null,bd=1e9;
-  foeNear(cx,cz,60,g=>{if(g.dead||g.wnd||g.cap||FOES[g.kind].fly||Math.hypot(g.x-cx,g.z-cz)>60)return;const d=Math.hypot(g.x-f.x,g.z-f.z)+Math.random()*20;if(d<bd){bd=d;best=g;}},0); // (the hosts' soldiers)
+function drakeDive(f,cx,cz){let best=null,bd=1e9,bestC=null,bdC=1e9;
+  foeNear(cx,cz,60,g=>{if(g.dead||g.wnd||g.cap||FOES[g.kind].fly||Math.hypot(g.x-cx,g.z-cz)>60)return;const d=Math.hypot(g.x-f.x,g.z-f.z)+Math.random()*20;if(FOES[g.kind].civ){if(d<bdC){bdC=d;bestC=g;}}else if(d<bd){bd=d;best=g;}},0); // (the hosts' soldiers; townsfolk only where no soldier is near)
+  if(!best)best=bestC;
   if(foeTarget()&&Math.hypot(PL.x-cx,PL.z-cz)<60&&(!best||Math.random()<0.3)){f.dvP=1;f.foe=null;}else if(best){f.dvP=0;f.foe=best;}else return;
   f.st='dive';f.t=9;f.br=0;}
 // its fire: along the way it flies, down to the ground before it; the other side's soldiers there and the player are burned

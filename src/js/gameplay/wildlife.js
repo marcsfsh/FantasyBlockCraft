@@ -177,6 +177,8 @@ function animalCall(a,hurt){
     case 'hen':if(a.young){for(let i=0;i<3;i++)voice(2300,2900,0.07,0.04,{type:'sine',form:2600,q:1,delay:i*0.16},at);}else for(let i=0;i<(hurt?2:4);i++)voice(540*p,420*p,0.07,0.07,{type:'square',form:1100,q:2,delay:i*(hurt?0.09:0.14)},at);break;
     case 'ehorse':case 'charger':case 'horse':voice(1150*yg*p,520*yg*p,hurt?0.5:1.1,0.07,{vib:8,vd:0.05,form:1400,q:1},at);if(!hurt)burst(0.22,'lowpass',520,0.7,0.09,1.2,at);break;
     case 'ox':voice(150*p,120*p,hurt?0.5:1.3,0.09,{vib:4,vd:0.05,form:420,q:1.2},at);break; // the ox's low call (D-089)
+    case 'windsteed':voice(1320*p,560*p,hurt?0.5:1.4,0.07,{vib:9,vd:0.06,form:1600,q:1},at);voice(700*p,420*p,0.5,0.04,{form:1100,q:1,delay:0.9},at);if(!hurt)burst(0.3,'lowpass',620,0.7,0.08,1.5,at);break; // the windsteed's high, ringing neigh (D-090)
+    case 'kine':voice(180*yg*p,130*yg*p,hurt?0.5:1.5,0.09,{vib:3,vd:0.05,form:460,q:1.1},at);break; // the steppe cattle's lowing (D-090)
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
     case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
@@ -206,6 +208,7 @@ function animalAct(btn){
   if(A.shear&&held===321){if(a.young){toast('A lamb has no fleece to take yet');return true;}if(a.shorn){toast('Its fleece has not grown back yet');return true;}const wl=AM_KINDS.sheep.coats[a.ci][0].black?WOOLK:A.shear;a.shorn=true;a.cool=300;addItem(wl,2);wearHeld(1);drawBar(true);toast('2 '+nameOf(wl));sfxBlock(WOOLW,false,a.x,a.y,a.z);swing=1;return true;}
   if(A.milk&&(!held||!SURV())){if(a.young){toast('Only a grown goat gives milk');return true;}if(a.cool>0){toast('The goat has no more milk for now');return true;}a.cool=240;addItem(360,1);drawBar(true);toast("Goat's Milk");return true;}
   if(A.egg&&(!held||!SURV())){if(a.young){toast('A chick lays no eggs');return true;}if(a.cool>0){toast('No egg yet');return true;}a.cool=300;addItem(355,1);drawBar(true);toast('An egg');return true;}
+  if(a.kind==='windsteed'&&!a.tame&&windTame(a))return true; // only a sworn rider may lay a hand on a windsteed (D-090)
   if(A.mount){if(a.young){toast('A foal is too small to ride');return true;}if(PL.ride===a)dismount();else mount(a);return true;}
   if(A.tame&&!a.tame){if(A.tame.includes(held)){const q=inv[sel];if(SURV()){q.c--;if(!q.c)inv[sel]=null;}drawBar(true);a.tame=true;a.uid=a.uid||(Date.now().toString(36)+a.id);a.st='follow';a.t=1;a.herd=a.id;saveDirty=true;animalCall(a,false);toast('The '+A.n.toLowerCase().replace('stray ','').replace('wild ','')+' will follow you now');tone(520,780,0.2,0.06,0,null,[a.x,a.y+0.6,a.z]);}
     else toast('The '+A.n.toLowerCase()+' sniffs your hand. '+(a.kind==='hound'?'It would like some meat.':'It would like some crops.'));return true;}
@@ -222,15 +225,15 @@ function animalStrike(a,dmg,kx,kz){const A=ANIMALS[a.kind],kd=Math.hypot(kx,kz)|
     for(const [id,n] of A.drops){const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));}drawBar(true);toast(A.drops.length?'You took '+A.drops.map(([id,n])=>n+' '+nameOf(id)).join(' and '):'The '+A.n.toLowerCase()+' is gone');if(PL.ride===a)dismount();a.dead=0.001;a.st='dead';a.sp=0;}}
 function confirmHunt(a){if(a.warned)return true;a.warned=true;a.hp=1;toast('This is your '+ANIMALS[a.kind].n.toLowerCase().replace('stray ','').replace('wild ','')+'. Strike again to part with it.');return false;}
 // ---- Riding (Q67): a wild horse can be ridden at once; it is faster and jumps higher. Use it again to get off.
-function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=ANIMALS[a.kind].boat?a.y:Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast(ANIMALS[a.kind].ride||'Riding. Sprint to gallop; use the horse again to get off.');animalCall(a,false);}
+function mount(a){PL.ride=a;a.st='walk';a.sl=a.si=0;PL.x=a.x;PL.z=a.z;PL.y=ANIMALS[a.kind].boat?a.y:Math.max(PL.y,a.y);PL.yaw=a.yaw+Math.PI;toast((a.nm?'Riding '+a.nm+'. ':'')+(ANIMALS[a.kind].ride||'Riding. Sprint to gallop; use the horse again to get off.'));animalCall(a,false);}
 function dismount(){const a=PL.ride;PL.ride=null;if(a){a.st='idle';a.t=3;a.sp=0;if(ANIMALS[a.kind].boat){boatLeave(a);return;}a.y=a.gy=Math.max(1,standY(a.x,a.y,a.z));}} // (out of a swan boat onto the shore: D-088)
 // ---- The mule's pack: a container like a chest, kept under the mule's own key with the other containers (cs)
 function openPack(a){if(!SURV()){toast('Packs open in survival');return;}const k='mule:'+a.uid;if(!boxes.has(k))boxes.set(k,new Array(BOX_SLOTS).fill(null));box={k:k,x:Math.floor(a.x),y:Math.floor(a.y),z:Math.floor(a.z)};saveDirty=true;openInv();$('invtitle').textContent="The mule's pack";}
 // ---- Saved with the world: the animals you have befriended (world coordinates)
-const wildRec=a=>[a.kind,+(a.x+OX).toFixed(1),+a.y.toFixed(1),+(a.z+OZ).toFixed(1),a.stay?1:0,a.uid,a.ci,a.young?1:0];
+const wildRec=a=>[a.kind,+(a.x+OX).toFixed(1),+a.y.toFixed(1),+(a.z+OZ).toFixed(1),a.stay?1:0,a.uid,a.ci,a.young?1:0,(a.shod?1:0)|(a.bard?2:0),a.nm||'']; // (a horse shod or barded by the riders, and its name: D-090)
 const wildSave=()=>({an:animals.filter(a=>a.tame&&!a.dead).map(wildRec).concat(wildPending)});
 let wildPending=saved&&Array.isArray(saved.an)?saved.an:[];
 // befriended animals come back once the world around them is loaded
-function wildRestore(){if(!wildPending.length||!ready)return;const keep=[];for(const r of wildPending){const [k,X,Y,Z,st,uid,ci,yg]=r,x=X-OX,z=Z-OZ;if(!ANIMALS[k])continue;
+function wildRestore(){if(!wildPending.length||!ready)return;const keep=[];for(const r of wildPending){const [k,X,Y,Z,st,uid,ci,yg,hb,nm]=r,x=X-OX,z=Z-OZ;if(!ANIMALS[k])continue;
   if(x<0||z<0||x>=W||z>=D||!genDone[(Math.floor(x)>>4)+(Math.floor(z)>>4)*NCX]){keep.push(r);continue;}const y=standY(x,Y,z);
-  addAnimal(k,x,y>0?y:Y,z,{tame:true,stay:!!st,uid:String(uid||''),ci:ci|0,young:!!yg,st:'idle',t:1});}wildPending=keep;}
+  const a=addAnimal(k,x,y>0?y:Y,z,{tame:true,stay:!!st,uid:String(uid||''),ci:ci|0,young:!!yg,st:'idle',t:1});if(a){if(hb&1)a.shod=1;if(hb&2)a.bard=1;if(nm)a.nm=String(nm).slice(0,24);}}wildPending=keep;}

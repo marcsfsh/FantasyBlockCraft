@@ -33,13 +33,13 @@ assert(clash===0,'the sites keep apart, and no ruin, landmark or small structure
 // ---- the nearest hill town: its palisade and towers, longhouses under thatch and turf, the golden hall; no heather in its lanes
 const towns=ps.flatMap(P=>P.sites.filter(s=>s.k==='city')).sort((a,b)=>Math.hypot(a.X,a.Z)-Math.hypot(b.X,b.Z)),C=towns[0];
 gen(C.X,C.Z);
-{const cnt={},ids=[GTHATCH,TURF,WATTLE,CTIMBER,FSTONE,STAKES,LOG,HORNS,HEARTH,GILDED,SHIELDS,TAPESTRY,HBANNER,FENCE,LANTERN,DLANTERN,HEATHER,WSBRICK];for(const id of ids)cnt[id]=0;
+{const cnt={},ids=[GTHATCH,TURF,WATTLE,CTIMBER,FSTONE,STAKES,LOG,HORNS,HEARTH,GILDED,SHIELDS,HTAP,HBANNER,FENCE,LANTERN,DLANTERN,HEATHER,WSBRICK];for(const id of ids)cnt[id]=0;
   for(let X=C.X-C.R-4;X<=C.X+C.R+4;X++)for(let Z=C.Z-C.R-4;Z<=C.Z+C.R+4;Z++){const inner=Math.hypot(X-C.X,Z-C.Z)<C.R-3;for(let y=C.T-6;y<C.T+60;y++){const id=at(X,y,Z);if(cnt[id]!==undefined&&(id!==HEATHER||inner))cnt[id]++;}}
   const [gx,gz]=siteXZ(C,-C.R+1,0),gateOpen=[1,2,3,4,5].every(dy=>at(gx,C.T+dy,gz)===AIR),houses=siteLayout(C).parts.filter(p=>p.k==='house').length;
   info(C.name,'('+(C.prov.capital?'the king\'s seat of ':'a hill town of ')+C.prov.kingdom.name+', '+C.R*2+' across, '+C.tiers+' terraces, '+houses+' longhouses):',ids.map(id=>nameOf(id)+' '+cnt[id]).join(', '),'; gate open',gateOpen);
   const A=C.R*C.R;
   assert(cnt[LOG]>1.2*A&&cnt[STAKES]>2*C.R&&cnt[FSTONE]>A&&cnt[GTHATCH]+cnt[TURF]>A&&cnt[WATTLE]>0.12*A,'the town stands in a palisade of logs on fieldstone, its longhouses of wattle under thatch and turf');
-  assert(houses>=10&&cnt[GILDED]>40&&cnt[HORNS]>=houses&&cnt[HEARTH]>=houses&&cnt[TAPESTRY]>0&&cnt[SHIELDS]>0&&cnt[HBANNER]>8,'longhouses with hearths and horse heads on their gables, the golden hall gilded and hung with tapestries and shields');
+  assert(houses>=10&&cnt[GILDED]>40&&cnt[HORNS]>=houses&&cnt[HEARTH]>=houses&&cnt[HTAP]>0&&cnt[SHIELDS]>0&&cnt[HBANNER]>8,'longhouses with hearths and horse heads on their gables, the golden hall gilded and hung with tapestries and shields');
   assert(cnt[LANTERN]>0.008*A&&cnt[DLANTERN]===0&&cnt[HEATHER]===0&&cnt[WSBRICK]===0,'its lamps are lit; no heather grows in it and none of the white realm\'s stone is in it');
   assert(gateOpen,'its gate stands open');
   assert(surfaceName(C.X,C.T+1,C.Z)===C.name&&realmPlace(C.X,C.Z).line.includes(C.prov.kingdom.name.replace(/^The /,'')),'standing in it, the readout names the town and its kingdom');}

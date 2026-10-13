@@ -92,7 +92,7 @@ function raidLiveTick(w,B,r,s,L,d){const live=L.m.filter(f=>!f.dead&&!f.gone),ag
   // the beacons on the province's watchtowers, from hill to hill
   if(!L.beac&&age>=6){L.beac=1;let n=0;for(const e of B.S){const o=e.s;if(o.prov!==s.prov||o.k!=='outpost')continue;const x=Math.round(o.X)-OX,z=Math.round(o.Z)-OZ;if(x<1||z<1||x>=W-1||z>=D-1||!genDone[(x>>4)+(z>>4)*NCX])continue;
       let y=Math.min(H-3,o.T+48);while(y>o.T-2&&!SOLID[get(x,y,z)])y--;if(get(x,y+1,z)!==AIR)continue;setBlock(x,y+1,z,BRAZIER,true);w.rd.bk.push([x+OX,y+1,z+OZ,Math.round(warPlay)]);n++;}
-    toast(n?'The beacons are lit on the heights of '+s.prov.name:'The alarm is raised in '+s.prov.name);if(s.prov.cult.k==='white'){const o=s.prov.sites.find(q=>q.k==='outpost');if(o)menBeaconChain(o);}} // (and the white realm's beacons answer, one after another, across the kingdom: D-089)
+    toast(n?'The beacons are lit on the heights of '+s.prov.name:'The alarm is raised in '+s.prov.name);if(s.prov.cult.k==='white'||s.prov.cult.k==='horse'){const o=s.prov.sites.find(q=>q.k==='outpost');if(o)menBeaconChain(o);}} // (and the white realm's beacons answer, one after another, across the kingdom: D-089)
   // the realm rides out: from its city or castle (the nearest), its soldiers and knights, along the way to the raid
   if(!L.rel&&age>=25){L.rel=1;let src=null,sd=1e9;for(const e of B.S){const o=e.s;if(o.prov!==s.prov||o===s||o.k!=='city'&&o.k!=='fort')continue;const q=Math.hypot(o.X-s.X,o.Z-s.Z);if(q<sd){sd=q;src=o;}}
     const a=src?sitePort(src):[s.X-(B.cx-s.X)*0.4,s.Z-(B.cz-s.Z)*0.4],route=raidRoute(a,[s.X,s.Z]),o={prov:s.prov.key,site:src||s,lead:FOLK_LEAD[fp+'host']||null},k=warSz();
@@ -121,8 +121,8 @@ function raidBorderTick(){for(const f of foes)if((f.ref||f.roam)&&!f.dead&&(Math
   const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),pv=realmOfColumn(X,Z);if(!pv)return;let w=null,B=null;
   for(const v of WARS.values()){const b=RAID_B.get(v.id);if(b&&b.done&&b.keys.has(pv.key)){w=v;B=b;break;}}if(!w)return;
   if(warAuto('r')){raidRoamT-=1;raidAmbT-=1;}const C=pv.cult,fp=C.fp; // (stopped from the war console, they come only when called: D-077)
-  if(raidRoamT<=0){raidRoamT=240+Math.random()*150;const dx=B.cx-X,dz=B.cz-Z,dl=Math.hypot(dx,dz)||1,ux=dx/dl,uz=dz/dl,sd=Math.random()<0.5?1:-1;
-    const a=[X+ux*90-uz*sd*60,Z+uz*90+ux*sd*60],b=[X-ux*40+uz*sd*120,Z-uz*40-ux*sd*120],g=warParty({id:w.id},'owolf',Math.round(3+2*Math.random()),raidRoute(a,b));
+  if(raidRoamT<=0){raidRoamT=240+Math.random()*150;const dx=B.cx-X,dz=B.cz-Z,dl=Math.hypot(dx,dz)||1,ux=dx/dl,uz=dz/dl,sd0=Math.random()<0.5?1:-1,n=Math.round(3+2*Math.random());let g=null;
+    for(const sd of [sd0,-sd0]){const a=[X+ux*90-uz*sd*60,Z+uz*90+ux*sd*60],b=[X-ux*40+uz*sd*120,Z-uz*40-ux*sd*120];g=warParty({id:w.id},'owolf',n,raidRoute(a,b));if(g)break;} // (the other flank if the first falls outside the loaded world)
     if(g){for(const f of g){f.roam=1;f.war=null;}toast('Wolf riders of the wastes roam the borderlands');foeCall(g[0],'alert');}}
   if(raidAmbT<=0&&realmRoadAt(X,Z,1)){raidAmbT=300+Math.random()*180;const R=realmRoadAt(X,Z,1).rd,ex=(R.b[0]-R.a[0])/(R.len||1),ez=(R.b[1]-R.a[1])/(R.len||1),dir=Math.random()<0.5?1:-1;
     const st=(x,z)=>x<4||z<4||x>=W-4||z>=D-4?-1:foeStand(x,ground[Math.floor(x)+W*Math.floor(z)]+2,z,2),tx=PL.x+ex*dir*20,tz=PL.z+ez*dir*20,ty=st(tx,tz);if(ty<0)return;

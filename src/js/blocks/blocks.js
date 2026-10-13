@@ -263,6 +263,17 @@ def(MILESTONE,'Milestone',[270,270,385]);def(HEARTSEASE,'Heartsease',[386,386,38
 def(RTHRONE,'Throne of the Realm',[389,389,390]);def(MAYPOLE,'Maypole',[392,392,391],{snd:'wood'});def(TARHULL,'Tarred Planks',[393,393,393],{snd:'wood'});def(RSAIL,'Sail of the Realm',[394,394,394],{snd:'soft'});
 def(OLDSTONE,'Weathered Whitestone',[395,395,395]);def(OLDCHEST,'Chest of the Old Kings',[397,397,396]);def(PAVCLOTH,'Pavilion Cloth',[398,398,398],{snd:'soft'});def(MYARMS,'Banner of Your Arms',[399,399,399],HANG);
 setH([NOTICE,TILTRAIL,MAYPOLE,TARHULL,SILVBARK],2,'wood');setH([SILVLEAF],0.4,'soft');setH([INNSIGN,SMITHSIGN,WSHIELD],0.6,'wood');setH([RTAP,MYARMS],0,'soft');setH([RSAIL,PAVCLOTH],0.8,'soft');
+// The riders enlarged (D-090): barrowbloom, small and white, on the kings' mounds and the cairns of the fallen; the bee skep of
+// coiled straw; the tapestry of the riders (the white horse on green under a gilt border) and their round shield, hung; the
+// horse stone that tells the way beside the riders' roads; the high seat of the riders, carved and gilded; the race pennon of
+// green and gold on its pole; the picture stone of the forefathers, carved with ships, horses and riders; the hoard chest of
+// the forefathers, dark oak in knotwork iron; the feasting board, laid; and the grey standing stone of the old rings
+const BARROWBLOOM=1212,SKEP=1213,HTAP=1214,HSHIELD=1215,HSTONE=1216,HSEAT=1217,PENNON=1218,PICSTONE=1219,FCHEST=1220,FEASTBOARD=1221,STANDSTONE=1222;
+def(BARROWBLOOM,'Barrowbloom',[400,400,400],PLANT);def(SKEP,'Bee Skep',[401,9,402],{snd:'soft'});def(HTAP,'Tapestry of the Riders',[403,403,403],HANG);
+def(HSHIELD,'Shield of the Riders',[404,404,404],Object.assign({},HANG,{snd:'wood'}));def(HSTONE,'Horse Stone',[405,294,406]);def(HSEAT,'High Seat of the Riders',[407,292,408],{snd:'wood'});
+def(PENNON,'Race Pennon',[409,409,409],Object.assign({},HANG,{snd:'wood'}));def(PICSTONE,'Picture Stone',[410,410,411]);def(FCHEST,'Hoard Chest of the Forefathers',[412,412,413],{snd:'wood'});
+def(FEASTBOARD,'Feasting Board',[292,292,414],{snd:'wood'});def(STANDSTONE,'Standing Stone',[415,415,416]);
+setH([BARROWBLOOM,HTAP],0,'soft');setH([SKEP],0.6,'soft');setH([HSHIELD,PENNON],0.6,'wood');setH([HSEAT,FEASTBOARD,FCHEST],2,'wood');setH([HSTONE,PICSTONE,STANDSTONE],4,'stone',1);
 setH([EFFIGY,MILESTONE,HEADSTONE,RTHRONE,OLDSTONE],4,'stone',1);setH([STGLASS],0.5,'misc');setH([HEARTSEASE],0,'soft');setH([OLDCHEST],2.5,'stone');
 setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');

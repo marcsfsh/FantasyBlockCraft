@@ -5,6 +5,29 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.53.0 (2026-10-13): the riders enlarged
+
+Saves from 0.52.0 do not carry over (save key v43).
+
+### Game
+- **The court in the golden hall:** the high seat of the riders stands on its dais under their banners, their tapestries on the walls and feasting boards down either side of the long hearth. At a king's seat the king or the queen sits there, doorwardens in gilded helms at the doors and about the seat, the king's counsellor and shieldmaidens in the court; in a lesser hill town a thane. Ask for an audience.
+- **Standing and the oath:** the riders remember what you do: Stranger, Guest of the Hall, Hall-friend, Friend of the Riders; then a friend of great standing kneels at a high seat and swears the oath, and is a Sworn Rider, given the oath-ring, the war-horn, the riders' mail and barding. A sworn rider of great standing is made a Thane by the king or the queen and given a steading.
+- **The riding:** a sworn rider's war-horn calls a riding of horsemen and a marshal over the grass, who ride with you a while.
+- **Speak with them** (use one of their folk): they greet you in their own tongue and say what it means. Stall-keepers trade, the horse-dealer sells horses of four breeds, the horse-healer tends and shoes your horse (it gallops faster) and sells barding (its rider takes less harm), smiths mend and forge, the herds give your horse a name, the lay-singer sings the songs of the kings.
+- **Tasks of the riders:** carry the war-arrow to another of their places before time runs out, find a strayed horse and lead it home, a bounty on the wastes' creatures, supplies, venison, a relic of the forefathers.
+- **The race:** a race course by most hill towns, a track round a long oval between rails and pennons, the chalk line between carved posts, a stand and a stable. Once a day by daylight four riders in their silks ride two laps. Ask the judge, be mounted at the line when the horn sounds, pass every pennon, and win three gold and the winner's bridle.
+- **The wild herds and the windsteeds:** wild herds run on the riders' lands, and now and then a windsteed with them, a great silver horse that lets only a sworn rider lay a hand on it. No horse runs faster.
+- **The mounds of the kings** by each king's seat: a field ringed by a turf bank, great mounds along the way of the kings with a horse stone at the foot of each, barrowbloom white on them, and the founder's mound with its passage of standing stones open to his chamber.
+- **The ruins of the forefathers** on the open lands outside the realms: white horses cut into the chalk of the hillsides, stone rings, stone ships, burned halls and picture stones, each with a hoard chest and a name. Cairns of fallen riders on the riders' own plains.
+- **The feast:** every evening the golden hall fills, the cup goes round and the lay-singer sings. Keep the feast and you are fed; make a boast before the high seat and its task pays double (and an empty boast costs you).
+- **More of their life:** the horse fair every third day; herders with horses and steppe cattle; sparring with a shieldmaiden or a marshal; riders of the border meeting you; no blade drawn in the golden hall; a horn at dawn; smoke over the hall at evening; wolves howling far off at night; a low horn for one of their folk fallen; the riders' beacons answer one another across a kingdom; bee skeps and honey; the songs of the kings in the journal; horse stones that tell the way.
+- **Small things:** their places marked on the map with a white horse's head on green, the forefathers' ruins with a ring of stones; the province's name as you come into it; the forefathers' ruins in the discovery log; in creative, tours to the course, the mounds and each kind of the forefathers' ruins.
+- **New fare and gear:** mead, honey, oatcakes, smoked meat, the horn bow, the riders' mail, barding, the war-horn, the war-arrow, a halter, and three relics of the forefathers. New blocks under Building and Wood and plants.
+- **Fixes:** a diving drake takes a soldier before one of the townsfolk; the wolf riders roaming the borderlands no longer fail to come when one flank lies beyond the loaded world.
+
+### Tooling
+- New tests: `88-rider-places`, `89-rider-standing`, `90-rider-court`, `91-rider-life`.
+
 ## 0.52.0 (2026-10-13): the white realm enlarged
 
 Saves from 0.51.0 do not carry over (save key v42).

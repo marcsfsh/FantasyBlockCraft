@@ -38,7 +38,9 @@ RB.gatebeam=(s,p,u,v,X,Z)=>{const g=p.y,top=g+p.H,av=Math.abs(v);RBS(X,Z,top-3,t
 // The king's golden hall (a thane's hall in a lesser town): on a fieldstone terrace with steps before it, a long hall (p.W across,
 // p.D deep, p.sh to its eaves) of carved and gilded oak under a steep roof of golden thatch, its ridge gilded, crossed horse heads
 // on its gables; a porch on carved pillars before its doors; within, two rows of carved pillars under the open roof, a long hearth
-// down the middle, tapestries and shields on the walls, lamps, and at the far end a dais with the high seat under the banners
+// down the middle, tapestries and shields on the walls, lamps, and at the far end a dais with the high seat under the banners;
+// since D-090 the riders' own tapestries, the high seat of carved and gilded oak, and feasting boards down either side of the
+// hearth between the pillars (gaps every six for passing)
 RB.ghall=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),tm=2,pr=3,W=p.W,D=p.D,TW=W+2*tm,TD=D+pr+2*tm,ca=a-tm,cb=b-tm-pr,g=p.y,fl=g+2,eave=fl+p.sh,mid=(W-1)/2;
   if(a<0||b<0||a>=TW||b>=TD)return;const inA=ca>=0&&ca<W,core=inA&&cb>=0&&cb<D,porch=inA&&cb>=-pr&&cb<0,dm=Math.abs(ca-mid);
   // the steps up to the terrace, the terrace, its low wall and lamps
@@ -59,9 +61,10 @@ RB.ghall=(s,p,u,v,X,Z)=>{const [a,b]=partAB(p,u,v),tm=2,pr=3,W=p.W,D=p.D,TW=W+2*
         if(dais&&dy===1)id=PLANKS;
         if((ca===2||ca===W-3)&&cb%3===1&&cb<D-4)id=CTIMBER; // the pillars
         else if(dm<0.6&&cb>=3&&cb<=D-7&&dy===0)id=HEARTH;
-        else if((ca===1||ca===W-2)&&cb%4===2&&cb<D-4&&dy>=2&&dy<=4)id=TAPESTRY;
-        else if(dm<0.6&&cb===D-3&&dy===2)id=GILDED; // the high seat
-        else if(dm<0.6&&cb===D-2&&dy>=2&&dy<=4)id=GILDED;
+        else if((ca===1||ca===W-2)&&cb%4===2&&cb<D-4&&dy>=2&&dy<=4)id=HTAP;
+        else if((ca===3||ca===W-4)&&cb>=3&&cb<=D-7&&cb%6!==0&&dy===1)id=FEASTBOARD;
+        else if(dm<0.6&&cb===D-3&&dy===2)id=HSEAT; // the high seat
+        else if(dm<0.6&&cb===D-2&&dy>=2&&dy<=3)id=HSEAT;else if(dm<0.6&&cb===D-2&&dy===4)id=GILDED;
         else if(Math.abs(dm-2)<0.6&&cb===D-2&&dy>=3&&dy<=5)id=HBANNER;
         else if((ca===2||ca===W-3)&&cb%6===4&&y===eave)id=LANTERN;}
       if(id!==AIR||!wall)RBP(X,y,Z,id);else RBP(X,y,Z,AIR);}
@@ -113,7 +116,7 @@ RB.rtower=(s,p,u,v,X,Z)=>{const a=u-p.cu,b=v-p.cv,d=Math.hypot(a,b),rr=p.rr,g=p.
 RB.tring=(s,p,u,v,X,Z)=>{const d=Math.hypot(u-p.cu,v-p.cv),g=p.y;if(d>p.r+0.5)return;RBP(X,g,Z,d>p.r-0.6?GRASS:hsh(X,9613,Z)<0.6?SAND:GRAVEL);RBS(X,Z,g+1,g+3,AIR);
   if(d>p.r-0.6&&!(Math.abs(v-p.cv)<=1&&u<p.cu))RBP(X,g+1,Z,FENCE);};
 // ---- Layouts of the riders' places
-function riderLayout(s,L,r){if(s.k==='city')riderTown(s,L,r);else if(s.k==='fort')riderHold(s,L,r);else if(s.k==='village')riderSteading(s,L,r);else if(s.k==='farm')riderStud(s,L,r);else riderBeacon(s,L,r);}
+function riderLayout(s,L,r){if(s.k==='course')riderCourse(s,L,r);else if(s.k==='barrows')riderBarrows(s,L,r);else if(s.k==='city')riderTown(s,L,r);else if(s.k==='fort')riderHold(s,L,r);else if(s.k==='village')riderSteading(s,L,r);else if(s.k==='farm')riderStud(s,L,r);else riderBeacon(s,L,r);}
 // a longhouse of the riders: wattle and daub under turf or golden thatch, a steep roof with the horse heads on its gables, carved
 // door posts, a hearth within; on its core (u0..u1, v0..v1), its front facing f
 // (its ridge runs along its longer side, so the roof spans the shorter)
@@ -149,7 +152,8 @@ function riderTown(s,L,r){
   // by the gate: stables and a paddock on one side, a smithy and stalls on the other, a well by the way
   const sg=r()<0.5?1:-1,gu=-R+8;
   if(free(gu,gu+8,sg*6,sg*20)){const a=sg>0?6:-20;P.push({k:'stable',u0:gu,u1:gu+5,v0:a,v1:a+14,f:0,y:g0,roof:TURF});P.push({k:'paddock',u0:gu+7,u1:gu+15,v0:a,v1:a+14,f:0,y:g0});take(gu-1,gu+16,a-1,a+15);
-    L.spots.push({kind:'stable',u:gu-2,v:a+7,y:g0},{kind:'paddock',u:gu+11,v:a+7,y:g0,horses:3});}
+    L.spots.push({kind:'stable',u:gu-2,v:a+7,y:g0},{kind:'paddock',u:gu+11,v:a+7,y:g0,horses:3},{kind:'leech',u:gu-2,v:a+2,y:g0});L.fair={u:gu+11,v:a+7,y:g0}; // (the horse-healer and the horse fair, D-090)
+  }
   if(free(gu,gu+6,-sg*18,-sg*6)){const a=sg>0?-13:7;P.push({k:'smithy',u0:gu,u1:gu+5,v0:a,v1:a+6,f:3*(sg>0?1:0)+2*(sg>0?0:1),y:g0,roof:GTHATCH});take(gu-1,gu+6,a-1,a+7);L.spots.push({kind:'smithy',u:gu+2,v:a+(sg>0?8:-2),y:g0});
     for(let k=0;k<2;k++){const u0=gu+8+k*5;P.push({k:'stall',u0:u0,u1:u0+2,v0:sg>0?-9:5,v1:sg>0?-6:8,f:sg>0?3:2,y:g0,wool:[WOOLG,WOOLY][k],c:k});}
     L.spots.push({kind:'market',u:gu+11,v:-sg*5,y:g0});}
@@ -163,7 +167,8 @@ function riderTown(s,L,r){
   for(const vv of [8,-8])P.push({k:'ladder',u0:-R+3,u1:-R+3,v0:vv,v1:vv,f:0,y0:g0+1,y1:g0+5});
   // the kings' mounds along the road before the royal seat
   if(s.prov.capital)for(let k=0;k<6;k++){const sd=k%2?1:-1,cu0=-R-12-Math.floor(k/2)*11,cv0=sd*(11+(k%3)*2);P.push({k:'mound',u0:cu0-5,u1:cu0+5,v0:cv0-5,v1:cv0+5,cu:cu0,cv:cv0,r:5,hm:4});}
-  L.spots.push({kind:'gate',u:-R-8,v:0,y:g0},{kind:'gatein',u:-R+6,v:0,y:g0},{kind:'hall',u:hu0+(D>>1)+5,v:0,y:tierY(top)+2},{kind:'citgate',u:hu0-1,v:0,y:tierY(top)},{kind:'street',u:Math.round(cu-f.r1-8),v:0,y:g0});
+  L.hall={u0:hu0+5,u1:hu0+D+4,W:W,D:D,y:tierY(top)+2,mid:0}; // (the feast, D-090)
+  L.spots.push({kind:'gate',u:-R-8,v:0,y:g0},{kind:'gatein',u:-R+6,v:0,y:g0},{kind:'hall',u:hu0+(D>>1)+5,v:0,y:tierY(top)+2},{kind:'seat',u:hu0+D+1,v:0,y:tierY(top)+3},{kind:'hdoor',u:hu0+3,v:0,y:tierY(top)+2},{kind:'hcourt',u:hu0+D-1,v:0,y:tierY(top)+2},{kind:'scop',u:hu0+7,v:0,y:tierY(top)+2},{kind:'citgate',u:hu0-1,v:0,y:tierY(top)},{kind:'street',u:Math.round(cu-f.r1-8),v:0,y:g0});
 }
 // The hold: a round wall of fieldstone on its bank over a ditch, the gate in it under the horse heads; within, a round keep at
 // the back with a gallery round its top, a hall (a longhouse), stables, a ring for training, a well, hay
@@ -197,6 +202,7 @@ function riderSteading(s,L,r){
     const bu=f===0?cu0+d/2+2:f===1?cu0-d/2-2:cu0,bv=f===2?cv0+d/2+2:f===3?cv0-d/2-2:cv0;if(Math.max(Math.abs(bu),Math.abs(bv))<R-3&&hsh(i,9621,Math.round(s.Z))<0.5)P.push({k:'hay',u0:Math.round(bu)-2,u1:Math.round(bu)+2,v0:Math.round(bv)-2,v1:Math.round(bv)+2,cu:Math.round(bu),cv:Math.round(bv),y:g});});
   L.spots.push({kind:'green',u:-3,v:3,y:g},{kind:'green',u:3,v:-3,y:g},{kind:'lane',u:-R+4,v:0,y:g});
   fieldsRound(s,L,r,3);
+  if(!small)P.push({k:'hskeps',u0:R+1,u1:R+3,v0:2,v1:8,pts:[[R+2,3],[R+2,5],[R+2,7]]}); // bee skeps by the lane out (D-090)
 }
 // a fence of wattle hurdles round a steading (p.r its line), open where the lanes leave it
 RB.hurdle=(s,p,u,v,X,Z)=>{const d=Math.hypot(u,v);if(d<p.r-0.7||d>=p.r+0.7||Math.abs(u)<=2||Math.abs(v)<=2)return;RBP(X,p.y+1,Z,WATTLE);if(hsh(X,9623,Z)<0.3)RBP(X,p.y+2,Z,STAKES);};
@@ -209,6 +215,7 @@ function riderStud(s,L,r){
   P.push({k:'hay',u0:5,u1:9,v0:-12,v1:-8,cu:7,cv:-10,y:g});
   L.spots.push({kind:'farm',u:-3,v:-2,y:g},{kind:'paddock',u:-8,v:7,y:g,horses:3},{kind:'paddock',u:4,v:8,y:g,horses:3});
   fieldsRound(s,L,r,2);
+  P.push({k:'hskeps',u0:-12,u1:-8,v0:-10,v1:-8,pts:[[-11,-9],[-9,-9]],y:g}); // (D-090)
 }
 // A beacon on the heights: a palisade ring of stakes, the beacon (a crib of logs under its fire basket, kept lit), a timber
 // lookout and a hut of turf
@@ -224,7 +231,7 @@ function riderBeacon(s,L,r){
 // lanes of earth; timber bridges on piles of logs; beside the riders' road a carved post with the horse heads every 72 blocks
 function riderRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBS(X,Z,g+1,g+2,CTIMBER);RBP(X,g+3,Z,HORNS);}return;}
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%72===36){RBP(X,g+1,Z,HSTONE);RBP(X,g+2,Z,CTIMBER);RBP(X,g+3,Z,HORNS);}return;} // (a horse stone at its foot, D-090)
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,PLANKS);if(edge)RBP(X,y+1,Z,LOG);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%5===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,LOG);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
