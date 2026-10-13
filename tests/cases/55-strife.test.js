@@ -69,7 +69,7 @@ setMode('survival');put(0);clearFoes();hp=20;
   const kinds={};for(const f of host)kinds[f.kind]=(kinds[f.kind]||0)+1;info('a host:',JSON.stringify(kinds));
   const c=host.reduce((a,f)=>[a[0]+f.x/host.length,a[1]+f.z/host.length],[0,0]),hm=host.reduce((a,f)=>[a[0]+f.hx/host.length,a[1]+f.hz/host.length],[0,0]);
   const back=(c[0]-PL.x)*(hm[0]-PL.x)+(c[1]-PL.z)*(hm[1]-PL.z)<0;
-  assert(host.length>=4&&host.every(f=>f.kind[0]===H.C.fp[0]&&f.prov===H.key&&f.st==='return')&&back&&Math.hypot(c[0]-PL.x,c[1]-PL.z)>40,'a host of that people comes from out of sight and marches past the player to the far side');
+  assert(host.length>=4&&host.every(f=>(f.kind[0]===H.C.fp[0]||FOES[f.kind].hound)&&f.prov===H.key&&f.st==='return')&&back&&Math.hypot(c[0]-PL.x,c[1]-PL.z)>40,'a host of that people comes from out of sight and marches past the player to the far side');
   const again=foes.length;hostT=0;foeSpawnTick();assert(foes.filter(f=>f.host).length===host.length,'one host at a time');
   // a warband between them
   const band=[];for(let q=0.5;q<0.95&&!band.length;q+=0.05){const mx=c[0]+(PL.x-c[0])*q,mz=c[1]+(PL.z-c[1])*q;band.push(...spawnGroup('band',4,mx,ground[Math.floor(mx)+W*Math.floor(mz)],mz,4,{}));} // (between them, where it can stand)

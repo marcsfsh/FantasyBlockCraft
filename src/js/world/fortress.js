@@ -16,10 +16,11 @@ const FORT_P={
   throneL:{gw:9,gh:26,cw:10,ch:28,hw:40,Lhs:[84,72,60],Hmin:34,Hmax:50,tv:28,ts:5,th:58,fw:36,fh:50,tz:36,td:40,pv:24,ps:3,pg:12,lv:14,dw:20,steps:6,k:3,bw:4},
   throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:27,td:30,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
 const FORT_C=new Map(),FORT_LORD=21; // (an Ember Throne's gate and way in leave this much clear over the middle of the floor for its lord, D-074)
-// the four quarters of a volcano, the one farthest from its flows (old and new) and its lesser cones first: a fortress faces the
-// first where it fits (pure, without the ground, so the gullies' lava can keep off it, D-064)
+// the four quarters of a volcano, the one farthest from its flows (old and new) and its lesser cones first (a great volcano's
+// facing its gate's road before all, D-087): a fortress faces the first where it fits (pure, without the ground, so the gullies'
+// lava can keep off it, D-064)
 function fortQuarters(v){const qs=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
-    for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);qs.push({th:th,m:m});}
+    for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);if(v.gth!==undefined&&Math.abs(angDiffV(th,v.gth))<0.79)m=99;qs.push({th:th,m:m});}
   return qs.sort((a,b)=>b.m-a.m);}
 // The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across.
 function fortOf(v){
@@ -35,13 +36,16 @@ function fortOf(v){
         for(let Dd=0;Dd<=Math.min(20,Math.floor((U1-8)/2));Dd+=2){const Fh=Fy-Dd,Hh=Math.min(P.Hmax,cov-Fh-6);if(Hh<P.Hmin)continue;
           const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),E=U1+Lh,xs=[GX+ox*(P.td+8),GX-ox*(E+1)],zs=[GZ+oz*(P.td+8),GZ-oz*(E+1)],wd=Math.max(P.hw+3,P.fw+1,P.tz,P.tv+P.ts+1+2*P.k)+1;
           for(const w of [-wd,wd]){xs.push(GX+px*w);zs.push(GZ+pz*w);}
+          if(v.ft){xs.push(v.ft[0]-P.gw-4,v.ft[0]+P.gw+4);zs.push(v.ft[1]-P.gw-4,v.ft[1]+P.gw+4);} // (its causeway to its gate's road, D-087)
           F={v:v,P:P,great:!!v.great,GX:GX,GZ:GZ,Fy:Fy,Fh:Fh,Dd:Dd,ox:ox,oz:oz,px:px,pz:pz,U1:U1,Lh:Lh,Hh:Hh,lord:lord,id:'f'+key,
-            name:v.great?'The Ember Throne of '+lord:'The Warhold of '+v.name,box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Math.min(Fh-8,Fy-30),Fy+Math.max(P.th+7*P.k+4,P.fh+14*P.k+4)],seed:Math.floor(r()*1e6)};break;}
+            cw:v.ft?(()=>{const dx=v.ft[0]-GX,dz=v.ft[1]-GZ;return [-(dx*ox+dz*oz),dx*px+dz*pz];})():null,name:v.great?'The Ember Throne of '+lord:'The Warhold of '+v.name,box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Math.min(Fh-8,Fy-30),Fy+Math.max(P.th+7*P.k+4,P.fh+14*P.k+4)],seed:Math.floor(r()*1e6)};break;}
         if(F)break;}}}
   FORT_C.set(key,F);return F;
 }
 // the fortresses whose works reach within m of (X,Z)
-function fortsNear(X,Z,m){const out=[];for(const v of volcanoesNear(X,Z,m+60)){const F=fortOf(v);if(F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m)out.push(F);}return out;}
+function fortsNear(X,Z,m){const out=[],inB=F=>F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m;for(const v of volcanoesNear(X,Z,m+60)){const F=fortOf(v);if(inB(F))out.push(F);}
+  for(const g of greatNear(X,Z,200))if(g.ft&&Math.hypot(g.X-X,g.Z-Z)>=m+60+g.R){const F=fortOf(g);if(inB(F))out.push(F);} // (a great fortress's causeway reaches farther out, D-087)
+  return out;}
 // Is (X,Y,Z) within m of a fortress's works? (the warrens keep out)
 function fortZone(X,Y,Z,m){for(const F of fortsNear(X,Z,m))if(Y>=F.box[4]-m&&Y<=F.box[5]+m)return true;return false;}
 // local (u,v) of a world column
@@ -298,6 +302,8 @@ function fortHall(F,d,X,Z,u,v,av,h){const P=F.P,k=P.k,Fh=F.Fh,top=d.top,pu=u-F.U
 function fortBuild(F){
   const P=F.P,d=fortD(F),U1=F.U1,E=d.E,span=Math.max(P.hw+3,P.fw+1,P.tz,P.tv+P.ts+1+d.mo);
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,[u,v]=fortUV(F,X,Z),av=Math.abs(v),h=hsh(X,9175,Z);
+    if(F.cw&&u<-P.td-8){const e=wgLineD([[-P.td-8,0],F.cw],u,v);if(e<=P.gw+1.5){const cu=F.cw[0]+P.td+8,cv=F.cw[1],l2=cu*cu+cv*cv||1,t=Math.max(0,Math.min(1,((F.cw[0]-u)*cu+(F.cw[1]-v)*cv)/l2));
+      fortCauseway(F,X,Z,u,e,h,Math.round(F.v.ft[2]+(F.Fy-9-F.v.ft[2])*t));}}
     if(u<-P.td-8||u>E+1||av>span)continue;
     if(u<-P.td)fortStairs(F,X,Z,u,av);else if(u<0&&av<=P.tz)fortTerrace(F,d,X,Z,u,v,av,h);
     if(u>=-2*P.k-1&&u<=2*P.k+2&&av<=P.fw+1)fortFacade(F,d,X,Z,u,v,av);
@@ -306,4 +312,12 @@ function fortBuild(F){
     if(u>=U1&&av<=P.hw+3)fortHall(F,d,X,Z,u,v,av,h);
   }
 }
+// The causeway (D-087): from the end of the gate's road straight on to the foot of a great fortress's stairs, as wide as the gate,
+// rising evenly from the road's height to the stairs' (y), cut down through what stands higher and built up in basalt over what
+// lies lower; paved with basalt tiles between edges of obsidian, a fire basket on a post every fourteen along either edge. Never
+// where it would open lava or water.
+function fortCauseway(F,X,Z,u,e,h,y){const g=hAt(X,Z);for(let q=Math.min(g,y)-1;q<=Math.max(g,y)+4;q++){const id=GW(X,q,Z);if(id<0||id===LAVA||isWetId(id))return;}
+  for(let q=Math.min(g,y)-3;q<y;q++)PW(X,q,Z,BASALT,MODE_FILL);
+  const edge=e>F.P.gw-0.5;PW(X,y,Z,edge?OBSBRICK:h<0.25?BASCRACK:BASTILE,MODE_SET);for(let q=y+1;q<=Math.max(g,y)+4;q++)PW(X,q,Z,AIR,MODE_SET);
+  if(edge&&e>F.P.gw+0.5&&Math.round(-u)%14===0){PW(X,y+1,Z,BASBRICK,MODE_SET);PW(X,y+2,Z,BRAZIER,MODE_SET);}}
 function applyFortresses(WCX,WCZ){const X=WCX*CS+8,Z=WCZ*CS+8;for(const F of fortsNear(X,Z,12))fortBuild(F);}

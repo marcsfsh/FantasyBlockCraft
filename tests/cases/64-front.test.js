@@ -11,8 +11,8 @@ const clear=()=>{for(const f of [...foes])removeFoe(f);foeSpots.clear();};
 WARS.clear();warPlay=0;warArmies.length=0;WJ.length=0;
 const w={id:P.id,n:P.name,X:P.X,Z:P.Z,camp:P.camp,f:0,b:{ram:1,mine:1,walls:1,sally:1},m:{ram:4,mine:4,walls:4,sally:4},w:[0,0],log:[[0,'x']]};WARS.set(P.id,w);warFall(w,false,P);
 // the front with play time
-const F=warFrontPath(P),f0=warFront(w),st0=warStage(w);warPlay+=360;const f1=warFront(w),st1=warStage(w);
-info('the front\'s way',F.length,'points; at the fall',f0,st0,'; six minutes on',f1.toFixed(2),st1);
+const F=warFrontPath(P),f0=warFront(w),st0=warStage(w);warPlay+=180;const f1=warFront(w),st1=warStage(w);
+info('the front\'s way',F.length,'points; at the fall',f0,st0,'; three minutes on',f1.toFixed(2),st1);
 assert(F.length>=4&&f0===0&&st0==='The gate has fallen'&&f1>0.2&&f1<0.5&&st1==='The hosts push into the basin','beyond the fallen gate the front moves out across the basin\'s floor with play time');
 // the first forward camp: built where loaded, in the chronicle, garrisoned
 {const C=warCampAt(P,0);gen(C[0],C[1]);PL.x=C[0]-OX+0.5;PL.z=C[1]-OZ+12.5;PL.y=ground[Math.floor(PL.x)+W*Math.floor(PL.z)]+1;

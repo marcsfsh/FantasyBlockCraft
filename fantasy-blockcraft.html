@@ -240,7 +240,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v39',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v40',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -253,7 +253,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=39,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=40,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -4737,39 +4737,54 @@ function keptBuild(s,r){
 const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
 // ---- The great volcano (D-054, D-055, D-067): every basin of the wastes has one, near its middle, far larger than the rest,
 // the seat of an Emberlord's fortress, rising from the sunken floor high over the ring of ash mountains about it. Placed where
-// the floor holds its whole foot with room to spare (the widest that fits, searched first a short way on from the foot of its
-// gate's road toward the basin's middle, within 180 and then 360 for the widest and within 180 for the rest, so the way from the
-// gate is short: D-083; else from the middle), clear of the way down from its gate (wasteGateOf); its lesser cones about its
-// foot. A basin of several stretches has one all the same, in its chief stretch's name (wasteBasin).
+// the floor holds its whole foot with room to spare (the widest that fits): on the line of its gate's road a short way past its
+// foot, its fortress facing up the road (D-087; searched outward along the line and a little to either side, the widest first
+// down to 150, then from the road's foot toward the basin's middle); else from the basin's middle, clear of the way down from its gate
+// (wasteGateOf); its lesser cones about its foot. A basin of several stretches has
+// one all the same, in its chief stretch's name (wasteBasin).
 const GREAT_R=[250,225,200,175,150,125];
 function greatOf(c){
   const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;greatC.set(key,null);
   if(LANDS[cellLand(c)].k==='volcanic'){const B=wasteBasin(c),ch=B.chief;
-    if(ch.i===c.i&&ch.j===c.j){const P=wasteGateOf(B),ft=P&&P.ramp.pts[P.ramp.pts.length-1]; // (near the foot of its gate's road, a short way on: D-083)
-      if(ft){const ex=B.cx-ft[0],ez=B.cz-ft[1],el=Math.hypot(ex,ez)||1;const at=(R,m)=>{const d=R*1.3+90;return greatTry(c,R,ft[0]+ex/el*d,ft[1]+ez/el*d,[],B,m);};
-        for(const [m,big] of [[180,1],[360,1],[180,0]]){for(const R of GREAT_R)if((R>=200)===!!big){v=at(R,m);if(v)break;}if(v)break;}}
+    if(ch.i===c.i&&ch.j===c.j){const P=wasteGateOf(B),pp=P&&P.ramp.pts;
+      if(pp){ // on the line of its gate's road, a short way past its foot, facing it (D-087)
+        const a=pp[pp.length-4]||pp[pp.length-1],b=pp[Math.max(0,pp.length-9)],dl=Math.hypot(a[0]-b[0],a[1]-b[1])||1,ex=B.cx-a[0],ez=B.cz-a[1],el=Math.hypot(ex,ez)||1;
+        const dirs=[[(a[0]-b[0])/dl,(a[1]-b[1])/dl],[ex/el,ez/el]]; // (on along the road, else from its foot toward the basin's middle)
+        find:for(const [k,Rs] of [[0,[250,225,200,175,150]],[1,[250,225,200,175,150]],[0,[125]]])for(const R of Rs){const [ux,uz]=dirs[k];
+          for(let e=0;e<=240;e+=8)for(const off of [0,12,-12,24,-24,48,-48,72,-72]){const d=R*1.05+90+e,X=Math.round(a[0]+ux*d-uz*off),Z=Math.round(a[1]+uz*d+ux*off);
+            v=greatAt(c,R,X,Z,[],B,Math.round(R),Math.atan2(a[1]-Z,a[0]-X));if(v){const q=pp[pp.length-1];v.ft=[Math.round(q[0]),Math.round(q[1]),Math.round(q[3])];break find;}}}}
       if(!v)for(const R of GREAT_R){v=greatTry(c,R,B.cx,B.cz,[],B);if(v)break;}}}
   greatC.set(key,v);return v;
 }
 // Is a disc of radius m about (X,Z) on the floor of a basin, and not over the sea?
 function onFloor(X,Z,m,k){landsAt(X,Z,TVC);if(TVC.bs>-m-8||TVC.wVolc<0.95)return false;
   for(let q=0;q<k;q++){const a=q*6.2832/k;landsAt(X+Math.round(Math.cos(a)*m),Z+Math.round(Math.sin(a)*m),TVC2);if(TVC2.bs>-8)return false;}return true;}
+// the first place that holds a great volcano of radius R on a spiral about (cx,cz) (within maxd of it, if given)
 function greatTry(c,R,cx,cz,G,B,maxd){
-  const foot=Math.round(R*1.3)+40;
-  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0;if(maxd&&d>maxd)break;const X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
-    if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24))continue;if(!onFloor(X,Z,foot,16))continue;if(B&&wasteGateKeep(B,X,Z,foot+16))continue;
-    volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)continue;
-      const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);
-      const fl=[],nf=4+Math.floor(r()*3),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.6,len:0.85+r()*0.4});const old=[];for(let q=0;q<5;q++)old.push(r()*6.283);
-      const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
-      // lesser cones about its foot, where the floor holds them, clear of each other and of the stronger great volcanoes
-      const s0=r()*6.283;for(let q=0;q<18&&v.sats.length<4;q++){const sa=s0+q*0.75+(r()-0.5)*0.3,sR=30+Math.floor(r()*28),sd=R*1.15+sR*1.1+10+(q%2)*20+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
-        if(v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8)||B&&wasteGateKeep(B,sX,sZ,Math.round(sR*1.45)+12))continue;
-        const so={};colInfoBase(sX,sZ,so);if(so.h<so.sl+2||so.river||so.rvBot!==999)continue;
-        const sHv=Math.min(H-50-so.h,Math.round(sR*(0.62+sh*0.26))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
-        v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
-      return v;}finally{volcSkip=false;}}
+  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0;if(maxd&&d>maxd)break;const v=greatAt(c,R,Math.round(cx+Math.cos(a)*d),Math.round(cz+Math.sin(a)*d),G,B);if(v)return v;}
   return null;
+}
+// A great volcano of radius R at (X,Z), or null where the floor will not hold its foot or its gate's road comes within km (its
+// foot and more, by default). gth (D-087): the way from it to its gate's road; its flows and old flows are turned (all together)
+// so the widest gap between them faces that way, no lesser cone stands within half a right angle of it, and its fortress faces it.
+function greatAt(c,R,X,Z,G,B,km,gth){
+  const foot=Math.round(R*1.3)+40;
+  if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24)||!onFloor(X,Z,foot,16)||B&&wasteGateKeep(B,X,Z,km!==undefined?km:foot+16))return null;
+  volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)return null;
+    const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);
+    const fl=[],nf=4+Math.floor(r()*3),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.6,len:0.85+r()*0.4});const old=[];for(let q=0;q<5;q++)old.push(r()*6.283);
+    if(gth!==undefined){const A=fl.map(f=>f.a).concat(old).map(t=>((t%6.2832)+6.2832)%6.2832).sort((p,q)=>p-q);let gc=0,gw=-1;
+      for(let q=0;q<A.length;q++){const t0=A[q],t1=q+1<A.length?A[q+1]:A[0]+6.2832;if(t1-t0>gw){gw=t1-t0;gc=(t0+t1)/2;}}
+      const dt=gth-gc;for(const f of fl)f.a+=dt;for(let q=0;q<old.length;q++)old[q]+=dt;}
+    const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
+    if(gth!==undefined)v.gth=gth;
+    // lesser cones about its foot, where the floor holds them, clear of each other and of the stronger great volcanoes
+    const s0=r()*6.283;for(let q=0;q<18&&v.sats.length<4;q++){const sa=s0+q*0.75+(r()-0.5)*0.3,sR=30+Math.floor(r()*28),sd=R*1.15+sR*1.1+10+(q%2)*20+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
+      if(gth!==undefined&&Math.abs(angDiffV(sa,gth))<0.8||v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8)||B&&wasteGateKeep(B,sX,sZ,Math.round(sR*1.45)+12))continue;
+      const so={};colInfoBase(sX,sZ,so);if(so.h<so.sl+2||so.river||so.rvBot!==999)continue;
+      const sHv=Math.min(H-50-so.h,Math.round(sR*(0.62+sh*0.26))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
+      v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
+    return v;}finally{volcSkip=false;}
 }
 // the great volcanoes whose works may reach within r of (X,Z), with their lesser cones (cached by 32-block tile for the terrain):
 // the basins of the volcanic cells about it, each once
@@ -4956,10 +4971,11 @@ const FORT_P={
   throneL:{gw:9,gh:26,cw:10,ch:28,hw:40,Lhs:[84,72,60],Hmin:34,Hmax:50,tv:28,ts:5,th:58,fw:36,fh:50,tz:36,td:40,pv:24,ps:3,pg:12,lv:14,dw:20,steps:6,k:3,bw:4},
   throneS:{gw:8,gh:22,cw:9,ch:24,hw:22,Lhs:[44,36],Hmin:26,Hmax:32,tv:20,ts:4,th:40,fw:26,fh:36,tz:27,td:30,pv:14,ps:2,pg:9,lv:8,dw:12,steps:5,k:2,bw:3}};
 const FORT_C=new Map(),FORT_LORD=21; // (an Ember Throne's gate and way in leave this much clear over the middle of the floor for its lord, D-074)
-// the four quarters of a volcano, the one farthest from its flows (old and new) and its lesser cones first: a fortress faces the
-// first where it fits (pure, without the ground, so the gullies' lava can keep off it, D-064)
+// the four quarters of a volcano, the one farthest from its flows (old and new) and its lesser cones first (a great volcano's
+// facing its gate's road before all, D-087): a fortress faces the first where it fits (pure, without the ground, so the gullies'
+// lava can keep off it, D-064)
 function fortQuarters(v){const qs=[];for(let q=0;q<4;q++){const th=q*Math.PI/2;let m=9;for(const f of v.fl)m=Math.min(m,Math.abs(angDiffV(th,f.a)));for(const a of v.old)m=Math.min(m,Math.abs(angDiffV(th,a))*1.5);
-    for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);qs.push({th:th,m:m});}
+    for(const t of v.sats||[])m=Math.min(m,Math.abs(angDiffV(th,Math.atan2(t.Z-v.Z,t.X-v.X)))*1.2);if(v.gth!==undefined&&Math.abs(angDiffV(th,v.gth))<0.79)m=99;qs.push({th:th,m:m});}
   return qs.sort((a,b)=>b.m-a.m);}
 // The fortress of volcano v, or null. Local frame: u runs in from the gate's outer face, v across.
 function fortOf(v){
@@ -4975,13 +4991,16 @@ function fortOf(v){
         for(let Dd=0;Dd<=Math.min(20,Math.floor((U1-8)/2));Dd+=2){const Fh=Fy-Dd,Hh=Math.min(P.Hmax,cov-Fh-6);if(Hh<P.Hmin)continue;
           const r=rngAt(v.i,9173,v.j),lord=fullName('fiend',r,false),E=U1+Lh,xs=[GX+ox*(P.td+8),GX-ox*(E+1)],zs=[GZ+oz*(P.td+8),GZ-oz*(E+1)],wd=Math.max(P.hw+3,P.fw+1,P.tz,P.tv+P.ts+1+2*P.k)+1;
           for(const w of [-wd,wd]){xs.push(GX+px*w);zs.push(GZ+pz*w);}
+          if(v.ft){xs.push(v.ft[0]-P.gw-4,v.ft[0]+P.gw+4);zs.push(v.ft[1]-P.gw-4,v.ft[1]+P.gw+4);} // (its causeway to its gate's road, D-087)
           F={v:v,P:P,great:!!v.great,GX:GX,GZ:GZ,Fy:Fy,Fh:Fh,Dd:Dd,ox:ox,oz:oz,px:px,pz:pz,U1:U1,Lh:Lh,Hh:Hh,lord:lord,id:'f'+key,
-            name:v.great?'The Ember Throne of '+lord:'The Warhold of '+v.name,box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Math.min(Fh-8,Fy-30),Fy+Math.max(P.th+7*P.k+4,P.fh+14*P.k+4)],seed:Math.floor(r()*1e6)};break;}
+            cw:v.ft?(()=>{const dx=v.ft[0]-GX,dz=v.ft[1]-GZ;return [-(dx*ox+dz*oz),dx*px+dz*pz];})():null,name:v.great?'The Ember Throne of '+lord:'The Warhold of '+v.name,box:[Math.min(...xs)-1,Math.max(...xs)+1,Math.min(...zs)-1,Math.max(...zs)+1,Math.min(Fh-8,Fy-30),Fy+Math.max(P.th+7*P.k+4,P.fh+14*P.k+4)],seed:Math.floor(r()*1e6)};break;}
         if(F)break;}}}
   FORT_C.set(key,F);return F;
 }
 // the fortresses whose works reach within m of (X,Z)
-function fortsNear(X,Z,m){const out=[];for(const v of volcanoesNear(X,Z,m+60)){const F=fortOf(v);if(F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m)out.push(F);}return out;}
+function fortsNear(X,Z,m){const out=[],inB=F=>F&&X>=F.box[0]-m&&X<=F.box[1]+m&&Z>=F.box[2]-m&&Z<=F.box[3]+m;for(const v of volcanoesNear(X,Z,m+60)){const F=fortOf(v);if(inB(F))out.push(F);}
+  for(const g of greatNear(X,Z,200))if(g.ft&&Math.hypot(g.X-X,g.Z-Z)>=m+60+g.R){const F=fortOf(g);if(inB(F))out.push(F);} // (a great fortress's causeway reaches farther out, D-087)
+  return out;}
 // Is (X,Y,Z) within m of a fortress's works? (the warrens keep out)
 function fortZone(X,Y,Z,m){for(const F of fortsNear(X,Z,m))if(Y>=F.box[4]-m&&Y<=F.box[5]+m)return true;return false;}
 // local (u,v) of a world column
@@ -5238,6 +5257,8 @@ function fortHall(F,d,X,Z,u,v,av,h){const P=F.P,k=P.k,Fh=F.Fh,top=d.top,pu=u-F.U
 function fortBuild(F){
   const P=F.P,d=fortD(F),U1=F.U1,E=d.E,span=Math.max(P.hw+3,P.fw+1,P.tz,P.tv+P.ts+1+d.mo);
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,[u,v]=fortUV(F,X,Z),av=Math.abs(v),h=hsh(X,9175,Z);
+    if(F.cw&&u<-P.td-8){const e=wgLineD([[-P.td-8,0],F.cw],u,v);if(e<=P.gw+1.5){const cu=F.cw[0]+P.td+8,cv=F.cw[1],l2=cu*cu+cv*cv||1,t=Math.max(0,Math.min(1,((F.cw[0]-u)*cu+(F.cw[1]-v)*cv)/l2));
+      fortCauseway(F,X,Z,u,e,h,Math.round(F.v.ft[2]+(F.Fy-9-F.v.ft[2])*t));}}
     if(u<-P.td-8||u>E+1||av>span)continue;
     if(u<-P.td)fortStairs(F,X,Z,u,av);else if(u<0&&av<=P.tz)fortTerrace(F,d,X,Z,u,v,av,h);
     if(u>=-2*P.k-1&&u<=2*P.k+2&&av<=P.fw+1)fortFacade(F,d,X,Z,u,v,av);
@@ -5246,6 +5267,14 @@ function fortBuild(F){
     if(u>=U1&&av<=P.hw+3)fortHall(F,d,X,Z,u,v,av,h);
   }
 }
+// The causeway (D-087): from the end of the gate's road straight on to the foot of a great fortress's stairs, as wide as the gate,
+// rising evenly from the road's height to the stairs' (y), cut down through what stands higher and built up in basalt over what
+// lies lower; paved with basalt tiles between edges of obsidian, a fire basket on a post every fourteen along either edge. Never
+// where it would open lava or water.
+function fortCauseway(F,X,Z,u,e,h,y){const g=hAt(X,Z);for(let q=Math.min(g,y)-1;q<=Math.max(g,y)+4;q++){const id=GW(X,q,Z);if(id<0||id===LAVA||isWetId(id))return;}
+  for(let q=Math.min(g,y)-3;q<y;q++)PW(X,q,Z,BASALT,MODE_FILL);
+  const edge=e>F.P.gw-0.5;PW(X,y,Z,edge?OBSBRICK:h<0.25?BASCRACK:BASTILE,MODE_SET);for(let q=y+1;q<=Math.max(g,y)+4;q++)PW(X,q,Z,AIR,MODE_SET);
+  if(edge&&e>F.P.gw+0.5&&Math.round(-u)%14===0){PW(X,y+1,Z,BASBRICK,MODE_SET);PW(X,y+2,Z,BRAZIER,MODE_SET);}}
 function applyFortresses(WCX,WCZ){const X=WCX*CS+8,Z=WCZ*CS+8;for(const F of fortsNear(X,Z,12))fortBuild(F);}
 // ---- The Ember Stair (D-067): the way up inside each great volcano, from its foot to its crater. It leaves the Ember Throne's
 // way in by a door in its side wall and winds round the mountain inside it, rising one in six, as near the flank as keeps 18
@@ -5545,14 +5574,14 @@ function orcBuild(p){
 // ---- The Gate of the Wastes (D-067): every basin of the Volcanic Wastes has one way in for an army. Where the ring of ash
 // mountains faces the nearest realm, a pass is cut through it down to the level of the lands outside, and the orcs have shut it
 // with a gate between two towers; one leaf hangs ajar. Inside, a yard is cut into the inner wall for the orcs' camp, and from it a
-// broad road runs down to the floor in one straight line, at one in four (D-083; winding along the wall at one in eight before). Outside, the pass opens onto the siege lines and the camp of
+// broad road runs down to the floor in one straight line at one in two, toward the great volcano's fortress (D-083, D-087; winding along the wall at one in eight before). Outside, the pass opens onto the siege lines and the camp of
 // the allied hosts, levelled at the gate's height. Plans are pure functions of the seed and the land layout, read from the
 // ground before any volcano, realm or gate touches it (wgRaw, never cached); colInfoBase shapes the ground to them (wgMask,
 // wgShape). Everything else keeps off them (wasteGateNear); the great volcano and its cones too (wasteGateKeep).
 //
 // The gate's frame: u from the gate outward (toward the camp), v across; the gate faces one of the four ways (dir, DIRS), so its
 // works stand square in the world. Inside the ring u is negative.
-const WG_STEP_MS=6,WG_GRADE=1/4,WG_RW=12,WG_WY=50,WG_WG=34,WG_CAMP=[250,125],wgC=new Map(),wgJ=new Map(),wgTC=new Map(),TWG={},TWG2={};let wgSkip=false;
+const WG_STEP_MS=6,WG_GRADE=1/2,WG_RW=12,WG_WY=50,WG_WG=34,WG_CAMP=[250,125],wgC=new Map(),wgJ=new Map(),wgTC=new Map(),TWG={},TWG2={};let wgSkip=false;
 // the ground before the gate's works, the volcanoes and the realms shape it (so the plan cannot depend on itself)
 function wgRaw(X,Z){const a=volcSkip,b=wgSkip,c=realmSkip;volcSkip=wgSkip=realmSkip=true;try{return colInfoBase(Math.round(X),Math.round(Z),TWG);}finally{volcSkip=a;wgSkip=b;realmSkip=c;}}
 const wgBs=(X,Z)=>{landsAt(Math.round(X),Math.round(Z),TWG2);return TWG2.bs;};
@@ -5594,8 +5623,8 @@ function* planGate(B){
   // the ring's outer foot (uF), past which the ground before the camp (the siege lines) is levelled gently, not cut
   yield;P.uF=170;for(let u=10;u<=170;u+=3)if(wgBs(...wgXZ(P,u,0))>=WB_END||wgRaw(...wgXZ(P,u,0)).h<=hG+1){P.uF=Math.max(60,u);break;}
   P.uC0=P.uF+64;P.uC1=P.uC0+WG_CAMP[0];
-  // the road down: from the yard's inner corner on one side, one straight line slanting down the inner wall, falling one in
-  // four, until it meets the floor (D-083)
+  // the road down: from the yard's inner corner on one side, one straight line down the inner wall, falling one in two, until
+  // it meets the floor (D-083, D-087)
   const side0=hsh(P.X,9705,P.Z)<0.5?1:-1;let path=null;
   for(const side of [side0,-side0]){yield;path=yield* wgTrace(P,side);if(path){P.side=side;break;}}
   if(!path)return null;P.ramp=path;path.all=path.pts.slice(1).map((_,i)=>i);
@@ -5607,15 +5636,16 @@ function* planGate(B){
   P.id='wg'+P.X+','+P.Z;P.seed=hsh(P.X,9707,P.Z);
   return P;
 }
-// The road's line (D-083): one straight line from the yard's inner corner, falling one in four, cut down through the inner wall
-// and banked out over lower ground until it meets the floor; steps of six. It slants off the way the gate faces toward its side,
-// the least that brings it down by the floor's edge (so it never runs far out over the floor, where the great volcano stands).
-// Null if no slant keeps it inside the ring.
+// The road's line (D-083, D-087): one straight line from the yard's inner corner, falling one in two, cut down through the inner
+// wall and banked out over lower ground until it meets the floor; steps of six. It runs straight in, the way the gate faces, where
+// it comes down within 160 of the floor's edge (the great volcano stands on its line, its fortress facing it: greatOf); else it
+// slants toward its side, the least that brings it down by the floor's edge. Null if no line keeps it inside the ring.
 function* wgTrace(P,side){
   const hG=P.hG,[sx,sz]=wgXZ(P,P.uY+8,side*(WG_WY-WG_RW-2)),ix=-P.dx,iz=-P.dz,ax=P.dz*side,az=-P.dx*side;let pts=null,best=-1e9;
-  for(let a=0.2;a<1.31;a+=0.1){const dx=ix*Math.cos(a)+ax*Math.sin(a),dz=iz*Math.cos(a)+az*Math.sin(a);let x=sx,z=sz,L=0,bs=0;const pp=[[x,z]];
+  for(const a of [0,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3]){const dx=ix*Math.cos(a)+ax*Math.sin(a),dz=iz*Math.cos(a)+az*Math.sin(a);let x=sx,z=sz,L=0,bs=0;const pp=[[x,z]];
     for(let k=0;k<160;k++){if(k%4===0)yield;x+=dx*6;z+=dz*6;L+=6;const y=hG-L*WG_GRADE;bs=wgBs(x,z);if(bs>WB_IN+WB_CR){pp.length=0;break;}pp.push([x,z]);
       if(bs<-8&&wgRaw(x,z).h>=y-1)break;} // the floor: the road is down
+    if(pp.length>=8&&a===0&&bs>=-160){pts=pp;break;}
     if(pp.length>=8&&bs>best){best=bs;pts=pp;if(bs>=-40)break;}}
   if(!pts)return null;
   // smooth the line, then its lengths and heights; the road levels out on the floor
@@ -13354,8 +13384,8 @@ function warSwornJournal(out){if(!SW.on){out.push('','YOUR PART','You have not s
   out.push('','YOUR PART',WAR_RANKS[SW.r][0]+', sworn in hour '+(SW.t/3600).toFixed(1)+'. Merit '+SW.m+'; battles won beside the hosts '+SW.b+'; creatures of the wastes slain '+SW.k+'.');}
 const warSwornPanel=()=>SW.on?'<div>You: '+WAR_RANKS[SW.r][0]+' (merit '+SW.m+')</div>':'';
 // ---- Into the basin and beneath it (W5, D-072; Q138, Q143, Q149, Q175). Once a gate has fallen its war goes on into its basin.
-// The front (`w.fr`, 0 to 1) moves out from the foot of the Long Descent across the floor toward the great volcano's foot with
-// play time (twenty minutes or so since D-083, a little different at each gate) and with battles won; four forward camps rise along that way as the
+// The front (`w.fr`, 0 to 1) moves out from the foot of the Long Descent across the floor toward the Ember Throne's stairs with
+// play time (ten minutes or so since D-087, a little different at each gate) and with battles won; four forward camps rise along that way as the
 // front passes them (a palisade ring with a gate toward the road, a watchtower, tents, the peoples' banners and a fire; made as
 // edits like the works, w.ap.fc), each with its garrison. The hosts' armies march down the Long Descent to the front and on, the
 // warhosts come at it from the volcano. The wastes' places are stormed: when every creature of one of their spots has fallen
@@ -13364,22 +13394,25 @@ const warSwornPanel=()=>SW.on?'<div>You: '+WAR_RANKS[SW.r][0]+' (merit '+SW.m+')
 // hall and the Ember Stair chamber by chamber. Underground in such a basin a company of the hosts goes with the player, and now
 // and then a warband of the deep comes at it.
 const WAR_CAMPS=[0.05,0.35,0.65,0.95];
-// the way of the front: from the foot of the Long Descent to the great volcano's foot, a point every 16 (world), cached
-function warFrontPath(P){if(P.fpth)return P.fpth;const p=P.ramp.pts,a=p[p.length-1],G=P.B&&greatOf(P.B.chief),out=[];
-  if(!G){P.fpth=[[a[0],a[1]]];return P.fpth;}const dx=G.X-a[0],dz=G.Z-a[1],L=Math.hypot(dx,dz)||1,end=Math.max(20,L-(G.R*1.3+24));
-  for(let s=0;s<=end;s+=16)out.push([a[0]+dx/L*s,a[1]+dz/L*s]);return P.fpth=out;}
+// the way of the front: from the foot of the Long Descent along the causeway to the foot of the Ember Throne's stairs (D-087; to
+// the great volcano's foot where it has none), a point every 8 (world), cached
+function warFrontPath(P){if(P.fpth)return P.fpth;const p=P.ramp.pts,a=p[Math.max(0,p.length-4)],G=P.B&&greatOf(P.B.chief),F=G&&fortOf(G),out=[];
+  if(!G){P.fpth=[[a[0],a[1]]];return P.fpth;}let dx=G.X-a[0],dz=G.Z-a[1],end=Math.max(20,Math.hypot(dx,dz)-(G.R*1.3+24));
+  if(F&&F.cw){dx=F.GX+F.ox*(F.P.td+8)-a[0];dz=F.GZ+F.oz*(F.P.td+8)-a[1];end=Math.max(8,Math.hypot(dx,dz));}
+  const L=Math.hypot(dx,dz)||1;for(let s=0;s<=end;s+=8)out.push([a[0]+dx/L*s,a[1]+dz/L*s]);return P.fpth=out;}
 // the war of the basin a world point lies in, if its gate has fallen (and the gate)
 // the basin a world point lies in (its floor, or the ring's inner wall), or null
 function warBasinAt(X,Z){const o={};wasteAt(X,Z,o);return o.bc&&o.bs<40?wasteBasin(o.bc):null;}
 function warBasinWar(X,Z){let any=false;for(const w of WARS.values())if(w.s>=2)any=true;if(!any)return null;const B=warBasinAt(X,Z),P=B&&wasteGateOf(B);if(!P)return null;
   const w=WARS.get(P.id);return w&&w.s>=2?{P:P,w:w}:null;}
 // how far the front has come
-const warFrontPace=w=>20*60*(0.85+0.3*hsh(w.X,9921,w.Z)); // (twenty minutes or so: the way to the great volcano is short since D-083)
+const warFrontPace=w=>10*60*(0.85+0.3*hsh(w.X,9921,w.Z)); // (ten minutes or so: the way to the Ember Throne is short since D-083, D-087)
 function warFront(w){if(!(w.s>=2))return 0;const pace=warFrontPace(w);return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
 const warFrontAt=(P,w)=>{const F=warFrontPath(P);return F[Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1)))];};
 // ---- the forward camps: where each stands (the path's point, moved along it to dry ground), and its cells
 function warCampAt(P,k){P.fcs=P.fcs||[];if(P.fcs[k]!==undefined)return P.fcs[k];const F=warFrontPath(P),i0=Math.round(WAR_CAMPS[k]*(F.length-1));let r=null;
-  for(let d=0;d<F.length&&!r;d++)for(const i of [i0+d,i0-d]){if(i<0||i>=F.length)continue;const [X,Z]=F[i],o={};colInfoBase(Math.round(X),Math.round(Z),o);if(o.h>o.sl+1&&!o.river&&!o.lake){r=[Math.round(X),Math.round(Z),i,Math.round(o.h)];break;}}
+  const f0=F[0],f1=F[F.length-1],fl=Math.hypot(f1[0]-f0[0],f1[1]-f0[1])||1,sh=fl<140?(k%2?26:-26):0,nx=-(f1[1]-f0[1])/fl*sh,nz=(f1[0]-f0[0])/fl*sh; // (on a short way, beside it, either side in turn: D-087)
+  for(let d=0;d<F.length&&!r;d++)for(const i of [i0+d,i0-d]){if(i<0||i>=F.length)continue;const X=F[i][0]+nx,Z=F[i][1]+nz,o={};colInfoBase(Math.round(X),Math.round(Z),o);if(o.h>o.sl+1&&!o.river&&!o.lake){r=[Math.round(X),Math.round(Z),i,Math.round(o.h)];break;}}
   return P.fcs[k]=r;}
 function warCampCells(P,k){const C=warCampAt(P,k);if(!C)return [];const [X,Z,i]=C,F=warFrontPath(P),[bx,bz]=F[Math.max(0,i-1)],gdx=bx-X,gdz=bz-Z,gl=Math.hypot(gdx,gdz)||1,out=[];
   const top=(x,z)=>{const lx=x-OX,lz=z-OZ;return lx<0||lz<0||lx>=W||lz>=D?-1:ground[lx+W*lz];},put=(x,y,z,id)=>out.push([x,y,z,id]);

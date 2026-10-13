@@ -5,6 +5,14 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.50.0 (2026-10-13): straight down to the Ember Throne
+
+Saves from 0.49.0 do not carry over (save key v40).
+
+### Game
+- **A short way to the fortress:** the Long Descent now drops straight down the ring's inner wall at one in two, and the great volcano stands right on its line with the Ember Throne facing it. A paved causeway with fire baskets runs from the road's end to the fortress's stairs. From the orcs' yard to the fortress is now about 230 to 370 blocks (it was 480 to 830).
+- Beyond a fallen gate the front reaches the fortress in about ten minutes; its forward camps stand beside the causeway.
+
 ## 0.49.0 (2026-10-13): the way in, the camp's life, the hidden way and the war below
 
 Saves from 0.48.0 do not carry over (save key v39).

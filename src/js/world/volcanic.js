@@ -6,39 +6,54 @@
 const VOLC_C=140,volcCandC=new Map(),volcC=new Map(),greatC=new Map(),greatNC=new Map(),TVC={},TVC2={};let volcSkip=false;
 // ---- The great volcano (D-054, D-055, D-067): every basin of the wastes has one, near its middle, far larger than the rest,
 // the seat of an Emberlord's fortress, rising from the sunken floor high over the ring of ash mountains about it. Placed where
-// the floor holds its whole foot with room to spare (the widest that fits, searched first a short way on from the foot of its
-// gate's road toward the basin's middle, within 180 and then 360 for the widest and within 180 for the rest, so the way from the
-// gate is short: D-083; else from the middle), clear of the way down from its gate (wasteGateOf); its lesser cones about its
-// foot. A basin of several stretches has one all the same, in its chief stretch's name (wasteBasin).
+// the floor holds its whole foot with room to spare (the widest that fits): on the line of its gate's road a short way past its
+// foot, its fortress facing up the road (D-087; searched outward along the line and a little to either side, the widest first
+// down to 150, then from the road's foot toward the basin's middle); else from the basin's middle, clear of the way down from its gate
+// (wasteGateOf); its lesser cones about its foot. A basin of several stretches has
+// one all the same, in its chief stretch's name (wasteBasin).
 const GREAT_R=[250,225,200,175,150,125];
 function greatOf(c){
   const key=landKey(c.i,c.j);if(greatC.has(key))return greatC.get(key);let v=null;greatC.set(key,null);
   if(LANDS[cellLand(c)].k==='volcanic'){const B=wasteBasin(c),ch=B.chief;
-    if(ch.i===c.i&&ch.j===c.j){const P=wasteGateOf(B),ft=P&&P.ramp.pts[P.ramp.pts.length-1]; // (near the foot of its gate's road, a short way on: D-083)
-      if(ft){const ex=B.cx-ft[0],ez=B.cz-ft[1],el=Math.hypot(ex,ez)||1;const at=(R,m)=>{const d=R*1.3+90;return greatTry(c,R,ft[0]+ex/el*d,ft[1]+ez/el*d,[],B,m);};
-        for(const [m,big] of [[180,1],[360,1],[180,0]]){for(const R of GREAT_R)if((R>=200)===!!big){v=at(R,m);if(v)break;}if(v)break;}}
+    if(ch.i===c.i&&ch.j===c.j){const P=wasteGateOf(B),pp=P&&P.ramp.pts;
+      if(pp){ // on the line of its gate's road, a short way past its foot, facing it (D-087)
+        const a=pp[pp.length-4]||pp[pp.length-1],b=pp[Math.max(0,pp.length-9)],dl=Math.hypot(a[0]-b[0],a[1]-b[1])||1,ex=B.cx-a[0],ez=B.cz-a[1],el=Math.hypot(ex,ez)||1;
+        const dirs=[[(a[0]-b[0])/dl,(a[1]-b[1])/dl],[ex/el,ez/el]]; // (on along the road, else from its foot toward the basin's middle)
+        find:for(const [k,Rs] of [[0,[250,225,200,175,150]],[1,[250,225,200,175,150]],[0,[125]]])for(const R of Rs){const [ux,uz]=dirs[k];
+          for(let e=0;e<=240;e+=8)for(const off of [0,12,-12,24,-24,48,-48,72,-72]){const d=R*1.05+90+e,X=Math.round(a[0]+ux*d-uz*off),Z=Math.round(a[1]+uz*d+ux*off);
+            v=greatAt(c,R,X,Z,[],B,Math.round(R),Math.atan2(a[1]-Z,a[0]-X));if(v){const q=pp[pp.length-1];v.ft=[Math.round(q[0]),Math.round(q[1]),Math.round(q[3])];break find;}}}}
       if(!v)for(const R of GREAT_R){v=greatTry(c,R,B.cx,B.cz,[],B);if(v)break;}}}
   greatC.set(key,v);return v;
 }
 // Is a disc of radius m about (X,Z) on the floor of a basin, and not over the sea?
 function onFloor(X,Z,m,k){landsAt(X,Z,TVC);if(TVC.bs>-m-8||TVC.wVolc<0.95)return false;
   for(let q=0;q<k;q++){const a=q*6.2832/k;landsAt(X+Math.round(Math.cos(a)*m),Z+Math.round(Math.sin(a)*m),TVC2);if(TVC2.bs>-8)return false;}return true;}
+// the first place that holds a great volcano of radius R on a spiral about (cx,cz) (within maxd of it, if given)
 function greatTry(c,R,cx,cz,G,B,maxd){
-  const foot=Math.round(R*1.3)+40;
-  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0;if(maxd&&d>maxd)break;const X=Math.round(cx+Math.cos(a)*d),Z=Math.round(cz+Math.sin(a)*d);
-    if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24))continue;if(!onFloor(X,Z,foot,16))continue;if(B&&wasteGateKeep(B,X,Z,foot+16))continue;
-    volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)continue;
-      const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);
-      const fl=[],nf=4+Math.floor(r()*3),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.6,len:0.85+r()*0.4});const old=[];for(let q=0;q<5;q++)old.push(r()*6.283);
-      const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
-      // lesser cones about its foot, where the floor holds them, clear of each other and of the stronger great volcanoes
-      const s0=r()*6.283;for(let q=0;q<18&&v.sats.length<4;q++){const sa=s0+q*0.75+(r()-0.5)*0.3,sR=30+Math.floor(r()*28),sd=R*1.15+sR*1.1+10+(q%2)*20+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
-        if(v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8)||B&&wasteGateKeep(B,sX,sZ,Math.round(sR*1.45)+12))continue;
-        const so={};colInfoBase(sX,sZ,so);if(so.h<so.sl+2||so.river||so.rvBot!==999)continue;
-        const sHv=Math.min(H-50-so.h,Math.round(sR*(0.62+sh*0.26))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
-        v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
-      return v;}finally{volcSkip=false;}}
+  for(let k=0;k<40;k++){const a=k*2.4,d=k?k*9:0;if(maxd&&d>maxd)break;const v=greatAt(c,R,Math.round(cx+Math.cos(a)*d),Math.round(cz+Math.sin(a)*d),G,B);if(v)return v;}
   return null;
+}
+// A great volcano of radius R at (X,Z), or null where the floor will not hold its foot or its gate's road comes within km (its
+// foot and more, by default). gth (D-087): the way from it to its gate's road; its flows and old flows are turned (all together)
+// so the widest gap between them faces that way, no lesser cone stands within half a right angle of it, and its fortress faces it.
+function greatAt(c,R,X,Z,G,B,km,gth){
+  const foot=Math.round(R*1.3)+40;
+  if(G.some(g=>Math.hypot(g.X-X,g.Z-Z)<(g.R+R)*1.3+24)||!onFloor(X,Z,foot,16)||B&&wasteGateKeep(B,X,Z,km!==undefined?km:foot+16))return null;
+  volcSkip=true;try{const o={};colInfoBase(X,Z,o);if(o.h<o.sl+2||o.river||o.rvBot!==999)return null;
+    const r=rngAt(c.i,9131,c.j),Hv=Math.min(H-30-o.h,Math.round(R*(0.95+r()*0.15))),rc=Math.round(R*0.14)+5,cd=12+Math.floor(r()*6);
+    const fl=[],nf=4+Math.floor(r()*3),a0=r()*6.283;for(let q=0;q<nf;q++)fl.push({a:a0+q*6.283/nf+(r()-0.5)*0.6,len:0.85+r()*0.4});const old=[];for(let q=0;q<5;q++)old.push(r()*6.283);
+    if(gth!==undefined){const A=fl.map(f=>f.a).concat(old).map(t=>((t%6.2832)+6.2832)%6.2832).sort((p,q)=>p-q);let gc=0,gw=-1;
+      for(let q=0;q<A.length;q++){const t0=A[q],t1=q+1<A.length?A[q+1]:A[0]+6.2832;if(t1-t0>gw){gw=t1-t0;gc=(t0+t1)/2;}}
+      const dt=gth-gc;for(const f of fl)f.a+=dt;for(let q=0;q<old.length;q++)old[q]+=dt;}
+    const v={great:1,key:'g'+c.i+','+c.j,i:c.i,j:c.j,X:X,Z:Z,R:R,pri:2,base:o.h,Hv:Hv,rc:rc,cd:cd,rimTop:o.h+Hv,lake:o.h+Hv-cd,fl:fl,old:old,name:'The Burning Mountain of '+fullName('drow',r,false),sats:[]};
+    if(gth!==undefined)v.gth=gth;
+    // lesser cones about its foot, where the floor holds them, clear of each other and of the stronger great volcanoes
+    const s0=r()*6.283;for(let q=0;q<18&&v.sats.length<4;q++){const sa=s0+q*0.75+(r()-0.5)*0.3,sR=30+Math.floor(r()*28),sd=R*1.15+sR*1.1+10+(q%2)*20+r()*14,sX=Math.round(X+Math.cos(sa)*sd),sZ=Math.round(Z+Math.sin(sa)*sd),sh=r(),sn=fullName('drow',r,false);
+      if(gth!==undefined&&Math.abs(angDiffV(sa,gth))<0.8||v.sats.some(t=>Math.hypot(t.X-sX,t.Z-sZ)<(t.R+sR)*1.3+12)||G.some(g=>Math.hypot(g.X-sX,g.Z-sZ)<(g.R+sR)*1.3+16)||!onFloor(sX,sZ,Math.round(sR*1.3)+6,8)||B&&wasteGateKeep(B,sX,sZ,Math.round(sR*1.45)+12))continue;
+      const so={};colInfoBase(sX,sZ,so);if(so.h<so.sl+2||so.river||so.rvBot!==999)continue;
+      const sHv=Math.min(H-50-so.h,Math.round(sR*(0.62+sh*0.26))),src=Math.round(sR*0.15)+3,scd=7+Math.floor(sh*5),sfl=[],snf=2+Math.floor(sh*2.9),sa0=sh*6.283;for(let t=0;t<snf;t++)sfl.push({a:sa0+t*6.283/snf,len:0.8+((sh*7.31+t*0.37)%1)*0.5});
+      v.sats.push({sat:1,key:'s'+c.i+','+c.j+','+q,i:c.i*16+q,j:c.j,X:sX,Z:sZ,R:sR,pri:1,base:so.h,Hv:sHv,rc:src,cd:scd,rimTop:so.h+sHv,lake:so.h+sHv-scd,fl:sfl,old:[sa0+1,sa0+3,sa0+5],name:'Mount '+sn});}
+    return v;}finally{volcSkip=false;}
 }
 // the great volcanoes whose works may reach within r of (X,Z), with their lesser cones (cached by 32-block tile for the terrain):
 // the basins of the volcanic cells about it, each once

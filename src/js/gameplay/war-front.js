@@ -1,6 +1,6 @@
 // ---- Into the basin and beneath it (W5, D-072; Q138, Q143, Q149, Q175). Once a gate has fallen its war goes on into its basin.
-// The front (`w.fr`, 0 to 1) moves out from the foot of the Long Descent across the floor toward the great volcano's foot with
-// play time (twenty minutes or so since D-083, a little different at each gate) and with battles won; four forward camps rise along that way as the
+// The front (`w.fr`, 0 to 1) moves out from the foot of the Long Descent across the floor toward the Ember Throne's stairs with
+// play time (ten minutes or so since D-087, a little different at each gate) and with battles won; four forward camps rise along that way as the
 // front passes them (a palisade ring with a gate toward the road, a watchtower, tents, the peoples' banners and a fire; made as
 // edits like the works, w.ap.fc), each with its garrison. The hosts' armies march down the Long Descent to the front and on, the
 // warhosts come at it from the volcano. The wastes' places are stormed: when every creature of one of their spots has fallen
@@ -9,22 +9,25 @@
 // hall and the Ember Stair chamber by chamber. Underground in such a basin a company of the hosts goes with the player, and now
 // and then a warband of the deep comes at it.
 const WAR_CAMPS=[0.05,0.35,0.65,0.95];
-// the way of the front: from the foot of the Long Descent to the great volcano's foot, a point every 16 (world), cached
-function warFrontPath(P){if(P.fpth)return P.fpth;const p=P.ramp.pts,a=p[p.length-1],G=P.B&&greatOf(P.B.chief),out=[];
-  if(!G){P.fpth=[[a[0],a[1]]];return P.fpth;}const dx=G.X-a[0],dz=G.Z-a[1],L=Math.hypot(dx,dz)||1,end=Math.max(20,L-(G.R*1.3+24));
-  for(let s=0;s<=end;s+=16)out.push([a[0]+dx/L*s,a[1]+dz/L*s]);return P.fpth=out;}
+// the way of the front: from the foot of the Long Descent along the causeway to the foot of the Ember Throne's stairs (D-087; to
+// the great volcano's foot where it has none), a point every 8 (world), cached
+function warFrontPath(P){if(P.fpth)return P.fpth;const p=P.ramp.pts,a=p[Math.max(0,p.length-4)],G=P.B&&greatOf(P.B.chief),F=G&&fortOf(G),out=[];
+  if(!G){P.fpth=[[a[0],a[1]]];return P.fpth;}let dx=G.X-a[0],dz=G.Z-a[1],end=Math.max(20,Math.hypot(dx,dz)-(G.R*1.3+24));
+  if(F&&F.cw){dx=F.GX+F.ox*(F.P.td+8)-a[0];dz=F.GZ+F.oz*(F.P.td+8)-a[1];end=Math.max(8,Math.hypot(dx,dz));}
+  const L=Math.hypot(dx,dz)||1;for(let s=0;s<=end;s+=8)out.push([a[0]+dx/L*s,a[1]+dz/L*s]);return P.fpth=out;}
 // the war of the basin a world point lies in, if its gate has fallen (and the gate)
 // the basin a world point lies in (its floor, or the ring's inner wall), or null
 function warBasinAt(X,Z){const o={};wasteAt(X,Z,o);return o.bc&&o.bs<40?wasteBasin(o.bc):null;}
 function warBasinWar(X,Z){let any=false;for(const w of WARS.values())if(w.s>=2)any=true;if(!any)return null;const B=warBasinAt(X,Z),P=B&&wasteGateOf(B);if(!P)return null;
   const w=WARS.get(P.id);return w&&w.s>=2?{P:P,w:w}:null;}
 // how far the front has come
-const warFrontPace=w=>20*60*(0.85+0.3*hsh(w.X,9921,w.Z)); // (twenty minutes or so: the way to the great volcano is short since D-083)
+const warFrontPace=w=>10*60*(0.85+0.3*hsh(w.X,9921,w.Z)); // (ten minutes or so: the way to the Ember Throne is short since D-083, D-087)
 function warFront(w){if(!(w.s>=2))return 0;const pace=warFrontPace(w);return Math.max(0,Math.min(1,(w.b.fr||0)+(warPlay-(w.fallT||0))/pace));}
 const warFrontAt=(P,w)=>{const F=warFrontPath(P);return F[Math.min(F.length-1,Math.floor(warFront(w)*(F.length-1)))];};
 // ---- the forward camps: where each stands (the path's point, moved along it to dry ground), and its cells
 function warCampAt(P,k){P.fcs=P.fcs||[];if(P.fcs[k]!==undefined)return P.fcs[k];const F=warFrontPath(P),i0=Math.round(WAR_CAMPS[k]*(F.length-1));let r=null;
-  for(let d=0;d<F.length&&!r;d++)for(const i of [i0+d,i0-d]){if(i<0||i>=F.length)continue;const [X,Z]=F[i],o={};colInfoBase(Math.round(X),Math.round(Z),o);if(o.h>o.sl+1&&!o.river&&!o.lake){r=[Math.round(X),Math.round(Z),i,Math.round(o.h)];break;}}
+  const f0=F[0],f1=F[F.length-1],fl=Math.hypot(f1[0]-f0[0],f1[1]-f0[1])||1,sh=fl<140?(k%2?26:-26):0,nx=-(f1[1]-f0[1])/fl*sh,nz=(f1[0]-f0[0])/fl*sh; // (on a short way, beside it, either side in turn: D-087)
+  for(let d=0;d<F.length&&!r;d++)for(const i of [i0+d,i0-d]){if(i<0||i>=F.length)continue;const X=F[i][0]+nx,Z=F[i][1]+nz,o={};colInfoBase(Math.round(X),Math.round(Z),o);if(o.h>o.sl+1&&!o.river&&!o.lake){r=[Math.round(X),Math.round(Z),i,Math.round(o.h)];break;}}
   return P.fcs[k]=r;}
 function warCampCells(P,k){const C=warCampAt(P,k);if(!C)return [];const [X,Z,i]=C,F=warFrontPath(P),[bx,bz]=F[Math.max(0,i-1)],gdx=bx-X,gdz=bz-Z,gl=Math.hypot(gdx,gdz)||1,out=[];
   const top=(x,z)=>{const lx=x-OX,lz=z-OZ;return lx<0||lz<0||lx>=W||lz>=D?-1:ground[lx+W*lz];},put=(x,y,z,id)=>out.push([x,y,z,id]);
