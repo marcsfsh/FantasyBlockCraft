@@ -5,6 +5,29 @@ Entries are grouped under **Game** (anything a player would notice) and **Toolin
 
 ## Unreleased
 
+## 0.54.0 (2026-10-14): the dwarves enlarged
+
+Saves from 0.53.0 do not carry over (save key v44).
+
+### Game
+- **The court under the mountain:** in every high hold the king or the queen of the mountain sits the throne on its dais, the anvilguard in gilded plate either side, the warden of the hold, the loremaster and the court below. A lesser hold's throne has its thane. Ask for an audience.
+- **Standing, the oath and kinship:** the dwarves keep a ledger of what you do: Stranger, Guest of the Hold, Stone-friend (they give you a name of their own), Friend of the Mountain; then a friend of great standing swears the oath on the anvil before a throne and is Oathbound of the Hold, given the hold-ring, the horn of the hold, the plate of the mountain and a rune. An oathbound friend of great standing is made Kin of the Mountain, given a hall in that hold and its key: rest there, and wake there after a fall.
+- **The horn of the hold:** an oathbound friend's horn calls a shield-wall of axeguards and hammerers to your side.
+- **Speak with them:** their own tongue, merchants, the moneychanger (who buys ore, ingots and gems), the gemcutter, the brewer, the farmers, smiths, the ram-keeper and the loremaster.
+- **Runes:** the runesmith cuts runes for a new Rune slot: keenness (harder blows), warding (lighter blows taken), delving (faster mining), the lamp (light about you), the hearth (slower hunger), stone (gentler falls).
+- **Tasks of the hold:** carry a writ-stone to another hold in time, supplies for the smelters, find a miner lost in the deep galleries, a bounty on the wastes' creatures, bring home a hold's heirloom from a worked-out claim.
+- **Below the mountain:** two streets of halls under every high hold: the ale-hall, the runesmith's chamber, the brewery and the market hall; the mushroom gardens, the hot baths and the treasury; and the Hall of the Fathers, the long vault of the kings' tombs, their flames, the kings of old in stone and the annals at its lecterns. Take nothing from the treasury.
+- **The delving contest:** once a day at a hold or mining town, three miners race to bring out the most ore in ninety seconds. Ask a miner at the headframe to dig with them and win gold and the golden pick.
+- **The great rams:** buy one from a ram-keeper's pen and ride it: it springs up ledges a horse balks at. Wild rams roam the heights, and take only to a friend of the dwarves.
+- **The Kindling:** every fourth evening the hold gathers in the great hall; the deep drum is beaten and the old names sung. Stay a while and you are fed.
+- **Prospectors' claims** across the high lands outside the realms: adits timbered into the hillsides with their camps and strongboxes, some worked by a prospector who will trade, some worked out and left.
+- **More of their life:** pony caravans on the Stone Road, ram-riders, the shift horns at dawn and dusk, the engine drill at the bastions, the deep watch, ravens with news, pipe smoke at the gates, the lamplighter, children in the streets, gems in the mines' walls, waymarks on the roads that tell the way, the deep drum, a low horn for the fallen.
+- **Small things:** the dwarves' places marked on the map with the golden anvil under three peaks, the claims with a pick; the province's name as you come into it and the great doors' greeting; the claims in the discovery log; the annals in the journal; in creative, tours under the mountain and to the claims.
+- **New fare and gear:** dark ale, the stout of the deep, fire ale, mushroom bread, hard cheese, mushroom stew, rough and cut gems, the dwarven mattock, the bearded axe of the mountain, the plate of the mountain, six runes. New blocks under Building.
+
+### Tooling
+- New tests: `92-dwarf-places`, `93-dwarf-standing`, `94-dwarf-court`, `95-dwarf-life`; `19-equipment` counts the rune slot.
+
 ## 0.53.0 (2026-10-13): the riders enlarged
 
 Saves from 0.52.0 do not carry over (save key v43).

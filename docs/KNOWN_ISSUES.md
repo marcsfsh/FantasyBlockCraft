@@ -121,3 +121,7 @@
 - **Sparring is a count of touches (D-090).** The opponent stands and swings on a beat; a swing within reach lands unless the player's guard is up, and every blow the player lands counts. No harm is done on either side.
 - **Fixed (D-090): a drake could dive on the townsfolk while soldiers stood by.** It now takes a soldier in reach first, and one of the townsfolk only when none is.
 - **Fixed (D-090): the wolf riders of the borderlands sometimes never came.** When the flank they were sent up lay outside the loaded world they gave up; they now try the other.
+- **Prospectors' claims are few (D-091).** A claim needs the foot of a steep dry rise in the high lands outside the realms, level ground before it and rock over its adit; on the default seed ten lie within 1,440 blocks of the origin (four worked out), and near some holds there are none, so the task for a hold's heirloom is not always offered.
+- **The delving contest's miners are a count (D-091).** The three miners go down at the horn and their tallies rise each second; they are not seen digging. Every ore or gem the player breaks below the place's level within it counts.
+- **The Kindling's folk stand at the boards (D-091).** As at the riders' feast, there are no seats; the brewer with the horn waits near the dais.
+- **Caravans and ram-riders walk straight (D-091).** They make for a point far along the Stone Road and may leave it where it bends; the ponies trail their master inside a moving pen.

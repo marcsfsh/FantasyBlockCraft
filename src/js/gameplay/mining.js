@@ -30,12 +30,12 @@ function mineTick(dt){
   if(BOX_IDS.has(hit.id)&&boxBusy(hit.x,hit.y,hit.z)){toast(boxes.has(wkey(hit.x+OX,hit.y,hit.z+OZ))||hit.id===CHEST?'Empty it before you break it':'Open it first (place button)');hold=-1;crack.visible=false;return;}
   const i=I(hit.x,hit.y,hit.z);if(i!==mineI){mineI=i;mineP=0;}
   const info=mineInfo(hit.id,curId());if(!info){crack.visible=false;return;}
-  mineP+=info.t<=0?1:dt/info.t;
+  mineP+=info.t<=0?1:dt/info.t*(runeOn('delve')?1.3:1); // (the rune of delving: D-091)
   mineTk-=dt;
   if(mineTk<=0){mineTk=0.24;swing=1;breakFx(hit.x,hit.y,hit.z,hit.id,2);const sd=SND[BL[hit.id].snd]||SND.stone;burst(0.05,'bandpass',sd[0]*0.8,sd[1],0.12);}
   if(mineP>=1){
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false,hit.x,hit.y,hit.z);buzz(10);
-    const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
+    const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);dwarfTheft(hit.x,hit.y,hit.z,id);delveMined(id,hit.x,hit.y,hit.z);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
     if(info.drop){let lost=0;const got=sick?sickleSweep(hit.x,hit.y,hit.z):id===ROPE||id===GRAPNEL?ropeTake(id,hit.x,hit.y,hit.z):dropsFor(id,tool);
       if(BL[id].mat==='ore')hint('ore');
       for(const [d,n] of got){lost+=addItem(d,n);showName('+'+n+' '+nameOf(d));}if(lost)toast('Inventory full');drawBar(true);}

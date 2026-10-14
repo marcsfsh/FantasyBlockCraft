@@ -19,7 +19,7 @@ const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.value
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
   for(const p of places)if(p.n===n&&Math.hypot(p.X-X,p.Z-Z)<160)return false;
-  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':ck==='white'?'m':ck==='horse'?'h':elderNear(X,Z,2)?'r':oldNear(X,Z,2)?'o':fathersNear(X,Z,2)&&fathersNear(X,Z,2).name?'g':''; // the elves' places are marked with their sign (D-088), the white realm's and the old kingdom's with theirs (D-089), the riders' and the forefathers' (D-090)
+  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':ck==='white'?'m':ck==='horse'?'h':ck==='dwarf'?'d':claimsNear(X,Z,-4)?'c':elderNear(X,Z,2)?'r':oldNear(X,Z,2)?'o':fathersNear(X,Z,2)&&fathersNear(X,Z,2).name?'g':''; // the elves' places are marked with their sign (D-088), the white realm's and the old kingdom's with theirs (D-089), the riders' and the forefathers' (D-090)
   if(places.length>=PLACE_CAP)places.shift();places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});saveDirty=true;return true;
 }
 // the sign of an elven place on the map (D-088): a star of the high elves in silver and blue, a leaf of the wood elves in gold and
@@ -29,6 +29,9 @@ function wmElfSign(g,x,y,e){g.save();g.translate(x,y);g.lineWidth=1.5;
     if(e==='m'){g.beginPath();for(let k=0;k<16;k++){const r=k%2?1.2:(k%4===0?3.6:2.4),a=k/16*6.283-1.5708;g.lineTo(Math.cos(a)*r,-8+Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}else{g.beginPath();g.moveTo(-2.5,-4);g.lineTo(0,-6);g.lineTo(2.5,-5);g.stroke();}g.restore();return;}
   if(e==='h'){g.fillStyle='#32602e';g.strokeStyle='#d6b054';g.beginPath();g.arc(0,0,6,0,6.283);g.fill();g.stroke();g.fillStyle='#f0eee4'; // the riders: a white horse's head on a round green shield
     g.beginPath();g.moveTo(-2.5,4);g.lineTo(-1,-1);g.lineTo(-2.5,-3);g.lineTo(1,-4);g.lineTo(3.5,-1);g.lineTo(2,0);g.lineTo(0.5,-1.5);g.lineTo(1.5,4);g.closePath();g.fill();g.restore();return;}
+  if(e==='d'){g.fillStyle='#28386e';g.strokeStyle='#d6b054';g.fillRect(-6,-6,12,12);g.strokeRect(-6,-6,12,12);g.fillStyle='#ececf0'; // the dwarves: a golden anvil under three white peaks on blue
+    g.beginPath();g.moveTo(-5,0);g.lineTo(-3,-4);g.lineTo(-1,0);g.lineTo(0,-5);g.lineTo(1,0);g.lineTo(3,-4);g.lineTo(5,0);g.closePath();g.fill();g.fillStyle='#d6b054';g.fillRect(-3.5,1,7,1.6);g.fillRect(-1,2.6,2,1.4);g.fillRect(-2.5,4,5,1.2);g.restore();return;}
+  if(e==='c'){g.strokeStyle='#5a4a36';g.lineWidth=2;g.beginPath();g.moveTo(-5,5);g.lineTo(4,-4);g.stroke();g.strokeStyle='#9a9ca4';g.beginPath();g.moveTo(1,-6);g.quadraticCurveTo(4,-5,6,-1);g.stroke();g.restore();return;} // a claim: a pick
   if(e==='g'){g.fillStyle='#8c8c86';g.strokeStyle='#3c3c38';for(let k=0;k<7;k++){const a=k/7*6.283;g.fillRect(Math.cos(a)*5-1,Math.sin(a)*5-1.5,2,3);g.strokeRect(Math.cos(a)*5-1,Math.sin(a)*5-1.5,2,3);}g.restore();return;} // the forefathers: a ring of stones
   if(e==='w'){g.fillStyle='#d8b040';g.strokeStyle='#2e5a26';g.beginPath();g.moveTo(0,-7);g.quadraticCurveTo(6,0,0,7);g.quadraticCurveTo(-6,0,0,-7);g.fill();g.stroke();g.beginPath();g.moveTo(0,-6);g.lineTo(0,6);g.stroke();}
   else{g.fillStyle=e==='r'?'#9a9890':'#e6ecf6';g.strokeStyle=e==='r'?'#4a4844':'#1e3060';g.beginPath();for(let k=0;k<12;k++){const r=k%2?2.6:(e==='r'&&k===4?3.5:7),a=k/12*6.283-1.5708;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}

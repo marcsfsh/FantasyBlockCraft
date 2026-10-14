@@ -35,6 +35,7 @@ function update(dt){
     const bx=moveAxis('x',PL.vx*h),bz=moveAxis('z',PL.vz*h);if(bx||bz)wallHit=true;
     if(bx)PL.vx=0;if(bz)PL.vz=0;
     if((bx||bz)&&TOUCH&&wasGround&&!PL.fly&&wl>0.3&&!SOLID[get(Math.floor(PL.x+wx*0.6),Math.floor(PL.y+1.5),Math.floor(PL.z+wz*0.6))])PL.vy=8.4;
+    if((bx||bz)&&PL.ride&&ANIMALS[PL.ride.kind].climb&&wasGround&&wl>0.3&&PL.vy<=0&&!SOLID[get(Math.floor(PL.x+wx*0.7),Math.floor(PL.y+2.5),Math.floor(PL.z+wz*0.7))])PL.vy=12; // a ram springs up a step or a ledge of two (D-091)
   }
   if(PL.y<-20){if(SURV())hurt(999,'void');else respawn();}
   survivalTick(dt,inLiq,Math.hypot(PL.vx,PL.vz)*dt,sprint);

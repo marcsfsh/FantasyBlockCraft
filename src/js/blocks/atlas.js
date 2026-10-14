@@ -685,6 +685,52 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
       P(415,x,y,ms?sh([86,120,66],(hn(x,y,1036)-.5)*18):li?sh([170,170,116],(hn(x,y,1037)-.5)*16):sh([128,128,126],(gr?-10:0)+(hn(x,y>>1,1038)-.5)*16+(x===0?8:x===15?-10:0)));
       P(416,x,y,hn(x>>1,y>>1,1039)<0.16?sh([170,170,116],(hn(x,y,1040)-.5)*14):sh([134,134,130],(hn(x,y,1041)-.5)*14));}
   }
+  // the dwarves enlarged (D-091). The gem seam: grey rock with clusters of crystals, green, red and blue, each lit at one facet;
+  // a heap of gems on gold coin; the rune forge, an anvil's dark polished face cut with runes glowing blue, and its side of
+  // granite banded in iron with runes; the tomb of a king, his effigy in pale granite on the lid (the helm, the beard to the belt,
+  // the axe laid by his side) and its side of granite with a knotwork panel; the brewing vat, its copper rim riveted round dark
+  // wort and foam, its side of riveted copper with iron hoops; the ale keg, its head ringed and bunged, its staves hooped with a
+  // brass tap; the waymark of the Stone Road, cut with the four ways on its cap and runes down its face under a chevron; the deep
+  // drum, its hide pale and worn at the heart, its shell hooped in bronze and laced; the mushroom bed, dark loam threaded white
+  // with small caps; and the prospector's strongbox, oak in iron straps with a hasp and a lock
+  const RUN=['................','..1......1......','..11.....1.1....','..1.1....11.....','..1......1.1....','..1......1..1...','..1......1......','................',
+    '................','..1...1....1....','...1.1....111...','....1....1.1.1..','...1.1.....1....','..1...1....1....','................','................'];
+  const rn=(x,y)=>x>=0&&y>=0&&x<16&&y<16&&RUN[y][x]==='1',rnNear=(x,y)=>rn(x-1,y)||rn(x+1,y)||rn(x,y-1)||rn(x,y+1);
+  const GEMC=[[70,200,120],[210,60,80],[80,140,230],[230,200,90],[170,90,220]];
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const g=[[4,4,0,1.8],[11,6,1,1.6],[6,11,2,1.9],[12,12,0,1.1],[2,9,3,0.9]].map(([cx,cy,c,r])=>[Math.abs(x-cx)+Math.abs(y-cy),c,r,x-cx,y-cy]).find(q=>q[0]<=q[2]);
+      P(417,x,y,g?sh(GEMC[g[1]],g[3]<0&&g[4]<0?40:g[3]>0&&g[4]>0?-36:(hn(x,y,1050)-.5)*20):sh([128,128,128],(hn(x,y,1051)-.5)*22+(hn(x>>2,y>>2,1052)-.5)*10));}
+    {const q=hn(x>>1,y>>1,1053),c=GEMC[(hn(x>>1,y>>1,1054)*5)|0],hl=x%2===0&&y%2===0;
+      P(418,x,y,q<0.4?sh(c,hl?46:(x%2&&y%2?-30:0)):sh([214,176,84],((x*3+y*5)%7===0?26:(x+y)%3===0?-22:4)+(hn(x,y,1055)-.5)*12));}
+    {const ed=x===0||y===0||x===15||y===15;P(419,x,y,rn(x,y)?[150,226,255]:rnNear(x,y)?[70,110,150]:ed?sh([110,112,120],x===0||y===0?20:-10):sh([66,68,76],(hn(x,y,1056)-.5)*10+(x+y<10?10:0)));
+      const band=y>=4&&y<=11,ry=y-4+1;P(420,x,y,y<=1?sh([186,138,72],y===0?18:-6):band?(rn(x,ry)?[150,226,255]:rnNear(x,ry)?[70,104,140]:sh([62,64,72],(hn(x,y,1057)-.5)*10+(y===4?16:y===11?-14:0))):sh(gran(x,y,1058),y===15?-12:0));}
+    {const sl=x===0||x===15||y===0||y===15,helm=y>=1&&y<=3&&x>=5&&x<=10,crest=y===1&&x>=7&&x<=8,face=y>=4&&y<=5&&x>=6&&x<=9,beard=y>=6&&y<=10&&Math.abs(x-7.5)<=2.6-(y-6)*0.45,
+      body=y>=6&&y<=13&&x>=4&&x<=11,hands=y===9&&x>=5&&x<=10&&!beard,feet=y===14&&(x===5||x===6||x===9||x===10),haft=x===13&&y>=6&&y<=14,ahead=y>=5&&y<=7&&x>=12&&x<=14;
+      P(421,x,y,sl?sh([104,100,98],(hn(x,y,1059)-.5)*8):crest?[186,138,72]:helm?sh([182,176,170],x<8?10:-8):face?sh([196,190,182],x===7||x===8?10:-6):beard?sh([170,164,156],(x+y)%2?-12:6):hands?sh([190,184,176],-4):
+        ahead?sh([170,170,176],x===12?16:-10):haft?[150,110,60]:feet?sh([150,144,138],0):body?sh([160,154,148],(x===4||x===11?-14:0)+(y%3===0?-6:0)):sh(gran(x,y,1060),-16));
+      const kx=x%8,ky=(y-5)%8,kn=y>=5&&y<=11&&(kx===1||kx===6||ky===1||ky===5)&&!(kx===1&&ky===1)&&(kx+ky)%3!==0;
+      P(422,x,y,y<=1?sh([186,138,72],y===0?18:-8):y===4||y===12?sh([110,106,102],0):kn?sh([196,148,72],(hn(x,y,1061)-.5)*12):y===14&&x%3!==0?[96,92,90]:sh(gran(x,y,1062),y>4&&y<12?-12:0));}
+    {const r=Math.hypot(x-7.5,y-7.5),rim=r>6.2&&r<=7.7,riv=rim&&Math.abs(r-7)<0.5&&((Math.atan2(y-7.5,x-7.5)*8/Math.PI+16)%2<0.4),foam=r<=6.2&&hn(x>>1,y>>1,1063)<0.3&&r>2;
+      P(423,x,y,r>7.7?[56,42,30]:riv?[230,200,130]:rim?sh([186,124,68],(x+y<15?14:-12)+(hn(x,y,1064)-.5)*8):foam?sh([232,222,190],(hn(x,y,1065)-.5)*12):sh([92,58,32],(hn(x,y,1066)-.5)*14-r*1.5));
+      const hp=y===2||y===12,seam=y%8===6,riv2=seam&&x%3===1,vg=hn(x,y,1067)<0.06;
+      P(424,x,y,hp?sh([80,82,88],(x%4===0?18:0)):riv2?[230,196,130]:seam?sh([140,84,46],0):vg?sh([96,150,120],(hn(x,y,1068)-.5)*12):sh([186,112,64],(x===0?14:x===15?-14:0)+(hn(x,y>>2,1069)-.5)*14+(y%8===0?12:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(425,x,y,r>6.6?sh([80,82,88],r>7.3?-20:10):r<1.3?[40,28,18]:sh([128,88,52],(Math.floor(r*1.3)%2?-12:6)+(hn(x,y,1070)-.5)*10));
+      const hoop=(y>=2&&y<=3)||(y>=12&&y<=13),tap=(y>=7&&y<=8&&x>=6&&x<=9)||(x===7||x===8)&&y>=9&&y<=10,stave=x%3===0;
+      P(426,x,y,tap?sh([220,180,90],y===7?18:-6):hoop?sh([80,82,88],(y===2||y===12?16:-8)):sh([128,88,52],(stave?-16:0)+(hn(x,y>>2,1071)-.5)*12+(Math.abs(x-7.5)>6?-14:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5),ways=(Math.abs(x-7.5)<0.6||Math.abs(y-7.5)<0.6)&&r<6.5&&r>1.6,tips=r>=5.2&&r<6.5&&(Math.abs(x-7.5)<1.6||Math.abs(y-7.5)<1.6),boss=r<1.6;
+      P(427,x,y,boss?[150,146,142]:ways||tips?[96,92,90]:x===0||y===0||x===15||y===15?sh([110,106,102],0):sh(gran(x,y,1072),0));
+      const arrow=y>=1&&y<=4&&Math.abs(Math.abs(x-7.5)-(y-0.5))<0.6,cut=(rn(x,y+2)&&y>=5&&y<=12),band=y>=14;
+      P(428,x,y,arrow||cut?[96,92,90]:rn(x-1,y+2)&&y>=5&&y<=12?sh(gran(x,y,1073),18):band?sh([196,148,72],((x+y)%4===0?-30:0)+(hn(x,y,1074)-.5)*10):sh(gran(x,y,1075),y===13?-14:0));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(429,x,y,r>7?sh([186,138,72],r>7.5?-24:10):Math.abs(r-5)<0.5?sh([176,156,120],0):r<2.2?sh([170,148,110],(hn(x,y,1076)-.5)*12):sh([218,200,164],(hn(x,y,1077)-.5)*12-r*0.8));
+      const hoop=y<=1||y>=14,lace=y>=2&&y<=13&&((x+y)%8===0||(x-y+16)%8===0);P(430,x,y,hoop?sh([186,138,72],(y===0||y===14?16:-10)):lace?sh([210,190,140],(hn(x,y,1078)-.5)*10):sh([120,80,46],(x%4===0?-14:0)+(hn(x,y>>2,1079)-.5)*12));}
+    {const th=Math.abs(Math.sin(x*1.3+y*0.7+Math.sin(y*0.9)*2))<0.13&&hn(x,y,1080)<0.7,cap=[[3,4],[10,3],[6,10],[12,11]].some(([cx,cy])=>Math.hypot(x-cx,y-cy)<1.3);
+      const loam=(xx,yy,k)=>sh([62,44,32],(hn(xx,yy,k)-.5)*18);P(431,x,y,cap?sh([206,166,112],(hn(x,y,1081)-.5)*16+(y%2?-10:6)):th?sh([224,218,204],(hn(x,y,1082)-.5)*10):loam(x,y,1083));
+      P(432,x,y,y<=2?sh([110,80,50],(y===0?14:y===2?-12:0)+(hn(x>>2,y,1084)-.5)*10):th&&y>4?sh([214,208,196],-10):loam(x,y,1085));}
+    {const strap=(x>=3&&x<=4)||(x>=11&&x<=12),ed=x===0||y===0||x===15||y===15,lock=x>=6&&x<=9&&y>=6&&y<=9,riv=strap&&y%4===1;
+      P(433,x,y,lock?sh([70,72,78],(x===6||y===6?20:-8)):riv?[160,162,168]:strap||ed?sh([60,62,68],(hn(x,y,1086)-.5)*10):sh([100,66,38],(y%4===3?-14:0)+(hn(x,y>>2,1087)-.5)*12));
+      const hasp=x>=6&&x<=9&&y>=1&&y<=5,pad=x>=6&&x<=9&&y>=6&&y<=9,riv2=strap&&y%5===2;
+      P(434,x,y,pad?sh([150,120,60],(x===6?16:-8)):hasp?sh([70,72,78],(y===1?18:0)):riv2?[160,162,168]:strap||ed?sh([60,62,68],(hn(x,y,1088)-.5)*10):sh([100,66,38],(y%4===3?-14:0)+(hn(x,y>>2,1089)-.5)*12));}
+  }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
     P(47,x,y,st===0?sh([132,110,184],(hn(x,y,307)-.5)*16):st===1?sh([84,66,124],(hn(x,y,308)-.5)*10):hn(x,y,309)<.07?[104,78,156]:sh([42,32,62],(hn(x,y,310)-.5)*12+(Math.abs(cc-3.5)<0.7||Math.abs(cc-6.5)<0.7?14:0)));}

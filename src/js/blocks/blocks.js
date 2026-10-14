@@ -274,6 +274,16 @@ def(HSHIELD,'Shield of the Riders',[404,404,404],Object.assign({},HANG,{snd:'woo
 def(PENNON,'Race Pennon',[409,409,409],Object.assign({},HANG,{snd:'wood'}));def(PICSTONE,'Picture Stone',[410,410,411]);def(FCHEST,'Hoard Chest of the Forefathers',[412,412,413],{snd:'wood'});
 def(FEASTBOARD,'Feasting Board',[292,292,414],{snd:'wood'});def(STANDSTONE,'Standing Stone',[415,415,416]);
 setH([BARROWBLOOM,HTAP],0,'soft');setH([SKEP],0.6,'soft');setH([HSHIELD,PENNON],0.6,'wood');setH([HSEAT,FEASTBOARD,FCHEST],2,'wood');setH([HSTONE,PICSTONE,STANDSTONE],4,'stone',1);
+// The dwarves enlarged (D-091): the gem seam in the mines' walls, crystals of green, red and blue in the rock; a heap of cut gems and
+// gold in the treasuries; the rune forge, an anvil whose face is cut with runes that glow blue; the tomb of a king of the
+// mountain, his effigy in granite on its lid; the brewing vat of riveted copper, foaming; an ale keg on its rack, a brass tap in
+// it; the waymark of the Stone Road, a granite post cut with runes and the ways; the deep drum, a great hide drum hooped in
+// bronze; the mushroom bed of dark loam threaded with white; and the prospector's strongbox, oak bound in iron
+const GEMORE=1223,GEMHEAP=1224,DRUNE=1225,DTOMB=1226,DVAT=1227,DKEG=1228,DWAY=1229,DDRUM=1230,MUSHBED=1231,DSTRONG=1232;
+def(GEMORE,'Gem Seam',[417,417,417]);def(GEMHEAP,'Heap of Gems',[418,418,418],{emit:true,lum:5,snd:'glass'});def(DRUNE,'Rune Forge',[419,335,420],{emit:true,lum:9});
+def(DTOMB,'Tomb of a King',[421,335,422]);def(DVAT,'Brewing Vat',[423,340,424]);def(DKEG,'Ale Keg',[425,425,426],{snd:'wood'});def(DWAY,'Waymark of the Stone Road',[427,335,428]);
+def(DDRUM,'Deep Drum',[429,349,430],{snd:'wood'});def(MUSHBED,'Mushroom Bed',[431,2,432],{snd:'soft'});def(DSTRONG,"Prospector's Strongbox",[433,433,434],{snd:'wood'});
+setH([GEMORE],6,'ore',4);setH([GEMHEAP],1.5,'misc');setH([DRUNE,DVAT],5,'metal',2);setH([DTOMB,DWAY],5,'stone',1);setH([DKEG,DDRUM,DSTRONG],2,'wood');setH([MUSHBED],0.6,'soft');
 setH([EFFIGY,MILESTONE,HEADSTONE,RTHRONE,OLDSTONE],4,'stone',1);setH([STGLASS],0.5,'misc');setH([HEARTSEASE],0,'soft');setH([OLDCHEST],2.5,'stone');
 setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');

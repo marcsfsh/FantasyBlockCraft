@@ -70,7 +70,7 @@ function foeStruck(f,dmg,kx,kz,o){o=o||{};const F=FOES[f.kind];if(f.dead)return;
   if(f.hp<=0)foeSlain(f);}
 // the player's blow, its reach and power (foeAct): a running blow, the saddle and the lance, the bash; an axe's cleave
 const armsReach=()=>PL.ride&&ITEMS[curId()]&&ITEMS[curId()].tool==='lance'?6:4.6;
-function armsBlow(f,held){const it=ITEMS[held],v=Math.hypot(PL.vx,PL.vz);let dmg=hitPower(held),kb=5,st=0,say='';
+function armsBlow(f,held){const it=ITEMS[held],v=Math.hypot(PL.vx,PL.vz);let dmg=hitPower(held)*(runeOn('keen')?1.25:1),kb=5,st=0,say=''; // (the rune of keenness: D-091)
   if(it&&it.tool==='lance')dmg=PL.ride?6+v*2.6:4;
   else if(PL.ride)dmg*=1+v/10;
   else if(v>5){dmg*=1.4;kb=8;say='run';}

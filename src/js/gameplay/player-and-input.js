@@ -69,7 +69,8 @@ const HEADINGS=['north','north-west','west','south-west','south','south-east','e
 const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 // Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
 // its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
-const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag',body:'Body',arm:'Arm'},equip={belt:null,pack:null,bag:null,body:null,arm:null}; // body: armour (D-052); arm: a shield (W8a)
+const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag',body:'Body',arm:'Arm',rune:'Rune'},equip={belt:null,pack:null,bag:null,body:null,arm:null,rune:null}; // body: armour (D-052); arm: a shield (W8a); rune: a rune of the dwarves (D-091)
+const runeOn=k=>!!(equip.rune&&ITEMS[equip.rune.id].rune===k&&SURV()); // the rune worn (D-091)
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
 function invCap(s,id){let n=36;for(const k of ['pack','bag']){const q=k===s?(id?{id:id}:null):equip[k];if(q&&ITEMS[q.id].slots)n+=ITEMS[q.id].slots;}return n;} // with slot s holding id instead, if given
@@ -116,6 +117,7 @@ function dropsFor(id,tool){
     case TURN2:return[[330,2+(Math.random()*2|0)]];case BEAN0:case BEAN1:return[[331,1]];case BEAN2:return[[331,2+(Math.random()*2|0)]];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
     case CHARWOOD:case SMOULDER:return[[200,1+(Math.random()<0.3?1:0)]];case VENT:return[[CINDER,1]];case LAVACRUST:return[[CINDER,1]];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
+    case GEMORE:return[[468,1+(Math.random()<0.2?1:0)]];case DSTRONG:return[];case MUSHBED:return[[DIRT,1]]; // (a rough gem from the dwarves' seams: D-091)
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case ECHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
     case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.17?[[331,1]]:r<0.47?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];

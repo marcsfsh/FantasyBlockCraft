@@ -240,7 +240,7 @@ function autoArea(n){const c=n.hardwareConcurrency||4,mob=n.userAgentData?!!n.us
 const AREA=(a=>a>=0&&a<AREAS.length?AREAS[a]:autoArea(navigator))((lsGet('blockcraft-settings-v1')||{}).area);
 // Settings and save data
 const W=AREA,D=AREA,H=512,SEA=310,CS=16,NCX=W/CS,NCZ=D/CS,VOL=W*H*D;
-const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v43',SET_KEY='blockcraft-settings-v1';
+const SKY=0xa9d3ff,SAVE_KEY='fantasy-blockcraft-save-v44',SET_KEY='blockcraft-settings-v1';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
@@ -253,7 +253,7 @@ function newWorldEntry(name,seed,mode){return{id:'w'+Date.now().toString(36)+(Ma
 const WIX=worldIndex();
 if(!WIX.list.some(w=>w.id===WIX.active)){if(!WIX.list.length)WIX.list.push(newWorldEntry('World 1',0,(lsGet(SET_KEY)||{}).newMode));WIX.active=WIX.list[0].id;lsSet(SAVE_KEY,WIX);}
 const WORLD=WIX.list.find(w=>w.id===WIX.active);
-const SAVE_V=43,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
+const SAVE_V=44,savedOK=d=>!!(d&&d.v===SAVE_V&&d.seed===WORLD.seed); // world data version: the loader and saveNow share it
 const saved=(d=>savedOK(d)?d:null)(lsGet(worldKey(WORLD.id)));
 const SEED=WORLD.seed;
 const settings=Object.assign({touch:'auto',res:'auto',hud:true,hints:true,seen:{},cave:1,fov:75,sens:1,view:-1,area:-1,sound:true,time:'cycle',weather:true,war:2},lsGet(SET_KEY)||{});
@@ -624,6 +624,16 @@ def(HSHIELD,'Shield of the Riders',[404,404,404],Object.assign({},HANG,{snd:'woo
 def(PENNON,'Race Pennon',[409,409,409],Object.assign({},HANG,{snd:'wood'}));def(PICSTONE,'Picture Stone',[410,410,411]);def(FCHEST,'Hoard Chest of the Forefathers',[412,412,413],{snd:'wood'});
 def(FEASTBOARD,'Feasting Board',[292,292,414],{snd:'wood'});def(STANDSTONE,'Standing Stone',[415,415,416]);
 setH([BARROWBLOOM,HTAP],0,'soft');setH([SKEP],0.6,'soft');setH([HSHIELD,PENNON],0.6,'wood');setH([HSEAT,FEASTBOARD,FCHEST],2,'wood');setH([HSTONE,PICSTONE,STANDSTONE],4,'stone',1);
+// The dwarves enlarged (D-091): the gem seam in the mines' walls, crystals of green, red and blue in the rock; a heap of cut gems and
+// gold in the treasuries; the rune forge, an anvil whose face is cut with runes that glow blue; the tomb of a king of the
+// mountain, his effigy in granite on its lid; the brewing vat of riveted copper, foaming; an ale keg on its rack, a brass tap in
+// it; the waymark of the Stone Road, a granite post cut with runes and the ways; the deep drum, a great hide drum hooped in
+// bronze; the mushroom bed of dark loam threaded with white; and the prospector's strongbox, oak bound in iron
+const GEMORE=1223,GEMHEAP=1224,DRUNE=1225,DTOMB=1226,DVAT=1227,DKEG=1228,DWAY=1229,DDRUM=1230,MUSHBED=1231,DSTRONG=1232;
+def(GEMORE,'Gem Seam',[417,417,417]);def(GEMHEAP,'Heap of Gems',[418,418,418],{emit:true,lum:5,snd:'glass'});def(DRUNE,'Rune Forge',[419,335,420],{emit:true,lum:9});
+def(DTOMB,'Tomb of a King',[421,335,422]);def(DVAT,'Brewing Vat',[423,340,424]);def(DKEG,'Ale Keg',[425,425,426],{snd:'wood'});def(DWAY,'Waymark of the Stone Road',[427,335,428]);
+def(DDRUM,'Deep Drum',[429,349,430],{snd:'wood'});def(MUSHBED,'Mushroom Bed',[431,2,432],{snd:'soft'});def(DSTRONG,"Prospector's Strongbox",[433,433,434],{snd:'wood'});
+setH([GEMORE],6,'ore',4);setH([GEMHEAP],1.5,'misc');setH([DRUNE,DVAT],5,'metal',2);setH([DTOMB,DWAY],5,'stone',1);setH([DKEG,DDRUM,DSTRONG],2,'wood');setH([MUSHBED],0.6,'soft');
 setH([EFFIGY,MILESTONE,HEADSTONE,RTHRONE,OLDSTONE],4,'stone',1);setH([STGLASS],0.5,'misc');setH([HEARTSEASE],0,'soft');setH([OLDCHEST],2.5,'stone');
 setH([MOONSTONE,LEAFSTONE,EVOLD],4,'stone',1);setH([STARLAMP],0.5,'misc');setH([ETHRONE,EHULL],2,'wood');setH([STARBLOOM,SILVFERN,DAWNLILY],0,'soft');setH([ESAIL,EAWNING],0.8,'soft');setH([ECHEST],2.5,'stone');
 setH([CANVAS],0.8,'soft');setH([OBANNER],0,'soft');setH([BOLTTHR],1.5,'wood');setH([GATEIRON],8,'metal',3);setH([MANTLET],2,'wood');
@@ -711,6 +721,19 @@ item(452,'Barding of the Riders','cloak',[50,92,48],{once:true});item(453,'War-h
 item(454,'Oath-ring','circlet',[214,176,84]);item(455,"Thane's Brooch",'brooch',[214,176,84]);item(456,"Winner's Bridle",'fibre',[214,176,84]);
 item(457,'Bracteate of the Forefathers','coin',[226,186,80]);item(458,'Golden Horn of the Forefathers','horn',[230,190,80]);item(459,'Arm-ring of the Forefathers','circlet',[200,170,90]);
 item(460,'War-arrow','arrow',[176,40,40],{once:true});item(461,'Halter','fibre',[150,110,70],{once:true});
+// the dwarves' fare and gear (D-091): dark ale, the stout of the deep and fire ale (which warms and heals a little) from the
+// hold's brewery; mushroom bread and stew from its gardens, hard cheese; rough gems from the seams in the mines' walls, cut by
+// the gemcutter; the dwarven mattock (a pick, quick and long-lasting), the bearded axe of the mountain, the plate of the
+// mountain; the horn of the hold, which calls a shield-wall to an oathbound friend; the hold-ring of the oath, the kin-brooch
+// and the hall-key of a kinsman; the golden pick from the delving contest; the writ-stone carried for the hold; the six runes
+// the runesmith cuts, worn in the rune slot; and the heirloom of a hold, lost at a prospector's claim
+item(462,'Dark Ale','wine',[84,52,32]);item(463,'Stout of the Deep','wine',[44,34,30]);item(464,'Fire Ale','wine',[206,96,44]);item(465,'Mushroom Bread','bread',[168,134,100]);
+item(466,'Hard Cheese','cake',[226,196,96]);item(467,'Mushroom Stew','bowl',[140,100,70]);item(468,'Rough Gem','gem',[120,160,150]);item(469,'Cut Gem','gem',[80,206,226]);
+item(470,'Dwarven Mattock','pick',[120,128,150],{tool:'pick',tier:6,speed:10.5,dur:1300});item(471,'Bearded Axe of the Mountain','axe',[150,156,170],{tool:'axe',tier:6,speed:9,dur:1200});
+item(472,'Plate of the Mountain','mail',[70,78,104],{equip:'body',armor:0.6,dur:1600,one:true});item(473,'Horn of the Hold','horn',[186,138,72],{once:true});
+item(474,'Hold-ring','circlet',[186,138,72]);item(475,'Kin-brooch','brooch',[214,176,84]);item(476,'Hall-key','key',[186,138,72]);item(477,'Golden Pick','pick',[246,206,64]);
+item(478,'Writ-stone','tablet',[150,146,142],{once:true});item(485,'Heirloom of the Hold','goblet',[226,190,90]);
+[['Keenness','keen',[200,90,70]],['Warding','ward',[80,120,200]],['Delving','delve',[150,120,80]],['the Lamp','lamp',[240,210,120]],['the Hearth','hearth',[200,120,60]],['Stone','stone',[140,140,146]]].forEach(([n,k,c],i)=>item(479+i,'Rune of '+n,'tablet',c,{equip:'rune',rune:k}));
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -822,6 +845,7 @@ function itemIcon(id){
   else if(it.kind==='draught'){for(let y=5;y<15;y++){const w=y<8?1:3;for(let x=8-w;x<8+w;x++)px(x,y,(x<8?24:-10));}g.fillStyle='#e8eef4';g.fillRect(7,2,2,3);g.fillStyle='rgba(255,255,255,0.9)';g.fillRect(6,10,1,2);}
   else if(it.kind==='brooch'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-7.5)*1.4),lf=d<6&&Math.abs(Math.atan2(y-7.5,x-7.5))>0.3;if(lf)px(x,y,d>5?-30:x<8?20:0);}g.fillStyle='#7ad8f0';g.fillRect(7,7,2,2);}
   else if(it.kind==='circlet'){for(let a=0;a<40;a++){const t=a/40*6.283,x=Math.round(7.5+Math.cos(t)*6),y=Math.round(9+Math.sin(t)*3);px(x,y,Math.sin(t)>0?-24:16);}g.fillStyle='#e6ecf4';g.fillRect(7,4,2,3);g.fillStyle='#7ad8f0';g.fillRect(7,5,2,1);}
+  else if(it.kind==='key'){for(let a=0;a<24;a++)px(Math.round(5+Math.cos(a/24*6.283)*2.6),Math.round(5+Math.sin(a/24*6.283)*2.6),a<12?20:-10);for(let k=0;k<8;k++){px(7+k,7+k,10);px(8+k,7+k,-20);}px(10,13,0);px(11,14,0);px(13,10,0);px(14,11,0);}
   else if(it.kind==='whistle'){for(let k=0;k<10;k++){px(3+k,10-Math.round(k*0.4),k<2?-20:10);px(3+k,11-Math.round(k*0.4),-20);}g.fillStyle='#2a2a30';g.fillRect(8,7,1,1);}
   else if(it.kind==='boat'){for(let x=1;x<15;x++){const d=Math.abs(x-7.5)/7.5,top=10+Math.round(d*d*2);for(let y=top;y<14-Math.round(d*2);y++)px(x,y,(y===top?20:-10));}for(let y=3;y<10;y++)px(13,y,-10);g.fillStyle='#d8b050';g.fillRect(14,3,2,1);for(let y=4;y<10;y++)for(let x=5;x<10;x++)if(x-5<y-3)px(x,y,30);}
   else if(it.kind==='pick'){
@@ -830,7 +854,7 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444,456,457,458,459]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444,456,457,458,459,477,485]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
 // Texture atlas, drawn pixel by pixel
 const TS=16,AC=8,AR=64,AW=TS*AC,AH=TS*AR;
 const atlas=document.createElement('canvas');atlas.width=AW;atlas.height=AH;
@@ -1517,6 +1541,52 @@ function wool(t,c){for(let y=0;y<16;y++)for(let x=0;x<16;x++)P(t,x,y,sh(c,(tr()-
     {const gr=(hn(x,0,1033)*6|0)%3===0,li=hn(x>>1,y>>1,1034)<0.14,ms=y>=13&&hn(x,y,1035)<0.6;
       P(415,x,y,ms?sh([86,120,66],(hn(x,y,1036)-.5)*18):li?sh([170,170,116],(hn(x,y,1037)-.5)*16):sh([128,128,126],(gr?-10:0)+(hn(x,y>>1,1038)-.5)*16+(x===0?8:x===15?-10:0)));
       P(416,x,y,hn(x>>1,y>>1,1039)<0.16?sh([170,170,116],(hn(x,y,1040)-.5)*14):sh([134,134,130],(hn(x,y,1041)-.5)*14));}
+  }
+  // the dwarves enlarged (D-091). The gem seam: grey rock with clusters of crystals, green, red and blue, each lit at one facet;
+  // a heap of gems on gold coin; the rune forge, an anvil's dark polished face cut with runes glowing blue, and its side of
+  // granite banded in iron with runes; the tomb of a king, his effigy in pale granite on the lid (the helm, the beard to the belt,
+  // the axe laid by his side) and its side of granite with a knotwork panel; the brewing vat, its copper rim riveted round dark
+  // wort and foam, its side of riveted copper with iron hoops; the ale keg, its head ringed and bunged, its staves hooped with a
+  // brass tap; the waymark of the Stone Road, cut with the four ways on its cap and runes down its face under a chevron; the deep
+  // drum, its hide pale and worn at the heart, its shell hooped in bronze and laced; the mushroom bed, dark loam threaded white
+  // with small caps; and the prospector's strongbox, oak in iron straps with a hasp and a lock
+  const RUN=['................','..1......1......','..11.....1.1....','..1.1....11.....','..1......1.1....','..1......1..1...','..1......1......','................',
+    '................','..1...1....1....','...1.1....111...','....1....1.1.1..','...1.1.....1....','..1...1....1....','................','................'];
+  const rn=(x,y)=>x>=0&&y>=0&&x<16&&y<16&&RUN[y][x]==='1',rnNear=(x,y)=>rn(x-1,y)||rn(x+1,y)||rn(x,y-1)||rn(x,y+1);
+  const GEMC=[[70,200,120],[210,60,80],[80,140,230],[230,200,90],[170,90,220]];
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    {const g=[[4,4,0,1.8],[11,6,1,1.6],[6,11,2,1.9],[12,12,0,1.1],[2,9,3,0.9]].map(([cx,cy,c,r])=>[Math.abs(x-cx)+Math.abs(y-cy),c,r,x-cx,y-cy]).find(q=>q[0]<=q[2]);
+      P(417,x,y,g?sh(GEMC[g[1]],g[3]<0&&g[4]<0?40:g[3]>0&&g[4]>0?-36:(hn(x,y,1050)-.5)*20):sh([128,128,128],(hn(x,y,1051)-.5)*22+(hn(x>>2,y>>2,1052)-.5)*10));}
+    {const q=hn(x>>1,y>>1,1053),c=GEMC[(hn(x>>1,y>>1,1054)*5)|0],hl=x%2===0&&y%2===0;
+      P(418,x,y,q<0.4?sh(c,hl?46:(x%2&&y%2?-30:0)):sh([214,176,84],((x*3+y*5)%7===0?26:(x+y)%3===0?-22:4)+(hn(x,y,1055)-.5)*12));}
+    {const ed=x===0||y===0||x===15||y===15;P(419,x,y,rn(x,y)?[150,226,255]:rnNear(x,y)?[70,110,150]:ed?sh([110,112,120],x===0||y===0?20:-10):sh([66,68,76],(hn(x,y,1056)-.5)*10+(x+y<10?10:0)));
+      const band=y>=4&&y<=11,ry=y-4+1;P(420,x,y,y<=1?sh([186,138,72],y===0?18:-6):band?(rn(x,ry)?[150,226,255]:rnNear(x,ry)?[70,104,140]:sh([62,64,72],(hn(x,y,1057)-.5)*10+(y===4?16:y===11?-14:0))):sh(gran(x,y,1058),y===15?-12:0));}
+    {const sl=x===0||x===15||y===0||y===15,helm=y>=1&&y<=3&&x>=5&&x<=10,crest=y===1&&x>=7&&x<=8,face=y>=4&&y<=5&&x>=6&&x<=9,beard=y>=6&&y<=10&&Math.abs(x-7.5)<=2.6-(y-6)*0.45,
+      body=y>=6&&y<=13&&x>=4&&x<=11,hands=y===9&&x>=5&&x<=10&&!beard,feet=y===14&&(x===5||x===6||x===9||x===10),haft=x===13&&y>=6&&y<=14,ahead=y>=5&&y<=7&&x>=12&&x<=14;
+      P(421,x,y,sl?sh([104,100,98],(hn(x,y,1059)-.5)*8):crest?[186,138,72]:helm?sh([182,176,170],x<8?10:-8):face?sh([196,190,182],x===7||x===8?10:-6):beard?sh([170,164,156],(x+y)%2?-12:6):hands?sh([190,184,176],-4):
+        ahead?sh([170,170,176],x===12?16:-10):haft?[150,110,60]:feet?sh([150,144,138],0):body?sh([160,154,148],(x===4||x===11?-14:0)+(y%3===0?-6:0)):sh(gran(x,y,1060),-16));
+      const kx=x%8,ky=(y-5)%8,kn=y>=5&&y<=11&&(kx===1||kx===6||ky===1||ky===5)&&!(kx===1&&ky===1)&&(kx+ky)%3!==0;
+      P(422,x,y,y<=1?sh([186,138,72],y===0?18:-8):y===4||y===12?sh([110,106,102],0):kn?sh([196,148,72],(hn(x,y,1061)-.5)*12):y===14&&x%3!==0?[96,92,90]:sh(gran(x,y,1062),y>4&&y<12?-12:0));}
+    {const r=Math.hypot(x-7.5,y-7.5),rim=r>6.2&&r<=7.7,riv=rim&&Math.abs(r-7)<0.5&&((Math.atan2(y-7.5,x-7.5)*8/Math.PI+16)%2<0.4),foam=r<=6.2&&hn(x>>1,y>>1,1063)<0.3&&r>2;
+      P(423,x,y,r>7.7?[56,42,30]:riv?[230,200,130]:rim?sh([186,124,68],(x+y<15?14:-12)+(hn(x,y,1064)-.5)*8):foam?sh([232,222,190],(hn(x,y,1065)-.5)*12):sh([92,58,32],(hn(x,y,1066)-.5)*14-r*1.5));
+      const hp=y===2||y===12,seam=y%8===6,riv2=seam&&x%3===1,vg=hn(x,y,1067)<0.06;
+      P(424,x,y,hp?sh([80,82,88],(x%4===0?18:0)):riv2?[230,196,130]:seam?sh([140,84,46],0):vg?sh([96,150,120],(hn(x,y,1068)-.5)*12):sh([186,112,64],(x===0?14:x===15?-14:0)+(hn(x,y>>2,1069)-.5)*14+(y%8===0?12:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(425,x,y,r>6.6?sh([80,82,88],r>7.3?-20:10):r<1.3?[40,28,18]:sh([128,88,52],(Math.floor(r*1.3)%2?-12:6)+(hn(x,y,1070)-.5)*10));
+      const hoop=(y>=2&&y<=3)||(y>=12&&y<=13),tap=(y>=7&&y<=8&&x>=6&&x<=9)||(x===7||x===8)&&y>=9&&y<=10,stave=x%3===0;
+      P(426,x,y,tap?sh([220,180,90],y===7?18:-6):hoop?sh([80,82,88],(y===2||y===12?16:-8)):sh([128,88,52],(stave?-16:0)+(hn(x,y>>2,1071)-.5)*12+(Math.abs(x-7.5)>6?-14:0)));}
+    {const r=Math.hypot(x-7.5,y-7.5),ways=(Math.abs(x-7.5)<0.6||Math.abs(y-7.5)<0.6)&&r<6.5&&r>1.6,tips=r>=5.2&&r<6.5&&(Math.abs(x-7.5)<1.6||Math.abs(y-7.5)<1.6),boss=r<1.6;
+      P(427,x,y,boss?[150,146,142]:ways||tips?[96,92,90]:x===0||y===0||x===15||y===15?sh([110,106,102],0):sh(gran(x,y,1072),0));
+      const arrow=y>=1&&y<=4&&Math.abs(Math.abs(x-7.5)-(y-0.5))<0.6,cut=(rn(x,y+2)&&y>=5&&y<=12),band=y>=14;
+      P(428,x,y,arrow||cut?[96,92,90]:rn(x-1,y+2)&&y>=5&&y<=12?sh(gran(x,y,1073),18):band?sh([196,148,72],((x+y)%4===0?-30:0)+(hn(x,y,1074)-.5)*10):sh(gran(x,y,1075),y===13?-14:0));}
+    {const r=Math.hypot(x-7.5,y-7.5);P(429,x,y,r>7?sh([186,138,72],r>7.5?-24:10):Math.abs(r-5)<0.5?sh([176,156,120],0):r<2.2?sh([170,148,110],(hn(x,y,1076)-.5)*12):sh([218,200,164],(hn(x,y,1077)-.5)*12-r*0.8));
+      const hoop=y<=1||y>=14,lace=y>=2&&y<=13&&((x+y)%8===0||(x-y+16)%8===0);P(430,x,y,hoop?sh([186,138,72],(y===0||y===14?16:-10)):lace?sh([210,190,140],(hn(x,y,1078)-.5)*10):sh([120,80,46],(x%4===0?-14:0)+(hn(x,y>>2,1079)-.5)*12));}
+    {const th=Math.abs(Math.sin(x*1.3+y*0.7+Math.sin(y*0.9)*2))<0.13&&hn(x,y,1080)<0.7,cap=[[3,4],[10,3],[6,10],[12,11]].some(([cx,cy])=>Math.hypot(x-cx,y-cy)<1.3);
+      const loam=(xx,yy,k)=>sh([62,44,32],(hn(xx,yy,k)-.5)*18);P(431,x,y,cap?sh([206,166,112],(hn(x,y,1081)-.5)*16+(y%2?-10:6)):th?sh([224,218,204],(hn(x,y,1082)-.5)*10):loam(x,y,1083));
+      P(432,x,y,y<=2?sh([110,80,50],(y===0?14:y===2?-12:0)+(hn(x>>2,y,1084)-.5)*10):th&&y>4?sh([214,208,196],-10):loam(x,y,1085));}
+    {const strap=(x>=3&&x<=4)||(x>=11&&x<=12),ed=x===0||y===0||x===15||y===15,lock=x>=6&&x<=9&&y>=6&&y<=9,riv=strap&&y%4===1;
+      P(433,x,y,lock?sh([70,72,78],(x===6||y===6?20:-8)):riv?[160,162,168]:strap||ed?sh([60,62,68],(hn(x,y,1086)-.5)*10):sh([100,66,38],(y%4===3?-14:0)+(hn(x,y>>2,1087)-.5)*12));
+      const hasp=x>=6&&x<=9&&y>=1&&y<=5,pad=x>=6&&x<=9&&y>=6&&y<=9,riv2=strap&&y%5===2;
+      P(434,x,y,pad?sh([150,120,60],(x===6?16:-8)):hasp?sh([70,72,78],(y===1?18:0)):riv2?[160,162,168]:strap||ed?sh([60,62,68],(hn(x,y,1088)-.5)*10):sh([100,66,38],(y%4===3?-14:0)+(hn(x,y>>2,1089)-.5)*12));}
   }
   // obsidian (D-059): repainted here, with hashes only, so the shared stream that painted it first is unchanged
   for(let y=0;y<16;y++)for(let x=0;x<16;x++){const st=(x+y+Math.floor(hn(0,y>>2,305)*5))%9,cc=Math.hypot(x-4-hn(1,0,306)*8,y-4-hn(2,0,306)*8);
@@ -3305,6 +3375,7 @@ function showText(title,text){
 function openLore(X,Y,Z){
   if(elfLectern(X,Y,Z))return; // the histories of the elves, in their halls (D-088)
   if(menLectern(X,Y,Z))return; // the chronicles of the kings of the white realm (D-089)
+  if(dwarfLectern(X,Y,Z))return; // the annals of the mountain, in the Hall of the Fathers (D-091)
   const WX=X+OX,WZ=Z+OZ,cx=Math.floor(WX/CS),cz=Math.floor(WZ/CS),h=holdOf(cx,cz),plaza=roomAt(WX,Y,WZ)==='plaza',k=lecternPage(WX,Y,WZ);
   showText(plaza?'A waymarker of '+h.name:h.name+', page '+(k+1)+' of '+CHRON_N+': '+holdChronicle(cx,cz)[k][0],loreText(WX,Y,WZ));
   if(!plaza)journalPage(cx,cz,k);
@@ -4173,6 +4244,7 @@ function surfaceName(X,Y,Z){
   {const er=elderNear(X,Z,-1);if(er)return er.name;} // the ruins of the elder elves (D-088)
   {const ok=oldNear(X,Z,-1);if(ok)return ok.name;} // the ruins of the old kingdom (D-089)
   {const fa=fathersNear(X,Z,-1);if(fa&&fa.name)return fa.name;} // the ruins of the forefathers (D-090)
+  {const cl=claimsNear(X,Z,-4);if(cl)return cl.name;} // a prospectors' claim (D-091)
   if(oldRoadAt(X,Z))return 'An Old Road';
   {const sn=stairName(X,Y,Z);if(sn)return sn;} // the Ember Stair inside a great volcano (D-067)
   {const fn=fortName(X,Y,Z);if(fn)return fn;} // the terrace before an Emberlord's gate (D-052)
@@ -7640,7 +7712,7 @@ RB.dhold=(s,p,u,v,X,Z)=>{const near=[];for(const q of p.S)if(u>=q.bu0-1&&u<=q.bu
   for(let k=0;k<n;k++){const y=lo+k;if(me&&me[k]){RBP(X,y,Z,AIR);continue;}
     const up=me&&k+1<n?me[k+1]:0,dn=me&&k>0?me[k-1]:0;let st=up||dn||0;for(const c of nb)if(c&&c[k]&&(!st||c[k]<st))st=c[k];
     if(!st||y>g)continue;const cur=GW(X,y,Z);
-    if(st===2){if(!SOLID[cur])RBP(X,y,Z,up?COBBLE:STONE);else if(!up&&(cur===STONE||cur===DEEP)){const h=hsh(X*7+y,9465,Z);if(h<0.045)RBP(X,y,Z,DORE[(h*155)|0]);}continue;}
+    if(st===2){if(!SOLID[cur])RBP(X,y,Z,up?COBBLE:STONE);else if(!up&&(cur===STONE||cur===DEEP)){const h=hsh(X*7+y,9465,Z);if(h<0.045)RBP(X,y,Z,h<0.006?GEMORE:DORE[(h*155)|0]);}continue;}
     RBP(X,y,Z,up?DFLAG:dn?DGRAN:y<=lo+1?DGRAN:(((y-p.y0)%6)+6)%6===4?DKNOT:DCOURSE);}
   // each shape furnishes its own interior
   for(const q of near){const D=DEC[q.k];if(!D)continue;const iv=dIv(q,u,v);if(iv)D(s,p,q,u,v,X,Z,iv);}};
@@ -7942,7 +8014,7 @@ function dwarfCity(s,L,r){
   const Yf=Y0-22,Yd=Y0-46,sv=-19,su=F+Lg-4,sh={cu:su,cv:sv,r:2.5};
   K.room('gate',F,F+11,-5,5,Y0,9,{vr:2,vax:'v',open:1,force:1});
   K.room('great',F+12,F+11+Lg,-12,12,Y0,14,{vr:5,vax:'v',force:1});
-  L.spots.push({kind:'hall',u:F+16,v:4,y:Y0+1},{kind:'keep',u:F+Lg+6,v:2,y:Y0+2},{kind:'hall',u:F+Lg-6,v:-6,y:Y0+1});
+  L.spots.push({kind:'hall',u:F+16,v:4,y:Y0+1},{kind:'hall',u:F+Lg-6,v:-6,y:Y0+1}); // (the throne's court: dwarfHoldMore, D-091)
   if(K.room('barracks',F+16,F+28,-24,-15,Y0,6,{far:-24})){K.room('door',F+21,F+23,-14,-13,Y0,4,{force:1});L.spots.push({kind:'barracks',u:F+22,v:-19,y:Y0+1});}
   K.room('landing',su-4,su+4,sv-4,sv+4,Y0,7,{sh:sh,drum:1,force:1});K.room('door',su-1,su+1,-14,-13,Y0,4,{force:1});
   // the stair down beside the great hall to the forge hall
@@ -7959,6 +8031,7 @@ function dwarfCity(s,L,r){
   if(sm){K.room('door',su-8,su-6,-16,-14,Yd,4,{force:1});L.spots.push({kind:'smelt',u:F,v:0,y:Yd+1});K.gallery(F-13,-6,Yd,'u',-1,40,10);}
   K.gallery(su+6,sv,Yd,'u',1,44,10);K.gallery(su,sv-6,Yd,'v',-1,40,10);K.gallery(su,sv+6,Yd,'v',1,8,0);
   K.shaft(su,sv,Yd+1,Y0+6,2.5);
+  dwarfHoldMore(K,s,L,{F:F,Lg:Lg,Y0:Y0,Yf:Yf,Yd:Yd}); // the court, the halls along the streets below, the Hall of the Fathers (D-091)
   // the wall, its towers, the gatehouse
   const WH=15;P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:WH,gw:3,gh:8});
   const n=Math.max(6,Math.round(2*Math.PI*R/30));for(let k=1;k<n;k++){const a=Math.PI+k*2*Math.PI/n,cu=Math.round(Math.cos(a)*(R-1)),cv=Math.round(Math.sin(a)*(R-1));if(Math.abs(cv)<12&&cu<0||K.inM(cu,cv))continue;
@@ -7966,15 +8039,16 @@ function dwarfCity(s,L,r){
   for(const sg of [1,-1]){const t=K.tower(-R+1,sg*8,4,WH+8,{nopad:1,ball:1,flag:1,door:2+(sg>0?0:1)},true);L.spots.push({kind:'wall',u:-R+1,v:sg*8,y:t.y+WH+8});}
   L.spots.push({kind:'gate',u:-R-6,v:0,y:DVG(s,-R-6,0)},{kind:'gatein',u:-R+6,v:0,y:DVG(s,-R+6,0)});
   // trebuchets behind the gate
-  for(const sg of [1,-1])K.treb(-R+16,sg*16,0);
+  for(const sg of [1,-1]){const y=K.treb(-R+16,sg*16,0);if(y!==null){(L.trebs=L.trebs||[]).push({u:-R+16,v:sg*16,y:y});L.spots.push({kind:'dengine',u:-R+16,v:sg*10,y:y});}} // (their engineers: D-091)
   // the city's works: smelting furnaces with their slag, smithies, a headframe over its mine, cranes
   const spots=[];for(let cu=-R+10;cu<F-16;cu+=5)for(let cv=-R+6;cv<R-6;cv+=5){if(Math.abs(cv)<8||Math.hypot(cu,cv)>R-9)continue;spots.push([cu,cv,hsh(cu,9491,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
-  let ns=0,nf=0,nm=0,nc=0;
+  let ns=0,nf=0,nm=0,nc=0,np=0;
   for(const [cu,cv] of spots){
     if(nm<1){const y=K.lvl(cu,cv);if(K.free(cu-6,cu+6,cv-6,cv+6)&&dwMineHead(K,s,L,cu,cv,y,1,22,26)){K.pad(cu-5,cu+5,cv-5,cv+5,y);nm++;K.heap(cu+8,cv+(cv>0?-8:8),4.5,4,0);continue;}}
     if(ns<2&&K.smelt(cu,cv)){ns++;L.spots.push({kind:'forge',u:cu-6,v:cv,y:K.lvl(cu,cv)});K.heap(cu+3,cv+(cv>0?7:-7),3.5,3,1);continue;}
     if(nf<2){const f=K.bld('dforge',cu,cv,7,9,K.downhill(cu,cv));if(f){nf++;L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});continue;}}
-    if(nc<1&&K.crane(cu,cv)!==null){nc++;continue;}}
+    if(nc<1&&K.crane(cu,cv)!==null){nc++;continue;}
+    if(np<1&&dwPen(K,L,cu,cv)){np++;continue;}}
   // houses on the terraces facing the view; barracks by the gate
   for(const sg of [1,-1]){const b=K.bld('dhouse',-R+12,sg*24,9,15,sg>0?2:3,{st:2});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y});}
   const hs=[];for(let cu=-R+7;cu<R-7;cu+=4)for(let cv=-R+5;cv<R-5;cv+=4){if(Math.abs(cv)<7||Math.hypot(cu,cv)>R-8)continue;hs.push([cu,cv,hsh(cu,9493,cv)]);}hs.sort((a,b)=>a[2]-b[2]);
@@ -7991,7 +8065,7 @@ function dwarfBastion(s,L,r){
   P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:13,gw:2,gh:7});
   for(const a of [0.75,1.25,1.75,0.25].map(q=>q*Math.PI))K.tower(Math.round(Math.cos(a)*(R-1)),Math.round(Math.sin(a)*(R-1)),3,18,{nopad:1,ball:1,door:Math.cos(a)>0?0:1},true);
   for(const g of [1,-1]){const t=K.tower(-R+1,g*5,3,20,{nopad:1,ball:1,flag:1,door:2+(g>0?0:1)},true);L.spots.push({kind:'wall',u:-R+1,v:g*5,y:t.y+20});}
-  K.treb(-4,-sg*11,0);
+  {const y=K.treb(-4,-sg*11,0);if(y!==null){L.trebs=[{u:-4,v:-sg*11,y:y}];L.spots.push({kind:'dengine',u:-4,v:-sg*5,y:y});}} // (its engineer: D-091)
   const b=K.bld('dhouse',6,-sg*13,7,9,sg>0?3:2,{st:2});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y});
   const f=K.bld('dforge',-6,sg*12,7,7,sg>0?2:3);if(f)L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});
   L.spots.push({kind:'gate',u:-R-5,v:0,y:DVG(s,-R-5,0)},{kind:'gatein',u:-R+4,v:0,y:DVG(s,-R+4,0)},{kind:'drill',u:-2,v:0,y:DVG(s,-2,0)});
@@ -8012,6 +8086,7 @@ function dwarfTown(s,L,r){
   const sm=K.smelt(0,-14)||K.smelt(0,14);if(sm){L.spots.push({kind:'forge',u:sm.cu-6,v:sm.cv,y:sm.y});K.heap(sm.cu+7,sm.cv,3,3,1);}
   const f=K.bld('dforge',-11,sm&&sm.cv>0?-12:12,7,7,sm&&sm.cv>0?3:2);if(f)L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});
   K.heap(10,-10,3.5,3,0);
+  for(let k=0;k<8;k++){const a=k/8*6.283+1.1,cu=Math.round(Math.cos(a)*(R-13)),cv=Math.round(Math.sin(a)*(R-13));if(cu<-R*0.4&&Math.abs(cv)<8)continue;if(dwPen(K,L,cu,cv))break;} // the rams' pen (D-091)
   let n=0;for(let k=0;k<16&&n<9;k++){const a=k/16*6.283+0.2,rd=R-11,cu=Math.round(Math.cos(a)*rd),cv=Math.round(Math.sin(a)*rd);if(cu<-R*0.4&&Math.abs(cv)<6)continue;
     const h=K.bld('dhouse',cu,cv,7,7,K.downhill(cu,cv),{st:hsh(cu,9497,cv)<0.4?2:1})||K.bld('dhouse',cu,cv,5,7,K.downhill(cu,cv),{st:1});if(!h)continue;n++;if(n%3===1)L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:h.y});}
   L.spots.push({kind:'street',u:-R+4,v:0,y:DVG(s,-R+4,0)});}
@@ -8029,7 +8104,9 @@ function dwarfLookout(s,L,r){
 // tracks of gravel; bridges of granite on piers where they cross water
 function dwarfRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%40===20){RBS(X,Z,g+1,g+3,DCOL);RBP(X,g+4,Z,DLAMP);}return;}
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%40===20){RBS(X,Z,g+1,g+3,DCOL);RBP(X,g+4,Z,DLAMP);}
+    else if(!wet&&ao<=rd.w+1.5&&rr.off<0&&Math.floor(rr.along)%120===60){RBP(X,g+1,Z,DGRAN);RBP(X,g+2,Z,DWAY);} // a waymark that tells the way (D-091)
+    return;}
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?DCOURSE:DFLAG);if(edge)RBP(X,y+1,Z,DKNOT);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%7===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,DGRAN);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;
@@ -8039,6 +8116,173 @@ function dwarfRoadCol(X,Z,x,z,rr){
 // The water the dwarves hold under the ground (their cisterns): drainCaveWater trusts it where a chunk's edge cuts a basin
 function dwarfWaterAt(X,y,Z){for(const s of realmTile(X,Z).sites){if(s.prov.cult.k!=='dwarf'||Math.hypot(s.X-X,s.Z-Z)>s.R+20)continue;const L=siteLayout(s);if(!L.water||!L.water.length)continue;const [u,v]=siteUV(s,X,Z);
   for(const w of L.water)if(u>=w.u0&&u<=w.u1&&v>=w.v0&&v<=w.v1&&y>=w.y0&&y<=w.y1)return true;}return false;}
+// ---- The dwarves enlarged (D-091): more of a high hold under the mountain, and more of their works above it, in the frame and
+// shapes of dwarf-build.js (dwKit, RB.dhold, DEC).
+// In the great hall the court's places about the throne (the king or the queen of the mountain, or the hold's thane, on the
+// high seat; the anvilguard either side of the dais; the hold-warden, the loremaster and the court below it). Level 1 (the forge
+// hall's, 22 under the gate): a street running from the foot of the stair down from the great hall, and along it the ale-hall
+// (its boards, its kegs racked along the back wall, its hearth), the runesmith's chamber with the rune forge, the brewery (its
+// great vats of copper, the copper over its fire, kegs) and the market hall (its stalls down either side under the blue cloth of
+// the mountain, the gemcutter's at its end). Level 2 (the deep level, 46 under the gate): a street from the smelting hall, and
+// along it the mushroom gardens (beds of dark loam in rows, glowing mushrooms in them), the hot baths (a pool held in granite,
+// warmed by the furnaces' flues; its water is trusted as the cistern's is) and the treasury (its gold heaped along the walls, its
+// gems on a plinth); at the street's end a passage to the Hall of the Fathers, the long vault of the kings' tombs: their tombs
+// in two rows, each with its flame at its head, the kings of old in stone along the walls, the founder's tomb on its dais at the
+// far end under the banners, the annals at lecterns by the way in. Above: pens for the mountain rams at the holds and the mining
+// towns, their engineers by the trebuchets.
+function dwarfHoldMore(K,s,L,o){const F=o.F,Lg=o.Lg,Y0=o.Y0,Yf=o.Yf,Yd=o.Yd,a0=F+Lg-30,ue=F+Lg+4;
+  // the court about the throne (the old keep's place: D-066)
+  L.spots.push({kind:'dthrone',u:F+Lg+9,v:0,y:Y0+2},{kind:'danvil',u:F+Lg+7,v:5,y:Y0+2},{kind:'danvil',u:F+Lg+7,v:-5,y:Y0+2},{kind:'dcourt',u:F+Lg+1,v:5,y:Y0+1});
+  // level 1: the street from the stair's foot, the rooms along it (each with its door from the street)
+  K.room('door',a0,a0+2,20,21,Yf,4,{force:1});
+  if(K.room('dstreet',a0,ue,22,24,Yf,5,{force:1})){
+    const R=(k,u0,u1,du,h,o2)=>{const q=K.room(k,u0,u1,26,33,Yf,h,Object.assign({far:33},o2||{}));if(q)K.room('door',du-1,du+1,25,25,Yf,4,{force:1});return q;};
+    if(R('dale',a0,a0+8,a0+4,6,{vr:2,vax:'v'}))L.spots.push({kind:'dale',u:a0+4,v:29,y:Yf+1});
+    if(R('drunes',a0+10,a0+14,a0+12,6))L.spots.push({kind:'drunes',u:a0+12,v:28,y:Yf+1});
+    if(R('dbrew',a0+16,a0+22,a0+19,7))L.spots.push({kind:'dbrew',u:a0+19,v:28,y:Yf+1});
+    if(R('dmarket',a0+24,ue,a0+28,6,{vr:2,vax:'v'}))L.spots.push({kind:'dmarket',u:a0+27,v:29,y:Yf+1},{kind:'dgem',u:ue-2,v:30,y:Yf+1});
+    L.spots.push({kind:'dstreet',u:a0+12,v:23,y:Yf+1});L.lv1={a0:a0,ue:ue,y:Yf+1};}
+  // level 2: the deep street from the smelting hall, the rooms along it, the passage to the Hall of the Fathers
+  const b0=F-10,be=F+Lg+2;
+  if(K.room('dstreet',b0,be,7,9,Yd,5,{force:1})){K.room('door',F-4,F-2,5,6,Yd,4,{force:1});
+    const R2=(k,u0,u1,du,h,o2)=>{const q=K.room(k,u0,u1,11,20,Yd,h,Object.assign({far:20},o2||{}));if(q)K.room('door',du-1,du+1,10,10,Yd,4,{force:1});return q;};
+    if(R2('dgarden',b0,F+6,F-1,7,{vr:2,vax:'v'}))L.spots.push({kind:'dgarden',u:F-1,v:14,y:Yd+1});
+    if(R2('dbath',F+8,F+18,F+13,6)){L.spots.push({kind:'dbath',u:F+13,v:12,y:Yd+1});L.water.push({u0:F+10,u1:F+16,v0:13,v1:18,y0:Yd-1,y1:Yd});L.bath={u0:F+10,u1:F+16,v0:13,v1:18,y:Yd};}
+    if(R2('dvault',F+20,F+28,F+24,5)){L.spots.push({kind:'dvault',u:F+24,v:12,y:Yd+1});L.vault={u0:F+20,u1:F+28,v0:11,v1:19,y:Yd+1};}
+    K.room('door',be-2,be,10,22,Yd,5,{force:1});
+    if(K.room('dfathers',F-6,be,23,33,Yd,9,{vr:3,vax:'v',force:1})){L.fathers={u0:F-6,u1:be,v0:23,v1:33,y:Yd+1};L.spots.push({kind:'dfathers',u:be-4,v:28,y:Yd+1},{kind:'dmourn',u:F+10,v:28,y:Yd+1});}
+    L.spots.push({kind:'ddeep',u:F+10,v:8,y:Yd+1});L.lv2={b0:b0,be:be,y:Yd+1};}}
+// the street: lamps hung down its middle, the banners of the mountain along its walls
+DEC.dstreet=(s,p,q,u,v,X,Z,iv)=>{const mid=(q.v0+q.v1)/2,du=u-q.u0;if(Math.abs(v-mid)<0.6&&du%6===3)dHang(X,Z,iv[1],1);else if((v===q.v0||v===q.v1)&&du%12===8)RBS(X,Z,q.y0+2,q.y0+3,DBANNER);};
+// the ale-hall: kegs racked two high along the back wall between props, two long boards laid, the hearth at its end, lamps
+DEC.dale=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,Wd=q.u1-q.u0,mv=(q.v1-q.v0)/2;
+  if(v===q.far){if(du%2===0){RBP(X,y,Z,DKEG);RBP(X,y+1,Z,DKEG);}else RBS(X,Z,y,y+2,DPROP);return;}
+  if(du===0&&Math.abs(dv-mv)<1.1){RBP(X,y,Z,DFORGE);if(Math.abs(dv-mv)<0.6)RBP(X,y+1,Z,BRAZIER);return;}
+  if((dv===2||dv===4)&&du>=2&&du<=Wd-1)RBP(X,y,Z,FEASTBOARD);else if(dv===3&&du%3===1&&du>=2)dHang(X,Z,iv[1],2);};
+// the runesmith's chamber: the rune forge in its middle, an anvil by it, rune-stones set along its walls glowing, a lamp
+DEC.drunes=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,mu=Math.round((q.u0+q.u1)/2),dv=v-q.v0;
+  if(u===mu&&dv===4){RBP(X,y,Z,DRUNE);return;}if(u===mu+1&&dv===5){RBP(X,y,Z,DANVIL);return;}
+  if((u===q.u0||u===q.u1)&&dv%2===1&&dv>1)RBP(X,y+2,Z,RUNE);else if(v===q.far&&Math.abs(u-mu)<=1)RBP(X,y,Z,u===mu?DGEAR:BARREL);else if(u===mu&&dv===2)dHang(X,Z,iv[1],1);};
+// the brewery: great vats of copper two high along its sides, the copper over its fire in the middle, kegs and barrels along the
+// back wall, crates by the door, lamps
+DEC.dbrew=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,Wd=q.u1-q.u0,mu=Wd/2;
+  if(v===q.far){RBP(X,y,Z,du%2?BARREL:DKEG);if(du%2===0)RBP(X,y+1,Z,DKEG);return;}
+  if((dv===3||dv===5)&&(du===0||du===Wd)){RBP(X,y,Z,DVAT);RBP(X,y+1,Z,DVAT);return;}
+  if(dv===4&&Math.abs(du-mu)<0.6){RBP(X,y,Z,DFORGE);RBP(X,y+1,Z,DVAT);return;}
+  if(dv===1&&(du===0||du===Wd))RBP(X,y,Z,CRATE);else if(Math.abs(du-mu)<0.6&&dv===2)dHang(X,Z,iv[1],2);};
+// the market hall: stalls down either side, a counter of granite with goods on it and the cloth of the mountain over it, a gap
+// every four; stock behind the stalls; lamps down the aisle
+DEC.dmarket=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,Dv=q.v1-q.v0,Wd=q.u1-q.u0;
+  if((dv===1||dv===Dv-1)&&du>=1&&du<=Wd-1&&du%4!==0){RBP(X,y,Z,DGRAN);if(hsh(X,9533,Z)<0.6)RBP(X,y+1,Z,[CRATE,BARREL,DKEG,GOLDB,GEMHEAP,DANVIL][(hsh(X,9531,Z)*6)|0]);RBP(X,y+3,Z,DBANNER);return;}
+  if((dv===0||dv===Dv)&&du%4===2){RBP(X,y,Z,hsh(X,9535,Z)<0.5?BARREL:CRATE);return;}
+  if(Math.abs(dv-Dv/2)<0.6&&du%5===2)dHang(X,Z,iv[1],2);};
+// the mushroom gardens: beds two wide of dark loam set in the floor between paths, glowing mushrooms and others in them, great
+// mushrooms at the ends of the paths, lamps hung over the paths
+DEC.dgarden=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,Wd=q.u1-q.u0;
+  if(du>=1&&du<=Wd-1&&dv>=1&&dv<=8&&dv%3!==0){RBP(X,y-1,Z,MUSHBED);const h=hsh(X,9537,Z);RBP(X,y,Z,h<0.35?GLOWSHROOM:h<0.7?MUSHB:AIR);return;}
+  if((du===0||du===Wd)&&(dv===3||dv===6)){RBS(X,Z,y,y+3,MUSHSTEM);RBP(X,y+4,Z,GLOWCAP);return;}
+  if(dv%3===0&&du%6===3)dHang(X,Z,iv[1],2);};
+// the baths: a pool two deep held in granite, its water level with the floor, columns at its corners, lamps on the walls
+DEC.dbath=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,Wd=q.u1-q.u0,Dv=q.v1-q.v0;RBP(X,y-3,Z,DGRAN);RBP(X,y-2,Z,DGRAN);
+  if(du>=2&&du<=Wd-2&&dv>=2&&dv<=Dv-2){RBS(X,Z,y-2,y-1,WATER);return;}
+  if((du===1||du===Wd-1)&&(dv===1||dv===Dv-1)){RBS(X,Z,y,iv[1]-1,DCOL);RBP(X,iv[1],Z,DKNOT);return;}
+  if((du===0||du===Wd)&&dv===(Dv>>1))RBP(X,y+2,Z,DLAMP);else if(v===q.far&&du%3===1)RBP(X,y,Z,BARREL);};
+// the treasury: gold heaped along its walls one to three high, gems on the heaps, a plinth with gems in the middle; the way in
+// left clear
+DEC.dvault=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dv=v-q.v0,Wd=q.u1-q.u0,Dv=q.v1-q.v0,h=hsh(X,9539,Z);
+  if(dv<=1&&Math.abs(du-Wd/2)<2)return;
+  if(du===0||du===Wd||dv===Dv||(dv>=Dv-2&&(du<=1||du>=Wd-1))){const n=1+((h*3)|0);RBS(X,Z,y,y+n-1,GOLDB);if(h<0.5)RBP(X,y+n,Z,GEMHEAP);return;}
+  if(Math.abs(du-Wd/2)<0.6&&Math.abs(dv-Dv/2)<0.6){RBP(X,y,Z,DGRAN);RBP(X,y+1,Z,GEMHEAP);return;}
+  if(Math.abs(du-Wd/2)<0.6&&dv===Dv-2)dHang(X,Z,iv[1],1);};
+// the Hall of the Fathers (entered at its +u end): the founder's dais at its far end, his tomb with gold at its head and the
+// banners behind it, flames either side; the kings' tombs in two rows, each with its flame at its head; the kings of old in stone
+// along the walls; the annals at lecterns by the way in; lamps hung down its middle
+DEC.dfathers=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,du=u-q.u0,dd=q.u1-u,mv=(q.v0+q.v1)/2,av=Math.abs(v-mv),hv=(q.v1-q.v0)/2,top=iv[1];
+  if(du<=4&&av<=3.5){RBP(X,y,Z,du===4||av>3?DKNOT:DFLAG);
+    if(du>=1&&du<=2&&av<0.6)RBP(X,y+1,Z,DTOMB);else if(du===0&&av<0.6)RBS(X,Z,y+1,y+2,GOLDB);
+    else if(du===2&&Math.abs(av-2)<0.6)RBP(X,y+1,Z,BRAZIER);else if(du===0&&Math.abs(av-2)<0.6)RBS(X,Z,y+3,y+7,DBANNER);return;}
+  const k=(du-6)%5;if(Math.abs(av-3)<0.6&&du>=6&&dd>=6){if(k===1||k===2)RBP(X,y,Z,DTOMB);else if(k===0)RBP(X,y,Z,BRAZIER);return;}
+  if(av>hv-0.6&&du>=6&&dd>=4&&k===3){RBS(X,Z,y,y+1,DCOURSE);RBP(X,y+2,Z,DKNOT);RBP(X,y+3,Z,DGRAN);RBP(X,y+4,Z,GOLDB);return;}
+  if(dd>=1&&dd<=3&&Math.abs(av-2)<0.6)RBP(X,y,Z,LECTERN);else if(av<0.6&&k===3)dHang(X,Z,top,Math.max(1,top-y-7));};
+// ---- Above: a pen for the mountain rams (p.W by p.D, its gate toward p.f): a fence round it but at its gate, a shelter of slate on
+// props over its back rows with a wall of courses behind, hay and a water barrel under it
+RB.dpen=(s,p,u,v,X,Z)=>{const [a0,b0]=partAB(p,u,v),a=a0-1,b=b0-1,W=p.W,D=p.D,g=p.y,mid=(W-1)/2,core=a>=0&&a<W&&b>=0&&b<D;
+  RBP(X,g,Z,core?(b>=D-3?DFLAG:GRAVEL):PAVING);if(!core)return;RBS(X,Z,g+1,g+5,AIR);
+  if(b===D-1){RBS(X,Z,g+1,g+3,DCOURSE);RBP(X,g+4,Z,SLATE);return;}
+  if(b>=D-3){if((a===0||a===W-1)&&b===D-3)RBS(X,Z,g+1,g+3,DPROP);else if(a===0||a===W-1)RBP(X,g+1,Z,FENCE);RBP(X,g+4,Z,SLATE);
+    if(b===D-2&&(a===1||a===W-2))RBP(X,g+1,Z,HAYBALE);else if(b===D-2&&a===2)RBP(X,g+1,Z,BARREL);return;}
+  if((a===0||a===W-1||b===0)&&!(b===0&&Math.abs(a-mid)<1.01))RBP(X,g+1,Z,FENCE);};
+// a pen at (cu, cv), facing downhill, its keeper's place before its gate (the rams themselves are brought by dwarf-life.js)
+function dwPen(K,L,cu,cv){const p=K.bld('dpen',cu,cv,9,7,K.downhill(cu,cv));if(!p)return null;L.pens=L.pens||[];L.pens.push({u:(p.u0+p.u1)/2,v:(p.v0+p.v1)/2,y:p.y});
+  L.spots.push({kind:'dpen',u:p.front[0],v:p.front[1],y:p.y});return p;}
+// ---- The prospectors' claims (D-091): the dwarves go out beyond their holds into the high lands no kingdom holds, after the
+// ore in the hills: the Pine Highlands, the Glacier Fields, the Alpine Meadows, the Karst Crags, the Crystal Barrens, the Frozen
+// Tundra, the Fjords, the Cloud Forest Heights and the Starfall Craters, outside the realms. About one chunk in eight of those lands is tried for one: the foot of the steepest rise in
+// the chunk (four or more in eight) (most fail on the ground: a claim wants a hillside steep enough to drive an adit into, level ground before it for the
+// camp, and no water, road or place near).
+// The adit runs level into the hill from its mouth (uphill, along the claim's a), three wide and four high, timbered every four,
+// walled as the holds' mines are (RB.dhold: the rock as it stands, filled where a cave or water touches it, ore and now and then
+// a gem in its walls), so no water or lava reaches in; a cart at its face. Before its mouth the camp: a lean-to of slate on props
+// with a bedroll and the prospector's strongbox (DSTRONG, PROSPLOOT), a fire, an anvil, a heap of spoil. One claim in three is
+// worked out and left: its props fallen here and there, its lamps gone, cobwebs in it, the fire ash. The rest are kept by a
+// prospector by day (dwarf-life.js), who will trade.
+// Pure per chunk like the forefathers' ruins; each reaches at most 24 blocks from its mouth, so the chunks two about it build it
+// (applyClaims); claimsNear keeps trees and boulders off. They keep off the elder elves' ruins, the old kingdom's and the
+// forefathers' (they ask elderNear, oldNear and fathersNear; those never ask for these).
+const CLAIM_LANDS=new Set(['pine','glacier','alpine','karst','crystal','tundra','fjord','cloud','starfall']);
+// what a strongbox holds: [item, least, most, weight]
+const PROSPLOOT=[[468,1,3,4],[469,1,1,1],[213,2,5,4],[214,1,3,2],[210,2,5,3],[200,3,8,4],[204,2,6,4],[462,1,2,3],[465,1,2,3],[466,1,1,2],[470,1,1,0.4],[485,1,1,0.3],[223,1,2,2]];
+const clmC=new Map(),TCL={},TCL2={};
+const claimLow=(WCX,WCZ,q)=>{for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if((a||b)&&hsh(WCX+a,9701,WCZ+b)<q)return false;return true;};
+function claimsAt(WCX,WCZ){
+  const key=WCX*65536+WCZ;if(clmC.has(key))return clmC.get(key);if(clmC.size>20000)clmC.clear();let s=null;const q=hsh(WCX,9701,WCZ);
+  if(q<0.13&&claimLow(WCX,WCZ,q)){const X0=WCX*CS+8,Z0=WCZ*CS+8;colInfo(X0,Z0,TCL);
+    if(CLAIM_LANDS.has(LANDS[TCL.land].k)&&!realmOfColumn(X0,Z0)&&!realmNear(X0,Z0,12)&&!wasteGateNear(X0,Z0,40)){
+      // the mouth: the foot of the steepest rise in the chunk (eight blocks on), with level ground before it for the camp
+      let top=null;for(let x=1;x<CS;x+=3)for(let z=1;z<CS;z+=3){const X=WCX*CS+x,Z=WCZ*CS+z,e0=colInfo(X,Z,TCL2),h=e0.h;if(e0.wet||e0.river||e0.bank||e0.lake||h<=e0.sl+3)continue;
+        for(let d=0;d<4;d++){const [fx,fz]=ELD4[d],r=colInfo(X+fx*8,Z+fz*8,TCL2).h-h;if(r<4)continue;const c=Math.abs(colInfo(X-fx*6,Z-fz*6,TCL2).h-h),sc=r-c*2;if(c<=4&&(!top||sc>top.sc))top={X:X,Z:Z,d:d,sc:sc};}}
+      if(top){const X=top.X,Z=top.Z,dir=top.d;colInfo(X,Z,TCL);const g=TCL.h;
+        let ok=CLAIM_LANDS.has(LANDS[TCL.land].k)&&!TCL.wet&&!TCL.river&&!TCL.bank&&!TCL.lake&&g>TCL.sl+3&&g+30<H&&!realmOfColumn(X,Z)
+          &&!surfTaken(X,Z,22)&&!sigNear(X,Z,22)&&!smallNear(X,Z,22)&&!pondNear(X,Z,22)&&!elderNear(X,Z,24)&&!oldNear(X,Z,24)&&!fathersNear(X,Z,24);
+        const [fx,fz]=ELD4[dir],XZ=(a,b)=>[X+a*fx-b*fz,Z+a*fz+b*fx],G=(a,b)=>{const [x,z]=XZ(a,b);return colInfo(x,z,TCL2);};
+        // the camp's ground before the mouth: near level, dry, no road
+        for(const [a,b] of [[-4,0],[-7,0],[-6,-5],[-6,4],[-2,-4],[-2,4]]){if(!ok)break;const e=G(a,b),[x,z]=XZ(a,b);if(e.wet||e.river||e.lake||Math.abs(e.h-g)>4||oldRoadAt(x,z)||realmRoadAt(x,z,2))ok=false;}
+        // the hill over the adit: rock over its roof from no more than ten in (an open cut before that), for six or more and as
+        // far as it runs (22 at most)
+        let ai=-1,n=0;if(ok)for(let a=3;a<=22;a++){let lo=1e9;for(const b of [-2,0,2]){const e=G(a,b);lo=Math.min(lo,e.wet||e.river||e.lake?-1e9:e.h);}if(lo>=g+5){if(ai<0)ai=a;n=a;}else if(ai>=0)break;}
+        if(ok&&ai>=0&&ai<=10&&n-ai>=6){for(let a=-3;a<=3&&ok;a++)for(let b=-3;b<=3;b++){const f=fallAt(WCX+a,WCZ+b);if(f&&f.path.some(([x,z])=>Math.hypot(x-X,z-Z)<28)){ok=false;break;}}
+          if(ok){const rn=rngAt(WCX,9703,WCZ),nm=nameWord('dwarf',rn),ab=hsh(WCX,9705,WCZ)<0.34;
+            s={kind:'claim',X:X,Z:Z,g:g,R:24,dir:dir,n:n,ab:ab,who:nm,name:ab?'The Old Claim of '+nm:nm+'\'s Claim'};}}}}}
+  clmC.set(key,s);return s;
+}
+function claimsNear(X,Z,m){const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const s=claimsAt(cx+a,cz+b);if(s&&Math.hypot(X-s.X,Z-s.Z)<=s.R+(m||0))return s;}return null;}
+function applyClaims(WCX,WCZ){for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const s=claimsAt(WCX+a,WCZ+b);if(s)claimsBuild(s);}}
+// the claim's frame: a along the adit into the hill from its mouth, b across it
+const claimAB=(s,X,Z)=>{const [fx,fz]=ELD4[s.dir],dx=X-s.X,dz=Z-s.Z;return [dx*fx+dz*fz,-dx*fz+dz*fx];};
+function claimsBuild(s){
+  const [fx,fz]=ELD4[s.dir],g=s.g,XZ=(a,b)=>[s.X+a*fx-b*fz,s.Z+a*fz+b*fx],P=(a,b,y,id,m)=>{const [x,z]=XZ(a,b);PW(x,y,z,id,m||MODE_SET);},G=(a,b)=>{const [x,z]=XZ(a,b);return hAt(x,z);};
+  // the adit: one shape in the claim's frame, carved and walled per column of this chunk by the holds' own builder
+  if(!s.S)s.S=[dBox({t:'b',k:'cgal',st:2,ax:'u',u0:0,u1:s.n,v0:-1,v1:1,y0:g+1,y1:g+4})];const p={S:s.S,y0:g},cl=s;
+  genLit=!s.ab;
+  try{for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const X=gx0+lx,Z=gz0+lz,[a,b]=claimAB(s,X,Z);if(a<-1||a>s.n+1||Math.abs(b)>2)continue;RB.dhold(cl,p,a,b,X,Z);}
+    // the cut before the mouth: the ground cleared to the adit's floor where it stands over it
+    for(let a=-2;a<=0;a++)for(let b=-1;b<=1;b++){const gg=G(a,b);for(let y=g+1;y<=Math.max(gg,g+4);y++)P(a,b,y,AIR);P(a,b,g,GRAVEL);}
+    for(const b of [-2,2]){const gg=G(0,b);for(let y=g+1;y<=g+4;y++)if(y<=gg)P(0,b,y,DPROP);}{const gg=G(0,0);if(gg>=g+5)for(let b=-2;b<=2;b++)P(0,b,g+5,DPROP);}
+    // the camp: a lean-to of slate on props, a bedroll and the strongbox under it; the fire; an anvil; the heap of spoil
+    for(let a=-9;a<=-6;a++)for(let b=3;b<=6;b++){const gg=G(a,b),post=(a===-9||a===-6)&&(b===3||b===6),roofY=gg+(b>=5?4:3);
+      if(post)for(let y=gg+1;y<roofY;y++)P(a,b,y,DPROP);if(!s.ab||hsh(a+s.X,9707,b+s.Z)<0.6)P(a,b,roofY,SLATE);}
+    {const gg=G(-8,5);P(-8,5,gg+1,WOOLB);const g2=G(-7,5);P(-7,5,g2+1,DSTRONG);const g3=G(-8,4);P(-8,4,g3+1,BARREL);}
+    {const gg=G(-5,-2);for(const [a,b] of [[-6,-2],[-4,-2],[-5,-3],[-5,-1]])P(a,b,G(a,b)+1,COBBLE);P(-5,-2,gg+1,s.ab?ASH:BRAZIER);}
+    {const gg=G(-3,-5);P(-3,-5,gg+1,DANVIL);}
+    for(let a=-12;a<=-6;a++)for(let b=-9;b<=-4;b++){const d=Math.hypot(a+9,b+6.5);if(d>3.2)continue;const gg=G(a,b),h=Math.round(3*(1-d/3.2));for(let y=gg+1;y<=gg+h;y++)P(a,b,y,hsh(a*3+y,9709,b+s.Z)<0.08?IRON:GRAVEL);}
+  }finally{genLit=false;}
+}
+// the adit's furnishing: a set of timbers every four (two props and a cap; in a worked-out claim some are down), a lamp at every
+// other cap's middle (gone in a worked-out one, cobwebs there instead), a cart at the face
+DEC.cgal=(s,p,q,u,v,X,Z,iv)=>{const y=q.y0,a=u-q.u0,c=v-q.v0,top=iv[1];
+  if(a===q.u1-q.u0&&c===1){RBP(X,y,Z,DCART);return;}
+  if(a%4===0&&a>0){if(s.ab&&hsh(X,9711,Z)<0.35){if(c===1&&hsh(X,9713,Z)<0.5)RBP(X,y,Z,DPROP);return;}if(c===0||c===2)RBS(X,Z,y,top-1,DPROP);RBP(X,top,Z,DPROP);return;}
+  if(a%8===2&&c===1){if(s.ab)RBP(X,top,Z,COBWEB);else RBP(X,top,Z,DLAMP);}else if(s.ab&&c!==1&&hsh(X,9715,Z)<0.08)RBP(X,top,Z,COBWEB);};
 // ---- The white realm enlarged (D-089): what the cities and villages of the high men gain, and three new places of theirs.
 //
 // In every city the great hall holds the throne of the realm on a dais under the tapestry of the realm, shields and banners
@@ -9103,7 +9347,7 @@ function features(WCX,WCZ,self,noLife){
   // boulders and tors where the land is rocky: the moors, the mountains and steep slopes; rare on gentle ground (Q93)
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,bq=hsh(X,19,Z);if(bq>=0.008)continue;
-    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2)||elderNear(X,Z,2)||oldNear(X,Z,2)||fathersNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
+    colInfo(X,Z,T2);if(bq>=(T2.b===4?0.008:T2.b===5?0.004:T2.b===7?0.0012:slopeAt(X,Z,T2.h)>=2?0.0015:0.0002))continue;const tb=topBlock(T2);if(sigNear(X,Z,2)||smallNear(X,Z,2)||pondNear(X,Z,2)||elderNear(X,Z,2)||oldNear(X,Z,2)||fathersNear(X,Z,2)||claimsNear(X,Z,2))continue;if(![GRASS,SNOWG,SAND,NEEDLES].includes(tb)||T2.h<=SEA+1||carved(X,T2.h,Z,T2)||surfTaken(X,Z))continue;
     const br=rngAt(X,20,Z),rad=1.1+br()*0.9+(T2.b===4?0.9:0),m=tb===SAND?SANDSTONE:null;
     for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=2;dy++)for(let dz=-2;dz<=2;dz++){if(Math.hypot(dx,dy*1.2,dz)>rad)continue;const q=br();PW(X+dx,T2.h+dy,Z+dz,m||(q<0.45?MOSSY:q<0.8?COBBLE:STONE),MODE_SET);}
   }
@@ -9113,7 +9357,7 @@ function features(WCX,WCZ,self,noLife){
   for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){
     const X=X0+lx,Z=Z0+lz,hv=hsh(X,1,Z);if(hv>=0.08&&((X%7+7)%7||(Z%7+7)%7))continue; // the orchards' rows (M6g) take every seventh column
     colInfo(X,Z,T2);const b=T2.b,h=T2.h,tr2=rngAt(X,3,Z);
-    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2)&&!elderNear(X,Z,2)&&!oldNear(X,Z,2)&&!fathersNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
+    const clear=h+12<H&&!carved(X,h,Z,T2)&&!surfTaken(X,Z,3,true)&&!sigNear(X,Z,3)&&!smallNear(X,Z,2)&&!pondNear(X,Z,2)&&!elderNear(X,Z,2)&&!oldNear(X,Z,2)&&!fathersNear(X,Z,2)&&!claimsNear(X,Z,2),top=topBlock(T2),F=forestOf(T2);
     if(clear&&F&&F.tree){ // the forests (M6b): their own trees, in groves or filling the land
       const G=sstep(-0.2,0.25,fbm2(X/70,Z/70,2,4801.3)),grv=(F.glade?0.15+1.7*G:0.55+0.8*G)*(T2.bank||h<SEA+6?1.4:1)*(slopeAt(X,Z,h)>=3?0.4:1);
       if((top===GRASS||top===SNOWG||top===DIRT||FLOORS.has(top)||F.floors&&F.floors.has(top))&&(F.grid?((X%F.grid+F.grid)%F.grid===0&&(Z%F.grid+F.grid)%F.grid===0):hv<F.trees*grv))F.tree(X,h+1,Z,tr2,T2);}
@@ -9184,7 +9428,7 @@ const GEN_STEPS=[
   (lcx,lcz,WCX,WCZ)=>caveLife(WCX*CS,WCZ*CS,rngAt(WCX,15,WCZ)), // the chunk's own cave life, in the same place in the order as before
   (lcx,lcz,WCX,WCZ)=>features(WCX,WCZ+1,false),
   (lcx,lcz,WCX,WCZ)=>{for(let b=-1;b<=1;b++)features(WCX+1,WCZ+b,false);},
-  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ);applyElder(WCX,WCZ);applyOld(WCX,WCZ);applyFathers(WCX,WCZ); // the ruins of the elder elves (D-088)
+  (lcx,lcz,WCX,WCZ)=>{applySites(WCX,WCZ);applyForestSigs(WCX,WCZ);applyFalls(WCX,WCZ);applySmall(WCX,WCZ);applyPonds(WCX,WCZ);applyElder(WCX,WCZ);applyOld(WCX,WCZ);applyFathers(WCX,WCZ);applyClaims(WCX,WCZ); // the ruins of the elder elves (D-088)
     // the forests' landmarks and features (M6b) after the old sites
     // hold gates come last, so no cave, room or ore cuts through the stair (and the ruins' tidy pass never sees it)
     applyFortresses(WCX,WCZ); // the Emberlords' fortresses in the great volcanoes (D-052)
@@ -10433,7 +10677,8 @@ const HEADINGS=['north','north-west','west','south-west','south','south-east','e
 const heading=()=>HEADINGS[((Math.round(PL.yaw/(Math.PI/4))%8)+8)%8];
 // Equipment: a belt (a lantern that lights the way), a pack and a bag (more room); filled in M4. An item goes in the slot
 // its ITEMS entry names with {equip:'belt'|'pack'|'bag'}. Equipped items are saved and go to the grave on death.
-const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag',body:'Body',arm:'Arm'},equip={belt:null,pack:null,bag:null,body:null,arm:null}; // body: armour (D-052); arm: a shield (W8a)
+const EQUIP_SLOTS={belt:'Belt',pack:'Pack',bag:'Bag',body:'Body',arm:'Arm',rune:'Rune'},equip={belt:null,pack:null,bag:null,body:null,arm:null,rune:null}; // body: armour (D-052); arm: a shield (W8a); rune: a rune of the dwarves (D-091)
+const runeOn=k=>!!(equip.rune&&ITEMS[equip.rune.id].rune===k&&SURV()); // the rune worn (D-091)
 const equipSlotOf=id=>(ITEMS[id]&&ITEMS[id].equip)||null;
 if(saved&&saved.eq)for(const s in EQUIP_SLOTS){const q=saved.eq[s];if(q&&equipSlotOf(q[0])===s)equip[s]={id:q[0],c:1,d:q[1]||0};}
 function invCap(s,id){let n=36;for(const k of ['pack','bag']){const q=k===s?(id?{id:id}:null):equip[k];if(q&&ITEMS[q.id].slots)n+=ITEMS[q.id].slots;}return n;} // with slot s holding id instead, if given
@@ -10480,6 +10725,7 @@ function dropsFor(id,tool){
     case TURN2:return[[330,2+(Math.random()*2|0)]];case BEAN0:case BEAN1:return[[331,1]];case BEAN2:return[[331,2+(Math.random()*2|0)]];case HEATHER:return Math.random()<0.3?[[328,1]]:[];case ROPE:case GRAPNEL:return[];
     case CHARWOOD:case SMOULDER:return[[200,1+(Math.random()<0.3?1:0)]];case VENT:return[[CINDER,1]];case LAVACRUST:return[[CINDER,1]];
     case STONE:return[[COBBLE,1]];case GRASS:case SNOWG:return[[DIRT,1]];case COAL:return[[200,1+(Math.random()<0.25?1:0)]];
+    case GEMORE:return[[468,1+(Math.random()<0.2?1:0)]];case DSTRONG:return[];case MUSHBED:return[[DIRT,1]]; // (a rough gem from the dwarves' seams: D-091)
     case COPO:return[[210,1]];case TINO:return[[211,1]];case ZINO:return[[212,1]];case IRON:return[[213,1]];case GOLD:return[[214,1]];
     case GLOWSHROOM:return Math.random()<0.7?[[270,1]]:[[GLOWSHROOM,1]];case CRATE:case DWCHEST:case ECHEST:case BARREL:return[];case GLOWCAP:return Math.random()<0.5?[[270,1]]:[];
     case PATH:case FARM_D:case FARM_W:return[[DIRT,1]];case WHEAT:return[[202,1],[208,1+(Math.random()<0.5?1:0)]];case WHEAT0:case WHEAT1:case WHEAT2:return[[208,1]];case POT0:case POT1:case POT2:return[[209,1]];case POT3:return[[209,1+(Math.random()*3|0)]];case TGRASS:{const r=Math.random();return r<0.12?[[208,1]]:r<0.15?[[209,1]]:r<0.17?[[331,1]]:r<0.47?[[328,1]]:[];}case PLATO:return[[215,1]];case TITO:return[[216,1]];case DIAMOND:return[[230,1]];case GLASS:case ICE:return[];case CRYSTAL:return[[CRYSTAL,1]];
@@ -10522,12 +10768,12 @@ function mineTick(dt){
   if(BOX_IDS.has(hit.id)&&boxBusy(hit.x,hit.y,hit.z)){toast(boxes.has(wkey(hit.x+OX,hit.y,hit.z+OZ))||hit.id===CHEST?'Empty it before you break it':'Open it first (place button)');hold=-1;crack.visible=false;return;}
   const i=I(hit.x,hit.y,hit.z);if(i!==mineI){mineI=i;mineP=0;}
   const info=mineInfo(hit.id,curId());if(!info){crack.visible=false;return;}
-  mineP+=info.t<=0?1:dt/info.t;
+  mineP+=info.t<=0?1:dt/info.t*(runeOn('delve')?1.3:1); // (the rune of delving: D-091)
   mineTk-=dt;
   if(mineTk<=0){mineTk=0.24;swing=1;breakFx(hit.x,hit.y,hit.z,hit.id,2);const sd=SND[BL[hit.id].snd]||SND.stone;burst(0.05,'bandpass',sd[0]*0.8,sd[1],0.12);}
   if(mineP>=1){
     breakFx(hit.x,hit.y,hit.z,hit.id,BL[hit.id].cross?6:16);sfxBlock(hit.id,false,hit.x,hit.y,hit.z);buzz(10);
-    const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
+    const id=hit.id,tool=curId(),sick=ITEMS[tool]&&ITEMS[tool].tool==='sickle'&&SICKLE_CUT.has(id);if(!sick)setBlock(hit.x,hit.y,hit.z,AIR);dwarfTheft(hit.x,hit.y,hit.z,id);delveMined(id,hit.x,hit.y,hit.z);exh+=0.005;if(BL[id].hard>0||sick)wearHeld(1);
     if(info.drop){let lost=0;const got=sick?sickleSweep(hit.x,hit.y,hit.z):id===ROPE||id===GRAPNEL?ropeTake(id,hit.x,hit.y,hit.z):dropsFor(id,tool);
       if(BL[id].mat==='ore')hint('ore');
       for(const [d,n] of got){lost+=addItem(d,n);showName('+'+n+' '+nameOf(d));}if(lost)toast('Inventory full');drawBar(true);}
@@ -10655,7 +10901,7 @@ function renderBlueprints(box){
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3,446:3,447:4,448:6,449:8}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089); the riders' (D-090)
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3,446:3,447:4,448:6,449:8,462:3,463:4,464:2,465:5,466:6,467:7}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089); the riders' (D-090); the dwarves' (D-091)
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -10704,7 +10950,8 @@ function openGrave(X,Y,Z){
 function eat(){
   const q=inv[sel];if(!q||!FOOD[q.id]||eatCD>0)return;
   if(food>=20){toast('You are not hungry');return;}
-  food=Math.min(20,food+FOOD[q.id]);q.c--;if(!q.c)inv[sel]=null;eatCD=0.6;swing=1;
+  food=Math.min(20,food+FOOD[q.id]);if(q.id===464)hp=Math.min(20,hp+3); // fire ale warms and heals a little (D-091)
+  q.c--;if(!q.c)inv[sel]=null;eatCD=0.6;swing=1;
   burst(0.12,'bandpass',600,1,0.3);burst(0.12,'bandpass',500,1,0.25,0.15);showName('+'+FOOD[q.id]+' food');drawBar(true);drawStats();
 }
 function cactusNear(){
@@ -10717,7 +10964,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   if(!SURV()||dead){air=10;return;}
   // falling
   if(inLiq||PL.fly||PL.climb)fallTop=PL.y;
-  else if(PL.ground){if(fallTop!==null&&fallTop-PL.y>3.5)hurt(Math.floor(fallTop-PL.y-3),'fell');fallTop=PL.y;}
+  else if(PL.ground){if(fallTop!==null&&fallTop-PL.y>3.5){const n=Math.floor((fallTop-PL.y-3)*(runeOn('stone')?0.5:1));if(n>0)hurt(n,'fell');}fallTop=PL.y;} // (the rune of stone halves a fall's harm: D-091)
   else fallTop=fallTop===null?PL.y:Math.max(fallTop,PL.y);
   // lava, cactus
   if(liquidAt(PL.x,PL.y+0.2,PL.z)===2||liquidAt(PL.x,PL.y+1.2,PL.z)===2)hurt(4,'lava');
@@ -10727,7 +10974,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   else{air=Math.min(10,air+dt*5);drownT=0;}
   // hunger
   exh+=moved*(sprinting?0.1:0.01)+dt*0.003;
-  while(exh>=4){exh-=4;food=Math.max(0,food-1);}
+  const ek=runeOn('hearth')?6:4;while(exh>=ek){exh-=ek;food=Math.max(0,food-1);} // (the rune of the hearth: hunger comes slower, D-091)
   if(food>=18&&hp<20){regenT+=dt;if(regenT>=4){regenT=0;hp++;exh+=3;}}else regenT=0;
   if(food===0){starveT+=dt;if(starveT>=4){starveT=0;if(hp>1)hurt(1,'starved');}}else starveT=0;
   drawStats();
@@ -10741,6 +10988,7 @@ function lampLevel(){
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
   const b=equip.belt;if(b&&ITEMS[b.id].ever)return[1,24+adj];if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj]; // (the starglass lantern needs no oil and reaches further: D-088)
   const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];if(h===378)return[0.95,14+adj]; // the Emberheart glows in the hand (W7c)
+  if(runeOn('lamp'))return[0.8,11+adj]; // the rune of the lamp glows about its wearer (D-091)
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
@@ -10906,7 +11154,7 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[FCHEST]:openBox,[HSTONE]:useHorseStone,[PICSTONE]:usePicStone,[SKEP]:useSkep,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[FCHEST]:openBox,[DSTRONG]:openBox,[DWAY]:useWaymark,[DTOMB]:useTomb,[DDRUM]:useDeepDrum,[DRUNE]:useRuneForge,[HSTONE]:useHorseStone,[PICSTONE]:usePicStone,[SKEP]:useSkep,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
@@ -10918,6 +11166,7 @@ function act(btn){
   if(btn===2&&elfAct())return; // speaking with the elves: trade, healing, tales, tasks, an audience (D-088)
   if(btn===2&&menAct())return; // speaking with the folk of the white realm (D-089)
   if(btn===2&&riderAct())return; // speaking with the riders' folk (D-090)
+  if(btn===2&&dwarfAct())return; // speaking with the dwarves (D-091)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
@@ -10927,6 +11176,8 @@ function act(btn){
   if(btn===2&&held===436&&menHorn())return; // the horn of the realm calls its soldiers (D-089)
   if(btn===2&&held===453&&riderHorn())return; // the war-horn of the riders calls a riding (D-090)
   if(btn===2&&held===452&&useBarding())return; // barding put on your horse (D-090)
+  if(btn===2&&held===473&&dwarfHorn())return; // the horn of the hold calls a shield-wall (D-091)
+  if(btn===2&&held===476&&useHallKey())return; // the hall-key: rest in your hall (D-091)
   if(btn===2&&held===435&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+8);drawBar(true);drawStats();toast('The salve soothes your wounds');return;} // heartsease salve
   if(btn===2&&held===430){boatPlace();return;} // a swan boat set on the water
   if(btn===2&&held===420&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+12);drawBar(true);drawStats();toast('The draught is cool and bright; your wounds close');return;} // an elven draught
@@ -11034,13 +11285,13 @@ function lockOrPlay(){
 // you build starts empty. Contents are saved with the world (save data `cs`). A container that holds anything (or a world one
 // never opened) cannot be broken: empty it first. In survival the inventory screen shows the container beside the pack;
 // tapping a slot on either side moves that stack across. Creative only looks inside.
-const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST,OLDCHEST,FCHEST]);
+const BOX_SLOTS=27,boxes=new Map(),BOX_IDS=new Set([CHEST,CRATE,DWCHEST,BARREL,ECHEST,OLDCHEST,FCHEST,DSTRONG]);
 let box=null; // the open container: {k, x, y, z} in window coordinates
 if(saved&&Array.isArray(saved.cs))saved.cs.forEach(([k,sl])=>{const a=new Array(BOX_SLOTS).fill(null);(sl||[]).forEach(([i,id,c,d])=>{if(i<BOX_SLOTS&&(ITEMS[id]||BL[id]))a[i]={id:id,c:c,d:d||0};});boxes.set(k,a);});
 const boxSave=()=>[...boxes].map(([k,a])=>[k,a.map((q,i)=>q&&[i,q.id,q.c,q.d||0]).filter(Boolean)]);
 // The loot a world container holds when first opened, decided by where it sits (the tables are in underground-sites.js)
 function lootOf(id,WX,Y,WZ){
-  const dw=id===DWCHEST||id===ECHEST||id===OLDCHEST||id===FCHEST,TBL=id===FCHEST?FATHERLOOT:id===OLDCHEST?OLDLOOT:id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
+  const dw=id===DWCHEST||id===ECHEST||id===OLDCHEST||id===FCHEST||id===DSTRONG,TBL=id===DSTRONG?PROSPLOOT:id===FCHEST?FATHERLOOT:id===OLDCHEST?OLDLOOT:id===ECHEST?ELDERLOOT:dw?(ROOM_LOOT[roomAt(WX,Y,WZ)]||DWLOOT):id===BARREL?BARRELLOOT:LOOT,r=rngAt(WX,Y*13+7,WZ),rolls=(dw?4:2)+(r()*3|0); // (an elder chest in the ruins of the elder elves: D-088)
   let tot=0;for(const l of TBL)tot+=l[3];
   const out=[];for(let k=0;k<rolls;k++){let v=r()*tot,it=TBL[0];for(const l of TBL){v-=l[3];if(v<=0){it=l;break;}}out.push([it[0],it[1]+Math.floor(r()*(it[2]-it[1]+1))]);}
   return out;
@@ -12784,6 +13035,135 @@ const FOLK_KIT=(function(){
     paint(P,c,f){P.coat(['body','head','dewlap','legFL','legFR','legBL','legBR','tail'],c.coat,18);P.coat(['muzzle'],[176,140,130],6);P.coat(['hornL','hornR'],c.horn,6);P.eyes('head',2,2,[20,16,14]);
       for(const l of ['legFL','legFR','legBL','legBR']){P.rows(l,['L','F','R','B'],5,8,c.low);P.rows(l,['L','F','R','B'],7,8,[40,34,30]);}P.rows('tail',['L','F','R','B'],7,10,c.low);}};
 })();
+// ---- The dwarves' court and the folk of their life (D-091), from their own parts and painters (FOLK_KIT, MODEL_KIT.dwarf): the
+// queen of the mountain in crimson and gold under a crown, her braids looped and pinned in gold, a sceptre; the anvilguard of
+// the throne in gilded plate under crested helms with masks, great double-bladed axes and blue cloaks; the warden of the hold in
+// a dark robe with the keys of the hold at his belt and his staff; the loremaster, white-bearded, hooded in grey-blue with the
+// great book under his arm; the runesmith, his apron marked with runes that glow, a blue hood, a rune-stone in his hand; the
+// brewer in shirt-sleeves under his apron with a tankard; the merchant in a furred coat and a broad hat with his purse; the
+// gemcutter with his lens; the mushroom-farmer with a basket of mushrooms on his back; the children of the hold (a boy with a toy
+// hammer, a girl with her braids looped like her mother's); the ram-riders of the mountain, axeguards astride great rams in
+// the mountain's saddle-cloth; the prospector under a broad hat with his pack and his pick; the deepwarden in a dark hooded cloak
+// with a lantern on a pole; and the engineer with a coil of rope and a measuring rod. Their beasts: the great ram of the
+// mountain (wild, or saddled when it is someone's), the shaggy pony of the caravans with its packs, and the raven.
+(function(){
+  const {ALL,SIDE,sh,hz,cloth,mail,plate,leather,band,rivets,boots,hands,STEEL,GOLD}=FOLK_KIT,D=MODEL_KIT.dwarf,{coats,dwarf,dface,kit,kitPaint,helm,helmPaint,axe,axePaint,shield,shieldPaint,sign,BRZ,BLUE,CRIM,DIRON}=D;
+  const base=(k,drop)=>AM_KINDS[k].parts.filter(p=>!(drop||[]).includes(p[0])).map(p=>p.slice());
+  const recoat=(k,o)=>AM_KINDS[k].coats.map(([c,w],i)=>[Object.assign({},c,typeof o==='function'?o(c,i):o),w]);
+  // a painter that passes over the parts a model has dropped (as the riders' court does)
+  const skip=(P,names)=>{const set=new Set(names);return new Proxy(P,{get(t,k){const f=t[k];if(typeof f!=='function')return f;
+    return (n,...a)=>Array.isArray(n)?f.call(t,n.filter(x=>!set.has(x)),...a):set.has(n)?undefined:f.call(t,n,...a);}});};
+  const crown=()=>[['crown','head',[0,6.5,0],[-3.75,0,-3.75,7.5,1.5,7.5],0,{head:1}],['cpt','crown',[0,1.5,0],[-3.75,0,-3.75,7.5,1.5,7.5],0,{head:1,nb:1}]];
+  const crownPaint=P=>{plate(P,['crown'],GOLD);P.map('cpt',ALL,(s,t,w,h,f)=>f==='T'||f==='D'?null:s%3===1?sh(GOLD,t===h-1?20:4):null);P.map('crown',['F'],s=>s===6||s===7?[200,40,60]:null);};
+  const braid=(P,c,n)=>P.map(n,ALL,(s,t)=>t===1?sh(GOLD,10):sh(c.hair,((t+s)%3===0?-16:6)+hz(s,t,801)*8));
+  const kids=coats(1).map(([c,w])=>[Object.assign({},c),w]);
+  // the rider's seat on a ram: the dwarf's body on the ram's back, thighs over its flanks (legs and toes dropped)
+  const seat=()=>dwarf().filter(p=>!['legL','legR','toeL','toeR'].includes(p[0])).map(p=>p[0]==='body'?['body','hbody',[0,11.5,-1],[-5,0,-3,10,10,6]]:p.slice());
+  const RAMC=[{coat:[214,206,188],shade:[170,160,140],horn:[150,132,100]},{coat:[120,104,84],shade:[84,72,58],horn:[176,160,126]},{coat:[70,64,60],shade:[46,42,40],horn:[188,174,140]}];
+  // the ram's frame for a rider (riderPose moves its legs, hbody and neck)
+  const ramParts=()=>[['legFL',null,[-2.5,9,5],[-1.5,-9,-1.5,3,9,3]],['legFR',null,[2.5,9,5],[-1.5,-9,-1.5,3,9,3],0,{m:'legFL'}],['legBL',null,[-2.5,9,-5],[-1.5,-9,-1.5,3,9,3]],['legBR',null,[2.5,9,-5],[-1.5,-9,-1.5,3,9,3],0,{m:'legBL'}],
+    ['hbody',null,[0,9,0],[-4.5,0,-8,9,9,16]],['neck','hbody',[0,6,7],[-2,-2,-2,4,7,4],[0.5,0,0]],['hhead','neck',[0,6,0],[-2.25,-2,-2,4.5,4.5,6],[0.35,0,0]],
+    ['rhL','hhead',[-2,2,0],[-3,-1,-1,3,2,2.5],[0,0,0.2],{nb:1}],['rcL','rhL',[-3,0,0.5],[-1.5,-4,-1,2,4,2.5],[0.5,0,0],{nb:1}],
+    ['rhR','hhead',[2,2,0],[0,-1,-1,3,2,2.5],[0,0,-0.2],{nb:1,m:'rhL'}],['rcR','rhR',[3,0,0.5],[-0.5,-4,-1,2,4,2.5],[0.5,0,0],{nb:1,m:'rcL'}],
+    ['tail','hbody',[0,6,-8],[-1,-2,-1,2,3,1],[-0.3,0,0]],['scloth','hbody',[0,0,0],[-5,3,-5,10,6.5,9]],['saddle','hbody',[0,9,-1],[-3.5,0,-3,7,1,6]]];
+  const ramPaint=(P,r)=>{P.map('hbody',ALL,(s,t,w,h,f)=>sh(r.coat,hz(s>>1,t>>1,805)*16-(f==='D'?20:0)+((s+t)%3===0?-8:0)));for(const n of ['neck','hhead','tail'])P.map(n,ALL,(s,t)=>sh(r.coat,hz(s,t,807)*14));
+    for(const n of ['legFL','legBL'])P.map(n,ALL,(s,t,w,h)=>t>h-4?[44,38,34]:sh(r.shade,hz(s,t,809)*10));P.map('hhead',['F'],(s,t)=>(t===5||t===6)&&(s===1||s===7)?[20,16,14]:t<3?sh(r.shade,0):null);
+    for(const n of ['rhL','rcL'])P.map(n,ALL,(s,t)=>sh(r.horn,(t%2?-16:8)+hz(s,t,811)*8));
+    cloth(P,['scloth'],BLUE);band(P,'scloth',SIDE,0,2,GOLD);sign(P,'scloth','L',2,0);sign(P,'scloth','R',2,0);leather(P,['saddle'],[96,62,36]);};
+  Object.assign(AM_KINDS,{
+    // the queen of the mountain
+    dqueen:{res:2,tex:256,scale:0.97,parts:[...base('dlady',['bun']),['mantle','body',[0,9,0],[-6,-3,-3.75,12,3.5,7.5]],['cape','body',[0,10,-3.2],[-5,-16,-0.5,10,16,1],[0.05,0,0],{nb:1}],...crown(),
+        ['staff','armR',[1.75,-8.5,0.5],[-0.5,-6,-0.5,1,17,1],[0.05,0,0],{nb:1}],['knob','staff',[0,11,0],[-1,0,-1,2,2,2],0,{nb:1}]],
+      coats:recoat('dlady',(c,i)=>({cl:CRIM,hair:[[150,146,140],[164,98,48],[72,46,28],[212,208,202]][i%4]})),
+      paint(P,c){AM_KINDS.dlady.paint(skip(P,['bun']),c);band(P,'dress',SIDE,4,7,GOLD);cloth(P,['mantle'],[226,220,206]);P.map('mantle',ALL,(s,t)=>(s*3+t*5)%7===0?[40,36,34]:null);
+        cloth(P,['cape'],CRIM,{off:2});band(P,'cape',SIDE,28,32,GOLD);sign(P,'cape','B',2,8);crownPaint(P);P.map('staff',ALL,(s,t)=>t%6===0?sh(GOLD,0):sh(DIRON,hz(s,t>>2,813)*10));plate(P,['knob'],GOLD);}},
+    // the anvilguard: the hammerer's plate gilded, a crest on the helm, a blue cloak, a great double-bladed axe
+    danvil:{res:2,tex:256,scale:1,parts:[...base('dhammer',['maul']),['crest','head',[0,8,0],[-0.5,0,-3,1,2.5,6],0,{head:1,nb:1}],['cape','body',[0,10,-3.2],[-5,-15,-0.5,10,15,1],[0.06,0,0],{nb:1}],
+        ['gaxe','haft',[0,0,11],[-0.5,-4.5,-0.5,1,9,4.5],0,{nb:1}]],coats:coats(3),
+      paint(P,c){AM_KINDS.dhammer.paint(skip(P,['maul']),c);band(P,'cuir',SIDE,0,3,GOLD);band(P,'skirt',SIDE,0,2,GOLD);P.map('helm',SIDE,(s,t,w)=>s===(w>>1)||t===0?sh(GOLD,10):null);
+        band(P,'pL',SIDE,0,3,GOLD);plate(P,['crest'],GOLD);cloth(P,['cape'],BLUE,{off:2});band(P,'cape',SIDE,26,30,GOLD);sign(P,'cape','B',2,6);
+        P.map('gaxe',ALL,(s,t,w,h,f)=>f==='L'||f==='R'?(s===w-1||s===0?sh([226,230,236],24):sh(STEEL,hz(s,t,815)*10+(t===h>>1?-20:0))):sh(GOLD,0));}},
+    // the warden of the hold: a dark robe, the keys at his belt, his staff of office
+    dhward:{res:2,tex:256,scale:0.98,parts:[...base('dlord'),['keys','body',[-4.8,1,1],[-0.5,-3,-1.5,1,3,3],0,{nb:1}],['staff','armR',[1.75,-8.5,0.5],[-0.5,-6,-0.5,1,18,1],[0.05,0,0],{nb:1}],['knob','staff',[0,12,0],[-1,0,-1,2,2,2],0,{nb:1}]],
+      coats:recoat('dlord',()=>({cl:[44,48,62]})),
+      paint(P,c){AM_KINDS.dlord.paint(P,c);P.map('keys',ALL,(s,t)=>(s+t)%2?sh(DIRON,16):sh(BRZ,0));P.map('staff',ALL,(s,t)=>t%8===0?sh(BRZ,10):sh([70,52,36],hz(s,t>>2,817)*10));plate(P,['knob'],BRZ);}},
+    // the loremaster: hooded, white-bearded, the great book under his arm
+    dlore:{res:2,tex:256,scale:0.96,parts:[...base('dlord',['circ','chain']),['hood','head',[0,0,-0.5],[-3.75,0,-3.75,7.5,7.75,5.5],0,{head:1}],['book','armL',[-1.5,-6,1.5],[-1.25,-3,-2.5,2.5,6,5],0,{nb:1}]],
+      coats:recoat('dlord',(c,i)=>({cl:[62,78,104],hair:[[212,208,202],[176,172,166],[150,146,140]][i%3]})),
+      paint(P,c){AM_KINDS.dlord.paint(skip(P,['circ','chain']),c);cloth(P,['hood'],[62,78,104]);P.map('hood',['F'],(s,t,w)=>s>=1&&s<w-1&&t<12?null:sh([62,78,104],-10));
+        P.map('book',ALL,(s,t,w,h,f)=>f==='F'||f==='B'||f==='T'||f==='D'?sh([226,214,180],(t%2?-10:0)):sh([110,40,36],(s===1||s===w-2?20:0)+hz(s,t,819)*8));}},
+    // the runesmith: the smith's apron marked with runes glowing blue, a blue hood, a rune-stone in his left hand
+    drune:{res:2,tex:256,scale:0.96,parts:[...base('dsmith'),['hood','head',[0,0,-0.5],[-3.75,0,-3.75,7.5,7.75,5.5],0,{head:1}],['stone','armL',[-1.75,-9,1],[-1.25,-2,-1.25,2.5,3,2.5],0,{nb:1}]],coats:coats(2),
+      paint(P,c){AM_KINDS.dsmith.paint(P,c);cloth(P,['hood'],[40,56,112]);P.map('apron',['F'],(s,t)=>(t%7===2&&s%5<3)||(s%5===1&&t%7<4&&t%7>0)?[120,200,255]:null);
+        P.map('stone',ALL,(s,t,w,h,f)=>f==='F'&&(s===2||t===2)?[150,226,255]:sh([128,126,124],hz(s,t,821)*14));}},
+    // the brewer: linen sleeves under the apron, a tankard in his right hand
+    dbrew:{res:2,tex:256,scale:0.97,parts:[...base('dsmith',['haft','hmr']),['mug','armR',[1.75,-9.5,1],[-1.25,-1,-1.25,2.5,3,2.5],0,{nb:1}]],coats:coats(4),
+      paint(P,c){AM_KINDS.dsmith.paint(skip(P,['haft','hmr']),c);cloth(P,['armL','body'],[200,186,156]);P.map('armL',ALL,(s,t,w,h)=>t>h-4?sh(c.skin,0):null);
+        leather(P,['apron'],[120,84,50]);P.map('mug',ALL,(s,t,w,h,f)=>f==='T'?[240,234,214]:t%3===0?sh(BRZ,14):sh([150,100,56],hz(s,t,823)*10));}},
+    // the merchant: a furred coat, a broad hat, his purse at his belt
+    dmerch:{res:2,tex:256,scale:0.96,parts:[...base('dlord',['circ','chain']),['hat','head',[0,6.5,0],[-3.5,0,-3.5,7,2,7],0,{head:1}],['brim','head',[0,6.5,0],[-4.75,-0.5,-4.75,9.5,1,9.5],0,{head:1}],
+        ['purse','body',[4.8,1,1.5],[-0.5,-3,-1.5,1.5,3,3],0,{nb:1}]],coats:recoat('dlord',(c,i)=>({cl:[[46,92,60],[120,70,40],[80,60,110]][i%3]})),
+      paint(P,c){AM_KINDS.dlord.paint(skip(P,['circ','chain']),c);cloth(P,['hat','brim'],[60,44,30]);band(P,'hat',SIDE,0,1,GOLD);P.map('purse',ALL,(s,t)=>t===0?sh(GOLD,0):sh([140,96,52],hz(s,t,825)*10));}},
+    // the gemcutter: the miner's tunic and apron, a lens before one eye
+    dgem:{res:2,tex:256,scale:0.94,parts:[...base('dminer',['lamp','haft','pick']),['loupe','head',[1.5,3.5,3],[-1,-1,0,2,2,1.5],0,{head:1,nb:1}]],coats:coats(5),
+      paint(P,c){AM_KINDS.dminer.paint(skip(P,['lamp','haft','pick']),c);P.map('loupe',ALL,(s,t,w,h,f)=>f==='F'&&s>0&&s<w-1&&t>0&&t<h-1?[170,220,240]:sh(BRZ,10));}},
+    // the mushroom-farmer: a hood, a basket of mushrooms on his back
+    dfarm:{res:2,tex:256,scale:0.94,parts:[...base('dminer',['lamp','haft','pick','cap']),['hood','head',[0,0,-0.5],[-3.75,0,-3.75,7.5,7.75,5.5],0,{head:1}],
+        ['basket','body',[0,5,-4],[-3,-3,-2.5,6,6,3]],['shrooms','basket',[0,3,0],[-2.5,0,-1.25,5,1.5,2.5],0,{nb:1}]],coats:coats(0),
+      paint(P,c){AM_KINDS.dminer.paint(skip(P,['lamp','haft','pick','cap']),c);cloth(P,['hood'],[96,76,56]);P.map('basket',ALL,(s,t)=>(s+t)%2?sh([170,130,80],4):sh([130,96,56],0));
+        P.map('shrooms',ALL,(s,t)=>(s>>1)%2?[206,70,56]:[214,190,150]);}},
+    // the children of the hold: a boy with a toy hammer, a girl with looped braids (no beards yet)
+    dchild:{res:2,tex:256,scale:0.66,parts:[...dwarf({nobeard:1}),['tunic','body',[0,0,0],[-5.25,-4,-3.25,10.5,14,6.5]],['haft','armR',[1.75,-8.5,0.5],[-0.5,-0.5,-1,1,1,5]],['hmr','haft',[0,0,3.5],[-1,-1,0,2,2,2.5],0,{nb:1}]],
+      coats:kids.map(([c,w],i)=>[Object.assign({},c,{cl:[[60,90,140],[140,60,50],[70,110,70]][i%3]}),w]),
+      paint(P,c){dface(P,c);cloth(P,['armL','body','tunic'],c.cl);band(P,'tunic',SIDE,0,2,sh(c.cl,-40));hands(P,c);boots(P,[80,60,40],7);P.map('legL',ALL,(s,t)=>t<7?sh([90,80,70],0):null);
+        P.map('haft',ALL,(s,t)=>sh([140,104,60],hz(s,t,827)*8));P.map('hmr',ALL,(s,t)=>sh([110,80,50],hz(s,t,829)*8));}},
+    dgirl:{res:2,tex:256,scale:0.64,parts:[...dwarf({nobeard:1}),['dress','body',[0,1,0],[-5.25,-8,-3.25,10.5,9,6.5],0,{tp:['-y',1.15,1.12,0,0]}],
+        ['loopL','head',[-3.25,2.5,0],[-1,-2,-1.5,1.5,4,3],0,{head:1,nb:1}],['loopR','head',[3.25,2.5,0],[-0.5,-2,-1.5,1.5,4,3],0,{head:1,nb:1,m:'loopL'}]],
+      coats:kids.map(([c,w],i)=>[Object.assign({},c,{cl:[[150,60,70],[60,110,150],[170,130,60]][i%3]}),w]),
+      paint(P,c){dface(P,c);cloth(P,['armL','body','dress'],c.cl);band(P,'dress',SIDE,10,12,[236,232,220]);hands(P,c);boots(P,[90,60,40],9);braid(P,c,'loopL');}},
+    // the ram-rider: an axeguard on a great ram in the mountain's saddle-cloth
+    dramr:{res:2,tex:256,parts:[...ramParts(),...seat(),['thL','body',[-2.5,0.5,0],[-2.25,-7,-2.25,4.5,7,4.5],[-0.6,0,-0.45]],['thR','body',[2.5,0.5,0],[-2.25,-7,-2.25,4.5,7,4.5],[-0.6,0,0.45],{m:'thL'}],
+        ...kit(),...helm(),...axe(12),shield],coats:coats(0).map(([c,w],i)=>[Object.assign({},c,{r:RAMC[i%3]}),w]),
+      paint(P,c){const Q=skip(P,['legL','legR','toeL','toeR']);kitPaint(Q,c);helmPaint(P);axePaint(P);shieldPaint(P);mail(P,['thL']);P.map('thL',ALL,(s,t,w,h)=>t>h-6?sh([70,50,34],hz(s,t,831)*8):null);ramPaint(P,c.r);}},
+    // the prospector: a broad hat in place of the cap, a pack with a blanket rolled on it, the pick
+    dprosp:{res:2,tex:256,scale:0.95,parts:[...base('dminer',['cap','lamp']),['hat','head',[0,5,0],[-3.5,0,-3.5,7,2.5,7],0,{head:1}],['brim','head',[0,5,0],[-5,-0.5,-5,10,1,10],0,{head:1}],
+        ['pack','body',[0,4,-4],[-4,-4,-2,8,8,3]],['roll','pack',[0,4.5,-1],[-4.5,0,-1.5,9,2.5,2.5],0,{nb:1}]],coats:coats(1),
+      paint(P,c){AM_KINDS.dminer.paint(skip(P,['cap','lamp']),c);cloth(P,['tunic','body','armL'],[120,108,84]);leather(P,['hat','brim'],[110,84,54]);leather(P,['pack'],[100,72,44]);P.map('roll',ALL,(s,t)=>(s>>2)%2?[150,60,50]:[190,170,130]);}},
+    // the deepwarden: the axeguard's kit under a dark hooded cloak, a lantern on a pole
+    ddeep:{res:2,tex:256,scale:0.96,parts:[...base('daxe',['shield']),['cape','body',[0,10,-3.2],[-5,-15,-0.5,10,15,1],[0.06,0,0],{nb:1}],['cowl','head',[0,1,-1],[-4,0,-3.5,8,6.5,4],0,{head:1}],
+        ['pole','armL',[-1.75,-8.5,0.5],[-0.5,-0.5,-1,1,1,11]],['lant','pole',[0,-0.5,10],[-1.25,-3.5,-1.25,2.5,3,2.5],0,{nb:1}]],coats:coats(2),
+      paint(P,c){AM_KINDS.daxe.paint(skip(P,['shield']),c);cloth(P,['cape','cowl'],[52,54,62],{off:2});P.map('pole',ALL,(s,t)=>sh([80,60,40],hz(s,t>>2,833)*8));
+        P.map('lant',ALL,(s,t,w,h)=>s===0||s===w-1||t===0||t===h-1?sh(BRZ,-10):[255,214,120]);}},
+    // the engineer: the smith's apron and a leather cap, a coil of rope over the shoulder, a mallet, a measuring rod
+    dengin:{res:2,tex:256,scale:0.96,parts:[...base('dsmith'),['cap','head',[0,5,0],[-3.5,0,-3.5,7,2.5,7],0,{head:1,tp:['y',0.8,0.8,0,0]}],['coil','body',[-2,8,0],[-3,-6,-3.5,6,7,7],[0,0,0.6],{nb:1}],
+        ['rod','armL',[-1.75,-8.5,0.5],[-0.5,-10,-0.5,1,14,1],0,{nb:1}]],coats:coats(3),
+      paint(P,c){AM_KINDS.dsmith.paint(P,c);cloth(P,['body','armL'],[96,84,70]);P.map('armL',ALL,(s,t,w,h)=>t>h-4?sh(c.skin,0):null);leather(P,['cap'],[100,72,46]);
+        P.map('coil',ALL,(s,t)=>(t+s)%3===0?[150,130,90]:[196,176,128]);P.map('rod',ALL,(s,t)=>(t>>1)%2?[226,214,180]:[60,44,30]);}}
+  });
+  // ---- the great ram of the mountain: thick-legged and shaggy, its horns curled about its ears; saddled when it is someone's
+  AM_KINDS.ram={parts:[['legFL',null,[-2.5,9,5],[-1.5,-9,-1.5,3,9,3]],['legFR',null,[2.5,9,5],[-1.5,-9,-1.5,3,9,3],0,{m:'legFL'}],['legBL',null,[-2.5,9,-5],[-1.5,-9,-1.5,3,9,3],0,{m:'legFL'}],['legBR',null,[2.5,9,-5],[-1.5,-9,-1.5,3,9,3],0,{m:'legFL'}],
+      ['body',null,[0,9,0],[-4.5,0,-8,9,9,16]],['ruff','body',[0,4,6],[-5,-1,-2.5,10,6,4]],['neck','body',[0,6,7],[-2,-2,-2,4,7,4],[0.5,0,0]],
+      ['head','neck',[0,6,0],[-2,-2,-2,4,5,6],[0.35,0,0],{head:1}],['beard','head',[0,-2,3.5],[-1,-3,-0.5,2,3,1],0,{head:1}],
+      ['hornL','head',[-2,2,0],[-3,-1,-1,3,2,3],[0,0,0.2],{head:1}],['tipL','hornL',[-3,0,0.5],[-1,-4,-1,2,4,3],[0.5,0,0],{head:1}],
+      ['hornR','head',[2,2,0],[0,-1,-1,3,2,3],[0,0,-0.2],{m:'hornL',head:1}],['tipR','hornR',[3,0,0.5],[-1,-4,-1,2,4,3],[0.5,0,0],{m:'tipL',head:1}],
+      ['earL','head',[-2,1,1.5],[-2,-0.5,-0.5,2,1,1],[0,0,0.3],{head:1}],['earR','head',[2,1,1.5],[0,-0.5,-0.5,2,1,1],[0,0,-0.3],{m:'earL',head:1}],
+      ['tail','body',[0,6,-8],[-1,-2,-1,2,3,1],[-0.3,0,0]],['scloth','body',[0,0,0],[-5,3,-5,10,6,9],0,{dyn:'pack'}],['saddle','body',[0,9,-1],[-3.5,0,-3,7,1,6],0,{dyn:'pack'}]],
+    scale:1.3,tex:128,coats:RAMC.map((c,i)=>[c,[3,2,1][i]]),
+    paint(P,c){P.coat(['body','neck','ruff','earL','tail','beard'],c.coat,16);P.fringe('body',c.shade);P.fringe('ruff',c.shade);P.coat(['head'],c.coat,10);P.rows('head',['F'],0,3,c.shade);
+      P.coat(['legFL'],c.shade,10);P.rows('legFL',['L','F','R','B'],7,9,[44,38,34]);P.coat(['hornL','tipL'],c.horn,12);P.eyes('head',1,1,[30,24,16],[200,170,80]);
+      P.coat(['scloth'],BLUE,6);P.rows('scloth',['L','F','R','B'],11,13,GOLD);P.coat(['saddle'],[96,62,36],8);}};
+  // ---- the pony of the caravans: the mule's frame a little smaller, shaggy, its packs always on
+  const MU=AM_KINDS.mule;
+  AM_KINDS.pony={parts:MU.parts.map(p=>{const q=p.slice();if(q[5]&&q[5].dyn){q[5]=Object.assign({},q[5]);delete q[5].dyn;}if(q[0]==='earL'||q[0]==='earR')q[3]=[q[3][0],0,-0.5,q[3][3],3,1];return q;}),scale:0.9,tex:MU.tex,
+    coats:[[{coat:[120,92,64],pale:[200,180,150],mane:[56,44,36]},3],[{coat:[86,80,76],pale:[180,174,166],mane:[40,36,34]},2],[{coat:[170,140,100],pale:[226,210,180],mane:[90,70,50]},2]],
+    paint(P,c,f){MU.paint(P,c,f);P.fringe('body',c.mane);P.coat(['bagL','roll'],[60,74,120],10);P.rows('bagL',['L','F','R','B'],1,2,[214,176,84]);}};
+  // ---- the raven: black, a heavy beak, its wings folded
+  AM_KINDS.raven={parts:[['legL',null,[-0.75,2,0.5],[-0.5,-2,-0.5,1,2,1]],['legR',null,[0.75,2,0.5],[-0.5,-2,-0.5,1,2,1],0,{m:'legL'}],
+      ['body',null,[0,2,0],[-1.5,0,-2.5,3,3,5],[-0.25,0,0]],['head','body',[0,2.5,2.5],[-1,0,-0.5,2,2,2],0,{head:1}],['beak','head',[0,0.75,1.5],[-0.5,-0.5,0,1,1,2],0,{head:1}],
+      ['wingL','body',[-1.5,2.75,0],[-1,-2,-2,1,2,4]],['wingR','body',[1.5,2.75,0],[0,-2,-2,1,2,4],0,{m:'wingL'}],['tail','body',[0,2,-2.5],[-1,-0.5,-3,2,1,3],[-0.3,0,0]]],
+    scale:1,tex:64,coats:[[{c:[30,30,36]},3],[{c:[40,38,46]},1]],
+    paint(P,c){P.coat(['body','head','wingL','tail'],c.c,8);P.coat(['beak','legL'],[34,32,30],4);P.eyes('head',0,0,[10,10,10]);}};
+})();
 // ---- The Emberlords remade (W7a, D-074; Q179, Q181, Q183): one kind, each lord its own. Every lord is about twenty blocks tall
 // (the scale of the D-055 model grown from about twelve; every part a whole number of texels across, or its paint lands in the
 // wrong channels), in one of three builds: the swept horns and the burning great sword
@@ -13067,6 +13447,9 @@ function animalCall(a,hurt){
     case 'ox':voice(150*p,120*p,hurt?0.5:1.3,0.09,{vib:4,vd:0.05,form:420,q:1.2},at);break; // the ox's low call (D-089)
     case 'windsteed':voice(1320*p,560*p,hurt?0.5:1.4,0.07,{vib:9,vd:0.06,form:1600,q:1},at);voice(700*p,420*p,0.5,0.04,{form:1100,q:1,delay:0.9},at);if(!hurt)burst(0.3,'lowpass',620,0.7,0.08,1.5,at);break; // the windsteed's high, ringing neigh (D-090)
     case 'kine':voice(180*yg*p,130*yg*p,hurt?0.5:1.5,0.09,{vib:3,vd:0.05,form:460,q:1.1},at);break; // the steppe cattle's lowing (D-090)
+    case 'ram':voice(260*yg*p,220*yg*p,hurt?0.35:0.8,0.09,{vib:11,vd:0.1,form:900,q:1.3},at);break; // the great ram's deep bleat (D-091)
+    case 'pony':voice(980*p,560*p,hurt?0.4:0.9,0.06,{vib:7,vd:0.05,form:1300,q:1},at);break; // the caravan pony's whinny (D-091)
+    case 'raven':for(let i=0;i<(hurt?1:2);i++)voice(620*p,480*p,0.22,0.06,{type:'square',form:900,q:2.5,delay:i*0.32},at);break; // the raven's croak (D-091)
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
     case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
@@ -13097,6 +13480,7 @@ function animalAct(btn){
   if(A.milk&&(!held||!SURV())){if(a.young){toast('Only a grown goat gives milk');return true;}if(a.cool>0){toast('The goat has no more milk for now');return true;}a.cool=240;addItem(360,1);drawBar(true);toast("Goat's Milk");return true;}
   if(A.egg&&(!held||!SURV())){if(a.young){toast('A chick lays no eggs');return true;}if(a.cool>0){toast('No egg yet');return true;}a.cool=300;addItem(355,1);drawBar(true);toast('An egg');return true;}
   if(a.kind==='windsteed'&&!a.tame&&windTame(a))return true; // only a sworn rider may lay a hand on a windsteed (D-090)
+  if(a.kind==='ram'&&!a.tame&&ramTame(a))return true; // a wild ram lets only a friend of the dwarves take it (D-091)
   if(A.mount){if(a.young){toast('A foal is too small to ride');return true;}if(PL.ride===a)dismount();else mount(a);return true;}
   if(A.tame&&!a.tame){if(A.tame.includes(held)){const q=inv[sel];if(SURV()){q.c--;if(!q.c)inv[sel]=null;}drawBar(true);a.tame=true;a.uid=a.uid||(Date.now().toString(36)+a.id);a.st='follow';a.t=1;a.herd=a.id;saveDirty=true;animalCall(a,false);toast('The '+A.n.toLowerCase().replace('stray ','').replace('wild ','')+' will follow you now');tone(520,780,0.2,0.06,0,null,[a.x,a.y+0.6,a.z]);}
     else toast('The '+A.n.toLowerCase()+' sniffs your hand. '+(a.kind==='hound'?'It would like some meat.':'It would like some crops.'));return true;}
@@ -13306,7 +13690,7 @@ function foeSpawnTick(){
     if(s.kind==='lord'){spawnGroup('gate',4,x,s.y,z,5,{spot:s.id,lead:'ochief'});continue;}
     if(s.kind==='citadel'){spawnGroup('band',4+Math.floor(Math.random()*3),x,s.y,z,s.R,{spot:s.id,lead:'ochief'});continue;}
     if(folk){const k=s.kind.slice(2),N=FOLK_N[k]||[1,2],night=ambNight()&&!['gate','gatein','post','citgate','barracks','keep','citadel'].includes(k);
-      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:s.kind==='r_throne'?menThroneLead(s.s):s.kind==='h_seat'?riderSeatLead(s.s):s.kind==='e_throne'?(hsh(s.s.prov.kingdom.key.length,9831,[...s.s.prov.kingdom.key].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'eking':'equeen'):FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
+      for(const f of spawnGroup(s.kind,Math.max(1,N[0]+Math.floor(Math.random()*(N[1]-N[0]+1))-(night&&!CAMP_ACT[s.kind]?1:0)),x,s.y,z,s.R,{spot:s.id,lead:s.kind==='r_throne'?menThroneLead(s.s):s.kind==='h_seat'?riderSeatLead(s.s):s.kind==='d_dthrone'?dwarfSeatLead(s.s):s.kind==='e_throne'?(hsh(s.s.prov.kingdom.key.length,9831,[...s.s.prov.kingdom.key].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'eking':'equeen'):FOLK_LEAD[s.kind]||null,prov:s.s.prov.key,site:s.s}))f.spk=s.kind; // (its place's work, D-084)
       if(s.horses)folkHorses(s,x,z);continue;}
     const N=FOE_N[s.kind]||[2,3],n=N[0]+Math.floor(Math.random()*(N[1]-N[0]+1));
     spawnGroup(s.kind,n,x,s.y,z,s.R,{spot:s.id,lead:s.kind==='chief'?'gchief':s.stair==='cavern'&&Math.random()<0.5?'troll':s.kind==='ocamp'&&Math.random()<0.35?'ochief':s.kind==='opit'&&Math.random()<0.4?'troll':null,sleep:s.kind==='den'?0.45:s.kind==='ocamp'&&ambNight()?0.4:0});}
@@ -13343,11 +13727,11 @@ function hostOf(X,Z){
 // creative. Patrols walk the king's roads; folk greet the player who comes close and looks at them.
 const FOLK_CAP=34,realmWrath=new Map();let folkGreetT=0;
 const folkCount=()=>{let n=0;for(const f of foes)if(FOES[f.kind].folk&&!f.dead&&!f.hst)n++;return n;}; // (a summoned host's soldiers do not count: D-077)
-const folkWrath=f=>!!f.prov&&((realmWrath.get(f.prov)||0)>0||menOutlaw(f)||riderOutlaw(f)); // (or the player outlawed in its kingdom, D-089; banished by the riders, D-090)
+const folkWrath=f=>!!f.prov&&((realmWrath.get(f.prov)||0)>0||menOutlaw(f)||riderOutlaw(f)||dwarfOutlaw(f)); // (or the player outlawed in its kingdom, D-089; banished by the riders, D-090, or the dwarves, D-091)
 function folkProvoke(f,secs){if(!f.prov||!foeTarget())return;const was=folkWrath(f);realmWrath.set(f.prov,Math.max(realmWrath.get(f.prov)||0,secs));
   for(const g of foes){if(g.dead||g.prov!==f.prov||Math.hypot(g.x-f.x,g.z-f.z)>40)continue;const G=FOES[g.kind];
     if(G.civ){if(Math.hypot(g.x-PL.x,g.z-PL.z)<18){g.st='flee';g.t=4+Math.random()*3;}}else if(g.st!=='chase'){g.st='chase';g.seen=0;g.t=0;g.ct=Math.random()*0.8;}}
-  if(!was){elfStruck(f);menStruck(f);riderStruck(f);toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
+  if(!was){elfStruck(f);menStruck(f);riderStruck(f);dwarfStruck(f);toast(f.host?'The host of '+f.host.k.replace(/^The /,'the ')+' turns on you':'The folk of '+(f.site?f.site.name:'the realm')+' take up arms against you');foeCall(f,'alert');}}
 // a patrol on the king's road (two to four soldiers, now and then with their captain), out of sight, walking the road
 function folkPatrol(){
   if(folkCount()>=FOLK_CAP-4||Math.random()>0.25)return;const X=PL.x+OX,Z=PL.z+OZ,T=realmTile(Math.floor(X),Math.floor(Z));
@@ -13406,7 +13790,7 @@ const FOLK_SAY={
 function folkGreet(){
   if(folkGreetT>0||!playing||dead)return;const d=camDir();
   for(const f of foes){const F=FOES[f.kind];if(!F.folk||F.hound||f.wnd||f.dead||f.greeted||f.foe||folkWrath(f))continue;const dx=f.x-PL.x,dz=f.z-PL.z,dp=Math.hypot(dx,dz);if(dp>3.6||Math.abs(f.y-PL.y)>2)continue;
-    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const eg=elfPeopleOf(f)&&elfGreet(f,F)||menPeopleOf(f)&&!f.host&&menGreet(f,F)||riderPeopleOf(f)&&!f.host&&riderGreet(f,F);if(eg){toast(eg);foeCall(f,'idle');return;}const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
+    if((dx*d.x+dz*d.z)/(dp||1)<0.75)continue;f.greeted=1;folkGreetT=7;const eg=elfPeopleOf(f)&&elfGreet(f,F)||menPeopleOf(f)&&!f.host&&menGreet(f,F)||riderPeopleOf(f)&&!f.host&&riderGreet(f,F)||dwarfPeopleOf(f)&&!f.host&&dwarfGreet(f,F);if(eg){toast(eg);foeCall(f,'idle');return;}const L=f.host&&FOLK_SAY.host||f.site&&f.site.k==='wgate'&&FOLK_SAY.siege||FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.guard;
     const p=f.site?f.site.name:'the realm',k=f.site?f.site.prov.kingdom.name.replace(/^The /,'the '):f.host?f.host.k.replace(/^The /,'the '):'the kingdom';
     toast((f.hero?f.hero.n:F.n)+': "'+L[Math.floor(Math.random()*L.length)].replace('{p}',p).replace('{k}',k)+'"');foeCall(f,'idle');return;}
 }
@@ -13713,7 +14097,7 @@ function emberPose(f,P,root,prog){
 }
 function updFoes(dt){
   if(!ready)return;foeClock+=dt;foeHitCD=Math.max(0,foeHitCD-dt);updShots(dt);
-  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();elfFrame(dt);menFrame(dt);riderFrame(dt);
+  for(const [k,t] of realmWrath){if(t-dt<=0)realmWrath.delete(k);else realmWrath.set(k,t-dt);}folkGreetT-=dt;folkGreet();elfFrame(dt);menFrame(dt);riderFrame(dt);dwarfFrame(dt);
   foeT-=dt;if(foeT<=0){foeT=1;if(playing)foeSpawnTick();warHeroSeen();for(const f of foes)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)<16)discover(FOES[f.kind].folk?'p':'f',FOES[f.kind].n);}
   warSoundTick(dt);warWorksFrame(dt);warNightFrame(dt);warUnitsFrame(dt);emberFrame(dt);hostFrame(dt);morFrame(dt);fieldFrame(dt);campFrame(dt); // the din of the fighting and the battle music (W1); the works of the war (W2); its units at work (W3)
   foeFrame++;foeGrid.clear();foeGridS[0].clear();foeGridS[1].clear();foeRadMax=1;
@@ -13780,12 +14164,12 @@ function foeSlain(f){
   const ar=armsSlain(f);if(ar)got.push(ar); // (arrows recovered, W8a)
   const bn=morSlain(f);if(bn)got.push(bn);morDeath(f,1);fieldSlain(f);warRecSlain(f); // (a warhost's banner taken; their hearts sink: W8b)
   drawBar(true);toast('The '+F.n.toLowerCase()+' is slain'+(got.length?'. You took '+got.join(', '):''));
-  if(f.lordOf)lordFalls(f);warSwornSlain(f);elfSlain(f);elfLament(f);menSlain(f);menPassing(f);riderSlain(f);riderPassing(f);
+  if(f.lordOf)lordFalls(f);warSwornSlain(f);elfSlain(f);elfLament(f);menSlain(f);menPassing(f);riderSlain(f);riderPassing(f);dwarfSlain(f);dwarfPassing(f);
 }
 function lordFalls(f){fallenLords.add(f.lordOf);saveDirty=true;if(!f.L)showName('The Emberlord has fallen');for(let k=0;k<60;k++)spawnP(f.x+(Math.random()-.5)*3,f.y+Math.random()*5,f.z+(Math.random()-.5)*3,(Math.random()-.5)*4,Math.random()*4,(Math.random()-.5)*4,[1,0.4+Math.random()*0.4,0.1],1.4,2);
   burst(2.5,'lowpass',200,0.7,0.5,0,[f.x,f.y+2,f.z]);}
 // armour (D-052): a coat in the body slot takes a share of every blow from a foe, and wears
-function armourCut(n){if(PL.ride&&PL.ride.bard)n=Math.max(1,Math.round(n*0.67)); // a barded horse takes a third off its rider's harm (D-090)
+function armourCut(n){if(PL.ride&&PL.ride.bard)n=Math.max(1,Math.round(n*0.67));if(runeOn('ward'))n=Math.max(1,Math.round(n*0.85)); // (the rune of warding: D-091) // a barded horse takes a third off its rider's harm (D-090)
   const q=equip.body;if(!q||!SURV())return n;const it=ITEMS[q.id];q.d=(q.d||0)+1;if(q.d>=it.dur){equip.body=null;toast('Your '+it.n+' is worn through');}return Math.max(1,Math.round(n*(1-it.armor)));}
 // ---- War at the gates of the wastes (D-067). The camp of the allied hosts, its siege works and the orcs' yard behind the
 // gate are peopled from the spots of the gate's layout (warPlaces, through foePlaces): soldiers of men, elves and dwarves in
@@ -15459,7 +15843,7 @@ function foeStruck(f,dmg,kx,kz,o){o=o||{};const F=FOES[f.kind];if(f.dead)return;
   if(f.hp<=0)foeSlain(f);}
 // the player's blow, its reach and power (foeAct): a running blow, the saddle and the lance, the bash; an axe's cleave
 const armsReach=()=>PL.ride&&ITEMS[curId()]&&ITEMS[curId()].tool==='lance'?6:4.6;
-function armsBlow(f,held){const it=ITEMS[held],v=Math.hypot(PL.vx,PL.vz);let dmg=hitPower(held),kb=5,st=0,say='';
+function armsBlow(f,held){const it=ITEMS[held],v=Math.hypot(PL.vx,PL.vz);let dmg=hitPower(held)*(runeOn('keen')?1.25:1),kb=5,st=0,say=''; // (the rune of keenness: D-091)
   if(it&&it.tool==='lance')dmg=PL.ride?6+v*2.6:4;
   else if(PL.ride)dmg*=1+v/10;
   else if(v>5){dmg*=1.4;kb=8;say='run';}
@@ -17274,6 +17658,426 @@ let rlifeT=0;
 function riderLife(dt){raceFrame(dt);feastFrame(dt);sparFrame(dt);riderHallSmoke(dt);riderWolves(dt);if((rlifeT-=dt)>0)return;rlifeT=1;
   raceTick();feastTick();horseFairTick();wildHerdTick();riderWork();riderDawn();}
 Object.assign(FOE_HOME,{h_feast:[['hman',2],['hwoman',2],['hspear',1],['hmaid',0.6],['hthane',0.4]]});
+// ---- The mountain dwarves (D-091): the player's standing with the dwarves, and what they offer those they know.
+//
+// Standing (DW.r, saved as dw) rises with tasks done for them, trade, their places and the prospectors' claims found, the annals
+// of their kings heard, creatures of the wastes slain near their folk, the Kindling kept in the great hall, the delving contest
+// won; it falls when one of their folk is struck, much further when one is slain, and when the treasury is robbed. Its ranks
+// (DW_AT): Stranger, Guest of the Hold, Stone-friend (when the dwarves give the player a name of their own), Friend of the
+// Mountain; Oathbound of the Hold only by the oath at a throne of the mountain (DW.sw), and an oathbound friend of great standing
+// is made Kin of the Mountain by a king or a queen, given a hall in a hold and its key (the player may rest there and wake there).
+// Speaking with the folk (use one of them): they greet in their own tongue (words of our own) and say what it means; then what
+// that one can do: merchants trade and the moneychanger buys ore, ingots and gems; the gemcutter cuts rough gems; the brewer sells
+// the hold's ales; the smiths mend and forge by rank; the runesmith cuts runes, worn in the rune slot (keenness, warding,
+// delving, the lamp, the hearth, stone); the ram-keeper sells great rams and tends them; the farmers sell from the gardens; the
+// loremaster and the warden of the tombs tell the annals of the kings; captains, thanes, the warden of the hold and the throne
+// give tasks: a writ-stone carried to another hold before time runs out, supplies for the smelters, a miner lost in the mines,
+// creatures of the wastes slain, a hold's heirloom brought back from a worked-out claim. Justice: whoever strikes their folk may
+// pay the stone-price to a captain or a thane; whoever slays one is banished from that kingdom a while. The horn of the hold calls
+// a shield-wall to an oathbound friend.
+const DW_AT=[0,10,30,70,140,240],DW_RANK=['Stranger','Guest of the Hold','Stone-friend','Friend of the Mountain','Oathbound of the Hold','Kin of the Mountain'];
+const DW_GIFTS=[null,[[465,3],[462,1]],[[466,2],[464,1]],[[470,1],[468,3]],[[474,1],[473,1],[472,1],[480,1]],[[475,1],[476,1],[469,2]]];
+let DW=saved&&saved.dw&&typeof saved.dw==='object'?saved.dw:null;
+if(!DW)DW={r:0,sw:0,kin:'',kx:0,kz:0,g:0,q:null,qn:0,an:[],ann:{},au:{},out:{},pt:0,hn:-1e9,ki:-1,cw:0,nm:'',sl:0,bath:-1};
+const dwarfSave=()=>({dw:DW});
+const DWARF_KINDS=new Set(['daxe','dhammer','dxbow','dcapt','dking','dlord','dlady','dminer','dsmith','dqueen','danvil','dhward','dlore','drune','dbrew','dmerch','dmint','dgem','dfarm','dkeep','dchild','dgirl','dramr','dprosp','ddeep','dengin']);
+function dwarfPeopleOf(f){if(!f)return false;const C=f.site&&f.site.prov&&f.site.prov.cult;if(C)return C.k==='dwarf';return DWARF_KINDS.has(f.kind);}
+const dwarfRank=()=>{let r=0;while(r+1<DW_AT.length&&DW.r>=DW_AT[r+1])r++;return DW.sw?Math.max(4,r):Math.min(3,r);};
+const dwarfRankName=()=>DW_RANK[dwarfRank()];
+function dwarfGain(n,why){if(!n)return;const r0=dwarfRank();DW.r=Math.max(-80,Math.min(500,DW.r+n));saveDirty=true;const r1=dwarfRank();
+  if(why)toast(why+' ('+(n>0?'+':'')+n+' standing with the dwarves)');if(r1>r0)setTimeout(()=>dwarfRankUp(r1),why?1600:0);}
+function dwarfRankUp(r){toast('The dwarves now name you '+DW_RANK[r]);
+  if(r>=2&&!DW.nm){DW.nm=nameWord('dwarf',mkRng(1+Math.floor(DW.r*7919+DW.qn*31+(DW.pt|0))));saveDirty=true;setTimeout(()=>toast('"Among us you shall be called '+DW.nm+'." The dwarves give you a name of their own'),2600);}
+  if(r===3)setTimeout(()=>toast('A friend of the mountain of great standing may swear the oath at a throne of the mountain'),5200);dwarfGift(r);}
+function dwarfGift(r){if(DW.g>=r)return;DW.g=r;const L=DW_GIFTS[r];if(!L)return;const got=[];if(SURV())for(const [id,c] of L){const left=addItem(id,c);if(left)toast('No room for '+nameOf(id));got.push((c>1?c+' ':'')+nameOf(id));}
+  if(got.length)setTimeout(()=>toast('In token of it the dwarves give you '+got.join(', ')),2400);drawBar(true);saveDirty=true;}
+// ---- their tongue: greetings with what they mean
+const DWARF_TONGUE=[['Thrumm gar, varrin','Hail, wanderer'],['Durrak hemmar','The stone holds'],['Embrak ul forge','The forge is warm'],['Gromm hethra, varrin','Deep roads to you, wanderer'],
+  ['Skaldur thrumm!','A full horn!'],['Haddur vorn, ulmin','Keep the oath, kinsman'],['Fathrak nor sunn','The fathers do not sleep'],['Karrin dur, karrin gald','Iron first, gold after'],['Velk thar ul dun','A light at the deep end'],['Varrin, brok ul ale','Wanderer, share the ale']];
+const dwarfTongue=()=>{const t=DWARF_TONGUE[Math.floor(Math.random()*DWARF_TONGUE.length)];return '"'+t[0]+'" ('+t[1]+')';};
+function dwarfGreet(f,F){const r=dwarfRank(),who=(f.nm||F.n)+': ';if(r>=4){f.bow=foeClock+2;return who+dwarfTongue()+(DW.kin?' Kinsman'+(DW.nm?' '+DW.nm:'')+'.':' Oathbound.');}
+  if(r>=2&&Math.random()<0.6)return who+dwarfTongue()+(DW.nm&&Math.random()<0.5?' Well met, '+DW.nm+'.':'');return null;}
+// ---- struck, slain, banished; the treasury robbed
+const dwarfOutlaw=f=>!!(f&&f.site&&f.site.prov&&f.site.prov.cult.k==='dwarf'&&(DW.out[f.site.prov.kingdom.key]||0)>DW.pt);
+function dwarfStruck(f){if(dwarfPeopleOf(f))dwarfGain(-6,'You struck one of the dwarves');}
+function dwarfSlain(f){const F=FOES[f.kind];if(F.folk){if(dwarfPeopleOf(f)&&f.site&&!f.war&&!f.host){dwarfGain(-25,'You slew one of the dwarves');const K=f.site.prov.kingdom;DW.out[K.key]=DW.pt+900;saveDirty=true;
+      setTimeout(()=>toast('You are banished from '+K.name.replace(/^The /,'the ')+'. Its axes will be raised against you on sight, unless you pay the stone-price to one of its captains or thanes.'),2400);}return;}
+  if(DW.q&&DW.q.k==='bounty'){DW.q.c=Math.max(0,DW.q.c-1);if(!DW.q.c)toast('The dwarves\' bounty is earned; claim it');}
+  let near=false;foeNear(f.x,f.z,30,g=>{if(!near&&!g.dead&&FOES[g.kind].folk&&dwarfPeopleOf(g))near=true;},0);if(near){DW.sl++;if(DW.sl%3===0)dwarfGain(1,null);}}
+function dwarfAmends(f){const s=f.site,K=s&&s.prov.kingdom,out=K&&(DW.out[K.key]||0)>DW.pt,v=out?200:30;
+  if(!payCoin(v))return 'They want '+coinWord(v)+' as the stone-price, and you have not got it.';realmWrath.delete(f.prov);if(out)delete DW.out[K.key];saveDirty=true;
+  for(const g of foes)if(g.prov===f.prov&&!g.dead){g.foe=null;if(g.st==='chase'||g.st==='flee'){g.st='return';g.t=4;}}
+  dwarfGain(2,null);return 'You pay '+coinWord(v)+'. "The stone-price is paid. The ledger is closed."';}
+// a block of gold or a heap of gems taken from one of their holds (from mining.js): the dwarves see it
+function dwarfTheft(x,y,z,id){if((id!==GOLDB&&id!==GEMHEAP)||!SURV())return;const X=x+OX,Z=z+OZ,s=realmSiteAt(X,Z,40);if(!s||s.prov.cult.k!=='dwarf')return;
+  dwarfGain(-10,'You took from the treasury of '+s.name);let g=null,bd=40;for(const f of foes){if(f.dead||!FOES[f.kind].folk||FOES[f.kind].civ||!dwarfPeopleOf(f))continue;const d=Math.hypot(f.x-PL.x,f.z-PL.z);if(d<bd){bd=d;g=f;}}
+  if(g){folkProvoke(g,120);foeAlert(g);toast('"Thief!" The dwarves of '+s.name+' take up their axes.');}}
+// ---- the panel and the folk who do more than greet
+const DWARF_TASK=new Set(['dcapt','dlord','dhward','dking','dqueen']),DWARF_COURT=new Set(['dking','dqueen']);
+function dwarfAct(){const f=foeHit(4.6);if(!f||f.dead||!FOES[f.kind].folk||f.foe&&!folkWrath(f))return false;if(!dwarfPeopleOf(f)||f.war||f.host||f.hst||(f.site&&f.site.k==='wgate'))return false;
+  if(folkWrath(f)){if(f.kind==='dcapt'||f.kind==='dlord'||DWARF_COURT.has(f.kind)){dwarfTalk(f,1);return true;}return false;}dwarfTalk(f);return true;}
+function dwarfTalk(f,wrath){const F=FOES[f.kind],s=f.site,r=dwarfRank(),spk=f.spk||'',seat=DWARF_COURT.has(f.kind)||spk==='d_dthrone'&&f.kind==='dlord';
+  f.st='idle';f.t=6;f.yaw=f.hd=Math.atan2(PL.x-f.x,PL.z-f.z);if(r>=4&&!wrath)f.bow=foeClock+2;
+  elfPanel((f.nm||F.n)+(s?', '+s.name:''),U=>{
+    if(wrath){U.text('"There is a stone-price owing. Pay it, and the ledger is closed."');const b=U.row();U.btn(b,'Pay the stone-price',()=>dwarfAmends(f));U.btn(b,'Farewell',()=>{closeInv();return false;});return;}
+    U.text(dwarfTongue()+' "'+(FOLK_SAY[f.kind]||FOLK_SAY[F.say]||FOLK_SAY.dguard)[Math.floor(Math.random()*3)].replace('{p}',s?s.name:'the mountain').replace('{k}',s?s.prov.kingdom.name.replace(/^The /,'the '):'the mountain')+'"');
+    U.text('You are '+DW_RANK[r]+(DW.kin?' (a hall of your own in '+DW.kin+')':'')+(DW.nm?', called '+DW.nm+',':'')+' among the dwarves. Standing '+DW.r+(r<3&&r+1<DW_AT.length?' ('+DW_AT[r+1]+' for '+DW_RANK[r+1]+')':r===3?(DW.r>=DW_AT[4]?' (enough to swear the oath at a throne of the mountain)':' ('+DW_AT[4]+' to swear the oath)'):'')+'.');
+    if(DW.q){const q=DW.q;U.text('Your task: '+q.n+'.');const b=U.row();if(dwarfTaskReady(q))U.btn(b,'Tell them the task is done',()=>dwarfTaskDone());U.btn(b,'Give up your task',()=>{DW.q=null;saveDirty=true;return 'You give up the task.';});}
+    const b=U.row();
+    if(f.kind==='dmerch'||spk==='d_dmarket'||f.kind==='dprosp')U.btn(b,'Trade',()=>{dwarfTradePanel(f,f.kind==='dprosp'?'The prospector\'s goods':'The market of '+(s?s.name:'the mountain'),f.kind==='dprosp'?DWARF_PROSP:DWARF_GOODS,DWARF_BUYS);return false;});
+    if(f.kind==='dmint')U.btn(b,'Change ore, ingots and gems for coin',()=>{dwarfTradePanel(f,'The moneychanger of '+(s?s.name:'the mountain'),[],DWARF_MINT);return false;});
+    if(f.kind==='dgem'){U.btn(b,'Have a gem cut (2 copper)',()=>dwarfCutGem());U.btn(b,'Trade',()=>{dwarfTradePanel(f,'The gemcutter\'s bench',[[469,24,1],[468,8]],[[468,5],[469,18]]);return false;});}
+    if(f.kind==='dbrew'||spk==='d_dale'||spk==='d_dbrew')U.btn(b,'Buy ale and fare',()=>{dwarfTradePanel(f,'The ale-hall of '+(s?s.name:'the mountain'),DWARF_ALE,[]);return false;});
+    if(f.kind==='dfarm'||spk==='d_dgarden')U.btn(b,'Buy from the gardens',()=>{dwarfTradePanel(f,'The mushroom gardens of '+(s?s.name:'the mountain'),[[MUSHB,1],[465,2],[467,3],[GLOWSHROOM,3]],[]);return false;});
+    if(f.kind==='dsmith'||spk==='d_forge'||spk==='d_dforge'){U.btn(b,'Mend your arms and tools',()=>menMend());U.btn(b,'Have arms forged',()=>{dwarfForgePanel(f);return false;});}
+    if(f.kind==='drune'||spk==='d_drunes')U.btn(b,'Have a rune cut',()=>{dwarfRunePanel(f);return false;});
+    if(f.kind==='dkeep'||spk==='d_dpen'){U.btn(b,'Buy a great ram',()=>{dwarfRamPanel(f);return false;});U.btn(b,'Tend your ram',()=>dwarfTendRam());}
+    if(f.kind==='dlore'||spk==='d_dfathers')U.btn(b,'Ask for the annals of the kings',()=>{dwarfAnnal(s,true);return false;});
+    if(f.kind==='dminer'&&(spk==='d_mine'||spk==='d_deep'))U.btn(b,'Ask about the delving contest',()=>dwarfContestAsk(f));
+    if(seat)U.btn(b,'Ask for an audience',()=>dwarfAudience(f));
+    if((DWARF_TASK.has(f.kind)||seat)&&!DW.q)U.btn(b,'Ask for a task',()=>{const q=dwarfTaskGive(f.site,null,DWARF_COURT.has(f.kind));if(q){closeInv();return false;}return 'There is nothing the hold needs of you now.';});
+    U.btn(b,'Farewell',()=>{closeInv();return false;});});
+  foeCall(f,'idle');tone(220,294,0.18,0.05);hint('dwarves');}
+// ---- trade: [item, price in copper, the least rank]; what they buy
+const DWARF_GOODS=[[465,2],[466,3],[462,3],[463,4],[449,4],[200,1],[213,4],[DLAMP,8],[LADDER,1],[468,8,1],[469,24,2],[470,90,2],[471,110,3],[480,60,2],[472,240,4]];
+const DWARF_ALE=[[462,3],[463,4],[464,6,1],[465,2],[466,3],[467,3]];
+const DWARF_PROSP=[[200,1],[213,4],[214,9],[468,7],[465,2],[DLAMP,8],[LADDER,1],[245,40,1]];
+const DWARF_BUYS=[[202,1],[206,2],[350,3],[351,2],[352,3],[223,4],[224,12],[227,10],[415,25],[468,5],[469,18],[485,60],[457,40],[442,60]];
+const DWARF_MINT=[[200,1],[210,2],[211,2],[212,2],[213,3],[214,7],[220,4],[221,4],[223,5],[224,14],[225,8],[227,12],[468,6],[469,20]];
+const DWARF_BUYK=[1.4,1.2,1,0.9,0.75,0.65],DWARF_SELLK=[0.6,0.75,0.85,0.95,1.05,1.15];
+const dwarfPrice=c=>Math.max(1,Math.round(c*DWARF_BUYK[dwarfRank()])),dwarfOffer=c=>Math.max(1,Math.round(c*DWARF_SELLK[dwarfRank()]));
+function dwarfBuy(id,c,n){const v=dwarfPrice(c)*n;if(!payCoin(v))return 'You have not the coin ('+coinWord(v)+')';const left=addItem(id,n);if(left)toast('No room for '+nameOf(id));
+  drawBar(true);saveDirty=true;if(v>=20)dwarfGain(1,null);return 'You buy '+(n>1?n+' ':'')+nameOf(id)+' for '+coinWord(v);}
+function dwarfSell(id,c,n){if(SURV()){if(countOf(id)<n)return 'You have no '+nameOf(id);takeItems(id,n);}const v=dwarfOffer(c)*n;giveCoin(v);saveDirty=true;if(v>=20)dwarfGain(1,null);return 'You sell '+(n>1?n+' ':'')+nameOf(id)+' for '+coinWord(v);}
+function dwarfTradePanel(f,title,goods,buys){const r=dwarfRank();elfPanel(title,U=>{
+  U.text('Your purse: '+coinWord(purse())+(SURV()?'':' (in creative the dwarves give freely)')+'. Prices for '+DW_RANK[r]+(r<2?': they are better for a friend of the stone.':'.'));
+  if(goods.length){U.text('They sell:');for(const [id,c,need] of goods){if((need||0)>r){U.text('  '+nameOf(id)+': for '+DW_RANK[need]+' and above');continue;}const row=U.row();
+    U.btn(row,nameOf(id)+' ('+coinWord(dwarfPrice(c))+')',()=>dwarfBuy(id,c,1));if(stackMax(id)>1)U.btn(row,'Four',()=>dwarfBuy(id,c,4));}}
+  if(buys.length){const mine=buys.filter(([id])=>!SURV()||countOf(id)>0);U.text(mine.length?'They will buy:':'They would buy ore, ingots, gems, hides and the old treasures; you have none of these.');
+    for(const [id,c] of mine){const row=U.row();U.btn(row,'Sell '+nameOf(id)+' ('+coinWord(dwarfOffer(c))+(SURV()?', you have '+countOf(id):'')+')',()=>dwarfSell(id,c,1));if(SURV()&&countOf(id)>=4)U.btn(row,'Four',()=>dwarfSell(id,c,4));}}
+  U.btn(U.row(),'Back',()=>{dwarfTalk(f);return false;});});}
+function dwarfForgePanel(f){const r=dwarfRank();elfPanel('The forge of '+(f.site?f.site.name:'the mountain'),U=>{U.text('"Iron is honest. Tell me what you need, and I will make it so it outlasts you."');
+  for(const [id,c,need] of [[245,30,0],[470,90,2],[471,110,3],[381,60,2],[403,80,3],[472,240,4]]){const row=U.row();if(need>r){U.text('  '+nameOf(id)+': for '+DW_RANK[need]+' and above');continue;}U.btn(row,nameOf(id)+' ('+coinWord(dwarfPrice(c))+')',()=>dwarfBuy(id,c,1));}
+  U.btn(U.row(),'Back',()=>{dwarfTalk(f);return false;});});}
+// the gemcutter cuts a rough gem for two copper
+function dwarfCutGem(){if(SURV()&&countOf(468)<1)return '"Bring me a rough gem from the seams, and I will show you what is inside it."';if(!payCoin(2))return '"Two copper for the cutting."';
+  if(SURV())takeItems(468,1);addItem(469,1);drawBar(true);saveDirty=true;burst(0.2,'bandpass',3200,6,0.12);return 'The gemcutter turns the stone on the wheel, and a cut gem lies in your palm.';}
+// ---- runes: cut by the runesmith and worn in the rune slot, one at a time ([item, price, the least rank, what it does])
+const DWARF_RUNES=[[479,40,1,'your blows strike a quarter harder'],[480,60,2,'a little of every blow is turned from you'],[481,50,1,'you dig and break stone a third faster'],[482,30,1,'a light about you, as a lantern gives'],
+  [483,45,2,'hunger comes on you more slowly'],[484,55,3,'a fall does you half the harm']];
+function dwarfRunePanel(f){const r=dwarfRank();elfPanel('The runesmith of '+(f.site?f.site.name:'the mountain'),U=>{
+  U.text('"A rune is not a trinket. It is cut once, and it holds. Wear one in the rune slot; two would quarrel."');
+  for(const [id,c,need,what] of DWARF_RUNES){const row=U.row();if(need>r){U.text('  '+nameOf(id)+' ('+what+'): for '+DW_RANK[need]+' and above');continue;}
+    U.btn(row,nameOf(id)+': '+what+' ('+coinWord(dwarfPrice(c))+')',()=>{const m=dwarfBuy(id,c,1);if(/^You buy/.test(m)){tone(523,784,0.5,0.05);for(let k=0;k<12;k++)spawnP(PL.x+(Math.random()-.5),PL.y+1.4,PL.z+(Math.random()-.5),0,1,0,[0.5,0.85,1],0.6,-0.5);}return m;});}
+  U.btn(U.row(),'Back',()=>{dwarfTalk(f);return false;});});}
+// ---- the great rams: the ram-keeper's rams of three coats, tended
+const DWARF_RAMS=[['A pale ram of the heights',0,60],['A brown ram, sure-footed',1,70],['A black ram, strong',2,90]];
+function dwarfRamPanel(f){elfPanel('The ram-keeper of '+(f.site?f.site.name:'the mountain'),U=>{U.text('"A ram goes where a horse breaks its legs. Up a cliff, over a scree, along a ledge. Choose."');
+  for(const [n,ci,c] of DWARF_RAMS){const row=U.row();U.btn(row,n+' ('+coinWord(dwarfPrice(c))+')',()=>{const v=dwarfPrice(c);if(!payCoin(v))return 'You have not the coin ('+coinWord(v)+')';riderLeadOut('ram',ci);dwarfGain(1,null);return 'The keeper leads the ram out by its horn and puts the rein in your hand. It is yours.';});}
+  U.btn(U.row(),'Back',()=>{dwarfTalk(f);return false;});});}
+function dwarfTendRam(){let a=null,bd=14;for(const q of animals)if(q.tame&&!q.dead&&q.kind==='ram'){const d=Math.hypot(q.x-PL.x,q.z-PL.z);if(d<bd){bd=d;a=q;}}if(!a)return '"Bring your ram here, and I will see to it."';
+  a.hp=ANIMALS.ram.hp;return 'The keeper runs a hand over its horns and its hooves. "Sound, and stubborn. A good ram."';}
+// a wild ram lets only a friend of the stone near it (from animalAct)
+function ramTame(a){if(dwarfRank()<2){toast('The ram lowers its horns and stamps. It lets no one near but a friend of the dwarves.');alarm(a,PL.x,PL.z,6);return true;}
+  if(a.tame)return false;a.tame=true;a.uid=a.uid||(Date.now().toString(36)+'m');a.herd=a.id;a.st='idle';a.t=2;saveDirty=true;animalCall(a,false);dwarfGain(2,'The ram lets you take it by the horn. It is yours');return true;}
+// ---- the throne: an audience with the king or the queen (a thane on a lesser seat): a welcome, a gift once for each rank; the
+// oath for a friend of great standing; at the last kinship and a hall of one's own
+const dwarfSeatLead=s=>{if(!s.prov.capital)return 'dlord';const k=s.prov.kingdom.key;return hsh(k.length,9931,[...k].reduce((a,c)=>a+c.charCodeAt(0),0))<0.5?'dking':'dqueen';};
+function dwarfAudience(f){const s=f.site,K=s?s.prov.kingdom:null,r=dwarfRank(),royal=DWARF_COURT.has(f.kind),who=royal?FOES[f.kind].n.replace(/ of the .*$/,'').toLowerCase():'thane of '+(s?s.name:'the hold');if(!K)return 'They nod to you.';
+  if(r<1)return 'The '+who+' looks at you for a long moment under heavy brows. "A stranger under the mountain. You may warm yourself at our fires. Come back when the stone knows your name."';
+  const given=DW.au[K.key]||0;let msg='The '+who+' lifts a hand. "'+(r>=4?'Our oathbound friend returns.':r>=2?'A friend of the stone is always welcome here.':'Be welcome, guest of the hold.')+'"';
+  if(given<r&&r<4){DW.au[K.key]=r;saveDirty=true;const g=[[0,0],[462,2],[466,3],[204,6]][r];if(SURV()&&g[0]){addItem(g[0],g[1]);drawBar(true);}if(g[0])msg+=' A gift from the throne: '+(g[1]>1?g[1]+' ':'')+nameOf(g[0])+'.';dwarfGain(2,null);}
+  if(r===3&&DW.r>=DW_AT[4]){closeInv();setTimeout(()=>dwarfOath(f,K),200);return false;}
+  if(r>=4&&DW.r>=DW_AT[5]&&!DW.kin&&royal){closeInv();setTimeout(()=>dwarfKin(f,K),200);return false;}
+  if(r>=2&&!DW.q)msg+=' "If you would serve the mountain, ask, and there will be work."';return msg;}
+// the oath: the player sets a hand on the anvil before the throne and swears
+function dwarfOath(f,K){f.bow=foeClock+4;tone(147,196,0.8,0.08);tone(196,247,0.8,0.07,0.7);tone(247,294,1.2,0.07,1.4);
+  showText('The oath','You lay your hand on the anvil before the throne of '+K.name.replace(/^The /,'the ')+'. "I will stand where the mountain stands, and strike where it strikes, and keep its secrets and its ledgers while stone is stone." Every axe in the hall is struck once on every shield: "'+DWARF_TONGUE[5][0]+'!"');
+  DW.sw=1;saveDirty=true;setTimeout(()=>dwarfGift(4),2600);setTimeout(()=>toast('Blow the horn of the hold, and a shield-wall will come to you'),5200);}
+function dwarfKin(f,K){const s=f.site;DW.kin=s.name;DW.kx=s.X;DW.kz=s.Z;saveDirty=true;
+  showText('Kin of the Mountain','The '+FOES[f.kind].n.toLowerCase()+' rises from the throne and gives you a brooch of gold and a key of bronze. "There is a hall in '+s.name+' that has stood empty since its last kinsman went down to the fathers. It is yours, and its hearth. Rise, kin of the mountain'+(DW.nm?', '+DW.nm:'')+'."');dwarfGift(5);tone(196,294,1,0.08);}
+// the hall-key: in the hold of one's hall, rest and wake there after a fall
+function useHallKey(){if(!DW.kin){toast('A key of bronze, cut with runes. It opens nothing you know of.');return true;}const d=Math.hypot(DW.kx-OX-PL.x,DW.kz-OZ-PL.z);
+  if(d>90){toast('Your hall is in '+DW.kin+', '+dirWord(DW.kx-OX-PL.x,DW.kz-OZ-PL.z)+', '+Math.round(d)+' blocks off');return true;}
+  spawnW=[PL.x+OX,PL.y,PL.z+OZ];if(SURV()){hp=20;food=Math.max(food,14);drawStats();}saveDirty=true;toast('You rest in your hall in '+DW.kin+'. After a fall you will wake here.');tone(294,392,0.5,0.05);return true;}
+// ---- tasks: from the captains, thanes, the warden of the hold and the throne
+const DWARF_TK=['writ','supply','miner','bounty','heirloom'],DWARF_SUPPLY=[[213,8],[200,12],[210,8],[LOG,16],[468,4]];
+function dwarfTaskGive(s,kind,crown){if(DW.q||!s)return null;if(!kind){for(let k=0;k<4;k++){const q=dwarfTaskGive(s,DWARF_TK[Math.floor(Math.random()*DWARF_TK.length)],crown);if(q)return q;}return null;}const K=kind||DWARF_TK[Math.floor(Math.random()*DWARF_TK.length)],X0=PL.x+OX,Z0=PL.z+OZ;
+  let q={k:K,from:s.id,fn:s.name,fx:s.X,fz:s.Z,t0:DW.pt,crown:crown?1:0};
+  if(K==='writ'){const t=dwarfOtherSite(s);if(!t)return null;const d=Math.hypot(t.X-s.X,t.Z-s.Z),lim=Math.round(80+d/4);Object.assign(q,{X:t.X,Z:t.Z,tn:t.name,lim:lim,n:'carry the writ-stone from '+s.name+' to '+t.name+' within '+Math.round(lim/60*10)/10+' minutes',rw:(crown?50:20)+Math.round(d/35)});if(SURV())addItem(478,1);}
+  else if(K==='bounty'){const n=5+Math.floor(Math.random()*4);Object.assign(q,{c:n,n:'slay '+n+' creatures of the wastes for the hold of '+s.name,rw:crown?110:55});}
+  else if(K==='supply'){const [it,n]=DWARF_SUPPLY[Math.floor(Math.random()*DWARF_SUPPLY.length)];Object.assign(q,{it:it,need:n,n:'bring '+n+' '+nameOf(it)+' for the smelters of '+s.name,rw:14+n*2});}
+  else if(K==='heirloom'){let best=null,bd=1e9;const cx=Math.floor(X0/CS),cz=Math.floor(Z0/CS);for(let r=0;r<=100&&!best;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const o=claimsAt(cx+a,cz+b);if(!o||!o.ab)continue;const d=Math.hypot(o.X-X0,o.Z-Z0);if(d>60&&d<bd){bd=d;best=o;}}
+    if(!best)return null;Object.assign(q,{X:best.X,Z:best.Z,got:0,cn:best.name,n:'bring back the heirloom of '+s.name+' from '+best.name+', where its last keeper went prospecting',rw:crown?120:60});}
+  else if(K==='miner'){const t=dwarfMineSite(s);if(!t)return null;const nm=nameWord('dwarf',Math.random);Object.assign(q,{X:t.X,Z:t.Z,tn:t.name,who:nm,found:0,n:'find '+nm+', a miner lost in the mines of '+t.name,rw:crown?80:40});}
+  DW.q=q;saveDirty=true;const d=q.X!==undefined?Math.hypot(q.X-X0,q.Z-Z0):0;
+  toast((crown?'A task of the throne':'A task of the hold')+': '+q.n+'.'+(q.X!==undefined?' It lies '+dirWord(q.X-X0,q.Z-Z0)+', '+Math.round(d)+' blocks off; sparks rise over it.':''));hint('dtask');return q;}
+// another hold, bastion or mining town of the dwarves 150 to 1500 blocks off; a place with mines near by
+function dwarfOtherSite(s){const P=s.prov,C=P.cult,ci=Math.floor(s.X/LS),cj=Math.floor(s.Z/LS),seen=new Set(),out=[];
+  for(let a=-5;a<=5;a++)for(let b=-5;b<=5;b++){const c=stretchCell(landSite(ci+a,cj+b)),k=landKey(c.i,c.j);if(seen.has(k))continue;seen.add(k);if(realmHeld(c)!==C)continue;
+    for(const t of provinceOf(c.i,c.j).sites)if(t!==s&&(t.k==='city'||t.k==='fort'||t.k==='village')){const d=Math.hypot(t.X-s.X,t.Z-s.Z);if(d>150&&d<1500)out.push([d,t]);}}
+  out.sort((a,b)=>a[0]-b[0]);return out.length?out[Math.floor(Math.random()*Math.min(4,out.length))][1]:null;}
+function dwarfMineSite(s){let best=null,bd=1e9;for(const t of s.prov.sites){if(t.k!=='village'&&t.k!=='farm'&&t.k!=='city')continue;if(!siteLayout(t).spots.some(p=>p.kind==='deep'))continue;const d=Math.hypot(t.X-s.X,t.Z-s.Z)+(t===s?60:0);if(d<bd){bd=d;best=t;}}return best;}
+function dwarfTaskReady(q){if(q.k==='supply')return !SURV()||countOf(q.it)>=q.need;if(q.k==='bounty')return q.c<=0;return false;}
+function dwarfTaskDone(){const q=DW.q;if(!q)return '';if(q.k==='supply'&&SURV())takeItems(q.it,q.need);return dwarfReward(q);}
+function dwarfReward(q){DW.q=null;DW.qn=(DW.qn||0)+1;saveDirty=true;giveCoin(q.rw);const extra=Math.random()<0.35?[462,466,468][Math.floor(Math.random()*3)]:0;if(extra&&SURV())addItem(extra,1);drawBar(true);
+  dwarfGain(q.crown?14:8,null);const msg='Task done: '+q.n.replace(/^./,c=>c.toUpperCase())+'. You are paid '+coinWord(q.rw)+(extra?' and given '+nameOf(extra):'')+'.';toast(msg);tone(392,587,0.35,0.05);return msg;}
+function dwarfFail(why){DW.q=null;saveDirty=true;toast(why);}
+// once a second: tasks that end where the player goes
+let dwarfLost=null,dwarfMk=0;
+function dwarfTaskTick(){const q=DW.q;if(!q)return;const X=PL.x+OX,Z=PL.z+OZ;
+  if(q.k==='writ'){if(DW.pt-q.t0>q.lim){dwarfFail('Too late: the writ-stone did not come to '+q.tn+' in time');if(SURV()&&countOf(478))takeItems(478,1);drawBar(true);return;}
+    if(Math.hypot(q.X-X,q.Z-Z)<30){if(SURV()&&countOf(478)<1){dwarfFail('You have lost the writ-stone');return;}if(SURV())takeItems(478,1);toast('You set the writ-stone in the hands of the captain of '+q.tn+'. He breaks the seal and reads the runes.');dwarfReward(q);}}
+  else if(q.k==='heirloom'){if(!q.got&&Math.hypot(q.X-X,q.Z-Z)<12){q.got=1;if(SURV())addItem(485,1);drawBar(true);saveDirty=true;toast('Under the fallen props of '+q.cn+' you find the heirloom of '+q.fn+'. Bring it home');}
+    else if(q.got&&Math.hypot(q.fx-X,q.fz-Z)<50){if(SURV()&&countOf(485)<1)return;if(SURV())takeItems(485,1);dwarfReward(q);}}
+  else if(q.k==='miner'){const L=dwarfLost&&!dwarfLost.dead&&foes.includes(dwarfLost)?dwarfLost:null,t=realmSiteAt(Math.round(q.X),Math.round(q.Z),4);
+    if(!L&&!q.found&&t&&Math.hypot(q.X-X,q.Z-Z)<90){const ds=siteLayout(t).spots.filter(p=>p.kind==='deep'),p=ds[ds.length-1];if(p){const [sx,sz]=siteXZ(t,p.u,p.v),x=sx-OX+0.5,z=sz-OZ+0.5,bx=Math.floor(x),bz=Math.floor(z);
+      if(bx>2&&bz>2&&bx<W-3&&bz<D-3&&genDone[(bx>>4)+(bz>>4)*NCX]){dwarfLost=addFoe('dminer',x,p.y,z,{site:t,prov:t.prov.key,st:'idle',t:99});if(dwarfLost){dwarfLost.nm=q.who;dwarfLost.hold=1;dwarfLost.holdSp=0;}}}}
+    else if(L&&!q.found&&Math.hypot(L.x-PL.x,L.z-PL.z)<5&&Math.abs(L.y-PL.y)<4){q.found=1;saveDirty=true;L.hold=0;L.st='idle';L.t=3;toast('"'+DWARF_TONGUE[8][0]+'!" '+q.who+' had lost his lamp in a side drift. He takes your light and finds his own way up the shaft.');removeFoe(L);dwarfLost=null;dwarfReward(q);}}}
+function dwarfMarks(dt){const q=DW.q;if(!q||(dwarfMk-=dt)>0)return;dwarfMk=0.4;let X,Z;if((q.k==='heirloom'&&!q.got)||q.k==='writ'||q.k==='miner'){X=q.X;Z=q.Z;}else if(q.k==='heirloom'){X=q.fx;Z=q.fz;}else return;
+  const x=X-OX,z=Z-OZ,bx=Math.floor(x),bz=Math.floor(z);if(Math.hypot(x-PL.x,z-PL.z)>240||bx<0||bz<0||bx>=W||bz>=D)return;const y=ground[bx+W*bz]+1;
+  for(let k=0;k<6;k++)spawnP(x+(Math.random()-.5)*0.6,y+Math.random()*16,z+(Math.random()-.5)*0.6,0,1.5,0,[1,0.7,0.3],1.2,-0.4);}
+// ---- the annals of the kings: eight for each kingdom, told by the loremasters and at the lecterns of the Hall of the Fathers
+const DWARF_ANN_N=8;
+function dwarfKings(key){const r=rngAt(hsh(key.length,9933,0)*1e6|0,9935,[...key].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)&0xffff),k=[];for(let i=0;i<9;i++)k.push(nameWord('dwarf',r));return k;}
+function dwarfAnnals(key,name){const k=dwarfKings(key),realm=name.replace(/^The /,'the ');return [
+  ['The First Delving',k[0]+' struck the first blow into the mountain with an axe of stone, and found iron under it, and said: here. The first hall was cut where the blow fell. The axe hangs over the throne of '+realm+' still.'],
+  ['The Stone Road',k[1]+' laid the Stone Road from hold to hold so that no dwarf need walk on mud again, and set a waymark every hundred paces and a lamp every forty. It took two hundred years. He did not live to walk it.'],
+  ['The Hall of the Fathers','In the days of '+k[2]+' the first king was laid in the deep vault, and a flame was lit at his head that has not gone out. Every king since lies beside him, and the flames are tended day and night.'],
+  ['The Great Forge',k[3]+' found the molten iron that rises in the deep places, and let it into a channel down the forge hall, so that the forges of '+realm+' are never cold. The smiths say the mountain itself works with them.'],
+  ['The Feud of the Gems','A seam of gems was found where two holds\' delvings met, and '+k[4]+' and his cousin quarrelled over it for forty years. It was ended by a marriage and a ledger, and both are kept in the Hall of the Fathers.'],
+  ['The Rams of the Heights',k[5]+' was the first to ride a ram of the heights into battle, up a cliff the orcs thought could not be climbed. The rams have been the mountain\'s ever since, and the keepers say every ram remembers it.'],
+  ['The War of the Ash','When the fire came out of the wastes in the days of '+k[6]+', the dwarves marched with men and elves to the Ashen Gate, and dug the mine under it. The mine is still being dug. The war is not over.'],
+  ['The Kindling',k[7]+' keeps the throne now. Every fourth evening the hold gathers in the great hall and the forge-fire is kindled anew, and the old names are sung over it, so that no king of '+realm+' is forgotten.']];}
+function dwarfAnnal(s,told){if(!s){showText('The annals','The loremaster has no annals to tell tonight.');return;}const K=s.prov.kingdom,T=dwarfAnnals(K.key,K.name),heard=DW.an.filter(x=>x.startsWith(K.key+':')).map(x=>+x.split(':')[1]);
+  let k=0;while(k<DWARF_ANN_N&&heard.includes(k))k++;const fresh=k<DWARF_ANN_N;if(!fresh)k=Math.floor(Math.random()*DWARF_ANN_N);
+  showText('The annals of '+K.name.replace(/^The /,'the ')+' ('+(k+1)+' of '+DWARF_ANN_N+'): '+T[k][0],T[k][1]+(fresh?'\n\nThe annal is written into your journal.':''));
+  if(fresh){DW.an.push(K.key+':'+k);DW.ann[K.key]=K.name;saveDirty=true;dwarfGain(1,null);}[147,165,196,165,147,131,147].forEach((fq,i)=>tone(fq,fq*1.003,0.6,0.04,i*0.5,'triangle'));}
+function dwarfJournal(out){const keys=Object.keys(DW.ann);out.push('','THE ANNALS OF THE MOUNTAIN');
+  if(!keys.length)out.push('No annals of the dwarves heard yet. Their loremasters tell them, and they are cut at the lecterns of the Hall of the Fathers under every high hold.');
+  for(const key of keys){const n=DW.ann[key],T=dwarfAnnals(key,n),got=DW.an.filter(x=>x.startsWith(key+':')).map(x=>+x.split(':')[1]);
+    out.push('','The Annals of '+n.replace(/^The /,'')+' ('+got.length+' of '+DWARF_ANN_N+')');for(let k=0;k<DWARF_ANN_N;k++)out.push(got.includes(k)?(k+1)+'. '+T[k][0]+'. '+T[k][1]:(k+1)+'. (not yet heard)');}
+  out.push('','YOUR STANDING WITH THE DWARVES',DW_RANK[dwarfRank()]+' ('+DW.r+')'+(DW.nm?'. Called '+DW.nm:'')+(DW.kin?'. Kin of the Mountain, with a hall in '+DW.kin:'')+(DW.cw?'. Delving contests won: '+DW.cw:''));}
+// a lectern in the Hall of the Fathers (from openLore): the annals
+function dwarfLectern(x,y,z){const X=x+OX,Z=z+OZ,s=realmSiteAt(X,Z,10);if(!s||s.prov.cult.k!=='dwarf'||s.k!=='city')return false;const F=siteLayout(s).fathers;if(!F)return false;const [u,v]=siteUV(s,X,Z);
+  if(u<F.u0-1||u>F.u1+1||v<F.v0-1||v>F.v1+1||Math.abs(y-F.y)>4)return false;dwarfAnnal(s,true);return true;}
+// ---- blocks: the waymark of the Stone Road, the tomb of a king, the deep drum, the rune forge
+function useWaymark(x,y,z){const X=x+OX,Z=z+OZ;let rr=null;for(let d=0;d<=4&&!rr;d++)for(const [a,b] of [[d,0],[-d,0],[0,d],[0,-d]]){rr=realmRoadAt(X+a,Z+b,1);if(rr)break;}
+  if(!rr){showText('A waymark','Runes are cut in it, and the four ways on its cap. The road they name is not here.');return true;}const P=rr.rd.P,ends=[rr.rd.a,rr.rd.b].map(e=>{let best=null,bd=1e9;for(const s of P.sites){const d=Math.hypot(s.X-e[0],s.Z-e[1])-s.R;if(d<bd){bd=d;best=s;}}return best;}).filter(Boolean);
+  showText('A waymark of '+P.kingdom.name.replace(/^The /,'the '),'Cut in runes: "'+realmRoadName(rr.rd)+', '+P.name+'." Below, and on its cap: '+ends.map(s=>s.name+', '+Math.round(Math.hypot(s.X-X,s.Z-Z)/10)*10+' paces '+dirWord(s.X-X,s.Z-Z)).join('; ')+'.');tone(196,247,0.25,0.05);return true;}
+function useTomb(x,y,z){const X=x+OX,Z=z+OZ,s=realmSiteAt(X,Z,10);if(!s||s.prov.cult.k!=='dwarf'){showText('A tomb','A king of the dwarves lies here in granite, his axe at his side. The runes of his name are worn smooth.');return true;}
+  const K=s.prov.kingdom,k=dwarfKings(K.key),i=Math.floor(hsh(X,9937,Z)*8);showText('The tomb of '+k[i],'"Here lies '+k[i]+', king under the mountain of '+K.name.replace(/^The /,'the ')+'. '+['He delved deep.','He kept the ledgers true.','He held the gate.','His forge was never cold.','He found the seam.','He rode the heights.','He marched to the Ashen Gate.','He kindled the fire anew.'][i]+'" A flame burns at his head.');
+  tone(110,110,1.2,0.05);if(!DW.an.length)hint('dwarves');return true;}
+let drumT=0;
+function useDeepDrum(x,y,z){if(drumT>foeClock){toast('The drum is still ringing');return true;}drumT=foeClock+4;const at=[x+0.5,y+1,z+0.5];for(let i=0;i<3;i++){burst(0.8,'lowpass',90,0.6,0.5,i*0.7,at);tone(55,50,0.6,0.08,i*0.7,'sine',at);}
+  toast('BOOM. BOOM. BOOM. The deep drum sounds through the hold.');return true;}
+function useRuneForge(x,y,z){let f=null,bd=12;for(const g of foes)if(!g.dead&&g.kind==='drune'){const d=Math.hypot(g.x-PL.x,g.z-PL.z);if(d<bd){bd=d;f=g;}}if(f&&!folkWrath(f)){dwarfRunePanel(f);return true;}
+  showText('The rune forge','The anvil\'s face is cut with runes that glow blue when iron is struck on it. Only a runesmith works here.');return true;}
+// ---- the horn of the hold: an oathbound friend blows it and a shield-wall comes (a captain and up to six axeguards, in the dwarves'
+// lands; the dwarves' soldiers within 80 elsewhere), who stand with the player for two minutes; once in five minutes
+function dwarfHorn(){if(dwarfRank()<4){toast('The horn of the hold answers only an oathbound friend\'s breath');return true;}if(DW.pt-DW.hn<300){toast('The horn\'s call is still echoing in the stone; wait a while before you blow it again');return true;}
+  DW.hn=DW.pt;saveDirty=true;tone(98,98,1.4,0.1,0,'sawtooth');tone(131,131,1.8,0.09,1.2,'sawtooth');let n=0;
+  for(const f of foes){if(f.dead||!FOES[f.kind].folk||FOES[f.kind].civ||!dwarfPeopleOf(f)||folkWrath(f)||f.war||f.host||Math.hypot(f.x-PL.x,f.z-PL.z)>80)continue;f.aid=MN.pt+120;f.hx=PL.x;f.hz=PL.z;f.st='return';f.t=6;n++;}
+  const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));
+  if(n<4&&P&&P.cult.k==='dwarf')for(let k=0;k<10&&n<7;k++){const a=PL.yaw+3.14+(k-5)*0.3,d=14,x=PL.x+Math.sin(a)*d,z=PL.z+Math.cos(a)*d,bx=Math.floor(x),bz=Math.floor(z);
+    if(bx<3||bz<3||bx>=W-3||bz>=D-3||!genDone[(bx>>4)+(bz>>4)*NCX])continue;const f=addFoe(n===0?'dcapt':n%3===2?'dhammer':'daxe',x,ground[bx+W*bz]+1,z,{prov:P.key,site:P.sites[0],st:'return',t:6});if(f){f.aid=MN.pt+120;f.hx=PL.x;f.hz=PL.z;n++;}}
+  toast(n?'You blow the horn of the hold. Boots on stone, and a shield-wall forms at your side.':'You blow the horn of the hold, but no dwarf is near enough to hear.');return true;}
+// ---- coming into a province of the dwarves, and to a hold's great gate
+let dwarfProv='',dwarfProvSeen=0,dwarfGateSeen=new Set();
+function dwarfBorder(){const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ),P=realmOfColumn(X,Z),key=P&&P.cult.k==='dwarf'?P.key:'';
+  if(key!==dwarfProv||!dwarfProvSeen){const was=dwarfProv;dwarfProv=key;const first=!dwarfProvSeen;dwarfProvSeen=1;if(key&&(was||ready)&&!first)showName(P.name+', '+P.kingdom.name);}
+  const s=realmSiteAt(X,Z,0);if(s&&s.prov.cult.k==='dwarf'&&s.k==='city'&&!dwarfGateSeen.has(s.id)){const L=siteLayout(s);if(L.mass){const [u,v]=siteUV(s,X,Z);if(u>L.mass.f-16&&u<L.mass.f&&Math.abs(v)<16){dwarfGateSeen.add(s.id);toast('The great doors of '+s.name+' stand open. Hammers ring somewhere under the mountain.');}}}}
+// ---- each frame (from foes.js): the clock, the marks, the life; each second the border, the tasks, the claims found
+let dwarfT=0;
+function dwarfFrame(dt){if(!ready)return;DW.pt+=dt;dwarfMarks(dt);dwarfLife(dt);if((dwarfT-=dt)>0)return;dwarfT=1;
+  dwarfBorder();dwarfTaskTick();
+  const o=claimsNear(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),-6);if(o&&discover('c',o.name))dwarfGain(2,null);}
+function dwarfPlaceFound(rp){if(rp.s.prov.cult.k==='dwarf')dwarfGain(2,null);}
+// ---- the dwarves' new folk (models: dwarf-court-models.js) and where they stand
+Object.assign(FOES,{
+  dqueen:{n:'Queen of the Mountain',m:'dqueen',hp:34,dmg:2,reach:1.8,walk:1,run:4,sight:20,cd:1.2,wind:0.4,mass:0.3,tall:1.8,folk:1,civ:1,fem:1,drops:[[224,2,4,0.6]],cause:'dwarf'},
+  danvil:{n:'Anvilguard of the Throne',m:'danvil',hp:60,dmg:10,reach:2.4,walk:1.1,run:4.2,sight:30,cd:1.2,wind:0.45,block:0.5,mass:0.15,tall:1.8,folk:1,elite:1,say:'danvil',drops:[[223,1,2,0.5],[227,1,1,0.4]],cause:'dwarf'},
+  dhward:{n:'Warden of the Hold',m:'dhward',hp:22,dmg:2,reach:1.8,walk:1.05,run:4.1,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[204,1,3,0.5]],cause:'dwarf'},
+  dlore:{n:'Loremaster',m:'dlore',hp:16,dmg:1,reach:1.6,walk:1,run:3.8,sight:16,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,drops:[[203,2,6,0.5]],cause:'dwarf'},
+  drune:{n:'Runesmith',m:'drune',hp:24,dmg:3,reach:1.8,walk:1.05,run:4,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[223,1,1,0.4]],cause:'dwarf'},
+  dbrew:{n:'Brewer of the Hold',m:'dbrew',hp:22,dmg:2,reach:1.8,walk:1.05,run:4,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[462,1,2,0.5]],cause:'dwarf'},
+  dmerch:{n:'Merchant of the Mountain',m:'dmerch',hp:18,dmg:1,reach:1.6,walk:1.05,run:4,sight:16,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,drops:[[203,2,6,0.5]],cause:'dwarf'},
+  dmint:{n:'Moneychanger',m:'dmerch',hp:16,dmg:1,reach:1.6,walk:1,run:4,sight:16,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,drops:[[204,1,3,0.5]],cause:'dwarf'},
+  dgem:{n:'Gemcutter',m:'dgem',hp:16,dmg:1,reach:1.6,walk:1,run:4,sight:16,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,drops:[[468,1,1,0.4]],cause:'dwarf'},
+  dfarm:{n:'Mushroom-farmer',m:'dfarm',hp:18,dmg:1,reach:1.6,walk:1.05,run:4,sight:16,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,drops:[[465,1,2,0.5]],cause:'dwarf'},
+  dkeep:{n:'Ram-keeper',m:'dfarm',hp:20,dmg:2,reach:1.6,walk:1.05,run:4.2,sight:16,cd:1.2,wind:0.4,mass:0.45,tall:1.7,folk:1,civ:1,drops:[[352,1,1,0.4]],cause:'dwarf'},
+  dchild:{n:'Child of the Hold',m:'dchild',hp:6,dmg:0,reach:1,walk:1.3,run:4.6,sight:14,cd:1.5,wind:0.4,mass:0.9,folk:1,civ:1,tall:1.1,say:'dchild',drops:[],cause:'dwarf'},
+  dgirl:{n:'Child of the Hold',m:'dgirl',hp:6,dmg:0,reach:1,walk:1.3,run:4.6,sight:14,cd:1.5,wind:0.4,mass:0.9,folk:1,civ:1,fem:1,tall:1.1,say:'dchild',drops:[],cause:'dwarf'},
+  dramr:{n:'Ram-rider of the Mountain',m:'dramr',hp:40,dmg:6,reach:2.6,walk:1.5,run:6.5,sight:32,cd:1.2,wind:0.45,block:0.4,mass:0.2,tall:2.4,mount:1,folk:1,say:'dguard',drops:[[223,1,1,0.3],[352,1,1,0.4]],cause:'dwarf'},
+  dprosp:{n:'Prospector',m:'dprosp',hp:24,dmg:3,reach:1.8,walk:1.1,run:4.2,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[468,1,1,0.4]],cause:'dwarf'},
+  ddeep:{n:'Deepwarden',m:'ddeep',hp:36,dmg:6,reach:2,walk:1.1,run:4.3,sight:26,cd:0.9,wind:0.35,block:0.35,mass:0.3,tall:1.7,folk:1,say:'ddeep',drops:[[223,1,1,0.4],[DLAMP,1,1,0.3]],cause:'dwarf'},
+  dengin:{n:'Engineer of the Hold',m:'dengin',hp:22,dmg:3,reach:1.8,walk:1.05,run:4.1,sight:18,cd:1.2,wind:0.4,mass:0.4,tall:1.7,folk:1,civ:1,drops:[[223,1,1,0.3]],cause:'dwarf'}});
+Object.assign(FOE_HOME,{d_dthrone:[['danvil',1]],d_danvil:[['danvil',2]],d_dcourt:[['dlore',1],['dlady',1],['dlord',1]],d_dale:[['dminer',2],['dsmith',1],['daxe',1],['dlady',1]],d_drunes:[['dsmith',1]],d_dbrew:[['dminer',1]],
+  d_dmarket:[['dmint',1],['dlady',1],['dminer',1]],d_dgem:[['dlady',1]],d_dstreet:[['dminer',1],['dlady',1],['dchild',0.6],['dgirl',0.5]],d_dgarden:[['dfarm',2]],d_dbath:[['dminer',1],['dlord',1]],d_dvault:[['danvil',2]],
+  d_dfathers:[['dlady',1],['dlord',1]],d_dmourn:[['dlady',1],['dlord',1]],d_ddeep:[['ddeep',1],['dminer',1]],d_dpen:[['dminer',1]],d_dengine:[['daxe',1]]});
+FOE_HOME.d_street.push(['dchild',0.6],['dgirl',0.5]);FOE_HOME.d_deep.push(['ddeep',0.6]);
+Object.assign(FOLK_N,{dthrone:[2,2],danvil:[2,2],dcourt:[3,4],dale:[3,5],drunes:[1,2],dbrew:[2,2],dmarket:[3,4],dgem:[1,2],dstreet:[2,3],dgarden:[2,3],dbath:[2,3],dvault:[2,2],dfathers:[1,2],dmourn:[1,2],ddeep:[2,2],dpen:[1,2],dengine:[1,2]});
+Object.assign(FOLK_LEAD,{d_keep:'dcapt',d_dcourt:'dhward',d_dale:'dbrew',d_drunes:'drune',d_dbrew:'dbrew',d_dmarket:'dmerch',d_dgem:'dgem',d_dgarden:'dfarm',d_dfathers:'dlore',d_ddeep:'ddeep',d_dpen:'dkeep',d_dengine:'dengin'});
+Object.assign(FOLK_SAY,{dqueen:['Be welcome under the mountain, and keep its peace.','Every lamp in {p} was lit by someone who loved it.','The ledgers say we owe the fire a reckoning. We will pay it.'],
+  danvil:['Stand back from the throne.','We have stood here since before your grandfather was born.','The anvil does not move. Neither do we.'],
+  dhward:['The keys of {p} are on my belt. All of them.','A hold is a thousand doors, and every one of them must be shut at night.','If you need anything in {p}, you need me first.'],
+  dlore:['Shall I tell you of the First Delving? It is a good one.','Every king of {k} is written down. Every one.','The fathers do not sleep. They listen.'],
+  drune:['A rune is cut once, and holds forever. Do not ask me to cut a careless one.','Keenness, warding, delving, the lamp. Which do you need?','Feel that? The stone is listening to the iron.'],
+  dbrew:['The dark ale is ready. The fire ale is not for the faint.','Sit down before you drink the stout. Trust me.','A hold runs on ale and iron. In that order, some say.'],
+  dmerch:['Good iron, fair prices, no haggling. Well, a little haggling.','Gems from the deep seams! Look how they take the light.','Coin is coin, but a dwarf remembers who paid fairly.'],
+  dgem:['Hold it to the lamp. See the fire in it? I put that there.','A rough stone is a promise. A cut one is a promise kept.','Mind my wheel.'],
+  dfarm:['The glowing ones light the beds. The brown ones you can eat.','Nothing grows without the sun, they say. They have never been down here.','Mind the beds, please.'],
+  dkeep:['A ram will go where a horse breaks its legs.','That one bites. That one butts. That one does both.','Up a cliff, over a scree, along a ledge. A ram does not care.'],
+  dchild:['Are you a giant? You are very tall.','I am going to be a hammerer when I grow a beard.','Have you seen the rams? I fed one!'],
+  dprosp:['There is a seam in this hill. I can smell it.','Two winters I have been digging here. One more, and I will find it.','You would not have a spare lamp, would you?'],
+  ddeep:['Who walks in the deep? Name yourself.','Keep to the lamplit ways. The dark ones are dark for a reason.','The mountain is quiet tonight. That is how I like it.'],
+  dengin:['The trebuchet throws a stone the weight of a pony two hundred paces. Accurately.','Every wheel in {p} I have greased myself.','Measure twice. Cut once. Then measure again.']});
+// ---- the great ram, the caravan pony and the raven
+Object.assign(ANIMALS,{
+  ram:{n:'Great Ram',hp:16,walk:1.2,run:6.5,shy:5,stride:1.6,amp:0.6,turn:3.4,graze:1,sleeps:1,drops:[[351,2],[352,1]],g:[],herd:[2,4],w:0,youngP:0.2,calls:[18,45],mount:true,gallop:11,leap:12.5,climb:1,ride:'Riding the great ram. It springs up ledges a horse would balk at; sprint to run.'},
+  pony:{n:'Caravan Pony',hp:12,walk:1.1,run:4,shy:0,stride:1.4,amp:0.6,turn:3,graze:1,sleeps:1,drops:[],g:[],herd:[1,1],w:0,youngP:0,calls:[30,80]},
+  raven:{n:'Raven of the Mountain',hp:3,walk:0.8,run:3,shy:3,stride:0.4,amp:0.8,turn:6,biped:1,graze:0,sleeps:1,drops:[],g:[],herd:[1,2],w:0,youngP:0,calls:[8,20]}});
+// ---- The life of the dwarves (D-091): what the mountain folk do about the player, day and night.
+//
+// The delving contest: once a day by daylight at a hold or a mining town with mines, while the player is near: three miners go
+// down at the horn, and ninety seconds later whoever has brought out the most ore wins; ask a miner at the headframe to join,
+// and every ore and gem the player breaks in that place's mines counts (gold and the golden pick for the winner). The Kindling:
+// every fourth evening the hold gathers in the great hall, the deep drum is beaten, the chant goes up, the brewer brings round the
+// horn; kept a while, the player is fed and the better thought of. The caravans: trains of ponies with their packs, a caravan
+// master and two axeguards, on the Stone Road between the holds by day. The shifts: a horn from the nearest hold or town at dawn
+// sends the miners down, another at dusk brings them up, and the hoists clank at the headframes. The engine drill: once a day the
+// engineers of a bastion or a hold loose a trebuchet at the range. The deep watch: the deepwardens challenge whoever comes down to
+// a hold's deep level. The baths: their hot water heals. Ravens perch on the towers, and bring a friend of the mountain the news.
+// Pipe smoke at the gates of an evening; the lamplighter's round at dusk; rams in their pens and wild rams on the heights;
+// prospectors at their claims by day; ram-riders on the Stone Road; a low horn for one of their folk fallen near by.
+const TDWL={};
+// the dwarves' life draws from its own stream, so the shared one (and all that hangs on it elsewhere) runs as before
+const dlRnd=mkRng(91021);
+function dwarfLandNow(){const P=realmOfColumn(Math.floor(PL.x+OX),Math.floor(PL.z+OZ));return !!(P&&P.cult.k==='dwarf');}
+function dwarfSitesNear(m){const X=PL.x+OX,Z=PL.z+OZ;return realmTile(Math.floor(X),Math.floor(Z)).sites.filter(s=>s.prov.cult.k==='dwarf'&&Math.hypot(s.X-X,s.Z-Z)<s.R+m);}
+const dwarfAt=(s,u,v,y)=>{const [X,Z]=siteXZ(s,u,v);return [X-OX+0.5,y,Z-OZ+0.5];};
+const dwLoaded=(x,z)=>{const bx=Math.floor(x),bz=Math.floor(z);return bx>2&&bz>2&&bx<W-3&&bz<D-3&&genDone[(bx>>4)+(bz>>4)*NCX];};
+function dwarfCheer(at,big){for(let i=0;i<(big?12:6);i++)voice(150+dlRnd()*90,130+dlRnd()*80,0.6,0.014,{form:520+dlRnd()*300,q:1,delay:i*0.07},at);}
+// ---- the delving contest
+let DELVE=null;const delveDone=new Set();
+function delveFind(){if(!(curT()>0.3&&curT()<0.68))return null;for(const s of dwarfSitesNear(20))if((s.k==='village'||s.k==='city')&&!delveDone.has(s.id+':'+dayN)&&siteLayout(s).spots.some(p=>p.kind==='mine'))return s;return null;}
+function delveStart(s){delveDone.add(s.id+':'+dayN);const K=[0,1,2].map(i=>({nm:nameWord('dwarf',dlRnd),n:0,rate:0.11+dlRnd()*0.06}));
+  DELVE={s:s,K:K,ph:'muster',t:20,me:0,pl:0,run:90};toast('The delving contest at '+s.name+'! Three miners are at the headframe. Ask one of them to dig with them.');hint('delve');return DELVE;}
+function dwarfContestAsk(f){if(!DELVE||DELVE.s!==f.site)return '"There is no contest today. Come back another day, by daylight."';if(DELVE.ph!=='muster')return '"They are down already! Next time."';
+  DELVE.pl=1;return '"Then dig! When the horn sounds, every ore and gem you break in our mines counts. Ninety seconds. The most wins."';}
+// an ore or a gem broken by the player (from mining.js): it counts in the contest if it lies in the contest's place
+function delveMined(id,x,y,z){const D0=DELVE;if(!D0||D0.ph!=='run'||!D0.pl||!BL[id]||BL[id].mat!=='ore')return;const s=D0.s;if(Math.hypot(s.X-OX-x,s.Z-OZ-z)>s.R+40||y>s.T-3)return;D0.me+=id===GEMORE?2:1;
+  if(D0.me%3===0)toast('Your tally: '+D0.me);}
+function delveTick(){const D0=DELVE;if(!D0){if(dlRnd()<0.25){const s=delveFind();if(s)delveStart(s);}return;}
+  const s=D0.s;if(Math.hypot(s.X-OX-PL.x,s.Z-OZ-PL.z)>s.R+140){DELVE=null;return;}
+  if(D0.ph==='muster'){if((D0.t-=1)>0)return;D0.ph='run';tone(110,110,1.2,0.08,0,'sawtooth');tone(147,147,1.4,0.07,1,'sawtooth');toast(D0.pl?'The horn! Dig, '+(DW.nm||'stranger')+'!':'The horn sounds and the miners go down.');return;}
+  for(const k of D0.K)if(dlRnd()<k.rate)k.n++;if((D0.run-=1)>0)return;
+  const all=[...D0.K.map(k=>({who:k.nm,n:k.n})),...(D0.pl?[{who:'you',n:D0.me,me:1}]:[])].sort((a,b)=>b.n-a.n||(a.me?-1:1)),i=all.findIndex(q=>q.me);
+  toast('The delving contest at '+s.name+' is over. '+(all[0].me?'You brought out the most, '+all[0].n+'!':all[0].who+' wins with '+all[0].n+(i>0?'; you came '+['','second','third','fourth'][i]+' with '+D0.me:'')+'.'));
+  if(i===0)delveWins();else if(i===1){giveCoin(10);dwarfGain(3,'Second in the delving contest at '+s.name);}dwarfCheer([s.X-OX,s.T+2,s.Z-OZ],true);DELVE=null;}
+function delveWins(){DW.cw=(DW.cw||0)+1;saveDirty=true;const got=['3 gold'];giveCoin(30);if(SURV()&&!countOf(477)&&DW.cw===1){addItem(477,1);got.push('the Golden Pick');}drawBar(true);
+  dwarfGain(10,'You won the delving contest at '+DELVE.s.name);toast('The miners lift you on their shoulders. Your prize: '+got.join(' and ')+'.');}
+// ---- the Kindling in the great hall
+let KINDLE=null;const kindleDone=new Set();
+function dwarfGreatOf(s){const L=siteLayout(s);return L.hold&&L.hold.find(q=>q.k==='great');}
+function dwarfInGreat(s){const q=dwarfGreatOf(s);if(!q)return false;const [u,v]=siteUV(s,Math.floor(PL.x+OX),Math.floor(PL.z+OZ));return u>=q.u0&&u<=q.u1&&v>=q.v0&&v<=q.v1&&Math.abs(PL.y-q.y0)<8;}
+function kindleTick(){const t=curT(),on=dayN%4===3&&t>0.74&&t<0.96;if(!on){if(KINDLE)kindleEnd();return;}
+  if(KINDLE&&Math.hypot(KINDLE.x-PL.x,KINDLE.z-PL.z)>140)kindleEnd();
+  if(!KINDLE){for(const s of dwarfSitesNear(80)){if(s.k!=='city'||kindleDone.has(s.id+':'+dayN))continue;const q=dwarfGreatOf(s);if(!q)continue;kindleDone.add(s.id+':'+dayN);
+      const G=[],mv=(q.v0+q.v1)/2;for(let du=4;du<=q.u1-q.u0-8&&G.length<16;du+=3)for(const sd of [1,-1]){const [x,y,z]=dwarfAt(s,q.u0+du,mv+sd*4,q.y0);if(!dwLoaded(x,z))continue;
+        const g=spawnGroup('d_kind',1,x,y,z,0.3,{prov:s.prov.key,site:s})[0];if(g){g.hold=1;g.holdSp=0;g.kindle=1;g.x=x;g.z=z;g.yaw=g.hd=Math.atan2(...dirUV(s,0,-sd));G.push(g);}}
+      const [bx,by,bz]=dwarfAt(s,q.u1-8,2,q.y0),bearer=addFoe('dbrew',bx,by,bz,{prov:s.prov.key,site:s,st:'idle',t:99});if(bearer){bearer.kindle=1;G.push(bearer);}
+      KINDLE={s:s,q:q,x:bx,y:by,z:bz,G:G,kept:0,told:0,drumT:2,chantT:6,bearer:bearer};break;}return;}
+  const inHall=dwarfInGreat(KINDLE.s);
+  if(inHall&&!KINDLE.told){KINDLE.told=1;toast('The Kindling in the great hall of '+KINDLE.s.name+': the forge-fire is kindled anew, the deep drum beats, and the old names are sung.');hint('kindling');}
+  if(inHall&&KINDLE.bearer&&!KINDLE.horn&&Math.hypot(KINDLE.bearer.x-PL.x,KINDLE.bearer.z-PL.z)<8){KINDLE.horn=1;toast('The brewer brings you the horn: "'+DWARF_TONGUE[4][0]+'" ('+DWARF_TONGUE[4][1]+')');tone(392,494,0.4,0.04);}
+  if(inHall){KINDLE.kept++;if(KINDLE.kept>=20&&DW.ki!==dayN){DW.ki=dayN;saveDirty=true;if(SURV()){food=Math.min(20,food+8);hp=Math.min(20,hp+4);drawStats();}dwarfGain(3,'You kept the Kindling in the hall of '+KINDLE.s.name);}}}
+function kindleFrame(dt){const K=KINDLE;if(!K)return;for(const g of K.G)if(!g.dead&&g.kindle&&dlRnd()<dt*0.1)g.cheer=foeClock+1;const near=Math.hypot(K.x-PL.x,K.z-PL.z)<50;
+  if((K.drumT-=dt)<=0){K.drumT=14;if(near)for(let i=0;i<3;i++){burst(0.8,'lowpass',80,0.6,0.4,i*0.75,[K.x,K.y+2,K.z]);tone(55,50,0.6,0.06,i*0.75,'sine',[K.x,K.y+2,K.z]);}}
+  if((K.chantT-=dt)<=0){K.chantT=24;if(near)[98,110,131,110,98,87,98,131,147].forEach((fq,i)=>voice(fq,fq*1.01,0.8,0.02,{form:400,q:1,delay:i*0.6},[K.x,K.y+2,K.z]));}
+  if(near&&dlRnd()<dt*3){const q=K.q,[x,,z]=dwarfAt(K.s,q.u1-2,(dlRnd()-0.5)*4,0);spawnP(x,q.y0+1.5,z,(dlRnd()-.5)*0.6,1.5+dlRnd(),(dlRnd()-.5)*0.6,[1,0.55+dlRnd()*0.3,0.15],0.7,-1);}}
+function kindleEnd(){if(!KINDLE)return;for(const g of KINDLE.G)if(!g.dead&&!g.gone){g.kindle=0;g.hold=0;if(Math.hypot(g.x-PL.x,g.z-PL.z)>40)removeFoe(g);else{g.st='idle';g.t=2;}}KINDLE=null;}
+// ---- the caravans on the Stone Road
+let CARAVAN=null,caravanT=40;
+function caravanTick(){if(CARAVAN){const C=CARAVAN,m=C.G[0];if(!m||m.dead||Math.hypot(m.x-PL.x,m.z-PL.z)>150||(C.age=(C.age||0)+1)>400){caravanEnd();return;}
+    for(const a of C.A)if(a.pen&&!a.dead){a.pen.x=m.x;a.pen.z=m.z;}return;}
+  if((caravanT-=1)>0)return;caravanT=150+dlRnd()*120;if(ambNight()||!dwarfLandNow())return;
+  const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);let rr=null;for(let d=0;d<=40&&!rr;d+=4)for(const [a,b] of [[d,0],[-d,0],[0,d],[0,-d]]){const q=realmRoadAt(X+a,Z+b,1);if(q&&q.rd.k==='high'&&q.rd.P.cult.k==='dwarf'){rr=q;break;}}if(!rr)return;
+  const R=rr.rd,ex=(R.b[0]-R.a[0])/(R.len||1),ez=(R.b[1]-R.a[1])/(R.len||1),dir=dlRnd()<0.5?1:-1,sx=X-ex*dir*36,sz=Z-ez*dir*36,x=sx-OX,z=sz-OZ;if(!dwLoaded(x,z))return;const y=ground[Math.floor(x)+W*Math.floor(z)]+1;
+  const P=R.P,site=P.sites[0],G=[];const tx=x+ex*dir*140,tz=z+ez*dir*140;
+  for(const [k,o] of [['dmerch',0],['daxe',2],['daxe',-2]]){const f=addFoe(k,x-ex*dir*o*1.5,y,z-ez*dir*o*1.5,{prov:P.key,site:site,st:'return',t:60});if(f){f.hx=tx;f.hz=tz;f.caravan=1;G.push(f);}}
+  if(!G.length)return;const A=[];for(let i=0;i<3;i++){const ax=x-ex*dir*(3+i*2),az=z-ez*dir*(3+i*2);if(!dwLoaded(ax,az))continue;const ay=standY(ax,ground[Math.floor(ax)+W*Math.floor(az)]+2,az);if(ay>0)A.push(addAnimal('pony',ax,ay,az,{pen:{x:x,z:z,r:3},caravan:1}));}
+  G[0].nm=nameWord('dwarf',dlRnd);CARAVAN={G:G,A:A};toast('A caravan of the mountain comes along the Stone Road: ponies laden with iron and gems, '+G[0].nm+' the caravan master, and two axeguards.');}
+function caravanEnd(){const C=CARAVAN;if(!C)return;for(const f of C.G)if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)>40)removeFoe(f);else if(!f.dead){f.caravan=0;f.st='idle';f.t=3;}
+  for(const a of C.A)if(!a.dead&&animals.includes(a)&&!a.tame)removeAnimal(a);CARAVAN=null;}
+// ---- the shifts: a horn at dawn and dusk from the nearest hold or mining town; the hoists clank at the headframes by day
+let shiftDay=-1,shiftDusk=-1,hoistT=3;
+function dwarfShift(){const t=curT();const dawn=t>=0.24&&t<=0.3&&shiftDay!==dayN,dusk=t>=0.72&&t<=0.76&&shiftDusk!==dayN;if(!dawn&&!dusk)return;
+  let s=null,bd=160;for(const q of dwarfSitesNear(160))if(q.k==='city'||q.k==='village'){const d=Math.hypot(q.X-OX-PL.x,q.Z-OZ-PL.z);if(d<bd){bd=d;s=q;}}if(!s)return;
+  if(dawn)shiftDay=dayN;else shiftDusk=dayN;const at=dwarfAt(s,0,0,s.T+8);tone(98,98,1.4,0.07,0,'sawtooth',at);tone(98,98,1.4,0.07,1.6,'sawtooth',at);
+  toast(dawn?'The shift horn sounds from '+s.name+': the miners go down.':'The shift horn sounds from '+s.name+': the miners come up out of the deep.');}
+function dwarfHoists(dt){if((hoistT-=dt)>0)return;hoistT=4+dlRnd()*5;if(ambNight())return;for(const s of dwarfSitesNear(50)){const p=siteLayout(s).parts.find(q=>q.k==='dhead');if(!p)continue;
+  const [x,,z]=dwarfAt(s,p.cu,p.cv,0),at=[x,p.y+p.H,z];for(let i=0;i<4;i++)burst(0.06,'bandpass',1800+dlRnd()*600,6,0.08,i*0.18,at);break;}}
+// ---- the engine drill: once a day by daylight, a trebuchet of a bastion or a hold looses at the range
+const engineDone=new Set();let ENG=null;
+function engineTick(){if(ENG||!(curT()>0.35&&curT()<0.65))return;for(const s of dwarfSitesNear(60)){const L=siteLayout(s);if(!L.trebs||engineDone.has(s.id+':'+dayN))continue;engineDone.add(s.id+':'+dayN);
+    const T=L.trebs[0],[x,,z]=dwarfAt(s,T.u,T.v,0),[ex,,ez]=dwarfAt(s,T.u-80,T.v*1.5,0);ENG={x:x,y:T.y+12,z:z,ex:ex,ez:ez,t:0,s:s};
+    toast('"Loose!" The engineers of '+s.name+' drill the trebuchet at the range.');burst(0.5,'lowpass',160,0.7,0.4,0,[x,T.y+6,z]);break;}}
+function engineFrame(dt){const E=ENG;if(!E)return;E.t+=dt;const k=Math.min(1,E.t/3.2),x=E.x+(E.ex-E.x)*k,z=E.z+(E.ez-E.z)*k,y=E.y+Math.sin(k*Math.PI)*30-k*10;spawnP(x,y,z,0,0,0,[0.5,0.48,0.44],0.6,0);
+  if(k>=1){const bx=Math.floor(E.ex),bz=Math.floor(E.ez),gy=dwLoaded(E.ex,E.ez)?ground[bx+W*bz]+1:y;for(let i=0;i<24;i++)spawnP(E.ex,gy,E.ez,(dlRnd()-.5)*5,dlRnd()*4,(dlRnd()-.5)*5,[0.55,0.5,0.44],1,6);burst(0.7,'lowpass',120,0.6,0.5,0,[E.ex,gy,E.ez]);ENG=null;}}
+// ---- the deep watch: a deepwarden's challenge on coming down to a hold's deep level
+const deepDone=new Set();
+function deepWatch(){for(const s of dwarfSitesNear(10)){const L=siteLayout(s);if(!L.lv2||deepDone.has(s.id+':'+dayN))continue;if(PL.y>L.lv2.y+6)continue;deepDone.add(s.id+':'+dayN);
+  toast(dwarfRank()<1?'A deepwarden steps out of the dark: "Who walks in the deep? Strangers keep to the upper halls, and the lamplit ways." He lets you pass, and watches you go.':'A deepwarden lifts his lantern: "Ah. '+(DW.nm||'Friend')+'. Pass, and mind the side drifts."');}}
+// ---- the baths: the hot water heals, and a day's first bath is remembered
+let bathT=0;
+function bathTick(dt){if((bathT-=dt)>0)return;bathT=2;const x=Math.floor(PL.x),z=Math.floor(PL.z),y=Math.floor(PL.y);if(get(x,y,z)!==WATER&&get(x,y-1,z)!==WATER)return;
+  for(const s of dwarfSitesNear(10)){const B=siteLayout(s).bath;if(!B)continue;const [u,v]=siteUV(s,x+OX,z+OZ);if(u<B.u0||u>B.u1||v<B.v0||v>B.v1||Math.abs(y-B.y)>2)continue;
+    if(SURV()&&hp<20){hp=Math.min(20,hp+1);drawStats();}if(DW.bath!==dayN){DW.bath=dayN;saveDirty=true;toast('The water is hot from the furnaces\' flues. Your aches go out of you.');dwarfGain(1,null);}return;}}
+// steam over the baths
+let steamT=0;
+function bathSteam(dt){if((steamT-=dt)>0)return;steamT=0.25;for(const s of dwarfSitesNear(0)){const B=siteLayout(s).bath;if(!B)continue;const [x,,z]=dwarfAt(s,B.u0+dlRnd()*(B.u1-B.u0),B.v0+dlRnd()*(B.v1-B.v0),0);
+  if(Math.hypot(x-PL.x,z-PL.z)>40)continue;spawnP(x,B.y+1,z,(dlRnd()-.5)*0.2,0.5+dlRnd()*0.3,(dlRnd()-.5)*0.2,[0.86,0.88,0.9],2.4,-0.2);}}
+// ---- ravens on the towers of the holds, and the news they bring a friend of the mountain
+const RAVENS=new Set();let ravenT=300;
+function ravenTick(){if(ambNight())return;for(const s of dwarfSitesNear(90)){if((s.k!=='city'&&s.k!=='fort')||RAVENS.has(s.id))continue;const ws=siteLayout(s).spots.filter(p=>p.kind==='wall').slice(0,2);let n=0;
+    for(const p of ws){const [x,y,z]=dwarfAt(s,p.u,p.v,p.y+1);if(!dwLoaded(x,z))continue;const a=addAnimal('raven',x,y,z,{pen:{x:x,z:z,r:1.5}});if(a)n++;}if(n)RAVENS.add(s.id);}
+  for(const id of [...RAVENS])if(!dwarfSitesNear(200).some(s=>s.id===id))RAVENS.delete(id);
+  if((ravenT-=1)>0)return;ravenT=600+dlRnd()*300;if(dwarfRank()<2||!dwarfLandNow())return;const s=dwarfSitesNear(400).find(q=>q.k==='city'||q.k==='fort');if(!s)return;
+  const w=typeof WARS!=='undefined'?[...WARS.values()][0]:null,news=w?'the war at '+w.n+' goes on, and the mine under the gate is '+Math.round(((w.b&&w.b.mine)||0)*100)+' parts in a hundred dug':['a new seam of iron was struck in the deep galleries','the forge hall\'s channel ran over, and the smiths were glad of it','a caravan came in from the far holds with gems and news','the Kindling was kept well, and the old names were sung'][Math.floor(dlRnd()*4)];
+  toast('A raven of '+s.name+' lands on your shoulder and croaks its news: '+news+'.');for(let i=0;i<2;i++)voice(620,480,0.22,0.05,{type:'square',form:900,q:2.5,delay:i*0.32});}
+// ---- pipe smoke at the gates of an evening; the lamplighter's round at dusk
+let pipeT=0;const lampDone=new Set();
+function dwarfPipes(dt){if((pipeT-=dt)>0)return;pipeT=0.6;const t=curT();if(t<0.68||t>0.92)return;for(const f of foes){if(f.dead||(f.spk!=='d_gate'&&f.spk!=='d_gatein')||Math.hypot(f.x-PL.x,f.z-PL.z)>30||dlRnd()<0.6)continue;
+  spawnP(f.x+Math.sin(f.yaw)*0.4,f.y+1.35,f.z+Math.cos(f.yaw)*0.4,(dlRnd()-.5)*0.2,0.5,(dlRnd()-.5)*0.2,[0.8,0.8,0.82],1.6,-0.15);}}
+function lamplighter(){const t=curT();if(t<0.7||t>0.78)return;for(const s of dwarfSitesNear(30)){if(s.k!=='city'&&s.k!=='village'||lampDone.has(s.id+':'+dayN))continue;const p=siteLayout(s).spots.find(q=>q.kind==='street');if(!p)continue;
+  const [x,y,z]=dwarfAt(s,p.u,p.v,p.y+1);if(!dwLoaded(x,z))continue;lampDone.add(s.id+':'+dayN);const f=addFoe('dminer',x,y,z,{prov:s.prov.key,site:s,st:'idle',t:6});if(f)f.nm='the lamplighter';
+  toast('The lamplighter of '+s.name+' goes round with his pole and his lamp.');break;}}
+// ---- rams in their pens; wild rams on the heights; prospectors at their claims by day; ram-riders on the Stone Road
+const PENS=new Set(),PROSP=new Map();let wildRamT=30,patrolT=90;
+function dwarfPens(){for(const s of dwarfSitesNear(70)){const L=siteLayout(s);if(!L.pens||PENS.has(s.id))continue;let n=0;
+    for(const pn of L.pens){const [x,,z]=dwarfAt(s,pn.u,pn.v,0);if(!dwLoaded(x,z))continue;for(let i=0;i<3;i++){const ax=x+(dlRnd()-0.5)*4,az=z+(dlRnd()-0.5)*3,ay=standY(ax,pn.y+2,az);if(ay>0&&addAnimal('ram',ax,ay,az,{pen:{x:x,z:z,r:3}}))n++;}}if(n)PENS.add(s.id);}
+  for(const id of [...PENS])if(!dwarfSitesNear(160).some(s=>s.id===id))PENS.delete(id);}
+function wildRamTick(){if((wildRamT-=1)>0)return;wildRamT=60+dlRnd()*50;const land=LANDS[colInfo(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),TDWL).land].k;if(!dwarfLandNow()&&!CLAIM_LANDS.has(land)&&land!=='mtn')return;
+  let n=0;for(const a of animals)if(a.kind==='ram'&&!a.tame&&!a.pen&&Math.hypot(a.x-PL.x,a.z-PL.z)<120)n++;if(n>=4)return;
+  const a0=dlRnd()*6.283,x=PL.x+Math.cos(a0)*55,z=PL.z+Math.sin(a0)*55;if(!dwLoaded(x,z))return;const id=2e6+Math.floor(dlRnd()*1e6),k=2+Math.floor(dlRnd()*3);
+  for(let i=0;i<k;i++){const ax=x+(dlRnd()-0.5)*8,az=z+(dlRnd()-0.5)*8,ay=standY(ax,ground[Math.floor(x)+W*Math.floor(z)]+3,az);if(ay<0||wetAt(ax,ay,az))continue;addAnimal('ram',ax,ay,az,{herd:id,young:i>1&&dlRnd()<0.3});}}
+function prospectorTick(){if(ambNight()){for(const [k,f] of PROSP){if(!f.dead&&Math.hypot(f.x-PL.x,f.z-PL.z)>30)removeFoe(f);PROSP.delete(k);}return;}
+  const o=claimsNear(Math.floor(PL.x+OX),Math.floor(PL.z+OZ),40);if(o&&!o.ab&&!PROSP.has(o.name)){const [fx,fz]=ELD4[o.dir],x=o.X-fx*5-OX+0.5,z=o.Z-fz*5-OZ+0.5;if(dwLoaded(x,z)){const y=standY(x,o.g+2,z);
+    const f=addFoe('dprosp',x,y>0?y:o.g+1,z,{st:'idle',t:6});if(f){f.nm=o.who;f.home=[x,z];PROSP.set(o.name,f);}}}
+  for(const [k,f] of PROSP)if(f.dead||Math.hypot(f.x-PL.x,f.z-PL.z)>120){if(!f.dead)removeFoe(f);PROSP.delete(k);}}
+function patrolTick(){if((patrolT-=1)>0)return;patrolT=200+dlRnd()*150;if(!dwarfLandNow())return;const X=Math.floor(PL.x+OX),Z=Math.floor(PL.z+OZ);let rr=null;for(let d=0;d<=30&&!rr;d+=3)for(const [a,b] of [[d,0],[-d,0],[0,d],[0,-d]]){const q=realmRoadAt(X+a,Z+b,1);if(q&&q.rd.P.cult.k==='dwarf'){rr=q;break;}}if(!rr)return;
+  const R=rr.rd,ex=(R.b[0]-R.a[0])/(R.len||1),ez=(R.b[1]-R.a[1])/(R.len||1),dir=dlRnd()<0.5?1:-1,x=X-ex*dir*40-OX,z=Z-ez*dir*40-OZ;if(!dwLoaded(x,z))return;const y=ground[Math.floor(x)+W*Math.floor(z)]+1;let n=0;
+  for(let i=0;i<2;i++){const f=addFoe('dramr',x+i*2,y,z,{prov:R.P.key,site:R.P.sites[0],st:'return',t:60});if(f){f.hx=x+ex*dir*160;f.hz=z+ez*dir*160;n++;}}
+  if(n)setTimeout(()=>toast('Ram-riders of '+R.P.name+' go by on the Stone Road, their rams\' hooves ringing on the setts.'),1500);}
+// ---- a low horn for one of their folk fallen near by
+let dpassT=0;
+function dwarfPassing(f){if(!f||f.war||f.hst||dpassT>foeClock||!FOES[f.kind].folk||!dwarfPeopleOf(f)||Math.hypot(f.x-PL.x,f.z-PL.z)>50)return;dpassT=foeClock+30;setTimeout(()=>{const at=[f.x,f.y+3,f.z];tone(98,98,2.4,0.07,0,'sawtooth',at);tone(73,73,2.6,0.05,2.2,'sawtooth',at);},1500);}
+// ---- each frame (from dwarfFrame)
+let dlifeT=0;
+function dwarfLife(dt){kindleFrame(dt);engineFrame(dt);bathSteam(dt);dwarfPipes(dt);dwarfHoists(dt);bathTick(dt);if((dlifeT-=dt)>0)return;dlifeT=1;
+  delveTick();kindleTick();caravanTick();dwarfShift();engineTick();deepWatch();ravenTick();lamplighter();dwarfPens();wildRamTick();prospectorTick();patrolTick();}
+Object.assign(FOE_HOME,{d_kind:[['dminer',2],['dsmith',1],['dlady',2],['daxe',1],['dhammer',0.6],['dlord',0.5]]});
 // Touch controls: floating stick on the left, look anywhere on the right.
 // A quick tap on the right side places, holding still on it breaks.
 const joy={id:null,ox:0,oy:0},look={id:null,lx:0,ly:0,sx:0,sy:0,t0:0,moved:false,breaking:false};
@@ -17349,7 +18153,7 @@ const PLACE_SKIP=new Set([...BIOMES,...Object.values(CAVE_NAMES),...Object.value
 function notePlace(n,X,Z){
   if(!n||PLACE_SKIP.has(n))return false;
   for(const p of places)if(p.n===n&&Math.hypot(p.X-X,p.Z-Z)<160)return false;
-  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':ck==='white'?'m':ck==='horse'?'h':elderNear(X,Z,2)?'r':oldNear(X,Z,2)?'o':fathersNear(X,Z,2)&&fathersNear(X,Z,2).name?'g':''; // the elves' places are marked with their sign (D-088), the white realm's and the old kingdom's with theirs (D-089), the riders' and the forefathers' (D-090)
+  const rp=realmPlace(X,Z),ck=rp&&rp.s.prov.cult.k,e=ck==='elf'?'e':ck==='wood'?'w':ck==='white'?'m':ck==='horse'?'h':ck==='dwarf'?'d':claimsNear(X,Z,-4)?'c':elderNear(X,Z,2)?'r':oldNear(X,Z,2)?'o':fathersNear(X,Z,2)&&fathersNear(X,Z,2).name?'g':''; // the elves' places are marked with their sign (D-088), the white realm's and the old kingdom's with theirs (D-089), the riders' and the forefathers' (D-090)
   if(places.length>=PLACE_CAP)places.shift();places.push(e?{n:n,X:X,Z:Z,e:e}:{n:n,X:X,Z:Z});saveDirty=true;return true;
 }
 // the sign of an elven place on the map (D-088): a star of the high elves in silver and blue, a leaf of the wood elves in gold and
@@ -17359,6 +18163,9 @@ function wmElfSign(g,x,y,e){g.save();g.translate(x,y);g.lineWidth=1.5;
     if(e==='m'){g.beginPath();for(let k=0;k<16;k++){const r=k%2?1.2:(k%4===0?3.6:2.4),a=k/16*6.283-1.5708;g.lineTo(Math.cos(a)*r,-8+Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}else{g.beginPath();g.moveTo(-2.5,-4);g.lineTo(0,-6);g.lineTo(2.5,-5);g.stroke();}g.restore();return;}
   if(e==='h'){g.fillStyle='#32602e';g.strokeStyle='#d6b054';g.beginPath();g.arc(0,0,6,0,6.283);g.fill();g.stroke();g.fillStyle='#f0eee4'; // the riders: a white horse's head on a round green shield
     g.beginPath();g.moveTo(-2.5,4);g.lineTo(-1,-1);g.lineTo(-2.5,-3);g.lineTo(1,-4);g.lineTo(3.5,-1);g.lineTo(2,0);g.lineTo(0.5,-1.5);g.lineTo(1.5,4);g.closePath();g.fill();g.restore();return;}
+  if(e==='d'){g.fillStyle='#28386e';g.strokeStyle='#d6b054';g.fillRect(-6,-6,12,12);g.strokeRect(-6,-6,12,12);g.fillStyle='#ececf0'; // the dwarves: a golden anvil under three white peaks on blue
+    g.beginPath();g.moveTo(-5,0);g.lineTo(-3,-4);g.lineTo(-1,0);g.lineTo(0,-5);g.lineTo(1,0);g.lineTo(3,-4);g.lineTo(5,0);g.closePath();g.fill();g.fillStyle='#d6b054';g.fillRect(-3.5,1,7,1.6);g.fillRect(-1,2.6,2,1.4);g.fillRect(-2.5,4,5,1.2);g.restore();return;}
+  if(e==='c'){g.strokeStyle='#5a4a36';g.lineWidth=2;g.beginPath();g.moveTo(-5,5);g.lineTo(4,-4);g.stroke();g.strokeStyle='#9a9ca4';g.beginPath();g.moveTo(1,-6);g.quadraticCurveTo(4,-5,6,-1);g.stroke();g.restore();return;} // a claim: a pick
   if(e==='g'){g.fillStyle='#8c8c86';g.strokeStyle='#3c3c38';for(let k=0;k<7;k++){const a=k/7*6.283;g.fillRect(Math.cos(a)*5-1,Math.sin(a)*5-1.5,2,3);g.strokeRect(Math.cos(a)*5-1,Math.sin(a)*5-1.5,2,3);}g.restore();return;} // the forefathers: a ring of stones
   if(e==='w'){g.fillStyle='#d8b040';g.strokeStyle='#2e5a26';g.beginPath();g.moveTo(0,-7);g.quadraticCurveTo(6,0,0,7);g.quadraticCurveTo(-6,0,0,-7);g.fill();g.stroke();g.beginPath();g.moveTo(0,-6);g.lineTo(0,6);g.stroke();}
   else{g.fillStyle=e==='r'?'#9a9890':'#e6ecf6';g.strokeStyle=e==='r'?'#4a4844':'#1e3060';g.beginPath();for(let k=0;k<12;k++){const r=k%2?2.6:(e==='r'&&k===4?3.5:7),a=k/12*6.283-1.5708;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.stroke();}
@@ -17472,10 +18279,10 @@ const TABLETS=[ // what the rune tablets say, read in this order (drafts for the
   'Every hall was a cave once, and every cave will be a hall.',
   'When the last lamp is out, leave the door open for the ones who come after.'
 ];
-const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size],['s','Places of the realms of men',null],['o','Places of the orcs',null],['e','Ruins of the elder elves',null],['k','Ruins of the old kingdom',null],['g','Ruins of the forefathers',null],['p','Folk of the realms',()=>Object.keys(FOES).filter(k=>FOES[k].folk).length]];
+const DISC=[['a','Animals',()=>Object.keys(ANIMALS).length],['f','Foes',()=>Object.keys(FOES).length],['l','Lands',()=>LANDS.length],['y','Layers',()=>LAYER_BANDS.length],['h','Holds',null],['r','Remains of other peoples',null],['q','Relics',()=>RELICS.size],['s','Places of the realms of men',null],['o','Places of the orcs',null],['e','Ruins of the elder elves',null],['k','Ruins of the old kingdom',null],['g','Ruins of the forefathers',null],['c','Prospectors\' claims',null],['p','Folk of the realms',()=>Object.keys(FOES).filter(k=>FOES[k].folk).length]];
 const LAYER_BANDS=['Crawlways','The Upper Caves','The Old Workings','The Great Caverns','The Deep','The Fire Below','The Goblin Warrens'];
 const layerBand=y=>y<12?5:y<100?4:y<152?3:y<204?2:y<260?1:0;
-const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[],s:[],p:[],o:[],e:[],k:[],g:[]}};
+const JN={h:{},t:0,d:{a:[],f:[],l:[],y:[],h:[],r:[],q:[],s:[],p:[],o:[],e:[],k:[],g:[],c:[]}};
 if(saved&&saved.jn){const j=saved.jn;if(j.h)for(const k in j.h)JN.h[k]={n:String(j.h[k].n),p:(j.h[k].p||[]).filter(x=>x>=0&&x<CHRON_N)};JN.t=j.t|0;if(j.d)for(const [c] of DISC)if(Array.isArray(j.d[c]))JN.d[c]=j.d[c].slice(0,500);}
 const journalSave=()=>({jn:JN});
 // A chronicle page read at a lectern: kept once, in the order of the chronicle
@@ -17494,7 +18301,7 @@ function discoverTick(dt){
   discT-=dt;if(discT>0||!ready)return;discT=1;
   if(LWX.k)discover('l',LWX.k);
   const bx=Math.floor(PL.x),bz=Math.floor(PL.z);if(bx<0||bz<0||bx>=W||bz>=D)return;const yy=Math.floor(PL.y),X=bx+OX,Z=bz+OZ;
-  {const rp=realmPlace(X,Z);if(rp&&yy>=ground[bx+W*bz]-3&&discover('s',rp.name)){elfPlaceFound(rp);menPlaceFound(rp);riderPlaceFound(rp);}} // a city, castle, village, watchtower or farmstead of the realms (D-060)
+  {const rp=realmPlace(X,Z);if(rp&&yy>=ground[bx+W*bz]-3&&discover('s',rp.name)){elfPlaceFound(rp);menPlaceFound(rp);riderPlaceFound(rp);dwarfPlaceFound(rp);}} // a city, castle, village, watchtower or farmstead of the realms (D-060)
   {const op=orcNear(X,Z,0);if(op&&yy>=ground[bx+W*bz]-6)discover('o',op.name);} // the orcs' places on the wastes (D-064)
   if(yy<ground[bx+W*bz]-3){discover('y',warrenName(X,yy,Z)?LAYER_BANDS[6]:LAYER_BANDS[layerBand(yy)]);const cx=Math.floor(X/CS),cz=Math.floor(Z/CS);
     if(yy<100&&ruinZone(cx,cz))discover('h',holdOf(cx,cz).name);const m=remainsNear(X,yy,Z);if(m)discover('r',m.name);}
@@ -17515,6 +18322,7 @@ function journalText(){
   elfJournal(out); // the histories of the elves read, and the player's standing with them (D-088)
   menJournal(out); // the chronicles of the kings, and the player's renown in the white realm (D-089)
   riderJournal(out); // the songs of the riders' kings, and the player's standing with the riders (D-090)
+  dwarfJournal(out); // the annals of the mountain, and the player's standing with the dwarves (D-091)
   out.push('','DISCOVERIES');
   for(const [c,n,tot] of DISC){const L=JN.d[c],names=c==='l'?L.map(k=>LANDS[LAND_I[k]].n):c==='q'?L.map(nameOf):c==='a'?L.map(k=>ANIMALS[k]?ANIMALS[k].n:k):L;out.push(n+': '+L.length+(tot?' of '+tot():'')+(names.length?' ('+names.join(', ')+')':''));}
   return out.join('\n');
@@ -17625,6 +18433,18 @@ function oldTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+O
 function fathersTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
   for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=fathersAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
   if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast((best.name||'A rider\'s cairn')+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
+// Under the mountain (D-091): the nearest high hold's throne or one of its halls below (stood in at its spot), or the nearest
+// prospector's claim (worked or worked out), seen from before its camp
+function dwarfTour(kind){if(creativeOnly())return null;
+  if(kind==='claim'||kind==='oldclaim'){const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS),ab=kind==='oldclaim';let best=null;
+    for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=claimsAt(cx+a,cz+b);if(s&&s.ab===ab){best=s;break;}}
+    if(!best){toast('No such claim within reach');return null;}const [fx,fz]=ELD4[best.dir];goTo(best.X-fx*14,best.Z-fz*14);PL.yaw=Math.atan2(fx,fz);toast(best.name+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
+  const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
+  for(let r=0;r<=40&&!(best&&bd<(r-1)*LS);r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=stretchCell(landSite(ci+a,cj+b)),k=landKey(s.i,s.j);
+    if(seen.has(k))continue;seen.add(k);const P=provinceOf(s.i,s.j);if(!P||P.cult.k!=='dwarf')continue;
+    for(const t of P.sites){if(t.k!=='city'||!siteLayout(t).spots.some(p=>p.kind===kind))continue;const d=Math.hypot(t.X-X,t.Z-Z)-(P.capital?200:0);if(d<bd){bd=d;best=t;}}}
+  if(!best){toast('No high hold of the dwarves within reach');return null;}const p=siteLayout(best).spots.find(q=>q.kind===kind),[x,z]=siteXZ(best,p.u,p.v);
+  goTo(Math.round(x),Math.round(z),p.y);toast(best.name+': '+{dthrone:'the throne',dale:'the ale-hall',dmarket:'the market hall',dgarden:'the mushroom gardens',dbath:'the baths',dvault:'the treasury',dfathers:'the Hall of the Fathers'}[kind]);return best;}
 // The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
 function gateTour(kind){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
@@ -17872,6 +18692,10 @@ const HINTS={
   mtask:()=>'A task of the realm. Where it leads, golden sparks rise; when it is done, tell any captain, lord or notice board of the realm (or come back where you were given it). A wagon you guard must be kept within sight.',
   riders:()=>'The riders of the plains greet you in their own tongue. Merchants trade, the horse-dealer sells horses, the horse-healer tends and shoes your horse, the lay-singer sings the songs of the kings, and marshals, thanes and the high seat give tasks. Strike none of their folk, and draw no blade in the golden hall.',
   htask:()=>'A task of the riders. Where it leads, green sparks rise; when it is done, tell any marshal, thane or the high seat (or come back where you were given it). The war-arrow must come where it is sent before its time runs out.',
+  dwarves:()=>'The dwarves greet you in their own tongue. Merchants and the moneychanger trade, the gemcutter cuts gems, the brewer sells ale, smiths forge, the runesmith cuts runes for the rune slot, the ram-keeper sells rams, the loremaster tells the annals, and captains, thanes and the throne give tasks. Take nothing from their treasuries.',
+  dtask:()=>'A task of the hold. Where it leads, amber sparks rise; when it is done, tell any captain, thane, the warden of the hold or the throne (or come back where you were given it). A writ-stone must come where it is sent before its time runs out.',
+  delve:()=>'The delving contest. Mine as much ore as you can in the hold\'s mines before the horn; coal, iron, copper, tin, gold and gems all count. The miners are digging too.',
+  kindling:()=>'The Kindling. The hold gathers in the great hall to kindle the forge-fire and sing the old names. Stay in the hall a while and drink with them.',
   race:()=>'A race at the course. Four riders ride two laps of the oval. Ask the judge at the line to ride it with them, be mounted at the chalk line when the horn sounds, and pass every pennon round the track.',
   tourney:()=>'A tourney at the lists. Knights ride against each other down the tilt. An esquire or knight of the realm may ride a bout: ask the herald, mount, take a lance in hand and charge down the near lane when the horn sounds, aiming at your opponent as you pass.',
   etask:()=>'A task of the elves. Where it leads, a mark of sparks rises; when it is done, speak with any of their folk (or come back to where you were given it). Speak with them, too, to give it up.',
@@ -17917,7 +18741,7 @@ function drawBar(quiet){
 }
 (function(){
   const g=$('invgrid'),CATS=[['Tools',[BPTOOL,FILLTOOL,LADDER,PITON,ROPE]],['Terrain',[DEEP,GLOWMOSS,GRASS,DIRT,PATH,FARM_D,SNOWG,PSNOW,GLACIER,LIMESTONE,CHALK,BASALT,BLACKASH,CINDER,LAVACRUST,SULFUR,VENT,BLACKSAND,PEAT,BOGMOSS,GOLDGRASS,ASH,MAGMA,DEADGRASS,PALEG,SCORCH,STONE,COBBLE,MOSSY,SAND,SANDSTONE,RSAND,TERO,TERB,TERT,GRAVEL,ICE,OBSID]],
-    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,STARBLOOM,SILVFERN,DAWNLILY,HEARTSEASE,BARROWBLOOM,SILVBARK,SILVLEAF,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,MOONSTONE,STARLAMP,ETHRONE,LEAFSTONE,EVOLD,EHULL,ESAIL,ECHEST,EAWNING,NOTICE,INNSIGN,SMITHSIGN,RTAP,WSHIELD,EFFIGY,STGLASS,MILESTONE,HEADSTONE,TILTRAIL,RTHRONE,MAYPOLE,TARHULL,RSAIL,OLDSTONE,OLDCHEST,PAVCLOTH,MYARMS,HTAP,HSHIELD,HSTONE,HSEAT,PENNON,PICSTONE,FCHEST,FEASTBOARD,STANDSTONE,SKEP,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,OBANNER,BOLTTHR,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
+    ['Wood and plants',[HEATHER,SNOWLEAF,LOG,BIRCH,SPRUCE,JLOG,...NEW_LOGS,CHARWOOD,SMOULDER,PLANKS,...NEW_PLANKS,BOOKS,LEAVES,BLEAVES,SLEAVES,JLEAVES,...NEW_LEAVES,LITTER,NEEDLES,FMOSS,TMOSS,FERN,BLUEB,MOONP,STARBLOOM,SILVFERN,DAWNLILY,HEARTSEASE,BARROWBLOOM,SILVBARK,SILVLEAF,GENTIAN,EDELW,KELP,SEAGRASS,LILYPAD,COTTONG,STEPPEG,DEADWOOD,PETRIWOOD,CAPB,CAPG,PRISM,AMBER,FRUITL,BLOSSOM,OXEYE,LAVENDER,CACTUS,TGRASS,FLOWR,FLOWY,DBUSH,BERRYB,MUSHB,WTURN]],['Building',[CHEST,BRICK,SBRICK,EVSTONE,EVBRICK,EVCARVE,EVPILLAR,EVMOSAIC,EVTRACERY,EVGLASS,EVROOF,EVSHINGLE,EVGOLD,EVWOOD,EVLAMP,EVBANNER,MOONSTONE,STARLAMP,ETHRONE,LEAFSTONE,EVOLD,EHULL,ESAIL,ECHEST,EAWNING,NOTICE,INNSIGN,SMITHSIGN,RTAP,WSHIELD,EFFIGY,STGLASS,MILESTONE,HEADSTONE,TILTRAIL,RTHRONE,MAYPOLE,TARHULL,RSAIL,OLDSTONE,OLDCHEST,PAVCLOTH,MYARMS,HTAP,HSHIELD,HSTONE,HSEAT,PENNON,PICSTONE,FCHEST,FEASTBOARD,STANDSTONE,SKEP,GEMORE,GEMHEAP,DRUNE,DTOMB,DVAT,DKEG,DWAY,DDRUM,MUSHBED,DSTRONG,WSTONE,WSBRICK,WSROUGH,WSTRIM,WSCARVE,WSPILLAR,PAVING,GTHATCH,TURF,WATTLE,CTIMBER,GILDED,FSTONE,FENCE,STAKES,SHIELDS,HEARTH,HBANNER,TAPESTRY,HORNS,SLATE,PLASTER,TIMBER,THATCH,HAYBALE,LGLASS,RBANNER,BASBRICK,BASCRACK,BASTILE,BASCARVE,EMGLYPH,BASPILLAR,EMBRICK,OBSBRICK,BRAZIER,CHAIN,SPIKES,HIDE,GRATE,ORCLOG,ORCIRON,WPLANK,WCARVE,WROOT,WRAIL,WHEDGE,WTHATCH,WLAMP,WBANNER,DGRAN,DCOURSE,DKNOT,DCOL,DFLAG,DBRONZE,DFORGE,DMOLTEN,DLAMP,DGEAR,DCART,DSLAG,DPROP,DANVIL,DBANNER,CANVAS,MANTLET,GATEIRON,OBANNER,BOLTTHR,GLASS,WOOLW,WOOLR,WOOLY,WOOLG,WOOLB,WOOLK]],
     ['Ores',[COAL,COPO,TINO,ZINO,IRON,GOLD,PLATO,DIAMOND,TITO,STARORE]],['Metals',[COPB,BRONB,BRASB,STEELB,TITB,PLATB]],['Dwarven',[BONES,SKULLS,BANNER,COBWEB,SCONCE,LECTERN,DWBRICK,DWCRACK,DWTILE,DWPILLAR,RUNE,GOLDB,DWCHEST,BARREL]],['Light and special',[GLOWSHROOM,GLOWCAP,MUSHSTEM,AMETH,CALCITE,DRIPU,DRIPD,CRATE,POT3,WHEAT,TORCH,GLOW,LANTERN,DTORCH,DGLOW,DLANTERN,DSCONCE,WAYSTONE,CRYSTAL,WAYPT,TNT,SPONGE,WATER,FURN,BLAST]],['Items',Object.keys(ITEMS).map(Number)]].map(c=>[c[0],c[1].filter(id=>!BANNED.has(id))]).filter(c=>c[1].length);
   const seen=new Set();CATS.forEach(c=>c[1].forEach(id=>seen.add(id)));
   const rest=BL.map((b,i)=>b&&b.place&&!seen.has(i)&&!BANNED.has(i)?i:-1).filter(i=>i>=0);if(rest.length)CATS.push(['Other',rest]);
@@ -17975,9 +18799,10 @@ for(const b of $('hostbar').querySelectorAll('button'))b.addEventListener('click
     ['g','The gates of the wastes',[['gate','The Ashen Gate'],['ram','The ram at the gate'],['lines','The siege lines'],['camp','The camp of the hosts'],['pavilion','The Pavilion of the Three Banners'],['yard','The orcs\' camp in the yard'],['road','The long road down']]],
     ['x','The ruins of the elder elves',[['tower','A fallen tower'],['colonnade','A broken colonnade'],['shrine','A moonwell shrine'],['theatre','A theatre'],['king','A fallen king'],['arch','A lone arch']]],
     ['k','The ruins of the old kingdom',[['colossi','The Kings\' Gate'],['crossroads','A crowned king at a crossroads'],['citadel','A fallen city'],['beacon','An old beacon'],['tomb','The tomb of a forgotten king']]],
-    ['f','The ruins of the forefathers',[['horse','A white horse on a hillside'],['ring','A stone ring'],['ship','A stone ship'],['hall','A burned hall'],['stones','Picture stones'],['cairn','A rider\'s cairn']]]]){
+    ['f','The ruins of the forefathers',[['horse','A white horse on a hillside'],['ring','A stone ring'],['ship','A stone ship'],['hall','A burned hall'],['stones','Picture stones'],['cairn','A rider\'s cairn']]],
+    ['u','Under the mountain',[['dthrone','The throne and its court'],['dale','The ale-hall'],['dmarket','The market hall'],['dgarden','The mushroom gardens'],['dbath','The baths'],['dvault','The treasury'],['dfathers','The Hall of the Fathers'],['claim','A prospector\'s claim'],['oldclaim','A worked-out claim']]]]){
     const g=document.createElement('optgroup');g.label=label;for(const [k,n] of list){const o=document.createElement('option');o.value=pre+':'+k;o.textContent=n;g.appendChild(o);}sel.appendChild(g);}
-  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='x:'?elderTour(v.slice(2)):rk==='k:'?oldTour(v.slice(2)):rk==='f:'?fathersTour(v.slice(2)):rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
+  $('tourbtn').addEventListener('click',()=>{const v=sel.value,rk=v.slice(0,2);if(rk==='x:'?elderTour(v.slice(2)):rk==='k:'?oldTour(v.slice(2)):rk==='f:'?fathersTour(v.slice(2)):rk==='u:'?dwarfTour(v.slice(2)):rk==='g:'?gateTour(v.slice(2)):rk==='r:'||rk==='h:'||rk==='e:'||rk==='w:'||rk==='d:'?realmTour(v.slice(2),{'r:':'white','h:':'horse','e:':'elf','w:':'wood','d:':'dwarf'}[rk]):landTour(+v))lockOrPlay();});}
 segBind('hintseg','hints',v=>v==='1');
 $('hudseg').addEventListener('click',e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!==undefined)setHud(v==='1');});setHud(settings.hud!==false);
 $('jnbtn').addEventListener('click',()=>{if(ready)openJournal();});
@@ -18025,7 +18850,7 @@ function saveNow(){
   if(!ready||skipSave)return;
   const e=[];edits.forEach((v,k)=>{e.push(k,v);});
   WORLD.mode=mode;WORLD.played=Date.now();lsSet(SAVE_KEY,WIX);
-  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),...warCampSave(),...elfSave(),...menSave(),...riderSave(),t:+tod.toFixed(4),dn:dayN});
+  const ok=lsSet(worldKey(WORLD.id),{v:SAVE_V,seed:SEED,e:e,spawn:spawnW,p:[+(PL.x+OX).toFixed(2),+PL.y.toFixed(2),+(PL.z+OZ).toFixed(2),+PL.yaw.toFixed(3),+PL.pitch.toFixed(3),PL.fly?1:0,PL.noclip?1:0],hot:hot,mode:mode,inv:inv.map(q=>q?[q.id,q.c,q.d||0]:0),eq:Object.fromEntries(Object.keys(EQUIP_SLOTS).map(s=>[s,equip[s]?[equip[s].id,equip[s].d||0]:0])),hp:hp,food:food,gv:[...graves],cs:boxSave(),at:[...attuned],...mapSave(),...journalSave(),...wildSave(),...foeSave(),...warSave(),...warSwornSave(),...emberSave(),...warCtlSave(),...warCampSave(),...elfSave(),...menSave(),...riderSave(),...dwarfSave(),t:+tod.toFixed(4),dn:dayN});
   if(!ok&&!saveWarned){saveWarned=true;toast('Storage is full, recent changes are not saved');}
   saveDirty=false;
 }
@@ -18574,6 +19399,7 @@ function update(dt){
     const bx=moveAxis('x',PL.vx*h),bz=moveAxis('z',PL.vz*h);if(bx||bz)wallHit=true;
     if(bx)PL.vx=0;if(bz)PL.vz=0;
     if((bx||bz)&&TOUCH&&wasGround&&!PL.fly&&wl>0.3&&!SOLID[get(Math.floor(PL.x+wx*0.6),Math.floor(PL.y+1.5),Math.floor(PL.z+wz*0.6))])PL.vy=8.4;
+    if((bx||bz)&&PL.ride&&ANIMALS[PL.ride.kind].climb&&wasGround&&wl>0.3&&PL.vy<=0&&!SOLID[get(Math.floor(PL.x+wx*0.7),Math.floor(PL.y+2.5),Math.floor(PL.z+wz*0.7))])PL.vy=12; // a ram springs up a step or a ledge of two (D-091)
   }
   if(PL.y<-20){if(SURV())hurt(999,'void');else respawn();}
   survivalTick(dt,inLiq,Math.hypot(PL.vx,PL.vz)*dt,sprint);

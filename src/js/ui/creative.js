@@ -103,6 +103,18 @@ function oldTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+O
 function fathersTour(kind){if(creativeOnly())return null;const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS);let best=null;
   for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=fathersAt(cx+a,cz+b);if(s&&s.kind===kind){best=s;break;}}
   if(!best){toast('No such ruin within reach');return null;}goTo(best.X+best.R+6,best.Z);PL.yaw=Math.PI/2;toast((best.name||'A rider\'s cairn')+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
+// Under the mountain (D-091): the nearest high hold's throne or one of its halls below (stood in at its spot), or the nearest
+// prospector's claim (worked or worked out), seen from before its camp
+function dwarfTour(kind){if(creativeOnly())return null;
+  if(kind==='claim'||kind==='oldclaim'){const cx=Math.floor((PL.x+OX)/CS),cz=Math.floor((PL.z+OZ)/CS),ab=kind==='oldclaim';let best=null;
+    for(let r=0;r<=150&&!best;r++)for(let a=-r;a<=r&&!best;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=claimsAt(cx+a,cz+b);if(s&&s.ab===ab){best=s;break;}}
+    if(!best){toast('No such claim within reach');return null;}const [fx,fz]=ELD4[best.dir];goTo(best.X-fx*14,best.Z-fz*14);PL.yaw=Math.atan2(fx,fz);toast(best.name+', '+Math.round(Math.hypot(best.X-PL.x-OX,best.Z-PL.z-OZ))+' blocks off');return best;}
+  const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;
+  for(let r=0;r<=40&&!(best&&bd<(r-1)*LS);r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){if(Math.max(Math.abs(a),Math.abs(b))!==r)continue;const s=stretchCell(landSite(ci+a,cj+b)),k=landKey(s.i,s.j);
+    if(seen.has(k))continue;seen.add(k);const P=provinceOf(s.i,s.j);if(!P||P.cult.k!=='dwarf')continue;
+    for(const t of P.sites){if(t.k!=='city'||!siteLayout(t).spots.some(p=>p.kind===kind))continue;const d=Math.hypot(t.X-X,t.Z-Z)-(P.capital?200:0);if(d<bd){bd=d;best=t;}}}
+  if(!best){toast('No high hold of the dwarves within reach');return null;}const p=siteLayout(best).spots.find(q=>q.kind===kind),[x,z]=siteXZ(best,p.u,p.v);
+  goTo(Math.round(x),Math.round(z),p.y);toast(best.name+': '+{dthrone:'the throne',dale:'the ale-hall',dmarket:'the market hall',dgarden:'the mushroom gardens',dbath:'the baths',dvault:'the treasury',dfathers:'the Hall of the Fathers'}[kind]);return best;}
 // The nearest gate of the wastes (D-067), and a place among its works to stand, facing the way to look
 function gateTour(kind){
   if(creativeOnly())return null;const X=PL.x+OX,Z=PL.z+OZ,ci=Math.floor(X/LS),cj=Math.floor(Z/LS),seen=new Set();let best=null,bd=1e9;

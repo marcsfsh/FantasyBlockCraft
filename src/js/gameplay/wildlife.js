@@ -179,6 +179,9 @@ function animalCall(a,hurt){
     case 'ox':voice(150*p,120*p,hurt?0.5:1.3,0.09,{vib:4,vd:0.05,form:420,q:1.2},at);break; // the ox's low call (D-089)
     case 'windsteed':voice(1320*p,560*p,hurt?0.5:1.4,0.07,{vib:9,vd:0.06,form:1600,q:1},at);voice(700*p,420*p,0.5,0.04,{form:1100,q:1,delay:0.9},at);if(!hurt)burst(0.3,'lowpass',620,0.7,0.08,1.5,at);break; // the windsteed's high, ringing neigh (D-090)
     case 'kine':voice(180*yg*p,130*yg*p,hurt?0.5:1.5,0.09,{vib:3,vd:0.05,form:460,q:1.1},at);break; // the steppe cattle's lowing (D-090)
+    case 'ram':voice(260*yg*p,220*yg*p,hurt?0.35:0.8,0.09,{vib:11,vd:0.1,form:900,q:1.3},at);break; // the great ram's deep bleat (D-091)
+    case 'pony':voice(980*p,560*p,hurt?0.4:0.9,0.06,{vib:7,vd:0.05,form:1300,q:1},at);break; // the caravan pony's whinny (D-091)
+    case 'raven':for(let i=0;i<(hurt?1:2);i++)voice(620*p,480*p,0.22,0.06,{type:'square',form:900,q:2.5,delay:i*0.32},at);break; // the raven's croak (D-091)
     case 'mule':for(let i=0;i<(hurt?2:4);i++)voice(i%2?270:610,i%2?245:560,0.34,0.08,{form:900,q:1.2,delay:i*0.38},at);break;
     case 'deer':voice(250*yg*p,170*yg*p,0.35,0.08,{form:700,q:1.5},at);break;
     case 'elk':voice(420*p,980*p,1.4,0.08,{vib:5,vd:0.04,form:1200,q:2},at);voice(980*p,300*p,0.6,0.05,{form:900,q:1.5},at);break; // the great elk's bugle (D-088)
@@ -209,6 +212,7 @@ function animalAct(btn){
   if(A.milk&&(!held||!SURV())){if(a.young){toast('Only a grown goat gives milk');return true;}if(a.cool>0){toast('The goat has no more milk for now');return true;}a.cool=240;addItem(360,1);drawBar(true);toast("Goat's Milk");return true;}
   if(A.egg&&(!held||!SURV())){if(a.young){toast('A chick lays no eggs');return true;}if(a.cool>0){toast('No egg yet');return true;}a.cool=300;addItem(355,1);drawBar(true);toast('An egg');return true;}
   if(a.kind==='windsteed'&&!a.tame&&windTame(a))return true; // only a sworn rider may lay a hand on a windsteed (D-090)
+  if(a.kind==='ram'&&!a.tame&&ramTame(a))return true; // a wild ram lets only a friend of the dwarves take it (D-091)
   if(A.mount){if(a.young){toast('A foal is too small to ride');return true;}if(PL.ride===a)dismount();else mount(a);return true;}
   if(A.tame&&!a.tame){if(A.tame.includes(held)){const q=inv[sel];if(SURV()){q.c--;if(!q.c)inv[sel]=null;}drawBar(true);a.tame=true;a.uid=a.uid||(Date.now().toString(36)+a.id);a.st='follow';a.t=1;a.herd=a.id;saveDirty=true;animalCall(a,false);toast('The '+A.n.toLowerCase().replace('stray ','').replace('wild ','')+' will follow you now');tone(520,780,0.2,0.06,0,null,[a.x,a.y+0.6,a.z]);}
     else toast('The '+A.n.toLowerCase()+' sniffs your hand. '+(a.kind==='hound'?'It would like some meat.':'It would like some crops.'));return true;}

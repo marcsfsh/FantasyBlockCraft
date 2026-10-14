@@ -38,7 +38,7 @@ RB.dhold=(s,p,u,v,X,Z)=>{const near=[];for(const q of p.S)if(u>=q.bu0-1&&u<=q.bu
   for(let k=0;k<n;k++){const y=lo+k;if(me&&me[k]){RBP(X,y,Z,AIR);continue;}
     const up=me&&k+1<n?me[k+1]:0,dn=me&&k>0?me[k-1]:0;let st=up||dn||0;for(const c of nb)if(c&&c[k]&&(!st||c[k]<st))st=c[k];
     if(!st||y>g)continue;const cur=GW(X,y,Z);
-    if(st===2){if(!SOLID[cur])RBP(X,y,Z,up?COBBLE:STONE);else if(!up&&(cur===STONE||cur===DEEP)){const h=hsh(X*7+y,9465,Z);if(h<0.045)RBP(X,y,Z,DORE[(h*155)|0]);}continue;}
+    if(st===2){if(!SOLID[cur])RBP(X,y,Z,up?COBBLE:STONE);else if(!up&&(cur===STONE||cur===DEEP)){const h=hsh(X*7+y,9465,Z);if(h<0.045)RBP(X,y,Z,h<0.006?GEMORE:DORE[(h*155)|0]);}continue;}
     RBP(X,y,Z,up?DFLAG:dn?DGRAN:y<=lo+1?DGRAN:(((y-p.y0)%6)+6)%6===4?DKNOT:DCOURSE);}
   // each shape furnishes its own interior
   for(const q of near){const D=DEC[q.k];if(!D)continue;const iv=dIv(q,u,v);if(iv)D(s,p,q,u,v,X,Z,iv);}};
@@ -340,7 +340,7 @@ function dwarfCity(s,L,r){
   const Yf=Y0-22,Yd=Y0-46,sv=-19,su=F+Lg-4,sh={cu:su,cv:sv,r:2.5};
   K.room('gate',F,F+11,-5,5,Y0,9,{vr:2,vax:'v',open:1,force:1});
   K.room('great',F+12,F+11+Lg,-12,12,Y0,14,{vr:5,vax:'v',force:1});
-  L.spots.push({kind:'hall',u:F+16,v:4,y:Y0+1},{kind:'keep',u:F+Lg+6,v:2,y:Y0+2},{kind:'hall',u:F+Lg-6,v:-6,y:Y0+1});
+  L.spots.push({kind:'hall',u:F+16,v:4,y:Y0+1},{kind:'hall',u:F+Lg-6,v:-6,y:Y0+1}); // (the throne's court: dwarfHoldMore, D-091)
   if(K.room('barracks',F+16,F+28,-24,-15,Y0,6,{far:-24})){K.room('door',F+21,F+23,-14,-13,Y0,4,{force:1});L.spots.push({kind:'barracks',u:F+22,v:-19,y:Y0+1});}
   K.room('landing',su-4,su+4,sv-4,sv+4,Y0,7,{sh:sh,drum:1,force:1});K.room('door',su-1,su+1,-14,-13,Y0,4,{force:1});
   // the stair down beside the great hall to the forge hall
@@ -357,6 +357,7 @@ function dwarfCity(s,L,r){
   if(sm){K.room('door',su-8,su-6,-16,-14,Yd,4,{force:1});L.spots.push({kind:'smelt',u:F,v:0,y:Yd+1});K.gallery(F-13,-6,Yd,'u',-1,40,10);}
   K.gallery(su+6,sv,Yd,'u',1,44,10);K.gallery(su,sv-6,Yd,'v',-1,40,10);K.gallery(su,sv+6,Yd,'v',1,8,0);
   K.shaft(su,sv,Yd+1,Y0+6,2.5);
+  dwarfHoldMore(K,s,L,{F:F,Lg:Lg,Y0:Y0,Yf:Yf,Yd:Yd}); // the court, the halls along the streets below, the Hall of the Fathers (D-091)
   // the wall, its towers, the gatehouse
   const WH=15;P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:WH,gw:3,gh:8});
   const n=Math.max(6,Math.round(2*Math.PI*R/30));for(let k=1;k<n;k++){const a=Math.PI+k*2*Math.PI/n,cu=Math.round(Math.cos(a)*(R-1)),cv=Math.round(Math.sin(a)*(R-1));if(Math.abs(cv)<12&&cu<0||K.inM(cu,cv))continue;
@@ -364,15 +365,16 @@ function dwarfCity(s,L,r){
   for(const sg of [1,-1]){const t=K.tower(-R+1,sg*8,4,WH+8,{nopad:1,ball:1,flag:1,door:2+(sg>0?0:1)},true);L.spots.push({kind:'wall',u:-R+1,v:sg*8,y:t.y+WH+8});}
   L.spots.push({kind:'gate',u:-R-6,v:0,y:DVG(s,-R-6,0)},{kind:'gatein',u:-R+6,v:0,y:DVG(s,-R+6,0)});
   // trebuchets behind the gate
-  for(const sg of [1,-1])K.treb(-R+16,sg*16,0);
+  for(const sg of [1,-1]){const y=K.treb(-R+16,sg*16,0);if(y!==null){(L.trebs=L.trebs||[]).push({u:-R+16,v:sg*16,y:y});L.spots.push({kind:'dengine',u:-R+16,v:sg*10,y:y});}} // (their engineers: D-091)
   // the city's works: smelting furnaces with their slag, smithies, a headframe over its mine, cranes
   const spots=[];for(let cu=-R+10;cu<F-16;cu+=5)for(let cv=-R+6;cv<R-6;cv+=5){if(Math.abs(cv)<8||Math.hypot(cu,cv)>R-9)continue;spots.push([cu,cv,hsh(cu,9491,cv)]);}spots.sort((a,b)=>a[2]-b[2]);
-  let ns=0,nf=0,nm=0,nc=0;
+  let ns=0,nf=0,nm=0,nc=0,np=0;
   for(const [cu,cv] of spots){
     if(nm<1){const y=K.lvl(cu,cv);if(K.free(cu-6,cu+6,cv-6,cv+6)&&dwMineHead(K,s,L,cu,cv,y,1,22,26)){K.pad(cu-5,cu+5,cv-5,cv+5,y);nm++;K.heap(cu+8,cv+(cv>0?-8:8),4.5,4,0);continue;}}
     if(ns<2&&K.smelt(cu,cv)){ns++;L.spots.push({kind:'forge',u:cu-6,v:cv,y:K.lvl(cu,cv)});K.heap(cu+3,cv+(cv>0?7:-7),3.5,3,1);continue;}
     if(nf<2){const f=K.bld('dforge',cu,cv,7,9,K.downhill(cu,cv));if(f){nf++;L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});continue;}}
-    if(nc<1&&K.crane(cu,cv)!==null){nc++;continue;}}
+    if(nc<1&&K.crane(cu,cv)!==null){nc++;continue;}
+    if(np<1&&dwPen(K,L,cu,cv)){np++;continue;}}
   // houses on the terraces facing the view; barracks by the gate
   for(const sg of [1,-1]){const b=K.bld('dhouse',-R+12,sg*24,9,15,sg>0?2:3,{st:2});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y});}
   const hs=[];for(let cu=-R+7;cu<R-7;cu+=4)for(let cv=-R+5;cv<R-5;cv+=4){if(Math.abs(cv)<7||Math.hypot(cu,cv)>R-8)continue;hs.push([cu,cv,hsh(cu,9493,cv)]);}hs.sort((a,b)=>a[2]-b[2]);
@@ -389,7 +391,7 @@ function dwarfBastion(s,L,r){
   P.push({k:'dwall',u0:-R-2,u1:R+2,v0:-R-2,v1:R+2,f:0,r:R-1,H:13,gw:2,gh:7});
   for(const a of [0.75,1.25,1.75,0.25].map(q=>q*Math.PI))K.tower(Math.round(Math.cos(a)*(R-1)),Math.round(Math.sin(a)*(R-1)),3,18,{nopad:1,ball:1,door:Math.cos(a)>0?0:1},true);
   for(const g of [1,-1]){const t=K.tower(-R+1,g*5,3,20,{nopad:1,ball:1,flag:1,door:2+(g>0?0:1)},true);L.spots.push({kind:'wall',u:-R+1,v:g*5,y:t.y+20});}
-  K.treb(-4,-sg*11,0);
+  {const y=K.treb(-4,-sg*11,0);if(y!==null){L.trebs=[{u:-4,v:-sg*11,y:y}];L.spots.push({kind:'dengine',u:-4,v:-sg*5,y:y});}} // (its engineer: D-091)
   const b=K.bld('dhouse',6,-sg*13,7,9,sg>0?3:2,{st:2});if(b)L.spots.push({kind:'barracks',u:b.front[0],v:b.front[1],y:b.y});
   const f=K.bld('dforge',-6,sg*12,7,7,sg>0?2:3);if(f)L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});
   L.spots.push({kind:'gate',u:-R-5,v:0,y:DVG(s,-R-5,0)},{kind:'gatein',u:-R+4,v:0,y:DVG(s,-R+4,0)},{kind:'drill',u:-2,v:0,y:DVG(s,-2,0)});
@@ -410,6 +412,7 @@ function dwarfTown(s,L,r){
   const sm=K.smelt(0,-14)||K.smelt(0,14);if(sm){L.spots.push({kind:'forge',u:sm.cu-6,v:sm.cv,y:sm.y});K.heap(sm.cu+7,sm.cv,3,3,1);}
   const f=K.bld('dforge',-11,sm&&sm.cv>0?-12:12,7,7,sm&&sm.cv>0?3:2);if(f)L.spots.push({kind:'forge',u:f.front[0],v:f.front[1],y:f.y});
   K.heap(10,-10,3.5,3,0);
+  for(let k=0;k<8;k++){const a=k/8*6.283+1.1,cu=Math.round(Math.cos(a)*(R-13)),cv=Math.round(Math.sin(a)*(R-13));if(cu<-R*0.4&&Math.abs(cv)<8)continue;if(dwPen(K,L,cu,cv))break;} // the rams' pen (D-091)
   let n=0;for(let k=0;k<16&&n<9;k++){const a=k/16*6.283+0.2,rd=R-11,cu=Math.round(Math.cos(a)*rd),cv=Math.round(Math.sin(a)*rd);if(cu<-R*0.4&&Math.abs(cv)<6)continue;
     const h=K.bld('dhouse',cu,cv,7,7,K.downhill(cu,cv),{st:hsh(cu,9497,cv)<0.4?2:1})||K.bld('dhouse',cu,cv,5,7,K.downhill(cu,cv),{st:1});if(!h)continue;n++;if(n%3===1)L.spots.push({kind:'street',u:h.front[0],v:h.front[1],y:h.y});}
   L.spots.push({kind:'street',u:-R+4,v:0,y:DVG(s,-R+4,0)});}
@@ -427,7 +430,9 @@ function dwarfLookout(s,L,r){
 // tracks of gravel; bridges of granite on piers where they cross water
 function dwarfRoadCol(X,Z,x,z,rr){
   const o=colInfo(X,Z,TRB),g=o.h,rd=rr.rd,hi=rd.k==='high',ao=Math.abs(rr.off),wet=o.wet||o.river||o.lake||o.b===0||g<o.sl+1;
-  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%40===20){RBS(X,Z,g+1,g+3,DCOL);RBP(X,g+4,Z,DLAMP);}return;}
+  if(ao>rd.w+0.5){if(hi&&!wet&&ao<=rd.w+1.5&&rr.off>0&&Math.floor(rr.along)%40===20){RBS(X,Z,g+1,g+3,DCOL);RBP(X,g+4,Z,DLAMP);}
+    else if(!wet&&ao<=rd.w+1.5&&rr.off<0&&Math.floor(rr.along)%120===60){RBP(X,g+1,Z,DGRAN);RBP(X,g+2,Z,DWAY);} // a waymark that tells the way (D-091)
+    return;}
   if(wet){const y=Math.max(o.sl,o.lake||0)+2,edge=ao>rd.w-0.5;RBP(X,y,Z,edge?DCOURSE:DFLAG);if(edge)RBP(X,y+1,Z,DKNOT);RBS(X,Z,y+(edge?2:1),y+3,AIR);
     if(Math.floor(rr.along)%7===0)for(let yy=y-1;yy>=Math.max(1,g-1);yy--)RBP(X,yy,Z,DGRAN);return;}
   const top=world[I(x,g,z)];if(top===AIR||top===WATER)return;

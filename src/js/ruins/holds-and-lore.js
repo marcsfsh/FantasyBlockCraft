@@ -68,6 +68,7 @@ function showText(title,text){
 function openLore(X,Y,Z){
   if(elfLectern(X,Y,Z))return; // the histories of the elves, in their halls (D-088)
   if(menLectern(X,Y,Z))return; // the chronicles of the kings of the white realm (D-089)
+  if(dwarfLectern(X,Y,Z))return; // the annals of the mountain, in the Hall of the Fathers (D-091)
   const WX=X+OX,WZ=Z+OZ,cx=Math.floor(WX/CS),cz=Math.floor(WZ/CS),h=holdOf(cx,cz),plaza=roomAt(WX,Y,WZ)==='plaza',k=lecternPage(WX,Y,WZ);
   showText(plaza?'A waymarker of '+h.name:h.name+', page '+(k+1)+' of '+CHRON_N+': '+holdChronicle(cx,cz)[k][0],loreText(WX,Y,WZ));
   if(!plaza)journalPage(cx,cz,k);

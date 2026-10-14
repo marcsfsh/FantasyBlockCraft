@@ -146,3 +146,28 @@ Drafts for the owner, in `gameplay/riders.js` and `world/forefathers.js`.
 **Horses the herds name** (`RIDER_HNAMES`): Swiftmane, Windfoot, Grassrunner, Greyflank, Sunmane, Stormhoof, Fleetwind, Duskmane, Brightfoot, Hillrunner.
 
 **What the folk say** (`FOLK_SAY`), among others: the king, "My fathers came out of the north with nothing but their horses." The queen, "The cup goes round the hall, and every rider drinks from it." A doorwarden, "Lay aside your blade at the door. It will be here when you come out." A shieldmaiden, "My shield has turned an orc's axe. It will turn yours." The warden of the mounds, "The barrowbloom came up white again this spring." A child, "I am a king of the riders and this is my horse!"
+
+## The dwarves (D-091)
+
+Drafts for the owner, in `gameplay/dwarves.js` and `world/claims.js`.
+
+**Ranks** (`DW_RANK`): Stranger, Guest of the Hold, Stone-friend, Friend of the Mountain, Oathbound of the Hold, Kin of the Mountain. A stone-friend is given a name in the dwarves' own style.
+
+**Their tongue** (`DWARF_TONGUE`): words of our own, checked against the blocklist (`93-dwarf-standing`).
+
+| Saying | Its meaning |
+|---|---|
+| Thrumm gar, varrin | Hail, wanderer |
+| Durrak hemmar | The stone holds |
+| Embrak ul forge | The forge is warm |
+| Gromm hethra, varrin | Deep roads to you, wanderer |
+| Skaldur thrumm! | A full horn! |
+| Haddur vorn, ulmin | Keep the oath, kinsman |
+| Fathrak nor sunn | The fathers do not sleep |
+| Karrin dur, karrin gald | Iron first, gold after |
+| Velk thar ul dun | A light at the deep end |
+| Varrin, brok ul ale | Wanderer, share the ale |
+
+**The annals of the kings** (`dwarfAnnals`): eight for each kingdom, told by the loremasters and read at the lecterns of the Hall of the Fathers, kept in the journal: The First Delving, The Stone Road, The Hall of the Fathers, The Great Forge, The Feud of the Gems, The Rams of the Heights, The War of the Ash, The Kindling. The kings' names are drawn for each kingdom in the dwarves' naming style.
+
+**Claims:** a worked claim is named for its prospector ("Ulmnir's Claim"); a worked-out one is "The Old Claim of" its last keeper.

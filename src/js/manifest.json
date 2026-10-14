@@ -174,6 +174,14 @@
       "about": "Building the mountain dwarves (D-066): terraces, granite houses, smithies, furnaces, headframes, cranes, engines of war, the hold's massif and great gate, and the sealed workings below (halls, forges, cistern, shafts, mines)"
     },
     {
+      "path": "world/dwarf-more.js",
+      "about": "The dwarves enlarged (D-091): the throne's court; the streets below with the ale-hall, the runesmith's chamber, the brewery, the market hall, the mushroom gardens, the baths and the treasury; the Hall of the Fathers; the rams' pens"
+    },
+    {
+      "path": "world/claims.js",
+      "about": "The prospectors' claims (D-091): adits driven into the hillsides of the high lands outside the realms, walled as the holds' mines, with their camps and strongboxes; one in three worked out and left; claimsAt, claimsNear, applyClaims"
+    },
+    {
       "path": "world/realm-more.js",
       "about": "The white realm enlarged (D-089): the throne and the kings in stone in every great hall, the silver tree of the royal citadel, houses of healing, inns, notice boards, signs, maypoles and churchyards; the lists, the hallows of the kings and the ports"
     },
@@ -310,6 +318,10 @@
       "about": "The riders' court and the folk of their life (D-090): the king and the queen, doorwardens, the counsellor, shieldmaidens, the lay-singer, the horse-healer, the horse-dealer, children, the warden of the mounds, the riders of the race; the windsteed and the steppe cattle"
     },
     {
+      "path": "engine/dwarf-court-models.js",
+      "about": "The dwarves' court and the folk of their life (D-091): the queen, the anvilguard, the warden of the hold, the loremaster, the runesmith, the brewer, the merchant, the gemcutter, the mushroom-farmer, children, the ram-riders, the prospector, the deepwarden, the engineer; the great ram, the caravan pony and the raven"
+    },
+    {
       "path": "engine/ember-models.js",
       "about": "The Emberlords remade (W7a, D-074): three builds (horns and arms) and four fires of the one kind, about twenty blocks tall; the fire spirits, flame hounds and lesser demons they call"
     },
@@ -424,6 +436,14 @@
     {
       "path": "gameplay/rider-life.js",
       "about": "The life of the riders (D-090): the race, the feast and the boast, the horse fair, wild herds and windsteeds, herders at work, sparring, the riders of the border, the dawn horn, the hall's smoke, wolves at night, the passing horn"
+    },
+    {
+      "path": "gameplay/dwarves.js",
+      "about": "The mountain dwarves (D-091): standing (DW, saved as dw), their tongue, the name they give, speaking with their folk, trade and the mint, the gemcutter, the brewer, smiths, runes, rams, the throne (audience, oath, kinship and the hall-key), tasks, the annals of the kings, waymarks, tombs, the deep drum, the horn of the hold, the treasury's theft, the new folk and beasts"
+    },
+    {
+      "path": "gameplay/dwarf-life.js",
+      "about": "The life of the dwarves (D-091): the delving contest, the Kindling, caravans, the shifts and the hoists, the engine drill, the deep watch, the baths, ravens and their news, pipe smoke, the lamplighter, rams in their pens and on the heights, prospectors at their claims, ram-riders on the Stone Road, the passing horn"
     },
     {
       "path": "input/touch.js",

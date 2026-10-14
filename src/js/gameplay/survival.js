@@ -1,7 +1,7 @@
 // ---- Survival: health, hunger, air, damage, death and graves
 let hp=20,food=20,exh=0,air=10,hurtCD=0,regenT=0,starveT=0,drownT=0,fallTop=null,dead=false,eatCD=0;
 if(saved&&typeof saved.hp==='number'){hp=Math.max(1,saved.hp);food=saved.food;}
-const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3,446:3,447:4,448:6,449:8}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089); the riders' (D-090)
+const FOOD={270:2,206:5,207:4,209:1,269:5,330:2,331:1,332:2,333:1,334:5,335:9,336:7,337:4,350:2,351:2,353:1,354:2,355:1,356:7,357:6,358:4,359:7,360:3,361:3,417:14,418:3,419:7,431:5,432:2,433:9,434:3,446:3,447:4,448:6,449:8,462:3,463:4,464:2,465:5,466:6,467:7}; // meat, eggs and milk since E1; the elves' fare (D-088); the white realm's (D-089); the riders' (D-090); the dwarves' (D-091)
 const graves=new Map();
 if(saved&&Array.isArray(saved.gv))saved.gv.forEach(q=>graves.set(q[0],q[1]));
 function wearHeld(n){
@@ -50,7 +50,8 @@ function openGrave(X,Y,Z){
 function eat(){
   const q=inv[sel];if(!q||!FOOD[q.id]||eatCD>0)return;
   if(food>=20){toast('You are not hungry');return;}
-  food=Math.min(20,food+FOOD[q.id]);q.c--;if(!q.c)inv[sel]=null;eatCD=0.6;swing=1;
+  food=Math.min(20,food+FOOD[q.id]);if(q.id===464)hp=Math.min(20,hp+3); // fire ale warms and heals a little (D-091)
+  q.c--;if(!q.c)inv[sel]=null;eatCD=0.6;swing=1;
   burst(0.12,'bandpass',600,1,0.3);burst(0.12,'bandpass',500,1,0.25,0.15);showName('+'+FOOD[q.id]+' food');drawBar(true);drawStats();
 }
 function cactusNear(){
@@ -63,7 +64,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   if(!SURV()||dead){air=10;return;}
   // falling
   if(inLiq||PL.fly||PL.climb)fallTop=PL.y;
-  else if(PL.ground){if(fallTop!==null&&fallTop-PL.y>3.5)hurt(Math.floor(fallTop-PL.y-3),'fell');fallTop=PL.y;}
+  else if(PL.ground){if(fallTop!==null&&fallTop-PL.y>3.5){const n=Math.floor((fallTop-PL.y-3)*(runeOn('stone')?0.5:1));if(n>0)hurt(n,'fell');}fallTop=PL.y;} // (the rune of stone halves a fall's harm: D-091)
   else fallTop=fallTop===null?PL.y:Math.max(fallTop,PL.y);
   // lava, cactus
   if(liquidAt(PL.x,PL.y+0.2,PL.z)===2||liquidAt(PL.x,PL.y+1.2,PL.z)===2)hurt(4,'lava');
@@ -73,7 +74,7 @@ function survivalTick(dt,inLiq,moved,sprinting){
   else{air=Math.min(10,air+dt*5);drownT=0;}
   // hunger
   exh+=moved*(sprinting?0.1:0.01)+dt*0.003;
-  while(exh>=4){exh-=4;food=Math.max(0,food-1);}
+  const ek=runeOn('hearth')?6:4;while(exh>=ek){exh-=ek;food=Math.max(0,food-1);} // (the rune of the hearth: hunger comes slower, D-091)
   if(food>=18&&hp<20){regenT+=dt;if(regenT>=4){regenT=0;hp++;exh+=3;}}else regenT=0;
   if(food===0){starveT+=dt;if(starveT>=4){starveT=0;if(hp>1)hurt(1,'starved');}}else starveT=0;
   drawStats();
@@ -87,6 +88,7 @@ function lampLevel(){
   if(!SURV())return[[0.78,0.95,1][settings.cave||0],[13,20,26][settings.cave||0]];
   const b=equip.belt;if(b&&ITEMS[b.id].ever)return[1,24+adj];if(b&&ITEMS[b.id].lamp&&b.d>0)return[1,18+adj]; // (the starglass lantern needs no oil and reaches further: D-088)
   const h=curId(),lum=h&&!isItem(h)&&BL[h]?BL[h].lum:0;if(lum>=8)return[0.9,Math.max(5,3+lum*0.6+adj)];if(h===378)return[0.95,14+adj]; // the Emberheart glows in the hand (W7c)
+  if(runeOn('lamp'))return[0.8,11+adj]; // the rune of the lamp glows about its wearer (D-091)
   return[0,4];
 }
 const lampDark=()=>{const x=Math.floor(PL.x),y=Math.floor(PL.y+EYE),z=Math.floor(PL.z);return Math.max(sky(x,y,z)*U.skyMul.value,bl(x,y,z))<0.4;};
@@ -252,7 +254,7 @@ function camDir(){const cp=Math.cos(PL.pitch);return{x:-Math.sin(PL.yaw)*cp,y:Ma
 function eyePos(){return{x:PL.x,y:PL.y+EYE+(PL.ride?0.9:0),z:PL.z};} // higher in the saddle (E1)
 // Blocks you use with right click; using a block wins over using what you hold (food, seeds, hoe, hook)
 function useBlock(th){
-  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[FCHEST]:openBox,[HSTONE]:useHorseStone,[PICSTONE]:usePicStone,[SKEP]:useSkep,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
+  const f={[GRAVE]:openGrave,[CRATE]:openBox,[DWCHEST]:openBox,[ECHEST]:openBox,[OLDCHEST]:openBox,[FCHEST]:openBox,[DSTRONG]:openBox,[DWAY]:useWaymark,[DTOMB]:useTomb,[DDRUM]:useDeepDrum,[DRUNE]:useRuneForge,[HSTONE]:useHorseStone,[PICSTONE]:usePicStone,[SKEP]:useSkep,[NOTICE]:useNotice,[MILESTONE]:useMilestone,[EFFIGY]:useEffigy,[BRAZIER]:useBeacon,[BARREL]:openBox,[CHEST]:openBox,[LECTERN]:openLore,[WAYSTONE]:useWaystone,[WAYPT]:useWaystone,[BOLTTHR]:engBolt,[LEAFSTONE]:useLeafStone,[MOONSTONE]:useMoonwell,[STARLAMP]:useMoonwell,[CALCITE]:(x,y,z)=>get(x,y-1,z)===WAYSTONE?useWaystone(x,y-1,z):false}[th.id];
   if(!f)return false;return f(th.x,th.y,th.z)!==false;
 }
 function act(btn){
@@ -264,6 +266,7 @@ function act(btn){
   if(btn===2&&elfAct())return; // speaking with the elves: trade, healing, tales, tasks, an audience (D-088)
   if(btn===2&&menAct())return; // speaking with the folk of the white realm (D-089)
   if(btn===2&&riderAct())return; // speaking with the riders' folk (D-090)
+  if(btn===2&&dwarfAct())return; // speaking with the dwarves (D-091)
   if((btn===0||btn===2)&&animalAct(btn))return; // animals first: strike, or use (E1)
   if(btn===2){const th=raycast(eyePos(),camDir(),6);if(th&&useBlock(th))return;}
   if(btn===2&&armsAct(held))return; // the guard, a bow drawn, a crossbow loaded or loosed, a javelin or axe thrown (W8a)
@@ -273,6 +276,8 @@ function act(btn){
   if(btn===2&&held===436&&menHorn())return; // the horn of the realm calls its soldiers (D-089)
   if(btn===2&&held===453&&riderHorn())return; // the war-horn of the riders calls a riding (D-090)
   if(btn===2&&held===452&&useBarding())return; // barding put on your horse (D-090)
+  if(btn===2&&held===473&&dwarfHorn())return; // the horn of the hold calls a shield-wall (D-091)
+  if(btn===2&&held===476&&useHallKey())return; // the hall-key: rest in your hall (D-091)
   if(btn===2&&held===435&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+8);drawBar(true);drawStats();toast('The salve soothes your wounds');return;} // heartsease salve
   if(btn===2&&held===430){boatPlace();return;} // a swan boat set on the water
   if(btn===2&&held===420&&SURV()){const q=inv[sel];q.c--;if(!q.c)inv[sel]=null;hp=Math.min(20,hp+12);drawBar(true);drawStats();toast('The draught is cool and bright; your wounds close');return;} // an elven draught

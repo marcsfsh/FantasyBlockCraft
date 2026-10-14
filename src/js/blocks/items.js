@@ -66,6 +66,19 @@ item(452,'Barding of the Riders','cloak',[50,92,48],{once:true});item(453,'War-h
 item(454,'Oath-ring','circlet',[214,176,84]);item(455,"Thane's Brooch",'brooch',[214,176,84]);item(456,"Winner's Bridle",'fibre',[214,176,84]);
 item(457,'Bracteate of the Forefathers','coin',[226,186,80]);item(458,'Golden Horn of the Forefathers','horn',[230,190,80]);item(459,'Arm-ring of the Forefathers','circlet',[200,170,90]);
 item(460,'War-arrow','arrow',[176,40,40],{once:true});item(461,'Halter','fibre',[150,110,70],{once:true});
+// the dwarves' fare and gear (D-091): dark ale, the stout of the deep and fire ale (which warms and heals a little) from the
+// hold's brewery; mushroom bread and stew from its gardens, hard cheese; rough gems from the seams in the mines' walls, cut by
+// the gemcutter; the dwarven mattock (a pick, quick and long-lasting), the bearded axe of the mountain, the plate of the
+// mountain; the horn of the hold, which calls a shield-wall to an oathbound friend; the hold-ring of the oath, the kin-brooch
+// and the hall-key of a kinsman; the golden pick from the delving contest; the writ-stone carried for the hold; the six runes
+// the runesmith cuts, worn in the rune slot; and the heirloom of a hold, lost at a prospector's claim
+item(462,'Dark Ale','wine',[84,52,32]);item(463,'Stout of the Deep','wine',[44,34,30]);item(464,'Fire Ale','wine',[206,96,44]);item(465,'Mushroom Bread','bread',[168,134,100]);
+item(466,'Hard Cheese','cake',[226,196,96]);item(467,'Mushroom Stew','bowl',[140,100,70]);item(468,'Rough Gem','gem',[120,160,150]);item(469,'Cut Gem','gem',[80,206,226]);
+item(470,'Dwarven Mattock','pick',[120,128,150],{tool:'pick',tier:6,speed:10.5,dur:1300});item(471,'Bearded Axe of the Mountain','axe',[150,156,170],{tool:'axe',tier:6,speed:9,dur:1200});
+item(472,'Plate of the Mountain','mail',[70,78,104],{equip:'body',armor:0.6,dur:1600,one:true});item(473,'Horn of the Hold','horn',[186,138,72],{once:true});
+item(474,'Hold-ring','circlet',[186,138,72]);item(475,'Kin-brooch','brooch',[214,176,84]);item(476,'Hall-key','key',[186,138,72]);item(477,'Golden Pick','pick',[246,206,64]);
+item(478,'Writ-stone','tablet',[150,146,142],{once:true});item(485,'Heirloom of the Hold','goblet',[226,190,90]);
+[['Keenness','keen',[200,90,70]],['Warding','ward',[80,120,200]],['Delving','delve',[150,120,80]],['the Lamp','lamp',[240,210,120]],['the Hearth','hearth',[200,120,60]],['Stone','stone',[140,140,146]]].forEach(([n,k,c],i)=>item(479+i,'Rune of '+n,'tablet',c,{equip:'rune',rune:k}));
 item(320,'Gold Sickle','sickle',[246,206,64],{tool:'sickle',speed:1,dur:250});item(321,'Bronze Shears','shears',[182,128,58],{tool:'shears',speed:8,dur:240});
 // Climbing and finding the way (Q45, Q66): the grapnel catches a ledge and hangs rope from it; a map shows the minimap in
 // survival, a compass where you are and which way you face, a depth gauge how deep you are. Signal flares replace fireworks.
@@ -177,6 +190,7 @@ function itemIcon(id){
   else if(it.kind==='draught'){for(let y=5;y<15;y++){const w=y<8?1:3;for(let x=8-w;x<8+w;x++)px(x,y,(x<8?24:-10));}g.fillStyle='#e8eef4';g.fillRect(7,2,2,3);g.fillStyle='rgba(255,255,255,0.9)';g.fillRect(6,10,1,2);}
   else if(it.kind==='brooch'){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,(y-7.5)*1.4),lf=d<6&&Math.abs(Math.atan2(y-7.5,x-7.5))>0.3;if(lf)px(x,y,d>5?-30:x<8?20:0);}g.fillStyle='#7ad8f0';g.fillRect(7,7,2,2);}
   else if(it.kind==='circlet'){for(let a=0;a<40;a++){const t=a/40*6.283,x=Math.round(7.5+Math.cos(t)*6),y=Math.round(9+Math.sin(t)*3);px(x,y,Math.sin(t)>0?-24:16);}g.fillStyle='#e6ecf4';g.fillRect(7,4,2,3);g.fillStyle='#7ad8f0';g.fillRect(7,5,2,1);}
+  else if(it.kind==='key'){for(let a=0;a<24;a++)px(Math.round(5+Math.cos(a/24*6.283)*2.6),Math.round(5+Math.sin(a/24*6.283)*2.6),a<12?20:-10);for(let k=0;k<8;k++){px(7+k,7+k,10);px(8+k,7+k,-20);}px(10,13,0);px(11,14,0);px(13,10,0);px(14,11,0);}
   else if(it.kind==='whistle'){for(let k=0;k<10;k++){px(3+k,10-Math.round(k*0.4),k<2?-20:10);px(3+k,11-Math.round(k*0.4),-20);}g.fillStyle='#2a2a30';g.fillRect(8,7,1,1);}
   else if(it.kind==='boat'){for(let x=1;x<15;x++){const d=Math.abs(x-7.5)/7.5,top=10+Math.round(d*d*2);for(let y=top;y<14-Math.round(d*2);y++)px(x,y,(y===top?20:-10));}for(let y=3;y<10;y++)px(13,y,-10);g.fillStyle='#d8b050';g.fillRect(14,3,2,1);for(let y=4;y<10;y++)for(let x=5;x<10;x++)if(x-5<y-3)px(x,y,30);}
   else if(it.kind==='pick'){
@@ -185,4 +199,4 @@ function itemIcon(id){
   }
   iconCache[id]=c;return c;
 }
-const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444,456,457,458,459]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
+const RELICS=new Set([271,272,273,274,255,PRISM,AMBER,STARORE,377,378,379,384,385,425,426,427,440,442,443,444,456,457,458,459,477,485]); // (the relics of the elder elves: D-088; of the old kings and the lists, D-089) // relics for the discovery log (M7)
